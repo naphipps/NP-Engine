@@ -1,0 +1,21 @@
+[submodule "vendor/concurrentqueue"]
+	path = vendor/concurrentqueue
+	url = https://github.com/cameron314/concurrentqueue.git
+[submodule "vendor/entt"]
+	path = vendor/entt
+	url = https://github.com/skypjack/entt.git
+[submodule "vendor/pcg-cpp"]
+	path = vendor/pcg-cpp
+	url = https://github.com/imneme/pcg-cpp.git
+[submodule "vendor/json"]
+	path = vendor/json
+	url = https://github.com/nlohmann/json.git
+[submodule "vendor/spdlog"]
+	path = vendor/spdlog
+	url = https://github.com/gabime/spdlog.git
+[submodule "vendor/liquidfun"]
+	path = vendor/liquidfun
+	url = https://github.com/google/liquidfun.git
+[submodule "vendor/540829265469e673d045"]
+	path = vendor/540829265469e673d045
+	url = https://gist.github.com/540829265469e673d045.git
