@@ -13,11 +13,6 @@
 
 #include "PoolAllocator.hpp"
 #include "LockingPoolAllocator.hpp"
-#include "RedBlackTreeAllocator.hpp"
-#include "ExplicitListAllocator.hpp"
-#include "ExplicitSegListAllocator.hpp"
-#include "ImplicitListAllocator.hpp"
-
 namespace np
 {
     namespace memory
@@ -35,12 +30,7 @@ namespace np
             using ObjectTypePtr = T*;
             
         protected:
-//            A _allocator;
-//            RedBlackTreeAllocator _allocator;
-//            ExplicitListAllocator _allocator;
-//            ExplicitSegListAllocator _allocator;
-            ImplicitListAllocator _allocator;
-            siz _object_count;
+            A _allocator;
             
         public:
             
@@ -48,17 +38,14 @@ namespace np
              constructor
              */
             ObjectPool(Block block):
-            _allocator(block),
-            _object_count(block.size / A::CHUNK_ALIGNED_SIZE)
+            _allocator(block)
             {}
             
             /**
              constructor
              */
             ObjectPool(siz object_count):
-//            _allocator(object_count * A::CHUNK_ALIGNED_SIZE),
-            _allocator(object_count * (A::CHUNK_ALIGNED_SIZE << 1)),
-            _object_count(object_count)
+            _allocator(object_count * A::CHUNK_ALIGNED_SIZE)
             {}
             
             /**
@@ -71,8 +58,7 @@ namespace np
              */
             siz ObjectCount() const
             {
-//                return _allocator.ChunkCount();
-                return _object_count;
+                return _allocator.ChunkCount();
             }
             
             /**
@@ -88,8 +74,7 @@ namespace np
              */
             siz ChunkSize() const
             {
-//                return _allocator.ChunkSize();
-                return A::CHUNK_ALIGNED_SIZE;
+                return _allocator.ChunkSize();
             }
             
             /**
@@ -128,9 +113,6 @@ namespace np
                 bl destroyed = false;
                 if (_allocator.Contains(object) && Destruct<T>(object))
                 {
-//                    Block block{.ptr = object, .size = _allocator.ChunkSize()};
-//                    Block block{.ptr = object, .size = ChunkSize()};
-//                    destroyed = _allocator.Deallocate(block);
                     destroyed = _allocator.Deallocate(object);
                 }
                 return destroyed;
