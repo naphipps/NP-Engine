@@ -9,8 +9,6 @@
 #ifndef NP_ENGINE_POINT_HPP
 #define NP_ENGINE_POINT_HPP
 
-#include <unordered_set>
-
 #include "Insight/Insight.hpp"
 #include "Primitive/Primitive.hpp"
 #include "TypeTraits/TypeTraits.hpp"
