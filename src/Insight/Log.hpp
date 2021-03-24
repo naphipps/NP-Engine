@@ -12,7 +12,6 @@
 #include <memory>
 
 #include "Foundation/Foundation.hpp"
-#include "Container/Container.hpp"
 #include "Primitive/Primitive.hpp"
 #include "Filesystem/Filesystem.hpp"
 
@@ -33,9 +32,11 @@ namespace np
         {
         private:
             static atm_bl _initialized;
-            static ::std::shared_ptr<spdlog::logger> _file_logger;
-            static ::std::shared_ptr<spdlog::logger> _stdout_logger;
-            static ::std::shared_ptr<spdlog::logger> _logger;
+            static ::std::shared_ptr<::spdlog::logger> _file_logger;
+            static ::std::shared_ptr<::spdlog::logger> _stdout_logger;
+            static ::std::shared_ptr<::spdlog::logger> _logger;
+            static ::std::shared_ptr<::spdlog::sinks::sink> _stdout_sink;
+            static ::std::shared_ptr<::spdlog::sinks::sink> _file_sink;
             
         public:
             
@@ -48,32 +49,31 @@ namespace np
                 {
                     _initialized.store(true, mo_release);
                     
-                    container::vector<spdlog::sink_ptr> sinks;
-                    
-                    //stdout sink
-                    sinks.emplace_back(::std::make_shared<spdlog::sinks::stdout_color_sink_mt>());
-                    
-                    //file sink
-                    str log_filepath = fs::append(OUTPUT_DIR, "np.log");
-                    sinks.emplace_back(::std::make_shared<spdlog::sinks::basic_file_sink_mt>(log_filepath, true));
-                    
                     str pattern = "[pid:%P, tid:%t] %+";
                     
-                    sinks.front()->set_pattern("%^" + pattern + "%$");
-                    sinks.back()->set_pattern(pattern);
+                    //stdout sink
+                    _stdout_sink = ::std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
+                    _stdout_sink->set_pattern("%^" + pattern + "%$");
+                    
+                    //file sink
+                    str log_filepath = fs::append(OUTPUT_DIR, "np.log"); //TODO: remove OUTPUT_DIR
+                    _file_sink = ::std::make_shared<spdlog::sinks::basic_file_sink_mt>(log_filepath, true);
+                    _file_sink->set_pattern(pattern);
                     
                     //constructor accepts multiple sinks via iterators begin and end
-                    _logger = ::std::make_shared<spdlog::logger>("NP_LOG", sinks.begin(), sinks.end());
+                    _logger = ::std::make_shared<spdlog::logger>("NP_LOG");
+                    _logger->sinks().push_back(_stdout_sink);
+                    _logger->sinks().push_back(_file_sink);
                     spdlog::register_logger(_logger);
                     _logger->set_level(spdlog::level::trace);
                     _logger->flush_on(spdlog::level::trace);
                     
-                    _file_logger = ::std::make_shared<spdlog::logger>("NP_FILE", sinks.back());
+                    _file_logger = ::std::make_shared<spdlog::logger>("NP_FILE", _file_sink);
                     spdlog::register_logger(_file_logger);
                     _file_logger->set_level(spdlog::level::trace);
                     _file_logger->flush_on(spdlog::level::trace);
                     
-                    _stdout_logger = ::std::make_shared<spdlog::logger>("NP_STDOUT", sinks.front());
+                    _stdout_logger = ::std::make_shared<spdlog::logger>("NP_STDOUT", _stdout_sink);
                     spdlog::register_logger(_stdout_logger);
                     _stdout_logger->set_level(spdlog::level::trace);
                     _stdout_logger->flush_on(spdlog::level::trace);
