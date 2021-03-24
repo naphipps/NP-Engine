@@ -93,6 +93,8 @@ namespace np
                 return true;
             }
         };
+        
+        static CAllocator DefaultAllocator;
     }
 }
 
