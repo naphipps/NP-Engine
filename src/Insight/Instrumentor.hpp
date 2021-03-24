@@ -14,11 +14,11 @@
 #include <thread>
 #include <sstream>
 
-#include "../Foundation/Foundation.hpp"
-#include "../Primitive/Primitive.hpp"
-#include "../Time/Time.hpp"
-#include "../Filesystem/Filesystem.hpp"
-#include "../Serialization/Serialization.hpp"
+#include "Foundation/Foundation.hpp"
+#include "Primitive/Primitive.hpp"
+#include "Time/Time.hpp"
+#include "Filesystem/Filesystem.hpp"
+#include "Serialization/Serialization.hpp"
 
 #include "Timer.hpp"
 #include "ScopedTimer.hpp"

@@ -8,10 +8,10 @@
 #ifndef NP_ENGINE_EVENT_QUEUE_HPP
 #define NP_ENGINE_EVENT_QUEUE_HPP
 
-#include "../Primitive/Primitive.hpp"
-#include "../Memory/Memory.hpp"
-#include "../Concurrency/Concurrency.hpp"
-#include "../Utility/Utility.hpp"
+#include "Primitive/Primitive.hpp"
+#include "Memory/Memory.hpp"
+#include "Concurrency/Concurrency.hpp"
+#include "Utility/Utility.hpp"
 
 namespace np
 {

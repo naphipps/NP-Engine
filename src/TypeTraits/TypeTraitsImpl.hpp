@@ -10,7 +10,7 @@
 
 #include <type_traits>
 
-#include "../Primitive/Primitive.hpp"
+#include "Primitive/Primitive.hpp"
 
 namespace np
 {

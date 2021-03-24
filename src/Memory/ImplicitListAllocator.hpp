@@ -8,7 +8,7 @@
 #ifndef NP_ENGINE_IMPLICIT_ALLOCATOR_HPP
 #define NP_ENGINE_IMPLICIT_ALLOCATOR_HPP
 
-#include "../Insight/Insight.hpp"
+#include "Insight/Insight.hpp"
 
 #include "SizedAllocator.hpp"
 #include "Margin.hpp"

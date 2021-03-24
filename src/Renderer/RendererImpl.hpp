@@ -8,7 +8,7 @@
 #ifndef NP_ENGINE_RENDERER_IMPL_HPP
 #define NP_ENGINE_RENDERER_IMPL_HPP
 
-#include "../Primitive/Primitive.hpp"
+#include "Primitive/Primitive.hpp"
 
 namespace np
 {

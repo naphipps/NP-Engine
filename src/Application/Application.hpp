@@ -9,8 +9,8 @@
 #ifndef NP_ENGINE_APPLICATION_HPP
 #define NP_ENGINE_APPLICATION_HPP
 
-#include "../Foundation/Foundation.hpp"
-#include "../Renderer/Renderer.hpp"
+#include "Foundation/Foundation.hpp"
+#include "Renderer/Renderer.hpp"
 
 #include "ApplicationImpl.hpp"
 #include "ApplicationEvent.hpp"

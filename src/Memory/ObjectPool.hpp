@@ -8,8 +8,8 @@
 #ifndef NP_ENGINE_OBJECT_POOL_HPP
 #define NP_ENGINE_OBJECT_POOL_HPP
 
-#include "../Insight/Insight.hpp"
-#include "../TypeTraits/TypeTraits.hpp"
+#include "Insight/Insight.hpp"
+#include "TypeTraits/TypeTraits.hpp"
 
 #include "PoolAllocator.hpp"
 #include "LockingPoolAllocator.hpp"

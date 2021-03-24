@@ -11,7 +11,7 @@
 #include <SFML/Graphics.hpp>
 #include <SFML/System.hpp>
 
-#include "../Foundation/Foundation.hpp"
+#include "Foundation/Foundation.hpp"
 
 #include "RendererImpl.hpp"
 

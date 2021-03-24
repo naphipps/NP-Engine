@@ -8,8 +8,8 @@
 #ifndef NP_ENGINE_SEGEREGATED_ALLOCATOR_HPP
 #define NP_ENGINE_SEGEREGATED_ALLOCATOR_HPP
 
-#include "../Primitive/Primitive.hpp"
-#include "../Insight/Insight.hpp"
+#include "Primitive/Primitive.hpp"
+#include "Insight/Insight.hpp"
 
 #include "Allocator.hpp"
 

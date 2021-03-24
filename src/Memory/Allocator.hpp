@@ -8,8 +8,8 @@
 #ifndef NP_ENGINE_ALLOCATOR_HPP
 #define NP_ENGINE_ALLOCATOR_HPP
 
-#include "../Primitive/Primitive.hpp"
-#include "../Utility/Utility.hpp"
+#include "Primitive/Primitive.hpp"
+#include "Utility/Utility.hpp"
 
 #include "Block.hpp"
 

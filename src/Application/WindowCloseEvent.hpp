@@ -8,7 +8,7 @@
 #ifndef NP_ENGINE_WINDOW_CLOSE_EVENT_HPP
 #define NP_ENGINE_WINDOW_CLOSE_EVENT_HPP
 
-#include "../Event/Event.hpp"
+#include "Event/Event.hpp"
 
 namespace np
 {

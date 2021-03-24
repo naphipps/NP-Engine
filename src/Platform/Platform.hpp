@@ -8,7 +8,7 @@
 #ifndef NP_ENGINE_PLATFORM_HPP
 #define NP_ENGINE_PLATFORM_HPP
 
-#include "../Foundation/Foundation.hpp"
+#include "Foundation/Foundation.hpp"
 #include "PlatformConstants.hpp"
 
 #endif /* NP_ENGINE_PLATFORM_HPP */

@@ -10,7 +10,7 @@
 
 #include <utility>
 
-#include "../TypeTraits/TypeTraits.hpp"
+#include "TypeTraits/TypeTraits.hpp"
 
 namespace np
 {

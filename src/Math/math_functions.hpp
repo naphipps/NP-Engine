@@ -12,7 +12,7 @@
 #include <cmath>
 #include <algorithm>
 
-#include "../Primitive/Primitive.hpp"
+#include "Primitive/Primitive.hpp"
 
 namespace np
 {

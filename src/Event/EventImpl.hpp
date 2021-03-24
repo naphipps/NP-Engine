@@ -9,8 +9,8 @@
 #ifndef NP_ENGINE_EVENT_IMPL_HPP
 #define NP_ENGINE_EVENT_IMPL_HPP
 
-#include "../Primitive/Primitive.hpp"
-#include "../Concurrency/Concurrency.hpp"
+#include "Primitive/Primitive.hpp"
+#include "Concurrency/Concurrency.hpp"
 
 namespace np
 {

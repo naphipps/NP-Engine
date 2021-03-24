@@ -9,7 +9,7 @@
 
 #if NP_PLATFORM_IS_APPLE
 //we include AppleWindow.hpp here instead of Window.hpp to avoid a cyclic include
-#include "../Platform/Apple/Application/AppleWindow.hpp"
+#include "Platform/Apple/Application/AppleWindow.hpp"
 #endif
 
 namespace np

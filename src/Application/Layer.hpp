@@ -9,10 +9,10 @@
 #ifndef NP_ENGINE_APPLICATION_LAYER_HPP
 #define NP_ENGINE_APPLICATION_LAYER_HPP
 
-#include "../Primitive/Primitive.hpp"
-#include "../Container/Container.hpp"
-#include "../Time/Time.hpp"
-#include "../Event/Event.hpp"
+#include "Primitive/Primitive.hpp"
+#include "Container/Container.hpp"
+#include "Time/Time.hpp"
+#include "Event/Event.hpp"
 
 namespace np
 {

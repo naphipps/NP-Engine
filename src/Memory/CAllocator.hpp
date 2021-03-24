@@ -10,8 +10,8 @@
 
 #include <cstdlib> //aligned_alloc and free
 
-#include "../Primitive/Primitive.hpp"
-#include "../Insight/Insight.hpp"
+#include "Primitive/Primitive.hpp"
+#include "Insight/Insight.hpp"
 
 #include "Allocator.hpp"
 #include "Block.hpp"

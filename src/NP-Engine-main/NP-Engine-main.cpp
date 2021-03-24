@@ -10,7 +10,7 @@
 
 #include <exception>
 
-#include "../NP-Engine.hpp" //TODO: redesign how we want to do our search paths
+#include "NP-Engine.hpp" //TODO: redesign how we want to do our search paths
 
 //TODO: is passing the main_block bellow enough?? I think passing the full allocator??
 extern ::np::app::Application* ::np::app::CreateApplication(const ::np::memory::Block& main_block);

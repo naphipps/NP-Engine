@@ -8,7 +8,7 @@
 #ifndef NP_ENGINE_PAD_OBJECT_HPP
 #define NP_ENGINE_PAD_OBJECT_HPP
 
-#include "../Primitive/Primitive.hpp"
+#include "Primitive/Primitive.hpp"
 
 #include "ConcurrencyConstants.hpp"
 
