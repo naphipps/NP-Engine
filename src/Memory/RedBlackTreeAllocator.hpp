@@ -9,7 +9,6 @@
 #define NP_ENGINE_RED_BLACK_TREE_ALLOCATOR_HPP
 
 #include "Primitive/Primitive.hpp"
-#include "../Math/Math.hpp"
 
 #include "SizedAllocator.hpp"
 #include "Margin.hpp"
@@ -683,7 +682,11 @@ namespace np
             {
                 Lock lock(_mutex);
                 Block block;
-                siz required_alloc_size = math::max(CalcAlignedSize(size) + (hidden::MARGIN_ALIGNED_SIZE << 1), OVERHEAD_ALIGNED_SIZE);
+                siz required_alloc_size = CalcAlignedSize(size) + (hidden::MARGIN_ALIGNED_SIZE << 1);
+                if (required_alloc_size < OVERHEAD_ALIGNED_SIZE)
+                {
+                    required_alloc_size = OVERHEAD_ALIGNED_SIZE;
+                }
                 ui8* alloc = FindAllocation(required_alloc_size, true_best_false_first);
                 
                 if (alloc != nullptr)
