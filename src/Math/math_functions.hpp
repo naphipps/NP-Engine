@@ -6,6 +6,8 @@
 //  Copyright © 2020 Nathan Phipps. All rights reserved.
 //
 
+//TODO: refactor all these "math_functions" files to Pascal casing instead of snake casing
+
 #ifndef NP_ENGINE_MATH_FUNCTIONS_HPP
 #define NP_ENGINE_MATH_FUNCTIONS_HPP
 

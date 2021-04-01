@@ -6,6 +6,8 @@
 //  Copyright © 2020 Nathan Phipps. All rights reserved.
 //
 
+//TODO: refactor these "primitive_types" files to Pascal casing
+
 #ifndef NP_ENGINE_PRIMITIVE_TYPES_HPP
 #define NP_ENGINE_PRIMITIVE_TYPES_HPP
 
