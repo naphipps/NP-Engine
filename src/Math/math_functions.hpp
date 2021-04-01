@@ -137,7 +137,7 @@ namespace np
          */
         static inline flt qInvSqrt(const flt n, i32 newton_iteration_count = 2)
         {
-            union
+            union //keeping union for speed
             {
                 flt result;
                 i32 i_result;

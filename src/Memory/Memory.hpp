@@ -28,5 +28,6 @@
 #include "LockingPoolAllocator.hpp"
 #include "FallbackAllocator.hpp"
 #include "SegregatedAllocator.hpp"
+#include "MemoryFunctions.hpp"
 
 #endif /* NP_ENGINE_MEMORY_HPP */

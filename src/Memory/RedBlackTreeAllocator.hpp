@@ -12,6 +12,7 @@
 
 #include "SizedAllocator.hpp"
 #include "Margin.hpp"
+#include "MemoryFunctions.hpp"
 
 namespace np
 {
@@ -39,14 +40,12 @@ namespace np
                  */
                 NodePtr GetParent()
                 {
-                    union
-                    {
-                        ui64 i;
-                        NodePtr p;
-                    };
-                    
-                    p = ParentAndColor;
+                    ui64 i;
+                    CopyBytes(&i, &ParentAndColor, sizeof(NodePtr));
                     i = (i >> 1) << 1;
+                    
+                    NodePtr p;
+                    CopyBytes(&p, &i, sizeof(NodePtr));
                     
                     return p;
                 }
@@ -56,14 +55,12 @@ namespace np
                  */
                 NodePtr GetParent() const
                 {
-                    union
-                    {
-                        ui64 i;
-                        NodePtr p;
-                    };
-                    
-                    p = ParentAndColor;
+                    ui64 i;
+                    CopyBytes(&i, &ParentAndColor, sizeof(NodePtr));
                     i = (i >> 1) << 1;
+                    
+                    NodePtr p;
+                    CopyBytes(&p, &i, sizeof(NodePtr));
                     
                     return p;
                 }
@@ -90,13 +87,8 @@ namespace np
                  */
                 bl IsRed() const
                 {
-                    union
-                    {
-                        ui64 i;
-                        NodePtr p;
-                    };
-                    
-                    p = ParentAndColor;
+                    ui64 i;
+                    CopyBytes(&i, &ParentAndColor, sizeof(NodePtr));
                     
                     return i & 1;
                 }
@@ -114,15 +106,10 @@ namespace np
                  */
                 void SetRed()
                 {
-                    union
-                    {
-                        ui64 i;
-                        NodePtr p;
-                    };
-                    
-                    p = ParentAndColor;
+                    ui64 i;
+                    CopyBytes(&i, &ParentAndColor, sizeof(NodePtr));
                     i |= 1;
-                    ParentAndColor = p;
+                    CopyBytes(&ParentAndColor, &i, sizeof(NodePtr));
                 }
                 
                 /**

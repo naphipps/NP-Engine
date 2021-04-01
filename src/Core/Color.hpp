@@ -10,6 +10,7 @@
 #define COLOR_HPP
 
 #include "Primitive/Primitive.hpp"
+#include "Memory/Memory.hpp"
 
 namespace np
 {
@@ -20,17 +21,19 @@ namespace np
          */
         struct Color //TODO: I think we should move this somewhere else... maybe that Image project?
         {
-            union
+            //TODO: how else would we represent this without punning?? make the i portion a function, since we really only care about the rgba - we could make RgbColor, RgbaColor, HsvColor, etc
+            
+            ui8 r;
+            ui8 g;
+            ui8 b;
+            ui8 a;
+            
+            ui32 ToUi32() const
             {
                 ui32 i;
-                struct
-                {
-                    ui8 r;
-                    ui8 g;
-                    ui8 b;
-                    ui8 a;
-                };
-            };
+                memory::CopyBytes(&i, &r, sizeof(ui32)); //TODO: fix this...
+                return i;
+            }
         };
     }
 }

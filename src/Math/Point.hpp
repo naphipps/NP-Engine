@@ -13,6 +13,7 @@
 #include "Primitive/Primitive.hpp"
 #include "TypeTraits/TypeTraits.hpp"
 #include "Container/Container.hpp"
+#include "Memory/Memory.hpp"
 
 namespace np
 {
@@ -384,22 +385,11 @@ namespace std
     {
         ui64 operator()(const ::np::math::fltPoint &p) const noexcept
         {
-            union
-            {
-                flt xf;
-                ui32 xi;
-            };
+            ui32 x, y;
+            ::np::memory::CopyBytes(&x, &p.x, sizeof(flt));
+            ::np::memory::CopyBytes(&y, &p.y, sizeof(flt));
             
-            union
-            {
-                flt yf;
-                ui32 yi;
-            };
-            
-            xf = p.x;
-            yf = p.y;
-            
-            return ((ui64)xi) << 32 | (ui64)yi;
+            return ((ui64)x) << 32 | (ui64)y;
         }
     };
 }

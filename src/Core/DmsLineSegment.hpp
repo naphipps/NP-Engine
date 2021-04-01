@@ -12,6 +12,7 @@
 #include "Primitive/Primitive.hpp"
 #include "Math/Math.hpp"
 #include "Serialization/Serialization.hpp"
+#include "Memory/Memory.hpp"
 
 namespace np
 {
@@ -155,21 +156,13 @@ namespace np
         {
             ui64 operator()(const DmsLineSegment& line) const noexcept
             {
-                union
-                {
-                    ui32 xi;
-                    flt xf;
-                };
-
-                union
-                {
-                    ui32 yi;
-                    flt yf;
-                };
-
-                xf = line.Midpoint().x;
-                yf = line.Midpoint().y;
-
+                flt xf = line.Midpoint().x;
+                flt yf = line.Midpoint().y;
+                
+                ui32 xi, yi;
+                memory::CopyBytes(&xi, &xf, sizeof(flt));
+                memory::CopyBytes(&yi, &yf, sizeof(flt));
+                
                 return ((ui64)xi << 32) | (ui64)yi;
             }
         };
