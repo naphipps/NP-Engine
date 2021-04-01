@@ -25,6 +25,7 @@ using i32 = int32_t;
 using i64 = int64_t;
 
 using siz = size_t;
+using dif = ptrdiff_t;
 
 using flt = float;
 using dbl = double;
