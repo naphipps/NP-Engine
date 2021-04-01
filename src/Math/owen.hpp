@@ -17,7 +17,7 @@ namespace np
 {
     namespace math
     {
-        namespace _hidden
+        namespace _hidden //TODO: refactor all hidden namespaces to the same... should we use "_hidden" or "hidden"?
         {
             /*
              John Burkardt owen T

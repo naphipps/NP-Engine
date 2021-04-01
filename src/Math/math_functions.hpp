@@ -129,7 +129,7 @@ namespace np
          encloses given n into [min, max]
          outputs (n > max ? max : (n < min ? min : n))
          */
-        static inline flt enclose(const flt n, const flt min, const flt max)
+        static inline flt enclose(const flt n, const flt min, const flt max) //TODO: refactor to Clamp when we go to pascal casing
         {
             return n > max ? max : (n < min ? min : n);
         }
