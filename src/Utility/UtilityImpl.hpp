@@ -32,6 +32,30 @@ namespace np
         {
             return ::std::forward<T>(arg);
         }
+        
+        /**
+         move
+         */
+        template <class T>
+        constexpr typetraits::RemoveRefType<T>&& Move(T&& t) noexcept
+        {
+            return ::std::move<T>(Forward<T>(t));
+        }
+        
+        /**
+         swap
+         */
+        template <class T>
+        constexpr void Swap(T& a, T& b) noexcept
+        {
+            ::std::swap<T>(a, b);
+        }
+        
+        template <class T, siz N>
+        constexpr void Swap(T (&a)[N], T (&b)[N]) noexcept
+        {
+            ::std::swap<T, N>(a, b);
+        }
     }
 }
 
