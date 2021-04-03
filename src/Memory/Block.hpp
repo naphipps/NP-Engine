@@ -45,7 +45,7 @@ namespace np
              */
             void* Begin() const
             {
-                return IsValid() ? ptr : NULL;
+                return IsValid() ? ptr : nullptr;
             }
             
             /**
@@ -53,7 +53,7 @@ namespace np
              */
             void* End() const
             {
-                return IsValid() ? static_cast<ui8*>(ptr) + size : NULL;
+                return IsValid() ? static_cast<ui8*>(ptr) + size : nullptr;
             }
             
             /**
