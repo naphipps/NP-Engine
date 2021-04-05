@@ -42,6 +42,24 @@ namespace np
         
         template <typename Base, typename Derived>
         inline constexpr bl IsBaseOf = ::std::is_base_of_v<Base, Derived>;
+        
+        /**
+         is pointer
+         */
+        template <class T>
+        using IsPointerObject = ::std::is_pointer<T>;
+        
+        template <class T>
+        inline constexpr bl IsPointer = ::std::is_pointer_v<T>;
+        
+        /**
+         remove pointer
+         */
+        template <class T>
+        using RemovePointer = ::std::remove_pointer<T>;
+        
+        template <class T>
+        using RemovePointerObject = ::std::remove_pointer_t<T>;
     }
 }
 
