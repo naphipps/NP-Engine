@@ -1551,7 +1551,7 @@ namespace np
                         }
                         
                         //sort the line loops based on how long they are [largest to shortest]
-                        sort(shapehen_holes.begin(), shapehen_holes.end(),
+                        ::std::sort(shapehen_holes.begin(), shapehen_holes.end(),
                              [](const math::fltPointVector &a, const math::fltPointVector &b) -> bl
                         {
                             return a.size() > b.size();
