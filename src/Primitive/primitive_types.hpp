@@ -16,6 +16,8 @@
 #include <string>
 #include <cfloat>
 
+using nptr = ::std::nullptr_t;
+
 using ui8 = uint8_t;
 using ui16 = uint16_t;
 using ui32 = uint32_t;
