@@ -477,7 +477,7 @@ namespace np
              */
             reverse_iterator operator++(i32)
             {
-                return iterator(iterator<T>::ptr--);
+                return reverse_iterator(iterator<T>::ptr--);
             }
             
             /**
@@ -494,7 +494,7 @@ namespace np
              */
             reverse_iterator operator--(i32)
             {
-                return iterator(iterator<T>::ptr++);
+                return reverse_iterator(iterator<T>::ptr++);
             }
             
             /**
