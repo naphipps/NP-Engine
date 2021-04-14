@@ -8,12 +8,23 @@
 #ifndef NP_ENGINE_MEMORY_FUNCTIONS_HPP
 #define NP_ENGINE_MEMORY_FUNCTIONS_HPP
 
+#include <memory>
+
 #include "Primitive/Primitive.hpp"
 
 namespace np
 {
     namespace memory
     {
+        template <class T>
+        constexpr T* AddressOf(T& t) noexcept
+        {
+            return ::std::addressof(t);
+        }
+        
+        template <class T>
+        constexpr T* AddressOf(const T&&) = delete;
+        
         /**
          mem functions
          */
