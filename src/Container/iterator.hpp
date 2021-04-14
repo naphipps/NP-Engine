@@ -287,65 +287,81 @@ namespace np
          represents the reverse of our iterator struct
          */
         template <class T>
-        struct reverse_iterator : public iterator<T>
+        struct reverse_iterator
         {
             NP_STATIC_ASSERT(typetraits::IsPointer<T>, "T must be a pointer");
             
-            using value_type = typename iterator<T>::value_type;
-            using pointer = typename iterator<T>::pointer;
-            using const_pointer = typename iterator<T>::const_pointer;
-            using reference = typename iterator<T>::reference;
-            using const_reference = typename iterator<T>::const_reference;
-            using difference_type = typename iterator<T>::difference_type;
-            using iterator_category = typename iterator<T>::iterator_category;
+            using value_type = typetraits::RemovePointerObject<T>;
+            using pointer = value_type*;
+            using const_pointer = const value_type*;
+            using reference = value_type&;
+            using const_reference = const value_type&;
+            using difference_type = dif;
+            using iterator_category = ::std::random_access_iterator_tag;
+            
+            pointer ptr;
             
             /**
              constructor
              */
             reverse_iterator():
-            iterator<T>(nullptr)
+            ptr(nullptr)
             {}
             
             /**
              copy constructor
              */
             reverse_iterator(const reverse_iterator& other):
-            iterator<T>(other.ptr)
+            ptr(other.ptr)
             {}
             
             /**
              move constructor
              */
             reverse_iterator(reverse_iterator&& other):
-            iterator<T>(utility::Move(other.ptr))
+            ptr(utility::Move(other.ptr))
+            {}
+            
+            /**
+             copy constructor
+             */
+            reverse_iterator(const iterator<T>& other):
+            ptr(other.ptr + 1)
+            {}
+            
+            /**
+             move constructor
+             */
+            reverse_iterator(iterator<T>&& other):
+            ptr(other.ptr + 1)
             {}
             
             /**
              copy constructor - copies std::reverse_iterator
              */
             reverse_iterator(const ::std::reverse_iterator<pointer>& other):
-            iterator<T>(other.base())
+            ptr(other.base())
             {}
             
             /**
              move constructor - moves std::reverse_iterator
              */
             reverse_iterator(::std::reverse_iterator<pointer>&& other):
-            iterator<T>(utility::Move(other.base()))
+            ptr(utility::Move(other.base()))
             {}
             
             /**
              constructor for void*
              */
             reverse_iterator(const void* t):
-            iterator<T>((pointer)t)
+            ptr((pointer)t)
             {}
             
             /**
              constructor for nullptr
              */
             reverse_iterator(nptr):
-            iterator<T>(nullptr)
+            ptr(nullptr)
             {}
             
             /**
@@ -358,7 +374,7 @@ namespace np
              */
             pointer base()
             {
-                return iterator<T>::ptr;
+                return ptr;
             }
             
             /**
@@ -366,7 +382,7 @@ namespace np
              */
             const_pointer base() const
             {
-                return iterator<T>::ptr;
+                return ptr;
             }
             
             /**
@@ -374,7 +390,12 @@ namespace np
              */
             operator T()
             {
-                return iterator<T>::ptr;
+                return ptr;
+            }
+            
+            operator iterator<T>()
+            {
+                return iterator<T>(ptr - 1);
             }
             
             /**
@@ -382,7 +403,7 @@ namespace np
              */
             operator ::std::reverse_iterator<T>()
             {
-                return ::std::reverse_iterator<T>(iterator<T>::ptr);
+                return ::std::reverse_iterator<T>(ptr);
             }
             
             /**
@@ -390,7 +411,7 @@ namespace np
              */
             reverse_iterator& operator=(const reverse_iterator& other)
             {
-                iterator<T>::ptr = other.ptr;
+                ptr = other.ptr;
                 return *this;
             }
             
@@ -399,7 +420,25 @@ namespace np
              */
             reverse_iterator& operator=(reverse_iterator&& other)
             {
-                iterator<T>::ptr = utility::Move(other.ptr);
+                ptr = utility::Move(other.ptr);
+                return *this;
+            }
+            
+            /**
+             copy assignment operator
+             */
+            reverse_iterator& operator=(const iterator<T>& other)
+            {
+                ptr = other.ptr + 1;
+                return *this;
+            }
+            
+            /**
+             move assignment operator
+             */
+            reverse_iterator& operator=(iterator<T>&& other)
+            {
+                ptr = other.ptr + 1;
                 return *this;
             }
             
@@ -408,7 +447,7 @@ namespace np
              */
             reverse_iterator& operator=(const ::std::reverse_iterator<pointer>& other)
             {
-                iterator<T>::ptr = other.base();
+                ptr = other.base();
                 return *this;
             }
             
@@ -417,7 +456,7 @@ namespace np
              */
             reverse_iterator& operator=(::std::reverse_iterator<pointer>&& other)
             {
-                iterator<T>::ptr = utility::Move(other.base());
+                ptr = utility::Move(other.base());
                 return *this;
             }
             
@@ -426,7 +465,7 @@ namespace np
              */
             reverse_iterator& operator=(const void* t)
             {
-                iterator<T>::ptr = (pointer)t;
+                ptr = (pointer)t;
                 return *this;
             }
             
@@ -435,7 +474,7 @@ namespace np
              */
             reverse_iterator& operator=(nptr)
             {
-                iterator<T>::ptr = nullptr;
+                ptr = nullptr;
                 return *this;
             }
             
@@ -444,7 +483,7 @@ namespace np
              */
             reference operator*() const
             {
-                return *(iterator<T>::ptr - 1);
+                return *(ptr - 1);
             }
             
             /**
@@ -460,7 +499,7 @@ namespace np
              */
             reference operator[](dif n) const
             {
-                return *(iterator<T>::ptr - 1 - n);
+                return *(ptr - 1 - n);
             }
             
             /**
@@ -468,7 +507,7 @@ namespace np
              */
             reverse_iterator& operator++()
             {
-                --iterator<T>::ptr;
+                --ptr;
                 return *this;
             }
             
@@ -477,7 +516,7 @@ namespace np
              */
             reverse_iterator operator++(i32)
             {
-                return reverse_iterator(iterator<T>::ptr--);
+                return reverse_iterator(ptr--);
             }
             
             /**
@@ -485,7 +524,7 @@ namespace np
              */
             reverse_iterator& operator--()
             {
-                ++iterator<T>::ptr;
+                ++ptr;
                 return *this;
             }
             
@@ -494,7 +533,7 @@ namespace np
              */
             reverse_iterator operator--(i32)
             {
-                return reverse_iterator(iterator<T>::ptr++);
+                return reverse_iterator(ptr++);
             }
             
             /**
@@ -502,7 +541,7 @@ namespace np
              */
             reverse_iterator& operator+=(dif n)
             {
-                iterator<T>::ptr -= n;
+                ptr -= n;
                 return *this;
             }
             
@@ -511,7 +550,7 @@ namespace np
              */
             reverse_iterator& operator-=(dif n)
             {
-                iterator<T>::ptr += n;
+                ptr += n;
                 return *this;
             }
             
@@ -520,7 +559,7 @@ namespace np
              */
             reverse_iterator operator+(dif n) const
             {
-                return reverse_iterator(iterator<T>::ptr - n);
+                return reverse_iterator(ptr - n);
             }
             
             /**
@@ -528,7 +567,7 @@ namespace np
              */
             reverse_iterator operator-(dif n) const
             {
-                return reverse_iterator(iterator<T>::ptr + n);
+                return reverse_iterator(ptr + n);
             }
             
             /**
@@ -536,7 +575,7 @@ namespace np
              */
             dif operator-(const reverse_iterator& other) const
             {
-                return iterator<T>::ptr - other.ptr;
+                return ptr - other.ptr;
             }
             
             /**
@@ -544,7 +583,7 @@ namespace np
              */
             bl operator==(const reverse_iterator& other) const
             {
-                return iterator<T>::ptr == other.ptr;
+                return ptr == other.ptr;
             }
             
             /**
@@ -552,7 +591,7 @@ namespace np
              */
             bl operator!=(const reverse_iterator& other) const
             {
-                return iterator<T>::ptr != other.ptr;
+                return ptr != other.ptr;
             }
             
             /**
@@ -560,7 +599,7 @@ namespace np
              */
             bl operator<(const reverse_iterator& other) const
             {
-                return iterator<T>::ptr < other.ptr;
+                return ptr < other.ptr;
             }
             
             /**
@@ -568,7 +607,7 @@ namespace np
              */
             bl operator>(const reverse_iterator& other) const
             {
-                return iterator<T>::ptr > other.ptr;
+                return ptr > other.ptr;
             }
             
             /**
@@ -576,7 +615,7 @@ namespace np
              */
             bl operator<=(const reverse_iterator& other) const
             {
-                return iterator<T>::ptr <= other.ptr;
+                return ptr <= other.ptr;
             }
             
             /**
@@ -584,7 +623,7 @@ namespace np
              */
             bl operator>=(const reverse_iterator& other) const
             {
-                return iterator<T>::ptr >= other.ptr;
+                return ptr >= other.ptr;
             }
         };
     }
