@@ -34,6 +34,14 @@ namespace np
                 memory::CopyBytes(&i, &r, sizeof(ui32)); //TODO: fix this...
                 return i;
             }
+            
+            void FromUi32(ui32 i)
+            {
+                r = (i >> 24) & 255;
+                g = (i >> 16) & 255;
+                b = (i >> 8) & 255;
+                a = i & 255;
+            }
         };
     }
 }
