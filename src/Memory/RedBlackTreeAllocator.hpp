@@ -9,6 +9,7 @@
 #define NP_ENGINE_RED_BLACK_TREE_ALLOCATOR_HPP
 
 #include "Primitive/Primitive.hpp"
+#include "Utility/Utility.hpp"
 
 #include "SizedAllocator.hpp"
 #include "Margin.hpp"
@@ -416,7 +417,7 @@ namespace np
                 NodePtr SearchBest(siz size)
                 {
                     NodePtr found = nullptr;
-                    siz min_diff = SIZE_MAX;
+                    siz min_diff = utility::NumericLimits<siz>::max();
                     for (NodePtr it = _root; it != &_nil;)
                     {
                         siz diff = it->GetSize() - size;
