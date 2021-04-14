@@ -35,6 +35,23 @@ namespace np
         }
         
         /**
+         constructs the given type using the given args
+         */
+        template <typename T>
+        constexpr bl ConstructArray(const Block& block, siz size)
+        {
+            bl constructed = false;
+            
+            if (block.IsValid() && block.size >= sizeof(T))
+            {
+                new (block.ptr) T[size];
+                constructed = true;
+            }
+            
+            return constructed;
+        }
+        
+        /**
          destructs the object given it's pointer
          */
         template <typename T>
@@ -51,6 +68,26 @@ namespace np
             return destructed;
         }
         
+        /**
+         destructs the object given it's pointer
+         */
+        template <typename T>
+        constexpr bl DestructArray(const T* t, siz size)
+        {
+            bl destructed = false;
+            
+            if (t != nullptr)
+            {
+                for (siz i=0; i<size; i++)
+                {
+                    t[i].~T();
+                }
+                destructed = true;
+            }
+            
+            return destructed;
+        }
+                
         /**
          the alignment our allocators with adhere to
          */
