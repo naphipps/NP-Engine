@@ -60,6 +60,45 @@ namespace np
         
         template <class T>
         using RemovePointerObject = ::std::remove_pointer_t<T>;
+        
+        /**
+         is constructible
+         */
+        template <class T>
+        inline constexpr bl IsDefaultConstructible = ::std::is_default_constructible_v<T>;
+        
+        template <class T>
+        using IsDefaultConstructibleObject = ::std::is_default_constructible<T>; //TODO: refactor these "Object" names to "Type"
+        
+        template <class T>
+        inline constexpr bl IsCopyConstructible = ::std::is_copy_constructible_v<T>;
+        
+        template <class T>
+        using IsCopyConstructibleObject = ::std::is_copy_constructible<T>;
+        
+        template <class T>
+        inline constexpr bl IsMoveConstructible = ::std::is_move_constructible_v<T>;
+        
+        template <class T>
+        using IsMoveConstructibleObject = ::std::is_move_constructible<T>;
+        
+        template <class T>
+        inline constexpr bl IsCopyAssignable = ::std::is_copy_assignable_v<T>;
+        
+        template <class T>
+        using IsCopyAssignableObject = ::std::is_copy_assignable<T>;
+        
+        template <class T>
+        inline constexpr bl IsMoveAssignable = ::std::is_move_assignable_v<T>;
+        
+        template <class T>
+        using IsMoveAssignableObject = ::std::is_move_assignable<T>;
+        
+        template <class T>
+        inline constexpr bl IsDestructible = ::std::is_destructible_v<T>;
+        
+        template <class T>
+        using IsDestructibleObject = ::std::is_destructible<T>;
     }
 }
 
