@@ -59,7 +59,7 @@ namespace np
         {
             bl destructed = false;
             
-            if (t != NULL)
+            if (t != nullptr)
             {
                 t->~T();
                 destructed = true;
