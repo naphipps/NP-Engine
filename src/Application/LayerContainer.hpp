@@ -20,7 +20,7 @@ namespace np
         class LayerContainer
         {
         private:
-            ui32 _layer_end;
+            ui32 _overlay_begin;
             container::vector<Layer*> _layers;
             using LayerVectorIterator = container::vector<Layer*>::iterator;
             
@@ -30,7 +30,7 @@ namespace np
              constructor
              */
             LayerContainer():
-            _layer_end(0)
+            _overlay_begin(0)
             {}
             
             /**
@@ -52,8 +52,8 @@ namespace np
              */
             void PushLayer(Layer* layer)
             {
-                _layers.emplace(_layers.begin() + _layer_end, layer);
-                _layer_end++;
+                _layers.emplace(_layers.begin() + _overlay_begin, layer);
+                _overlay_begin++;
             }
             
             /**
@@ -70,12 +70,12 @@ namespace np
             Layer* PopLayer()
             {
                 Layer* layer = NULL;
-                if (_layer_end > 0)
+                if (_overlay_begin > 0)
                 {
-                    _layer_end--;
-                    layer = _layers[_layer_end];
+                    _overlay_begin--;
+                    layer = _layers[_overlay_begin];
                     layer->Detach();
-                    _layers.erase(_layers.begin() + _layer_end);
+                    _layers.erase(_layers.begin() + _overlay_begin);
                 }
                 return layer;
             }
@@ -87,7 +87,7 @@ namespace np
             {
                 Layer* overlay = NULL;
                 
-                if (_layer_end < _layers.size())
+                if (_overlay_begin < _layers.size())
                 {
                     overlay = _layers.back();
                     overlay->Detach();
@@ -115,9 +115,9 @@ namespace np
                 
                 if (it < _layers.end())
                 {
-                    if (it < _layers.begin() + _layer_end)
+                    if (it < _layers.begin() + _overlay_begin)
                     {
-                        _layer_end--;
+                        _overlay_begin--;
                     }
                     
                     (*it)->Detach();
