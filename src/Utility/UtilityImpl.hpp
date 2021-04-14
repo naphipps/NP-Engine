@@ -9,6 +9,7 @@
 #define NP_ENGINE_UTILITY_IMPL_HPP
 
 #include <utility>
+#include <limits>
 
 #include "TypeTraits/TypeTraits.hpp"
 
@@ -56,6 +57,12 @@ namespace np
         {
             ::std::swap<T, N>(a, b);
         }
+        
+        /**
+         limitis
+         */
+        template <class T>
+        using NumericLimits = ::std::numeric_limits<T>;
     }
 }
 
