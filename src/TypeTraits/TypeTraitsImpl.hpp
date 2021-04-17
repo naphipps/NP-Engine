@@ -64,6 +64,12 @@ namespace np
         /**
          is constructible
          */
+        template <class T, class ... Args>
+        inline constexpr bl IsConstructible = ::std::is_constructible_v<T, Args...>;
+        
+        template <class T, class ... Args>
+        using IsConstructibleObject = ::std::is_constructible<T, Args...>;
+        
         template <class T>
         inline constexpr bl IsDefaultConstructible = ::std::is_default_constructible_v<T>;
         
