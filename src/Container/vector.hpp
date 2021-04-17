@@ -29,11 +29,8 @@ namespace np
         class vector
         {
         private:
-            NP_STATIC_ASSERT(typetraits::IsDefaultConstructible<T>, "T must be default constructible");
             NP_STATIC_ASSERT(typetraits::IsCopyConstructible<T>, "T must be copy constructible");
             NP_STATIC_ASSERT(typetraits::IsMoveConstructible<T>, "T must be move constructible");
-            NP_STATIC_ASSERT(typetraits::IsCopyAssignable<T>, "T must be copy assignable");
-            NP_STATIC_ASSERT(typetraits::IsMoveAssignable<T>, "T must be move assignable");
             NP_STATIC_ASSERT(typetraits::IsDestructible<T>, "T must be destructible");
             
         public:
@@ -67,11 +64,30 @@ namespace np
             siz _size;
             
             /**
+             destroys the object at given iterator
+             */
+            void destroy(iterator it)
+            {
+                memory::Destruct<T>(it.ptr);
+            }
+            
+            /**
+             destroys the objects in given [begin, end)
+             */
+            void destroy(iterator begin, iterator end)
+            {
+                for (iterator it = begin; it != end; it++)
+                {
+                    destroy(it);
+                }
+            }
+            
+            /**
              calculates the proper capacity value that supports the given target capacity
              */
             siz calc_capacity(siz target_capacity) const
             {
-                siz capacity = 1;
+                siz capacity = MIN_CAPACITY;
                 
                 while (capacity < target_capacity)
                 {
@@ -95,27 +111,19 @@ namespace np
                     memory::Block block = _allocator->Allocate(target_capacity * T_SIZE);
                     if (block.IsValid())
                     {
-                        if (memory::ConstructArray<T>(block, target_capacity))
-                        {
-                            pointer old_elements = _elements;
-                            iterator old_begin = begin();
-                            iterator old_end = end();
-                            
-                            _elements = (pointer)block.Begin();
-                            move_from(old_begin, old_end);
-                            
-                            memory::DestructArray<T>(old_elements, _capacity);
-                            bl deallocated = _allocator->Deallocate(old_elements);
-                            NP_ASSERT(deallocated, "we require a successful deallocation here");
-                            
-                            _capacity = target_capacity;
-                            ensured = true;
-                        }
-                        else
-                        {
-                            _allocator->Deallocate(block);
-                            NP_ASSERT(false, "construction failed");
-                        }
+                        pointer old_elements = _elements;
+                        iterator old_begin = begin();
+                        iterator old_end = end();
+                        
+                        _elements = (pointer)block.Begin();
+                        move_from(old_begin, old_end);
+                        
+                        destroy(old_begin, old_end);
+                        bl deallocated = _allocator->Deallocate(old_elements);
+                        NP_ASSERT(deallocated, "we require a successful deallocation here");
+                        
+                        _capacity = target_capacity;
+                        ensured = true;
                     }
                     else
                     {
@@ -134,9 +142,11 @@ namespace np
             {
                 _size = end - begin;
                 
+                memory::Block block{.size = T_SIZE};
                 for (iterator it = begin; it < end; it++)
                 {
-                    at(it - begin) = *it;
+                    block.ptr = _elements + (it - begin);
+                    memory::Construct<T>(block, (const_reference)*it);
                 }
             }
             
@@ -148,9 +158,11 @@ namespace np
             {
                 _size = rbegin - rend;
                 
+                memory::Block block{.size = T_SIZE};
                 for (reverse_iterator it = rbegin; it != rend; it++)
                 {
-                    at(rbegin - it) = *it;
+                    block.ptr = _elements + (rbegin - it);
+                    memory::Construct<T>(block, (const_reference)*it);
                 }
             }
             
@@ -162,9 +174,11 @@ namespace np
             {
                 _size = end - begin;
                 
+                memory::Block block{.size = T_SIZE};
                 for (iterator it = begin; it < end; it++)
                 {
-                    at(it - begin) = utility::Move(*it);
+                    block.ptr = _elements + (it - begin);
+                    memory::Construct<T>(block, utility::Move(*it));
                 }
             }
             
@@ -176,9 +190,11 @@ namespace np
             {
                 _size = rbegin - rend;
                 
+                memory::Block block{.size = T_SIZE};
                 for (reverse_iterator it = rbegin; it != rend; it++)
                 {
-                    at(rbegin - it) = utility::Move(*it);
+                    block.ptr = _elements + (rbegin - it);
+                    memory::Construct<T>(block, utility::Move(*it));
                 }
             }
             
@@ -188,9 +204,15 @@ namespace np
              */
             void move_backwards(const_iterator src_begin, const_iterator src_end, const_iterator dst_begin)
             {
+                memory::Block block{.size = T_SIZE};
                 for (reverse_iterator it = src_end - 1; it.base() > src_begin.base(); it++)
                 {
-                    *(dst_begin + ((iterator)it - src_begin)) = utility::Move(*it);
+                    block.ptr = dst_begin + ((iterator)it - src_begin);
+                    if (contains((iterator)block.ptr))
+                    {
+                        destroy(block.ptr);
+                    }
+                    memory::Construct<T>(block, utility::Move(*it));
                 }
             }
             
@@ -200,9 +222,15 @@ namespace np
              */
             void move_forwards(const_iterator src_begin, const_iterator src_end, const_iterator dst_begin)
             {
+                memory::Block block{.size = T_SIZE};
                 for (iterator it = src_begin; it < src_end; it++)
                 {
-                    *(dst_begin + (it - src_begin)) = utility::Move(*it);
+                    block.ptr = dst_begin + (it - src_begin);
+                    if (contains((iterator)block.ptr))
+                    {
+                        destroy(block.ptr);
+                    }
+                    memory::Construct<T>(block, utility::Move(*it));
                 }
             }
             
@@ -213,7 +241,7 @@ namespace np
             {
                 if (_allocator != nullptr)
                 {
-                    memory::DestructArray<T>(_elements, _capacity);
+                    destroy(begin(), end());
                     bl deallocation = _allocator->Deallocate(_elements);
                     NP_ASSERT(deallocation, "deallocation must be successful");
                 }
@@ -236,9 +264,7 @@ namespace np
                 memory::Block allocation = _allocator->Allocate(_capacity * T_SIZE);
                 NP_ASSERT(allocation.IsValid(), "we need successful allocation here in vector.init()");
                 
-                memory::ConstructArray<T>(allocation, _capacity);
                 _elements = (pointer)allocation.Begin();
-                
                 _size = 0;
             }
             
@@ -334,7 +360,7 @@ namespace np
              */
             ~vector()
             {
-                memory::DestructArray<T>(_elements, _capacity);
+                destroy(begin(), end());
                 _allocator->Deallocate(_elements);
             }
             
@@ -375,9 +401,11 @@ namespace np
             {
                 init(*_allocator, count);
                 _size = count;
+                memory::Block block{.size = T_SIZE};
                 for (iterator it = begin(); it != end(); it++)
                 {
-                    *it = value;
+                    block.ptr = it.ptr;
+                    memory::Construct<T>(block, value);
                 }
             }
             
@@ -436,26 +464,17 @@ namespace np
                 
                 if (block.IsValid())
                 {
-                    if (memory::ConstructArray<T>(block, _capacity))
-                    {
-                        pointer old_elements = _elements;
-                        iterator old_begin = begin();
-                        iterator old_end = end();
-                        
-                        _elements = (pointer)block.Begin();
-                        move_from(old_begin, old_end); //sets _size
-                        
-                        memory::DestructArray<T>(old_elements, _capacity);
-                        bl deallocated_successful = _allocator->Deallocate(old_elements);
-                        NP_ASSERT(deallocated_successful, "we require successful deallocation here");
-                        _allocator = &allocator;
-                        
-                        set = true;
-                    }
-                    else
-                    {
-                        allocator.Deallocate(block);
-                    }
+                    pointer old_elements = _elements;
+                    iterator old_begin = begin();
+                    iterator old_end = end();
+                    
+                    _elements = (pointer)block.Begin();
+                    move_from(old_begin, old_end); //sets _size
+                    
+                    destroy(old_begin, old_end);
+                    set = _allocator->Deallocate(old_elements);
+                    NP_ASSERT(set, "we require successful deallocation here");
+                    _allocator = &allocator;
                 }
                 
                 return set;
@@ -662,6 +681,8 @@ namespace np
              */
             bl resize(siz target_size)
             {
+                NP_ASSERT(typetraits::IsDefaultConstructible<T>, "T must be default constructible for this method");
+                
                 bl resized = false;
                 
                 if (target_size != _size || _capacity != calc_capacity(_size))
@@ -671,29 +692,25 @@ namespace np
                     
                     if (block.IsValid())
                     {
-                        if (memory::ConstructArray<T>(block, target_capacity))
+                        pointer old_elements = _elements;
+                        iterator old_begin = begin();
+                        iterator old_end = end();
+                        siz min_size = target_size < _size ? target_size : _size;
+                        
+                        _elements = (pointer)block.Begin();
+                        move_from(old_begin, old_begin + min_size); //sets _size
+                        block.size = T_SIZE;
+                        for (iterator it = end(); it < begin() + target_size; it++)
                         {
-                            pointer old_elements = _elements;
-                            iterator old_begin = begin();
-                            iterator old_end = end();
-                            siz min_size = target_size < _size ? target_size : _size;
-                            
-                            _elements = (pointer)block.Begin();
-                            move_from(old_begin, old_begin + min_size); //sets _size
-                            _size = target_size; // reset _size here in case we are growing in size
-                            
-                            memory::DestructArray<T>(old_elements, _capacity);
-                            bl deallocated_successful = _allocator->Deallocate(old_elements);
-                            NP_ASSERT(deallocated_successful, "we require successful deallocation here");
-                            
-                            _capacity = target_capacity;
-                            resized = true;
+                            block.ptr = it.ptr;
+                            memory::Construct<T>(block);
                         }
-                        else
-                        {
-                            _allocator->Deallocate(block);
-                            NP_ASSERT(false, "construction failed");
-                        }
+                        _size = target_size; // set _size here in case we are growing in size
+                        _capacity = target_capacity;
+                        
+                        destroy(old_begin, old_end);
+                        resized = _allocator->Deallocate(old_elements);
+                        NP_ASSERT(resized, "we require successful deallocation here");
                     }
                     else
                     {
@@ -723,40 +740,26 @@ namespace np
                     
                     if (block.IsValid())
                     {
-                        if (memory::ConstructArray<T>(block, target_capacity))
+                        pointer old_elements = _elements;
+                        iterator old_begin = begin();
+                        iterator old_end = end();
+                        bl is_size_decreasing = target_size < _size;
+                        siz min_size = is_size_decreasing ? target_size : _size;
+                        
+                        _elements = (pointer)block.Begin();
+                        move_from(old_begin, old_begin + min_size);
+                        block.size = T_SIZE;
+                        for (iterator it = end(); it < begin() + target_size; it++)
                         {
-                            pointer old_elements = _elements;
-                            iterator old_begin = begin();
-                            iterator old_end = end();
-                            bl is_size_decreasing = target_size < _size;
-                            siz min_size = is_size_decreasing ? target_size : _size;
-                            
-                            _elements = (pointer)block.Begin();
-                            move_from(old_begin, old_begin + min_size);
-                            
-                            memory::DestructArray<T>(old_elements, _capacity);
-                            bl deallocation_successful = _allocator->Deallocate(old_elements);
-                            NP_ASSERT(deallocation_successful, "we require successful deallocation here");
-                            
-                            _capacity = target_capacity;
-                            
-                            if (!is_size_decreasing)
-                            {
-                                iterator old_end = end();
-                                _size = target_size;
-                                for (iterator it = old_end; it != end(); it++)
-                                {
-                                    *it = value;
-                                }
-                            }
-                            
-                            resized = true;
+                            block.ptr = it.ptr;
+                            memory::Construct<T>(block, value);
                         }
-                        else
-                        {
-                            _allocator->Deallocate(block);
-                            NP_ASSERT(false, "construction failed");
-                        }
+                        _size = target_size; // set _size here in case we are growing in size
+                        _capacity = target_capacity;
+                        
+                        destroy(old_begin, old_end);
+                        resized = _allocator->Deallocate(old_elements);
+                        NP_ASSERT(resized, "we require successful deallocation here");
                     }
                     else
                     {
@@ -785,7 +788,7 @@ namespace np
              */
             void clear() noexcept
             {
-                memory::DestructArray<T>(_elements, _capacity);
+                destroy(begin(), end());
                 _allocator->Deallocate(_elements);
                 _capacity = MIN_CAPACITY;
                 init();
@@ -821,7 +824,12 @@ namespace np
                     {
                         inserted = begin() + index;
                         move_backwards(inserted, end(), inserted + 1);
-                        *inserted = value;
+                        if (index < _size) //dst is not at the end
+                        {
+                            destroy(inserted);
+                        }
+                        memory::Block block{.ptr = inserted.ptr, .size = T_SIZE};
+                        memory::Construct<T>(block, value);
                         _size++;
                     }
                 }
@@ -843,9 +851,15 @@ namespace np
                         inserted = begin() + index;
                         move_backwards(inserted, end(), inserted + count);
                         
+                        memory::Block block{.size = T_SIZE};
                         for (iterator it = inserted; it < inserted + count; it++)
                         {
-                            *it = value;
+                            block.ptr = it.ptr;
+                            if (index++ < _size)
+                            {
+                                destroy(block.ptr);
+                            }
+                            memory::Construct<T>(block, value);
                         }
                         
                         _size += count;
@@ -870,9 +884,15 @@ namespace np
                         inserted = begin() + index;
                         move_backwards(inserted, end(), inserted + src_size);
                         
+                        memory::Block block{.size = T_SIZE};
                         for (reverse_iterator it = src_rbegin; it != src_rend; it++)
                         {
-                            *(inserted + (src_rbegin - it)) = (const_reference)*it;
+                            block.ptr = inserted.base() + (src_rbegin - it);
+                            if (index++ < _size)
+                            {
+                                destroy(block.ptr);
+                            }
+                            memory::Construct<T>(block, (const_reference)*it);
                         }
                         
                         _size += src_size;
@@ -897,9 +917,15 @@ namespace np
                         inserted = begin() + index;
                         move_backwards(inserted, end(), inserted + src_size);
                         
+                        memory::Block block{.size = T_SIZE};
                         for (iterator it = src_begin; it < src_end; it++)
                         {
-                            *(inserted + (it - src_begin)) = (const_reference)*it;
+                            block.ptr = inserted.base() + (it - src_begin);
+                            if (index++ < _size)
+                            {
+                                destroy(block.ptr);
+                            }
+                            memory::Construct<T>(block, (const_reference)*it);
                         }
                         
                         _size += src_size;
@@ -923,9 +949,15 @@ namespace np
                         inserted = begin() + index;
                         move_backwards(inserted, end(), inserted + list.size());
                         
+                        memory::Block block{.size = T_SIZE};
                         for (iterator it = list.begin(); it < (iterator)list.end(); it++)
                         {
-                            *(inserted + (it - (iterator)list.begin())) = (const_reference)*it;
+                            block.ptr = inserted.base() + (it - (iterator)list.begin());
+                            if (index++ < _size)
+                            {
+                                destroy(block.ptr);
+                            }
+                            memory::Construct<T>(block, (const_reference)*it);
                         }
                         
                         _size += list.size();
@@ -945,11 +977,7 @@ namespace np
                 {
                     move_forwards(it + 1, end(), it);
                     _size--;
-                    /*
-                    memory::Block block{.ptr = (pointer)end(), .size = T_SIZE};
-                    memory::Destruct<T>(block.ptr);
-                    memory::Construct<T>(block);
-                     */
+                    destroy(end());
                     erased = it;
                 }
                 
@@ -966,17 +994,8 @@ namespace np
                 if (contains(src_begin) && (contains(src_end) || src_end == end()) && src_end > src_begin)
                 {
                     move_forwards(src_end, end(), src_begin);
-                    //iterator old_end = end();
                     _size -= src_end - src_begin;
-                    /*
-                    memory::Block block{.size = T_SIZE};
-                    for (iterator it = end(); it != old_end; it++)
-                    {
-                        block.ptr = (pointer)it;
-                        memory::Destruct<T>(block.ptr);
-                        memory::Construct<T>(block);
-                    }
-                     */
+                    destroy(end(), end() + (src_end - src_begin));
                     erased = src_begin;
                 }
                 
@@ -990,6 +1009,8 @@ namespace np
             template <class... Args>
             iterator emplace(const_iterator dst, Args&&... args)
             {
+                NP_ASSERT((typetraits::IsConstructible<T, Args...>), "T must be constructible with the given Args");
+                
                 iterator emplaced = nullptr;
                 if (contains(dst) || dst == end())
                 {
@@ -1000,8 +1021,12 @@ namespace np
                         move_backwards(emplaced, end(), emplaced + 1);
                         memory::Block block{.ptr = emplaced, .size = T_SIZE};
                         
-                        if (memory::Destruct<T>(emplaced) &&
-                            memory::Construct<T>(block, utility::Forward<Args>(args)...))
+                        if (index < _size)
+                        {
+                            destroy(emplaced);
+                        }
+                        
+                        if (memory::Construct<T>(block, utility::Forward<Args>(args)...))
                         {
                             _size++;
                         }
@@ -1046,6 +1071,7 @@ namespace np
             void pop_back()
             {
                 _size--;
+                destroy(end());
             }
             
             /**
