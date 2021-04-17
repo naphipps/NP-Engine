@@ -40,7 +40,7 @@ namespace np
         template <class T>
         constexpr typetraits::RemoveRefType<T>&& Move(T&& t) noexcept
         {
-            return ::std::move<T>(Forward<T>(t));
+            return ::std::move<T>(t);
         }
         
         /**
