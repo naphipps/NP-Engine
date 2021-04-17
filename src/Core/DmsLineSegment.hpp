@@ -34,32 +34,6 @@ namespace np
         public:
             
             /**
-             default constructor
-             */
-            DmsLineSegment()
-            {}
-            
-            /**
-             copy constructor
-             */
-            DmsLineSegment(const DmsLineSegment& other):
-            _begin(other._begin),
-            _end(other._end),
-            _associated(other._associated),
-            _midpoint(other._midpoint)
-            {}
-            
-            /**
-             move constructor
-             */
-            DmsLineSegment(DmsLineSegment&& other):
-            _begin(other._begin),
-            _end(other._end),
-            _associated(other._associated),
-            _midpoint(other._midpoint)
-            {}
-            
-            /**
              constructor
              */
             DmsLineSegment(math::fltPoint begin, math::fltPoint end,
@@ -91,30 +65,6 @@ namespace np
              */
             ~DmsLineSegment()
             {}
-            
-            /**
-             copy assignment
-             */
-            DmsLineSegment& operator=(const DmsLineSegment& other)
-            {
-                _begin = other._begin;
-                _end = other._end;
-                _associated = other._associated;
-                _midpoint = other._midpoint;
-                return *this;
-            }
-            
-            /**
-             move assignment - acts like copy
-             */
-            DmsLineSegment& operator=(DmsLineSegment&& other)
-            {
-                _begin = other._begin;
-                _end = other._end;
-                _associated = other._associated;
-                _midpoint = other._midpoint;
-                return *this;
-            }
             
             /**
              gets the begin points
