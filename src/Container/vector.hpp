@@ -37,7 +37,7 @@ namespace np
             using value_type = T;
             using allocator_type = memory::Allocator;
             using allocator_reference = allocator_type&;
-            using allocator_const_reference = const allocator_type&;
+            using const_allocator_reference = const allocator_type&;
             using allocator_pointer = allocator_type*;
             using size_type = siz;
             using difference_type = dif;
@@ -449,7 +449,7 @@ namespace np
             /**
              gets the allocator reference this vector is using
              */
-            allocator_const_reference get_allocator() const
+            const_allocator_reference get_allocator() const
             {
                 return *_allocator;
             }
