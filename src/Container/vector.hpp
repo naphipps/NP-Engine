@@ -239,7 +239,7 @@ namespace np
              */
             void init(allocator_reference allocator, siz capacity)
             {
-                if (_allocator != nullptr)
+                if (_size > 0)
                 {
                     destroy(begin(), end());
                     bl deallocation = _allocator->Deallocate(_elements);
