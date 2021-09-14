@@ -62,6 +62,15 @@ namespace np
         using RemovePointerObject = ::std::remove_pointer_t<T>;
         
         /**
+         enable if
+         */
+        template <bl B, class T = void>
+        using EnableIf = ::std::enable_if<B, T>;
+        
+        template <bl B, class T = void>
+        using EnableIfType = ::std::enable_if_t<B, T>;
+        
+        /**
          is constructible
          */
         template <class T, class ... Args>
