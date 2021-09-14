@@ -10,7 +10,7 @@
 
 #include <initializer_list>
 
-namespace np::container
+namespace np::container //TODO: use this notation everywhere else we deem appropriate
 {
     /**
      brings std initializer list here

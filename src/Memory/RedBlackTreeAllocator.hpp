@@ -145,7 +145,7 @@ namespace np
             private:
                 NodePtr _root;
                 Margin _nil_margin; //required for _nil.GetSize()
-                Node _nil; //TODO: set this up so this isn't needed... it's useless overhead
+                Node _nil; //TODO: set this up so this isn't needed... it's useless overhead... is it? I think it's fine... -- define convention to mark this as OPTIMIZE instead of TODO...
                 
                 /**
                  gets the minimum sized node from given node

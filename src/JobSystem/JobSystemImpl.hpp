@@ -21,6 +21,8 @@ namespace np
 {
     namespace js
     {
+        //TODO: support our allocators here
+        
         /**
          the cornerstone object for the job system
          */
@@ -58,7 +60,7 @@ namespace np
             }
             
             /**
-             deconstructor
+             deconstructor //TODO: refactor all "deconstruct" to "destruct"
              */
             ~JobSystem()
             {

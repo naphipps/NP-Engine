@@ -187,7 +187,7 @@ namespace np
          */
         static inline dbl calc_skew(const dbl scale, const dbl location, const dbl mean = 0.0)
         {
-            NP_ASSERT(is_calc_skew_real(scale, location, mean),
+            NP_ASSERT(is_calc_skew_real(scale, location, mean), //TODO: do we still want to return something reasonable, say 0, when skew is imaginary?
                       "skew must be real - s:"+to_str(scale)+", l:"+
                       to_str(location)+", m:"+to_str(mean));
             

@@ -30,7 +30,7 @@ namespace np
         {
         private:
             NP_STATIC_ASSERT(typetraits::IsCopyConstructible<T>, "T must be copy constructible");
-            NP_STATIC_ASSERT(typetraits::IsMoveConstructible<T>, "T must be move constructible");
+            NP_STATIC_ASSERT(typetraits::IsMoveConstructible<T>, "T must be move constructible"); //TODO: add default constructible
             NP_STATIC_ASSERT(typetraits::IsDestructible<T>, "T must be destructible");
             
         public:
@@ -269,6 +269,10 @@ namespace np
             }
             
         public:
+            
+            //TODO: what other constructors are we missing??
+            //TODO: missing vector(count, value)
+            //TODO: missing vector(allocator, count, value)
             
             /**
              constructor with given allocator and capacity
@@ -808,6 +812,7 @@ namespace np
             bl contains(const_reverse_iterator it) const
             {
                 return begin() <= (iterator)it && (iterator)it < end();
+                return begin() <= (iterator)it && (iterator)it != end(); //TODO: I think we can avoid casting here
             }
             
             /**
@@ -987,7 +992,7 @@ namespace np
             /**
              erases the elements from the given begin to end iterators
              */
-            iterator erase(const_iterator src_begin, const_iterator src_end)
+            iterator erase(const_iterator src_begin, const_iterator src_end) //TODO: refactor these to be first to last? Or should we stick with src_begin? In that case, deque needs to be fixed
             {
                 iterator erased = nullptr;
                 
@@ -1044,7 +1049,7 @@ namespace np
              constructs an element at the end
              */
             template <class... Args>
-            iterator emplace_back(Args&&... args)
+            reference emplace_back(Args&&... args) //TODO: returns reference -- check other method return types -- this should be constexpr
             {
                 return emplace(end(), utility::Forward<Args>(args)...);
             }

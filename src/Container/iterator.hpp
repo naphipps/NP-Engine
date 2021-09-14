@@ -72,7 +72,7 @@ namespace np
             /**
              deconstructor
              */
-            ~iterator() = default;
+            ~iterator() = default; //TODO: Jason Turner says to remove these?? Remove these everywhere??
             
             /**
              base method returns our ptr
@@ -147,7 +147,7 @@ namespace np
              */
             pointer operator->() const
             {
-                return memory::AddressOf(operator*());
+                return memory::AddressOf(operator*()); //TODO: change this to just return ptr...
             }
             
             /**
@@ -176,7 +176,7 @@ namespace np
             }
             
             /**
-             pre increment operator
+             pre increment operator //TODO: *decrement -- fix comments
              */
             iterator& operator--()
             {
@@ -372,7 +372,7 @@ namespace np
             /**
              base method returns our ptr
              */
-            pointer base()
+            pointer base() //TODO: do we need non-const?
             {
                 return ptr;
             }
@@ -388,12 +388,12 @@ namespace np
             /**
              cast operator allows us to implicitly convert to T
              */
-            operator T()
+            operator T() //TODO: make this const?
             {
                 return ptr;
             }
             
-            operator iterator<T>()
+            operator iterator<T>() //TODO: need comment //TODO: make const?
             {
                 return iterator<T>(ptr - 1);
             }
@@ -491,7 +491,7 @@ namespace np
              */
             pointer operator->() const
             {
-                return memory::AddressOf(operator*());
+                return memory::AddressOf(operator*()); //TODO: return ptr - 1 ??
             }
             
             /**

@@ -28,7 +28,11 @@
 #define NP_PROFILE_ENABLE 1
 #define NP_LOG_ENABLE 1
 #define NP_ASSERT_ENABLE 1
-#define OUTPUT_DIR "/Users/nathanphipps/Projects/Project Space/_output/"
+#define OUTPUT_DIR "/Users/nathanphipps/Projects/Project Space/_output/" //TODO: remove this and get a better setup for this / logging in general
+
+#else
+
+#define OUTPUT_DIR "/Users/nathanphipps/Projects/Project Space/_output2/"
 
 #endif
 

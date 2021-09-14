@@ -38,7 +38,7 @@ namespace np
              */
             static inline dbl znorm1(dbl z)
             {
-                return 0.5 * erf(z / sqrt(2.0));
+                return 0.5 * erf(z / sqrt(2.0)); //TODO: we need to use our erf, not c++'s
             }
             
             /**

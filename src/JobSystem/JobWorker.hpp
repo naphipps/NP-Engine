@@ -36,7 +36,7 @@ namespace np
             using JobRecordQueue = concurrency::vendor::moodycamel::ConcurrentQueue<JobRecord>;
             
         private:
-            static container::array<JobWorker*, concurrency::ThreadPool::MAX_THREAD_COUNT> _other_workers;
+            static container::array<JobWorker*, concurrency::ThreadPool::MAX_THREAD_COUNT> _other_workers; //TODO: I don't really like this. Make it so this array can be local to the system instead of global
             static ui64 _other_workers_size;
             
             ui32 _id = 0;

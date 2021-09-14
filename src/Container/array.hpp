@@ -15,13 +15,13 @@
 
 namespace np
 {
-    namespace container
+    namespace container //TODO: use ::np::container instead of nested namespaces here
     {
         /**
          brings the std array here since it is such a small class
          */
         template <class T, siz SIZE>
-        using array = ::std::array<T, SIZE>;
+        using array = ::std::array<T, SIZE>; //TODO: we may want to implement our own so our iterators work well??
     }
 }
 
