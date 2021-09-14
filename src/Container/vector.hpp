@@ -1094,5 +1094,17 @@ namespace np
     }
 }
 
+namespace std
+{
+    /**
+     add ::np::container::vector support to ::std::swap
+     */
+    template <class T>
+    void swap(::np::container::vector<T>& a, ::np::container::vector<T>& b)
+    {
+        a.swap(b);
+    }
+}
+
 #endif /* NP_ENGINE_VECTOR_HPP */
 
