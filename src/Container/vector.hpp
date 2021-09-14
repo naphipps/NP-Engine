@@ -1052,7 +1052,7 @@ namespace np
             template <class... Args>
             reference emplace_back(Args&&... args) //TODO: returns reference -- check other method return types -- this should be constexpr
             {
-                return emplace(end(), utility::Forward<Args>(args)...);
+                return *emplace(end(), utility::Forward<Args>(args)...);
             }
             
             /**
@@ -1060,7 +1060,7 @@ namespace np
              */
             iterator push_back(const_reference value)
             {
-                return emplace_back(value);
+                return memory::AddressOf(emplace_back(value));
             }
             
             /**
@@ -1068,7 +1068,7 @@ namespace np
              */
             iterator push_back(T&& value)
             {
-                return emplace_back(utility::Move(value));
+                return memory::AddressOf(emplace_back(utility::Move(value)));
             }
             
             /**
