@@ -68,7 +68,7 @@ namespace np
              */
             void destroy(iterator it)
             {
-                memory::Destruct<T>(it.ptr);
+                memory::Destruct<T>(it.base());
             }
             
             /**
@@ -143,7 +143,7 @@ namespace np
                 _size = end - begin;
                 
                 memory::Block block{.size = T_SIZE};
-                for (iterator it = begin; it < end; it++)
+                for (iterator it = begin; it != end; it++)
                 {
                     block.ptr = _elements + (it - begin);
                     memory::Construct<T>(block, (const_reference)*it);
@@ -175,7 +175,7 @@ namespace np
                 _size = end - begin;
                 
                 memory::Block block{.size = T_SIZE};
-                for (iterator it = begin; it < end; it++)
+                for (iterator it = begin; it != end; it++)
                 {
                     block.ptr = _elements + (it - begin);
                     memory::Construct<T>(block, utility::Move(*it));
@@ -408,7 +408,7 @@ namespace np
                 memory::Block block{.size = T_SIZE};
                 for (iterator it = begin(); it != end(); it++)
                 {
-                    block.ptr = it.ptr;
+                    block.ptr = it.base();
                     memory::Construct<T>(block, value);
                 }
             }
@@ -706,7 +706,7 @@ namespace np
                         block.size = T_SIZE;
                         for (iterator it = end(); it < begin() + target_size; it++)
                         {
-                            block.ptr = it.ptr;
+                            block.ptr = it.base();
                             memory::Construct<T>(block);
                         }
                         _size = target_size; // set _size here in case we are growing in size
@@ -755,7 +755,7 @@ namespace np
                         block.size = T_SIZE;
                         for (iterator it = end(); it < begin() + target_size; it++)
                         {
-                            block.ptr = it.ptr;
+                            block.ptr = it.base();
                             memory::Construct<T>(block, value);
                         }
                         _size = target_size; // set _size here in case we are growing in size
@@ -803,7 +803,7 @@ namespace np
              */
             bl contains(const_iterator it) const
             {
-                return begin() <= it && it < end();
+                return begin() <= it && it != end();
             }
             
             /**
@@ -811,7 +811,6 @@ namespace np
              */
             bl contains(const_reverse_iterator it) const
             {
-                return begin() <= (iterator)it && (iterator)it < end();
                 return begin() <= (iterator)it && (iterator)it != end(); //TODO: I think we can avoid casting here
             }
             
@@ -859,7 +858,7 @@ namespace np
                         memory::Block block{.size = T_SIZE};
                         for (iterator it = inserted; it < inserted + count; it++)
                         {
-                            block.ptr = it.ptr;
+                            block.ptr = it.base();
                             if (index++ < _size)
                             {
                                 destroy(block.ptr);
