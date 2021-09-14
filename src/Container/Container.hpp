@@ -18,7 +18,10 @@
 #include "fixed_queue.hpp"
 #include "uset.hpp"
 #include "oset.hpp"
+#include "deque.hpp"
 #include "init_list.hpp"
 #include "iterator.hpp"
+#include "deque_iterator.hpp"
+#include "container_traits.hpp"
 
 #endif /* NP_ENGINE_CONTAINER_HPP */
