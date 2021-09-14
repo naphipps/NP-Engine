@@ -463,22 +463,24 @@ namespace np
              */
             bl set_allocator(allocator_reference allocator)
             {
-                bl set = false;
-                memory::Block block = allocator.Allocate(_capacity * T_SIZE);
-                
-                if (block.IsValid())
+                bl set = memory::AddressOf(allocator) == memory::AddressOf(*_allocator);
+                if (!set)
                 {
-                    pointer old_elements = _elements;
-                    iterator old_begin = begin();
-                    iterator old_end = end();
-                    
-                    _elements = (pointer)block.Begin();
-                    move_from(old_begin, old_end); //sets _size
-                    
-                    destroy(old_begin, old_end);
-                    set = _allocator->Deallocate(old_elements);
-                    NP_ASSERT(set, "we require successful deallocation here");
-                    _allocator = &allocator;
+                    memory::Block block = allocator.Allocate(_capacity * T_SIZE);
+                    if (block.IsValid())
+                    {
+                        pointer old_elements = _elements;
+                        iterator old_begin = begin();
+                        iterator old_end = end();
+                        
+                        _elements = (pointer)block.Begin();
+                        move_from(old_begin, old_end); //sets _size
+                        
+                        destroy(old_begin, old_end);
+                        set = _allocator->Deallocate(old_elements);
+                        NP_ASSERT(set, "we require successful deallocation here");
+                        _allocator = memory::AddressOf(allocator);
+                    }
                 }
                 
                 return set;
