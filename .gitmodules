@@ -1,0 +1,21 @@
+[submodule "vendor/nlohmann_json"]
+	path = vendor/nlohmann_json
+	url = git@github.com:nlohmann/json.git
+[submodule "vendor/gabime_spdlog"]
+	path = vendor/gabime_spdlog
+	url = git@github.com:gabime/spdlog.git
+[submodule "vendor/skypjack_entt"]
+	path = vendor/skypjack_entt
+	url = git@github.com:skypjack/entt.git
+[submodule "vendor/naphipps_liquidfun"]
+	path = vendor/naphipps_liquidfun
+	url = git@github.com:naphipps/liquidfun.git
+[submodule "vendor/naphipps_concurrentqueue"]
+	path = vendor/naphipps_concurrentqueue
+	url = git@github.com:naphipps/concurrentqueue.git
+[submodule "vendor/naphipps_pcg-cpp"]
+	path = vendor/naphipps_pcg-cpp
+	url = git@github.com:naphipps/pcg-cpp.git
+[submodule "vendor/naphipps_randutils"]
+	path = vendor/naphipps_randutils
+	url = git@github.com:naphipps/randutils.git
