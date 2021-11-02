@@ -6,6 +6,8 @@
 //  Copyright © 2020 Nathan Phipps. All rights reserved.
 //
 
+//TODO: I don't think we need this file... or at least support for the std functions
+
 #ifndef NP_ENGINE_TRIG_FUNCTIONS_HPP
 #define NP_ENGINE_TRIG_FUNCTIONS_HPP
 

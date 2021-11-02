@@ -7,6 +7,7 @@
 //
 
 //TODO: refactor all these "math_functions" files to Pascal casing instead of snake casing
+//TODO: I don't think we need this file... or at least support for the std functions
 
 #ifndef NP_ENGINE_MATH_FUNCTIONS_HPP
 #define NP_ENGINE_MATH_FUNCTIONS_HPP

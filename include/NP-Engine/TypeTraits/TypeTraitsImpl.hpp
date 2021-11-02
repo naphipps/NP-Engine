@@ -5,6 +5,8 @@
 //  Created by Nathan Phipps on 2/17/21.
 //
 
+//TODO: I don't think we need this file... or at least support for the std functions
+
 #ifndef NP_ENGINE_TYPE_TRAITS_IMPL_HPP
 #define NP_ENGINE_TYPE_TRAITS_IMPL_HPP
 
