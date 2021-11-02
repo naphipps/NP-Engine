@@ -8,13 +8,8 @@
 #ifndef NP_ENGINE_RENDERER_HPP
 #define NP_ENGINE_RENDERER_HPP
 
-#include <SFML/Graphics.hpp>
-#include <SFML/System.hpp>
-
 #include "NP-Engine/Foundation/Foundation.hpp"
 
 #include "RendererImpl.hpp"
-
-using sfimg = sf::Image;
 
 #endif /* NP_ENGINE_RENDERER_HPP */
