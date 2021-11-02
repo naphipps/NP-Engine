@@ -11,10 +11,11 @@
 #ifndef NP_ENGINE_MATH_FUNCTIONS_HPP
 #define NP_ENGINE_MATH_FUNCTIONS_HPP
 
-#include <cmath>
 #include <algorithm>
 
 #include "NP-Engine/Primitive/Primitive.hpp"
+
+#include "cmath_include.hpp"
 
 namespace np
 {
@@ -81,7 +82,7 @@ namespace np
          */
         static inline dbl abs(const dbl n)
         {
-            return ::std::fabs(n);
+            return ::std::fabsl(n); //TODO: I'm not sure this is correct
         }
         
         /**

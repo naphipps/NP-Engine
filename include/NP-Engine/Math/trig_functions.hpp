@@ -9,6 +9,8 @@
 #ifndef NP_ENGINE_TRIG_FUNCTIONS_HPP
 #define NP_ENGINE_TRIG_FUNCTIONS_HPP
 
+#include "cmath_include.hpp"
+
 namespace np
 {
     namespace math
@@ -26,7 +28,7 @@ namespace np
          */
         static inline dbl cos(const dbl n)
         {
-            return ::std::cos(n);
+            return ::std::cosl(n);//TODO: I'm not sure this is correct
         }
         
         /**
@@ -42,7 +44,7 @@ namespace np
          */
         static inline dbl sin(const dbl n)
         {
-            return ::std::sin(n);
+            return ::std::sinl(n);//TODO: I'm not sure this is correct
         }
         
         /**
@@ -58,7 +60,7 @@ namespace np
          */
         static inline dbl acos(const dbl n)
         {
-            return ::std::acos(n);
+            return ::std::acosl(n);//TODO: I'm not sure this is correct
         }
         
         /**
@@ -74,7 +76,7 @@ namespace np
          */
         static inline dbl asin(const dbl n)
         {
-            return ::std::asin(n);
+            return ::std::asinl(n);//TODO: I'm not sure this is correct
         }
         
         /**
@@ -90,7 +92,7 @@ namespace np
          */
         static inline dbl atan(const dbl n)
         {
-            return ::std::atan(n);
+            return ::std::atanl(n);//TODO: I'm not sure this is correct
         }
         
         /**
@@ -106,7 +108,7 @@ namespace np
          */
         static inline dbl atan2(const dbl y, const dbl x)
         {
-            return ::std::atan2(y, x);
+            return ::std::atan2l(y, x);
         }
     }
 }
