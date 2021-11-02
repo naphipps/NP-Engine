@@ -16,8 +16,8 @@
 #include <algorithm>
 #include <set>
 #include <stdexcept>
-#include "Polygon.hpp"
-#include "Point.hpp"
+#include "NP-Engine/Polygon.hpp"
+#include "NP-Engine/Point.hpp"
 
 //TODO: refine this file and cpp
 

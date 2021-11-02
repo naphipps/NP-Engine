@@ -9,7 +9,7 @@
 #ifndef NP_ENGINE_AABB_HPP
 #define NP_ENGINE_AABB_HPP
 
-#include "Primitive/Primitive.hpp"
+#include "NP-Engine/Primitive/Primitive.hpp"
 
 #include "Point.hpp"
 

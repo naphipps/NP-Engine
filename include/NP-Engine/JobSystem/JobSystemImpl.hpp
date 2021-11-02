@@ -9,9 +9,9 @@
 #ifndef NP_ENGINE_JOB_SYSTEM_IMPL_HPP
 #define NP_ENGINE_JOB_SYSTEM_IMPL_HPP
 
-#include "Container/Container.hpp"
-#include "Concurrency/Concurrency.hpp"
-#include "Primitive/Primitive.hpp"
+#include "NP-Engine/Container/Container.hpp"
+#include "NP-Engine/Concurrency/Concurrency.hpp"
+#include "NP-Engine/Primitive/Primitive.hpp"
 
 #include "JobWorker.hpp"
 #include "JobWorkerToken.hpp"

@@ -14,7 +14,7 @@
 #include <cmath>
 #include <algorithm>
 
-#include "Primitive/Primitive.hpp"
+#include "NP-Engine/Primitive/Primitive.hpp"
 
 namespace np
 {

@@ -6,7 +6,7 @@
 //  Copyright © 2020 Nathan Phipps. All rights reserved.
 //
 
-#include "Log.hpp"
+#include "NP-Engine/Insight/Log.hpp"
 
 namespace np
 {

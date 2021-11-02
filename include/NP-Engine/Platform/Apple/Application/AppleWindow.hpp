@@ -8,7 +8,7 @@
 #ifndef NP_ENGINE_APPLE_WINDOW_HPP
 #define NP_ENGINE_APPLE_WINDOW_HPP
 
-#include "Application/Application.hpp"
+#include "NP-Engine/Application/Application.hpp"
 
 namespace np
 {

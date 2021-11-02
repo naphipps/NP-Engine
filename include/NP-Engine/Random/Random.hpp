@@ -9,7 +9,7 @@
 #ifndef NP_ENGINE_RANDOM_HPP
 #define NP_ENGINE_RANDOM_HPP
 
-#include "Foundation/Foundation.hpp"
+#include "NP-Engine/Foundation/Foundation.hpp"
 
 #include "RandomEngine.hpp"
 #include "RandomBase.hpp"

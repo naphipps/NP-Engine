@@ -9,7 +9,7 @@
 #ifndef NP_ENGINE_MEMORY_HPP
 #define NP_ENGINE_MEMORY_HPP
 
-#include "Foundation/Foundation.hpp"
+#include "NP-Engine/Foundation/Foundation.hpp"
 
 #include "sptr.hpp"
 #include "uptr.hpp"

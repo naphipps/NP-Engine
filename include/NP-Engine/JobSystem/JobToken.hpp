@@ -9,8 +9,8 @@
 #ifndef NP_ENGINE_JOB_TOKEN_HPP
 #define NP_ENGINE_JOB_TOKEN_HPP
 
-#include "Primitive/Primitive.hpp"
-#include "Insight/Insight.hpp"
+#include "NP-Engine/Primitive/Primitive.hpp"
+#include "NP-Engine/Insight/Insight.hpp"
 
 #include "Job.hpp"
 

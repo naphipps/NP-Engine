@@ -9,11 +9,11 @@
 #ifndef NP_ENGINE_APPLICATION_IMPL_HPP
 #define NP_ENGINE_APPLICATION_IMPL_HPP
 
-#include "Primitive/Primitive.hpp"
-#include "Time/Time.hpp"
-#include "Insight/Insight.hpp"
-#include "Renderer/Renderer.hpp"
-#include "Memory/Memory.hpp"
+#include "NP-Engine/Primitive/Primitive.hpp"
+#include "NP-Engine/Time/Time.hpp"
+#include "NP-Engine/Insight/Insight.hpp"
+#include "NP-Engine/Renderer/Renderer.hpp"
+#include "NP-Engine/Memory/Memory.hpp"
 
 #include "Layer.hpp"
 #include "LayerContainer.hpp"

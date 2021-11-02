@@ -9,6 +9,8 @@
 #ifndef NP_ENGINE_SPTR_HPP
 #define NP_ENGINE_SPTR_HPP
 
+#include <memory>
+
 namespace np
 {
     namespace memory

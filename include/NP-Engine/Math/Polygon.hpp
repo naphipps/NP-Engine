@@ -11,7 +11,7 @@
 
 //TODO: refine this file and cpp
 
-#include "Point.hpp"
+#include "NP-Engine/Point.hpp"
 
 #define POLYGON_CCW 1
 #define POLYGON_CW -1

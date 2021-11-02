@@ -9,10 +9,10 @@
 #ifndef NP_ENGINE_RANDOM_DISTRIBUTION_HPP
 #define NP_ENGINE_RANDOM_DISTRIBUTION_HPP
 
-#include "Container/Container.hpp"
-#include "Primitive/Primitive.hpp"
-#include "Math/Math.hpp"
-#include "Insight/Insight.hpp"
+#include "NP-Engine/Container/Container.hpp"
+#include "NP-Engine/Primitive/Primitive.hpp"
+#include "NP-Engine/Math/Math.hpp"
+#include "NP-Engine/Insight/Insight.hpp"
 
 namespace np
 {

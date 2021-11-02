@@ -2,10 +2,10 @@
 #ifndef NP_ENGINE_PERLIN_HPP
 #define NP_ENGINE_PERLIN_HPP
 
-#include "Primitive/Primitive.hpp"
-#include "Random/Random.hpp"
-#include "Math/Math.hpp"
-#include "Serialization/Serialization.hpp"
+#include "NP-Engine/Primitive/Primitive.hpp"
+#include "NP-Engine/Random/Random.hpp"
+#include "NP-Engine/Math/Math.hpp"
+#include "NP-Engine/Serialization/Serialization.hpp"
 
 namespace np
 {

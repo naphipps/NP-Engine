@@ -8,7 +8,7 @@
 #ifndef NP_ENGINE_TRAIT_ALLOCATOR_HPP
 #define NP_ENGINE_TRAIT_ALLOCATOR_HPP
 
-#include "Primitive/Primitive.hpp"
+#include "NP-Engine/Primitive/Primitive.hpp"
 
 //TODO: finish this
 

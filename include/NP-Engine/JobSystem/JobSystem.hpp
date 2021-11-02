@@ -9,7 +9,7 @@
 #ifndef NP_ENGINE_JOB_SYSTEM_HPP
 #define NP_ENGINE_JOB_SYSTEM_HPP
 
-#include "Foundation/Foundation.hpp"
+#include "NP-Engine/Foundation/Foundation.hpp"
 
 #include "JobFunction.hpp"
 #include "JobPool.hpp"

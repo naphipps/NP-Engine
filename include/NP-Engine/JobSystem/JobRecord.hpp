@@ -9,7 +9,7 @@
 #ifndef NP_ENGINE_JOB_RECORD_HPP
 #define NP_ENGINE_JOB_RECORD_HPP
 
-#include "Primitive/Primitive.hpp"
+#include "NP-Engine/Primitive/Primitive.hpp"
 
 #include "Job.hpp"
 #include "JobPriority.hpp"

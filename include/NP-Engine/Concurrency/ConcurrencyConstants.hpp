@@ -9,7 +9,7 @@
 #ifndef NP_ENGINE_CONCURRENCY_CONSTANTS_HPP
 #define NP_ENGINE_CONCURRENCY_CONSTANTS_HPP
 
-#include "Primitive/Primitive.hpp"
+#include "NP-Engine/Primitive/Primitive.hpp"
 
 namespace np
 {

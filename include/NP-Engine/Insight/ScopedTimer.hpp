@@ -9,7 +9,7 @@
 #ifndef NP_ENGINE_SCOPED_TIMER_HPP
 #define NP_ENGINE_SCOPED_TIMER_HPP
 
-#include "Primitive/Primitive.hpp"
+#include "NP-Engine/Primitive/Primitive.hpp"
 
 #include "Timer.hpp"
 

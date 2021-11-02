@@ -9,7 +9,7 @@
 #ifndef NP_ENGINE_CONCURRENCY_HPP
 #define NP_ENGINE_CONCURRENCY_HPP
 
-#include "Foundation/Foundation.hpp"
+#include "NP-Engine/Foundation/Foundation.hpp"
 
 #include "ConcurrencyConstants.hpp"
 #include "ThreadPool.hpp"

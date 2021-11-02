@@ -9,7 +9,7 @@
 #ifndef NP_ENGINE_JOB_WORKER_TOKEN_HPP
 #define NP_ENGINE_JOB_WORKER_TOKEN_HPP
 
-#include "Primitive/Primitive.hpp"
+#include "NP-Engine/Primitive/Primitive.hpp"
 
 #include "JobWorker.hpp"
 #include "JobToken.hpp"

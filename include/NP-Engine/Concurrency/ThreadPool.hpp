@@ -9,9 +9,9 @@
 #ifndef NP_ENGINE_THREAD_POOL_HPP
 #define NP_ENGINE_THREAD_POOL_HPP
 
-#include "Primitive/Primitive.hpp"
-#include "Memory/Memory.hpp"
-#include "Insight/Insight.hpp"
+#include "NP-Engine/Primitive/Primitive.hpp"
+#include "NP-Engine/Memory/Memory.hpp"
+#include "NP-Engine/Insight/Insight.hpp"
 
 #include "Thread.hpp"
 #include "ThreadToken.hpp"

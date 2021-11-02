@@ -6,8 +6,8 @@
 #ifndef NP_ENGINE_CLIP_LINE_HPP
 #define NP_ENGINE_CLIP_LINE_HPP
 
-#include "Primitive/Primitive.hpp"
-#include "Insight/Insight.hpp"
+#include "NP-Engine/Primitive/Primitive.hpp"
+#include "NP-Engine/Insight/Insight.hpp"
 
 #include "Point.hpp"
 

@@ -8,7 +8,7 @@
 #ifndef NP_ENGINE_WINDOW_EVENTS_HPP
 #define NP_ENGINE_WINDOW_EVENTS_HPP
 
-#include "Foundation/Foundation.hpp"
+#include "NP-Engine/Foundation/Foundation.hpp"
 
 #include "WindowResizeEvent.hpp"
 #include "WindowCloseEvent.hpp"

@@ -9,8 +9,8 @@
 #ifndef NP_ENGINE_TIMER_HPP
 #define NP_ENGINE_TIMER_HPP
 
-#include "Primitive/Primitive.hpp"
-#include "Time/Time.hpp"
+#include "NP-Engine/Primitive/Primitive.hpp"
+#include "NP-Engine/Time/Time.hpp"
 
 namespace np
 {

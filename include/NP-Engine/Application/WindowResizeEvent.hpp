@@ -8,8 +8,8 @@
 #ifndef NP_ENGINE_WINDOW_RESIZE_EVENT_HPP
 #define NP_ENGINE_WINDOW_RESIZE_EVENT_HPP
 
-#include "Primitive/Primitive.hpp"
-#include "Event/Event.hpp"
+#include "NP-Engine/Primitive/Primitive.hpp"
+#include "NP-Engine/Event/Event.hpp"
 
 namespace np
 {

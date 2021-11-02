@@ -5,6 +5,6 @@
 //  Created by Nathan Phipps on 3/23/21.
 //
 
-#include "CAllocator.hpp"
+#include "NP-Engine/Memory/CAllocator.hpp"
 
 ::np::memory::CAllocator DefaultAllocator;

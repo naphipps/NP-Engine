@@ -8,8 +8,8 @@
 #ifndef NP_ENGINE_RED_BLACK_TREE_ALLOCATOR_HPP
 #define NP_ENGINE_RED_BLACK_TREE_ALLOCATOR_HPP
 
-#include "Primitive/Primitive.hpp"
-#include "Utility/Utility.hpp"
+#include "NP-Engine/Primitive/Primitive.hpp"
+#include "NP-Engine/Utility/Utility.hpp"
 
 #include "SizedAllocator.hpp"
 #include "Margin.hpp"

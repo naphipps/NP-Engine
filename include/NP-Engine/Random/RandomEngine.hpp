@@ -9,10 +9,10 @@
 #ifndef NP_ENGINE_RANDOM_ENGINE_HPP
 #define NP_ENGINE_RANDOM_ENGINE_HPP
 
-#include "TypeTraits/TypeTraits.hpp"
-#include "Insight/Insight.hpp"
-#include "Container/Container.hpp"
-#include "Primitive/Primitive.hpp"
+#include "NP-Engine/TypeTraits/TypeTraits.hpp"
+#include "NP-Engine/Insight/Insight.hpp"
+#include "NP-Engine/Container/Container.hpp"
+#include "NP-Engine/Primitive/Primitive.hpp"
 
 #include "PcgRandutils.hpp"
 #include "RandomSeed.hpp"

@@ -8,8 +8,8 @@
 #ifndef NP_ENGINE_FALLBACK_ALLOCATOR_HHPP
 #define NP_ENGINE_FALLBACK_ALLOCATOR_HHPP
 
-#include "Primitive/Primitive.hpp"
-#include "Insight/Insight.hpp"
+#include "NP-Engine/Primitive/Primitive.hpp"
+#include "NP-Engine/Insight/Insight.hpp"
 
 #include "Allocator.hpp"
 

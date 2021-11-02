@@ -8,7 +8,7 @@
 #ifndef NP_ENGINE_LOCKING_POOL_ALLOCATOR_HPP
 #define NP_ENGINE_LOCKING_POOL_ALLOCATOR_HPP
 
-#include "Primitive/Primitive.hpp"
+#include "NP-Engine/Primitive/Primitive.hpp"
 
 #include "SizedAllocator.hpp"
 

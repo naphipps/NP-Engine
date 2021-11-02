@@ -8,8 +8,8 @@
 #ifndef NP_ENGINE_DEQUE_ITERATOR_HPP
 #define NP_ENGINE_DEQUE_ITERATOR_HPP
 
-#include "Utility/Utility.hpp"
-#include "Insight/Insight.hpp"
+#include "NP-Engine/Utility/Utility.hpp"
+#include "NP-Engine/Insight/Insight.hpp"
 
 #include "container_traits.hpp"
 #include "iterator.hpp" //::std::random_access_iterator_tag

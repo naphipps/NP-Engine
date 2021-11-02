@@ -9,7 +9,7 @@
 #ifndef NP_ENGINE_EVENT_HPP
 #define NP_ENGINE_EVENT_HPP
 
-#include "Foundation/Foundation.hpp"
+#include "NP-Engine/Foundation/Foundation.hpp"
 #include "EventImpl.hpp"
 #include "EventQueue.hpp"
 

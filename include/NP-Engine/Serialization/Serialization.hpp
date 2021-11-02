@@ -9,7 +9,7 @@
 #ifndef NP_ENGINE_SERIALIZATION_HPP
 #define NP_ENGINE_SERIALIZATION_HPP
 
-#include "Foundation/Foundation.hpp"
+#include "NP-Engine/Foundation/Foundation.hpp"
 #include "Serializable.hpp"
 #include "json.hpp"
 

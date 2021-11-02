@@ -9,7 +9,7 @@
 #ifndef NP_ENGINE_OWEN_HPP
 #define NP_ENGINE_OWEN_HPP
 
-#include "Primitive/Primitive.hpp"
+#include "NP-Engine/Primitive/Primitive.hpp"
 
 #include "math_functions.hpp"
 

@@ -6,7 +6,7 @@
 //  Copyright © 2020 Nathan Phipps. All rights reserved.
 //
 
-#include "JobWorker.hpp"
+#include "NP-Engine/JobSystem/JobWorker.hpp"
 
 namespace np
 {

@@ -9,7 +9,7 @@
 #ifndef NP_ENGINE_PCG_RANDUTILS_HPP
 #define NP_ENGINE_PCG_RANDUTILS_HPP
 
-#include "Primitive/Primitive.hpp"
+#include "NP-Engine/Primitive/Primitive.hpp"
 
 #include <pcg_random.hpp>
 #include <randutils.hpp>

@@ -9,10 +9,10 @@
 #ifndef NP_ENGINE_RANDOM_BASE_HPP
 #define NP_ENGINE_RANDOM_BASE_HPP
 
-#include "TypeTraits/TypeTraits.hpp"
-#include "Primitive/Primitive.hpp"
-#include "Insight/Insight.hpp"
-#include "Serialization/Serialization.hpp"
+#include "NP-Engine/TypeTraits/TypeTraits.hpp"
+#include "NP-Engine/Primitive/Primitive.hpp"
+#include "NP-Engine/Insight/Insight.hpp"
+#include "NP-Engine/Serialization/Serialization.hpp"
 
 #include "RandomEngine.hpp"
 

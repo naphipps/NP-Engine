@@ -9,7 +9,7 @@
 #ifndef NP_ENGINE_PRIMITIVE_HPP
 #define NP_ENGINE_PRIMITIVE_HPP
 
-#include "Foundation/Foundation.hpp"
+#include "NP-Engine/Foundation/Foundation.hpp"
 #include "primitive_types.hpp"
 #include "stream_types.hpp"
 #include "atomic_types.hpp"

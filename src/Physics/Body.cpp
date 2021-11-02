@@ -6,7 +6,7 @@
 //  Copyright © 2018 Nathan Phipps. All rights reserved.
 //
 
-#include "Body.hpp"
+#include "NP-Engine/Physics/Body.hpp"
 
 namespace np {
 

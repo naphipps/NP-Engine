@@ -9,9 +9,9 @@
 #ifndef NP_ENGINE_JOB_FUNCTION_HPP
 #define NP_ENGINE_JOB_FUNCTION_HPP
 
-#include "Primitive/Primitive.hpp"
-#include "Concurrency/Concurrency.hpp"
-#include "Insight/Insight.hpp"
+#include "NP-Engine/Primitive/Primitive.hpp"
+#include "NP-Engine/Concurrency/Concurrency.hpp"
+#include "NP-Engine/Insight/Insight.hpp"
 
 namespace np
 {

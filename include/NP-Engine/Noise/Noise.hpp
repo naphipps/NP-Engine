@@ -9,7 +9,7 @@
 #ifndef NP_ENGINE_NOISE_HPP
 #define NP_ENGINE_NOISE_HPP
 
-#include "Foundation/Foundation.hpp"
+#include "NP-Engine/Foundation/Foundation.hpp"
 #include "Perlin.hpp"
 #include "Simplex.hpp"
 #include "Turbulence.hpp"

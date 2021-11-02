@@ -11,9 +11,9 @@
 
 #include <memory>
 
-#include "Foundation/Foundation.hpp"
-#include "Primitive/Primitive.hpp"
-#include "Filesystem/Filesystem.hpp"
+#include "NP-Engine/Foundation/Foundation.hpp"
+#include "NP-Engine/Primitive/Primitive.hpp"
+#include "NP-Engine/Filesystem/Filesystem.hpp"
 
 //TODO: change all vendor code to use <> instead of ""
 #include <spdlog/spdlog.h>

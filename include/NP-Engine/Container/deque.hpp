@@ -11,9 +11,9 @@
 #include <deque> //TODO: remove this
 #include <algorithm> // lexicographical_compare //TODO: remove this?
 
-#include "Memory/Memory.hpp"
-#include "Utility/Utility.hpp"
-#include "TypeTraits/TypeTraits.hpp"
+#include "NP-Engine/Memory/Memory.hpp"
+#include "NP-Engine/Utility/Utility.hpp"
+#include "NP-Engine/TypeTraits/TypeTraits.hpp"
 
 #include "deque_iterator.hpp"
 #include "iterator.hpp"

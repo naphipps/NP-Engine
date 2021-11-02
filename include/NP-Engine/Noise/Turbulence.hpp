@@ -9,8 +9,8 @@
 #ifndef NP_ENGINE_TURBULENCE_HPP
 #define NP_ENGINE_TURBULENCE_HPP
 
-#include "Primitive/Primitive.hpp"
-#include "Random/Random.hpp"
+#include "NP-Engine/Primitive/Primitive.hpp"
+#include "NP-Engine/Random/Random.hpp"
 
 #include "Perlin.hpp"
 #include "Simplex.hpp"

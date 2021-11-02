@@ -6,7 +6,7 @@
 //  Copyright © 2020 Nathan Phipps. All rights reserved.
 //
 
-#include "Instrumentor.hpp"
+#include "NP-Engine/Insight/Instrumentor.hpp"
 
 namespace np
 {

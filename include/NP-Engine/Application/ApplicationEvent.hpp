@@ -9,7 +9,7 @@
 #ifndef NP_ENGINE_APPLICATION_EVENT_HPP
 #define NP_ENGINE_APPLICATION_EVENT_HPP
 
-#include "Event/Event.hpp"
+#include "NP-Engine/Event/Event.hpp"
 
 namespace np
 {

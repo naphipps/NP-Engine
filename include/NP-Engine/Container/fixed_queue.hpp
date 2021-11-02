@@ -9,7 +9,7 @@
 #ifndef NP_ENGINE_FIXED_QUEUE_HPP
 #define NP_ENGINE_FIXED_QUEUE_HPP
 
-#include "Primitive/Primitive.hpp"
+#include "NP-Engine/Primitive/Primitive.hpp"
 
 namespace np
 {

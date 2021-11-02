@@ -11,9 +11,9 @@
 
 #include <limits>
 
-#include "Primitive/Primitive.hpp"
-#include "Utility/Utility.hpp"
-#include "Memory/Memory.hpp"
+#include "NP-Engine/Primitive/Primitive.hpp"
+#include "NP-Engine/Utility/Utility.hpp"
+#include "NP-Engine/Memory/Memory.hpp"
 
 #include "iterator.hpp"
 #include "init_list.hpp"

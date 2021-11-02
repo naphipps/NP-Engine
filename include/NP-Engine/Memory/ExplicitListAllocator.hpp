@@ -8,8 +8,8 @@
 #ifndef NP_ENGINE_EXPLICIT_LIST_ALLOCATOR_HPP
 #define NP_ENGINE_EXPLICIT_LIST_ALLOCATOR_HPP
 
-#include "Primitive/Primitive.hpp"
-#include "Insight/Insight.hpp"
+#include "NP-Engine/Primitive/Primitive.hpp"
+#include "NP-Engine/Insight/Insight.hpp"
 
 #include "SizedAllocator.hpp"
 #include "Margin.hpp"

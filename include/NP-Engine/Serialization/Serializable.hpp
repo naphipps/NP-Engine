@@ -9,8 +9,8 @@
 #ifndef NP_ENGINE_SERIALIZABLE_HPP
 #define NP_ENGINE_SERIALIZABLE_HPP
 
-#include "Primitive/Primitive.hpp"
-#include "Filesystem/Filesystem.hpp"
+#include "NP-Engine/Primitive/Primitive.hpp"
+#include "NP-Engine/Filesystem/Filesystem.hpp"
 
 #include "json.hpp"
 

@@ -11,8 +11,8 @@
 
 #include <cassert>
 
-#include "Primitive/Primitive.hpp"
-#include "Foundation/Foundation.hpp"
+#include "NP-Engine/Primitive/Primitive.hpp"
+#include "NP-Engine/Foundation/Foundation.hpp"
 
 #include "Log.hpp"
 

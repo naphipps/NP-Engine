@@ -9,7 +9,7 @@
 #ifndef NP_ENGINE_CORE_HPP
 #define NP_ENGINE_CORE_HPP
 
-#include "Foundation/Foundation.hpp"
+#include "NP-Engine/Foundation/Foundation.hpp"
 #include "Image.hpp"
 #include "DrawableImage.hpp"
 #include "DmsImage.hpp"

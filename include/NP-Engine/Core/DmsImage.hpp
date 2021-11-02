@@ -9,9 +9,9 @@
 #ifndef NP_ENGINE_DMS_IMAGE_HPP
 #define NP_ENGINE_DMS_IMAGE_HPP
 
-#include "Serialization/Serialization.hpp"
-#include "Primitive/Primitive.hpp"
-#include "Math/Math.hpp"
+#include "NP-Engine/Serialization/Serialization.hpp"
+#include "NP-Engine/Primitive/Primitive.hpp"
+#include "NP-Engine/Math/Math.hpp"
 
 #include "DrawableImage.hpp"
 #include "DmsLineSegment.hpp"

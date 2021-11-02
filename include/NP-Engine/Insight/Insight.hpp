@@ -9,7 +9,7 @@
 #ifndef NP_ENGINE_INSIGHT_HPP
 #define NP_ENGINE_INSIGHT_HPP
 
-#include "Foundation/Foundation.hpp"
+#include "NP-Engine/Foundation/Foundation.hpp"
 #include "Log.hpp"
 #include "Instrumentor.hpp"
 #include "ScopedTimer.hpp"

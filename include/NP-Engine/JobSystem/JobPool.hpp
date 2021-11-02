@@ -9,8 +9,8 @@
 #ifndef NP_ENGINE_JOB_POOL_HPP
 #define NP_ENGINE_JOB_POOL_HPP
 
-#include "Primitive/Primitive.hpp"
-#include "Memory/Memory.hpp"
+#include "NP-Engine/Primitive/Primitive.hpp"
+#include "NP-Engine/Memory/Memory.hpp"
 
 #include "Job.hpp"
 

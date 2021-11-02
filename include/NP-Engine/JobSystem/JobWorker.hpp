@@ -11,10 +11,10 @@
 
 #include <utility>
 
-#include "Container/Container.hpp"
-#include "Concurrency/Concurrency.hpp"
-#include "Insight/Insight.hpp"
-#include "Primitive/Primitive.hpp"
+#include "NP-Engine/Container/Container.hpp"
+#include "NP-Engine/Concurrency/Concurrency.hpp"
+#include "NP-Engine/Insight/Insight.hpp"
+#include "NP-Engine/Primitive/Primitive.hpp"
 
 #include "JobRecord.hpp"
 #include "JobPool.hpp"

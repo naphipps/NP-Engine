@@ -6,7 +6,7 @@
 //  Copyright © 2018 Nathan Phipps. All rights reserved.
 //
 
-#include "Physics.hpp"
+#include "NP-Engine/Physics/Physics.hpp"
 
 namespace np {
 

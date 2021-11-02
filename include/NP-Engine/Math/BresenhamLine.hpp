@@ -9,7 +9,7 @@
 #ifndef NP_ENGINE_BRESENHAM_LINE_HPP
 #define NP_ENGINE_BRESENHAM_LINE_HPP
 
-#include "Primitive/Primitive.hpp"
+#include "NP-Engine/Primitive/Primitive.hpp"
 
 #include "Point.hpp"
 

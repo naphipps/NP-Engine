@@ -9,12 +9,12 @@
 #ifndef NP_ENGINE_IMAGE_HPP
 #define NP_ENGINE_IMAGE_HPP
 
-#include "TypeTraits/TypeTraits.hpp"
-#include "Serialization/Serialization.hpp"
-#include "Insight/Insight.hpp"
-#include "Primitive/Primitive.hpp"
-#include "Container/Container.hpp"
-#include "Math/Math.hpp"
+#include "NP-Engine/TypeTraits/TypeTraits.hpp"
+#include "NP-Engine/Serialization/Serialization.hpp"
+#include "NP-Engine/Insight/Insight.hpp"
+#include "NP-Engine/Primitive/Primitive.hpp"
+#include "NP-Engine/Container/Container.hpp"
+#include "NP-Engine/Math/Math.hpp"
 
 namespace np
 {

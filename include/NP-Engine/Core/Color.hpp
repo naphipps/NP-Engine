@@ -9,8 +9,8 @@
 #ifndef COLOR_HPP
 #define COLOR_HPP
 
-#include "Primitive/Primitive.hpp"
-#include "Memory/Memory.hpp"
+#include "NP-Engine/Primitive/Primitive.hpp"
+#include "NP-Engine/Memory/Memory.hpp"
 
 namespace np
 {

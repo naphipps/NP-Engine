@@ -9,7 +9,7 @@
 #ifndef NP_ENGINE_MATH_HPP
 #define NP_ENGINE_MATH_HPP
 
-#include "Foundation/Foundation.hpp"
+#include "NP-Engine/Foundation/Foundation.hpp"
 
 #include "math_functions.hpp"
 #include "MidpointCircle.hpp"

@@ -9,10 +9,10 @@
 #ifndef NP_ENGINE_DRAWABLE_IMAGE_HPP
 #define NP_ENGINE_DRAWABLE_IMAGE_HPP
 
-#include "Primitive/Primitive.hpp"
-#include "Container/Container.hpp"
-#include "Math/Math.hpp"
-#include "Serialization/Serialization.hpp"
+#include "NP-Engine/Primitive/Primitive.hpp"
+#include "NP-Engine/Container/Container.hpp"
+#include "NP-Engine/Math/Math.hpp"
+#include "NP-Engine/Serialization/Serialization.hpp"
 
 #include "Image.hpp"
 

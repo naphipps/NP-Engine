@@ -8,7 +8,7 @@
 #ifndef NP_ENGINE_BLOCK_HPP
 #define NP_ENGINE_BLOCK_HPP
 
-#include "Primitive/Primitive.hpp"
+#include "NP-Engine/Primitive/Primitive.hpp"
 
 namespace np
 {

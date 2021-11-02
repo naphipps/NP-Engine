@@ -2,9 +2,9 @@
 #ifndef NP_ENGINE_SIMPLEX_HPP
 #define NP_ENGINE_SIMPLEX_HPP
 
-#include "Primitive/Primitive.hpp"
-#include "Random/Random.hpp"
-#include "Math/Math.hpp"
+#include "NP-Engine/Primitive/Primitive.hpp"
+#include "NP-Engine/Random/Random.hpp"
+#include "NP-Engine/Math/Math.hpp"
 
 namespace np
 {

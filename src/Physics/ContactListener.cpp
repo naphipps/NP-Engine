@@ -6,7 +6,7 @@
 //  Copyright © 2018 Nathan Phipps. All rights reserved.
 //
 
-#include "ContactListener.hpp"
+#include "NP-Engine/Physics/ContactListener.hpp"
 
 namespace np {
     

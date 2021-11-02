@@ -5,7 +5,7 @@
 //  Created by Nathan Phipps on 2/10/21.
 //
 
-#include "Window.hpp"
+#include "NP-Engine/Application/Window.hpp"
 
 #if NP_PLATFORM_IS_APPLE
 //we include AppleWindow.hpp here instead of Window.hpp to avoid a cyclic include

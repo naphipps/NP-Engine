@@ -8,9 +8,9 @@
 #ifndef NP_ENGINE_WINDOW_HPP
 #define NP_ENGINE_WINDOW_HPP
 
-#include "Primitive/Primitive.hpp"
-#include "Event/Event.hpp"
-#include "Platform/Platform.hpp"
+#include "NP-Engine/Primitive/Primitive.hpp"
+#include "NP-Engine/Event/Event.hpp"
+#include "NP-Engine/Platform/Platform.hpp"
 
 namespace np
 {

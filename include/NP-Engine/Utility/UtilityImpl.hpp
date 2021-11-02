@@ -11,7 +11,7 @@
 #include <utility>
 #include <limits>
 
-#include "TypeTraits/TypeTraits.hpp"
+#include "NP-Engine/TypeTraits/TypeTraits.hpp"
 
 namespace np
 {

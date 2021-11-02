@@ -9,10 +9,10 @@
 #ifndef NP_ENGINE_DMS_LINE_SEGMENT_HPP
 #define NP_ENGINE_DMS_LINE_SEGMENT_HPP
 
-#include "Primitive/Primitive.hpp"
-#include "Math/Math.hpp"
-#include "Serialization/Serialization.hpp"
-#include "Memory/Memory.hpp"
+#include "NP-Engine/Primitive/Primitive.hpp"
+#include "NP-Engine/Math/Math.hpp"
+#include "NP-Engine/Serialization/Serialization.hpp"
+#include "NP-Engine/Memory/Memory.hpp"
 
 namespace np
 {
