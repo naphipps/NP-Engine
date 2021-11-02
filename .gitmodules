@@ -16,6 +16,3 @@
 [submodule "vendor/liquidfun"]
 	path = vendor/liquidfun
 	url = https://github.com/google/liquidfun.git
-[submodule "vendor/540829265469e673d045"]
-	path = vendor/540829265469e673d045
-	url = https://gist.github.com/540829265469e673d045.git
