@@ -4,9 +4,6 @@
 [submodule "vendor/entt"]
 	path = vendor/entt
 	url = https://github.com/skypjack/entt.git
-[submodule "vendor/pcg-cpp"]
-	path = vendor/pcg-cpp
-	url = https://github.com/imneme/pcg-cpp.git
 [submodule "vendor/json"]
 	path = vendor/json
 	url = https://github.com/nlohmann/json.git
