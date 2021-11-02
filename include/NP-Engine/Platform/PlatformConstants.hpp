@@ -49,7 +49,7 @@
 #endif // TARGET_IPHONE_SIMULARTOR || TARGET_OS_IPHONE || TARGET_OS_MAC
 
 #elif NP_PLATFORM_IS_LINUX
-#error NP detected linux - NP does not support
+#warning NP detected linux - NP loosely supports
 
 #else
 #error NP detected unknown platform - NP does not support
