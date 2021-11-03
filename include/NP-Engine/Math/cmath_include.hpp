@@ -3,6 +3,8 @@
 #ifndef NP_ENGINE_CMATH_INCLUDE
 #define NP_ENGINE_CMATH_INCLUDE
 
+#if NP_PLATFORM_IS_LINUX
+
 namespace std
 {
 
@@ -675,4 +677,5 @@ atanl(long double __x)
 
 }
 
+#endif
 #endif
