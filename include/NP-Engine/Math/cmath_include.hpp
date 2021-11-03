@@ -31,11 +31,11 @@ namespace std
 //////////////////////////////////////////////////////////////////////////////// NEW
 
 #ifndef __CORRECT_ISO_CPP_MATH_H_PROTO
-  inline float
+  inline float //TODO: _GLIBCXX_CONSTEXPR??
   modff(float __x, float* __iptr)
   { return __builtin_modff(__x, __iptr); }
 
-  inline long double
+  inline long double //TODO: _GLIBCXX_CONSTEXPR??
   modfl(long double __x, long double* __iptr)
   { return __builtin_modfl(__x, __iptr); }
 #endif
