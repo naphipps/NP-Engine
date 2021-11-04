@@ -115,7 +115,7 @@ namespace np
              */
             void Save(const str filepath = "")
             {
-                ::std::lock_guard<::std::mutex> lock(_mutex);
+                ::std::lock_guard<::std::mutex> lock(_mutex); //TODO: update this
                 
                 if (filepath.size() > 0)
                 {

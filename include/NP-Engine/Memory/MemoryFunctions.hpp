@@ -36,7 +36,7 @@ namespace np
             siz loops = byte_count / 8; //we'll copy 8 bytes at a time to start
             for(siz i = 0; i < loops; i++, dst_it += 8, src_it += 8)
             {
-                *(ui64*)dst_it = *(ui64*)src_it;
+                *(ui64*)dst_it = *(ui64*)src_it; //TODO: should we be using static casts?
             }
 
             loops = byte_count % 8; //now we'll copy the remaining bytes to finish
