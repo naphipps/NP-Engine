@@ -36,8 +36,10 @@
 #endif
 
 //perform platform checks
-#if NP_ENGINE_PLATFORM_IS_WINDOWS && defined(_WIN32) && !defined(_WIN64)
+#if NP_ENGINE_PLATFORM_IS_WINDOWS
+#if defined(_WIN32) && !defined(_WIN64)
 #error NP detected x86 platform - NP does not support
+#endif
 
 #elif NP_ENGINE_PLATFORM_IS_APPLE
 #include <TargetConditionals.h>

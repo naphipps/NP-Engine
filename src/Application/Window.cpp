@@ -8,15 +8,16 @@
 #include "NP-Engine/Application/Window.hpp"
 
 //we include our <Platform>Window.hpp here instead of Window.hpp to avoid a cyclic include
-
 #if NP_ENGINE_PLATFORM_IS_APPLE
 #include "NP-Engine/Platform/Apple/Application/AppleWindow.hpp"
 
 #elif NP_ENGINE_PLATFORM_IS_LINUX
 #include "NP-Engine/Platform/Linux/Application/LinuxWindow.hpp"
 
-#endif
+#elif NP_ENGINE_PLATFORM_IS_WINDOWS
+#include "NP-Engine/Platform/Windows/Application/WindowsWindow.hpp"
 
+#endif
 
 namespace np
 {
@@ -29,6 +30,10 @@ namespace np
 
 #elif NP_ENGINE_PLATFORM_IS_LINUX 
             return new LinuxWindow(properties);
+
+#elif NP_ENGINE_PLATFORM_IS_WINDOWS 
+            return new WindowsWindow(properties);
+
 #else
 #error We do not support a window for this platform
 #endif
