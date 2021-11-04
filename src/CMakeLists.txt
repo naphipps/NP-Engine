@@ -355,6 +355,7 @@ set_target_properties(
 
 ##==--------------------------------------------------------==##
 
+source_group("" FILES ${NP_ENGINE_HPP})
 source_group(Application FILES ${NP_ENGINE_APPLICATION_HPP} ${NP_ENGINE_APPLICATION_CPP})
 source_group(Concurrency FILES ${NP_ENGINE_CONCURRENCY_HPP})
 source_group(Container FILES ${NP_ENGINE_CONTAINER_HPP})
