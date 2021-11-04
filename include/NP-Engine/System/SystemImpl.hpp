@@ -9,6 +9,8 @@
 #include "NP-Engine/Platform/Platform.hpp"
 #include "NP-Engine/Primitive/Primitive.hpp"
 
+//TODO: add summary comments
+
 namespace np::system
 {
 	/**
