@@ -36,12 +36,7 @@
 #endif
 
 //perform platform checks
-#if NP_ENGINE_PLATFORM_IS_WINDOWS
-#if defined(_WIN32) && !defined(_WIN64)
-#error NP detected x86 platform - NP does not support
-#endif
-
-#elif NP_ENGINE_PLATFORM_IS_APPLE
+#if NP_ENGINE_PLATFORM_IS_APPLE
 #include <TargetConditionals.h>
 #if TARGET_IPHONE_SIMULARTOR == 1
 #error NP detected iPhone simulator - NP does not support
@@ -52,6 +47,11 @@
 
 #elif NP_ENGINE_PLATFORM_IS_LINUX
 #warning NP detected linux - NP loosely supports
+
+#elif NP_ENGINE_PLATFORM_IS_WINDOWS
+#if defined(_WIN32) && !defined(_WIN64)
+#error NP detected x86 platform - NP does not support
+#endif
 
 #else
 #error NP detected unknown platform - NP does not support
