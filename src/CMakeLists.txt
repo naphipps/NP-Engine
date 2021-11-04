@@ -322,6 +322,13 @@ set(NP_ENGINE_SOURCE_FILES
 
 add_library(${PROJECT_NAME} STATIC ${NP_ENGINE_SOURCE_FILES} ${NP_ENGINE_HEADER_FILES})
 
+if (MSVC)
+	target_compile_definitions(
+		${PROJECT_NAME} PRIVATE
+		_USE_MATH_DEFINES=1
+	)
+endif()
+
 target_link_libraries(
 	${PROJECT_NAME} PUBLIC
 	spdlog::spdlog
