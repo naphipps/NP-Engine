@@ -16,5 +16,7 @@ add_subdirectory(src)
 option(NP_ENGINE_BUILD_TESTER "Build the tester for NP-Engine" true)
 
 if (NP_ENGINE_BUILD_TESTER)
+	set(NP_ENGINE_TESTER "${PROJECT_NAME}-Tester")
 	add_subdirectory(test)
+	set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT ${NP_ENGINE_TESTER})
 endif()

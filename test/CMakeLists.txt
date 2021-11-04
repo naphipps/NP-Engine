@@ -1,5 +1,3 @@
-set(NP_ENGINE_TESTER "${PROJECT_NAME}-Tester")
-
 add_executable(${NP_ENGINE_TESTER} NP-Engine-Tester.cpp)
 
 if (MSVC)
