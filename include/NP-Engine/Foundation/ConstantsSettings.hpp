@@ -19,7 +19,7 @@
 
 #ifndef NP_ENGINE_MAIN_MEMORY_SIZE
 #define NP_ENGINE_MAIN_MEMORY_SIZE (2000000000)
-#endif /* NP_ENGINE_MAIN_MEMORY_SIZE */
+#endif
 
 //===----------------------------------------------------------------------===//
 

@@ -20,9 +20,6 @@ namespace np
             {
                 ::std::cout<<"hello world from my game app!\n";
                 ::std::cout<<"my title is '"<<GetWindow().GetTitle()<<"'\n";
-                
-                // ::np::test::TestManager manager;
-                // manager.Execute();
             }
         };
         
