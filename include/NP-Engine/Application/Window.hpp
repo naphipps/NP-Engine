@@ -11,6 +11,7 @@
 #include "NP-Engine/Primitive/Primitive.hpp"
 #include "NP-Engine/Event/Event.hpp"
 #include "NP-Engine/Platform/Platform.hpp"
+#include "NP-Engine/Memory/Memory.hpp"
 
 namespace np
 {
@@ -19,11 +20,15 @@ namespace np
         class Window
         {
         public:
+
+            constexpr static ui32 DEFAULT_WIDTH = 1600;
+            constexpr static ui32 DEFAULT_HEIGHT = 900;
+
             struct Properties
             {
                 str Title = "NP Window";
-                ui32 Width = 1600;
-                ui32 Height = 900;
+                ui32 Width = DEFAULT_WIDTH;
+                ui32 Height = DEFAULT_HEIGHT;
             };
             
         private:
@@ -105,7 +110,7 @@ namespace np
             virtual void* GetNativeWindow() const = 0;
         };
         
-        Window* CreateWindow(const Window::Properties& properties = Window::Properties());
+        Window* CreateWindow(memory::Allocator& allocator, const Window::Properties& properties = Window::Properties());
     }
 }
 

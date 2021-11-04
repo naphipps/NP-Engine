@@ -28,8 +28,18 @@ namespace np
         
         class Application
         {
-        private:
+        public:
+
+            struct Properties
+            {
+                str Title = "";
+                memory::Allocator& Allocator;
+            };
+
+        protected:
+
             Window* _window; //TODO: uptr??
+            Properties _properties;
             LayerContainer _layers;
             bl _running;
             bl _minimized;
@@ -38,21 +48,28 @@ namespace np
             //TODO: singleton check?? --extremely rare
             //TODO: figure out how to force this into a fixed step loop - aka, set this to loop at 60fps or something with 0 being infinitely fast
             
-        protected:
-            Application(const str& name = "NP Application")
+            Application(const Application::Properties& application_properties):
+            Application(application_properties, 
+                Window::Properties{application_properties.Title, Window::DEFAULT_WIDTH, Window::DEFAULT_HEIGHT})
+            {}
+
+            Application(const Application::Properties& application_properties, const Window::Properties& window_properties):
+            _properties(application_properties),
+            _minimized(false),
+            _running(false)
             {
-                Window::Properties properties{.Title = name};
-                _window = CreateWindow(properties);
-                
+                _window = CreateWindow(_properties.Allocator, window_properties);
                 renderer::Renderer::Init();
             }
             
         public:
+
             virtual ~Application()
             {
                 if (_window)
                 {
-                    delete _window;
+                    memory::Destruct(_window);
+                    _properties.Allocator.Deallocate(_window);
                 }
                 
                 renderer::Renderer::Shutdown();
@@ -149,7 +166,7 @@ namespace np
             
         };
         
-        Application* CreateApplication(const memory::Block& main_block);
+        Application* CreateApplication(memory::Allocator& application_allocator);
     }
 }
 

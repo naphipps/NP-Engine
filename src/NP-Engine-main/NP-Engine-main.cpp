@@ -9,7 +9,7 @@
 #include "NP-Engine/NP-Engine.hpp"
 
 //TODO: is passing the main_block bellow enough?? I think passing the full allocator??
-extern ::np::app::Application* ::np::app::CreateApplication(const ::np::memory::Block& main_block);
+extern ::np::app::Application* ::np::app::CreateApplication(::np::memory::Allocator& application_allocator);
 
 i32 main(i32 argc, chr** argv)
 {
@@ -18,14 +18,16 @@ i32 main(i32 argc, chr** argv)
     i32 retval = 0;
     ::np::memory::CAllocator& main_allocator = ::np::memory::DefaultAllocator;
     ::np::memory::Block main_block = main_allocator.Allocate(NP_ENGINE_MAIN_MEMORY_SIZE);
+    ::np::memory::RedBlackTreeAllocator application_allocator(main_block);
     
     if (main_block.IsValid())
     {
         try
         {
-            ::np::app::Application* app = ::np::app::CreateApplication(main_block);
+            ::np::app::Application* app = ::np::app::CreateApplication(application_allocator);
             app->Run();
             ::np::memory::Destruct(app);
+            application_allocator.Deallocate(app);
         }
         catch (const ::std::exception& e)
         {

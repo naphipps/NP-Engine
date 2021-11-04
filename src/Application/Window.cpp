@@ -23,16 +23,22 @@ namespace np
 {
     namespace app
     {
-        Window* CreateWindow(const Window::Properties& properties)
+        Window* CreateWindow(memory::Allocator& allocator, const Window::Properties& properties)
         {
 #if NP_ENGINE_PLATFORM_IS_APPLE
-            return new AppleWindow(properties);
+            memory::Block block = allocator.Allocate(sizeof(AppleWindow));
+            memory::Construct<AppleWindow>(block, properties);
+            return static_cast<AppleWindow*>(block.ptr);
 
 #elif NP_ENGINE_PLATFORM_IS_LINUX 
-            return new LinuxWindow(properties);
+            memory::Block block = allocator.Allocate(sizeof(LinuxWindow));
+            memory::Construct<LinuxWindow>(block, properties);
+            return static_cast<LinuxWindow*>(block.ptr);
 
 #elif NP_ENGINE_PLATFORM_IS_WINDOWS 
-            return new WindowsWindow(properties);
+            memory::Block block = allocator.Allocate(sizeof(WindowsWindow));
+            memory::Construct<WindowsWindow>(block, properties);
+            return static_cast<WindowsWindow*>(block.ptr);
 
 #else
 #error We do not support a window for this platform

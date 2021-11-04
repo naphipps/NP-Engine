@@ -10,8 +10,8 @@ namespace np
         {
         public:
             
-            GameApp():
-            Application("My Game App")
+            GameApp(memory::Allocator& application_allocator):
+            Application(Application::Properties{"My Game App", application_allocator})
             {}
             
             ~GameApp() = default;
@@ -26,11 +26,13 @@ namespace np
             }
         };
         
-        Application* CreateApplication(const memory::Block& main_block)
+        Application* CreateApplication(memory::Allocator& application_allocator)
         {
-            ::std::cout<<"hello world from game create application\n";
-            
-            return new GameApp();
+            ::std::cout << "hello world from game create application\n";
+
+            memory::Block block = application_allocator.Allocate(sizeof(GameApp));
+            memory::Construct<GameApp>(block, application_allocator);
+            return static_cast<GameApp*>(block.ptr);
         }
     }
 }
