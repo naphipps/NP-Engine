@@ -17,6 +17,7 @@ extern ::np::app::Application* ::np::app::CreateApplication(const ::np::memory::
 
 i32 main(i32 argc, chr** argv)
 {
+    ::np::system::Init();
 //     if (false)
 //     {
 //         using namespace ::np;

@@ -17,15 +17,6 @@
 
 //--------------------------------------------------------------------------------
 
-//TODO: remove this from the engine
-#ifndef OUTPUT_DIR
-#error OUTPUT_DIR must be defined
-#else
-#define OUTPUT_DIR_STR str(OUTPUT_DIR)
-#endif
-
-//--------------------------------------------------------------------------------
-
 #define MACRO_TO_STR(X) #X
 #define MACRO_VAL_TO_STR(X) MACRO_TO_STR(X)
 #define NP_FILE_AND_LINE __FILE__ ":" MACRO_VAL_TO_STR(__LINE__)

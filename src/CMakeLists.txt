@@ -207,6 +207,11 @@ set(NP_ENGINE_SERIALIZATION_HPP
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Serialization/Serialization.hpp
 )
 
+set(NP_ENGINE_SYSTEM_HPP
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/System/System.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/System/SystemImpl.hpp
+)
+
 set(NP_ENGINE_TIME_HPP
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Time/Time.hpp
 )
@@ -246,6 +251,7 @@ set(NP_ENGINE_HEADER_FILES
 	${NP_ENGINE_RANDOM_HPP}
 	${NP_ENGINE_RENDERER_HPP}
 	${NP_ENGINE_SERIALIZATION_HPP}
+	${NP_ENGINE_SYSTEM_HPP}
 	${NP_ENGINE_TIME_HPP}
 	${NP_ENGINE_TYPETRAITS_HPP}
 	${NP_ENGINE_UTILITY_HPP}
@@ -380,6 +386,7 @@ source_group(Primitive FILES ${NP_ENGINE_PRIMITIVE_HPP})
 source_group(Random FILES ${NP_ENGINE_RANDOM_HPP})
 source_group(Renderer FILES ${NP_ENGINE_RENDERER_HPP} ${NP_ENGINE_RENDERER_CPP})
 source_group(Serialization FILES ${NP_ENGINE_SERIALIZATION_HPP})
+source_group(System FILES ${NP_ENGINE_SYSTEM_HPP})
 source_group(Time FILES ${NP_ENGINE_TIME_HPP})
 source_group(TypeTraits FILES ${NP_ENGINE_TYPETRAITS_HPP})
 source_group(Utility FILES ${NP_ENGINE_UTILITY_HPP})

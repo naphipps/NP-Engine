@@ -24,6 +24,7 @@
 #include "JobSystem/JobSystem.hpp"
 #include "Noise/Noise.hpp"
 #include "Serialization/Serialization.hpp"
+#include "System/System.hpp"
 #include "Physics/Physics.hpp"
 #include "Time/Time.hpp"
 #include "Application/Application.hpp"

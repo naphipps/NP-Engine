@@ -56,7 +56,7 @@ namespace np
                     _stdout_sink->set_pattern("%^" + pattern + "%$");
                     
                     //file sink
-                    str log_filepath = fs::append(OUTPUT_DIR, "np.log"); //TODO: remove OUTPUT_DIR
+                    str log_filepath = fs::append(fs::get_current_path(), "np.log");
                     _file_sink = ::std::make_shared<spdlog::sinks::basic_file_sink_mt>(log_filepath, true);
                     _file_sink->set_pattern(pattern);
                     

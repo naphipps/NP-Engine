@@ -43,7 +43,7 @@ namespace np
             if (path_string.size() > 0)
             {
                 ::std::filesystem::path path(path_string);
-                parent_path = path.parent_path().c_str();
+                parent_path = path.parent_path().string().c_str();
             }
                 
             return parent_path;
@@ -56,8 +56,7 @@ namespace np
         {
             ::std::filesystem::path parent(parent_path);
             ::std::filesystem::path path(path_string);
-            
-            return (parent / path).c_str();
+            return (parent / path).string().c_str();
         }
         
         /**
@@ -70,6 +69,22 @@ namespace np
                 ::std::filesystem::path path(dirpath);
                 ::std::filesystem::create_directories(path);
             }
+        }
+
+        /**
+         gets the current working directory path
+        */
+        static inline str get_current_path()
+        {
+            return ::std::filesystem::current_path().string().c_str();
+        }
+
+        /**
+         sets the current working directory path
+        */
+        static inline void set_current_path(str path_string)
+        {
+            ::std::filesystem::current_path(::std::filesystem::path(path_string));
         }
     }
 }
