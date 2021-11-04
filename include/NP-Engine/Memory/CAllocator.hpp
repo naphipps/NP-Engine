@@ -64,8 +64,14 @@ namespace np
                 
                 size = CalcAlignedSize(size);
                 Block block;
-                void* ptr = ::aligned_alloc(ALIGNMENT, size);
-                
+                void* ptr = nullptr;
+
+#if defined(__clang__) || defined(_MSVC_LANG)
+                ptr = ::std::malloc(size);
+#else
+                ptr = ::aligned_alloc(ALIGNMENT, size);
+#endif
+
                 if (ptr != nullptr)
                 {
                     block.ptr = ptr;
