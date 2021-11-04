@@ -25,7 +25,7 @@ namespace np::system
 	static inline str GetDefaultWorkingDir()
 	{
 #if NP_ENGINE_PLATFORM_IS_APPLE
-		//TODO: implement
+        return fs::append(GetEnv("HOME"), fs::append("Library", "NP-Engine"));
 
 #elif NP_ENGINE_PLATFORM_IS_LINUX
 		//TODO: implement
