@@ -215,9 +215,6 @@ namespace np
 //check if NP_PROFILE_ENABLE is defined
 #ifndef NP_PROFILE_ENABLE
 #define NP_PROFILE_ENABLE 0
-#warning NP_PROFILE_ENABLE is defined as 0
-#else
-#warning NP_PROFILE_ENABLE is already defined
 #endif
 
 //set our Instrumentor-based macros

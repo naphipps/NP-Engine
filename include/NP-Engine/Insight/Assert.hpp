@@ -37,9 +37,6 @@ namespace np
 
 #ifndef NP_ASSERT_ENABLE
 #define NP_ASSERT_ENABLE 0
-#warning NP_ASSERT_ENABLE is defined as 0
-#else
-#warning NP_ASSERT_ENABLE is already defined
 #endif
 
 #if NP_ASSERT_ENABLE

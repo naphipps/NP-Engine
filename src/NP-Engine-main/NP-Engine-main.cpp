@@ -8,9 +8,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-//TODO: #warning is not supported by MSVC - so we need to remove them from everything
-//TODO: remove #warning since MVSC does not support - they were tacky anyways
-
 #include <exception>
 
 #include "NP-Engine/NP-Engine.hpp" //TODO: redesign how we want to do our search paths

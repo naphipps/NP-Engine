@@ -112,9 +112,6 @@ namespace np
 
 #ifndef NP_LOG_ENABLE
 #define NP_LOG_ENABLE 0
-#warning NP_LOG_ENABLE is defined as 0
-#else
-#warning NP_LOG_ENABLE is already defined
 #endif
 
 #if NP_LOG_ENABLE
