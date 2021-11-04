@@ -32,11 +32,7 @@ namespace np
             WindowResizeEvent(ui32 width, ui32 height):
             event::Event()
             {
-                DataType data
-                {
-                    .Width = width,
-                    .Height = height
-                };
+                DataType data{width, height};
                 _pad.AssignData(data);
             }
             

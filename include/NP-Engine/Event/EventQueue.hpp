@@ -60,15 +60,11 @@ namespace np
              */
             EventQueue(memory::Block block, siz buffered_events_size = 100):
             _buffer_flag(true),
-            _buffer1(memory::Block
-            {
-                .ptr = block.ptr,
-                .size = memory::CalcAlignedSize(block.size/2)
-            }),
+            _buffer1(memory::Block{block.ptr, memory::CalcAlignedSize(block.size/2)}),
             _buffer2(memory::Block
             {
-                .ptr = static_cast<ui8*>(block.ptr) + memory::CalcAlignedSize(block.size/2),
-                .size = memory::CalcAlignedSize(block.size/2)
+                static_cast<ui8*>(block.ptr) + memory::CalcAlignedSize(block.size/2),
+                memory::CalcAlignedSize(block.size/2)
             }),
             _buffer1_events(buffered_events_size),
             _buffer2_events(buffered_events_size)

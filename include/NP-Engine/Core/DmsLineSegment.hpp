@@ -43,8 +43,8 @@ namespace np
             _associated(associated),
             _midpoint(math::fltPoint
             {
-                .x=static_cast<flt>((begin.x + end.x)/2.f),
-                .y=static_cast<flt>((begin.y + end.y)/2.f)
+                static_cast<flt>((begin.x + end.x)/2.f),
+                static_cast<flt>((begin.y + end.y)/2.f)
             })
             {}
             

@@ -41,7 +41,7 @@ namespace np
                 
                 for (ui16 x = begin.x; x <= end.x; x++)
                 {
-                    points.push_back(ui16Point{.x = x, .y = y});
+                    points.push_back(ui16Point{x, y});
                     
                     if (D > 0)
                     {
@@ -79,7 +79,7 @@ namespace np
                 
                 for (ui16 y = begin.y; y <= end.y; y++)
                 {
-                    points.push_back(ui16Point{.x = x, .y = y});
+                    points.push_back(ui16Point{x, y});
                     
                     if (D > 0)
                     {

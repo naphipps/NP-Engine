@@ -36,8 +36,8 @@ namespace np
                 
                 if (block.size >= OVERHEAD_ALIGNED_SIZE)
                 {
-                    Block header_block{.ptr = block.Begin(), .size = hidden::MARGIN_ALIGNED_SIZE};
-                    Block footer_block{.ptr = (ui8*)block.End() - hidden::MARGIN_ALIGNED_SIZE, .size = hidden::MARGIN_ALIGNED_SIZE};
+                    Block header_block{block.Begin(), hidden::MARGIN_ALIGNED_SIZE};
+                    Block footer_block{(ui8*)block.End() - hidden::MARGIN_ALIGNED_SIZE, hidden::MARGIN_ALIGNED_SIZE};
                     Construct<Margin>(header_block);
                     Construct<Margin>(footer_block);
                     MarginPtr header = (MarginPtr)header_block.ptr;
@@ -117,14 +117,14 @@ namespace np
                 if (alloc != nullptr)
                 {
                     MarginPtr header = (MarginPtr)alloc;
-                    Block alloc_block{.ptr = header, .size = header->GetSize()};
+                    Block alloc_block{header, header->GetSize()};
                     
                     if (header->GetSize() - required_alloc_size >= OVERHEAD_ALIGNED_SIZE)
                     {
                         Block split_block
                         {
-                            .ptr = alloc + required_alloc_size,
-                            .size = header->GetSize() - required_alloc_size
+                            alloc + required_alloc_size,
+                            header->GetSize() - required_alloc_size
                         };
                         bl split_success = InitFreeBlock(split_block);
                         NP_ASSERT(split_success, "split must succeed here");
@@ -261,7 +261,7 @@ namespace np
                         }
                     }
                     
-                    Block dealloc_block{.ptr = header, .size = (ui8*)footer - (ui8*)header + hidden::MARGIN_ALIGNED_SIZE};
+                    Block dealloc_block{header, (ui8*)footer - (ui8*)header + hidden::MARGIN_ALIGNED_SIZE};
                     bl dealloc_success = InitFreeBlock(dealloc_block);
                     NP_ASSERT(dealloc_success, "we should have a successful deallocation here");
                     deallocated = true;

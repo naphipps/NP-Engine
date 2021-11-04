@@ -600,8 +600,8 @@ namespace np
                 
                 if (block.size >= OVERHEAD_ALIGNED_SIZE)
                 {
-                    Block header_block{.ptr = block.Begin(), .size = hidden::MARGIN_ALIGNED_SIZE};
-                    Block footer_block{.ptr = (ui8*)block.End() - hidden::MARGIN_ALIGNED_SIZE, .size = hidden::MARGIN_ALIGNED_SIZE};
+                    Block header_block{block.Begin(), hidden::MARGIN_ALIGNED_SIZE};
+                    Block footer_block{(ui8*)block.End() - hidden::MARGIN_ALIGNED_SIZE, hidden::MARGIN_ALIGNED_SIZE};
                     Construct<Margin>(header_block);
                     Construct<Margin>(footer_block);
                     MarginPtr header = (MarginPtr)header_block.Begin();
@@ -610,7 +610,7 @@ namespace np
                     header->SetDeallocated();
                     footer->Value = header->Value;
                     
-                    Block node_block{.ptr = header_block.End(), .size = NODE_ALIGNED_SIZE};
+                    Block node_block{header_block.End(), NODE_ALIGNED_SIZE};
                     Construct<Node>(node_block);
                     
                     initialized = true;
@@ -680,7 +680,7 @@ namespace np
                 if (alloc != nullptr)
                 {
                     MarginPtr header = (MarginPtr)alloc;
-                    Block alloc_block{.ptr = header, .size = header->GetSize()};
+                    Block alloc_block{header, header->GetSize()};
                     
                     NodePtr node = (NodePtr)((ui8*)alloc + hidden::MARGIN_ALIGNED_SIZE);
                     _tree.Remove(node);
@@ -690,8 +690,8 @@ namespace np
                     {
                         Block split_block
                         {
-                            .ptr = alloc + required_alloc_size,
-                            .size = header->GetSize() - required_alloc_size
+                            alloc + required_alloc_size,
+                            header->GetSize() - required_alloc_size
                         };
                         alloc_block.size -= split_block.size;
                         StowFreeBlock(split_block);
@@ -850,7 +850,7 @@ namespace np
                         }
                     }
                     
-                    Block dealloc_block{.ptr = header, .size = header->GetSize()};
+                    Block dealloc_block{header, header->GetSize()};
                     StowFreeBlock(dealloc_block);
                     deallocated = true;
                 }

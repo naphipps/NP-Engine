@@ -30,14 +30,14 @@ namespace np
             flt x = radius;
             flt y = 0;
             
-            points.push_back(fltPoint{.x=x, .y=y});
+            points.push_back(fltPoint{x, y});
             
             // When radius is zero only a single point
             if (radius > 0)
             {
-                points.push_back(fltPoint{.x=-x, .y=y});
-                points.push_back(fltPoint{.x=y, .y=x});
-                points.push_back(fltPoint{.x=y, .y=-x});
+                points.push_back(fltPoint{-x, y});
+                points.push_back(fltPoint{y, x});
+                points.push_back(fltPoint{y, -x});
             }
             
             // Initialising the value of P
@@ -66,19 +66,19 @@ namespace np
                 
                 // Printing the generated point and its reflection
                 // in the other octants after translation
-                points.push_back(fltPoint{.x=x, .y=y});
-                points.push_back(fltPoint{.x=-x, .y=y});
-                points.push_back(fltPoint{.x=x, .y=-y});
-                points.push_back(fltPoint{.x=-x, .y=-y});
+                points.push_back(fltPoint{x, y});
+                points.push_back(fltPoint{-x, y});
+                points.push_back(fltPoint{x, -y});
+                points.push_back(fltPoint{-x, -y});
                 
                 // If the generated point is on the line x = y then
                 // the perimeter points have already been printed
                 if (x != y)
                 {
-                    points.push_back(fltPoint{.x=y, .y=x});
-                    points.push_back(fltPoint{.x=-y, .y=x});
-                    points.push_back(fltPoint{.x=y, .y=-x});
-                    points.push_back(fltPoint{.x=-y, .y=-x});
+                    points.push_back(fltPoint{y, x});
+                    points.push_back(fltPoint{-y, x});
+                    points.push_back(fltPoint{y, -x});
+                    points.push_back(fltPoint{-y, -x});
                 }
             }
             

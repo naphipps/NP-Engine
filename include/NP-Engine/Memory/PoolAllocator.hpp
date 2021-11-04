@@ -38,7 +38,7 @@ namespace np
              */
             void Init()
             {
-                Block block{.size = CHUNK_ALIGNED_SIZE};
+                Block block{nullptr, CHUNK_ALIGNED_SIZE};
                 
                 for (ui32 i=0; i<ChunkCount()-1; i++)
                 {
@@ -154,7 +154,7 @@ namespace np
              */
             bl Deallocate(void* ptr) override
             {
-                Block dealloc_block{.ptr = ptr, .size = CHUNK_ALIGNED_SIZE};
+                Block dealloc_block{ptr, CHUNK_ALIGNED_SIZE};
                 return Deallocate(dealloc_block);
             }
             

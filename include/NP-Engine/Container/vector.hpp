@@ -142,7 +142,7 @@ namespace np
             {
                 _size = end - begin;
                 
-                memory::Block block{.size = T_SIZE};
+                memory::Block block{nullptr, T_SIZE};
                 for (iterator it = begin; it != end; it++)
                 {
                     block.ptr = _elements + (it - begin);
@@ -158,7 +158,7 @@ namespace np
             {
                 _size = rbegin - rend;
                 
-                memory::Block block{.size = T_SIZE};
+                memory::Block block{nullptr, T_SIZE};
                 for (reverse_iterator it = rbegin; it != rend; it++)
                 {
                     block.ptr = _elements + (rbegin - it);
@@ -174,7 +174,7 @@ namespace np
             {
                 _size = end - begin;
                 
-                memory::Block block{.size = T_SIZE};
+                memory::Block block{nullptr, T_SIZE};
                 for (iterator it = begin; it != end; it++)
                 {
                     block.ptr = _elements + (it - begin);
@@ -190,7 +190,7 @@ namespace np
             {
                 _size = rbegin - rend;
                 
-                memory::Block block{.size = T_SIZE};
+                memory::Block block{nullptr, T_SIZE};
                 for (reverse_iterator it = rbegin; it != rend; it++)
                 {
                     block.ptr = _elements + (rbegin - it);
@@ -204,7 +204,7 @@ namespace np
              */
             void move_backwards(const_iterator src_begin, const_iterator src_end, const_iterator dst_begin)
             {
-                memory::Block block{.size = T_SIZE};
+                memory::Block block{nullptr, T_SIZE};
                 for (reverse_iterator it = src_end - 1; it.base() > src_begin.base(); it++)
                 {
                     block.ptr = dst_begin + ((iterator)it - src_begin);
@@ -222,7 +222,7 @@ namespace np
              */
             void move_forwards(const_iterator src_begin, const_iterator src_end, const_iterator dst_begin)
             {
-                memory::Block block{.size = T_SIZE};
+                memory::Block block{nullptr, T_SIZE};
                 for (iterator it = src_begin; it < src_end; it++)
                 {
                     block.ptr = dst_begin + (it - src_begin);
@@ -405,7 +405,7 @@ namespace np
             {
                 init(*_allocator, count);
                 _size = count;
-                memory::Block block{.size = T_SIZE};
+                memory::Block block{nullptr, T_SIZE};
                 for (iterator it = begin(); it != end(); it++)
                 {
                     block.ptr = it.base();
@@ -834,7 +834,7 @@ namespace np
                         {
                             destroy(inserted);
                         }
-                        memory::Block block{.ptr = inserted.ptr, .size = T_SIZE};
+                        memory::Block block{inserted.ptr, T_SIZE};
                         memory::Construct<T>(block, value);
                         _size++;
                     }
@@ -857,7 +857,7 @@ namespace np
                         inserted = begin() + index;
                         move_backwards(inserted, end(), inserted + count);
                         
-                        memory::Block block{.size = T_SIZE};
+                        memory::Block block{nullptr, T_SIZE};
                         for (iterator it = inserted; it < inserted + count; it++)
                         {
                             block.ptr = it.base();
@@ -890,7 +890,7 @@ namespace np
                         inserted = begin() + index;
                         move_backwards(inserted, end(), inserted + src_size);
                         
-                        memory::Block block{.size = T_SIZE};
+                        memory::Block block{nullptr, T_SIZE};
                         for (reverse_iterator it = src_rbegin; it != src_rend; it++)
                         {
                             block.ptr = inserted.base() + (src_rbegin - it);
@@ -923,7 +923,7 @@ namespace np
                         inserted = begin() + index;
                         move_backwards(inserted, end(), inserted + src_size);
                         
-                        memory::Block block{.size = T_SIZE};
+                        memory::Block block{nullptr, T_SIZE};
                         for (iterator it = src_begin; it < src_end; it++)
                         {
                             block.ptr = inserted.base() + (it - src_begin);
@@ -955,7 +955,7 @@ namespace np
                         inserted = begin() + index;
                         move_backwards(inserted, end(), inserted + list.size());
                         
-                        memory::Block block{.size = T_SIZE};
+                        memory::Block block{nullptr, T_SIZE};
                         for (iterator it = list.begin(); it < (iterator)list.end(); it++)
                         {
                             block.ptr = inserted.base() + (it - (iterator)list.begin());
@@ -1025,7 +1025,7 @@ namespace np
                     {
                         emplaced = begin() + index;
                         move_backwards(emplaced, end(), emplaced + 1);
-                        memory::Block block{.ptr = emplaced, .size = T_SIZE};
+                        memory::Block block{emplaced, T_SIZE};
                         
                         if (index < _size)
                         {
