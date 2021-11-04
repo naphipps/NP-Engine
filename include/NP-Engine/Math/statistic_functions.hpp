@@ -11,11 +11,10 @@
 #ifndef NP_ENGINE_STATISTIC_FUNCTION_HPP
 #define NP_ENGINE_STATISTIC_FUNCTION_HPP
 
-#include <cmath>
-
 #include "NP-Engine/Insight/Insight.hpp"
 #include "NP-Engine/Primitive/Primitive.hpp"
 
+#include "cmath_include.hpp"
 #include "math_functions.hpp"
 #include "owen.hpp"
 

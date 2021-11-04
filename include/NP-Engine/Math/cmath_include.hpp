@@ -8,6 +8,7 @@
 namespace std
 {
 
+//TODO: cleanup this file
 //content from https://github.com/thisusernameonlyhasthirtyninecharacters/libstdc-math-functions-update
 // and https://gcc.gnu.org/onlinedocs/libstdc++/libstdc++-html-USERS-4.4/a01108.html
 
