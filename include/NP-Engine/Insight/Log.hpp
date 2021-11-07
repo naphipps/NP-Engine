@@ -56,7 +56,7 @@ namespace np
                     _stdout_sink->set_pattern("%^" + pattern + "%$");
                     
                     //file sink
-                    str log_filepath = fs::append(fs::get_current_path(), "np.log");
+                    str log_filepath = GetFileLoggerFilePath();
                     _file_sink = ::std::make_shared<spdlog::sinks::basic_file_sink_mt>(log_filepath, true);
                     _file_sink->set_pattern(pattern);
                     
@@ -80,6 +80,14 @@ namespace np
                 }
             }
             
+            /**
+             gets the file path the file logger honors
+            */
+            static inline str GetFileLoggerFilePath()
+            {
+                return fs::append(fs::get_current_path(), "NP-Engine-Log.log");
+            }
+
             /**
              gets the file logger
              */
