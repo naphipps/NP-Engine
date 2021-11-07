@@ -55,17 +55,17 @@ namespace np::app
         
         static inline Select Show(str title, str message, Style style)
         {
-            Show(title, message, style, DefaultButtons);
+            return Show(title, message, style, DefaultButtons);
         }
         
         static inline Select Show(str title, str message, Buttons buttons)
         {
-            Show(title, message, DefaultStyle, buttons);
+            return Show(title, message, DefaultStyle, buttons);
         }
         
         static inline Select Show(str title, str message)
         {
-            Show(title, message, DefaultStyle, DefaultButtons);
+            return Show(title, message, DefaultStyle, DefaultButtons);
         }
     };
 }
