@@ -25,7 +25,7 @@ i32 main(i32 argc, chr** argv)
         try
         {
             ::np::app::Application* app = ::np::app::CreateApplication(application_allocator);
-            app->Run();
+            app->Run(argc, argv);
             ::np::memory::Destruct(app);
             application_allocator.Deallocate(app);
         }

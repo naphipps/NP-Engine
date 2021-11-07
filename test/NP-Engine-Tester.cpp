@@ -16,7 +16,7 @@ namespace np
             
             ~GameApp() = default;
             
-            void Run() override
+            void Run(i32 argc, chr** argv) override
             {
                 ::std::cout<<"hello world from my game app!\n";
                 ::std::cout<<"my title is '"<<GetWindow().GetTitle()<<"'\n";

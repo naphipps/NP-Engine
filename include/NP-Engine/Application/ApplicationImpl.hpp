@@ -77,7 +77,12 @@ namespace np
             
         public:
             
-            virtual void Run()
+            void Run()
+            {
+                Run(0, nullptr);
+            }
+
+            virtual void Run(i32 argc, chr** argv)
             {
                 _running = true;
                 
