@@ -8,7 +8,6 @@
 
 #include "NP-Engine/NP-Engine.hpp"
 
-//TODO: is passing the main_block bellow enough?? I think passing the full allocator??
 extern ::np::app::Application* ::np::app::CreateApplication(::np::memory::Allocator& application_allocator);
 
 i32 main(i32 argc, chr** argv)
