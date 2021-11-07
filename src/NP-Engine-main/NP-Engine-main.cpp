@@ -18,12 +18,13 @@ i32 main(i32 argc, chr** argv)
     i32 retval = 0;
     ::np::memory::CAllocator& main_allocator = ::np::memory::DefaultAllocator;
     ::np::memory::Block main_block = main_allocator.Allocate(NP_ENGINE_MAIN_MEMORY_SIZE);
-    ::np::memory::RedBlackTreeAllocator application_allocator(main_block);
     
     if (main_block.IsValid())
     {
         try
         {
+            //TODO: register application_allocator to TraitsAllocator
+            ::np::memory::RedBlackTreeAllocator application_allocator(main_block);
             ::np::app::Application* app = ::np::app::CreateApplication(application_allocator);
             app->Run(argc, argv);
             ::np::memory::Destruct(app);
