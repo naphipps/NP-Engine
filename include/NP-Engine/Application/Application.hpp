@@ -17,5 +17,6 @@
 #include "Layer.hpp"
 #include "Window.hpp"
 #include "WindowEvents.hpp"
+#include "Popup.hpp"
 
 #endif /* NP_ENGINE_APPLICATION_HPP */

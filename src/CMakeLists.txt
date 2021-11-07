@@ -8,6 +8,7 @@ set(NP_ENGINE_APPLICATION_HPP
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Application/ApplicationImpl.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Application/Layer.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Application/LayerContainer.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Application/Popup.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Application/Window.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Application/WindowCloseEvent.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Application/WindowEvents.hpp
@@ -265,6 +266,18 @@ set(NP_ENGINE_APPLICATION_CPP
 	Application/Window.cpp
 )
 
+if (APPLE)
+	set(NP_ENGINE_APPLICATION_CPP
+		${NP_ENGINE_APPLICATION_CPP}
+		Application/Popup.mm
+	)
+else()
+	set(NP_ENGINE_APPLICATION_CPP
+		${NP_ENGINE_APPLICATION_CPP}
+		Application/Popup.cpp
+	)
+endif()
+
 set(NP_ENGINE_INSIGHT_CPP
 	Insight/Instrumentor.cpp
 	Insight/Log.cpp
@@ -358,6 +371,16 @@ set_target_properties(
 	CXX_EXTENSIONS false
 	CXX_STANDARD_REQUIRED true
 )
+
+if (APPLE)
+   find_library(COCOA_LIBRARY Cocoa)
+   target_link_libraries(${PROJECT_NAME} PUBLIC ${COCOA_LIBRARY})
+elseif (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+   find_package(PkgConfig REQUIRED)
+   pkg_check_modules(GTK3 REQUIRED gtk+-3.0)
+   target_link_libraries(${PROJECT_NAME} PUBLIC ${GTK3_LIBRARIES})
+   target_include_directories(${PROJECT_NAME} PRIVATE ${GTK3_INCLUDE_DIRS})
+endif()
 
 ##==--------------------------------------------------------==##
 
