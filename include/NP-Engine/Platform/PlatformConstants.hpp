@@ -46,7 +46,6 @@
 #endif // TARGET_IPHONE_SIMULARTOR || TARGET_OS_IPHONE || TARGET_OS_MAC
 
 #elif NP_ENGINE_PLATFORM_IS_LINUX
-#warning NP detected linux - NP loosely supports
 
 #elif NP_ENGINE_PLATFORM_IS_WINDOWS
 #if defined(_WIN32) && !defined(_WIN64)
