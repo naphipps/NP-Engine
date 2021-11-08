@@ -60,7 +60,7 @@ i32 main(i32 argc, chr** argv)
 
     if (retval != 0)
     {
-        ::np::system::Popup::Show("NP-Engine Code: " + retval, message, style, buttons);
+        ::np::system::Popup::Show("NP-Engine Code: " + to_str(retval), message, style, buttons);
     }
     
     main_allocator.Deallocate(main_block);
