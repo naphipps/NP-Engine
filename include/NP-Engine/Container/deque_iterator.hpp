@@ -9,8 +9,8 @@
 #define NP_ENGINE_DEQUE_ITERATOR_HPP
 
 #include <type_traits>
+#include <utility>
 
-#include "NP-Engine/Utility/Utility.hpp"
 #include "NP-Engine/Insight/Insight.hpp"
 
 #include "container_traits.hpp"
@@ -68,8 +68,8 @@ namespace np::container
          */
         void move_from(deque_iterator&& other)
         {
-            _buffers = utility::Move(other._buffers);
-            _ptr = utility::Move(other._ptr);
+            _buffers = ::std::move(other._buffers);
+            _ptr = ::std::move(other._ptr);
         }
         
         /**
@@ -103,7 +103,7 @@ namespace np::container
          */
         deque_iterator(deque_iterator&& other)
         {
-            move_from(utility::Move(other));
+            move_from(::std::move(other));
         }
         
         /**
@@ -394,14 +394,14 @@ namespace np::container
         
         void move_from(deque_reverse_iterator&& other)
         {
-            _buffers = utility::Move(other._buffers);
-            _ptr = utility::Move(other._ptr);
+            _buffers = ::std::move(other._buffers);
+            _ptr = ::std::move(other._ptr);
         }
         
         void move_from(deque_iterator<T>&& other)
         {
-            _buffers = utility::Move(other._buffers);
-            _ptr = utility::Move(other._ptr);
+            _buffers = ::std::move(other._buffers);
+            _ptr = ::std::move(other._ptr);
             (*this)--; //TODO: does our normal iterators follow this??
         }
         

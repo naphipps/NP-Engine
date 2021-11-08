@@ -11,10 +11,11 @@
 #include <deque> //TODO: remove this
 #include <algorithm> // lexicographical_compare //TODO: remove this?
 #include <type_traits>
+#include <limits>
+#include <utility>
 
 #include "NP-Engine/Primitive/Primitive.hpp"
 #include "NP-Engine/Memory/Memory.hpp"
-#include "NP-Engine/Utility/Utility.hpp"
 
 #include "deque_iterator.hpp"
 #include "iterator.hpp"
@@ -91,7 +92,7 @@ namespace np
                 while (old_rit != old_rend /* && new_rit != new_rend */)
                 {
                     block.ptr = new_rit.base();
-                    memory::Construct<T>(block, utility::Move(*old_rit));
+                    memory::Construct<T>(block, ::std::move(*old_rit));
                     memory::Destruct<T>(old_rit.base());
                     old_rit++;
                     new_rit++;
@@ -110,7 +111,7 @@ namespace np
                 while (old_it != old_end /* && new_it != new_end */)
                 {
                     block.ptr = new_it.base();
-                    memory::Construct<T>(block, utility::Move(*old_it));
+                    memory::Construct<T>(block, ::std::move(*old_it));
                     memory::Destruct<T>(old_it.base());
                     old_it++;
                     new_it++;
@@ -219,8 +220,8 @@ namespace np
             
             void move_from(deque&& other)
             {
-                _begin_index = utility::Move(other._begin_index);
-                _size = utility::Move(other._size);
+                _begin_index = ::std::move(other._begin_index);
+                _size = ::std::move(other._size);
                 append_buffers(other._buffers.size() - _buffers.size());
                 memory::Block block{.size = TRAITS::T_SIZE};
                 iterator dst = begin();
@@ -228,7 +229,7 @@ namespace np
                 for (iterator src = other.begin(); src != other.end(); src++)
                 {
                     block.ptr = dst.base();
-                    memory::Construct<T>(block, utility::Move(*src));
+                    memory::Construct<T>(block, ::std::move(*src));
                     dst++;
                 }
             }
@@ -364,7 +365,7 @@ namespace np
                     {
                         //move element and destruct the old one
                         block.ptr = (pointer)buffer_block.ptr + e;
-                        set &= memory::Construct<T>(block, utility::Move(_buffers[b][e]));
+                        set &= memory::Construct<T>(block, ::std::move(_buffers[b][e]));
                         NP_ASSERT(set, "failed construction for new element in set_allocator");
                         set &= memory::Destruct<T>(memory::AddressOf(_buffers[b][e]));
                         NP_ASSERT(set, "failed destruction for old element in set_allocator");
@@ -530,7 +531,7 @@ namespace np
             
             siz max_size() const
             {
-                return utility::NumericLimits<siz>::max();
+                return ::std::numeric_limits<siz>::max();
             }
             
             bl empty() const
@@ -647,7 +648,7 @@ namespace np
                     _size++;
                     shift_elements_right(dst, old_end, dst + 1, end());
                     memory::Block block{.ptr = dst.base(), .size = TRAITS::T_SIZE};
-                    memory::Construct<T>(block, utility::Move(value));
+                    memory::Construct<T>(block, ::std::move(value));
                     inserted = dst;
                 }
                 return inserted;
@@ -790,7 +791,7 @@ namespace np
                     _size++;
                     shift_elements_right(dst, old_end, dst + 1, end());
                     memory::Block block{.ptr = dst.base(), .size = TRAITS::T_SIZE};
-                    memory::Construct<T>(block, utility::Forward<Args>(args)...);
+                    memory::Construct<T>(block, ::std::forward<Args>(args)...);
                 }
                 
                 return emplaced;
@@ -799,7 +800,7 @@ namespace np
             template <class... Args>
             reference emplace_back(Args&&... args)
             {
-                return *emplace(end(), utility::Forward<Args>(args)...);
+                return *emplace(end(), ::std::forward<Args>(args)...);
             }
             
             iterator erase(const_iterator dst)
@@ -909,7 +910,7 @@ namespace np
             template <class ... Args>
             reference emplace_front(Args&&... args)
             {
-                return *emplace(begin(), utility::Forward<Args>(args)...);
+                return *emplace(begin(), ::std::forward<Args>(args)...);
             }
             
             void pop_front()
@@ -945,9 +946,9 @@ namespace np
                     other.set_allocator(allocator);
                 }
                 
-                utility::Swap(_begin_index, other._begin_index);
-                utility::Swap(_size, other._size);
-                utility::Swap(_buffers, other._buffers);
+                ::std::swap(_begin_index, other._begin_index);
+                ::std::swap(_size, other._size);
+                ::std::swap(_buffers, other._buffers);
             }
             
             bl operator==(const deque& other) const

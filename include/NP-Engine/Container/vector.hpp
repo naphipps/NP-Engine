@@ -11,9 +11,9 @@
 
 #include <limits>
 #include <type_traits>
+#include <utility>
 
 #include "NP-Engine/Primitive/Primitive.hpp"
-#include "NP-Engine/Utility/Utility.hpp"
 #include "NP-Engine/Memory/Memory.hpp"
 
 #include "iterator.hpp"
@@ -179,7 +179,7 @@ namespace np
                 for (iterator it = begin; it != end; it++)
                 {
                     block.ptr = _elements + (it - begin);
-                    memory::Construct<T>(block, utility::Move(*it));
+                    memory::Construct<T>(block, ::std::move(*it));
                 }
             }
             
@@ -195,7 +195,7 @@ namespace np
                 for (reverse_iterator it = rbegin; it != rend; it++)
                 {
                     block.ptr = _elements + (rbegin - it);
-                    memory::Construct<T>(block, utility::Move(*it));
+                    memory::Construct<T>(block, ::std::move(*it));
                 }
             }
             
@@ -213,7 +213,7 @@ namespace np
                     {
                         destroy(block.ptr);
                     }
-                    memory::Construct<T>(block, utility::Move(*it));
+                    memory::Construct<T>(block, ::std::move(*it));
                 }
             }
             
@@ -231,7 +231,7 @@ namespace np
                     {
                         destroy(block.ptr);
                     }
-                    memory::Construct<T>(block, utility::Move(*it));
+                    memory::Construct<T>(block, ::std::move(*it));
                 }
             }
             
@@ -672,7 +672,7 @@ namespace np
              */
             siz max_size() const
             {
-                return utility::NumericLimits<siz>::max();
+                return ::std::numeric_limits<siz>::max();
             }
             
             /**
@@ -1033,7 +1033,7 @@ namespace np
                             destroy(emplaced);
                         }
                         
-                        if (memory::Construct<T>(block, utility::Forward<Args>(args)...))
+                        if (memory::Construct<T>(block, ::std::forward<Args>(args)...))
                         {
                             _size++;
                         }
@@ -1053,7 +1053,7 @@ namespace np
             template <class... Args>
             reference emplace_back(Args&&... args) //TODO: returns reference -- check other method return types -- this should be constexpr
             {
-                return *emplace(end(), utility::Forward<Args>(args)...);
+                return *emplace(end(), ::std::forward<Args>(args)...);
             }
             
             /**
@@ -1069,7 +1069,7 @@ namespace np
              */
             iterator push_back(T&& value)
             {
-                return memory::AddressOf(emplace_back(utility::Move(value)));
+                return memory::AddressOf(emplace_back(::std::move(value)));
             }
             
             /**
@@ -1086,10 +1086,10 @@ namespace np
              */
             void swap(vector<T>& other) noexcept
             {
-                utility::Swap(_allocator, other._allocator);
-                utility::Swap(_capacity, other._capacity);
-                utility::Swap(_elements, other._elements);
-                utility::Swap(_size, other._size);
+                ::std::swap(_allocator, other._allocator);
+                ::std::swap(_capacity, other._capacity);
+                ::std::swap(_elements, other._elements);
+                ::std::swap(_size, other._size);
             }
         };
     }

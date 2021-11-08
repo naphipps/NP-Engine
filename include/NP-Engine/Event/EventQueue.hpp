@@ -8,10 +8,11 @@
 #ifndef NP_ENGINE_EVENT_QUEUE_HPP
 #define NP_ENGINE_EVENT_QUEUE_HPP
 
+#include <utility>
+
 #include "NP-Engine/Primitive/Primitive.hpp"
 #include "NP-Engine/Memory/Memory.hpp"
 #include "NP-Engine/Concurrency/Concurrency.hpp"
-#include "NP-Engine/Utility/Utility.hpp"
 
 namespace np
 {
@@ -123,7 +124,7 @@ namespace np
                 memory::Block block = buffer->Allocate(sizeof(T));
                 if (block.IsValid())
                 {
-                    memory::Construct<T>(block, utility::Forward<Args>(args)...);
+                    memory::Construct<T>(block, ::std::forward<Args>(args)...);
                     pushed = events->try_enqueue((event::Event*)block.ptr);
                 }
                 

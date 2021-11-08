@@ -10,6 +10,7 @@
 #define NP_ENGINE_UPTR_HPP
 
 #include <memory>
+#include <utility>
 
 namespace np
 {

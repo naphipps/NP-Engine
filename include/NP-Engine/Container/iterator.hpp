@@ -10,6 +10,7 @@
 
 #include <iterator>
 #include <type_traits>
+#include <utility>
 
 namespace np
 {
@@ -51,7 +52,7 @@ namespace np
              constructor
              */
             iterator(iterator&& other):
-            ptr(utility::Move(other.ptr))
+            ptr(::std::move(other.ptr))
             {}
             
             /**
@@ -111,7 +112,7 @@ namespace np
              */
             iterator& operator=(iterator&& other)
             {
-                ptr = utility::Move(other.ptr);
+                ptr = ::std::move(other.ptr);
                 return *this;
             }
             
@@ -318,7 +319,7 @@ namespace np
              move constructor
              */
             reverse_iterator(reverse_iterator&& other):
-            ptr(utility::Move(other.ptr))
+            ptr(::std::move(other.ptr))
             {}
             
             /**
@@ -346,7 +347,7 @@ namespace np
              move constructor - moves std::reverse_iterator
              */
             reverse_iterator(::std::reverse_iterator<pointer>&& other):
-            ptr(utility::Move(other.base()))
+            ptr(::std::move(other.base()))
             {}
             
             /**
@@ -419,7 +420,7 @@ namespace np
              */
             reverse_iterator& operator=(reverse_iterator&& other)
             {
-                ptr = utility::Move(other.ptr);
+                ptr = ::std::move(other.ptr);
                 return *this;
             }
             
@@ -455,7 +456,7 @@ namespace np
              */
             reverse_iterator& operator=(::std::reverse_iterator<pointer>&& other)
             {
-                ptr = utility::Move(other.base());
+                ptr = ::std::move(other.base());
                 return *this;
             }
             

@@ -229,11 +229,6 @@ set(NP_ENGINE_TIME_HPP
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Time/Time.hpp
 )
 
-set(NP_ENGINE_UTILITY_HPP
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Utility/Utility.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Utility/UtilityImpl.hpp
-)
-
 set(NP_ENGINE_HEADER_FILES
 	${NP_ENGINE_APPLICATION_HPP}
 	${NP_ENGINE_CONCURRENCY_HPP}
@@ -264,7 +259,6 @@ set(NP_ENGINE_HEADER_FILES
 	${NP_ENGINE_SERIALIZATION_HPP}
 	${NP_ENGINE_SYSTEM_HPP}
 	${NP_ENGINE_TIME_HPP}
-	${NP_ENGINE_UTILITY_HPP}
 )
 
 ##==--------------------------------------------------------==##
@@ -441,4 +435,3 @@ source_group(Renderer/RHI/Vulkan FILES ${NP_ENGINE_RENDERER_RHI_VULKAN_HPP} ${NP
 source_group(Serialization FILES ${NP_ENGINE_SERIALIZATION_HPP})
 source_group(System FILES ${NP_ENGINE_SYSTEM_HPP} ${NP_ENGINE_SYSTEM_CPP})
 source_group(Time FILES ${NP_ENGINE_TIME_HPP})
-source_group(Utility FILES ${NP_ENGINE_UTILITY_HPP})

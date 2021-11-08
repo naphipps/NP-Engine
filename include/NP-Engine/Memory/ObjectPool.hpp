@@ -9,6 +9,7 @@
 #define NP_ENGINE_OBJECT_POOL_HPP
 
 #include <type_traits>
+#include <utility>
 
 #include "NP-Engine/Insight/Insight.hpp"
 
@@ -102,7 +103,7 @@ namespace np
             ObjectTypePtr CreateObject(Args&& ... args)
             {
                 Block block = _allocator.Allocate(ObjectSize());
-                Construct<T>(block, utility::Forward<Args>(args)...);
+                Construct<T>(block, ::std::forward<Args>(args)...);
                 return static_cast<ObjectTypePtr>(block.ptr);
             }
             

@@ -8,8 +8,9 @@
 #ifndef NP_ENGINE_ALLOCATOR_HPP
 #define NP_ENGINE_ALLOCATOR_HPP
 
+#include <utility>
+
 #include "NP-Engine/Primitive/Primitive.hpp"
-#include "NP-Engine/Utility/Utility.hpp"
 
 #include "Block.hpp"
 
@@ -27,7 +28,7 @@ namespace np
             
             if (block.IsValid() && block.size >= sizeof(T))
             {
-                new (block.ptr) T(utility::Forward<Args>(args)...);
+                new (block.ptr) T(::std::forward<Args>(args)...);
                 constructed = true;
             }
             
