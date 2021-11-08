@@ -8,7 +8,6 @@ set(NP_ENGINE_APPLICATION_HPP
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Application/ApplicationImpl.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Application/Layer.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Application/LayerContainer.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Application/Popup.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Application/Window.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Application/WindowCloseEvent.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Application/WindowEvents.hpp
@@ -211,6 +210,7 @@ set(NP_ENGINE_SERIALIZATION_HPP
 set(NP_ENGINE_SYSTEM_HPP
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/System/System.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/System/SystemImpl.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/System/Popup.hpp
 )
 
 set(NP_ENGINE_TIME_HPP
@@ -266,18 +266,6 @@ set(NP_ENGINE_APPLICATION_CPP
 	Application/Window.cpp
 )
 
-if (APPLE)
-	set(NP_ENGINE_APPLICATION_CPP
-		${NP_ENGINE_APPLICATION_CPP}
-		Application/Popup.mm
-	)
-else()
-	set(NP_ENGINE_APPLICATION_CPP
-		${NP_ENGINE_APPLICATION_CPP}
-		Application/Popup.cpp
-	)
-endif()
-
 set(NP_ENGINE_INSIGHT_CPP
 	Insight/Instrumentor.cpp
 	Insight/Log.cpp
@@ -323,6 +311,20 @@ set(NP_ENGINE_RENDERER_CPP
 	Renderer/RendererImpl.cpp
 )
 
+set(NP_ENGINE_SYSTEM_CPP)
+
+if (APPLE)
+	set(NP_ENGINE_SYSTEM_CPP
+		${NP_ENGINE_SYSTEM_CPP}
+		System/Popup.mm
+	)
+else()
+	set(NP_ENGINE_SYSTEM_CPP
+		${NP_ENGINE_SYSTEM_CPP}
+		System/Popup.cpp
+	)
+endif()
+
 set(NP_ENGINE_SOURCE_FILES
 	${NP_ENGINE_APPLICATION_CPP}
 	${NP_ENGINE_INSIGHT_CPP}
@@ -335,6 +337,7 @@ set(NP_ENGINE_SOURCE_FILES
 	${NP_ENGINE_PLATFORM_LINUX_APPLICATION_CPP}
 	${NP_ENGINE_PLATFORM_WINDOWS_APPLICATION_CPP}
 	${NP_ENGINE_RENDERER_CPP}
+	${NP_ENGINE_SYSTEM_CPP}
 )
 
 ##==--------------------------------------------------------==##
@@ -409,7 +412,7 @@ source_group(Primitive FILES ${NP_ENGINE_PRIMITIVE_HPP})
 source_group(Random FILES ${NP_ENGINE_RANDOM_HPP})
 source_group(Renderer FILES ${NP_ENGINE_RENDERER_HPP} ${NP_ENGINE_RENDERER_CPP})
 source_group(Serialization FILES ${NP_ENGINE_SERIALIZATION_HPP})
-source_group(System FILES ${NP_ENGINE_SYSTEM_HPP})
+source_group(System FILES ${NP_ENGINE_SYSTEM_HPP} ${NP_ENGINE_SYSTEM_CPP})
 source_group(Time FILES ${NP_ENGINE_TIME_HPP})
 source_group(TypeTraits FILES ${NP_ENGINE_TYPETRAITS_HPP})
 source_group(Utility FILES ${NP_ENGINE_UTILITY_HPP})

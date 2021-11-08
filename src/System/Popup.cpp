@@ -4,7 +4,7 @@
 //
 //##===----------------------------------------------------------------------===##//
 
-#include "NP-Engine/Application/Popup.hpp"
+#include "NP-Engine/System/Popup.hpp"
 
 #if NP_ENGINE_PLATFORM_IS_LINUX
 #include <gtk/gtk.h>
@@ -12,7 +12,7 @@
 #include <Windows.h>
 #endif
 
-namespace np::app
+namespace np::system
 {
     Popup::Select Popup::Show(str title, str message, Popup::Style style, Popup::Buttons buttons)
     {

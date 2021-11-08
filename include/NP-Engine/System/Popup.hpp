@@ -13,7 +13,7 @@
 
 //TODO: add summary comments
 
-namespace np::app
+namespace np::system
 {
     class Popup
     {
