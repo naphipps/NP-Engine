@@ -49,11 +49,11 @@ namespace np
                 {
                     _initialized.store(true, mo_release);
                     
-                    str pattern = "[pid:%P, tid:%t] %+";
+                    str pattern = "%^[pid:%P, tid:%t, %Y-%m-%d %H:%M:%S.%e] [%n, %l]%$ %v";
                     
                     //stdout sink
                     _stdout_sink = ::std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
-                    _stdout_sink->set_pattern("%^" + pattern + "%$");
+                    _stdout_sink->set_pattern(pattern);
                     
                     //file sink
                     str log_filepath = GetFileLoggerFilePath();
