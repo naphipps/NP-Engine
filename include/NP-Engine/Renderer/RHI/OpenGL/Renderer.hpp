@@ -17,7 +17,7 @@ namespace np::renderer::rhi
 	{
 	public:
 		bl Init() override;
-		rpi::Renderer::Type GetType() const;
+		rpi::Renderer::Type GetType() const override;
 	};
 }
 
