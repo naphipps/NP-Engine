@@ -1,7 +1,9 @@
-#include <cmath>
-
 #ifndef NP_ENGINE_CMATH_INCLUDE
 #define NP_ENGINE_CMATH_INCLUDE
+
+#include <cmath>
+
+#include "NP-Engine/Platform/Platform.hpp"
 
 #if NP_ENGINE_PLATFORM_IS_LINUX
 
