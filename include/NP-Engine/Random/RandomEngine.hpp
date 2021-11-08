@@ -9,7 +9,8 @@
 #ifndef NP_ENGINE_RANDOM_ENGINE_HPP
 #define NP_ENGINE_RANDOM_ENGINE_HPP
 
-#include "NP-Engine/TypeTraits/TypeTraits.hpp"
+#include <type_traits>
+
 #include "NP-Engine/Insight/Insight.hpp"
 #include "NP-Engine/Container/Container.hpp"
 #include "NP-Engine/Primitive/Primitive.hpp"
@@ -29,9 +30,10 @@ namespace np
         {
         private:
             
-            NP_STATIC_ASSERT((typetraits::IsSame<T, ::pcg32> ||
-                              typetraits::IsSame<T, ::pcg64>),
-                             "random_engine<T> requires T to be ::pcg32 or ::pcg64");
+            NP_STATIC_ASSERT((
+                ::std::is_same_v<T, ::pcg32> ||
+                ::std::is_same_v<T, ::pcg64>),
+                "random_engine<T> requires T to be ::pcg32 or ::pcg64");
             
         public:
             
@@ -153,11 +155,11 @@ namespace np
              */
             void Reconstruct()
             {
-                if constexpr (typetraits::IsSame<T, ::pcg32>)
+                if constexpr (::std::is_same_v<T, ::pcg32>)
                 {
                     *this = ::pcg32_fe().engine();
                 }
-                else //if constexpr (typetraits::IsSame<T, ::pcg64>)
+                else //if constexpr (::std::is_same_v<T, ::pcg64>)
                 {
                     *this = ::pcg64_fe().engine();
                 }
@@ -194,11 +196,11 @@ namespace np
                 
                 StateType shift_amount = 0;
                 
-                if constexpr (typetraits::IsSame<T, ::pcg32>)
+                if constexpr (::std::is_same_v<T, ::pcg32>)
                 {
                     shift_amount = 32;
                 }
-                else //if constexpr (typetraits::IsSame<T, ::pcg64>)
+                else //if constexpr (::std::is_same_v<T, ::pcg64>)
                 {
                     shift_amount = 64;
                 }
@@ -295,11 +297,11 @@ namespace np
             {
                 StateType shift_amount = 0;
                 
-                if constexpr (typetraits::IsSame<T, ::pcg32>)
+                if constexpr (::std::is_same_v<T, ::pcg32>)
                 {
                     shift_amount = 32;
                 }
-                else //if constexpr (typetraits::IsSame<T, ::pcg64>)
+                else //if constexpr (::std::is_same_v<T, ::pcg64>)
                 {
                     shift_amount = 64;
                 }

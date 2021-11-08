@@ -9,7 +9,8 @@
 #ifndef NP_ENGINE_IMAGE_HPP
 #define NP_ENGINE_IMAGE_HPP
 
-#include "NP-Engine/TypeTraits/TypeTraits.hpp"
+#include <type_traits>
+
 #include "NP-Engine/Serialization/Serialization.hpp"
 #include "NP-Engine/Insight/Insight.hpp"
 #include "NP-Engine/Primitive/Primitive.hpp"
@@ -29,21 +30,22 @@ namespace np
         {
         private:
             
-            NP_STATIC_ASSERT((typetraits::IsSame<T, ui8> ||
-                              typetraits::IsSame<T, ui16> ||
-                              typetraits::IsSame<T, ui32> ||
-                              typetraits::IsSame<T, ui64> ||
-                              typetraits::IsSame<T, i8> ||
-                              typetraits::IsSame<T, i16> ||
-                              typetraits::IsSame<T, i32> ||
-                              typetraits::IsSame<T, i64> ||
-                              typetraits::IsSame<T, flt> ||
-                              typetraits::IsSame<T, dbl> ||
-                              typetraits::IsSame<T, chr> ||
-                              typetraits::IsSame<T, uchr> ||
-                              typetraits::IsSame<T, bl> ||
-                              typetraits::IsBaseOf<serialization::Serializable, T>),
-                             "Image<T, SIZE> requires T to be types listed in Image.hpp");
+            NP_STATIC_ASSERT((
+                ::std::is_same_v<T, ui8> ||
+                ::std::is_same_v<T, ui16> ||
+                ::std::is_same_v<T, ui32> ||
+                ::std::is_same_v<T, ui64> ||
+                ::std::is_same_v<T, i8> ||
+                ::std::is_same_v<T, i16> ||
+                ::std::is_same_v<T, i32> ||
+                ::std::is_same_v<T, i64> ||
+                ::std::is_same_v<T, flt> ||
+                ::std::is_same_v<T, dbl> ||
+                ::std::is_same_v<T, chr> ||
+                ::std::is_same_v<T, uchr> ||
+                ::std::is_same_v<T, bl> ||
+                ::std::is_base_of_v<serialization::Serializable, T>),
+                "Image<T, SIZE> requires T to be types listed in Image.hpp");
             
             /**
              gets the filename based on T
@@ -52,41 +54,43 @@ namespace np
             {
                 str filename = "";
                 
-                if constexpr (typetraits::IsSame<T, ui8> ||
-                              typetraits::IsSame<T, ui16> ||
-                              typetraits::IsSame<T, ui32> ||
-                              typetraits::IsSame<T, ui64>)
+                if constexpr (
+                    ::std::is_same_v<T, ui8> ||
+                    ::std::is_same_v<T, ui16> ||
+                    ::std::is_same_v<T, ui32> ||
+                    ::std::is_same_v<T, ui64>)
                 {
                     filename = "ui" + to_str(8 * sizeof(T)) + "Image" + to_str(SIZE) + ".bin";
                 }
-                else if constexpr (typetraits::IsSame<T, i8> ||
-                                   typetraits::IsSame<T, i16> ||
-                                   typetraits::IsSame<T, i32> ||
-                                   typetraits::IsSame<T, i64>)
+                else if constexpr (
+                    ::std::is_same_v<T, i8> ||
+                    ::std::is_same_v<T, i16> ||
+                    ::std::is_same_v<T, i32> ||
+                    ::std::is_same_v<T, i64>)
                 {
                     filename = "i" + to_str(8 * sizeof(T)) + "Image" + to_str(SIZE) + ".bin";
                 }
-                NP_ELIF_IS_SAME(T, flt)
+                else if constexpr (::std::is_same_v<T, flt>)
                 {
                     filename = "fltImage" + to_str(SIZE) + ".bin";
                 }
-                NP_ELIF_IS_SAME(T, dbl)
+                else if constexpr (::std::is_same_v<T, dbl>)
                 {
                     filename = "dblImage" + to_str(SIZE) + ".bin";
                 }
-                NP_ELIF_IS_SAME(T, chr)
+                else if constexpr (::std::is_same_v<T, chr>)
                 {
                     filename = "chrImage" + to_str(SIZE) + ".bin";
                 }
-                NP_ELIF_IS_SAME(T, uchr)
+                else if constexpr (::std::is_same_v<T, uchr>)
                 {
                     filename = "uchrImage" + to_str(SIZE) + ".bin";
                 }
-                NP_ELIF_IS_SAME(T, bl)
+                else if constexpr (::std::is_same_v<T, bl>)
                 {
                     filename = "blImage" + to_str(SIZE) + ".bin";
                 }
-                NP_ELIF_IS_BASE_OF(T, serialization::Serializable)
+                else if constexpr (::std::is_base_of_v<T, serialization::Serializable>)
                 {
                     filename = "Image.json";
                 }
@@ -130,19 +134,20 @@ namespace np
              */
             virtual inline void Clear()
             {
-                if constexpr (typetraits::IsSame<T, ui8> ||
-                              typetraits::IsSame<T, ui16> ||
-                              typetraits::IsSame<T, ui32> ||
-                              typetraits::IsSame<T, ui64> ||
-                              typetraits::IsSame<T, i8> ||
-                              typetraits::IsSame<T, i16> ||
-                              typetraits::IsSame<T, i32> ||
-                              typetraits::IsSame<T, i64> ||
-                              typetraits::IsSame<T, flt> ||
-                              typetraits::IsSame<T, dbl> ||
-                              typetraits::IsSame<T, chr> ||
-                              typetraits::IsSame<T, uchr> ||
-                              typetraits::IsSame<T, bl>)
+                if constexpr (
+                    ::std::is_same_v<T, ui8> ||
+                    ::std::is_same_v<T, ui16> ||
+                    ::std::is_same_v<T, ui32> ||
+                    ::std::is_same_v<T, ui64> ||
+                    ::std::is_same_v<T, i8> ||
+                    ::std::is_same_v<T, i16> ||
+                    ::std::is_same_v<T, i32> ||
+                    ::std::is_same_v<T, i64> ||
+                    ::std::is_same_v<T, flt> ||
+                    ::std::is_same_v<T, dbl> ||
+                    ::std::is_same_v<T, chr> ||
+                    ::std::is_same_v<T, uchr> ||
+                    ::std::is_same_v<T, bl>)
                 {
                     for (ui32 i=0; i<_value.size(); i++)
                     {
@@ -204,19 +209,20 @@ namespace np
              */
             virtual ostrm& Insertion(ostrm& os, str filepath) const override
             {
-                if constexpr (typetraits::IsSame<T, ui8> ||
-                              typetraits::IsSame<T, ui16> ||
-                              typetraits::IsSame<T, ui32> ||
-                              typetraits::IsSame<T, ui64> ||
-                              typetraits::IsSame<T, i8> ||
-                              typetraits::IsSame<T, i16> ||
-                              typetraits::IsSame<T, i32> ||
-                              typetraits::IsSame<T, i64> ||
-                              typetraits::IsSame<T, flt> ||
-                              typetraits::IsSame<T, dbl> ||
-                              typetraits::IsSame<T, chr> ||
-                              typetraits::IsSame<T, uchr> ||
-                              typetraits::IsSame<T, bl>)
+                if constexpr (
+                    ::std::is_same_v<T, ui8> ||
+                    ::std::is_same_v<T, ui16> ||
+                    ::std::is_same_v<T, ui32> ||
+                    ::std::is_same_v<T, ui64> ||
+                    ::std::is_same_v<T, i8> ||
+                    ::std::is_same_v<T, i16> ||
+                    ::std::is_same_v<T, i32> ||
+                    ::std::is_same_v<T, i64> ||
+                    ::std::is_same_v<T, flt> ||
+                    ::std::is_same_v<T, dbl> ||
+                    ::std::is_same_v<T, chr> ||
+                    ::std::is_same_v<T, uchr> ||
+                    ::std::is_same_v<T, bl>)
                 {
                     //TODO: test to make sure this works - especially for flt and dbl
 //                    T* data_ptr = const_cast<T*>(_value.data());
@@ -229,7 +235,7 @@ namespace np
                         os << _value[i];
                     }
                 }
-                else if constexpr (typetraits::IsBaseOf<T, serialization::Serializable>)
+                else if constexpr (::std::is_base_of_v<T, serialization::Serializable>)
                 {
                     str dirpath = fs::get_parent_path(filepath);
                     serialization::vendor::nlohmann::json json;
@@ -252,19 +258,20 @@ namespace np
             */
             virtual istrm& Extraction(istrm& is, str filepath) override
             {
-                if constexpr (typetraits::IsSame<T, ui8> ||
-                              typetraits::IsSame<T, ui16> ||
-                              typetraits::IsSame<T, ui32> ||
-                              typetraits::IsSame<T, ui64> ||
-                              typetraits::IsSame<T, i8> ||
-                              typetraits::IsSame<T, i16> ||
-                              typetraits::IsSame<T, i32> ||
-                              typetraits::IsSame<T, i64> ||
-                              typetraits::IsSame<T, flt> ||
-                              typetraits::IsSame<T, dbl> ||
-                              typetraits::IsSame<T, chr> ||
-                              typetraits::IsSame<T, uchr> ||
-                              typetraits::IsSame<T, bl>)
+                if constexpr (
+                    ::std::is_same_v<T, ui8> ||
+                    ::std::is_same_v<T, ui16> ||
+                    ::std::is_same_v<T, ui32> ||
+                    ::std::is_same_v<T, ui64> ||
+                    ::std::is_same_v<T, i8> ||
+                    ::std::is_same_v<T, i16> ||
+                    ::std::is_same_v<T, i32> ||
+                    ::std::is_same_v<T, i64> ||
+                    ::std::is_same_v<T, flt> ||
+                    ::std::is_same_v<T, dbl> ||
+                    ::std::is_same_v<T, chr> ||
+                    ::std::is_same_v<T, uchr> ||
+                    ::std::is_same_v<T, bl>)
                 {
                     //TODO: test to make sure this works - especially for flt and dbl
 //                    const chr* const_bytes = static_cast<const chr*>(_value.data());
@@ -277,7 +284,7 @@ namespace np
                         is >> _value[i];
                     }
                 }
-                else if constexpr (typetraits::IsBaseOf<T, serialization::Serializable>)
+                else if constexpr (::std::is_base_of_v<T, serialization::Serializable>)
                 {
                     serialization::vendor::nlohmann::json json;
                     is >> json;

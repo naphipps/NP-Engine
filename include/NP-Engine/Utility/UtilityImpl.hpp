@@ -12,8 +12,7 @@
 
 #include <utility>
 #include <limits>
-
-#include "NP-Engine/TypeTraits/TypeTraits.hpp"
+#include <type_traits>
 
 namespace np
 {
@@ -25,13 +24,13 @@ namespace np
          forward
          */
         template <typename T>
-        constexpr T&& Forward(typename typetraits::RemoveRefType<T>& arg) noexcept //TODO: should we add the remove referrence??
+        constexpr T&& Forward(typename ::std::remove_reference_t<T>& arg) noexcept //TODO: should we add the remove referrence??
         {
             return ::std::forward<T>(arg);
         }
         
         template <typename T>
-        constexpr T&& Forward(typename typetraits::RemoveRefType<T>&& arg) noexcept
+        constexpr T&& Forward(typename ::std::remove_reference_t<T>&& arg) noexcept
         {
             return ::std::forward<T>(arg);
         }
@@ -40,7 +39,7 @@ namespace np
          move
          */
         template <class T>
-        constexpr typetraits::RemoveRefType<T>&& Move(T&& t) noexcept
+        constexpr ::std::remove_reference_t<T>&& Move(T&& t) noexcept
         {
             return ::std::move<T>(t);
         }

@@ -8,6 +8,8 @@
 #ifndef NP_ENGINE_DEQUE_ITERATOR_HPP
 #define NP_ENGINE_DEQUE_ITERATOR_HPP
 
+#include <type_traits>
+
 #include "NP-Engine/Utility/Utility.hpp"
 #include "NP-Engine/Insight/Insight.hpp"
 
@@ -30,14 +32,14 @@ namespace np::container
     class deque_iterator
     {
     private:
-        friend class deque<typetraits::RemovePointerObject<T>>;
+        friend class deque<::std::remove_pointer_t<T>>;
         friend class deque_reverse_iterator<T>;
         
     public:
-        NP_STATIC_ASSERT(typetraits::IsPointer<T>, "T must be a pointer");
+        NP_STATIC_ASSERT(::std::is_pointer_v<T>, "T must be a pointer");
         
         using attached_deque_type = deque<T>;
-        using value_type = typetraits::RemovePointerObject<T>;
+        using value_type = ::std::remove_pointer_t<T>;
         using pointer = value_type*;
         using const_pointer = const value_type*;
         using reference = value_type&;
@@ -358,10 +360,10 @@ namespace np::container
         friend class deque<T>;
         
     public:
-        NP_STATIC_ASSERT(typetraits::IsPointer<T>, "T must be a pointer");
+        NP_STATIC_ASSERT(::std::is_pointer_v<T>, "T must be a pointer");
         
         using attached_deque_type = deque<T>;
-        using value_type = typetraits::RemovePointerObject<T>;
+        using value_type = ::std::remove_pointer_t<T>;
         using pointer = value_type*;
         using const_pointer = const value_type*;
         using reference = value_type&;

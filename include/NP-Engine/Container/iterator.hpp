@@ -9,8 +9,7 @@
 #define NP_ENGINE_ITERATOR_HPP
 
 #include <iterator>
-
-#include "NP-Engine/TypeTraits/TypeTraits.hpp"
+#include <type_traits>
 
 namespace np
 {
@@ -22,9 +21,9 @@ namespace np
         template <class T>
         struct iterator
         {
-            NP_STATIC_ASSERT(typetraits::IsPointer<T>, "T must be a pointer");
+            NP_STATIC_ASSERT(::std::is_pointer_v<T>, "T must be a pointer");
             
-            using value_type = typetraits::RemovePointerObject<T>;
+            using value_type = ::std::remove_pointer_t<T>;
             using pointer = value_type*;
             using const_pointer = const value_type*;
             using reference = value_type&;
@@ -289,9 +288,9 @@ namespace np
         template <class T>
         struct reverse_iterator
         {
-            NP_STATIC_ASSERT(typetraits::IsPointer<T>, "T must be a pointer");
+            NP_STATIC_ASSERT(::std::is_pointer_v<T>, "T must be a pointer");
             
-            using value_type = typetraits::RemovePointerObject<T>;
+            using value_type = ::std::remove_pointer_t<T>;
             using pointer = value_type*;
             using const_pointer = const value_type*;
             using reference = value_type&;

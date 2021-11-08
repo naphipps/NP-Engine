@@ -9,7 +9,8 @@
 #ifndef NP_ENGINE_RANDOM_BASE_HPP
 #define NP_ENGINE_RANDOM_BASE_HPP
 
-#include "NP-Engine/TypeTraits/TypeTraits.hpp"
+#include <type_traits>
+
 #include "NP-Engine/Primitive/Primitive.hpp"
 #include "NP-Engine/Insight/Insight.hpp"
 #include "NP-Engine/Serialization/Serialization.hpp"
@@ -28,9 +29,10 @@ namespace np
         {
         private:
             
-            NP_STATIC_ASSERT((typetraits::IsSame<T, Random32> ||
-                              typetraits::IsSame<T, Random64>),
-                             "RandomBase<T> requires T to be random32 or random64");
+            NP_STATIC_ASSERT((
+                ::std::is_same_v<T, Random32> ||
+                ::std::is_same_v<T, Random64>),
+                "RandomBase<T> requires T to be random32 or random64");
             
             T _original_random_engine;
             T _random_engine;

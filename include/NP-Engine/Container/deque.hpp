@@ -10,10 +10,10 @@
 
 #include <deque> //TODO: remove this
 #include <algorithm> // lexicographical_compare //TODO: remove this?
+#include <type_traits>
 
 #include "NP-Engine/Memory/Memory.hpp"
 #include "NP-Engine/Utility/Utility.hpp"
-#include "NP-Engine/TypeTraits/TypeTraits.hpp"
 
 #include "deque_iterator.hpp"
 #include "iterator.hpp"
@@ -33,10 +33,10 @@ namespace np
         class deque
         {
         private:
-            NP_STATIC_ASSERT(typetraits::IsMoveConstructible<T>, "T must be move constructible");
-            NP_STATIC_ASSERT(typetraits::IsCopyConstructible<T>, "T must be copy constructible");
-            NP_STATIC_ASSERT(typetraits::IsDefaultConstructible<T>, "T must be default constructible");
-            NP_STATIC_ASSERT(typetraits::IsDestructible<T>, "T must be destructible");
+            NP_STATIC_ASSERT(::std::is_move_constructible_v<T>, "T must be move constructible");
+            NP_STATIC_ASSERT(::std::is_copy_constructible_v<T>, "T must be copy constructible");
+            NP_STATIC_ASSERT(::std::is_default_constructible_v<T>, "T must be default constructible");
+            NP_STATIC_ASSERT(::std::is_destructible_v<T>, "T must be destructible");
             
         public:
             using value_type = T;
@@ -779,7 +779,7 @@ namespace np
             template <class... Args>
             iterator emplace(const_iterator dst, Args&&... args)
             {
-                NP_ASSERT((typetraits::IsConstructible<T, Args...>), "T must be constructible with the given Args");
+                NP_ASSERT((::std::is_constructible_v<T, Args...>), "T must be constructible with the given Args");
                 
                 iterator emplaced;
                 if (contains(dst) || dst == end())

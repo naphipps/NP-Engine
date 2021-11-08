@@ -9,8 +9,9 @@
 #ifndef NP_ENGINE_RANDOM_SEED_HPP
 #define NP_ENGINE_RANDOM_SEED_HPP
 
+#include <type_traits>
+
 #include "NP-Engine/Primitive/Primitive.hpp"
-#include "NP-Engine/TypeTraits/TypeTraits.hpp"
 #include "NP-Engine/Insight/Insight.hpp"
 
 #include "PcgRandutils.hpp"
@@ -27,9 +28,10 @@ namespace np
         {
         private:
             
-            NP_STATIC_ASSERT((typetraits::IsSame<T, ui64> ||
-                              typetraits::IsSame<T, ::pcg_extras::pcg128_t>),
-                             "RandomSeed<T> requires T to be ui64 or ::pcg_extras::pcg128_t");
+            NP_STATIC_ASSERT((
+                ::std::is_same_v<T, ui64> ||
+                ::std::is_same_v<T, ::pcg_extras::pcg128_t>),
+                "RandomSeed<T> requires T to be ui64 or ::pcg_extras::pcg128_t");
             
             T _inc;
             T _state;

@@ -115,7 +115,7 @@ namespace np
             template <typename T, typename ... Args>
             bl Emplace(Args&& ... args)
             {
-                NP_STATIC_ASSERT((typetraits::IsBaseOf<event::Event, T>), "T is requried to be a base of event:Event");
+                NP_STATIC_ASSERT((::std::is_base_of_v<event::Event, T>), "T is requried to be a base of event:Event");
                 bl pushed = false;
                 memory::LinearAllocator* buffer = GetBuffer();
                 BufferedEventQueue* events = GetEventQueue(buffer);

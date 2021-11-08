@@ -43,41 +43,41 @@ namespace np
             {
                 str filename = "";
                 
-                if constexpr (typetraits::IsSame<T, ui8> ||
-                              typetraits::IsSame<T, ui16> ||
-                              typetraits::IsSame<T, ui32> ||
-                              typetraits::IsSame<T, ui64>)
+                if constexpr (::std::is_same_v<T, ui8> ||
+                              ::std::is_same_v<T, ui16> ||
+                              ::std::is_same_v<T, ui32> ||
+                              ::std::is_same_v<T, ui64>)
                 {
                     filename = "ui" + to_str(8 * sizeof(T)) + "DrawableImage" + to_str(SIZE) + ".json";
                 }
-                else if constexpr (typetraits::IsSame<T, i8> ||
-                                   typetraits::IsSame<T, i16> ||
-                                   typetraits::IsSame<T, i32> ||
-                                   typetraits::IsSame<T, i64>)
+                else if constexpr (::std::is_same_v<T, i8> ||
+                                   ::std::is_same_v<T, i16> ||
+                                   ::std::is_same_v<T, i32> ||
+                                   ::std::is_same_v<T, i64>)
                 {
                     filename = "i" + to_str(8 * sizeof(T)) + "DrawableImage" + to_str(SIZE) + ".json";
                 }
-                NP_ELIF_IS_SAME(T, flt)
+                else if constexpr (::std::is_same_v<T, flt>)
                 {
                     filename = "fltDrawableImage" + to_str(SIZE) + ".json";
                 }
-                NP_ELIF_IS_SAME(T, dbl)
+                else if constexpr (::std::is_same_v<T, dbl>)
                 {
                     filename = "dblDrawableImage" + to_str(SIZE) + ".json";
                 }
-                NP_ELIF_IS_SAME(T, chr)
+                else if constexpr (::std::is_same_v<T, chr>)
                 {
                     filename = "chrDrawableImage" + to_str(SIZE) + ".json";
                 }
-                NP_ELIF_IS_SAME(T, uchr)
+                else if constexpr (::std::is_same_v<T, uchr>)
                 {
                     filename = "uchrDrawableImage" + to_str(SIZE) + ".json";
                 }
-                NP_ELIF_IS_SAME(T, bl)
+                else if constexpr (::std::is_same_v<T, bl>)
                 {
                     filename = "blDrawableImage" + to_str(SIZE) + ".json";
                 }
-                NP_ELIF_IS_BASE_OF(T, serialization::Serializable)
+                else if constexpr (::std::is_base_of_v<T, serialization::Serializable>)
                 {
                     filename = "DrawableImage.json";
                 }

@@ -9,9 +9,10 @@
 #ifndef NP_ENGINE_POINT_HPP
 #define NP_ENGINE_POINT_HPP
 
+#include <type_traits>
+
 #include "NP-Engine/Insight/Insight.hpp"
 #include "NP-Engine/Primitive/Primitive.hpp"
-#include "NP-Engine/TypeTraits/TypeTraits.hpp"
 #include "NP-Engine/Container/Container.hpp"
 #include "NP-Engine/Memory/Memory.hpp"
 
@@ -22,17 +23,18 @@ namespace np
         template <typename T>
         struct Point //TODO: investigate if we should use glm::vec2 instead of this!! Yes. Yes we should.
         {
-            NP_STATIC_ASSERT((typetraits::IsSame<T, ui8> ||
-                              typetraits::IsSame<T, ui16> ||
-                              typetraits::IsSame<T, ui32> ||
-                              typetraits::IsSame<T, ui64> ||
-                              typetraits::IsSame<T, i8> ||
-                              typetraits::IsSame<T, i16> ||
-                              typetraits::IsSame<T, i32> ||
-                              typetraits::IsSame<T, i64> ||
-                              typetraits::IsSame<T, flt> ||
-                              typetraits::IsSame<T, dbl>),
-                             "Point<T> requires T to be types listed in Point.hpp");
+            NP_STATIC_ASSERT((
+                ::std::is_same_v<T, ui8> ||
+                ::std::is_same_v<T, ui16> ||
+                ::std::is_same_v<T, ui32> ||
+                ::std::is_same_v<T, ui64> ||
+                ::std::is_same_v<T, i8> ||
+                ::std::is_same_v<T, i16> ||
+                ::std::is_same_v<T, i32> ||
+                ::std::is_same_v<T, i64> ||
+                ::std::is_same_v<T, flt> ||
+                ::std::is_same_v<T, dbl>),
+                "Point<T> requires T to be types listed in Point.hpp");
             
             T x = 0;
             T y = 0;

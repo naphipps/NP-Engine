@@ -17,7 +17,6 @@
 #include "Filesystem/Filesystem.hpp"
 #include "Concurrency/Concurrency.hpp"
 #include "Insight/Insight.hpp"
-#include "TypeTraits/TypeTraits.hpp"
 #include "Container/Container.hpp"
 #include "Primitive/Primitive.hpp"
 #include "Core/Core.hpp"

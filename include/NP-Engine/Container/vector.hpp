@@ -10,6 +10,7 @@
 #define NP_ENGINE_VECTOR_HPP
 
 #include <limits>
+#include <type_traits>
 
 #include "NP-Engine/Primitive/Primitive.hpp"
 #include "NP-Engine/Utility/Utility.hpp"
@@ -29,9 +30,9 @@ namespace np
         class vector
         {
         private:
-            NP_STATIC_ASSERT(typetraits::IsCopyConstructible<T>, "T must be copy constructible");
-            NP_STATIC_ASSERT(typetraits::IsMoveConstructible<T>, "T must be move constructible"); //TODO: add default constructible
-            NP_STATIC_ASSERT(typetraits::IsDestructible<T>, "T must be destructible");
+            NP_STATIC_ASSERT(::std::is_copy_constructible_v<T>, "T must be copy constructible");
+            NP_STATIC_ASSERT(::std::is_move_constructible_v<T>, "T must be move constructible"); //TODO: add default constructible
+            NP_STATIC_ASSERT(::std::is_destructible_v<T>, "T must be destructible");
             
         public:
             using value_type = T;
@@ -687,7 +688,7 @@ namespace np
              */
             bl resize(siz target_size)
             {
-                NP_ASSERT(typetraits::IsDefaultConstructible<T>, "T must be default constructible for this method");
+                NP_ASSERT(::std::is_default_constructible_v<T>, "T must be default constructible for this method");
                 
                 bl resized = false;
                 
@@ -1015,7 +1016,7 @@ namespace np
             template <class... Args>
             iterator emplace(const_iterator dst, Args&&... args)
             {
-                NP_ASSERT((typetraits::IsConstructible<T, Args...>), "T must be constructible with the given Args");
+                NP_ASSERT((::std::is_constructible_v<T, Args...>), "T must be constructible with the given Args");
                 
                 iterator emplaced = nullptr;
                 if (contains(dst) || dst == end())
