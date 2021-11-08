@@ -59,7 +59,7 @@ namespace np
             _running(false)
             {
                 _window = CreateWindow(_properties.Allocator, window_properties);
-                renderer::Renderer::Init();
+                renderer::Renderer::Init(_properties.Allocator);
             }
             
         public:
