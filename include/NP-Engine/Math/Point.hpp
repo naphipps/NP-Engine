@@ -20,7 +20,7 @@ namespace np
     namespace math
     {
         template <typename T>
-        struct Point //TODO: investigate if we should use glm::vec2 instead of this!!
+        struct Point //TODO: investigate if we should use glm::vec2 instead of this!! Yes. Yes we should.
         {
             NP_STATIC_ASSERT((typetraits::IsSame<T, ui8> ||
                               typetraits::IsSame<T, ui16> ||
