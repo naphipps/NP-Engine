@@ -12,6 +12,7 @@
 #include <algorithm> // lexicographical_compare //TODO: remove this?
 #include <type_traits>
 
+#include "NP-Engine/Primitive/Primitive.hpp"
 #include "NP-Engine/Memory/Memory.hpp"
 #include "NP-Engine/Utility/Utility.hpp"
 
