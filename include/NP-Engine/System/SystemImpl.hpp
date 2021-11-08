@@ -28,7 +28,7 @@ namespace np::system
         return fs::append(GetEnv("HOME"), fs::append("Library", "NP-Engine"));
 
 #elif NP_ENGINE_PLATFORM_IS_LINUX
-		//TODO: implement
+		return fs::append(GetEnv("HOME"), ".NP-Engine");
 
 #elif NP_ENGINE_PLATFORM_IS_WINDOWS
 		return fs::append(GetEnv("ALLUSERSPROFILE"), "NP-Engine");
