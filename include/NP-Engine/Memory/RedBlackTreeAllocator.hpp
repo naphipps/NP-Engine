@@ -245,7 +245,7 @@ namespace np
                  */
                 void InsertCleanup(NodePtr node)
                 {
-                    while (node != _root && node->GetParent()->IsRed())
+                    while (node->GetParent() != nullptr && node->GetParent()->IsRed())
                     {
                         NodePtr y = nullptr;
                         if (node->GetParent() == node->GetParent()->GetParent()->Left)
@@ -468,11 +468,14 @@ namespace np
                 void Insert(NodePtr node)
                 {
                     NodePtr parent = nullptr;
-                    
-                    for (NodePtr it = _root; it != &_nil;
-                         it = node->GetSize() < it->GetSize() ? it->Left : it->Right)
+
+                    if (node != _root)
                     {
-                        parent = it;
+                        for (NodePtr it = _root; it != &_nil;
+                             it = node->GetSize() < it->GetSize() ? it->Left : it->Right)
+                        {
+                            parent = it;
+                        }
                     }
                     
                     node->SetParent(parent);
