@@ -12,7 +12,7 @@ extern ::np::app::Application* ::np::app::CreateApplication(::np::memory::Alloca
 
 i32 main(i32 argc, chr** argv)
 {
-    ::np::system::Init();
+    ::np::system::Init(); //TODO: register TraitAllocator here maybe??
 
     i32 retval = 0;
     str message;
@@ -26,7 +26,6 @@ i32 main(i32 argc, chr** argv)
     {
         try
         {
-            //TODO: register application_allocator to TraitsAllocator
             ::np::memory::RedBlackTreeAllocator application_allocator(main_block);
             ::np::app::Application* app = ::np::app::CreateApplication(application_allocator);
             app->Run(argc, argv);
