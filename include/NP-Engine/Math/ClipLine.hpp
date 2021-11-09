@@ -23,7 +23,7 @@ namespace np
          Sobkow, M., Pospisila, P., & Yang, Y. (1987). A fast two-dimesional line clipping algorithm via line encoding. Compuing and Graphics, 11(4), 459-467
          */
         
-        namespace _hidden
+        namespace __detail
         {
             /**
              clips given point p given top value
@@ -162,57 +162,57 @@ namespace np
                     break;
                     
                 case 0x01:
-                    retval.clipped = _hidden::ClipQLeft(p, q, left);
+                    retval.clipped = __detail::ClipQLeft(p, q, left);
                     retval.visible = true;
                     break;
                     
                 case 0x02:
-                    retval.clipped = _hidden::ClipQRight(p, q, right);
+                    retval.clipped = __detail::ClipQRight(p, q, right);
                     retval.visible = true;
                     break;
                     
                 case 0x04:
-                    retval.clipped = _hidden::ClipQBottom(p, q, bottom);
+                    retval.clipped = __detail::ClipQBottom(p, q, bottom);
                     retval.visible = true;
                     break;
                     
                 case 0x05:
-                    retval.clipped = _hidden::ClipQLeft(p, q, left);
+                    retval.clipped = __detail::ClipQLeft(p, q, left);
                     if (q.y < bottom)
                     {
-                        retval.clipped |= _hidden::ClipQBottom(p, q, bottom);
+                        retval.clipped |= __detail::ClipQBottom(p, q, bottom);
                     }
                     retval.visible = true;
                     break;
                     
                 case 0x06:
-                    retval.clipped = _hidden::ClipQRight(p, q, right);
+                    retval.clipped = __detail::ClipQRight(p, q, right);
                     if (q.y < bottom)
                     {
-                        retval.clipped |= _hidden::ClipQBottom(p, q, bottom);
+                        retval.clipped |= __detail::ClipQBottom(p, q, bottom);
                     }
                     retval.visible = true;
                     break;
                     
                 case 0x08:
-                    retval.clipped = _hidden::ClipQTop(p, q, top);
+                    retval.clipped = __detail::ClipQTop(p, q, top);
                     retval.visible = true;
                     break;
                     
                 case 0x09:
-                    retval.clipped = _hidden::ClipQLeft(p, q, left);
+                    retval.clipped = __detail::ClipQLeft(p, q, left);
                     if (q.y > top)
                     {
-                        retval.clipped |= _hidden::ClipQTop(p, q, top);
+                        retval.clipped |= __detail::ClipQTop(p, q, top);
                     }
                     retval.visible = true;
                     break;
                     
                 case 0x0A:
-                    retval.clipped = _hidden::ClipQRight(p, q, right);
+                    retval.clipped = __detail::ClipQRight(p, q, right);
                     if (q.y > top)
                     {
-                        retval.clipped |= _hidden::ClipQTop(p, q, top);
+                        retval.clipped |= __detail::ClipQTop(p, q, top);
                     }
                     retval.visible = true;
                     break;
@@ -220,7 +220,7 @@ namespace np
                     //---------------------------------------------
                     
                 case 0x10:
-                    retval.clipped = _hidden::ClipPLeft(p, q, left);
+                    retval.clipped = __detail::ClipPLeft(p, q, left);
                     retval.visible = true;
                     break;
                     
@@ -228,19 +228,19 @@ namespace np
                     break;
                     
                 case 0x12:
-                    retval.clipped = _hidden::ClipPLeft(p, q, left);
-                    retval.clipped |= _hidden::ClipQRight(p, q, right);
+                    retval.clipped = __detail::ClipPLeft(p, q, left);
+                    retval.clipped |= __detail::ClipQRight(p, q, right);
                     retval.visible = true;
                     break;
                     
                 case 0x14:
-                    retval.clipped = _hidden::ClipPLeft(p, q, left);
+                    retval.clipped = __detail::ClipPLeft(p, q, left);
                     if (p.y < bottom)
                     {
                     }
                     else
                     {
-                        retval.clipped |= _hidden::ClipQBottom(p, q, bottom);
+                        retval.clipped |= __detail::ClipQBottom(p, q, bottom);
                         retval.visible = true;
                     }
                     break;
@@ -249,29 +249,29 @@ namespace np
                     break;
                     
                 case 0x16:
-                    retval.clipped = _hidden::ClipPLeft(p, q, left);
+                    retval.clipped = __detail::ClipPLeft(p, q, left);
                     if (p.y < bottom)
                     {
                     }
                     else
                     {
-                        retval.clipped |= _hidden::ClipQBottom(p, q, bottom);
+                        retval.clipped |= __detail::ClipQBottom(p, q, bottom);
                         if (q.x > right)
                         {
-                            retval.clipped |= _hidden::ClipQRight(p, q, right);
+                            retval.clipped |= __detail::ClipQRight(p, q, right);
                         }
                         retval.visible = true;
                     }
                     break;
                     
                 case 0x18:
-                    retval.clipped = _hidden::ClipPLeft(p, q, left);
+                    retval.clipped = __detail::ClipPLeft(p, q, left);
                     if (p.y > top)
                     {
                     }
                     else
                     {
-                        retval.clipped |= _hidden::ClipQTop(p, q, top);
+                        retval.clipped |= __detail::ClipQTop(p, q, top);
                         retval.visible = true;
                     }
                     break;
@@ -280,16 +280,16 @@ namespace np
                     break;
                     
                 case 0x1A:
-                    retval.clipped = _hidden::ClipPLeft(p, q, left);
+                    retval.clipped = __detail::ClipPLeft(p, q, left);
                     if (p.y > top)
                     {
                     }
                     else
                     {
-                        retval.clipped |= _hidden::ClipQTop(p, q, top);
+                        retval.clipped |= __detail::ClipQTop(p, q, top);
                         if (q.x > right)
                         {
-                            retval.clipped |= _hidden::ClipQRight(p, q, right);
+                            retval.clipped |= __detail::ClipQRight(p, q, right);
                         }
                         retval.visible = true;
                     }
@@ -298,13 +298,13 @@ namespace np
                     //---------------------------------------------
                     
                 case 0x20:
-                    retval.clipped = _hidden::ClipPRight(p, q, right);
+                    retval.clipped = __detail::ClipPRight(p, q, right);
                     retval.visible = true;
                     break;
                     
                 case 0x21:
-                    retval.clipped = _hidden::ClipPRight(p, q, right);
-                    retval.clipped |= _hidden::ClipQLeft(p, q, left);
+                    retval.clipped = __detail::ClipPRight(p, q, right);
+                    retval.clipped |= __detail::ClipQLeft(p, q, left);
                     retval.visible = true;
                     break;
                     
@@ -312,28 +312,28 @@ namespace np
                     break;
                     
                 case 0x24:
-                    retval.clipped = _hidden::ClipPRight(p, q, right);
+                    retval.clipped = __detail::ClipPRight(p, q, right);
                     if (p.y < bottom)
                     {
                     }
                     else
                     {
-                        retval.clipped |= _hidden::ClipQBottom(p, q, bottom);
+                        retval.clipped |= __detail::ClipQBottom(p, q, bottom);
                         retval.visible = true;
                     }
                     break;
                     
                 case 0x25:
-                    retval.clipped = _hidden::ClipPRight(p, q, right);
+                    retval.clipped = __detail::ClipPRight(p, q, right);
                     if (p.y < bottom)
                     {
                     }
                     else
                     {
-                        retval.clipped |= _hidden::ClipQBottom(p, q, bottom);
+                        retval.clipped |= __detail::ClipQBottom(p, q, bottom);
                         if (q.x < left)
                         {
-                            retval.clipped |= _hidden::ClipQLeft(p, q, left);
+                            retval.clipped |= __detail::ClipQLeft(p, q, left);
                         }
                         retval.visible = true;
                     }
@@ -343,28 +343,28 @@ namespace np
                     break;
                     
                 case 0x28:
-                    retval.clipped = _hidden::ClipPRight(p, q, right);
+                    retval.clipped = __detail::ClipPRight(p, q, right);
                     if (p.y > top)
                     {
                     }
                     else
                     {
-                        retval.clipped |= _hidden::ClipQTop(p, q, top);
+                        retval.clipped |= __detail::ClipQTop(p, q, top);
                         retval.visible = true;
                     }
                     break;
                     
                 case 0x29:
-                    retval.clipped = _hidden::ClipPRight(p, q, right);
+                    retval.clipped = __detail::ClipPRight(p, q, right);
                     if (p.y > top)
                     {
                     }
                     else
                     {
-                        retval.clipped |= _hidden::ClipQTop(p, q, top);
+                        retval.clipped |= __detail::ClipQTop(p, q, top);
                         if (q.x < left)
                         {
-                            retval.clipped |= _hidden::ClipQLeft(p, q, left);
+                            retval.clipped |= __detail::ClipQLeft(p, q, left);
                         }
                         retval.visible = true;
                     }
@@ -376,34 +376,34 @@ namespace np
                     //---------------------------------------------
                     
                 case 0x40:
-                    retval.clipped = _hidden::ClipPBottom(p, q, bottom);
+                    retval.clipped = __detail::ClipPBottom(p, q, bottom);
                     retval.visible = true;
                     break;
                     
                 case 0x41:
-                    retval.clipped = _hidden::ClipPBottom(p, q, bottom);
+                    retval.clipped = __detail::ClipPBottom(p, q, bottom);
                     if (p.x < left)
                     {
                     }
                     else
                     {
-                        retval.clipped |= _hidden::ClipQLeft(p, q, left);
+                        retval.clipped |= __detail::ClipQLeft(p, q, left);
                         if (q.y < bottom)
                         {
-                            retval.clipped |= _hidden::ClipQBottom(p, q, bottom);
+                            retval.clipped |= __detail::ClipQBottom(p, q, bottom);
                         }
                         retval.visible = true;
                     }
                     break;
                     
                 case 0x42:
-                    retval.clipped = _hidden::ClipPBottom(p, q, bottom);
+                    retval.clipped = __detail::ClipPBottom(p, q, bottom);
                     if (p.x > right)
                     {
                     }
                     else
                     {
-                        retval.clipped |= _hidden::ClipQRight(p, q, right);
+                        retval.clipped |= __detail::ClipQRight(p, q, right);
                         retval.visible = true;
                     }
                     break;
@@ -418,38 +418,38 @@ namespace np
                     break;
                     
                 case 0x48:
-                    retval.clipped = _hidden::ClipPBottom(p, q, bottom);
-                    retval.clipped |= _hidden::ClipQTop(p, q, top);
+                    retval.clipped = __detail::ClipPBottom(p, q, bottom);
+                    retval.clipped |= __detail::ClipQTop(p, q, top);
                     retval.visible = true;
                     break;
                     
                 case 0x49:
-                    retval.clipped = _hidden::ClipPBottom(p, q, bottom);
+                    retval.clipped = __detail::ClipPBottom(p, q, bottom);
                     if (p.x < left)
                     {
                     }
                     else
                     {
-                        retval.clipped |= _hidden::ClipQLeft(p, q, left);
+                        retval.clipped |= __detail::ClipQLeft(p, q, left);
                         if (q.y > top)
                         {
-                            retval.clipped |= _hidden::ClipQTop(p, q, top);
+                            retval.clipped |= __detail::ClipQTop(p, q, top);
                         }
                         retval.visible = true;
                     }
                     break;
                     
                 case 0x4A:
-                    retval.clipped = _hidden::ClipPBottom(p, q, bottom);
+                    retval.clipped = __detail::ClipPBottom(p, q, bottom);
                     if (p.x > right)
                     {
                     }
                     else
                     {
-                        retval.clipped |= _hidden::ClipQRight(p, q, right);
+                        retval.clipped |= __detail::ClipQRight(p, q, right);
                         if (q.y > top)
                         {
-                            retval.clipped |= _hidden::ClipQTop(p, q, top);
+                            retval.clipped |= __detail::ClipQTop(p, q, top);
                         }
                         retval.visible = true;
                     }
@@ -458,10 +458,10 @@ namespace np
                     //---------------------------------------------
                     
                 case 0x50:
-                    retval.clipped = _hidden::ClipPLeft(p, q, left);
+                    retval.clipped = __detail::ClipPLeft(p, q, left);
                     if (p.y < bottom)
                     {
-                        retval.clipped |= _hidden::ClipPBottom(p, q, bottom);
+                        retval.clipped |= __detail::ClipPBottom(p, q, bottom);
                     }
                     retval.visible = true;
                     break;
@@ -470,16 +470,16 @@ namespace np
                     break;
                     
                 case 0x52:
-                    retval.clipped = _hidden::ClipQRight(p, q, right);
+                    retval.clipped = __detail::ClipQRight(p, q, right);
                     if (q.y < bottom)
                     {
                     }
                     else
                     {
-                        retval.clipped |= _hidden::ClipPBottom(p, q, bottom);
+                        retval.clipped |= __detail::ClipPBottom(p, q, bottom);
                         if (p.x < left)
                         {
-                            retval.clipped |= _hidden::ClipPLeft(p, q, left);
+                            retval.clipped |= __detail::ClipPLeft(p, q, left);
                         }
                         retval.visible = true;
                     }
@@ -495,16 +495,16 @@ namespace np
                     break;
                     
                 case 0x58:
-                    retval.clipped = _hidden::ClipQTop(p, q, top);
+                    retval.clipped = __detail::ClipQTop(p, q, top);
                     if (q.x < left)
                     {
                     }
                     else
                     {
-                        retval.clipped |= _hidden::ClipPBottom(p, q, bottom);
+                        retval.clipped |= __detail::ClipPBottom(p, q, bottom);
                         if (p.x < left)
                         {
-                            retval.clipped |= _hidden::ClipPLeft(p, q, left);
+                            retval.clipped |= __detail::ClipPLeft(p, q, left);
                         }
                         retval.visible = true;
                     }
@@ -513,12 +513,12 @@ namespace np
                     break;
                     
                 case 0x5A:
-                    retval.clipped = _hidden::ClipPLeft(p, q, left);
+                    retval.clipped = __detail::ClipPLeft(p, q, left);
                     if (p.y < left)
                     {
                     }
                     else {
-                        retval.clipped |= _hidden::ClipQRight(p, q, right);
+                        retval.clipped |= __detail::ClipQRight(p, q, right);
                         if (q.y < bottom)
                         {
                         }
@@ -526,11 +526,11 @@ namespace np
                         {
                             if (p.y < bottom)
                             {
-                                retval.clipped |= _hidden::ClipPBottom(p, q, bottom);
+                                retval.clipped |= __detail::ClipPBottom(p, q, bottom);
                             }
                             if (q.y > top)
                             {
-                                retval.clipped |= _hidden::ClipQTop(p, q, top);
+                                retval.clipped |= __detail::ClipQTop(p, q, top);
                             }
                             retval.visible = true;
                         }
@@ -540,25 +540,25 @@ namespace np
                     //---------------------------------------------
                     
                 case 0x60:
-                    retval.clipped = _hidden::ClipPRight(p, q, right);
+                    retval.clipped = __detail::ClipPRight(p, q, right);
                     if (p.y < bottom)
                     {
-                        retval.clipped |= _hidden::ClipPBottom(p, q, bottom);
+                        retval.clipped |= __detail::ClipPBottom(p, q, bottom);
                     }
                     retval.visible = true;
                     break;
                     
                 case 0x61:
-                    retval.clipped = _hidden::ClipQLeft(p, q, left);
+                    retval.clipped = __detail::ClipQLeft(p, q, left);
                     if (q.y < bottom)
                     {
                     }
                     else
                     {
-                        retval.clipped |= _hidden::ClipPBottom(p, q, bottom);
+                        retval.clipped |= __detail::ClipPBottom(p, q, bottom);
                         if (p.x > right)
                         {
-                            retval.clipped |= _hidden::ClipPRight(p, q, right);
+                            retval.clipped |= __detail::ClipPRight(p, q, right);
                         }
                         retval.visible = true;
                     }
@@ -577,29 +577,29 @@ namespace np
                     break;
                     
                 case 0x68:
-                    retval.clipped = _hidden::ClipQTop(p, q, top);
+                    retval.clipped = __detail::ClipQTop(p, q, top);
                     if (q.x > right)
                     {
                     }
                     else
                     {
-                        retval.clipped |= _hidden::ClipPRight(p, q, right);
+                        retval.clipped |= __detail::ClipPRight(p, q, right);
                         if (p.y < bottom)
                         {
-                            retval.clipped |= _hidden::ClipPBottom(p, q, bottom);
+                            retval.clipped |= __detail::ClipPBottom(p, q, bottom);
                         }
                         retval.visible = true;
                     }
                     break;
                     
                 case 0x69:
-                    retval.clipped = _hidden::ClipQLeft(p, q, left);
+                    retval.clipped = __detail::ClipQLeft(p, q, left);
                     if (q.y < bottom)
                     {
                     }
                     else
                     {
-                        retval.clipped |= _hidden::ClipPRight(p, q, right);
+                        retval.clipped |= __detail::ClipPRight(p, q, right);
                         if (p.y > top)
                         {
                         }
@@ -607,11 +607,11 @@ namespace np
                         {
                             if (q.y > top)
                             {
-                                retval.clipped |= _hidden::ClipQTop(p, q, top);
+                                retval.clipped |= __detail::ClipQTop(p, q, top);
                             }
                             if (p.y < bottom)
                             {
-                                retval.clipped |= _hidden::ClipPBottom(p, q, bottom);
+                                retval.clipped |= __detail::ClipPBottom(p, q, bottom);
                             }
                             retval.visible = true;
                         }
@@ -624,67 +624,67 @@ namespace np
                     //---------------------------------------------
                     
                 case 0x80:
-                    retval.clipped = _hidden::ClipPTop(p, q, top);
+                    retval.clipped = __detail::ClipPTop(p, q, top);
                     retval.visible = true;
                     break;
                     
                 case 0x81:
-                    retval.clipped = _hidden::ClipPTop(p, q, top);
+                    retval.clipped = __detail::ClipPTop(p, q, top);
                     if (p.x < left)
                     {
                     }
                     else
                     {
-                        retval.clipped |= _hidden::ClipQLeft(p, q, left);
+                        retval.clipped |= __detail::ClipQLeft(p, q, left);
                         retval.visible = true;
                     }
                     break;
                     
                 case 0x82:
-                    retval.clipped = _hidden::ClipPTop(p, q, top);
+                    retval.clipped = __detail::ClipPTop(p, q, top);
                     if (p.x > right)
                     {
                     }
                     else
                     {
-                        retval.clipped |= _hidden::ClipQRight(p, q, right);
+                        retval.clipped |= __detail::ClipQRight(p, q, right);
                         retval.visible = true;
                     }
                     break;
                     
                 case 0x84:
-                    retval.clipped = _hidden::ClipPTop(p, q, top);
-                    retval.clipped |= _hidden::ClipQBottom(p, q, bottom);
+                    retval.clipped = __detail::ClipPTop(p, q, top);
+                    retval.clipped |= __detail::ClipQBottom(p, q, bottom);
                     retval.visible = true;
                     break;
                     
                 case 0x85:
-                    retval.clipped = _hidden::ClipPTop(p, q, top);
+                    retval.clipped = __detail::ClipPTop(p, q, top);
                     if (p.x < left)
                     {
                     }
                     else
                     {
-                        retval.clipped |= _hidden::ClipQLeft(p, q, left);
+                        retval.clipped |= __detail::ClipQLeft(p, q, left);
                         if (q.y < bottom)
                         {
-                            retval.clipped |= _hidden::ClipQBottom(p, q, bottom);
+                            retval.clipped |= __detail::ClipQBottom(p, q, bottom);
                         }
                         retval.visible = true;
                     }
                     break;
                     
                 case 0x86:
-                    retval.clipped = _hidden::ClipPTop(p, q, top);
+                    retval.clipped = __detail::ClipPTop(p, q, top);
                     if (p.x > right)
                     {
                     }
                     else
                     {
-                        retval.clipped |= _hidden::ClipQRight(p, q, right);
+                        retval.clipped |= __detail::ClipQRight(p, q, right);
                         if (q.y < bottom)
                         {
-                            retval.clipped |= _hidden::ClipQBottom(p, q, bottom);
+                            retval.clipped |= __detail::ClipQBottom(p, q, bottom);
                         }
                         retval.visible = true;
                     }
@@ -702,10 +702,10 @@ namespace np
                     //---------------------------------------------
                     
                 case 0x90:
-                    retval.clipped = _hidden::ClipPLeft(p, q, left);
+                    retval.clipped = __detail::ClipPLeft(p, q, left);
                     if (p.y > top)
                     {
-                        retval.clipped |= _hidden::ClipPTop(p, q, top);
+                        retval.clipped |= __detail::ClipPTop(p, q, top);
                     }
                     retval.visible = true;
                     break;
@@ -714,32 +714,32 @@ namespace np
                     break;
                     
                 case 0x92:
-                    retval.clipped = _hidden::ClipQRight(p, q, right);
+                    retval.clipped = __detail::ClipQRight(p, q, right);
                     if (q.y > top)
                     {
                     }
                     else
                     {
-                        retval.clipped |= _hidden::ClipPTop(p, q, top);
+                        retval.clipped |= __detail::ClipPTop(p, q, top);
                         if (p.x < left)
                         {
-                            retval.clipped |= _hidden::ClipPLeft(p, q, left);
+                            retval.clipped |= __detail::ClipPLeft(p, q, left);
                         }
                         retval.visible = true;
                     }
                     break;
                     
                 case 0x94:
-                    retval.clipped = _hidden::ClipQBottom(p, q, bottom);
+                    retval.clipped = __detail::ClipQBottom(p, q, bottom);
                     if (q.x < left)
                     {
                     }
                     else
                     {
-                        retval.clipped |= _hidden::ClipPLeft(p, q, left);
+                        retval.clipped |= __detail::ClipPLeft(p, q, left);
                         if (p.y > top)
                         {
-                            retval.clipped |= _hidden::ClipPTop(p, q, top);
+                            retval.clipped |= __detail::ClipPTop(p, q, top);
                         }
                         retval.visible = true;
                     }
@@ -749,13 +749,13 @@ namespace np
                     break;
                     
                 case 0x96:
-                    retval.clipped = _hidden::ClipPLeft(p, q, left);
+                    retval.clipped = __detail::ClipPLeft(p, q, left);
                     if (p.y < bottom)
                     {
                     }
                     else
                     {
-                        retval.clipped |= _hidden::ClipQRight(p, q, right);
+                        retval.clipped |= __detail::ClipQRight(p, q, right);
                         if (q.y > top)
                         {
                         }
@@ -763,11 +763,11 @@ namespace np
                         {
                             if (p.y > top)
                             {
-                                retval.clipped |= _hidden::ClipPTop(p, q, top);
+                                retval.clipped |= __detail::ClipPTop(p, q, top);
                             }
                             if (q.y < bottom)
                             {
-                                retval.clipped |= _hidden::ClipQBottom(p, q, bottom);
+                                retval.clipped |= __detail::ClipQBottom(p, q, bottom);
                             }
                             retval.visible = true;
                         }
@@ -786,25 +786,25 @@ namespace np
                     //---------------------------------------------
                     
                 case 0xA0:
-                    retval.clipped = _hidden::ClipPRight(p, q, right);
+                    retval.clipped = __detail::ClipPRight(p, q, right);
                     if (p.y > top)
                     {
-                        retval.clipped |= _hidden::ClipPTop(p, q, top);
+                        retval.clipped |= __detail::ClipPTop(p, q, top);
                     }
                     retval.visible = true;
                     break;
                     
                 case 0xA1:
-                    retval.clipped = _hidden::ClipQLeft(p, q, left);
+                    retval.clipped = __detail::ClipQLeft(p, q, left);
                     if (q.y > top)
                     {
                     }
                     else
                     {
-                        retval.clipped |= _hidden::ClipPTop(p, q, top);
+                        retval.clipped |= __detail::ClipPTop(p, q, top);
                         if (p.x > right)
                         {
-                            retval.clipped |= _hidden::ClipPRight(p, q, right);
+                            retval.clipped |= __detail::ClipPRight(p, q, right);
                         }
                         retval.visible = true;
                     }
@@ -814,29 +814,29 @@ namespace np
                     break;
                     
                 case 0xA4:
-                    retval.clipped = _hidden::ClipQBottom(p, q, bottom);
+                    retval.clipped = __detail::ClipQBottom(p, q, bottom);
                     if (q.x > right)
                     {
                     }
                     else
                     {
-                        retval.clipped |= _hidden::ClipPRight(p, q, right);
+                        retval.clipped |= __detail::ClipPRight(p, q, right);
                         if (p.y > top)
                         {
-                            retval.clipped |= _hidden::ClipPTop(p, q, top);
+                            retval.clipped |= __detail::ClipPTop(p, q, top);
                         }
                         retval.visible = true;
                     }
                     break;
                     
                 case 0xA5:
-                    retval.clipped = _hidden::ClipQLeft(p, q, left);
+                    retval.clipped = __detail::ClipQLeft(p, q, left);
                     if (q.y > top)
                     {
                     }
                     else
                     {
-                        retval.clipped |= _hidden::ClipPRight(p, q, right);
+                        retval.clipped |= __detail::ClipPRight(p, q, right);
                         if (p.y < bottom)
                         {
                         }
@@ -844,11 +844,11 @@ namespace np
                         {
                             if (q.y < bottom)
                             {
-                                retval.clipped |= _hidden::ClipQBottom(p, q, bottom);
+                                retval.clipped |= __detail::ClipQBottom(p, q, bottom);
                             }
                             if (p.y > top)
                             {
-                                retval.clipped |= _hidden::ClipPTop(p, q, top);
+                                retval.clipped |= __detail::ClipPTop(p, q, top);
                             }
                             retval.visible = true;
                         }

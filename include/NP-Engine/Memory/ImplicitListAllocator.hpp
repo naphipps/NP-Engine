@@ -20,10 +20,10 @@ namespace np
         class ImplicitListAllocator : public SizedAllocator
         {
         private:
-            using Margin = hidden::Margin;
-            using MarginPtr = hidden::MarginPtr;
+            using Margin = __detail::Margin;
+            using MarginPtr = __detail::MarginPtr;
             
-            constexpr static siz OVERHEAD_ALIGNED_SIZE = (hidden::MARGIN_ALIGNED_SIZE << 1);
+            constexpr static siz OVERHEAD_ALIGNED_SIZE = (__detail::MARGIN_ALIGNED_SIZE << 1);
             
             Mutex _mutex;
             
@@ -36,8 +36,8 @@ namespace np
                 
                 if (block.size >= OVERHEAD_ALIGNED_SIZE)
                 {
-                    Block header_block{block.Begin(), hidden::MARGIN_ALIGNED_SIZE};
-                    Block footer_block{(ui8*)block.End() - hidden::MARGIN_ALIGNED_SIZE, hidden::MARGIN_ALIGNED_SIZE};
+                    Block header_block{block.Begin(), __detail::MARGIN_ALIGNED_SIZE};
+                    Block footer_block{(ui8*)block.End() - __detail::MARGIN_ALIGNED_SIZE, __detail::MARGIN_ALIGNED_SIZE};
                     Construct<Margin>(header_block);
                     Construct<Margin>(footer_block);
                     MarginPtr header = (MarginPtr)header_block.ptr;
@@ -111,7 +111,7 @@ namespace np
             {
                 Lock lock(_mutex);
                 Block block;
-                siz required_alloc_size = CalcAlignedSize(size) + (hidden::MARGIN_ALIGNED_SIZE << 1);
+                siz required_alloc_size = CalcAlignedSize(size) + (__detail::MARGIN_ALIGNED_SIZE << 1);
                 ui8* alloc = FindAllocation(required_alloc_size, true_best_false_first);
                 
                 if (alloc != nullptr)
@@ -138,11 +138,11 @@ namespace np
                     }
                     
                     header->SetAllocated();
-                    MarginPtr footer = (MarginPtr)((ui8*)alloc_block.End() - hidden::MARGIN_ALIGNED_SIZE);
+                    MarginPtr footer = (MarginPtr)((ui8*)alloc_block.End() - __detail::MARGIN_ALIGNED_SIZE);
                     footer->Value = header->Value;
                     
-                    block.ptr = (ui8*)alloc_block.Begin() + hidden::MARGIN_ALIGNED_SIZE;
-                    block.size = alloc_block.size - (hidden::MARGIN_ALIGNED_SIZE << 1);
+                    block.ptr = (ui8*)alloc_block.Begin() + __detail::MARGIN_ALIGNED_SIZE;
+                    block.size = alloc_block.size - (__detail::MARGIN_ALIGNED_SIZE << 1);
                 }
                 
                 return block;
@@ -228,13 +228,13 @@ namespace np
                 
                 if (Contains(ptr))
                 {
-                    MarginPtr header = (MarginPtr)((ui8*)ptr - hidden::MARGIN_ALIGNED_SIZE);
-                    MarginPtr footer = (MarginPtr)((ui8*)header + header->GetSize() - hidden::MARGIN_ALIGNED_SIZE);
+                    MarginPtr header = (MarginPtr)((ui8*)ptr - __detail::MARGIN_ALIGNED_SIZE);
+                    MarginPtr footer = (MarginPtr)((ui8*)header + header->GetSize() - __detail::MARGIN_ALIGNED_SIZE);
                     
                     //claim previous blocks
-                    for (ui8* prev_footer = (ui8*)header - hidden::MARGIN_ALIGNED_SIZE;
+                    for (ui8* prev_footer = (ui8*)header - __detail::MARGIN_ALIGNED_SIZE;
                          Contains(prev_footer);
-                         prev_footer = (ui8*)header - hidden::MARGIN_ALIGNED_SIZE)
+                         prev_footer = (ui8*)header - __detail::MARGIN_ALIGNED_SIZE)
                     {
                         if (((MarginPtr)prev_footer)->IsAllocated())
                         {
@@ -242,14 +242,14 @@ namespace np
                         }
                         else
                         {
-                            header = (MarginPtr)(prev_footer + hidden::MARGIN_ALIGNED_SIZE - ((MarginPtr)prev_footer)->GetSize());
+                            header = (MarginPtr)(prev_footer + __detail::MARGIN_ALIGNED_SIZE - ((MarginPtr)prev_footer)->GetSize());
                         }
                     }
 
                     //claim next blocks
-                    for (ui8* next_header = (ui8*)footer + hidden::MARGIN_ALIGNED_SIZE;
+                    for (ui8* next_header = (ui8*)footer + __detail::MARGIN_ALIGNED_SIZE;
                          Contains(next_header);
-                         next_header = (ui8*)footer + hidden::MARGIN_ALIGNED_SIZE)
+                         next_header = (ui8*)footer + __detail::MARGIN_ALIGNED_SIZE)
                     {
                         if (((MarginPtr)next_header)->IsAllocated())
                         {
@@ -257,11 +257,11 @@ namespace np
                         }
                         else
                         {
-                            footer = (MarginPtr)(next_header - hidden::MARGIN_ALIGNED_SIZE + ((MarginPtr)next_header)->GetSize());
+                            footer = (MarginPtr)(next_header - __detail::MARGIN_ALIGNED_SIZE + ((MarginPtr)next_header)->GetSize());
                         }
                     }
                     
-                    Block dealloc_block{header, (ui8*)footer - (ui8*)header + hidden::MARGIN_ALIGNED_SIZE};
+                    Block dealloc_block{header, (ui8*)footer - (ui8*)header + __detail::MARGIN_ALIGNED_SIZE};
                     bl dealloc_success = InitFreeBlock(dealloc_block);
                     NP_ASSERT(dealloc_success, "we should have a successful deallocation here");
                     deallocated = true;

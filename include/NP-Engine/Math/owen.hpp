@@ -17,7 +17,7 @@ namespace np
 {
     namespace math
     {
-        namespace _hidden //TODO: refactor all hidden namespaces to the same... should we use "_hidden" or "hidden"?
+        namespace __detail
         {
             /*
              John Burkardt owen T
@@ -372,19 +372,19 @@ namespace np
             
             if (absa <= 1.0)
             {
-                value = _hidden::tfun(absh, absa, ah);
+                value = __detail::tfun(absh, absa, ah);
             }
             else if (absh <= cut)
             {
-                value = 0.25 - _hidden::znorm1(absh) * _hidden::znorm1(ah)
-                -_hidden::tfun(ah, 1.0 / absa, absh);
+                value = 0.25 - __detail::znorm1(absh) * __detail::znorm1(ah)
+                -__detail::tfun(ah, 1.0 / absa, absh);
             }
             else
             {
-                normh = _hidden::znorm2(absh);
-                normah = _hidden::znorm2(ah);
+                normh = __detail::znorm2(absh);
+                normah = __detail::znorm2(ah);
                 value = 0.5 * (normh + normah) - normh * normah
-                -_hidden::tfun(ah, 1.0 / absa, absh);
+                -__detail::tfun(ah, 1.0 / absa, absh);
             }
             
             if (a < 0.0)

@@ -14,7 +14,7 @@ namespace np
 {
     namespace memory
     {
-        namespace hidden
+        namespace __detail
         {
             /**
              represents the margins we use as our header and footers for allocations

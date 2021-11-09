@@ -20,7 +20,7 @@ namespace np
 {
     namespace memory
     {
-        namespace hidden
+        namespace __detail
         {
             /**
              the node structure for our RedBlackTreeAllocator
@@ -127,7 +127,7 @@ namespace np
                  */
                 siz GetSize() const
                 {
-                    return ((MarginPtr)((ui8*)this - hidden::MARGIN_ALIGNED_SIZE))->GetSize();
+                    return ((MarginPtr)((ui8*)this - __detail::MARGIN_ALIGNED_SIZE))->GetSize();
                 }
             };
             
@@ -578,19 +578,19 @@ namespace np
         }
         
         /**
-         uses our hidden RedBlackTree data structures r this allocator
+         uses our __detail RedBlackTree data structures r this allocator
          */
         class RedBlackTreeAllocator : public SizedAllocator
         {
         private:
-            using Tree = hidden::RedBlackTreeAllocatorTree;
+            using Tree = __detail::RedBlackTreeAllocatorTree;
             using Node = Tree::Node;
             using NodePtr = Tree::NodePtr;
-            using Margin = hidden::Margin;
-            using MarginPtr = hidden::MarginPtr;
+            using Margin = __detail::Margin;
+            using MarginPtr = __detail::MarginPtr;
             
             constexpr static siz NODE_ALIGNED_SIZE = CalcAlignedSize(sizeof(Node));
-            constexpr static siz OVERHEAD_ALIGNED_SIZE = (hidden::MARGIN_ALIGNED_SIZE << 1) + NODE_ALIGNED_SIZE;
+            constexpr static siz OVERHEAD_ALIGNED_SIZE = (__detail::MARGIN_ALIGNED_SIZE << 1) + NODE_ALIGNED_SIZE;
             
             Mutex _mutex;
             Tree _tree;
@@ -604,8 +604,8 @@ namespace np
                 
                 if (block.size >= OVERHEAD_ALIGNED_SIZE)
                 {
-                    Block header_block{block.Begin(), hidden::MARGIN_ALIGNED_SIZE};
-                    Block footer_block{(ui8*)block.End() - hidden::MARGIN_ALIGNED_SIZE, hidden::MARGIN_ALIGNED_SIZE};
+                    Block header_block{block.Begin(), __detail::MARGIN_ALIGNED_SIZE};
+                    Block footer_block{(ui8*)block.End() - __detail::MARGIN_ALIGNED_SIZE, __detail::MARGIN_ALIGNED_SIZE};
                     Construct<Margin>(header_block);
                     Construct<Margin>(footer_block);
                     MarginPtr header = (MarginPtr)header_block.Begin();
@@ -635,7 +635,7 @@ namespace np
                 bl init_success = InitFreeBlock(block);
                 NP_ASSERT(init_success, "our init here should always succeed");
                 
-                NodePtr node = (NodePtr)((ui8*)block.Begin() + hidden::MARGIN_ALIGNED_SIZE);
+                NodePtr node = (NodePtr)((ui8*)block.Begin() + __detail::MARGIN_ALIGNED_SIZE);
                 _tree.Insert(node);
             }
             
@@ -651,7 +651,7 @@ namespace np
                     NodePtr alloc_node =_tree.SearchBest(required_aligned_size);
                     if (alloc_node != nullptr)
                     {
-                        allocation = (ui8*)alloc_node - hidden::MARGIN_ALIGNED_SIZE;
+                        allocation = (ui8*)alloc_node - __detail::MARGIN_ALIGNED_SIZE;
                     }
                 }
                 else
@@ -659,7 +659,7 @@ namespace np
                     NodePtr alloc_node =_tree.SearchFirst(required_aligned_size);
                     if (alloc_node != nullptr)
                     {
-                        allocation = (ui8*)alloc_node - hidden::MARGIN_ALIGNED_SIZE;
+                        allocation = (ui8*)alloc_node - __detail::MARGIN_ALIGNED_SIZE;
                     }
                 }
                 
@@ -674,7 +674,7 @@ namespace np
             {
                 Lock lock(_mutex);
                 Block block;
-                siz required_alloc_size = CalcAlignedSize(size) + (hidden::MARGIN_ALIGNED_SIZE << 1);
+                siz required_alloc_size = CalcAlignedSize(size) + (__detail::MARGIN_ALIGNED_SIZE << 1);
                 if (required_alloc_size < OVERHEAD_ALIGNED_SIZE)
                 {
                     required_alloc_size = OVERHEAD_ALIGNED_SIZE;
@@ -686,7 +686,7 @@ namespace np
                     MarginPtr header = (MarginPtr)alloc;
                     Block alloc_block{header, header->GetSize()};
                     
-                    NodePtr node = (NodePtr)((ui8*)alloc + hidden::MARGIN_ALIGNED_SIZE);
+                    NodePtr node = (NodePtr)((ui8*)alloc + __detail::MARGIN_ALIGNED_SIZE);
                     _tree.Remove(node);
                     
                     //can we split?
@@ -705,11 +705,11 @@ namespace np
                     }
                     
                     header->SetAllocated();
-                    MarginPtr footer = (MarginPtr)((ui8*)alloc_block.End() - hidden::MARGIN_ALIGNED_SIZE);
+                    MarginPtr footer = (MarginPtr)((ui8*)alloc_block.End() - __detail::MARGIN_ALIGNED_SIZE);
                     footer->Value = header->Value;
                     
-                    block.ptr = (ui8*)alloc_block.Begin() + hidden::MARGIN_ALIGNED_SIZE;
-                    block.size = alloc_block.size - (hidden::MARGIN_ALIGNED_SIZE << 1);
+                    block.ptr = (ui8*)alloc_block.Begin() + __detail::MARGIN_ALIGNED_SIZE;
+                    block.size = alloc_block.size - (__detail::MARGIN_ALIGNED_SIZE << 1);
                 }
                 
                 return block;
@@ -723,12 +723,12 @@ namespace np
                 InitFreeBlock(_block);
                 
                 MarginPtr header = (MarginPtr)_block.Begin();
-                MarginPtr footer = (MarginPtr)((ui8*)_block.End() - hidden::MARGIN_ALIGNED_SIZE);
+                MarginPtr footer = (MarginPtr)((ui8*)_block.End() - __detail::MARGIN_ALIGNED_SIZE);
                 header->SetSize(_block.size);
                 header->SetDeallocated();
                 footer->Value = header->Value;
                 
-                NodePtr root = (NodePtr)((ui8*)_block.Begin() + hidden::MARGIN_ALIGNED_SIZE);
+                NodePtr root = (NodePtr)((ui8*)_block.Begin() + __detail::MARGIN_ALIGNED_SIZE);
                 _tree.Clear();
                 _tree.Insert(root);
             }
@@ -805,14 +805,14 @@ namespace np
                 
                 if (Contains(ptr))
                 {
-                    MarginPtr header = (MarginPtr)((ui8*)ptr - hidden::MARGIN_ALIGNED_SIZE);
+                    MarginPtr header = (MarginPtr)((ui8*)ptr - __detail::MARGIN_ALIGNED_SIZE);
                     header->SetDeallocated();
                     
                     //coalesce
                     {
-                        for (void* prev_footer = (ui8*)header - hidden::MARGIN_ALIGNED_SIZE;
+                        for (void* prev_footer = (ui8*)header - __detail::MARGIN_ALIGNED_SIZE;
                              Contains(prev_footer);
-                             prev_footer = (ui8*)header - hidden::MARGIN_ALIGNED_SIZE)
+                             prev_footer = (ui8*)header - __detail::MARGIN_ALIGNED_SIZE)
                         {
                             if (((MarginPtr)prev_footer)->IsAllocated())
                             {
@@ -820,13 +820,13 @@ namespace np
                             }
                             else
                             {
-                                MarginPtr claim_header = (MarginPtr)((ui8*)prev_footer + hidden::MARGIN_ALIGNED_SIZE - ((MarginPtr)prev_footer)->GetSize());
+                                MarginPtr claim_header = (MarginPtr)((ui8*)prev_footer + __detail::MARGIN_ALIGNED_SIZE - ((MarginPtr)prev_footer)->GetSize());
                                 
-                                NodePtr claim_node = (NodePtr)((ui8*)claim_header + hidden::MARGIN_ALIGNED_SIZE);
+                                NodePtr claim_node = (NodePtr)((ui8*)claim_header + __detail::MARGIN_ALIGNED_SIZE);
                                 _tree.Remove(claim_node);
                                 
                                 claim_header->SetSize(claim_header->GetSize() + header->GetSize());
-                                MarginPtr claim_footer = (MarginPtr)((ui8*)claim_header + claim_header->GetSize() - hidden::MARGIN_ALIGNED_SIZE);
+                                MarginPtr claim_footer = (MarginPtr)((ui8*)claim_header + claim_header->GetSize() - __detail::MARGIN_ALIGNED_SIZE);
                                 claim_footer->Value = claim_header->Value;
                                 header = claim_header;
                             }
@@ -844,11 +844,11 @@ namespace np
                             {
                                 MarginPtr claim_header = (MarginPtr)next_header;
                                 
-                                NodePtr claim_node = (NodePtr)((ui8*)claim_header + hidden::MARGIN_ALIGNED_SIZE);
+                                NodePtr claim_node = (NodePtr)((ui8*)claim_header + __detail::MARGIN_ALIGNED_SIZE);
                                 _tree.Remove(claim_node);
                                 
                                 header->SetSize(header->GetSize() + claim_header->GetSize());
-                                MarginPtr claim_footer = (MarginPtr)((ui8*)header + header->GetSize() - hidden::MARGIN_ALIGNED_SIZE);
+                                MarginPtr claim_footer = (MarginPtr)((ui8*)header + header->GetSize() - __detail::MARGIN_ALIGNED_SIZE);
                                 claim_footer->Value = header->Value;
                             }
                         }

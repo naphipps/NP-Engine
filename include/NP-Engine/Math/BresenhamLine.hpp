@@ -17,7 +17,7 @@ namespace np
 {
     namespace math
     {
-        namespace _hidden
+        namespace __detail
         {
             /**
              gets the series of points on low sloped line given begin point and given end point
@@ -309,22 +309,22 @@ namespace np
             {
                 if (begin.x > end.x)
                 {
-                    points = _hidden::GetLowSlopedLine(end, begin);
+                    points = __detail::GetLowSlopedLine(end, begin);
                 }
                 else
                 {
-                    points = _hidden::GetLowSlopedLine(begin, end);
+                    points = __detail::GetLowSlopedLine(begin, end);
                 }
             }
             else
             {
                 if (begin.y > end.y)
                 {
-                    points = _hidden::GetHighSlopedLine(end, begin);
+                    points = __detail::GetHighSlopedLine(end, begin);
                 }
                 else
                 {
-                    points = _hidden::GetHighSlopedLine(begin, end);
+                    points = __detail::GetHighSlopedLine(begin, end);
                 }
             }
             
@@ -343,22 +343,22 @@ namespace np
             {
                 if (begin.x > end.x)
                 {
-                    result = _hidden::GetLowSlopedLine(line, line_size, line_max_size, end, begin);
+                    result = __detail::GetLowSlopedLine(line, line_size, line_max_size, end, begin);
                 }
                 else
                 {
-                    result = _hidden::GetLowSlopedLine(line, line_size, line_max_size, begin, end);
+                    result = __detail::GetLowSlopedLine(line, line_size, line_max_size, begin, end);
                 }
             }
             else
             {
                 if (begin.y > end.y)
                 {
-                    result = _hidden::GetHighSlopedLine(line, line_size, line_max_size, end, begin);
+                    result = __detail::GetHighSlopedLine(line, line_size, line_max_size, end, begin);
                 }
                 else
                 {
-                    result = _hidden::GetHighSlopedLine(line, line_size, line_max_size, begin, end);
+                    result = __detail::GetHighSlopedLine(line, line_size, line_max_size, begin, end);
                 }
             }
             
@@ -378,22 +378,22 @@ namespace np
             {
                 if (begin.x > end.x)
                 {
-                    result = _hidden::GetLowSlopedLine(line, line_size, end, begin);
+                    result = __detail::GetLowSlopedLine(line, line_size, end, begin);
                 }
                 else
                 {
-                    result = _hidden::GetLowSlopedLine(line, line_size, begin, end);
+                    result = __detail::GetLowSlopedLine(line, line_size, begin, end);
                 }
             }
             else
             {
                 if (begin.y > end.y)
                 {
-                    result = _hidden::GetHighSlopedLine(line, line_size, end, begin);
+                    result = __detail::GetHighSlopedLine(line, line_size, end, begin);
                 }
                 else
                 {
-                    result = _hidden::GetHighSlopedLine(line, line_size, begin, end);
+                    result = __detail::GetHighSlopedLine(line, line_size, begin, end);
                 }
             }
             
