@@ -29,5 +29,6 @@
 #include "FallbackAllocator.hpp"
 #include "SegregatedAllocator.hpp"
 #include "MemoryFunctions.hpp"
+#include "TraitAllocator.hpp"
 
 #endif /* NP_ENGINE_MEMORY_HPP */

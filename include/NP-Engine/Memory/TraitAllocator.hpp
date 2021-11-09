@@ -1,57 +1,95 @@
+//##===----------------------------------------------------------------------===##//
 //
-//  TraitAllocator.hpp
-//  NP-Engine
+//  Author: Nathan Phipps 7/20/21
 //
-//  Created by Nathan Phipps on 7/20/21.
-//
+//##===----------------------------------------------------------------------===##//
 
 #ifndef NP_ENGINE_TRAIT_ALLOCATOR_HPP
 #define NP_ENGINE_TRAIT_ALLOCATOR_HPP
 
 #include "NP-Engine/Primitive/Primitive.hpp"
 
-//TODO: finish this
+#include "Allocator.hpp"
+#include "CAllocator.hpp"
+#include "MemoryFunctions.hpp"
+
+//TODO: add summary comments
 
 namespace np
 {
     namespace memory
     {
-        class TraitAllocator; //TODO: inherit anything?
-        
-        namespace _hidden //TODO: are we doing this or __detail? Or something different?
-        {
-            TraitAllocator* _trait_allocator = nullptr;
-        }
-        
-        void* TraitAllocate(siz size) //TODO: we could make this a static for TraitAllocator? Maybe? I don't think that's needed
-        {
-            NP_ASSERT(_hidden::_trait_allocator != nullptr, "Registered TraitAllocator is nullptr");
-            return _trait_allocator.Allocate(size).Begin();
-        }
-        
-        void TraitDeallocate(void* ptr)
-        {
-            NP_ASSERT(_hidden::_trait_allocator != nullptr, "Registered TraitAllocator is nullptr");
-            _trait_allocator.Deallocate(ptr);
-        }
-        
-        class TraitAllocator
+        class TraitAllocator : public Allocator
         {
         private:
+
+            static Allocator* _allocator;
             
         public:
-            
-            void register_this()
+
+            /**
+             check if we contain block
+             */
+            bl Contains(const Block& block) const override
             {
-                _hidden::_trait_allocator = this;
+                return Contains(block.Begin());
+            }
+
+            /**
+             check if we contain ptr
+             */
+            bl Contains(const void* ptr) const override
+            {
+                NP_ASSERT(_allocator != nullptr, "Registered TraitAllocator is nullptr");
+                return _allocator->Contains(ptr);
+            }
+
+            /**
+             allocates a Block of given size
+             */
+            Block Allocate(siz size) override
+            {
+                NP_ASSERT(_allocator != nullptr, "Registered TraitAllocator is nullptr");
+                return _allocator->Allocate(size);
+            }
+
+            /**
+             deallocates a given Block
+             */
+            bl Deallocate(Block& block) override
+            {
+                return Deallocate(block.ptr);
+            }
+
+            /**
+             deallocates a block given the ptr
+             */
+            bl Deallocate(void* ptr) override
+            {
+                NP_ASSERT(_allocator != nullptr, "Registered TraitAllocator is nullptr");
+                return _allocator->Deallocate(ptr);
+            }
+
+
+            static inline void* malloc(siz size)
+            {
+                NP_ASSERT(_allocator != nullptr, "Registered TraitAllocator is nullptr");
+                return _allocator->Allocate(size).Begin();
+            }
+
+
+            static inline void free(void* ptr)
+            {
+                NP_ASSERT(_allocator != nullptr, "Registered TraitAllocator is nullptr");
+                _allocator->Deallocate(ptr);
             }
             
-            //TODO: in the actual implementation a malloc/free functions in a traits struct, we could right then and there set them
-            
+
+            static inline void Register(Allocator& allocator)
+            {
+                _allocator = AddressOf(allocator);
+            }
         };
-        
-        static TraitAllocator DefaultTraitAllocator;
-        
     }
 }
 

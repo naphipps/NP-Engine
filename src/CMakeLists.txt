@@ -285,6 +285,7 @@ set(NP_ENGINE_MATH_CPP
 
 set(NP_ENGINE_MEMORY_CPP
 	Memory/CAllocator.cpp
+	Memory/TraitAllocator.cpp
 )
 
 set(NP_ENGINE_NP_ENGINE_MAIN_CPP
