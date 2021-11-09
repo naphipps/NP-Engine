@@ -33,7 +33,7 @@ namespace np
             friend class JobSystem;
             
         public:
-            using JobRecordQueue = concurrency::vendor::moodycamel::ConcurrentQueue<JobRecord>;
+            using JobRecordQueue = concurrency::MpmcQueue<JobRecord>;
             
         private:
             static container::array<JobWorker*, concurrency::ThreadPool::MAX_THREAD_COUNT> _other_workers; //TODO: I don't really like this. Make it so this array can be local to the system instead of global

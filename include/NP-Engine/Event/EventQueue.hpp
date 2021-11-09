@@ -21,7 +21,7 @@ namespace np
         class EventQueue
         {
         public:
-            using BufferedEventQueue = concurrency::vendor::moodycamel::ConcurrentQueue<event::Event*>;
+            using BufferedEventQueue = concurrency::MpmcQueue<Event*>;
             
         private:
             atm_bl _buffer_flag;
