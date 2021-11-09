@@ -4,11 +4,11 @@
 //
 //##===----------------------------------------------------------------------===##//
 
-#include "NP-Engine/Renderer/RHI/Vulkan/Renderer.hpp"
+#include "NP-Engine/Graphics/RHI/Vulkan/Renderer.hpp"
 
 //TODO: add summary comments
 
-namespace np::renderer::rhi
+namespace np::graphics::rhi
 {
 	bl VulkanRenderer::Init()
 	{

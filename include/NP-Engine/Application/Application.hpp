@@ -10,7 +10,6 @@
 #define NP_ENGINE_APPLICATION_HPP
 
 #include "NP-Engine/Foundation/Foundation.hpp"
-#include "NP-Engine/Renderer/Renderer.hpp"
 
 #include "ApplicationImpl.hpp"
 #include "ApplicationEvent.hpp"

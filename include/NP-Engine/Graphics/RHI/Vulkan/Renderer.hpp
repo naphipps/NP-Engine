@@ -4,14 +4,14 @@
 //
 //##===----------------------------------------------------------------------===##//
 
-#ifndef NP_ENGINE_RENDERER_VULKAN_RENDERER_HPP
-#define NP_ENGINE_RENDERER_VULKAN_RENDERER_HPP
+#ifndef NP_ENGINE_GRAPHICS_VULKAN_RENDERER_HPP
+#define NP_ENGINE_GRAPHICS_VULKAN_RENDERER_HPP
 
-#include "NP-Engine/Renderer/RPI/Renderer.hpp"
+#include "NP-Engine/Graphics/RPI/Renderer.hpp"
 
 //TODO: add summary comments
 
-namespace np::renderer::rhi
+namespace np::graphics::rhi
 {
 	class VulkanRenderer : public rpi::Renderer
 	{
@@ -21,4 +21,4 @@ namespace np::renderer::rhi
 	};
 }
 
-#endif /* NP_ENGINE_RENDERER_VULKAN_RENDERER_HPP */
+#endif /* NP_ENGINE_GRAPHICS_VULKAN_RENDERER_HPP */

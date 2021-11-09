@@ -4,8 +4,8 @@
 //
 //##===----------------------------------------------------------------------===##//
 
-#ifndef NP_ENGINE_RENDERER_IMPL_HPP
-#define NP_ENGINE_RENDERER_IMPL_HPP
+#ifndef NP_ENGINE_GRAPHICS_IMPL_HPP
+#define NP_ENGINE_GRAPHICS_IMPL_HPP
 
 #include "NP-Engine/Primitive/Primitive.hpp"
 #include "NP-Engine/Platform/Platform.hpp"
@@ -16,7 +16,7 @@
 
 #include "RPI/Renderer.hpp"
 
-namespace np::renderer
+namespace np::graphics
 {
     //TODO: add summary comments
 
@@ -36,4 +36,4 @@ namespace np::renderer
     };
 }
 
-#endif /* NP_ENGINE_RENDERER_IMPL_HPP */
+#endif /* NP_ENGINE_GRAPHICS_IMPL_HPP */

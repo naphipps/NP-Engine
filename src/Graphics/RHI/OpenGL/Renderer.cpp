@@ -4,11 +4,11 @@
 //
 //##===----------------------------------------------------------------------===##//
 
-#include "NP-Engine/Renderer/RHI/OpenGL/Renderer.hpp"
+#include "NP-Engine/Graphics/RHI/OpenGL/Renderer.hpp"
 
 //TODO: add summary comments
 
-namespace np::renderer::rhi
+namespace np::graphics::rhi
 {
 	bl OpenGLRenderer::Init()
 	{

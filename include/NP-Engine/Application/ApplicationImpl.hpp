@@ -12,7 +12,7 @@
 #include "NP-Engine/Primitive/Primitive.hpp"
 #include "NP-Engine/Time/Time.hpp"
 #include "NP-Engine/Insight/Insight.hpp"
-#include "NP-Engine/Renderer/Renderer.hpp"
+#include "NP-Engine/Graphics/Graphics.hpp"
 #include "NP-Engine/Memory/Memory.hpp"
 
 #include "Layer.hpp"
@@ -59,7 +59,7 @@ namespace np
             _running(false)
             {
                 _window = CreateWindow(_properties.Allocator, window_properties);
-                renderer::Renderer::Init(_properties.Allocator);
+                graphics::Renderer::Init(_properties.Allocator);
             }
             
         public:
@@ -72,7 +72,7 @@ namespace np
                     _properties.Allocator.Deallocate(_window);
                 }
                 
-                renderer::Renderer::Shutdown();
+                graphics::Renderer::Shutdown();
             }
             
         public:
@@ -146,7 +146,7 @@ namespace np
                 
                 if (!_minimized)
                 {
-                    renderer::Renderer::ResizeWindow(e.GetWidth(), e.GetHeight());
+                    graphics::Renderer::ResizeWindow(e.GetWidth(), e.GetHeight());
                 }
                 
                 return !_minimized;

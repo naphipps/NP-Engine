@@ -4,7 +4,7 @@
 //
 //##===----------------------------------------------------------------------===##//
 
-#include "NP-Engine/Renderer/RendererImpl.hpp"
+#include "NP-Engine/Graphics/GraphicsImpl.hpp"
 
 #if NP_ENGINE_PLATFORM_IS_APPLE
 //TODO: implement
@@ -13,14 +13,14 @@
 //TODO: implement
 
 #elif NP_ENGINE_PLATFORM_IS_WINDOWS
-#include "NP-Engine/Renderer/RHI/OpenGL/Renderer.hpp"
-#include "NP-Engine/Renderer/RHI/Vulkan/Renderer.hpp"
+#include "NP-Engine/Graphics/RHI/OpenGL/Renderer.hpp"
+#include "NP-Engine/Graphics/RHI/Vulkan/Renderer.hpp"
 
 #endif
 
 //TODO: add summary comments
 
-namespace np::renderer
+namespace np::graphics
 {
 	container::vector<rpi::Renderer*> Renderer::_renderers;
 

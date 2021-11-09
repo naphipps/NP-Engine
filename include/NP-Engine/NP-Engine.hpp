@@ -27,7 +27,7 @@
 #include "Physics/Physics.hpp"
 #include "Time/Time.hpp"
 #include "Application/Application.hpp"
-#include "Renderer/Renderer.hpp"
+#include "Graphics/Graphics.hpp"
 #include "Event/Event.hpp"
 #include "Platform/Platform.hpp"
 #include "Input/Input.hpp"

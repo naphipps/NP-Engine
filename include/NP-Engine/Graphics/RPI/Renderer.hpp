@@ -4,12 +4,12 @@
 //
 //##===----------------------------------------------------------------------===##//
 
-#ifndef NP_ENGINE_RENDERER_RPI_RENDERER_HPP
-#define NP_ENGINE_RENDERER_RPI_RENDERER_HPP
+#ifndef NP_ENGINE_GRAPHICS_RPI_RENDERER_HPP
+#define NP_ENGINE_GRAPHICS_RPI_RENDERER_HPP
 
 #include "NP-Engine/Primitive/Primitive.hpp"
 
-namespace np::renderer::rpi
+namespace np::graphics::rpi
 {
 	class Renderer
 	{
@@ -30,4 +30,4 @@ namespace np::renderer::rpi
 	};
 }
 
-#endif /* NP_ENGINE_RENDERER_RPI_RENDERER_HPP */
+#endif /* NP_ENGINE_GRAPHICS_RPI_RENDERER_HPP */
