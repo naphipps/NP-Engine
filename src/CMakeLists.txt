@@ -377,6 +377,8 @@ target_link_libraries(
 	randutils
 	nlohmann_json::nlohmann_json
 	EnTT::EnTT
+	glm
+	glfw
 )
 
 target_include_directories(

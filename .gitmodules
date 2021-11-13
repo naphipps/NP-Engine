@@ -19,3 +19,9 @@
 [submodule "vendor/naphipps_randutils"]
 	path = vendor/naphipps_randutils
 	url = git@github.com:naphipps/randutils.git
+[submodule "vendor/g-truc_glm"]
+	path = vendor/g-truc_glm
+	url = git@github.com:g-truc/glm.git
+[submodule "vendor/glfw_glfw"]
+	path = vendor/glfw_glfw
+	url = git@github.com:glfw/glfw.git
