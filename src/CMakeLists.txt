@@ -57,6 +57,8 @@ set(NP_ENGINE_EVENT_HPP
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Event/Event.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Event/EventImpl.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Event/EventQueue.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Event/EventHandler.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Event/EventManager.hpp
 )
 
 set(NP_ENGINE_FILESYSTEM_HPP

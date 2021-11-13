@@ -1,16 +1,17 @@
+//##===----------------------------------------------------------------------===##//
 //
-//  Event.hpp
-//  Project Space
+//  Author: Nathan Phipps 2/9/21
 //
-//  Created by Nathan Phipps on 2/9/21.
-//  Copyright © 2021 Nathan Phipps. All rights reserved.
-//
+//##===----------------------------------------------------------------------===##//
 
 #ifndef NP_ENGINE_EVENT_HPP
 #define NP_ENGINE_EVENT_HPP
 
 #include "NP-Engine/Foundation/Foundation.hpp"
+
 #include "EventImpl.hpp"
 #include "EventQueue.hpp"
+#include "EventHandler.hpp"
+#include "EventManager.hpp"
 
 #endif /* NP_ENGINE_EVENT_HPP */

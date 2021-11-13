@@ -1,10 +1,8 @@
+//##===----------------------------------------------------------------------===##//
 //
-//  EventImpl.hpp
-//  Project Space
+//  Author: Nathan Phipps 2/9/21
 //
-//  Created by Nathan Phipps on 2/9/21.
-//  Copyright © 2021 Nathan Phipps. All rights reserved.
-//
+//##===----------------------------------------------------------------------===##//
 
 #ifndef NP_ENGINE_EVENT_IMPL_HPP
 #define NP_ENGINE_EVENT_IMPL_HPP
@@ -53,7 +51,7 @@ namespace np
          */
         constexpr static bl EventCategoryContains(EventCategory a, EventCategory b)
         {
-            return (a | b) != EVENT_CATEGORY_NONE;
+            return (a & b) != EVENT_CATEGORY_NONE;
         }
         
         /**
@@ -62,7 +60,7 @@ namespace np
         class Event
         {
         public:
-            using Callback = void(*)(Event&); //TODO: figure out ehat this is for...
+            using Callback = void(*)(Event&); //TODO: figure out what this is for...
             
         protected:
             bl _handled;
@@ -93,7 +91,7 @@ namespace np
             /**
              gets whether this event has been handled or not
              */
-            bl GetHandled() const
+            bl IsHandled() const
             {
                 return _handled;
             }
