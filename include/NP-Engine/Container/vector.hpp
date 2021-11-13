@@ -296,14 +296,14 @@ namespace np
              default constructor
              */
             vector():
-            vector(memory::DefaultAllocator, MIN_CAPACITY)
+            vector(memory::DefaultTraitAllocator, MIN_CAPACITY)
             {}
             
             /**
              constructor with given capacity
              */
             vector(siz capacity):
-            vector(memory::DefaultAllocator, capacity)
+            vector(memory::DefaultTraitAllocator, capacity)
             {}
             
             /**
@@ -319,7 +319,7 @@ namespace np
              constructor with given init_list<T>
              */
             vector(init_list<T> list):
-            vector(memory::DefaultAllocator, list.size())
+            vector(memory::DefaultTraitAllocator, list.size())
             {
                 copy_from((const_iterator)list.begin(), list.end());
             }
