@@ -86,7 +86,7 @@ namespace np
             /**
              calculates the proper capacity value that supports the given target capacity
              */
-            siz calc_capacity(siz target_capacity) const
+            static inline siz calc_capacity(siz target_capacity)
             {
                 siz capacity = MIN_CAPACITY;
                 
