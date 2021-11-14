@@ -404,7 +404,7 @@ elseif (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
       message(FATAL_ERROR "Could not find gtk+-3.0, so install libgtk-3-dev.\nExample: sudo apt install libgtk-3-dev")
    else()
 	   target_link_libraries(${PROJECT_NAME} PUBLIC ${GTK3_LIBRARIES})
-	   target_include_directories(${PROJECT_NAME} PRIVATE ${GTK3_INCLUDE_DIRS})
+	   target_include_directories(${PROJECT_NAME} PUBLIC ${GTK3_INCLUDE_DIRS})
 	endif()
 endif()
 
