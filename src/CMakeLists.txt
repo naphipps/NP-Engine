@@ -408,6 +408,14 @@ elseif (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 	endif()
 endif()
 
+find_package(Vulkan REQUIRED FATAL_ERROR)
+if(NOT Vulkan_FOUND OR NOT DEFINED Vulkan_FOUND)
+	message(FATAL_ERROR "Could not find Vulkan. Install the Vulkan SDK")
+else()
+	target_link_libraries(${PROJECT_NAME} PUBLIC ${Vulkan_LIBRARY})
+	target_include_directories(${PROJECT_NAME} PUBLIC ${Vulkan_INCLUDE_DIR})
+endif()
+
 ##==--------------------------------------------------------==##
 
 source_group("" FILES ${NP_ENGINE_HPP})
