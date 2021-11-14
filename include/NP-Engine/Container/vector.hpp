@@ -238,7 +238,7 @@ namespace np
             /**
              init with given allocator and capacity
              */
-            void init(allocator_reference allocator, siz capacity)
+            void init(allocator_reference allocator, siz capacity, bl default_construct_initial_elements)
             {
                 if (_size > 0)
                 {
@@ -249,24 +249,32 @@ namespace np
                 
                 _allocator = memory::AddressOf(allocator);
                 _capacity = calc_capacity(capacity);
-                init();
+                init(default_construct_initial_elements);
             }
             
             /**
              init
              */
-            void init()
+            void init(bl default_construct_initial_elements)
             {
                 if (_capacity < MIN_CAPACITY)
                 {
                     _capacity = MIN_CAPACITY;
                 }
                 
-                memory::Block allocation = _allocator->Allocate(_capacity * T_SIZE);
+                memory::Block allocation = _allocator->Allocate(calc_capacity(_capacity) * T_SIZE);
                 NP_ASSERT(allocation.IsValid(), "we need successful allocation here in vector.init()");
                 
                 _elements = (pointer)allocation.Begin();
                 _size = 0;
+
+                if (default_construct_initial_elements)
+                {
+                    for (siz i = 0, count = _capacity; i < count; i++)
+                    {
+                        emplace_back();
+                    }
+                }
             }
             
         public:
@@ -278,25 +286,32 @@ namespace np
             /**
              constructor with given allocator and capacity
              */
-            vector(allocator_reference allocator, siz capacity):
+            vector(allocator_reference allocator, siz capacity, bl default_construct_initial_elements):
             _allocator(memory::AddressOf(allocator)),
-            _capacity(calc_capacity(capacity))
+            _capacity(capacity)
             {
-                init();
+                init(default_construct_initial_elements);
             }
+
+            /**
+             constructor with given allocator and capacity
+             */
+            vector(allocator_reference allocator, siz capacity) :
+            vector(allocator, capacity, true)
+            {}
             
             /**
              constructor with given allocator
              */
             vector(allocator_reference allocator):
-            vector(allocator, MIN_CAPACITY)
+            vector(allocator, MIN_CAPACITY, false)
             {}
             
             /**
              default constructor
              */
             vector():
-            vector(memory::DefaultTraitAllocator, MIN_CAPACITY)
+            vector(memory::DefaultTraitAllocator, MIN_CAPACITY, false)
             {}
             
             /**
@@ -310,7 +325,7 @@ namespace np
              constructor with given allocator and init_list<T>
              */
             vector(allocator_reference allocator, init_list<T> list):
-            vector(allocator, list.size())
+            vector(allocator, list.size(), false)
             {
                 copy_from((const_iterator)list.begin(), list.end());
             }
@@ -319,7 +334,7 @@ namespace np
              constructor with given init_list<T>
              */
             vector(init_list<T> list):
-            vector(memory::DefaultTraitAllocator, list.size())
+            vector(memory::DefaultTraitAllocator, list.size(), false)
             {
                 copy_from((const_iterator)list.begin(), list.end());
             }
@@ -328,7 +343,7 @@ namespace np
              copy constructor
              */
             vector(const vector<T>& other):
-            vector(*other._allocator, other._capacity)
+            vector(*other._allocator, other._capacity, false)
             {
                 copy_from(other.begin(), other.end());
             }
@@ -337,7 +352,7 @@ namespace np
              move constructor - acts like copy on allocator and capacity but moves elements
              */
             vector(vector<T>&& other):
-            vector(*other._allocator, other._capacity)
+            vector(*other._allocator, other._capacity, false)
             {
                 move_from(other.begin(), other.end());
             }
@@ -346,7 +361,7 @@ namespace np
              copy constructor with specified allocator
              */
             vector(allocator_reference allocator, const vector<T>& other):
-            vector(allocator, other._capacity)
+            vector(allocator, other._capacity, false)
             {
                 copy_from(other.begin(), other.end());
             }
@@ -355,7 +370,7 @@ namespace np
              move constructor with specified allocator
              */
             vector(allocator_reference allocator, vector<T>&& other):
-            vector(allocator, other._capacity)
+            vector(allocator, other._capacity, false)
             {
                 move_from(other.begin(), other.end());
             }
@@ -374,7 +389,7 @@ namespace np
              */
             vector& operator=(const vector<T>& other)
             {
-                init(*other._allocator, other._capacity);
+                init(*other._allocator, other._capacity, false);
                 copy_from(other.begin(), other.end());
                 return *this;
             }
@@ -384,7 +399,7 @@ namespace np
              */
             vector& operator=(vector<T>&& other)
             {
-                init(*other._allocator, other._capacity);
+                init(*other._allocator, other._capacity, false);
                 move_from(other.begin(), other.end());
                 return *this;
             }
@@ -394,7 +409,7 @@ namespace np
              */
             vector& operator=(init_list<T> list)
             {
-                init(*_allocator, list.size());
+                init(*_allocator, list.size(), false);
                 copy_from((const_iterator)list.begin(), list.end());
                 return *this;
             }
@@ -404,7 +419,7 @@ namespace np
              */
             void assign(siz count, const_reference value)
             {
-                init(*_allocator, count);
+                init(*_allocator, count, false);
                 _size = count;
                 memory::Block block{nullptr, T_SIZE};
                 for (iterator it = begin(); it != end(); it++)
@@ -419,7 +434,7 @@ namespace np
              */
             void assign(init_list<T> list)
             {
-                init(*_allocator, list.size());
+                init(*_allocator, list.size(), false);
                 copy_from((const_iterator)list.begin(), list.end());
             }
             
@@ -429,7 +444,7 @@ namespace np
             void assign(iterator begin, iterator end)
             {
                 NP_ASSERT(end > begin, "end must be greater than begin for iterator");
-                init(*_allocator, end - begin);
+                init(*_allocator, end - begin, false);
                 copy_from(begin, end);
             }
             
@@ -439,7 +454,7 @@ namespace np
             void assign(reverse_iterator rbegin, reverse_iterator rend)
             {
                 NP_ASSERT(rbegin > rend, "begin must be greater than end for reverse_iterator");
-                init(*_allocator, rbegin - rend);
+                init(*_allocator, rbegin - rend, false);
                 copy_from(rbegin, rend);
             }
             
@@ -467,7 +482,7 @@ namespace np
                 bl set = memory::AddressOf(allocator) == memory::AddressOf(*_allocator);
                 if (!set)
                 {
-                    memory::Block block = allocator.Allocate(_capacity * T_SIZE);
+                    memory::Block block = allocator.Allocate(calc_capacity(_capacity) * T_SIZE);
                     if (block.IsValid())
                     {
                         pointer old_elements = _elements;
@@ -798,7 +813,7 @@ namespace np
                 destroy(begin(), end());
                 _allocator->Deallocate(_elements);
                 _capacity = MIN_CAPACITY;
-                init();
+                init(false);
             }
             
             /**
