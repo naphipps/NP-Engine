@@ -501,6 +501,19 @@ namespace np
                 
                 return set;
             }
+
+            //TODO: update comments
+
+            constexpr const_pointer data() const noexcept
+            {
+                return _elements;
+            }
+            
+            constexpr pointer data() noexcept
+            {
+                return _elements;
+            }
+
             
             /**
              returns the element at the given index
