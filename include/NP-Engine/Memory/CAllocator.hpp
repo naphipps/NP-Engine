@@ -28,16 +28,6 @@ namespace np
         public:
             
             /**
-             constructor
-             */
-            CAllocator() = default;
-            
-            /**
-             deconstructor
-             */
-            virtual ~CAllocator() = default;
-            
-            /**
              check if we contain block
              always true
              */
