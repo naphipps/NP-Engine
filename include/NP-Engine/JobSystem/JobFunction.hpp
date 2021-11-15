@@ -20,7 +20,7 @@ namespace np
         /**
          JobFunction function acts as a delegate for member methods and static functions following the void(*)() signature
          */
-        class JobFunction// : public concurrency::PaddedObject
+        class JobFunction// : public concurrency::PaddedObject //TODO: ?? what is this comment? makes sense though...
         {
         private:
             using InstancePtr = void*;
