@@ -30,5 +30,6 @@
 #include "SegregatedAllocator.hpp"
 #include "MemoryFunctions.hpp"
 #include "TraitAllocator.hpp"
+#include "StdAllocator.hpp"
 
 #endif /* NP_ENGINE_MEMORY_HPP */
