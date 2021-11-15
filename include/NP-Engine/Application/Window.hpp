@@ -50,6 +50,11 @@ namespace np
             {
                 _properties.EventManager.RegisterHandler(*this);
             }
+
+            virtual ~Window()
+            {
+                _properties.EventManager.UnregisterHandler(*this);
+            }
             
             /**
              gets the width
