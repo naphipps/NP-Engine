@@ -52,7 +52,7 @@ namespace np
             virtual void* GetNativeWindow() const override
             {
                 //TODO: implement
-                return NULL;
+                return nullptr;
             }
         };
     }

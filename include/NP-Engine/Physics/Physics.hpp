@@ -22,7 +22,7 @@ namespace np {
     private:
         
         b2World *world;
-        b2Draw *drawer = NULL;
+        b2Draw *drawer = nullptr;
         unsigned int frameRate = 60;
         float32 timeStep;
         int32 velocityIterations = 8;

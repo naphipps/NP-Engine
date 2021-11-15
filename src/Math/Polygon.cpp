@@ -11,7 +11,7 @@
 Polygon::Polygon() {
     hole = false;
     numpoints = 0;
-    points = NULL;
+    points = nullptr;
 }
 
 Polygon::Polygon(const np::math::fltPointVector &pointList) : Polygon() {
@@ -50,7 +50,7 @@ void Polygon::Clear() {
     if(points) delete [] points;
     hole = false;
     numpoints = 0;
-    points = NULL;
+    points = nullptr;
 }
 
 void Polygon::Init(long numpoints) {

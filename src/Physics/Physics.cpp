@@ -65,7 +65,7 @@ namespace np {
 
     Body *Physics::CreateBody(BodyDef* physicsBodyDef){
         
-        b2Body* body = NULL;
+        b2Body* body = nullptr;
         std::vector<b2FixtureDef*> fixtureDefs = physicsBodyDef->GetFixtureDefs();
         
         if (fixtureDefs.size() > 0){

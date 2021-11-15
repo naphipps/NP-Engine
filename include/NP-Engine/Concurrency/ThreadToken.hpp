@@ -31,7 +31,7 @@ namespace np
              constructor
              */
             ThreadToken():
-            _thread(NULL)
+            _thread(nullptr)
             {}
             
             /**
@@ -62,19 +62,19 @@ namespace np
             {}
             
             /**
-             checks if our Thread pointer is NULL or not
+             checks if our Thread pointer is nullptr or not
              */
             inline bl IsValid() const
             {
-                return _thread != NULL;
+                return _thread != nullptr;
             }
             
             /**
-             invalidates our Thread pointer bu setting it to NULL
+             invalidates our Thread pointer bu setting it to nullptr
              */
             void Invalidate()
             {
-                _thread = NULL;
+                _thread = nullptr;
             }
             
             /**

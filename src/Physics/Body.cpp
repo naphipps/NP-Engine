@@ -19,7 +19,7 @@ namespace np {
     ///
     BodyDef::BodyDef(){
         
-        bodyUserData = NULL;
+        bodyUserData = nullptr;
         position.Set(0.0f, 0.0f);
         angle = 0.0f;
         linearVelocity.Set(0.0f, 0.0f);
@@ -77,14 +77,14 @@ namespace np {
         if (this->fixtureDefs.size() < i){
             return this->fixtureDefs[i];
         }
-        return NULL;
+        return nullptr;
     }
 
     b2FixtureDef* BodyDef::GetLastFixtureDef(){
         if (this->fixtureDefs.size() > 0){
             return this->fixtureDefs.back();
         }
-        return NULL;
+        return nullptr;
     }
 
     void BodyDef::AddFixtureDef(b2FixtureDef *fixtureDef){

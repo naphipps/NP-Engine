@@ -129,8 +129,8 @@ np::math::fltPointVector PolygonUtility::Simplify(const np::math::fltPointVector
 //---------------------------------------------------------------------------
 
 PolygonUtility::PolygonPartitioner::PartitionVertex::PartitionVertex() {
-    this->previous = NULL;
-    this->next = NULL;
+    this->previous = nullptr;
+    this->next = nullptr;
 }
 
 np::math::fltPoint PolygonUtility::PolygonPartitioner::Normalize(const np::math::fltPoint &p) {
@@ -370,7 +370,7 @@ bool PolygonUtility::PolygonPartitioner::InCone(PartitionVertex *v, np::math::fl
 }
 
 void PolygonUtility::PolygonPartitioner::UpdateVertexReflexity(PartitionVertex *v) {
-    PartitionVertex *v1 = NULL,*v3 = NULL;
+    PartitionVertex *v1 = nullptr,*v3 = nullptr;
     v1 = v->previous;
     v3 = v->next;
     v->isConvex = !IsReflex(v1->p,v->p,v3->p);
@@ -378,7 +378,7 @@ void PolygonUtility::PolygonPartitioner::UpdateVertexReflexity(PartitionVertex *
 
 void PolygonUtility::PolygonPartitioner::UpdateVertex(PartitionVertex *v, PartitionVertex *vertices, long numvertices) {
     long i;
-    PartitionVertex *v1 = NULL,*v3 = NULL;
+    PartitionVertex *v1 = nullptr,*v3 = nullptr;
     np::math::fltPoint vec1,vec3;
     
     v1 = v->previous;
@@ -420,8 +420,8 @@ int PolygonUtility::PolygonPartitioner::Triangulate_EC(Polygon *poly, PolygonVec
     if(!poly->Valid()) return 0;
     
     long numvertices;
-    PartitionVertex *vertices = NULL;
-    PartitionVertex *ear = NULL;
+    PartitionVertex *vertices = nullptr;
+    PartitionVertex *ear = nullptr;
     Polygon triangle;
     long i,j;
     bool earfound;
@@ -508,7 +508,7 @@ int PolygonUtility::PolygonPartitioner::ConvexPartition_HM(Polygon *poly, Polygo
     
     PolygonVector triangles;
     PolygonVector::iterator iter1,iter2;
-    Polygon *poly1 = NULL,*poly2 = NULL;
+    Polygon *poly1 = nullptr,*poly2 = nullptr;
     Polygon newpoly;
     np::math::fltPoint d1,d2,p1,p2,p3;
     long i11,i12,i21,i22,i13,i23,j,k;
@@ -623,7 +623,7 @@ int PolygonUtility::PolygonPartitioner::Triangulate_OPT(Polygon *poly, PolygonVe
     if(!poly->Valid()) return 0;
     
     long i,j,k,gap,n;
-    DPState **dpstates = NULL;
+    DPState **dpstates = nullptr;
     np::math::fltPoint p1,p2,p3,p4;
     long bestvertex;
     float weight,minweight,d1,d2;
@@ -754,7 +754,7 @@ int PolygonUtility::PolygonPartitioner::Triangulate_OPT(Polygon *poly, PolygonVe
 
 void PolygonUtility::PolygonPartitioner::UpdateState(long a, long b, long w, long i, long j, DPState2 **dpstates) {
     Diagonal newdiagonal;
-    DiagonalList *pairs = NULL;
+    DiagonalList *pairs = nullptr;
     long w2;
     
     w2 = dpstates[a][b].weight;
@@ -779,7 +779,7 @@ void PolygonUtility::PolygonPartitioner::UpdateState(long a, long b, long w, lon
 }
 
 void PolygonUtility::PolygonPartitioner::TypeA(long i, long j, long k, PartitionVertex *vertices, DPState2 **dpstates) {
-    DiagonalList *pairs = NULL;
+    DiagonalList *pairs = nullptr;
     DiagonalList::iterator iter,lastiter;
     long top;
     long w;
@@ -810,7 +810,7 @@ void PolygonUtility::PolygonPartitioner::TypeA(long i, long j, long k, Partition
 }
 
 void PolygonUtility::PolygonPartitioner::TypeB(long i, long j, long k, PartitionVertex *vertices, DPState2 **dpstates) {
-    DiagonalList *pairs = NULL;
+    DiagonalList *pairs = nullptr;
     DiagonalList::iterator iter,lastiter;
     long top;
     long w;
@@ -847,12 +847,12 @@ int PolygonUtility::PolygonPartitioner::ConvexPartition_OPT(Polygon *poly, Polyg
     if(!poly->Valid()) return 0;
     
     np::math::fltPoint p1,p2,p3,p4;
-    PartitionVertex *vertices = NULL;
-    DPState2 **dpstates = NULL;
+    PartitionVertex *vertices = nullptr;
+    DPState2 **dpstates = nullptr;
     long i,j,k,n,gap;
     DiagonalList diagonals,diagonals2;
     Diagonal diagonal,newdiagonal;
-    DiagonalList *pairs = NULL,*pairs2 = NULL;
+    DiagonalList *pairs = nullptr,*pairs2 = nullptr;
     DiagonalList::iterator iter,iter2;
     int ret;
     Polygon newpoly;
@@ -1226,11 +1226,11 @@ int PolygonUtility::PolygonPartitioner::Triangulate_MONO(Polygon *poly, PolygonV
 //by Mark de Berg, Otfried Cheong, Marc van Kreveld and Mark Overmars
 int PolygonUtility::PolygonPartitioner::MonotonePartition(PolygonVector *inpolys, PolygonVector *monotonePolys) {
     PolygonVector::iterator iter;
-    MonotoneVertex *vertices = NULL;
+    MonotoneVertex *vertices = nullptr;
     long i,numvertices,vindex,vindex2,newnumvertices,maxnumvertices;
     long polystartindex, polyendindex;
-    Polygon *poly = NULL;
-    MonotoneVertex *v = NULL,*v2 = NULL,*vprev = NULL,*vnext = NULL;
+    Polygon *poly = nullptr;
+    MonotoneVertex *v = nullptr,*v2 = nullptr,*vprev = nullptr,*vnext = nullptr;
     ScanLineEdge newedge;
     bool error = false;
     
@@ -1500,7 +1500,7 @@ int PolygonUtility::PolygonPartitioner::TriangulateMonotone(Polygon *inPoly, Pol
     if(!inPoly->Valid()) return 0;
     
     long i,i2,j,topindex,bottomindex,leftindex,rightindex,vindex;
-    np::math::fltPoint *points = NULL;
+    np::math::fltPoint *points = nullptr;
     long numpoints;
     Polygon triangle;
     

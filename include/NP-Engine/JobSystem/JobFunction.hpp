@@ -61,11 +61,11 @@ namespace np
         public:
             
             /**
-             constructor - NULL instance and function pointers
+             constructor - nullptr instance and function pointers
              */
             JobFunction():
-            _instance_ptr(NULL),
-            _function_ptr(NULL)
+            _instance_ptr(nullptr),
+            _function_ptr(nullptr)
             {}
             
             /**
@@ -96,7 +96,7 @@ namespace np
             template <void (*Function)(JobFunction&)>
             inline void Connect()
             {
-                _instance_ptr = NULL;
+                _instance_ptr = nullptr;
                 _function_ptr = &wrap<Function>;
             }
             
@@ -122,24 +122,24 @@ namespace np
             }
                         
             /**
-             checks if our function pointer is NULL or not
+             checks if our function pointer is nullptr or not
              */
             bl IsValid() const
             {
-                return _function_ptr != NULL;
+                return _function_ptr != nullptr;
             }
             
             /**
-             invalidates our instance and function pointers by setting them to NULL
+             invalidates our instance and function pointers by setting them to nullptr
              */
             inline void Invalidate()
             {
-                _instance_ptr = NULL;
-                _function_ptr = NULL;
+                _instance_ptr = nullptr;
+                _function_ptr = nullptr;
             }
             
             /**
-             checks if our function pointer is NULL or not
+             checks if our function pointer is nullptr or not
              */
             inline explicit operator bl() const
             {

@@ -65,7 +65,7 @@ namespace np
              */
             JobRecordQueue& GetQueueFromPriority(JobPriority priority)
             {
-                JobRecordQueue* deque = NULL;
+                JobRecordQueue* deque = nullptr;
                 
                 switch (priority)
                 {
@@ -131,7 +131,7 @@ namespace np
                 
                 JobRecord stolen_job;
                 
-                if (_other_workers[0] != NULL && _other_workers_size > 0)
+                if (_other_workers[0] != nullptr && _other_workers_size > 0)
                 {
                     if (_refresh_other_worker_index)
                     {
@@ -218,7 +218,7 @@ namespace np
             /**
              creates Job from pool given function and parent
              */
-            Job* CreateJob(JobFunction& function, Job* dependent = NULL)
+            Job* CreateJob(JobFunction& function, Job* dependent = nullptr)
             {
                 //TODO: clean up this api
 //                return _job_pool->CreateJob(function, dependent);
@@ -275,7 +275,7 @@ namespace np
             _lowest_job_deque(JOB_DEQUEUE_SIZE),
             _keep_working(false),
             _work_procedure_incomplete(false),
-            _thread_pool(NULL),
+            _thread_pool(nullptr),
             _steal_counter(0),
             _steal_threshold(0),
             _other_worker_index(0),
@@ -283,7 +283,7 @@ namespace np
             {
                 for (ui32 i=0; i<_other_workers.size(); i++)
                 {
-                    _other_workers[i] = NULL;
+                    _other_workers[i] = nullptr;
                 }
             }
             
@@ -363,7 +363,7 @@ namespace np
                 {
                     _thread_pool->RemoveThread(_thread_token);
                     _thread_token.Invalidate();
-                    _thread_pool = NULL;
+                    _thread_pool = nullptr;
                 }
             }
         };

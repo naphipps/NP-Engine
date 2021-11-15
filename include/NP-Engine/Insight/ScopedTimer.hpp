@@ -35,14 +35,14 @@ namespace np
             /**
              constructor
              */
-            ScopedTimer(Action action = NULL):
+            ScopedTimer(Action action = nullptr):
             ScopedTimer("", action)
             {}
             
             /**
              constructor
              */
-            ScopedTimer(str name, Action action = NULL):
+            ScopedTimer(str name, Action action = nullptr):
             Timer(name),
             _stopped_action(action),
             _stopped(false)

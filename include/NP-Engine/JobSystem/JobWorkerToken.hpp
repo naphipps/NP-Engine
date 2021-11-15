@@ -32,7 +32,7 @@ namespace np
              constructor
              */
             JobWorkerToken():
-            JobWorkerToken(NULL)
+            JobWorkerToken(nullptr)
             {}
             
             /**
@@ -63,19 +63,19 @@ namespace np
             {}
             
             /**
-             checks if our worker pointer is NULL or not
+             checks if our worker pointer is nullptr or not
              */
             bl IsValid() const
             {
-                return _worker != NULL;
+                return _worker != nullptr;
             }
             
             /**
-             invalidate worker pointer by setting it to NULL
+             invalidate worker pointer by setting it to nullptr
              */
             void Invalidate()
             {
-                _worker = NULL;
+                _worker = nullptr;
             }
                         
             /**

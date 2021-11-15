@@ -39,7 +39,7 @@ namespace np
                     _dependent_job->_dependency_count--;
                 }
                 
-                _dependent_job = NULL;
+                _dependent_job = nullptr;
                 _job_function.Invalidate();
                 _dependency_count = -1;
             }
@@ -64,7 +64,7 @@ namespace np
              constructor
              */
             Job():
-            _dependent_job(NULL),
+            _dependent_job(nullptr),
             _dependency_count(-1)
             {}
             
@@ -92,7 +92,7 @@ namespace np
                 if (_dependent_job && !IsComplete())
                 {
                     _dependent_job->_dependency_count--;
-                    _dependent_job = NULL;
+                    _dependent_job = nullptr;
                 }
                 
                 //TODO: investigate the following assert
@@ -125,7 +125,7 @@ namespace np
              */
             void Init(JobFunction& function)
             {
-                _dependent_job = NULL;
+                _dependent_job = nullptr;
                 _job_function = function;
                 _dependency_count = 1;
             }

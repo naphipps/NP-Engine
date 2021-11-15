@@ -28,7 +28,7 @@ namespace np
             /**
              constructor
              */
-            JobToken(Job* j = NULL):
+            JobToken(Job* j = nullptr):
             _job(j)
             {}
             
@@ -45,7 +45,7 @@ namespace np
              */
             inline bl IsValid() const
             {
-                return _job != NULL;
+                return _job != nullptr;
             }
             
             /**

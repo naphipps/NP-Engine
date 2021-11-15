@@ -69,7 +69,7 @@ namespace np
              */
             Layer* PopLayer()
             {
-                Layer* layer = NULL;
+                Layer* layer = nullptr;
                 if (_overlay_begin > 0)
                 {
                     _overlay_begin--;
@@ -85,7 +85,7 @@ namespace np
              */
             Layer* PopOverlay()
             {
-                Layer* overlay = NULL;
+                Layer* overlay = nullptr;
                 
                 if (_overlay_begin < _layers.size())
                 {

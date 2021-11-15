@@ -30,10 +30,10 @@ namespace np
         public:
             
             /**
-             constuctor - normal priority with NULL job
+             constuctor - normal priority with nullptr job
              */
             JobRecord():
-            JobRecord(JobPriority::NORMAL, NULL)
+            JobRecord(JobPriority::NORMAL, nullptr)
             {}
 
             /**
@@ -59,19 +59,19 @@ namespace np
             {}
             
             /**
-             checks if our job is NULL or not
+             checks if our job is nullptr or not
              */
             bl IsValid() const
             {
-                return _job != NULL;
+                return _job != nullptr;
             }
             
             /**
-             invalidates our job by setting it to NULL
+             invalidates our job by setting it to nullptr
              */
             void Invalidate()
             {
-                _job = NULL;
+                _job = nullptr;
             }
             
             /**
@@ -104,7 +104,7 @@ namespace np
             }
             
             /**
-             bl operator checks if we have a NULL job or not
+             bl operator checks if we have a nullptr job or not
              */
             explicit operator bl() const
             {
