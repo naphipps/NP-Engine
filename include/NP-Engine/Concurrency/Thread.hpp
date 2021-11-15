@@ -13,6 +13,8 @@
 
 #include "NP-Engine/Primitive/Primitive.hpp"
 
+//TODO: update comments
+
 namespace np
 {
     namespace concurrency
@@ -34,35 +36,32 @@ namespace np
             }
             
         private:
-            bl _running;
             ui8 _thread_allocation[sizeof(::std::thread)];
             
-            /**
-             safely disposed of std Thread
-             */
-            void Dispose()
+            void ClearThreadAllocation()
             {
-                if (IsRunning())
+                for (siz i = 0; i < sizeof(::std::thread); i++)
                 {
-                    //TODO: do we need to handle affinity here??
-                    
-                    //deallocate std::Thread -- should always be joinable here
-                    ::std::thread* std_thread = GetStdThreadPtr();
-                    std_thread->join();
-                    std_thread->::std::thread::~thread();
-                    std_thread = NULL;
-                    _running = false;
+                    _thread_allocation[i] = 0;
                 }
             }
-            
-            /**
-             gets the std thread ptr from our allocation
-             */
-            ::std::thread* GetStdThreadPtr()
+
+            bl IsThreadAllocationClear() const
             {
-                return (::std::thread*)_thread_allocation;
+                bl is_clear = true;
+
+                for (siz i = 0; i < sizeof(::std::thread); i++)
+                {
+                    if (_thread_allocation[i] != 0)
+                    {
+                        is_clear = false;
+                        break;
+                    }
+                }
+
+                return is_clear;
             }
-            
+
             /**
              gets the std thread ptr from our allocation
              */
@@ -76,9 +75,10 @@ namespace np
             /**
              constructor
              */
-            Thread():
-            _running(false)
-            {}
+            Thread()
+            {
+                ClearThreadAllocation();
+            }
             
             /**
              deconstructor
@@ -94,8 +94,27 @@ namespace np
             template <class Function, class... Args>
             void Run(Function&& f, Args&&... args)
             {
-                _running = true;
                 new (_thread_allocation) ::std::thread(f, args...);
+            }
+
+            /**
+             safely disposed of std Thread
+             */
+            void Dispose()
+            {
+                if (!IsThreadAllocationClear())
+                {
+                    //TODO: do we need to handle affinity here??
+
+                    //deallocate std::Thread -- should always be joinable here
+                    ::std::thread* std_thread = GetStdThreadPtr();
+                    if (std_thread->joinable())
+                    {
+                        std_thread->join();
+                        std_thread->::std::thread::~thread();
+                        ClearThreadAllocation();
+                    }
+                }
             }
             
             /**
@@ -112,7 +131,7 @@ namespace np
              */
             bl IsRunning() const
             {
-                return _running;
+                return !IsThreadAllocationClear();
             }
             
             /**
@@ -121,8 +140,7 @@ namespace np
              */
             Id GetId() const
             {
-                ::std::thread* std_thread = GetStdThreadPtr();
-                return std_thread != NULL ? std_thread->get_id() : Id();
+                return !IsThreadAllocationClear() ? GetStdThreadPtr()->get_id() : Id();
             }
         };
         
