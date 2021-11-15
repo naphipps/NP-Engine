@@ -31,7 +31,7 @@ namespace np
             bl _show_procedure_is_complete;
             bl _keep_showing;
 
-            void HandleWindowClose(event::Event& event)
+            void HandleClose(event::Event& event)
             {
                 if (event.RetrieveData<WindowCloseEvent::DataType>().Window == this)
                 {
@@ -47,7 +47,7 @@ namespace np
                 switch (event.GetType())
                 {
                 case event::EVENT_TYPE_WINDOW_CLOSE:
-                    HandleWindowClose(event);
+                    HandleClose(event);
                     break;
                 }
             }
