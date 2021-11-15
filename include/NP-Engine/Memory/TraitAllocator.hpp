@@ -90,6 +90,8 @@ namespace np
                 _allocator = AddressOf(allocator);
             }
         };
+
+        static TraitAllocator DefaultTraitAllocator;
     }
 }
 
