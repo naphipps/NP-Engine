@@ -11,69 +11,44 @@
 #include "NP-Engine/Primitive/Primitive.hpp"
 #include "NP-Engine/Event/Event.hpp"
 
-namespace np
+namespace np::app
 {
-    namespace app
+    class WindowResizeEvent : public event::Event
     {
-        class WindowResizeEvent : public event::Event
+    public:
+        struct DataType
         {
-        public:
-            struct DataType
-            {
-                ui32 Width;
-                ui32 Height;
-            };
-            
-        public:
-            
-            /**
-             constructor
-             */
-            WindowResizeEvent(ui32 width, ui32 height):
-            event::Event()
-            {
-                DataType data{width, height};
-                _pad.AssignData(data);
-            }
-            
-            /**
-             deconstructor
-             */
-            ~WindowResizeEvent() = default;
-            
-            /**
-             gets the width of the resize
-             */
-            ui32 GetWidth() const
-            {
-                return RetrieveData<DataType>().Width;
-            }
-            
-            /**
-             gets the height of the resize
-             */
-            ui32 GetHeight() const
-            {
-                return RetrieveData<DataType>().Height;
-            }
-            
-            /**
-             gets the type of this event
-             */
-            event::EventType GetType() const override
-            {
-                return event::EVENT_TYPE_WINDOW_RESIZE;
-            }
-            
-            /**
-             gets the category of this event
-             */
-            event::EventCategory GetCategory() const override
-            {
-                return event::EVENT_CATEGORY_WINDOW;
-            }
+            Window* Window;
+            ui32 Width;
+            ui32 Height;
         };
-    }
+            
+        WindowResizeEvent(Window* window, ui32 width, ui32 height):
+        event::Event()
+        {
+            _pad.AssignData<DataType>({window, width, height});
+        }
+
+        ui32 GetWidth() const
+        {
+            return RetrieveData<DataType>().Width;
+        }
+
+        ui32 GetHeight() const
+        {
+            return RetrieveData<DataType>().Height;
+        }
+
+        event::EventType GetType() const override
+        {
+            return event::EVENT_TYPE_WINDOW_RESIZE;
+        }
+
+        event::EventCategory GetCategory() const override
+        {
+            return event::EVENT_CATEGORY_WINDOW;
+        }
+    };
 }
 
 #endif /* NP_ENGINE_WINDOW_RESIZE_EVENT_HPP */
