@@ -14,6 +14,8 @@
 #include "NP-Engine/Insight/Insight.hpp"
 #include "NP-Engine/Graphics/Graphics.hpp"
 #include "NP-Engine/Memory/Memory.hpp"
+#include "NP-Engine/Event/Event.hpp"
+#include "NP-Engine/Container/Container.hpp"
 
 #include "Layer.hpp"
 #include "LayerContainer.hpp"
@@ -26,7 +28,7 @@ namespace np
     {
         //TODO: add summary comments
         
-        class Application
+        class Application : public event::EventHandler
         {
         public:
 
@@ -38,44 +40,59 @@ namespace np
 
         protected:
 
-            Window* _window; //TODO: uptr??
             Properties _properties;
+            event::EventManager _event_manager;
+            container::vector<Window*> _windows;
             LayerContainer _layers;
             bl _running;
-            bl _minimized;
-            time::SteadyTimestamp _last_frame_timestamp;
-            
-            //TODO: singleton check?? --extremely rare
-            //TODO: figure out how to force this into a fixed step loop - aka, set this to loop at 60fps or something with 0 being infinitely fast
             
             Application(const Application::Properties& application_properties):
-            Application(application_properties, 
-                Window::Properties{application_properties.Title, Window::DEFAULT_WIDTH, Window::DEFAULT_HEIGHT})
-            {}
-
-            Application(const Application::Properties& application_properties, const Window::Properties& window_properties):
             _properties(application_properties),
-            _minimized(false),
             _running(false)
             {
-                _window = CreateWindow(_properties.Allocator, window_properties);
-                graphics::Renderer::Init(_properties.Allocator);
+                _event_manager.RegisterHandler(*this);
+                graphics::Init();
             }
             
+            virtual void Cleanup()
+            {
+                if (!_windows.empty())
+                {
+                    for (i32 i = _windows.size() - 1; i >= 0; i--)
+                    {
+                        if (!_windows[i]->IsRunning())
+                        {
+                            memory::Destruct(_windows[i]);
+                            _windows.get_allocator().Deallocate(_windows[i]);
+                            _windows.erase(_windows.begin() + i);
+                        }
+                    }
+                }
+
+                if (_windows.empty())
+                {
+                    StopRunning();
+                }
+            }
+
+            virtual void CreateWindow()
+            {
+                _windows.emplace_back(Window::Create(_windows.get_allocator(), Window::Properties{ _event_manager }));
+                _windows.back()->Show();
+            }
+
         public:
 
             virtual ~Application()
             {
-                if (_window)
+                for (Window* window : _windows)
                 {
-                    memory::Destruct(_window);
-                    _properties.Allocator.Deallocate(_window);
+                    memory::Destruct(window);
+                    _properties.Allocator.Deallocate(window);
                 }
                 
-                graphics::Renderer::Shutdown();
+                graphics::Shutdown();
             }
-            
-        public:
             
             void Run()
             {
@@ -85,34 +102,56 @@ namespace np
             virtual void Run(i32 argc, chr** argv)
             {
                 _running = true;
-                
+                time::SteadyTimestamp _last_frame_timestamp;
+
                 while(_running)
                 {
                     time::SteadyTimestamp current_timestamp = time::SteadyClock::now();
                     time::DurationMilliseconds timestamp_diff = current_timestamp - _last_frame_timestamp;
                     _last_frame_timestamp = current_timestamp;
                     
-                    if (!_minimized)
+                    _event_manager.DispatchEvents(); //TODO: is this right spot??
+
+                    for (ui32 i=0; i<_layers.Size(); i++)
                     {
-                        for (ui32 i=0; i<_layers.Size(); i++)
-                        {
-                            _layers[i]->Update(timestamp_diff);
-                        }
-                        
-                        /*
-                         //TODO: implement imgui? I think the update above should handle imgui stuff...
-                        for (ui32 i=0; i<_layers.Size(); i++)
-                        {
-                            _layers[i]->RenderImGui();
-                        }
-                         */
+                        _layers[i]->Update(timestamp_diff);
                     }
+                        
+                    /*
+                        //TODO: implement imgui? I think the update above should handle imgui stuff...
+                    for (ui32 i=0; i<_layers.Size(); i++)
+                    {
+                        _layers[i]->RenderImGui();
+                    }
+                        */
                     
                     //TODO: figure out how to fix our loops to 60fps
+                    //TODO: figure out how to force this into a fixed step loop - aka, set this to loop at 60fps or something with 0 being infinitely fast
                     
-                    _window->Update();
+                    for (Window* window : _windows)
+                    {
+                        window->Update(timestamp_diff);
+                    }
+
+                    Cleanup();
                 }
             }
+
+            Properties GetProperties() const
+            {
+                return _properties;
+            }
+
+            str GetTitle() const
+            {
+                return _properties.Title;
+            }
+
+            memory::Allocator& GetAllocator() const
+            {
+                return _properties.Allocator;
+            }
+
             
             void StopRunning()
             {
@@ -129,49 +168,23 @@ namespace np
                 _layers.PushOverlay(overlay);
             }
             
-            void OnEvent(event::Event& e)
+            void HandleEvent(event::Event& e) override
             {
-                
+                //TODO: close application?
             }
-            
-            bl OnWindowClose(WindowCloseEvent& e)
+
+            event::EventCategory GetHandledCategories() const override
             {
-                StopRunning();
-                return true;
-            }
-            
-            bl OnWindowResize(WindowResizeEvent& e)
-            {
-                _minimized = e.GetWidth() == 0 || e.GetHeight() == 0;
-                
-                if (!_minimized)
-                {
-                    graphics::Renderer::ResizeWindow(e.GetWidth(), e.GetHeight());
-                }
-                
-                return !_minimized;
-            }
-            
-            Window& GetWindow()
-            {
-                NP_ASSERT(_window, "_window must be defined");
-                return *_window;
+                return event::EVENT_CATEGORY_APPLICATION | event::EVENT_CATEGORY_WINDOW;
             }
             
             bl IsRunning() const
             {
                 return _running;
             }
-            
-            bl IsMinimized() const
-            {
-                return _minimized;
-            }
-            
-            
         };
         
-        Application* CreateApplication(memory::Allocator& application_allocator);
+        Application* CreateApplication(memory::Allocator& application_allocator); //TODO: make this a static function of Application?
     }
 }
 

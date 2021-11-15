@@ -35,11 +35,14 @@ namespace np::event
 		{
 			EventHandler* handler_address = const_cast<EventHandler*>(memory::AddressOf(handler));
 			
-			for (siz i = _handlers.size() - 1; i >= 0; i--)
+			if (!_handlers.empty())
 			{
-				if (_handlers[i] == handler_address)
+				for (i64 i = _handlers.size() - 1; i >= 0; i--)
 				{
-					_handlers.erase(_handlers.begin() + i);
+					if (_handlers[i] == handler_address)
+					{
+						_handlers.erase(_handlers.begin() + i);
+					}
 				}
 			}
 		}
@@ -59,9 +62,9 @@ namespace np::event
 				}
 				else
 				{
-					if (!GetBuffer().try_enqueue(event))
+					if (!GetBuffer().enqueue(event))
 					{
-						NP_ASSERT(false, "Dispatched event was not handled and cannot go to other buffer");
+						NP_ASSERT(false, "Dispatched event was not handled and could not go to current buffer");
 					}
 				}
 			}

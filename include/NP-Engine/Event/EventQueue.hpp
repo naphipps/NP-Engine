@@ -81,7 +81,7 @@ namespace np
                     if (memory::Construct<T>(block, ::std::forward<Args>(args)...))
                     {
                         event = static_cast<Event*>(block.Begin());
-                        if (!buffer.try_enqueue(event))
+                        if (!buffer.enqueue(event))
                         {
                             memory::Destruct(static_cast<T*>(event));
                             _allocator.Deallocate(event);

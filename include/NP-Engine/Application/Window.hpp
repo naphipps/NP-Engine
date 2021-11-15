@@ -12,41 +12,44 @@
 #include "NP-Engine/Event/Event.hpp"
 #include "NP-Engine/Platform/Platform.hpp"
 #include "NP-Engine/Memory/Memory.hpp"
+#include "NP-Engine/Time/Time.hpp"
+
+//TODo: update comments
 
 namespace np
 {
     namespace app
     {
-        class Window
+        class Window : public event::EventHandler
         {
         public:
 
-            constexpr static ui32 DEFAULT_WIDTH = 1600;
-            constexpr static ui32 DEFAULT_HEIGHT = 900;
+            constexpr static ui32 DEFAULT_WIDTH = 800;
+            constexpr static ui32 DEFAULT_HEIGHT = 600;
 
             struct Properties
             {
+                event::EventManager& EventManager;
                 str Title = "NP Window";
                 ui32 Width = DEFAULT_WIDTH;
                 ui32 Height = DEFAULT_HEIGHT;
             };
             
-        private:
+        protected:
             Properties _properties;
-            
+
         public:
             
+            static Window* Create(memory::Allocator& allocator, const Window::Properties& properties);
+
             /**
              constructor
              */
             Window(const Window::Properties& properties):
             _properties(properties)
-            {}
-            
-            /**
-             deconstructor
-             */
-            virtual ~Window() = default;
+            {
+                _properties.EventManager.RegisterHandler(*this);
+            }
             
             /**
              gets the width
@@ -83,13 +86,14 @@ namespace np
             /**
              update method
              */
-            virtual void Update() = 0;
+            virtual void Update(time::DurationMilliseconds duration_milliseconds) = 0; //TODO: should this also have a delta time param??
             
-            /**
-             sets the event callback
-             */
-            virtual void SetEventCallback(const event::Event::Callback& callback) = 0;
+            virtual void Show() = 0;
             
+            virtual bl IsRunning() const = 0;
+
+            virtual void SetTitle(str title) = 0;
+
             /**
              enables or disables vsync
              */
@@ -108,9 +112,9 @@ namespace np
              gets the native window pointer
              */
             virtual void* GetNativeWindow() const = 0;
+
+            virtual bl IsMinimized() const = 0; //TODO: or can we keep track of this with a flag??
         };
-        
-        Window* CreateWindow(memory::Allocator& allocator, const Window::Properties& properties = Window::Properties());
     }
 }
 

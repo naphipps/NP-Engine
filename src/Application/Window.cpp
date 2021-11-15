@@ -23,7 +23,7 @@ namespace np
 {
     namespace app
     {
-        Window* CreateWindow(memory::Allocator& allocator, const Window::Properties& properties)
+        Window* Window::Create(memory::Allocator& allocator, const Window::Properties& properties)
         {
 #if NP_ENGINE_PLATFORM_IS_APPLE
             memory::Block block = allocator.Allocate(sizeof(AppleWindow));

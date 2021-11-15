@@ -19,7 +19,11 @@ namespace np
             void Run(i32 argc, chr** argv) override
             {
                 ::std::cout<<"hello world from my game app!\n";
-                ::std::cout<<"my title is '"<<GetWindow().GetTitle()<<"'\n";
+                ::std::cout << "my title is '" << GetTitle() << "'\n";
+                CreateWindow();
+                _windows.back()->SetTitle("My Game Window >:D");
+
+                Application::Run(argc, argv);
             }
         };
         
