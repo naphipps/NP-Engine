@@ -62,9 +62,10 @@ namespace np
                     {
                         if (!_windows[i]->IsRunning())
                         {
-                            memory::Destruct(_windows[i]);
-                            _windows.get_allocator().Deallocate(_windows[i]);
+                            Window* w = _windows[i];
                             _windows.erase(_windows.begin() + i);
+                            memory::Destruct(w);
+                            _windows.get_allocator().Deallocate(w);
                         }
                     }
                 }
