@@ -170,7 +170,7 @@ namespace np
             
             void HandleEvent(event::Event& e) override
             {
-                //TODO: close application?
+                //TODO: close application? to close all the windows, then stop running
             }
 
             event::EventCategory GetHandledCategories() const override
