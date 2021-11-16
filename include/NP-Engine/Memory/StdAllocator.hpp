@@ -22,13 +22,13 @@ namespace np::memory
 
 	public:
 
-		using value_type = ::std::allocator<T>::value_type;
-		using pointer = ::std::allocator<T>::pointer;
-		using const_pointer = ::std::allocator<T>::const_pointer;
-		using reference = ::std::allocator<T>::reference;
-		using const_reference = ::std::allocator<T>::const_reference;
-		using size_type = ::std::allocator<T>::size_type;
-		using difference_type = ::std::allocator<T>::difference_type;
+		using value_type = typename ::std::allocator<T>::value_type;
+		using pointer = typename ::std::allocator<T>::pointer;
+		using const_pointer = typename ::std::allocator<T>::const_pointer;
+		using reference = typename ::std::allocator<T>::reference;
+		using const_reference = typename ::std::allocator<T>::const_reference;
+		using size_type = typename ::std::allocator<T>::size_type;
+		using difference_type = typename ::std::allocator<T>::difference_type;
 
 		template< class U > 
 		struct rebind
