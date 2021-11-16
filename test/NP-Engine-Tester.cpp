@@ -20,8 +20,12 @@ namespace np
             {
                 ::std::cout<<"hello world from my game app!\n";
                 ::std::cout << "my title is '" << GetTitle() << "'\n";
-                CreateWindow();
-                _windows.back()->SetTitle("My Game Window >:D");
+
+                for (siz i = 0; i < 1; i++)
+                {
+                    CreateWindow();
+                    _windows.back()->SetTitle("My Game Window >:D - " + to_str(i));
+                }
 
                 Application::Run(argc, argv);
             }
