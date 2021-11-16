@@ -9,6 +9,7 @@
 #define NP_ENGINE_PAD_OBJECT_HPP
 
 #include "NP-Engine/Primitive/Primitive.hpp"
+#include "NP-Engine/String/String.hpp"
 
 #include "ConcurrencyConstants.hpp"
 

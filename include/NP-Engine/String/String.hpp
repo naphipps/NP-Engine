@@ -53,9 +53,9 @@ public:
     tstr(::std::initializer_list<T> list) : base(list) {}
 
     template <class InputIt>
-    tstr(InputIt first, InputIt last) : base<InputIt>(first, last) {}
+    tstr(InputIt first, InputIt last) : base(first, last) {}
 
-    operator STD_T() const { return c_str(); }
+    operator STD_T() const { return base::c_str(); }
 
     tstr& operator=(const tstr& other) { base::operator=(other);  return *this; }
 
