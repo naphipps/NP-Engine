@@ -11,6 +11,7 @@
 #include <limits>
 
 #include "NP-Engine/Primitive/Primitive.hpp"
+#include "NP-Engine/Insight/Insight.hpp"
 
 #include "SizedAllocator.hpp"
 #include "Margin.hpp"
