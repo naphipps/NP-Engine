@@ -11,6 +11,7 @@
 
 #include "NP-Engine/Primitive/Primitive.hpp"
 #include "NP-Engine/Random/Random.hpp"
+#include "NP-Engine/JSON/JSON.hpp"
 
 #include "Perlin.hpp"
 #include "Simplex.hpp"
@@ -87,7 +88,7 @@ namespace np
              */
             virtual ostrm& Insertion(ostrm& os, str filepath) const override
             {
-                serialization::vendor::nlohmann::json json;
+                nlohmann::json json;
                 
                 json["scalar"] = _scalar;
                 
@@ -117,7 +118,7 @@ namespace np
              */
             virtual istrm& Extraction(istrm& is, str filepath) override
             {
-                serialization::vendor::nlohmann::json json;
+                nlohmann::json json;
                 is >> json;
                 
                 _scalar = json["scalar"];

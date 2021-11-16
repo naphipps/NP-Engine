@@ -506,17 +506,17 @@ namespace np
              */
             virtual ostrm& Insertion(ostrm& os, str filepath) const override
             {
-                serialization::vendor::nlohmann::json json;
-                json["origin"] = serialization::vendor::nlohmann::json::array();
+                nlohmann::json json;
+                json["origin"] = nlohmann::json::array();
                 json["origin"].push_back(_origin.x);
                 json["origin"].push_back(_origin.y);
                 
-                json["aabb"] = serialization::vendor::nlohmann::json::object();
-                json["aabb"]["LowerLeft"] = serialization::vendor::nlohmann::json::array();
+                json["aabb"] = nlohmann::json::object();
+                json["aabb"]["LowerLeft"] = nlohmann::json::array();
                 json["aabb"]["LowerLeft"].push_back(_aabb.LowerLeft.x);
                 json["aabb"]["LowerLeft"].push_back(_aabb.LowerLeft.y);
                 
-                json["aabb"]["UpperRight"] = serialization::vendor::nlohmann::json::array();
+                json["aabb"]["UpperRight"] = nlohmann::json::array();
                 json["aabb"]["UpperRight"].push_back(_aabb.UpperRight.x);
                 json["aabb"]["UpperRight"].push_back(_aabb.UpperRight.y);
                 
@@ -533,7 +533,7 @@ namespace np
             */
             virtual istrm& Extraction(istrm& is, str filepath) override
             {
-                serialization::vendor::nlohmann::json json;
+                nlohmann::json json;
                 is >> json;
                 
                 _origin.x = json["origin"][0];

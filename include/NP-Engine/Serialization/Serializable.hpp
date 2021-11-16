@@ -12,7 +12,7 @@
 #include "NP-Engine/Primitive/Primitive.hpp"
 #include "NP-Engine/Filesystem/Filesystem.hpp"
 
-#include "json.hpp"
+#include "NP-Engine/JSON/JSON.hpp"
 
 namespace np
 {
@@ -80,7 +80,7 @@ namespace np
             /**
              save ourselves to the given json object
              */
-            virtual bl SaveToJson(vendor::nlohmann::json& json) const
+            virtual bl SaveToJson(nlohmann::json& json) const
             {
                 return false;
             }
@@ -88,7 +88,7 @@ namespace np
             /**
              load ourselves from the given json object
              */
-            virtual bl LoadFromJson(const vendor::nlohmann::json& json)
+            virtual bl LoadFromJson(const nlohmann::json& json)
             {
                 return false;
             }

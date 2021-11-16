@@ -11,6 +11,5 @@
 
 #include "NP-Engine/Foundation/Foundation.hpp"
 #include "Serializable.hpp"
-#include "json.hpp"
 
 #endif /* NP_ENGINE_SERIALIZATION_HPP */

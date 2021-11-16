@@ -238,7 +238,7 @@ namespace np
                 else if constexpr (::std::is_base_of_v<T, serialization::Serializable>)
                 {
                     str dirpath = fs::get_parent_path(filepath);
-                    serialization::vendor::nlohmann::json json;
+                    nlohmann::json json;
                     
                     for (ui32 i=0; i<_value.size(); i++)
                     {
@@ -286,7 +286,7 @@ namespace np
                 }
                 else if constexpr (::std::is_base_of_v<T, serialization::Serializable>)
                 {
-                    serialization::vendor::nlohmann::json json;
+                    nlohmann::json json;
                     is >> json;
                     
                     for (ui32 i=0; i<_value.size(); i++)

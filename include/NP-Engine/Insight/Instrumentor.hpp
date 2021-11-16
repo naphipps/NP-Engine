@@ -18,7 +18,7 @@
 #include "NP-Engine/Primitive/Primitive.hpp"
 #include "NP-Engine/Time/Time.hpp"
 #include "NP-Engine/Filesystem/Filesystem.hpp"
-#include "NP-Engine/Serialization/Serialization.hpp"
+#include "NP-Engine/JSON/JSON.hpp"
 
 #include "Timer.hpp"
 #include "ScopedTimer.hpp"
@@ -50,7 +50,7 @@ namespace np
             static const str TraceEvents;
             static Instrumentor _instance;
             
-            serialization::vendor::nlohmann::json _json;
+            nlohmann::json _json;
             str _filepath;
             Timer _trace_timer;
             ::std::mutex _mutex;
@@ -68,8 +68,8 @@ namespace np
             Instrumentor(str filepath):
             _filepath(filepath)
             {
-                _json[OtherData] = serialization::vendor::nlohmann::json::object();
-                _json[TraceEvents] = serialization::vendor::nlohmann::json::array();
+                _json[OtherData] = nlohmann::json::object();
+                _json[TraceEvents] = nlohmann::json::array();
                 _trace_timer.Stop();
             }
             
@@ -149,7 +149,7 @@ namespace np
                 ::std::lock_guard<::std::mutex> lock(_mutex);
                 
                 ::std::stringstream ss;
-                serialization::vendor::nlohmann::json trace;
+                nlohmann::json trace;
                 
                 trace["cat"] = "function";
                 trace["dur"] = event.ElapsedMicroseconds.count();

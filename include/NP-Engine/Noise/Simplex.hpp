@@ -5,6 +5,7 @@
 #include "NP-Engine/Primitive/Primitive.hpp"
 #include "NP-Engine/Random/Random.hpp"
 #include "NP-Engine/Math/Math.hpp"
+#include "NP-Engine/JSON/JSON.hpp"
 
 namespace np
 {
@@ -205,7 +206,7 @@ namespace np
              */
             virtual ostrm& Insertion(ostrm& os, str filepath) const override
             {
-                serialization::vendor::nlohmann::json json;
+                nlohmann::json json;
                 
                 str random32base_path = fs::append(fs::get_parent_path(filepath), "random32base_path");
                 json["random32base_path"] = random32base_path;
@@ -222,7 +223,7 @@ namespace np
                 json["warp_octave_increment"] = _warp_octave_increment;
                 json["warp_octave_displacement"] = _warp_octave_displacement;
                 
-                json["permutation"] = serialization::vendor::nlohmann::json::array();
+                json["permutation"] = nlohmann::json::array();
                 for (i32 i=0; i<PERMUTATION_SIZE; i++)
                 {
                     json["permutation"].push_back(_permutation[i]);
@@ -240,7 +241,7 @@ namespace np
              */
             virtual istrm& Extraction(istrm& is, str filepath) override
             {
-                serialization::vendor::nlohmann::json json;
+                nlohmann::json json;
                 is >> json;
                 
                 _frequency = json["frequency"];

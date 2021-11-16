@@ -1588,7 +1588,7 @@ namespace np
              */
             virtual ostrm& Insertion(ostrm& os, str filepath) const override
             {
-                serialization::vendor::nlohmann::json json;
+                nlohmann::json json;
                 str ui16_drawable_image_path = fs::append(fs::get_parent_path(filepath),
                                                              "ui16_drawable_image_path");
                 json["ui16_drawable_image_path"] = ui16_drawable_image_path;
@@ -1604,7 +1604,7 @@ namespace np
             */
             virtual istrm& Extraction(istrm& is, str filepath) override
             {
-                serialization::vendor::nlohmann::json json;
+                nlohmann::json json;
                 is >> json;
                 
                 str ui16_drawable_image_path = json["ui16_drawable_image_path"];

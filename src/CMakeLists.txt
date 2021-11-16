@@ -119,6 +119,10 @@ set(NP_ENGINE_JOBSYSTEM_HPP
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/JobSystem/JobWorkerToken.hpp
 )
 
+set(NP_ENGINE_JSON_HPP
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/JSON/JSON.hpp
+)
+
 set(NP_ENGINE_MATH_HPP
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Math/AABB.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Math/BresenhamLine.hpp
@@ -217,7 +221,6 @@ set(NP_ENGINE_RANDOM_HPP
 )
 
 set(NP_ENGINE_SERIALIZATION_HPP
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Serialization/json.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Serialization/Serializable.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Serialization/Serialization.hpp
 )
@@ -248,6 +251,7 @@ set(NP_ENGINE_HEADER_FILES
 	${NP_ENGINE_INPUT_HPP}
 	${NP_ENGINE_INSIGHT_HPP}
 	${NP_ENGINE_JOBSYSTEM_HPP}
+	${NP_ENGINE_JSON_HPP}
 	${NP_ENGINE_MATH_HPP}
 	${NP_ENGINE_MEMORY_HPP}
 	${NP_ENGINE_NOISE_HPP}
@@ -435,6 +439,7 @@ source_group(Graphics/RHI/Vulkan FILES ${NP_ENGINE_GRAPHICS_VULKAN_HPP} ${NP_ENG
 source_group(Input FILES ${NP_ENGINE_INPUT_HPP})
 source_group(Insight FILES ${NP_ENGINE_INSIGHT_HPP} ${NP_ENGINE_INSIGHT_CPP})
 source_group(JobSystem FILES ${NP_ENGINE_JOBSYSTEM_HPP} ${NP_ENGINE_JOBSYSTEM_CPP})
+source_group(JSON FILES ${NP_ENGINE_JSON_HPP})
 source_group(Math FILES ${NP_ENGINE_MATH_HPP} ${NP_ENGINE_MATH_CPP})
 source_group(Memory FILES ${NP_ENGINE_MEMORY_HPP} ${NP_ENGINE_MEMORY_CPP})
 source_group(Noise FILES ${NP_ENGINE_NOISE_HPP})
