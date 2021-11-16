@@ -10,6 +10,7 @@
 #define NP_ENGINE_ASSERT_HPP
 
 #include <cassert>
+#include <string>
 
 #include "NP-Engine/Primitive/Primitive.hpp"
 #include "NP-Engine/Foundation/Foundation.hpp"
@@ -24,7 +25,7 @@ namespace np
          this static assert method will be used as our assert function
          this forces a log to file and console
          */
-        static void Assert(bl expression, str message)
+        static void Assert(bl expression, ::std::string message)
         {
             if (!expression)
             {

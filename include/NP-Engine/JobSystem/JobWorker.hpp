@@ -15,6 +15,7 @@
 #include "NP-Engine/Concurrency/Concurrency.hpp"
 #include "NP-Engine/Insight/Insight.hpp"
 #include "NP-Engine/Primitive/Primitive.hpp"
+#include "NP-Engine/String/String.hpp"
 
 #include "JobRecord.hpp"
 #include "JobPool.hpp"

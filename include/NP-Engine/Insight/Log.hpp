@@ -10,6 +10,7 @@
 #define NP_ENGINE_LOG_HPP
 
 #include <memory>
+#include <string>
 
 #include "NP-Engine/Foundation/Foundation.hpp"
 #include "NP-Engine/Primitive/Primitive.hpp"
@@ -49,14 +50,14 @@ namespace np
                 {
                     _initialized.store(true, mo_release);
                     
-                    str pattern = "%^[pid:%P, tid:%t, %Y-%m-%d %H:%M:%S.%e] [%n, %l]%$ %v";
+                    ::std::string pattern = "%^[pid:%P, tid:%t, %Y-%m-%d %H:%M:%S.%e] [%n, %l]%$ %v";
                     
                     //stdout sink
                     _stdout_sink = ::std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
                     _stdout_sink->set_pattern(pattern);
                     
                     //file sink
-                    str log_filepath = GetFileLoggerFilePath();
+                    ::std::string log_filepath = GetFileLoggerFilePath();
                     _file_sink = ::std::make_shared<spdlog::sinks::basic_file_sink_mt>(log_filepath, true);
                     _file_sink->set_pattern(pattern);
                     
@@ -83,7 +84,7 @@ namespace np
             /**
              gets the file path the file logger honors
             */
-            static inline str GetFileLoggerFilePath()
+            static inline ::std::string GetFileLoggerFilePath()
             {
                 return fs::append(fs::get_current_path(), "NP-Engine-Log.log");
             }

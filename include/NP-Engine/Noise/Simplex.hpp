@@ -6,6 +6,7 @@
 #include "NP-Engine/Random/Random.hpp"
 #include "NP-Engine/Math/Math.hpp"
 #include "NP-Engine/JSON/JSON.hpp"
+#include "NP-Engine/String/String.hpp"
 
 namespace np
 {

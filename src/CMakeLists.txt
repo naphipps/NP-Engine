@@ -225,6 +225,10 @@ set(NP_ENGINE_SERIALIZATION_HPP
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Serialization/Serialization.hpp
 )
 
+set(NP_ENGINE_STRING_HPP
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/String/String.hpp
+)
+
 set(NP_ENGINE_SYSTEM_HPP
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/System/System.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/System/SystemImpl.hpp
@@ -264,6 +268,7 @@ set(NP_ENGINE_HEADER_FILES
 	${NP_ENGINE_PRIMITIVE_HPP}
 	${NP_ENGINE_RANDOM_HPP}
 	${NP_ENGINE_SERIALIZATION_HPP}
+	${NP_ENGINE_STRING_HPP}
 	${NP_ENGINE_SYSTEM_HPP}
 	${NP_ENGINE_TIME_HPP}
 )
@@ -452,5 +457,6 @@ source_group(Platform/Windows/Application FILES ${NP_ENGINE_PLATFORM_WINDOWS_APP
 source_group(Primitive FILES ${NP_ENGINE_PRIMITIVE_HPP})
 source_group(Random FILES ${NP_ENGINE_RANDOM_HPP})
 source_group(Serialization FILES ${NP_ENGINE_SERIALIZATION_HPP})
+source_group(String FILES ${NP_ENGINE_STRING_HPP})
 source_group(System FILES ${NP_ENGINE_SYSTEM_HPP} ${NP_ENGINE_SYSTEM_CPP})
 source_group(Time FILES ${NP_ENGINE_TIME_HPP})

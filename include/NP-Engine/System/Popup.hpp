@@ -7,6 +7,8 @@
 #ifndef NP_ENGINE_POPUP_HPP
 #define NP_ENGINE_POPUP_HPP
 
+#include <string>
+
 #include "NP-Engine/Primitive/Primitive.hpp"
 #include "NP-Engine/Platform/Platform.hpp"
 #include "NP-Engine/Insight/Insight.hpp"
@@ -51,19 +53,19 @@ namespace np::system
         constexpr static Style DefaultStyle = Style::Info;
         constexpr static Buttons DefaultButtons = Buttons::OK;
         
-        static Select Show(str title, str message, Style style, Buttons buttons);
+        static Select Show(::std::string title, ::std::string message, Style style, Buttons buttons);
         
-        static inline Select Show(str title, str message, Style style)
+        static inline Select Show(::std::string title, ::std::string message, Style style)
         {
             return Show(title, message, style, DefaultButtons);
         }
         
-        static inline Select Show(str title, str message, Buttons buttons)
+        static inline Select Show(::std::string title, ::std::string message, Buttons buttons)
         {
             return Show(title, message, DefaultStyle, buttons);
         }
         
-        static inline Select Show(str title, str message)
+        static inline Select Show(::std::string title, ::std::string message)
         {
             return Show(title, message, DefaultStyle, DefaultButtons);
         }

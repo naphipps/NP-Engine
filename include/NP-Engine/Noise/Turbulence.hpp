@@ -12,6 +12,7 @@
 #include "NP-Engine/Primitive/Primitive.hpp"
 #include "NP-Engine/Random/Random.hpp"
 #include "NP-Engine/JSON/JSON.hpp"
+#include "NP-Engine/String/String.hpp"
 
 #include "Perlin.hpp"
 #include "Simplex.hpp"

@@ -32,5 +32,6 @@
 #include "Platform/Platform.hpp"
 #include "Input/Input.hpp"
 #include "ECS/ECS.hpp"
+#include "String/String.hpp"
 
 #endif /* NP_ENGINE_HPP */

@@ -9,6 +9,8 @@
 #ifndef NP_ENGINE_TIMER_HPP
 #define NP_ENGINE_TIMER_HPP
 
+#include <string>
+
 #include "NP-Engine/Primitive/Primitive.hpp"
 #include "NP-Engine/Time/Time.hpp"
 
@@ -22,7 +24,7 @@ namespace np
         class Timer
         {
         protected:
-            str _name;
+            ::std::string _name;
             time::SteadyTimestamp _start_timestamp;
             time::SteadyTimestamp _end_timestamp;
             
@@ -31,7 +33,7 @@ namespace np
             /**
              constructor
              */
-            Timer(str name = ""):
+            Timer(::std::string name = ""):
             _start_timestamp(time::SteadyClock::now()),
             _name(name)
             {
@@ -81,7 +83,7 @@ namespace np
             /**
              sets the name of this timer
              */
-            void SetName(str name)
+            void SetName(::std::string name)
             {
                 _name = name;
             }
@@ -89,7 +91,7 @@ namespace np
             /**
              gets the name of this timer
              */
-            str GetName()
+            ::std::string GetName()
             {
                 return _name;
             }

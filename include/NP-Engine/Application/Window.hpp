@@ -13,6 +13,7 @@
 #include "NP-Engine/Platform/Platform.hpp"
 #include "NP-Engine/Memory/Memory.hpp"
 #include "NP-Engine/Time/Time.hpp"
+#include "NP-Engine/String/String.hpp"
 
 //TODo: update comments
 

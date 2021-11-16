@@ -13,7 +13,6 @@
 
 #include <cstddef>
 #include <cstdint>
-#include <string>
 #include <cfloat>
 
 using nptr = ::std::nullptr_t;
@@ -36,20 +35,10 @@ using dbl = double;
 
 using chr = char;
 using uchr = unsigned char;
+using wchr = wchar_t;
+using u16chr = char16_t;
+using u32chr = char32_t;
 
 using bl = bool;
-
-using str = ::std::string;
-
-static str to_str(const chr* c)
-{
-    return str(c);
-}
-
-template <typename T>
-static str to_str(T t)
-{
-    return ::std::to_string(t);
-}
 
 #endif /* NP_ENGINE_PRIMITIVE_TYPES_HPP */

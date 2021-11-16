@@ -12,8 +12,8 @@ namespace np
 {
     namespace insight
     {
-        const str Instrumentor::OtherData = "otherData";
-        const str Instrumentor::TraceEvents = "traceEvents";
+        const ::std::string Instrumentor::OtherData = "otherData";
+        const ::std::string Instrumentor::TraceEvents = "traceEvents";
         Instrumentor Instrumentor::_instance;
     }
 }

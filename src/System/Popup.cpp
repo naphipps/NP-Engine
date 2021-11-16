@@ -19,7 +19,7 @@
 
 namespace np::system
 {
-    Popup::Select Popup::Show(str title, str message, Popup::Style style, Popup::Buttons buttons)
+    Popup::Select Popup::Show(::std::string title, ::std::string message, Popup::Style style, Popup::Buttons buttons)
     {
         Popup::Select select = Popup::Select::Error;
 

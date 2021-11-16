@@ -31,7 +31,7 @@ namespace np::system
 
         static inline void signal_handler(int signal) noexcept
         {
-            str signal_string = "";
+            ::std::string signal_string = "";
             switch (signal)
             {
             case SIGINT:
@@ -70,13 +70,13 @@ namespace np::system
 	/**
 	 gets the value of the given env variable
 	*/
-	static inline str GetEnv(str variable)
+	static inline ::std::string GetEnv(::std::string variable)
 	{
 		return ::std::getenv(variable.c_str());
 	}
 
 
-	static inline str GetDefaultWorkingDir()
+	static inline ::std::string GetDefaultWorkingDir()
 	{
 #if NP_ENGINE_PLATFORM_IS_APPLE
         return fs::append(GetEnv("HOME"), fs::append("Library", "NP-Engine"));
@@ -92,7 +92,7 @@ namespace np::system
 
 	static inline void Init()
 	{
-		str working_dir = GetDefaultWorkingDir();
+        ::std::string working_dir = GetDefaultWorkingDir();
 		fs::create_directories(working_dir);
 		fs::set_current_path(working_dir);
 

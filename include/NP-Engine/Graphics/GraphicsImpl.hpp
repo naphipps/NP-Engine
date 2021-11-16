@@ -13,6 +13,7 @@
 #include "NP-Engine/Memory/Memory.hpp"
 #include "NP-Engine/Insight/Insight.hpp"
 #include "NP-Engine/System/System.hpp"
+#include "NP-Engine/String/String.hpp"
 
 #include "RPI/Renderer.hpp"
 

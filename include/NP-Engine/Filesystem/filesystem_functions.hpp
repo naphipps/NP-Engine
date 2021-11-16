@@ -9,6 +9,7 @@
 #ifndef NP_ENGINE_FILESYSTEM_FUNCTIONS_HPP
 #define NP_ENGINE_FILESYSTEM_FUNCTIONS_HPP
 
+#include <string>
 #include <filesystem>
 
 #include "NP-Engine/Primitive/Primitive.hpp"
@@ -20,7 +21,7 @@ namespace np
         /**
          checks if the given file or dir exists
          */
-        static inline bl exists(str path_string)
+        static inline bl exists(::std::string path_string)
         {
             bl exists = false;
             
@@ -36,9 +37,9 @@ namespace np
         /**
          gets the parent path of the given file or dir path
          */
-        static inline str get_parent_path(str path_string)
+        static inline ::std::string get_parent_path(::std::string path_string)
         {
-            str parent_path;
+            ::std::string parent_path;
             
             if (path_string.size() > 0)
             {
@@ -52,7 +53,7 @@ namespace np
         /**
          appends the given path string to the given parent path
          */
-        static inline str append(str parent_path, str path_string)
+        static inline ::std::string append(::std::string parent_path, ::std::string path_string)
         {
             ::std::filesystem::path parent(parent_path);
             ::std::filesystem::path path(path_string);
@@ -62,7 +63,7 @@ namespace np
         /**
          creates all the directories throughout the given dir path
          */
-        static inline void create_directories(str dirpath)
+        static inline void create_directories(::std::string dirpath)
         {
             if (dirpath.size() > 0)
             {
@@ -74,7 +75,7 @@ namespace np
         /**
          gets the current working directory path
         */
-        static inline str get_current_path()
+        static inline ::std::string get_current_path()
         {
             return ::std::filesystem::current_path().string().c_str();
         }
@@ -82,7 +83,7 @@ namespace np
         /**
          sets the current working directory path
         */
-        static inline void set_current_path(str path_string)
+        static inline void set_current_path(::std::string path_string)
         {
             ::std::filesystem::current_path(::std::filesystem::path(path_string));
         }

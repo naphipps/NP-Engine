@@ -13,6 +13,7 @@
 #include <mutex>
 #include <thread>
 #include <sstream>
+#include <string>
 
 #include "NP-Engine/Foundation/Foundation.hpp"
 #include "NP-Engine/Primitive/Primitive.hpp"
@@ -32,7 +33,7 @@ namespace np
          */
         struct TraceEvent
         {
-            str Name;
+            ::std::string Name;
             time::SteadyTimestamp StartTimestamp;
             time::DurationMicroseconds ElapsedMicroseconds;
             time::DurationMilliseconds ElapsedMilliseconds;
@@ -46,12 +47,12 @@ namespace np
         class Instrumentor
         {
         private:
-            static const str OtherData;
-            static const str TraceEvents;
+            static const ::std::string OtherData;
+            static const ::std::string TraceEvents;
             static Instrumentor _instance;
             
             nlohmann::json _json;
-            str _filepath;
+            ::std::string _filepath;
             Timer _trace_timer;
             ::std::mutex _mutex;
             
@@ -65,7 +66,7 @@ namespace np
             /**
              private constructor - intentional singleton
              */
-            Instrumentor(str filepath):
+            Instrumentor(::std::string filepath):
             _filepath(filepath)
             {
                 _json[OtherData] = nlohmann::json::object();
@@ -113,7 +114,7 @@ namespace np
             /**
              saves the json file to the filepath we already have or the given one if specified
              */
-            void Save(const str filepath = "")
+            void Save(const ::std::string filepath = "")
             {
                 ::std::lock_guard<::std::mutex> lock(_mutex); //TODO: update this
                 
@@ -128,7 +129,7 @@ namespace np
             /**
              sets the filepath of the json file we will save
              */
-            void SetFilepath(const str filepath)
+            void SetFilepath(const ::std::string filepath)
             {
                 _filepath = filepath;
             }
@@ -136,7 +137,7 @@ namespace np
             /**
              gets the filepath of the json file we will save
              */
-            str GetFilepath()
+            ::std::string GetFilepath()
             {
                 return _filepath;
             }
@@ -199,7 +200,7 @@ namespace np
             /**
              constructor
              */
-            InstrumentorTimer(str name):
+            InstrumentorTimer(::std::string name):
             ScopedTimer(name, AddTraceEventAction)
             {}
             

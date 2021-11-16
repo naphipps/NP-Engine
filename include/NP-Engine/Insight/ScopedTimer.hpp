@@ -9,6 +9,8 @@
 #ifndef NP_ENGINE_SCOPED_TIMER_HPP
 #define NP_ENGINE_SCOPED_TIMER_HPP
 
+#include <string>
+
 #include "NP-Engine/Primitive/Primitive.hpp"
 
 #include "Timer.hpp"
@@ -42,7 +44,7 @@ namespace np
             /**
              constructor
              */
-            ScopedTimer(str name, Action action = nullptr):
+            ScopedTimer(::std::string name, Action action = nullptr):
             Timer(name),
             _stopped_action(action),
             _stopped(false)
