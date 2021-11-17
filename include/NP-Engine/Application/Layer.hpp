@@ -1,65 +1,45 @@
+//##===----------------------------------------------------------------------===##//
 //
-//  Layer.hpp
-//  Project Space
+//  Author: Nathan Phipps 2/9/21
 //
-//  Created by Nathan Phipps on 2/9/21.
-//  Copyright © 2021 Nathan Phipps. All rights reserved.
-//
+//##===----------------------------------------------------------------------===##//
 
-#ifndef NP_ENGINE_APPLICATION_LAYER_HPP
-#define NP_ENGINE_APPLICATION_LAYER_HPP
+#ifndef NP_ENGINE_LAYER_HPP
+#define NP_ENGINE_LAYER_HPP
 
-#include "NP-Engine/Primitive/Primitive.hpp"
-#include "NP-Engine/Container/Container.hpp"
 #include "NP-Engine/Time/Time.hpp"
 #include "NP-Engine/Event/Event.hpp"
 
-namespace np
+namespace np::app
 {
-    namespace app
+    /*
+        Layer will represent a layer in our application
+    */
+    class Layer : public event::EventHandler
     {
-        /**
-         Layer will represent a layer in our application
-         */
-        class Layer
-        {
-        public:
-            
-            /**
-             constructor
-             */
-            Layer() = default;
-            
-            /**
-             deconstructor
-             */
-            virtual ~Layer() = default;
-            
-            /**
-             attach method
-             */
-            virtual void Attach()
-            {}
-            
-            /**
-             detach method
-             */
-            virtual void Detach()
-            {}
+    protected:
 
-            /**
-             update method receives a time delta value
-             */
-            virtual void Update(time::DurationMilliseconds time_delta)
-            {}
-            
-            /**
-             on event method
-             */
-            virtual void OnEvent(event::Event& e)
-            {}
-        };
-    }
+        virtual void HandleEvent(event::Event& event) {}
+
+    public:
+
+        Layer(event::EventSubmitter& event_submitter):
+        event::EventHandler(event_submitter)
+        {}
+
+        virtual void Attach() {}
+
+        virtual void Detach() {}
+
+        virtual void Update(time::DurationMilliseconds time_delta) {}
+
+        virtual void Cleanup() {}
+
+        virtual event::EventCategory GetHandledCategories() const
+        {
+            return event::EVENT_CATEGORY_NONE;
+        }
+    };
 }
 
-#endif /* NP_ENGINE_APPLICATION_LAYER_HPP */
+#endif /* NP_ENGINE_LAYER_HPP */

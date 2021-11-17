@@ -30,7 +30,6 @@ namespace np
 
             struct Properties
             {
-                event::EventManager& EventManager;
                 str Title = "NP Window";
                 ui32 Width = DEFAULT_WIDTH;
                 ui32 Height = DEFAULT_HEIGHT;
@@ -41,21 +40,18 @@ namespace np
 
         public:
             
-            static Window* Create(memory::Allocator& allocator, const Window::Properties& properties);
+            static Window* Create(memory::Allocator& allocator, const Window::Properties& properties, event::EventSubmitter& event_submitter);
 
             /**
              constructor
              */
-            Window(const Window::Properties& properties):
+            Window(const Window::Properties& properties, event::EventSubmitter& event_submitter):
+            event::EventHandler(event_submitter),
             _properties(properties)
-            {
-                _properties.EventManager.RegisterHandler(*this);
-            }
+            {}
 
             virtual ~Window()
-            {
-                _properties.EventManager.UnregisterHandler(*this);
-            }
+            {}
             
             /**
              gets the width
@@ -99,6 +95,8 @@ namespace np
             virtual bl IsRunning() const = 0;
 
             virtual void SetTitle(str title) = 0;
+
+            //virtual void AttachToRenderer() = 0; //TODO: we need to attach/detach from our renderer
 
             /**
              enables or disables vsync

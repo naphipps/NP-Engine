@@ -8,6 +8,7 @@
 #define NP_ENGINE_EVENT_HANDLER_HPP
 
 #include "EventImpl.hpp"
+#include "EventSubmitter.hpp"
 
 //TODO: add summary comments
 
@@ -17,9 +18,15 @@ namespace np::event
     {
     protected:
 
+        EventSubmitter& _event_submitter;
+
         virtual void HandleEvent(Event& event) = 0;
 
     public:
+
+        EventHandler(EventSubmitter& event_submitter):
+        _event_submitter(event_submitter)
+        {}
 
         virtual void OnEvent(Event& event)
         {

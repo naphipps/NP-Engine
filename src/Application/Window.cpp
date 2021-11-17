@@ -23,7 +23,7 @@ namespace np
 {
     namespace app
     {
-        Window* Window::Create(memory::Allocator& allocator, const Window::Properties& properties)
+        Window* Window::Create(memory::Allocator& allocator, const Window::Properties& properties, event::EventSubmitter& event_submitter)
         {
 #if NP_ENGINE_PLATFORM_IS_APPLE
             memory::Block block = allocator.Allocate(sizeof(AppleWindow));
@@ -37,7 +37,7 @@ namespace np
 
 #elif NP_ENGINE_PLATFORM_IS_WINDOWS 
             memory::Block block = allocator.Allocate(sizeof(WindowsWindow));
-            memory::Construct<WindowsWindow>(block, properties);
+            memory::Construct<WindowsWindow>(block, properties, event_submitter);
             return static_cast<WindowsWindow*>(block.ptr);
 
 #else

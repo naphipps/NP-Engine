@@ -4,11 +4,11 @@
 
 set(NP_ENGINE_APPLICATION_HPP
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Application/Application.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Application/ApplicationEvent.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Application/ApplicationCloseEvent.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Application/ApplicationImpl.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Application/Layer.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Application/LayerContainer.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Application/Window.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Application/WindowLayer.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Application/WindowCloseEvent.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Application/WindowEvents.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Application/WindowResizeEvent.hpp
@@ -58,7 +58,7 @@ set(NP_ENGINE_EVENT_HPP
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Event/EventImpl.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Event/EventQueue.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Event/EventHandler.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Event/EventManager.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Event/EventSubmitter.hpp
 )
 
 set(NP_ENGINE_FILESYSTEM_HPP

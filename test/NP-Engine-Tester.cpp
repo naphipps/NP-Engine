@@ -23,8 +23,9 @@ namespace np
 
                 for (siz i = 0; i < 1; i++)
                 {
-                    CreateWindow();
-                    _windows.back()->SetTitle("My Game Window >:D - " + to_str(i));
+                    Window* window = GetWindowLayer().CreateWindow();
+                    window->SetTitle("My Game Window >:D - " + to_str(i));
+                    window->Show();
                 }
 
                 Application::Run(argc, argv);

@@ -35,6 +35,7 @@ namespace np
             {
                 if (event.RetrieveData<WindowCloseEvent::DataType>().Window == this)
                 {
+                    //TODO: could we set the event as handled then send this logic into a thread? or like how can we asyncronsly handle this event?
                     _keep_showing = false;
                     while (!_show_procedure_is_complete);
                     _thread.Dispose();
@@ -87,7 +88,7 @@ namespace np
                 {
                     if (glfwWindowShouldClose(_glfw_window))
                     {
-                        _properties.EventManager.Emplace<WindowCloseEvent>(this);
+                        _event_submitter.Emplace<WindowCloseEvent>(this);
                     }
 
                     glfwPollEvents();
@@ -101,8 +102,8 @@ namespace np
             /**
              construcotr
              */
-            WindowsWindow(const Window::Properties& properties) :
-            Window(properties),
+            WindowsWindow(const Window::Properties& properties, event::EventSubmitter& event_submitter) :
+            Window(properties, event_submitter),
             _glfw_window(nullptr),
             _show_procedure_is_complete(true),
             _keep_showing(false)

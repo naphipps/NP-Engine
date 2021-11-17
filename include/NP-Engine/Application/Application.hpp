@@ -1,10 +1,8 @@
+//##===----------------------------------------------------------------------===##//
 //
-//  Application.hpp
-//  Project Space
+//  Author: Nathan Phipps 2/9/21
 //
-//  Created by Nathan Phipps on 2/9/21.
-//  Copyright © 2021 Nathan Phipps. All rights reserved.
-//
+//##===----------------------------------------------------------------------===##//
 
 #ifndef NP_ENGINE_APPLICATION_HPP
 #define NP_ENGINE_APPLICATION_HPP
@@ -12,7 +10,7 @@
 #include "NP-Engine/Foundation/Foundation.hpp"
 
 #include "ApplicationImpl.hpp"
-#include "ApplicationEvent.hpp"
+#include "ApplicationCloseEvent.hpp"
 #include "Layer.hpp"
 #include "Window.hpp"
 #include "WindowEvents.hpp"

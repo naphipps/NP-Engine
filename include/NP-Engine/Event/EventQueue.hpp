@@ -96,6 +96,11 @@ namespace np
 
                 return event != nullptr;
             }
+
+            bl Emplace(const Event* event)
+            {
+                return GetBuffer().enqueue(const_cast<Event*>(event));
+            }
             
             /**
              pop from the other buffer

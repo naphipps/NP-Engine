@@ -28,6 +28,7 @@ namespace np
         constexpr static EventType EVENT_TYPE_MOUSE_BUTTON_RELEASED = 10;
         constexpr static EventType EVENT_TYPE_MOUSE_MOVED = 11;
         constexpr static EventType EVENT_TYPE_MOUSE_SCROLLED = 12;
+        constexpr static EventType EVENT_TYPE_APPLICATION_CLOSE = 13;
         
         /**
          determines if EventType a matches b

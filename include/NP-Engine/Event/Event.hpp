@@ -12,6 +12,6 @@
 #include "EventImpl.hpp"
 #include "EventQueue.hpp"
 #include "EventHandler.hpp"
-#include "EventManager.hpp"
+#include "EventSubmitter.hpp"
 
 #endif /* NP_ENGINE_EVENT_HPP */
