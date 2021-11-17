@@ -38,6 +38,7 @@ namespace np
             
         private:
             static container::array<JobWorker*, concurrency::ThreadPool::MAX_THREAD_COUNT> _other_workers; //TODO: I don't really like this. Make it so this array can be local to the system instead of global
+            //container::vector<JobWorker*>* _neighbor_workers;//TODO: ^ use this vector pointer to add/remove neighbors, and then steal from them
             static ui64 _other_workers_size;
             
             ui32 _id = 0;

@@ -65,7 +65,7 @@ namespace np
             
         protected:
             bl _handled;
-            concurrency::PadObject _pad;
+            concurrency::PadObject _pad; //TODO: should we just inherit PadObject??
             
         public:
             
