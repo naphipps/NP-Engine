@@ -64,14 +64,13 @@ namespace np::app
             return _window_layer;
         }
 
-        void HandleEvent(event::Event& e) override
+        void HandleEvent(event::Event& event) override
         {
-            switch (e.GetType())
+            switch (event.GetType())
             {
             case event::EVENT_TYPE_APPLICATION_CLOSE:
-                std::cout << "handled application close event\n";
                 StopRunning();
-                e.SetHandled();
+                event.SetHandled();
                 break;
             }
         }
