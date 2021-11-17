@@ -21,6 +21,16 @@ namespace np::app
 
         container::vector<Window*> _windows;
 
+    protected:
+
+        virtual void HandleEvent(event::Event& event) override
+        {
+            for (auto it = _windows.begin(); !event.IsHandled() && it != _windows.end(); it++)
+            {
+                (*it)->OnEvent(event);
+            }
+        }
+
     public:
 
         WindowLayer(event::EventSubmitter& event_submitter):
@@ -51,14 +61,6 @@ namespace np::app
             for (Window* window : _windows)
             {
                 window->Update(time_delta);
-            }
-        }
-
-        virtual void OnEvent(event::Event& e) override
-        {
-            for (auto it = _windows.begin(); !e.IsHandled() && it != _windows.end(); it++)
-            {
-                (*it)->OnEvent(e);
             }
         }
 
