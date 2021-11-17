@@ -84,7 +84,7 @@ namespace np
                 NP_ASSERT((old_end - old_begin) == (new_end - new_begin),
                           "we need to make sure our iterators line up with an equal number of elements");
                 
-                memory::Block block{.size = TRAITS::T_SIZE};
+                memory::Block block{nullptr, TRAITS::T_SIZE};
                 reverse_iterator old_rend(old_begin);
                 reverse_iterator old_rit(old_end);
                 reverse_iterator new_rit(new_end);
@@ -104,7 +104,7 @@ namespace np
                 NP_ASSERT((old_end - old_begin) == (new_end - new_begin),
                           "we need to make sure our iterators line up with an equal number of elements");
                 
-                memory::Block block{.size = TRAITS::T_SIZE};
+                memory::Block block{nullptr, TRAITS::T_SIZE};
                 iterator old_it(old_begin);
                 iterator new_it(new_begin);
                 
@@ -192,7 +192,7 @@ namespace np
                     iterator it = end();
                     append_capacity(count);
                     _size += count;
-                    memory::Block block{.size = TRAITS::T_SIZE};
+                    memory::Block block{nullptr, TRAITS::T_SIZE};
                     iterator e = end();
                     for (; it != e; it++)
                     {
@@ -207,7 +207,7 @@ namespace np
                 _begin_index = other._begin_index;
                 _size = other._size;
                 append_buffers(other._buffers.size() - _buffers.size());
-                memory::Block block{.size = TRAITS::T_SIZE};
+                memory::Block block{nullptr, TRAITS::T_SIZE};
                 iterator dst = begin();
                 
                 for (iterator src = other.begin(); src != other.end(); src++)
@@ -223,7 +223,7 @@ namespace np
                 _begin_index = ::std::move(other._begin_index);
                 _size = ::std::move(other._size);
                 append_buffers(other._buffers.size() - _buffers.size());
-                memory::Block block{.size = TRAITS::T_SIZE};
+                memory::Block block{nullptr, TRAITS::T_SIZE};
                 iterator dst = begin();
                 
                 for (iterator src = other.begin(); src != other.end(); src++)
@@ -289,7 +289,7 @@ namespace np
             deque(allocator_reference allocator, deque&& other):
             deque(allocator)
             {
-                move_from(other);
+                move_from(::std::move(other));
             }
             
             deque(deque&& other):
@@ -351,7 +351,7 @@ namespace np
                 NP_ASSERT(set, "failed to set allocator on buffer vector in set_allocator");
                 
                 memory::Block buffer_block;
-                memory::Block block{.size = TRAITS::T_SIZE};
+                memory::Block block{nullptr, TRAITS::T_SIZE};
                 for (siz b=0; b<_buffers.size(); b++)
                 {
                     //move buffer to new allocator
@@ -390,7 +390,7 @@ namespace np
                 }
                 _size = list.size();
                 
-                memory::Block block{.size = TRAITS::T_SIZE};
+                memory::Block block{nullptr, TRAITS::T_SIZE};
                 iterator b = begin();
                 iterator e = end();
                 siz i = 0;
@@ -419,7 +419,7 @@ namespace np
                 }
                 _size = size;
                 
-                memory::Block block{.size = TRAITS::T_SIZE};
+                memory::Block block{nullptr, TRAITS::T_SIZE};
                 iterator dst = this->begin();
                 for (iterator src = begin; src != end; src++)
                 {
@@ -441,7 +441,7 @@ namespace np
                 }
                 _size = size;
                 
-                memory::Block block{.size = TRAITS::T_SIZE};
+                memory::Block block{nullptr, TRAITS::T_SIZE};
                 reverse_iterator dst = this->rbegin();
                 for (reverse_iterator src = rbegin; src != rend; src++)
                 {
@@ -461,7 +461,7 @@ namespace np
             deque& operator=(deque&& other)
             {
                 init();
-                move_from(other);
+                move_from(::std::move(other));
                 return *this;
             }
             
@@ -631,7 +631,7 @@ namespace np
                     append_capacity(1);
                     _size++;
                     shift_elements_right(dst, old_end, dst + 1, end());
-                    memory::Block block{.ptr = dst.base(), .size = TRAITS::T_SIZE};
+                    memory::Block block{(void*)dst.base(), TRAITS::T_SIZE};
                     memory::Construct<T>(block, value);
                     inserted = dst;
                 }
@@ -647,7 +647,7 @@ namespace np
                     append_capacity(1);
                     _size++;
                     shift_elements_right(dst, old_end, dst + 1, end());
-                    memory::Block block{.ptr = dst.base(), .size = TRAITS::T_SIZE};
+                    memory::Block block{(void*)dst.base(), TRAITS::T_SIZE};
                     memory::Construct<T>(block, ::std::move(value));
                     inserted = dst;
                 }
@@ -663,7 +663,7 @@ namespace np
                     append_capacity(count);
                     _size += count;
                     shift_elements_right(dst, old_end, dst + count, end());
-                    memory::Block block{.size = TRAITS::T_SIZE};
+                    memory::Block block{nullptr, TRAITS::T_SIZE};
                     for (siz i=0; i<count; i++)
                     {
                         block.ptr = (dst + i).base();
@@ -684,7 +684,7 @@ namespace np
                     append_capacity(count);
                     _size += count;
                     shift_elements_right(dst, old_end, dst + (last - first), end());
-                    memory::Block block{.size = TRAITS::T_SIZE};
+                    memory::Block block{nullptr, TRAITS::T_SIZE};
                     for (container::iterator<T> it = first; it != last; it++)
                     {
                         block.ptr = (dst + (it - first)).base();
@@ -705,7 +705,7 @@ namespace np
                     append_capacity(count);
                     _size += count;
                     shift_elements_right(dst, old_end, dst + (rfirst - rlast), end());
-                    memory::Block block{.size = TRAITS::T_SIZE};
+                    memory::Block block{nullptr, TRAITS::T_SIZE};
                     for (container::reverse_iterator<T> rit = rfirst; rit != rlast; rit++)
                     {
                         block.ptr = (dst + (rfirst - rit)).base();
@@ -726,7 +726,7 @@ namespace np
                     append_capacity(count);
                     _size += count;
                     shift_elements_right(dst, old_end, dst + (last - first), end());
-                    memory::Block block{.size = TRAITS::T_SIZE};
+                    memory::Block block{nullptr, TRAITS::T_SIZE};
                     for (iterator it = first; it != last; it++)
                     {
                         block.ptr = (dst + (it - first)).base();
@@ -747,7 +747,7 @@ namespace np
                     append_capacity(count);
                     _size += count;
                     shift_elements_right(dst, old_end, dst + (rfirst - rlast), end());
-                    memory::Block block{.size = TRAITS::T_SIZE};
+                    memory::Block block{nullptr, TRAITS::T_SIZE};
                     for (reverse_iterator rit = rfirst; rit != rlast; rit++)
                     {
                         block.ptr = (dst + (rfirst - rit)).base();
@@ -767,7 +767,7 @@ namespace np
                     append_capacity(list.size());
                     _size += list.size();
                     shift_elements_right(dst, old_end, dst + list.size(), end());
-                    memory::Block block{.size = TRAITS::T_SIZE};
+                    memory::Block block{nullptr, TRAITS::T_SIZE};
                     for (siz i=0; i<list.size(); i++)
                     {
                         block.ptr = (dst + i).base();
@@ -790,7 +790,7 @@ namespace np
                     append_capacity(1);
                     _size++;
                     shift_elements_right(dst, old_end, dst + 1, end());
-                    memory::Block block{.ptr = dst.base(), .size = TRAITS::T_SIZE};
+                    memory::Block block{(void*)dst.base(), TRAITS::T_SIZE};
                     memory::Construct<T>(block, ::std::forward<Args>(args)...);
                 }
                 

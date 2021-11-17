@@ -159,7 +159,7 @@ namespace np::container
          */
         deque_iterator& operator=(deque_iterator&& other)
         {
-            move_from(other);
+            move_from(::std::move(other));
             return *this;
         }
         
@@ -425,7 +425,7 @@ namespace np::container
         
         deque_reverse_iterator(deque_reverse_iterator&& other)
         {
-            move_from(other);
+            move_from(::std::move(other));
         }
         
         deque_reverse_iterator(const deque_iterator<T>& other)
@@ -435,7 +435,7 @@ namespace np::container
         
         deque_reverse_iterator(deque_iterator<T>&& other)
         {
-            move_from(other);
+            move_from(::std::move(other));
         }
         
         deque_reverse_iterator(nptr):
@@ -477,7 +477,7 @@ namespace np::container
         
         deque_reverse_iterator& operator=(deque_reverse_iterator&& other)
         {
-            move_from(other);
+            move_from(::std::move(other));
             return *this;
         }
         
@@ -489,7 +489,7 @@ namespace np::container
         
         deque_reverse_iterator& operator=(deque_iterator<T>&& other)
         {
-            move_from(other);
+            move_from(::std::move(other));
             return *this;
         }
         
