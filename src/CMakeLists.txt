@@ -5,7 +5,6 @@
 set(NP_ENGINE_APPLICATION_HPP
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Application/Application.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Application/ApplicationCloseEvent.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Application/ApplicationImpl.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Application/Layer.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Application/Window.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Application/WindowLayer.hpp
@@ -74,7 +73,6 @@ set(NP_ENGINE_FOUNDATION_HPP
 
 set(NP_ENGINE_GRAPHICS_HPP
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/Graphics.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/GraphicsImpl.hpp
 )
 
 set(NP_ENGINE_GRAPHICS_RPI_HPP
@@ -82,11 +80,11 @@ set(NP_ENGINE_GRAPHICS_RPI_HPP
 )
 
 set(NP_ENGINE_GRAPHICS_OPENGL_HPP
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RHI/OpenGL/Renderer.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RHI/OpenGL/OpenGLRenderer.hpp
 )
 
 set(NP_ENGINE_GRAPHICS_VULKAN_HPP
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RHI/Vulkan/Renderer.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RHI/Vulkan/VulkanRenderer.hpp
 )
 
 set(NP_ENGINE_INPUT_HPP
@@ -282,15 +280,19 @@ set(NP_ENGINE_APPLICATION_CPP
 )
 
 set(NP_ENGINE_GRAPHICS_CPP
-	Graphics/GraphicsImpl.cpp
+	Graphics/Graphics.cpp
+)
+
+set(NP_ENGINE_GRAPHICS_RPI_CPP
+	Graphics/RPI/Renderer.cpp
 )
 
 set(NP_ENGINE_GRAPHICS_OPENGL_CPP
-	Graphics/RHI/OpenGL/Renderer.cpp
+	Graphics/RHI/OpenGL/OpenGLRenderer.cpp
 )
 
 set(NP_ENGINE_GRAPHICS_VULKAN_CPP
-	Graphics/RHI/Vulkan/Renderer.cpp
+	Graphics/RHI/Vulkan/VulkanRenderer.cpp
 )
 
 set(NP_ENGINE_INSIGHT_CPP
@@ -352,6 +354,7 @@ endif()
 set(NP_ENGINE_SOURCE_FILES
 	${NP_ENGINE_APPLICATION_CPP}
 	${NP_ENGINE_GRAPHICS_CPP}
+	${NP_ENGINE_GRAPHICS_RPI_CPP}
 	${NP_ENGINE_GRAPHICS_OPENGL_CPP}
 	${NP_ENGINE_GRAPHICS_VULKAN_CPP}
 	${NP_ENGINE_INSIGHT_CPP}
@@ -438,7 +441,7 @@ source_group(Event FILES ${NP_ENGINE_EVENT_HPP})
 source_group(Filesystem FILES ${NP_ENGINE_FILESYSTEM_HPP})
 source_group(Foundation FILES ${NP_ENGINE_FOUNDATION_HPP})
 source_group(Graphics FILES ${NP_ENGINE_GRAPHICS_HPP} ${NP_ENGINE_GRAPHICS_CPP})
-source_group(Graphics/RPI FILES ${NP_ENGINE_GRAPHICS_RPI_HPP})
+source_group(Graphics/RPI FILES ${NP_ENGINE_GRAPHICS_RPI_HPP} ${NP_ENGINE_GRAPHICS_RPI_CPP})
 source_group(Graphics/RHI/OpenGL FILES ${NP_ENGINE_GRAPHICS_OPENGL_HPP} ${NP_ENGINE_GRAPHICS_OPENGL_CPP})
 source_group(Graphics/RHI/Vulkan FILES ${NP_ENGINE_GRAPHICS_VULKAN_HPP} ${NP_ENGINE_GRAPHICS_VULKAN_CPP})
 source_group(Input FILES ${NP_ENGINE_INPUT_HPP})

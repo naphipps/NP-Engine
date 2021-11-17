@@ -7,17 +7,22 @@
 #ifndef NP_ENGINE_GRAPHICS_OPENGL_RENDERER_HPP
 #define NP_ENGINE_GRAPHICS_OPENGL_RENDERER_HPP
 
-#include "NP-Engine/Graphics/RPI/Renderer.hpp"
+#include "NP-Engine/Primitive/Primitive.hpp"
+#include "NP-Engine/String/String.hpp"
+
+#include "../../RPI/Renderer.hpp"
 
 //TODO: add summary comments
 
 namespace np::graphics::rhi
 {
-	class OpenGLRenderer : public rpi::Renderer
+	class OpenGLRenderer : public Renderer
 	{
 	public:
-		bl Init() override;
-		rpi::Renderer::Type GetType() const override;
+		
+		Renderer::RhiType GetRhiType() const override;
+		bl IsEnabled() const override;
+		str GetName() const override { return "OpenGL"; }
 	};
 }
 

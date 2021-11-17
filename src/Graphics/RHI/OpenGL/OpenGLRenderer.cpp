@@ -4,19 +4,19 @@
 //
 //##===----------------------------------------------------------------------===##//
 
-#include "NP-Engine/Graphics/RHI/OpenGL/Renderer.hpp"
+#include "NP-Engine/Graphics/RHI/OpenGL/OpenGLRenderer.hpp"
 
 //TODO: add summary comments
 
 namespace np::graphics::rhi
 {
-	bl OpenGLRenderer::Init()
+	Renderer::RhiType OpenGLRenderer::GetRhiType() const
 	{
-		return false;
+		return Renderer::RhiType::OpenGL;
 	}
 
-	rpi::Renderer::Type OpenGLRenderer::GetType() const
+	bl OpenGLRenderer::IsEnabled() const
 	{
-		return rpi::Renderer::Type::OpenGL;
+		return false;
 	}
 }

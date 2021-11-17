@@ -4,19 +4,14 @@
 //
 //##===----------------------------------------------------------------------===##//
 
-#include "NP-Engine/Graphics/RHI/Vulkan/Renderer.hpp"
+#include "NP-Engine/Graphics/RHI/Vulkan/VulkanRenderer.hpp"
 
 //TODO: add summary comments
-
+/*
 namespace np::graphics::rhi
 {
-	bl VulkanRenderer::Init()
+	rpi::Renderer::RhiType VulkanRenderer::GetRhiType() const
 	{
-		return false;
+		
 	}
-
-	rpi::Renderer::Type VulkanRenderer::GetType() const
-	{
-		return rpi::Renderer::Type::Vulkan;
-	}
-}
+}*/
