@@ -6,6 +6,8 @@
 //  Copyright © 2020 Nathan Phipps. All rights reserved.
 //
 
+//TODO: move contents here to JobSystem.hpp
+
 #ifndef NP_ENGINE_JOB_SYSTEM_IMPL_HPP
 #define NP_ENGINE_JOB_SYSTEM_IMPL_HPP
 

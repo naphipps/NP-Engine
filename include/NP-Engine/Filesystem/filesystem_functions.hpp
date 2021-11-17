@@ -6,6 +6,8 @@
 //  Copyright © 2020 Nathan Phipps. All rights reserved.
 //
 
+//TODO: move these contents to Filesystem.hpp
+
 #ifndef NP_ENGINE_FILESYSTEM_FUNCTIONS_HPP
 #define NP_ENGINE_FILESYSTEM_FUNCTIONS_HPP
 

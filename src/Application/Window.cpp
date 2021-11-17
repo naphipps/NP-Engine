@@ -38,7 +38,7 @@ namespace np
 #elif NP_ENGINE_PLATFORM_IS_WINDOWS 
             memory::Block block = allocator.Allocate(sizeof(WindowsWindow));
             memory::Construct<WindowsWindow>(block, properties, event_submitter);
-            return static_cast<WindowsWindow*>(block.ptr);
+            return static_cast<WindowsWindow*>(block.ptr); //TODO: just use direct cast on Begin() instead
 
 #else
 #error We do not support a window for this platform

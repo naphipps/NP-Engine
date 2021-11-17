@@ -4,6 +4,8 @@
 //
 //##===----------------------------------------------------------------------===##//
 
+//TODO: move these contents to Event.hpp
+
 #ifndef NP_ENGINE_EVENT_IMPL_HPP
 #define NP_ENGINE_EVENT_IMPL_HPP
 
