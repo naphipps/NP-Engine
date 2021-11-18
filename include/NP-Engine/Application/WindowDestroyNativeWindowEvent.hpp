@@ -22,23 +22,18 @@ namespace np::app
             Window* window;
         };
         
-        WindowDestroyNativeWindowEvent(Window* window)
+        WindowDestroyNativeWindowEvent(Window* window):
+        event::Event()
         {
-            _pad.AssignData<DataType>({window});
+            AssignData<DataType>({window});
         }
         
-        /**
-         get the type that this event should be treated as
-         */
-        virtual event::EventType GetType() const
+        virtual event::EventType GetType() const override
         {
             return event::EVENT_TYPE_WINDOW_DESTROY_NATIVE_WINDOW;
         }
         
-        /**
-         get the category this event should be treated as
-         */
-        virtual event::EventCategory GetCategory() const
+        virtual event::EventCategory GetCategory() const override
         {
             return event::EVENT_CATEGORY_WINDOW;
         }

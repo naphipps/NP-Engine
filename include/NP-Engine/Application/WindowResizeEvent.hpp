@@ -1,15 +1,16 @@
+//##===----------------------------------------------------------------------===##//
 //
-//  WindowResizeEvent.hpp
-//  NP-Engine
+//  Author: Nathan Phipps 2/10/21
 //
-//  Created by Nathan Phipps on 2/10/21.
-//
+//##===----------------------------------------------------------------------===##//
 
 #ifndef NP_ENGINE_WINDOW_RESIZE_EVENT_HPP
 #define NP_ENGINE_WINDOW_RESIZE_EVENT_HPP
 
 #include "NP-Engine/Primitive/Primitive.hpp"
 #include "NP-Engine/Event/Event.hpp"
+
+#include "Window.hpp"
 
 namespace np::app
 {
@@ -26,7 +27,7 @@ namespace np::app
         WindowResizeEvent(Window* window, ui32 width, ui32 height):
         event::Event()
         {
-            _pad.AssignData<DataType>({window, width, height});
+            AssignData<DataType>({window, width, height});
         }
 
         ui32 GetWidth() const

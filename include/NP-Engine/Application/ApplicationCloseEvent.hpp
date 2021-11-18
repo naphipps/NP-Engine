@@ -15,12 +15,16 @@ namespace np::app
     {
     public:
 
-        virtual event::EventType GetType() const
+        ApplicationCloseEvent():
+        event::Event()
+        {}
+
+        virtual event::EventType GetType() const override
         {
             return event::EVENT_TYPE_APPLICATION_CLOSE;
         }
 
-        virtual event::EventCategory GetCategory() const
+        virtual event::EventCategory GetCategory() const override
         {
             return event::EVENT_CATEGORY_APPLICATION;
         }

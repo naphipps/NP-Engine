@@ -25,7 +25,7 @@ namespace np::app
         WindowCloseEvent(Window* window):
         event::Event()
         {
-            _pad.AssignData<DataType>({window});
+            AssignData<DataType>({window});
         }
 
         event::EventType GetType() const override
