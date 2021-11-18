@@ -60,7 +60,9 @@ namespace np::app
 
         Window* CreateWindow()
         {
-            return _windows.emplace_back(Window::Create(_windows.get_allocator(), Window::Properties(), _event_submitter));
+            memory::Block block = _windows.get_allocator().Allocate(sizeof(Window));
+            memory::Construct<Window>(block, Window::Properties(), _event_submitter);
+            return _windows.emplace_back((Window*)block.ptr);
         }
         
         virtual void Update(time::DurationMilliseconds time_delta) override

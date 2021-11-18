@@ -190,20 +190,6 @@ set(NP_ENGINE_PLATFORM_HPP
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Platform/PlatformConstants.hpp
 )
 
-if (APPLE)
-	set(NP_ENGINE_PLATFORM_APPLE_APPLICATION_HPP
-		${PROJECT_SOURCE_DIR}/include/NP-Engine/Platform/Apple/Application/AppleWindow.hpp
-	)
-elseif(MSVC)
-	set(NP_ENGINE_PLATFORM_WINDOWS_APPLICATION_HPP
-		${PROJECT_SOURCE_DIR}/include/NP-Engine/Platform/Windows/Application/WindowsWindow.hpp
-	)
-else()
-	set(NP_ENGINE_PLATFORM_LINUX_APPLICATION_HPP
-		${PROJECT_SOURCE_DIR}/include/NP-Engine/Platform/Linux/Application/LinuxWindow.hpp
-	)
-endif()
-
 set(NP_ENGINE_PRIMITIVE_HPP
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Primitive/atomic_types.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Primitive/Primitive.hpp
@@ -272,23 +258,6 @@ set(NP_ENGINE_HEADER_FILES
 	${NP_ENGINE_TIME_HPP}
 )
 
-if (APPLE)
-	set(NP_ENGINE_HEADER_FILES
-		${NP_ENGINE_HEADER_FILES}
-		${NP_ENGINE_PLATFORM_APPLE_APPLICATION_HPP}
-	)
-elseif(MSVC)
-	set(NP_ENGINE_HEADER_FILES
-		${NP_ENGINE_HEADER_FILES}
-		${NP_ENGINE_PLATFORM_WINDOWS_APPLICATION_HPP}
-	)
-else()
-	set(NP_ENGINE_HEADER_FILES
-		${NP_ENGINE_HEADER_FILES}
-		${NP_ENGINE_PLATFORM_LINUX_APPLICATION_HPP}
-	)
-endif()
-
 ##==--------------------------------------------------------==##
 #NP_ENGINE Source Files
 ##==--------------------------------------------------------==##
@@ -343,20 +312,6 @@ set(NP_ENGINE_PHYSICS_CPP
 	Physics/Physics.cpp
 )
 
-if(APPLE)
-	set(NP_ENGINE_PLATFORM_APPLE_APPLICATION_CPP
-		Platform/Apple/Application/AppleWindow.cpp
-	)
-elseif(MSVC)
-	set(NP_ENGINE_PLATFORM_WINDOWS_APPLICATION_CPP
-		Platform/Windows/Application/WindowsWindow.cpp
-	)
-else()
-	set(NP_ENGINE_PLATFORM_LINUX_APPLICATION_CPP
-		Platform/Linux/Application/LinuxWindow.cpp
-	)
-endif()
-
 set(NP_ENGINE_SYSTEM_CPP)
 
 if (APPLE)
@@ -385,23 +340,6 @@ set(NP_ENGINE_SOURCE_FILES
 	${NP_ENGINE_PHYSICS_CPP}
 	${NP_ENGINE_SYSTEM_CPP}
 )
-
-if (APPLE)
-	set(NP_ENGINE_SOURCE_FILES
-		${NP_ENGINE_SOURCE_FILES}
-		${NP_ENGINE_PLATFORM_APPLE_APPLICATION_CPP}
-	)
-elseif(MSVC)
-	set(NP_ENGINE_SOURCE_FILES
-		${NP_ENGINE_SOURCE_FILES}
-		${NP_ENGINE_PLATFORM_WINDOWS_APPLICATION_CPP}
-	)
-else()
-	set(NP_ENGINE_SOURCE_FILES
-		${NP_ENGINE_SOURCE_FILES}
-		${NP_ENGINE_PLATFORM_LINUX_APPLICATION_CPP}
-	)
-endif()
 
 ##==--------------------------------------------------------==##
 
@@ -494,11 +432,3 @@ source_group(Serialization FILES ${NP_ENGINE_SERIALIZATION_HPP})
 source_group(String FILES ${NP_ENGINE_STRING_HPP})
 source_group(System FILES ${NP_ENGINE_SYSTEM_HPP} ${NP_ENGINE_SYSTEM_CPP})
 source_group(Time FILES ${NP_ENGINE_TIME_HPP})
-
-if (APPLE)
-	source_group(Platform/Apple/Application FILES ${NP_ENGINE_PLATFORM_APPLE_APPLICATION_HPP} ${NP_ENGINE_PLATFORM_APPLE_APPLICATION_CPP})
-elseif(MSVC)
-	source_group(Platform/Windows/Application FILES ${NP_ENGINE_PLATFORM_WINDOWS_APPLICATION_HPP} ${NP_ENGINE_PLATFORM_WINDOWS_APPLICATION_CPP})
-else()
-	source_group(Platform/Linux/Application FILES ${NP_ENGINE_PLATFORM_LINUX_APPLICATION_HPP} ${NP_ENGINE_PLATFORM_LINUX_APPLICATION_CPP})
-endif()
