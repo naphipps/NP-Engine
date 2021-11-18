@@ -7,16 +7,10 @@
 
 //TODO: can we remove this?
 
-//#include "AppleWindow.hpp"
+#include "NP-Engine/Platform/Apple/Application/AppleWindow.hpp"
 
-//namespace np
-//{
-//    namespace application
-//    {
-//        
-//        AppleWindow::AppleWindow(const Window::Properties& properties):
-//        Window(properties)
-//        {}
-//        
-//    }
-//}
+namespace np::app
+{
+    atm_ui32 AppleWindow::_window_count = 0;
+    Mutex AppleWindow::_mutex;
+}

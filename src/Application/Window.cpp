@@ -27,7 +27,7 @@ namespace np
         {
 #if NP_ENGINE_PLATFORM_IS_APPLE
             memory::Block block = allocator.Allocate(sizeof(AppleWindow));
-            memory::Construct<AppleWindow>(block, properties);
+            memory::Construct<AppleWindow>(block, properties, event_submitter);
             return static_cast<AppleWindow*>(block.ptr);
 
 #elif NP_ENGINE_PLATFORM_IS_LINUX 
