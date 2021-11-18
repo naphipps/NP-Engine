@@ -32,7 +32,7 @@ namespace np
 
 #elif NP_ENGINE_PLATFORM_IS_LINUX 
             memory::Block block = allocator.Allocate(sizeof(LinuxWindow));
-            memory::Construct<LinuxWindow>(block, properties);
+            memory::Construct<LinuxWindow>(block, properties, event_submitter);
             return static_cast<LinuxWindow*>(block.ptr);
 
 #elif NP_ENGINE_PLATFORM_IS_WINDOWS 
