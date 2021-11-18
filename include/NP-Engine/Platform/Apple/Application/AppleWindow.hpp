@@ -28,29 +28,16 @@ namespace np
         {
         private:
             
-            static atm_ui32 _window_count;
-            static Mutex _mutex;
-
             GLFWwindow* _glfw_window;
             concurrency::Thread _thread;
             bl _show_procedure_is_complete;
-            bl _keep_showing;
 
             void HandleSpawnNative(event::Event& event)
             {
                 if (event.RetrieveData<WindowSpawnNativeWindowEvent::DataType>().window == this)
                 {
-                    //Lock lock(_mutex);
-                    _window_count++;
-
-                    if (_window_count == 1)
-                    {
-                        
-                    }
-
                     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
                     _glfw_window = glfwCreateWindow(_properties.Width, _properties.Height, _properties.Title.c_str(), nullptr, nullptr);
-                    
                     event.SetHandled();
                 }
             }
@@ -59,27 +46,21 @@ namespace np
             {
                 if (event.RetrieveData<WindowDestroyNativeWindowEvent::DataType>().window == this)
                 {
-                    //Lock lock(_mutex);
-                    _window_count--;
-
                     glfwDestroyWindow(_glfw_window);
-                    
-                    if (_window_count == 0)
-                    {
-                        
-                    }
-                    
                     _glfw_window = nullptr;
                     event.SetHandled();
                 }
             }
-            
+
             void HandleClose(event::Event& event)
             {
                 if (event.RetrieveData<WindowCloseEvent::DataType>().window == this)
                 {
-                    //TODO: could we set the event as handled then send this logic into a thread? or like how can we asyncronsly handle this event?
-                    _keep_showing = false;
+                    if (_glfw_window != nullptr)
+                    {
+                        glfwSetWindowShouldClose(_glfw_window, GLFW_TRUE);
+                    }
+
                     if (_show_procedure_is_complete)
                     {
                         _thread.Dispose();
@@ -106,31 +87,26 @@ namespace np
             
             void ShowProcedure()
             {
-                //system::Popup::Show("Hey", "we got here just fine");
-//                ::std::cout<<"got here just fine\n";
-                //std::abort();
-                
                 _event_submitter.Emplace<WindowSpawnNativeWindowEvent>(this);
-                while(_glfw_window == nullptr);
-                
-                bl should_close = false;
-                
-                _keep_showing = true;
-                while (_keep_showing)
+                while (_glfw_window == nullptr)
                 {
-                    if (glfwWindowShouldClose(_glfw_window))
-                    {
-                        if (!should_close)
-                        {
-                            should_close = true;
-                            _event_submitter.Emplace<WindowCloseEvent>(this);
-                        }
-                    }
+                    concurrency::ThisThread::yield();
+                    concurrency::ThisThread::sleep_for(time::Milliseconds(8));
                 }
-                
+
+                while (!glfwWindowShouldClose(_glfw_window))
+                {
+                    concurrency::ThisThread::yield();
+                    concurrency::ThisThread::sleep_for(time::Milliseconds(8));
+                }
+
                 _event_submitter.Emplace<WindowDestroyNativeWindowEvent>(this);
-                while(_glfw_window != nullptr);
-                
+                while (_glfw_window != nullptr)
+                {
+                    concurrency::ThisThread::yield();
+                    concurrency::ThisThread::sleep_for(time::Milliseconds(8));
+                }
+
                 _show_procedure_is_complete = true;
             }
             
@@ -139,8 +115,7 @@ namespace np
             AppleWindow(const Window::Properties& properties, event::EventSubmitter& event_submitter):
             Window(properties, event_submitter),
             _glfw_window(nullptr),
-            _show_procedure_is_complete(true),
-            _keep_showing(false)
+            _show_procedure_is_complete(true)
             {}
             
             virtual void Show() override
@@ -149,9 +124,9 @@ namespace np
                 _thread.Run(&AppleWindow::ShowProcedure, this);
             }
             
-            virtual bl IsRunning() const override
+            bl IsRunning() const override
             {
-                return _thread.IsRunning();
+                return !_show_procedure_is_complete;
             }
 
             virtual void SetTitle(str title) override
