@@ -19,7 +19,7 @@ namespace np::app
 
         struct DataType
         {
-            Window* Window;
+            Window* window;
         };
 
         WindowCloseEvent(Window* window):

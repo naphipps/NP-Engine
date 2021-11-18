@@ -18,9 +18,9 @@ namespace np::app
     public:
         struct DataType
         {
-            Window* Window;
-            ui32 Width;
-            ui32 Height;
+            Window* window;
+            ui32 width;
+            ui32 height;
         };
             
         WindowResizeEvent(Window* window, ui32 width, ui32 height):
@@ -31,12 +31,12 @@ namespace np::app
 
         ui32 GetWidth() const
         {
-            return RetrieveData<DataType>().Width;
+            return RetrieveData<DataType>().width;
         }
 
         ui32 GetHeight() const
         {
-            return RetrieveData<DataType>().Height;
+            return RetrieveData<DataType>().height;
         }
 
         event::EventType GetType() const override
