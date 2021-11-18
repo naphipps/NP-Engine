@@ -12,8 +12,8 @@
 
 #include "NP-Engine/Primitive/Primitive.hpp"
 #include "NP-Engine/Concurrency/Concurrency.hpp"
-
 #include "NP-Engine/Application/Application.hpp"
+#include "NP-Engine/Time/Time.hpp"
 
 namespace np
 {
@@ -23,23 +23,44 @@ namespace np
         {
         private:
 
-            static ui32 _window_count;
-            static Mutex _mutex;
-
             GLFWwindow* _glfw_window;
             concurrency::Thread _thread;
             bl _show_procedure_is_complete;
-            bl _keep_showing;
+
+            void HandleSpawnNative(event::Event& event)
+            {
+                if (event.RetrieveData<WindowSpawnNativeWindowEvent::DataType>().window == this)
+                {
+                    glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+                    _glfw_window = glfwCreateWindow(_properties.Width, _properties.Height, _properties.Title.c_str(), nullptr, nullptr);
+                    event.SetHandled();
+                }
+            }
+
+            void HandleDestroyNative(event::Event& event)
+            {
+                if (event.RetrieveData<WindowDestroyNativeWindowEvent::DataType>().window == this)
+                {
+                    glfwDestroyWindow(_glfw_window);
+                    _glfw_window = nullptr;
+                    event.SetHandled();
+                }
+            }
 
             void HandleClose(event::Event& event)
             {
                 if (event.RetrieveData<WindowCloseEvent::DataType>().window == this)
                 {
-                    //TODO: could we set the event as handled then send this logic into a thread? or like how can we asyncronsly handle this event?
-                    _keep_showing = false;
-                    while (!_show_procedure_is_complete);
-                    _thread.Dispose();
-                    event.SetHandled();
+                    if (_glfw_window != nullptr)
+                    {
+                        glfwSetWindowShouldClose(_glfw_window, GLFW_TRUE);
+                    }
+
+                    if (_show_procedure_is_complete)
+                    {
+                        _thread.Dispose();
+                        event.SetHandled();
+                    }
                 }
             }
 
@@ -50,63 +71,46 @@ namespace np
                 case event::EVENT_TYPE_WINDOW_CLOSE:
                     HandleClose(event);
                     break;
-                }
-            }
-
-            void CreateGlfwWindow()
-            {
-                Lock lock(_mutex);
-                _window_count++;
-
-                if (_window_count == 1)
-                {
-                    glfwInit();
-                }
-
-                glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-                _glfw_window = glfwCreateWindow(_properties.Width, _properties.Height, _properties.Title.c_str(), nullptr, nullptr);
-            }
-
-            void DestroyGlfwWindow()
-            {
-                Lock lock(_mutex);
-                _window_count--;
-
-                glfwDestroyWindow(_glfw_window);
-
-                if (_window_count == 0)
-                {
-                    glfwTerminate();
+                case event::EVENT_TYPE_WINDOW_SPAWN_NATIVE_WINDOW:
+                    HandleSpawnNative(event);
+                    break;
+                case event::EVENT_TYPE_WINDOW_DESTROY_NATIVE_WINDOW:
+                    HandleDestroyNative(event);
+                    break;
                 }
             }
 
             void ShowProcedure()
             {
-                CreateGlfwWindow();
-                _keep_showing = true;
-                while (_keep_showing)
+                _event_submitter.Emplace<WindowSpawnNativeWindowEvent>(this);
+                while (_glfw_window == nullptr)
                 {
-                    if (glfwWindowShouldClose(_glfw_window))
-                    {
-                        _event_submitter.Emplace<WindowCloseEvent>(this);
-                    }
-
-                    glfwPollEvents();
+                    concurrency::ThisThread::yield();
+                    concurrency::ThisThread::sleep_for(time::Milliseconds(8));
                 }
-                DestroyGlfwWindow();
+
+                while (!glfwWindowShouldClose(_glfw_window))
+                {
+                    concurrency::ThisThread::yield();
+                    concurrency::ThisThread::sleep_for(time::Milliseconds(8));
+                }
+
+                _event_submitter.Emplace<WindowDestroyNativeWindowEvent>(this);
+                while (_glfw_window != nullptr)
+                {
+                    concurrency::ThisThread::yield();
+                    concurrency::ThisThread::sleep_for(time::Milliseconds(8));
+                }
+
                 _show_procedure_is_complete = true;
             }
 
         public:
 
-            /**
-             construcotr
-             */
             WindowsWindow(const Window::Properties& properties, event::EventSubmitter& event_submitter) :
             Window(properties, event_submitter),
             _glfw_window(nullptr),
-            _show_procedure_is_complete(true),
-            _keep_showing(false)
+            _show_procedure_is_complete(true)
             {}
                         
             void Show() override
@@ -117,12 +121,9 @@ namespace np
 
             bl IsRunning() const override
             {
-                return _thread.IsRunning();
+                return !_show_procedure_is_complete;
             }
 
-            /**
-             update method
-             */
             virtual void Update(time::DurationMilliseconds duratrion_milliseconds) override
             {
                 //TODO: implement
@@ -137,12 +138,9 @@ namespace np
                 }
             }
 
-            /**
-             gets the native window pointer
-             */
             virtual void* GetNativeWindow() const override
             {
-                return nullptr; //TODO: implement
+                return _glfw_window;
             }
 
             virtual event::EventCategory GetHandledCategories() const override
