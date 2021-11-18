@@ -96,7 +96,7 @@ namespace np
                 DestroyGlfwWindow();
                 _show_procedure_is_complete = true;
             }
-
+            
         public:
             
             /**

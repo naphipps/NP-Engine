@@ -10,7 +10,7 @@
 
 #include <GLFW/glfw3.h>
 
-#include <iostream> //TOOD: remove
+#include <iostream> //TODO: remove
 #include <cstdlib> //TODO: remove
 
 #include "NP-Engine/Primitive/Primitive.hpp"
@@ -36,15 +36,55 @@ namespace np
             bl _show_procedure_is_complete;
             bl _keep_showing;
 
+            void HandleSpawnNative(event::Event& event)
+            {
+                if (event.RetrieveData<WindowSpawnNativeWindowEvent::DataType>().window == this)
+                {
+                    //Lock lock(_mutex);
+                    _window_count++;
+
+                    if (_window_count == 1)
+                    {
+                        
+                    }
+
+                    glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+                    _glfw_window = glfwCreateWindow(_properties.Width, _properties.Height, _properties.Title.c_str(), nullptr, nullptr);
+                    
+                    event.SetHandled();
+                }
+            }
+
+            void HandleDestroyNative(event::Event& event)
+            {
+                if (event.RetrieveData<WindowDestroyNativeWindowEvent::DataType>().window == this)
+                {
+                    //Lock lock(_mutex);
+                    _window_count--;
+
+                    glfwDestroyWindow(_glfw_window);
+                    
+                    if (_window_count == 0)
+                    {
+                        
+                    }
+                    
+                    _glfw_window = nullptr;
+                    event.SetHandled();
+                }
+            }
+            
             void HandleClose(event::Event& event)
             {
-                if (event.RetrieveData<WindowCloseEvent::DataType>().Window == this)
+                if (event.RetrieveData<WindowCloseEvent::DataType>().window == this)
                 {
                     //TODO: could we set the event as handled then send this logic into a thread? or like how can we asyncronsly handle this event?
                     _keep_showing = false;
-                    while (!_show_procedure_is_complete);
-                    _thread.Dispose();
-                    event.SetHandled();
+                    if (_show_procedure_is_complete)
+                    {
+                        _thread.Dispose();
+                        event.SetHandled();
+                    }
                 }
             }
 
@@ -55,67 +95,47 @@ namespace np
                 case event::EVENT_TYPE_WINDOW_CLOSE:
                     HandleClose(event);
                     break;
+                case event::EVENT_TYPE_WINDOW_SPAWN_NATIVE_WINDOW:
+                    HandleSpawnNative(event);
+                    break;
+                case event::EVENT_TYPE_WINDOW_DESTROY_NATIVE_WINDOW:
+                    HandleDestroyNative(event);
+                    break;
                 }
             }
-
-            void CreateGlfwWindow()
-            {
-                Lock lock(_mutex);
-                _window_count++;
-
-                if (_window_count == 1)
-                {
-                    int response = glfwInit();
-                    if (response == GLFW_FALSE)
-                    {
-                        std::cout<<"ERROR GLFW DID NOT INIT\n";
-                    }
-                    else
-                    {
-                        std::cout<<"GLFW DID INIT\n";
-                    }
-                }
-                
-                glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-                _glfw_window = glfwCreateWindow(_properties.Width, _properties.Height, _properties.Title.c_str(), nullptr, nullptr);
-                
-                NP_ASSERT(_glfw_window != nullptr, "glfw window did not get created");
-            }
-
-            void DestroyGlfwWindow()
-            {
-                Lock lock(_mutex);
-                _window_count--;
-
-                glfwDestroyWindow(_glfw_window);
-                if (_window_count == 0)
-                {
-                    glfwTerminate();
-                }
-            }
-
+            
             void ShowProcedure()
             {
-                CreateGlfwWindow();
+                //system::Popup::Show("Hey", "we got here just fine");
+//                ::std::cout<<"got here just fine\n";
+                //std::abort();
+                
+                _event_submitter.Emplace<WindowSpawnNativeWindowEvent>(this);
+                while(_glfw_window == nullptr);
+                
+                bl should_close = false;
+                
                 _keep_showing = true;
                 while (_keep_showing)
                 {
                     if (glfwWindowShouldClose(_glfw_window))
                     {
-                        _event_submitter.Emplace<WindowCloseEvent>(this);
+                        if (!should_close)
+                        {
+                            should_close = true;
+                            _event_submitter.Emplace<WindowCloseEvent>(this);
+                        }
                     }
-
-                    glfwPollEvents();
                 }
-                DestroyGlfwWindow();
+                
+                _event_submitter.Emplace<WindowDestroyNativeWindowEvent>(this);
+                while(_glfw_window != nullptr);
+                
                 _show_procedure_is_complete = true;
             }
             
         public:
             
-            /**
-             construcotr
-             */
             AppleWindow(const Window::Properties& properties, event::EventSubmitter& event_submitter):
             Window(properties, event_submitter),
             _glfw_window(nullptr),
@@ -143,21 +163,14 @@ namespace np
                 }
             }
             
-            /**
-             update method
-             */
             virtual void Update(time::DurationMilliseconds duration_milliseconds) override
             {
                 //TODO: implement
             }
             
-            /**
-             gets the native window pointer
-             */
             virtual void* GetNativeWindow() const override
             {
-                //TODO: implement
-                return nullptr;
+                return _glfw_window;
             }
             
             virtual event::EventCategory GetHandledCategories() const override

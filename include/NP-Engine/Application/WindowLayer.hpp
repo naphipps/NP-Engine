@@ -7,6 +7,8 @@
 #ifndef NP_ENGINE_WINDOW_LAYER_HPP
 #define NP_ENGINE_WINDOW_LAYER_HPP
 
+#include <GLFW/glfw3.h>
+
 #include "NP-Engine/Container/Container.hpp"
 
 #include "Layer.hpp"
@@ -20,6 +22,7 @@ namespace np::app
     private:
 
         container::vector<Window*> _windows;
+        container::vector<void*> _native_windows;
 
     protected:
 
@@ -40,7 +43,9 @@ namespace np::app
         WindowLayer(memory::Allocator& allocator, event::EventSubmitter& event_submitter):
         Layer(event_submitter),
         _windows(allocator)
-        {}
+        {
+            glfwInit();
+        }
 
         virtual ~WindowLayer()
         {
@@ -49,15 +54,19 @@ namespace np::app
                 memory::Destruct(*it);
                 _windows.get_allocator().Deallocate(*it);
             }
+            
+            glfwTerminate();
         }
 
         Window* CreateWindow()
         {
             return _windows.emplace_back(Window::Create(_windows.get_allocator(), Window::Properties(), _event_submitter));
         }
-
+        
         virtual void Update(time::DurationMilliseconds time_delta) override
         {
+            glfwPollEvents(); //TODO: how do we move this to the main thread
+            
             for (Window* window : _windows)
             {
                 window->Update(time_delta);

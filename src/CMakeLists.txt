@@ -11,6 +11,8 @@ set(NP_ENGINE_APPLICATION_HPP
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Application/WindowCloseEvent.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Application/WindowEvents.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Application/WindowResizeEvent.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Application/WindowSpawnNativeWindowEvent.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Application/WindowDestroyNativeWindowEvent.hpp
 )
 
 set(NP_ENGINE_CONCURRENCY_HPP

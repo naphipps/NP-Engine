@@ -33,7 +33,7 @@ namespace np
 
             void HandleClose(event::Event& event)
             {
-                if (event.RetrieveData<WindowCloseEvent::DataType>().Window == this)
+                if (event.RetrieveData<WindowCloseEvent::DataType>().window == this)
                 {
                     //TODO: could we set the event as handled then send this logic into a thread? or like how can we asyncronsly handle this event?
                     _keep_showing = false;

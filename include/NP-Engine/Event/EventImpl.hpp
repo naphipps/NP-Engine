@@ -31,6 +31,8 @@ namespace np
         constexpr static EventType EVENT_TYPE_MOUSE_MOVED = 11;
         constexpr static EventType EVENT_TYPE_MOUSE_SCROLLED = 12;
         constexpr static EventType EVENT_TYPE_APPLICATION_CLOSE = 13;
+        constexpr static EventType EVENT_TYPE_WINDOW_SPAWN_NATIVE_WINDOW = 14;
+        constexpr static EventType EVENT_TYPE_WINDOW_DESTROY_NATIVE_WINDOW = 15;
         
         /**
          determines if EventType a matches b
