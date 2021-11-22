@@ -257,11 +257,6 @@ namespace np
              */
             void init(bl default_construct_initial_elements)
             {
-                if (_capacity < MIN_CAPACITY)
-                {
-                    _capacity = MIN_CAPACITY;
-                }
-                
                 memory::Block allocation = _allocator->Allocate(calc_capacity(_capacity) * T_SIZE);
                 NP_ASSERT(allocation.IsValid(), "we need successful allocation here in vector.init()");
                 
