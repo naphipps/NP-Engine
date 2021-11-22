@@ -33,6 +33,7 @@ public:
     using const_iterator = typename base::const_iterator;
     using reverse_iterator = typename base::reverse_iterator;
     using const_reverse_iterator = typename base::const_reverse_iterator;
+    using std_type = STD_T;
 
     tstr() noexcept : base() {}
 
@@ -48,14 +49,14 @@ public:
 
     tstr(const T* chrs, size_type count) : base(chrs, count) {}
 
-    tstr(const STD_T& other) : tstr<T>(other.c_str()) {}
+    tstr(const std_type& other) : tstr<T>(other.c_str()) {}
 
     tstr(::std::initializer_list<T> list) : base(list) {}
 
     template <class InputIt>
     tstr(InputIt first, InputIt last) : base(first, last) {}
 
-    operator STD_T() const { return base::c_str(); }
+    operator std_type() const { return base::c_str(); }
 
     tstr& operator=(const tstr& other) { base::operator=(other);  return *this; }
 
