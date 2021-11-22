@@ -4,16 +4,16 @@
 //
 //##===----------------------------------------------------------------------===##//
 
-#ifndef NP_ENGINE_WINDOW_SPAWN_NATIVE_WINDOW_EVENT_HPP
-#define NP_ENGINE_WINDOW_SPAWN_NATIVE_WINDOW_EVENT_HPP
+#ifndef NP_ENGINE_WINDOW_DESTROY_NATIVE_WINDOW_EVENT_HPP
+#define NP_ENGINE_WINDOW_DESTROY_NATIVE_WINDOW_EVENT_HPP
 
 #include "NP-Engine/Event/Event.hpp"
 
 #include "Window.hpp"
 
-namespace np::app
+namespace np::window
 {
-    class WindowSpawnNativeWindowEvent : public event::Event
+    class WindowDestroyNativeWindowEvent : public event::Event
     {
     public:
      
@@ -22,7 +22,7 @@ namespace np::app
             Window* window;
         };
         
-        WindowSpawnNativeWindowEvent(Window* window):
+        WindowDestroyNativeWindowEvent(Window* window):
         event::Event()
         {
             AssignData<DataType>({window});
@@ -30,7 +30,7 @@ namespace np::app
         
         virtual event::EventType GetType() const override
         {
-            return event::EVENT_TYPE_WINDOW_SPAWN_NATIVE_WINDOW;
+            return event::EVENT_TYPE_WINDOW_DESTROY_NATIVE_WINDOW;
         }
         
         virtual event::EventCategory GetCategory() const override
@@ -40,4 +40,4 @@ namespace np::app
     };
 }
 
-#endif /* NP_ENGINE_APPLICATION_SPAWN_NATIVE_WINDOW_EVENT_HPP */
+#endif /* NP_ENGINE_WINDOW_DESTROY_NATIVE_WINDOW_EVENT_HPP */

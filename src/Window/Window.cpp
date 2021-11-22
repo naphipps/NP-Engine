@@ -5,10 +5,10 @@
 //##===----------------------------------------------------------------------===##//
 
 
-#include "NP-Engine/Application/Window.hpp"
-#include "NP-Engine/Application/WindowEvents.hpp"
+#include "NP-Engine/Window/Window.hpp"
+#include "NP-Engine/Window/WindowEvents.hpp"
 
-namespace np::app
+namespace np::window
 {
     void Window::HandleSpawnNative(event::Event& event)
     {
@@ -39,7 +39,7 @@ namespace np::app
                 glfwSetWindowShouldClose(_glfw_window, GLFW_TRUE);
             }
 
-            if (_show_procedure_is_complete)
+            if (_show_procedure_is_complete.load(mo_acquire))
             {
                 _thread.Dispose();
                 event.SetHandled();
@@ -69,6 +69,6 @@ namespace np::app
             concurrency::ThisThread::sleep_for(time::Milliseconds(8));
         }
 
-        _show_procedure_is_complete = true;
+        _show_procedure_is_complete.store(true, mo_release);
     }
 }

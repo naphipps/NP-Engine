@@ -10,9 +10,9 @@
 #include <GLFW/glfw3.h>
 
 #include "NP-Engine/Container/Container.hpp"
+#include "NP-Engine/Window/Window.hpp"
 
 #include "Layer.hpp"
-#include "Window.hpp"
 #include "ApplicationCloseEvent.hpp"
 
 namespace np::app
@@ -21,7 +21,7 @@ namespace np::app
 	{
     private:
 
-        container::vector<Window*> _windows;
+        container::vector<window::Window*> _windows;
         container::vector<void*> _native_windows;
 
     protected:
@@ -58,18 +58,18 @@ namespace np::app
             glfwTerminate();
         }
 
-        Window* CreateWindow()
+        window::Window* CreateWindow()
         {
-            memory::Block block = _windows.get_allocator().Allocate(sizeof(Window));
-            memory::Construct<Window>(block, Window::Properties(), _event_submitter);
-            return _windows.emplace_back((Window*)block.ptr);
+            memory::Block block = _windows.get_allocator().Allocate(sizeof(window::Window));
+            memory::Construct<window::Window>(block, window::Window::Properties(), _event_submitter);
+            return _windows.emplace_back((window::Window*)block.ptr);
         }
         
         virtual void Update(time::DurationMilliseconds time_delta) override
         {
             glfwPollEvents(); //TODO: how do we move this to the main thread
             
-            for (Window* window : _windows)
+            for (window::Window* window : _windows)
             {
                 window->Update(time_delta);
             }
@@ -81,7 +81,7 @@ namespace np::app
             {
                 if (!_windows[i]->IsRunning())
                 {
-                    Window* window = _windows[i];
+                    window::Window* window = _windows[i];
                     _windows.erase(_windows.begin() + i);
                     memory::Destruct(window);
                     _windows.get_allocator().Deallocate(window);

@@ -11,7 +11,7 @@
 
 #include "Window.hpp"
 
-namespace np::app
+namespace np::window
 {
     class WindowCloseEvent : public event::Event
     {

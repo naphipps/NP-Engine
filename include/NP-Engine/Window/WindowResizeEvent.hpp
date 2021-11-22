@@ -12,7 +12,7 @@
 
 #include "Window.hpp"
 
-namespace np::app
+namespace np::window
 {
     class WindowResizeEvent : public event::Event
     {

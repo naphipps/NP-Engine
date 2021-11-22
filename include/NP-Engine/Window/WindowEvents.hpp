@@ -1,9 +1,8 @@
+//##===----------------------------------------------------------------------===##//
 //
-//  WindowEvents.hpp
-//  NP-Engine
+//  Author: Nathan Phipps 2/11/21
 //
-//  Created by Nathan Phipps on 2/11/21.
-//
+//##===----------------------------------------------------------------------===##//
 
 #ifndef NP_ENGINE_WINDOW_EVENTS_HPP
 #define NP_ENGINE_WINDOW_EVENTS_HPP

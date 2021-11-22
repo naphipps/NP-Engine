@@ -16,12 +16,12 @@
 #include "NP-Engine/Memory/Memory.hpp"
 #include "NP-Engine/Event/Event.hpp"
 #include "NP-Engine/Container/Container.hpp"
+#include "NP-Engine/Window/Window.hpp"
 
 #include "ApplicationCloseEvent.hpp"
 #include "Layer.hpp"
-#include "Window.hpp"
 #include "WindowLayer.hpp"
-#include "WindowEvents.hpp"
+
 
 namespace np::app
 {

@@ -6,13 +6,7 @@ set(NP_ENGINE_APPLICATION_HPP
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Application/Application.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Application/ApplicationCloseEvent.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Application/Layer.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Application/Window.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Application/WindowLayer.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Application/WindowCloseEvent.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Application/WindowEvents.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Application/WindowResizeEvent.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Application/WindowSpawnNativeWindowEvent.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Application/WindowDestroyNativeWindowEvent.hpp
 )
 
 set(NP_ENGINE_CONCURRENCY_HPP
@@ -227,6 +221,15 @@ set(NP_ENGINE_TIME_HPP
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Time/Time.hpp
 )
 
+set(NP_ENGINE_WINDOW_HPP
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Window/Window.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Window/WindowCloseEvent.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Window/WindowEvents.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Window/WindowResizeEvent.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Window/WindowSpawnNativeWindowEvent.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Window/WindowDestroyNativeWindowEvent.hpp
+)
+
 set(NP_ENGINE_HEADER_FILES
 	${NP_ENGINE_APPLICATION_HPP}
 	${NP_ENGINE_CONCURRENCY_HPP}
@@ -256,15 +259,12 @@ set(NP_ENGINE_HEADER_FILES
 	${NP_ENGINE_STRING_HPP}
 	${NP_ENGINE_SYSTEM_HPP}
 	${NP_ENGINE_TIME_HPP}
+	${NP_ENGINE_WINDOW_HPP}
 )
 
 ##==--------------------------------------------------------==##
 #NP_ENGINE Source Files
 ##==--------------------------------------------------------==##
-
-set(NP_ENGINE_APPLICATION_CPP
-	Application/Window.cpp
-)
 
 set(NP_ENGINE_GRAPHICS_CPP
 	Graphics/Graphics.cpp
@@ -326,8 +326,11 @@ else()
 	)
 endif()
 
+set(NP_ENGINE_WINDOW_CPP
+	Window/Window.cpp
+)
+
 set(NP_ENGINE_SOURCE_FILES
-	${NP_ENGINE_APPLICATION_CPP}
 	${NP_ENGINE_GRAPHICS_CPP}
 	${NP_ENGINE_GRAPHICS_RPI_CPP}
 	${NP_ENGINE_GRAPHICS_OPENGL_CPP}
@@ -339,6 +342,7 @@ set(NP_ENGINE_SOURCE_FILES
 	${NP_ENGINE_NP_ENGINE_MAIN_CPP}
 	${NP_ENGINE_PHYSICS_CPP}
 	${NP_ENGINE_SYSTEM_CPP}
+	${NP_ENGINE_WINDOW_CPP}
 )
 
 ##==--------------------------------------------------------==##
@@ -404,7 +408,7 @@ endif()
 ##==--------------------------------------------------------==##
 
 source_group("" FILES ${NP_ENGINE_HPP})
-source_group(Application FILES ${NP_ENGINE_APPLICATION_HPP} ${NP_ENGINE_APPLICATION_CPP})
+source_group(Application FILES ${NP_ENGINE_APPLICATION_HPP})
 source_group(Concurrency FILES ${NP_ENGINE_CONCURRENCY_HPP})
 source_group(Container FILES ${NP_ENGINE_CONTAINER_HPP})
 source_group(Core FILES ${NP_ENGINE_CORE_HPP})
@@ -432,3 +436,4 @@ source_group(Serialization FILES ${NP_ENGINE_SERIALIZATION_HPP})
 source_group(String FILES ${NP_ENGINE_STRING_HPP})
 source_group(System FILES ${NP_ENGINE_SYSTEM_HPP} ${NP_ENGINE_SYSTEM_CPP})
 source_group(Time FILES ${NP_ENGINE_TIME_HPP})
+source_group(Window FILES ${NP_ENGINE_WINDOW_HPP} ${NP_ENGINE_WINDOW_CPP})
