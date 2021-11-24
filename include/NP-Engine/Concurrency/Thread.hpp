@@ -72,17 +72,11 @@ namespace np
             
         public:
             
-            /**
-             constructor
-             */
             Thread()
             {
                 ClearThreadAllocation();
             }
-            
-            /**
-             deconstructor
-             */
+
             ~Thread()
             {
                 Dispose();

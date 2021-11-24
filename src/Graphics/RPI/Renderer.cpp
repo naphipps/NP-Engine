@@ -4,6 +4,8 @@
 //
 //##===----------------------------------------------------------------------===##//
 
+#include <iostream> //TODO: remove
+
 #include "NP-Engine/Graphics/RPI/Renderer.hpp"
 
 #if NP_ENGINE_PLATFORM_IS_APPLE
@@ -14,30 +16,25 @@
 
 #elif NP_ENGINE_PLATFORM_IS_WINDOWS
 #include "NP-Engine/Graphics/RHI/OpenGL/OpenGLRenderer.hpp"
-#include "NP-Engine/Graphics/RHI/Vulkan/VulkanRenderer.hpp"
 
 #endif
+
+#include "NP-Engine/Graphics/RHI/Vulkan/VulkanRenderer.hpp"
 
 namespace np::graphics
 {
-	Renderer::RhiType Renderer::_renderer_rhi_type = Renderer::RhiType::None;
-
 	Renderer* Renderer::Create(memory::Allocator& allocator)
 	{
-		Renderer* renderer = nullptr;
+		memory::Block block;
 
-		switch (GetRegisteredRhiType())
+		switch (__detail::RegisteredRhiType)
 		{
-#if /* NP_ENGINE_PLATFORM_IS_APPLE || NP_ENGINE_PLATFORM_IS_LINUX || */ NP_ENGINE_PLATFORM_IS_WINDOWS
-			//TODO: try vulkan on apple and linux
-		case RhiType::Vulkan:
-			memory::Block block = allocator.Allocate(sizeof(rhi::VulkanRenderer));
+		case RhiType::Vulkan: //TODO: seems to work on all platforms...
+			block = allocator.Allocate(sizeof(rhi::VulkanRenderer));
 			memory::Construct<rhi::VulkanRenderer>(block);
-			renderer = (Renderer*)block.Begin();
 			break;
-#endif
 		}
 
-		return renderer;
+		return (Renderer*)block.ptr;
 	}
 }

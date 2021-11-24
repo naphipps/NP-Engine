@@ -11,6 +11,7 @@
 
 #include "NP-Engine/Container/Container.hpp"
 #include "NP-Engine/Window/Window.hpp"
+#include "NP-Engine/Platform/Platform.hpp"
 
 #include "Layer.hpp"
 #include "ApplicationCloseEvent.hpp"
@@ -21,13 +22,26 @@ namespace np::app
 	{
     private:
 
-        container::vector<window::Window*> _windows;
+        container::vector<window::Window*> _windows; //TODO: make this vector of pointers again...
         container::vector<void*> _native_windows;
 
     protected:
 
+        virtual void HandleWindowCreate(event::Event& event)
+        {
+            CreateWindow(event.RetrieveData<window::Window::Properties>());
+            event.SetHandled();
+        }
+
         virtual void HandleEvent(event::Event& event) override
         {
+            switch (event.GetType())
+            {
+            case event::EVENT_TYPE_WINDOW_CREATE:
+                HandleWindowCreate(event);
+                break;
+            }
+
             for (auto it = _windows.begin(); !event.IsHandled() && it != _windows.end(); it++)
             {
                 (*it)->OnEvent(event);
@@ -54,16 +68,11 @@ namespace np::app
                 memory::Destruct(*it);
                 _windows.get_allocator().Deallocate(*it);
             }
-            
+
             glfwTerminate();
         }
 
-        window::Window* CreateWindow()
-        {
-            memory::Block block = _windows.get_allocator().Allocate(sizeof(window::Window));
-            memory::Construct<window::Window>(block, window::Window::Properties(), _event_submitter);
-            return _windows.emplace_back((window::Window*)block.ptr);
-        }
+        virtual window::Window* CreateWindow(window::Window::Properties& properties);
         
         virtual void Update(time::DurationMilliseconds time_delta) override
         {
@@ -81,17 +90,16 @@ namespace np::app
             {
                 if (!_windows[i]->IsRunning())
                 {
-                    window::Window* window = _windows[i];
                     _windows.erase(_windows.begin() + i);
-                    memory::Destruct(window);
-                    _windows.get_allocator().Deallocate(window);
                 }
             }
 
+//#if !NP_ENGINE_PLATFORM_IS_APPLE //TODO: ?
             if (_windows.size() == 0)
             {
                 _event_submitter.Emplace<ApplicationCloseEvent>();
             }
+//#endif
         }
 
         virtual event::EventCategory GetHandledCategories() const

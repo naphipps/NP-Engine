@@ -1,12 +1,7 @@
 //##===----------------------------------------------------------------------===##//
 //
-//  Author: Nathan Phipps 3/23/21
+//  Author: Nathan Phipps 11/22/21
 //
 //##===----------------------------------------------------------------------===##//
 
-#include "NP-Engine/Memory/CAllocator.hpp"
-
-namespace np::memory
-{
-	CAllocator DefaultAllocator;
-}
+#include "GraphicsCreateRendererForWindowEvent.hpp"

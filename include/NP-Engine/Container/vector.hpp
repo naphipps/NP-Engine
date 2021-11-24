@@ -9,6 +9,8 @@
 #ifndef NP_ENGINE_VECTOR_HPP
 #define NP_ENGINE_VECTOR_HPP
 
+#include <vector> //TODO: remove
+
 #include <limits>
 #include <type_traits>
 #include <utility>
@@ -21,6 +23,12 @@
 
 namespace np
 {
+    namespace container::_other
+    {
+        template <class T>
+        using vector = ::std::vector<T, memory::StdAllocator<T>>;
+    }
+
     namespace container
     {
         /**

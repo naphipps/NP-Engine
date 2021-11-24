@@ -16,12 +16,14 @@
 #include "NP-Engine/Memory/Memory.hpp"
 #include "NP-Engine/Event/Event.hpp"
 #include "NP-Engine/Container/Container.hpp"
+#include "NP-Engine/Concurrency/Concurrency.hpp"
+#include "NP-Engine/Time/Time.hpp"
 #include "NP-Engine/Window/Window.hpp"
 
 #include "ApplicationCloseEvent.hpp"
 #include "Layer.hpp"
 #include "WindowLayer.hpp"
-
+#include "GraphicsLayer.hpp"
 
 namespace np::app
 {
@@ -43,28 +45,34 @@ namespace np::app
         event::EventQueue _event_queue;
         event::EventSubmitter _application_event_submitter;
         WindowLayer _window_layer;
+        GraphicsLayer _graphics_layer;
         container::vector<Layer*> _layers;
         container::vector<Layer*> _overlays;
         atm_bl _running;
 
         Application(const Application::Properties& application_properties) :
-            _application_event_submitter(_event_queue), //order matters
-            Layer(_application_event_submitter),
-            _properties(application_properties),
-            _window_layer(_properties.Allocator, _event_submitter),
-            _layers(_properties.Allocator),
-            _overlays(_properties.Allocator),
-            _running(false)
+        _application_event_submitter(_event_queue), //order matters
+        Layer(_application_event_submitter),
+        _properties(application_properties),
+        _window_layer(_properties.Allocator, _event_submitter),
+        _graphics_layer(_properties.Allocator, _event_submitter),
+        _layers(_properties.Allocator),
+        _overlays(_properties.Allocator),
+        _running(false)
         {
             _layers.emplace_back(this);
             _layers.emplace_back(memory::AddressOf(_window_layer));
-
-            graphics::Init();
+            _layers.emplace_back(memory::AddressOf(_graphics_layer));
         }
 
         virtual WindowLayer& GetWindowLayer()
         {
             return _window_layer;
+        }
+
+        virtual GraphicsLayer& GetGraphicsLayer()
+        {
+            return _graphics_layer;
         }
 
         void HandleEvent(event::Event& event) override
@@ -82,7 +90,7 @@ namespace np::app
 
         virtual ~Application()
         {
-            graphics::Shutdown();
+            
         }
 
         void Run()
@@ -93,37 +101,32 @@ namespace np::app
         virtual void Run(i32 argc, chr** argv)
         {
             _running.store(true, mo_release);
-            time::SteadyTimestamp _last_frame_timestamp;
+            time::SteadyTimestamp current_timestamp;
+            time::SteadyTimestamp prev_timestamp;
+            time::DurationMilliseconds timestamp_diff;
+            time::DurationMilliseconds loop_duration(4);
+            time::DurationMilliseconds sleep_duration;
 
             while (_running.load(mo_acquire))
             {
-                time::SteadyTimestamp current_timestamp = time::SteadyClock::now();
-                time::DurationMilliseconds timestamp_diff = current_timestamp - _last_frame_timestamp;
-                _last_frame_timestamp = current_timestamp;
+                current_timestamp = time::SteadyClock::now();
+                timestamp_diff = current_timestamp - prev_timestamp;
+                prev_timestamp = current_timestamp;
 
-                for (Layer* layer : _layers)
-                {
-                    layer->Update(timestamp_diff);
-                }
+                for (Layer* layer : _layers) layer->BeforeUdpate();
+                for (Layer* overlay : _overlays) overlay->BeforeUdpate();
 
-                for (Layer* overlay : _overlays)
-                {
-                    overlay->Update(timestamp_diff);
-                }
+                for (Layer* layer : _layers) layer->Update(timestamp_diff);
+                for (Layer* overlay : _overlays) overlay->Update(timestamp_diff);
 
-                /*
-                    //TODO: implement imgui? I think the update above should handle imgui stuff...
-                for (ui32 i=0; i<_layers.Size(); i++)
-                {
-                    _layers[i]->RenderImGui();
-                }
-                    */
-
-                    //TODO: figure out how to fix our loops to 60fps
-                    //TODO: figure out how to force this into a fixed step loop - aka, set this to loop at 60fps or something with 0 being infinitely fast
+                for (Layer* layer : _layers) layer->AfterUdpate();
+                for (Layer* overlay : _overlays) overlay->AfterUdpate();
 
                 /*
                 * //TODO: http://www.gameprogrammingpatterns.com/game-loop.html
+                * 
+                * //TODO: figure out how to fix our loops to 60fps
+                //TODO: figure out how to force this into a fixed step loop - aka, set this to loop at 60fps or something with 0 being infinitely fast
                 
                 double previous = getCurrentTime();
                 double lag = 0.0;
@@ -158,26 +161,20 @@ namespace np::app
                         (*it)->OnEvent(*e);
                     }
 
-                    if (e->IsHandled())
-                    {
-                        _event_queue.DestroyEvent(e);
-                    }
-                    else
-                    {
-                        _event_queue.Emplace(e);
-                    }
+                    if (e->IsHandled()) _event_queue.DestroyEvent(e);
+                    else _event_queue.Emplace(e);
                 }
 
                 _event_queue.SwapBuffers();
 
-                for (Layer* layer : _layers)
-                {
-                    layer->Cleanup();
-                }
+                for (Layer* layer : _layers) layer->Cleanup();
+                for (Layer* overlay : _overlays) overlay->Cleanup();
 
-                for (Layer* overlay : _overlays)
+                sleep_duration = loop_duration - timestamp_diff;
+                if (sleep_duration.count() > 0)
                 {
-                    overlay->Cleanup();
+                    concurrency::ThisThread::yield();
+                    concurrency::ThisThread::sleep_for(sleep_duration);
                 }
             }
         }

@@ -17,7 +17,7 @@
 #include "NP-Engine/Primitive/Primitive.hpp"
 #include "NP-Engine/Memory/Memory.hpp"
 
-#include "deque_iterator.hpp"
+//#include "deque_iterator.hpp"
 #include "iterator.hpp"
 #include "init_list.hpp"
 #include "vector.hpp"
@@ -27,10 +27,17 @@ namespace np
     namespace container
     {
         template <class T>
+        using deque = ::std::deque<T, memory::StdAllocator<T>>;
+    }
+
+    namespace container::__other
+    {
+        template <class T>
         using std_deque = ::std::deque<T>;
         
         //TODO: add summary comments
-        
+        /*
+
         template <class T>
         class deque
         {
@@ -89,7 +96,7 @@ namespace np
                 reverse_iterator old_rit(old_end);
                 reverse_iterator new_rit(new_end);
                 
-                while (old_rit != old_rend /* && new_rit != new_rend */)
+                while (old_rit != old_rend) // && new_rit != new_rend 
                 {
                     block.ptr = new_rit.base();
                     memory::Construct<T>(block, ::std::move(*old_rit));
@@ -108,7 +115,7 @@ namespace np
                 iterator old_it(old_begin);
                 iterator new_it(new_begin);
                 
-                while (old_it != old_end /* && new_it != new_end */)
+                while (old_it != old_end) // && new_it != new_end
                 {
                     block.ptr = new_it.base();
                     memory::Construct<T>(block, ::std::move(*old_it));
@@ -989,6 +996,8 @@ namespace np
             //another erase for the whole deque?? investigate this...
             
         };
+
+        //*/
     }
 }
 

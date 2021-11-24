@@ -11,8 +11,7 @@
 
 #include "WindowResizeEvent.hpp"
 #include "WindowCloseEvent.hpp"
-#include "WindowSpawnNativeWindowEvent.hpp"
-#include "WindowDestroyNativeWindowEvent.hpp"
+#include "WindowCreateEvent.hpp"
 
 //TODO: add events: WindowFocus, WindowLostFocus, WindowMoved
 

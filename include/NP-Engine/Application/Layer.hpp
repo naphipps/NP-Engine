@@ -27,11 +27,11 @@ namespace np::app
         event::EventHandler(event_submitter)
         {}
 
-        virtual void Attach() {}
-
-        virtual void Detach() {}
+        virtual void BeforeUdpate() {} //TODO: do we like this idea??
 
         virtual void Update(time::DurationMilliseconds time_delta) {}
+
+        virtual void AfterUdpate() {} //TODO: do we like this idea??
 
         virtual void Cleanup() {}
 

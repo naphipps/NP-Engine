@@ -10,6 +10,9 @@
 #define NP_ENGINE_QUEUE_HPP
 
 #include <queue>
+#include <deque>
+
+#include "NP-Engine/Memory/Memory.hpp"
 
 namespace np
 {
@@ -19,7 +22,7 @@ namespace np
          brings the std queue here for it's usefulness
          */
         template<typename T>
-        using queue = ::std::queue<T>;
+        using queue = ::std::queue<T, ::std::deque<T, memory::StdAllocator<T>>>;
     }
 }
 

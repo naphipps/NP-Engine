@@ -91,7 +91,7 @@ namespace np
             }
         };
 
-        static TraitAllocator DefaultTraitAllocator;
+        extern TraitAllocator DefaultTraitAllocator;
     }
 }
 

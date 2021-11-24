@@ -21,7 +21,34 @@
 #include "deque.hpp"
 #include "init_list.hpp"
 #include "iterator.hpp"
-#include "deque_iterator.hpp"
+//#include "deque_iterator.hpp"
 #include "container_traits.hpp"
+
+#include "NP-Engine/Memory/Memory.hpp"
+
+#include <utility> //pair
+
+#include <set>
+#include <unordered_set>
+
+#include <map>
+#include <unordered_map>
+
+namespace np::container
+{
+	template <class Key, class Compare = ::std::less<Key>>
+	using omset = ::std::multiset<Key, Compare, memory::StdAllocator<Key>>;
+
+	template <class Key, class T, class Compare = ::std::less<Key>>
+	using ommap = ::std::multimap<Key, T, Compare, memory::StdAllocator<::std::pair<const Key, T>>>;
+
+
+	template <class Key, class Hash = ::std::hash<Key>, class KeyEqualTo = ::std::equal_to<Key>>
+	using umset = ::std::unordered_multiset<Key, Hash, KeyEqualTo, memory::StdAllocator<Key>>;
+
+	template <class Key, class T, class Hash = ::std::hash<Key>, class KeyEqualTo = ::std::equal_to<Key>>
+	using ummap = ::std::unordered_multimap<Key, T, Hash, KeyEqualTo, memory::StdAllocator<::std::pair<const Key, T>>>;
+}
+
 
 #endif /* NP_ENGINE_CONTAINER_HPP */

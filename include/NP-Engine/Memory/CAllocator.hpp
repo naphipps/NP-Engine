@@ -1,9 +1,8 @@
+//##===----------------------------------------------------------------------===##//
 //
-//  CAllocator.hpp
-//  NP-Engine
+//  Author: Nathan Phipps 2/12/21
 //
-//  Created by Nathan Phipps on 2/12/21.
-//
+//##===----------------------------------------------------------------------===##//
 
 #ifndef NP_ENGINE_DEFAULT_ALLOCATOR_HPP
 #define NP_ENGINE_DEFAULT_ALLOCATOR_HPP
@@ -90,7 +89,7 @@ namespace np
             }
         };
         
-        static CAllocator DefaultAllocator;
+        extern CAllocator DefaultAllocator;
     }
 }
 

@@ -9,15 +9,18 @@
 
 #include <iostream> //TODO: remove
 
-#include <vulkan/vulkan.hpp>
+//#include <vulkan/vulkan.hpp>
+//#include <GLFW/glfw3.h>
 
 #include "NP-Engine/Primitive/Primitive.hpp"
 #include "NP-Engine/String/String.hpp"
-#include "NP-Engine/Container/Container.hpp"
+#include "NP-Engine/Memory/Memory.hpp"
+#include "NP-Engine/Window/Window.hpp"
 
 #include "../../RPI/Renderer.hpp"
+#include "../../RPI/RhiType.hpp"
 
-
+#include "VulkanDevice.hpp"
 
 //TODO: add summary comments
 
@@ -27,69 +30,45 @@ namespace np::graphics::rhi
 	{
 	private:
 
-		bl _is_enabled;
+		memory::Allocator& _allocator;
+		VulkanDevice* _device;
 
 	public:
 
-		constexpr static ui32 REQUIRED_VERSION = VK_MAKE_API_VERSION(0, 1, 2, 189);
-
-
 		VulkanRenderer():
-		_is_enabled(false)
+		_allocator(memory::DefaultTraitAllocator),
+		_device(nullptr)
+		{}
+
+		~VulkanRenderer()
 		{
-			/*
-				version: 4202658
-				1.2.162.0
-			*/
-			ui32 version = VK_HEADER_VERSION_COMPLETE;
-			//vkEnumerateInstanceVersion(&version);
-
-			std::cout << "version: " << version << "\n";
-			std::cout << "\t" << VK_API_VERSION_MAJOR(version) << "." << VK_API_VERSION_MINOR(version) << "." << VK_API_VERSION_PATCH(version) << "." << VK_API_VERSION_VARIANT(version) << "\n";
-
-			uint32_t extensionCount = 0;
-			vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, nullptr);
-			container::vector<VkExtensionProperties> extensionProperties(extensionCount);
-			vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, extensionProperties.data());
-
-			std::cout << extensionCount << " extensions supported:\n";
-
-			for (VkExtensionProperties& prop : extensionProperties)
+			if (_device != nullptr)
 			{
-				::std::cout << "\t- " << prop.extensionName << ", " << prop.specVersion << "\n";
+				memory::Destruct(_device);
+				_allocator.Deallocate(_device);
 			}
-
-			uint32_t layerCount;
-			vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
-
-			std::vector<VkLayerProperties> availableLayers(layerCount);
-			vkEnumerateInstanceLayerProperties(&layerCount, availableLayers.data());
-
-			std::cout << layerCount << " layer supported\n";
-
-			for (VkLayerProperties& prop : availableLayers)
-			{
-				::std::cout << "\t- " << prop.layerName << ", " << prop.description << ", " << prop.implementationVersion << ", " << prop.specVersion << "\n";
-			}
-
-
-
 		}
 
-		Renderer::RhiType GetRhiType() const override
+		RhiType GetRhiType() const override
 		{
-			return Renderer::RhiType::Vulkan;
-		}
-
-
-		bl IsEnabled() const override
-		{
-			return _is_enabled;
+			return RhiType::Vulkan;
 		}
 
 		str GetName() const override
 		{
 			return "Vulkan";
+		}
+
+		void AttachToWindow(window::Window& window) override
+		{
+			memory::Block block = _allocator.Allocate(sizeof(VulkanDevice));
+			memory::Construct<VulkanDevice>(block, window);
+			_device = (VulkanDevice*)block.ptr;
+
+			std::cout << "Renderer Attaching to Window\n";
+			//set up our surface
+			//create our device
+			//this is all tied together, so we might move all this to device...
 		}
 	};
 }

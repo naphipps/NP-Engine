@@ -7,6 +7,8 @@
 #ifndef NP_ENGINE_WINDOW_HPP
 #define NP_ENGINE_WINDOW_HPP
 
+#include <utility>
+
 #include <GLFW/glfw3.h>
 
 #include "NP-Engine/Primitive/Primitive.hpp"
@@ -41,10 +43,6 @@ namespace np::window
         concurrency::Thread _thread;
         atm_bl _show_procedure_is_complete;
 
-        virtual void HandleSpawnNative(event::Event& event);
-
-        virtual void HandleDestroyNative(event::Event& event);
-
         virtual void HandleClose(event::Event& event);
 
         virtual void HandleEvent(event::Event& event) override
@@ -54,28 +52,32 @@ namespace np::window
             case event::EVENT_TYPE_WINDOW_CLOSE:
                 HandleClose(event);
                 break;
-            case event::EVENT_TYPE_WINDOW_SPAWN_NATIVE_WINDOW:
-                HandleSpawnNative(event);
-                break;
-            case event::EVENT_TYPE_WINDOW_DESTROY_NATIVE_WINDOW:
-                HandleDestroyNative(event);
-                break;
             }
         }
 
         virtual void ShowProcedure();
+
+        GLFWwindow* CreateGlfwWindow() const
+        {
+            glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+            return glfwCreateWindow(_properties.Width, _properties.Height, _properties.Title.c_str(), nullptr, nullptr);
+        }
 
     public:
             
         Window(const Window::Properties& properties, event::EventSubmitter& event_submitter):
         event::EventHandler(event_submitter),
         _properties(properties),
-        _glfw_window(nullptr),
+        _glfw_window(CreateGlfwWindow()),
         _show_procedure_is_complete(true)
-        {}
+        {
+            Show();
+        }
 
         virtual ~Window()
-        {}
+        {
+            glfwDestroyWindow(_glfw_window);
+        }
             
         virtual void Show()
         {

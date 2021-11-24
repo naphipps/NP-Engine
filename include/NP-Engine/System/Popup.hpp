@@ -4,6 +4,8 @@
 //
 //##===----------------------------------------------------------------------===##//
 
+//TODO: move popups to Application level
+
 #ifndef NP_ENGINE_POPUP_HPP
 #define NP_ENGINE_POPUP_HPP
 

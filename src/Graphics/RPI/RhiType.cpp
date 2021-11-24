@@ -1,12 +1,15 @@
 //##===----------------------------------------------------------------------===##//
 //
-//  Author: Nathan Phipps 3/23/21
+//  Author: Nathan Phipps 11/23/21
 //
 //##===----------------------------------------------------------------------===##//
 
-#include "NP-Engine/Memory/CAllocator.hpp"
+#include "NP-Engine/Graphics/RPI/RhiType.hpp"
 
-namespace np::memory
+namespace np::graphics
 {
-	CAllocator DefaultAllocator;
+	namespace __detail
+	{
+		RhiType RegisteredRhiType = RhiType::None;
+	}
 }

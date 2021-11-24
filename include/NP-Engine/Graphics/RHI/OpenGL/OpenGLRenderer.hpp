@@ -9,8 +9,10 @@
 
 #include "NP-Engine/Primitive/Primitive.hpp"
 #include "NP-Engine/String/String.hpp"
+#include "NP-Engine/Window/Window.hpp"
 
 #include "../../RPI/Renderer.hpp"
+#include "../../RPI/RhiType.hpp"
 
 //TODO: add summary comments
 
@@ -19,10 +21,15 @@ namespace np::graphics::rhi
 	class OpenGLRenderer : public Renderer
 	{
 	public:
-		
-		Renderer::RhiType GetRhiType() const override;
-		bl IsEnabled() const override;
+
+		OpenGLRenderer()
+		{}
+
+		RhiType GetRhiType() const override { return RhiType::OpenGL; }
+
 		str GetName() const override { return "OpenGL"; }
+
+		void AttachToWindow(window::Window& window) override {}
 	};
 }
 

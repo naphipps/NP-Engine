@@ -1,12 +1,7 @@
 //##===----------------------------------------------------------------------===##//
 //
-//  Author: Nathan Phipps 3/23/21
+//  Author: Nathan Phipps 11/21/21
 //
 //##===----------------------------------------------------------------------===##//
 
-#include "NP-Engine/Memory/CAllocator.hpp"
-
-namespace np::memory
-{
-	CAllocator DefaultAllocator;
-}
+#include "NP-Engine/Graphics/RHI/Vulkan/VulkanDevice.hpp"

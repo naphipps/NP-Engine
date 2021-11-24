@@ -7,6 +7,7 @@ set(NP_ENGINE_APPLICATION_HPP
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Application/ApplicationCloseEvent.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Application/Layer.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Application/WindowLayer.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Application/GraphicsLayer.hpp
 )
 
 set(NP_ENGINE_CONCURRENCY_HPP
@@ -24,7 +25,7 @@ set(NP_ENGINE_CONTAINER_HPP
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Container/Container.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Container/container_traits.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Container/deque.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Container/deque_iterator.hpp
+	#${PROJECT_SOURCE_DIR}/include/NP-Engine/Container/deque_iterator.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Container/fixed_queue.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Container/init_list.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Container/iterator.hpp
@@ -69,10 +70,23 @@ set(NP_ENGINE_FOUNDATION_HPP
 
 set(NP_ENGINE_GRAPHICS_HPP
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/Graphics.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/GraphicsEvents.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/GraphicsCreateRendererForWindowEvent.hpp
 )
 
 set(NP_ENGINE_GRAPHICS_RPI_HPP
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/RPI.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/Renderer.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/Camera.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/Command.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/Buffer.hpp
+	#${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/Device.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/Image.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/Pipeline.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/Scene.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/Shader.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/Texture.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/RhiType.hpp
 )
 
 set(NP_ENGINE_GRAPHICS_OPENGL_HPP
@@ -81,6 +95,7 @@ set(NP_ENGINE_GRAPHICS_OPENGL_HPP
 
 set(NP_ENGINE_GRAPHICS_VULKAN_HPP
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RHI/Vulkan/VulkanRenderer.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RHI/Vulkan/VulkanDevice.hpp
 )
 
 set(NP_ENGINE_INPUT_HPP
@@ -224,10 +239,9 @@ set(NP_ENGINE_TIME_HPP
 set(NP_ENGINE_WINDOW_HPP
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Window/Window.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Window/WindowCloseEvent.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Window/WindowCreateEvent.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Window/WindowEvents.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Window/WindowResizeEvent.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Window/WindowSpawnNativeWindowEvent.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Window/WindowDestroyNativeWindowEvent.hpp
 )
 
 set(NP_ENGINE_HEADER_FILES
@@ -266,20 +280,34 @@ set(NP_ENGINE_HEADER_FILES
 #NP_ENGINE Source Files
 ##==--------------------------------------------------------==##
 
+set(NP_ENGINE_APPPLICATION_CPP
+	Application/WindowLayer.cpp
+)
+
 set(NP_ENGINE_GRAPHICS_CPP
-	Graphics/Graphics.cpp
+	#Graphics/Graphics.cpp
 )
 
 set(NP_ENGINE_GRAPHICS_RPI_CPP
+	Graphics/RPI/RhiType.cpp
+	Graphics/RPI/Camera.cpp
+	Graphics/RPI/Command.cpp
+	Graphics/RPI/Buffer.cpp
+	Graphics/RPI/Image.cpp
+	Graphics/RPI/Pipeline.cpp
+	Graphics/RPI/Scene.cpp
+	Graphics/RPI/Shader.cpp
+	Graphics/RPI/Texture.cpp
 	Graphics/RPI/Renderer.cpp
 )
 
 set(NP_ENGINE_GRAPHICS_OPENGL_CPP
-	Graphics/RHI/OpenGL/OpenGLRenderer.cpp
+	#Graphics/RHI/OpenGL/OpenGLRenderer.cpp
 )
 
 set(NP_ENGINE_GRAPHICS_VULKAN_CPP
-	Graphics/RHI/Vulkan/VulkanRenderer.cpp
+	#Graphics/RHI/Vulkan/VulkanDevice.cpp
+	#Graphics/RHI/Vulkan/VulkanRenderer.cpp
 )
 
 set(NP_ENGINE_INSIGHT_CPP
@@ -331,10 +359,6 @@ set(NP_ENGINE_WINDOW_CPP
 )
 
 set(NP_ENGINE_SOURCE_FILES
-	${NP_ENGINE_GRAPHICS_CPP}
-	${NP_ENGINE_GRAPHICS_RPI_CPP}
-	${NP_ENGINE_GRAPHICS_OPENGL_CPP}
-	${NP_ENGINE_GRAPHICS_VULKAN_CPP}
 	${NP_ENGINE_INSIGHT_CPP}
 	${NP_ENGINE_JOBSYSTEM_CPP}
 	${NP_ENGINE_MATH_CPP}
@@ -343,6 +367,11 @@ set(NP_ENGINE_SOURCE_FILES
 	${NP_ENGINE_PHYSICS_CPP}
 	${NP_ENGINE_SYSTEM_CPP}
 	${NP_ENGINE_WINDOW_CPP}
+	${NP_ENGINE_GRAPHICS_RPI_CPP}
+	${NP_ENGINE_GRAPHICS_OPENGL_CPP}
+	${NP_ENGINE_GRAPHICS_VULKAN_CPP}
+	${NP_ENGINE_GRAPHICS_CPP}
+	${NP_ENGINE_APPPLICATION_CPP}
 )
 
 ##==--------------------------------------------------------==##
@@ -408,7 +437,7 @@ endif()
 ##==--------------------------------------------------------==##
 
 source_group("" FILES ${NP_ENGINE_HPP})
-source_group(Application FILES ${NP_ENGINE_APPLICATION_HPP})
+source_group(Application FILES ${NP_ENGINE_APPLICATION_HPP} ${NP_ENGINE_APPPLICATION_CPP})
 source_group(Concurrency FILES ${NP_ENGINE_CONCURRENCY_HPP})
 source_group(Container FILES ${NP_ENGINE_CONTAINER_HPP})
 source_group(Core FILES ${NP_ENGINE_CORE_HPP})

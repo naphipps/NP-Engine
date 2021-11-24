@@ -1,12 +1,12 @@
 //##===----------------------------------------------------------------------===##//
 //
-//  Author: Nathan Phipps 3/23/21
+//  Author: Nathan Phipps 11/22/21
 //
 //##===----------------------------------------------------------------------===##//
 
-#include "NP-Engine/Memory/CAllocator.hpp"
+#ifndef NP_ENGINE_RPI_HPP
+#define NP_ENGINE_RPI_HPP
 
-namespace np::memory
-{
-	CAllocator DefaultAllocator;
-}
+#include "Renderer.hpp"
+
+#endif /* NP_ENGINE_RPI_HPP */

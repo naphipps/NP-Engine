@@ -19,47 +19,23 @@
 #include "NP-Engine/System/System.hpp"
 #include "NP-Engine/String/String.hpp"
 
-#include "RPI/Renderer.hpp"
+#include "RPI/RPI.hpp"
+#include "GraphicsEvents.hpp"
 
 #include <vulkan/vulkan.hpp>
 #include <glm/glm.hpp>//TODO: move this to math
 
-//TODO: add summary comments
-
 namespace np::graphics
 {
-	namespace __detail
+	static void Init()
 	{
-		template <class T>
-		static inline Renderer* TryRenderer(memory::Allocator& allocator)
-		{
-			Renderer* renderer = nullptr;
 
-			memory::Block block = allocator.Allocate(sizeof(T));
-			if (block.IsValid())
-			{
-				memory::Construct<T>(block);
-				renderer = static_cast<Renderer*>(block.Begin());
-
-				if (!renderer->IsEnabled())
-				{
-					renderer = nullptr;
-					memory::Destruct<T>(static_cast<T*>(renderer));
-					allocator.Deallocate(block);
-				}
-			}
-			else
-			{
-				allocator.Deallocate(block);
-			}
-
-			return renderer;
-		}
 	}
 
-	void Init();
+	static void Shutdown()
+	{
 
-	void Shutdown();
+	}
 }
 
 #endif /* NP_ENGINE_GRAPHICS_HPP */

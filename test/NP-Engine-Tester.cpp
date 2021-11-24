@@ -19,11 +19,11 @@ namespace np::app
             ::std::cout<<"hello world from my game app!\n";
             ::std::cout << "my title is '" << GetTitle() << "'\n";
 
+            window::Window::Properties window_properties;
             for (siz i = 0; i < 1; i++)
             {
-                window::Window* window = GetWindowLayer().CreateWindow();
-                window->SetTitle("My Game Window >:D - " + to_str(i));
-                window->Show();
+                window_properties.Title = "My Game Window >:D - " + to_str(i);
+                window::Window* window = GetWindowLayer().CreateWindow(window_properties);
             }
 
             Application::Run(argc, argv);
