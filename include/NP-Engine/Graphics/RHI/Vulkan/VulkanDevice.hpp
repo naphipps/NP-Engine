@@ -303,7 +303,7 @@ namespace np::graphics::rhi
 
 				if (vkCreateDevice(_physical_device, &device_create_info, nullptr, &logical_device) != VK_SUCCESS)
 				{
-					logical_device = false;
+					logical_device = nullptr;
 				}
 			}
 
