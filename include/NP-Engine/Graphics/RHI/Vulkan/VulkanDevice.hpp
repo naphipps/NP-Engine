@@ -204,6 +204,8 @@ namespace np::graphics::rhi
 				case VK_PHYSICAL_DEVICE_TYPE_VIRTUAL_GPU:
 					score += 100;
 					break;
+                default:
+                    break;
 				}
 
 

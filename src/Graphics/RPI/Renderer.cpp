@@ -33,6 +33,8 @@ namespace np::graphics
 			block = allocator.Allocate(sizeof(rhi::VulkanRenderer));
 			memory::Construct<rhi::VulkanRenderer>(block);
 			break;
+        default:
+            break;
 		}
 
 		return (Renderer*)block.ptr;

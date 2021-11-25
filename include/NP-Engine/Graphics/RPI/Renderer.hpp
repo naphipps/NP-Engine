@@ -23,6 +23,8 @@ namespace np::graphics
 
 		static Renderer* Create(memory::Allocator& allocator);
 
+		virtual ~Renderer() {}
+		
 		virtual void RegisterRhiType() const
 		{
 			__detail::RegisteredRhiType = GetRhiType();

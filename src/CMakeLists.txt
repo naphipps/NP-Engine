@@ -64,16 +64,16 @@ set(NP_ENGINE_GRAPHICS_HPP
 
 set(NP_ENGINE_GRAPHICS_RPI_HPP
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/RPI.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/Renderer.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/Camera.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/Command.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/Buffer.hpp
+	#${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/Renderer.hpp
+	#${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/Camera.hpp
+	#${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/Command.hpp
+	#${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/Buffer.hpp
 	#${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/Device.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/Image.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/Pipeline.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/Scene.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/Shader.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/Texture.hpp
+	#${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/Image.hpp
+	#${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/Pipeline.hpp
+	#${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/Scene.hpp
+	#${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/Shader.hpp
+	#${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/Texture.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/RhiType.hpp
 )
 
@@ -278,14 +278,14 @@ set(NP_ENGINE_GRAPHICS_CPP
 
 set(NP_ENGINE_GRAPHICS_RPI_CPP
 	Graphics/RPI/RhiType.cpp
-	Graphics/RPI/Camera.cpp
-	Graphics/RPI/Command.cpp
-	Graphics/RPI/Buffer.cpp
-	Graphics/RPI/Image.cpp
-	Graphics/RPI/Pipeline.cpp
-	Graphics/RPI/Scene.cpp
-	Graphics/RPI/Shader.cpp
-	Graphics/RPI/Texture.cpp
+	#Graphics/RPI/Camera.cpp
+	#Graphics/RPI/Command.cpp
+	#Graphics/RPI/Buffer.cpp
+	#Graphics/RPI/Image.cpp
+	#Graphics/RPI/Pipeline.cpp
+	#Graphics/RPI/Scene.cpp
+	#Graphics/RPI/Shader.cpp
+	#Graphics/RPI/Texture.cpp
 	Graphics/RPI/Renderer.cpp
 )
 

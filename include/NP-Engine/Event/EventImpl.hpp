@@ -70,6 +70,8 @@ namespace np::event
         concurrency::PadObject(),
         _handled(false)
         {}
+        
+        virtual ~Event() {}
             
         void SetHandled(bl handled = true)
         {

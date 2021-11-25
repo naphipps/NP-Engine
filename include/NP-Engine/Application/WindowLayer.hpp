@@ -99,7 +99,7 @@ namespace np::app
 //#endif
         }
 
-        virtual event::EventCategory GetHandledCategories() const
+        virtual event::EventCategory GetHandledCategories() const override
         {
             return event::EVENT_CATEGORY_WINDOW;
         }

@@ -188,7 +188,7 @@ namespace np::app
 			}
 		}
 
-		virtual event::EventCategory GetHandledCategories() const
+		virtual event::EventCategory GetHandledCategories() const override
 		{
 			return event::EVENT_CATEGORY_GRAPHICS;
 		}
