@@ -6,14 +6,17 @@ namespace np::app
 {
     class GameApp : public Application
     {
+    private:
+        
+        memory::Allocator& _allocator;
+        
     public:
             
         GameApp(memory::Allocator& application_allocator):
-        Application(Application::Properties{"My Game App", application_allocator})
+        Application(Application::Properties{"My Game App"}),
+        _allocator(application_allocator)
         {}
-            
-        ~GameApp() = default;
-            
+        
         void Run(i32 argc, chr** argv) override
         {
             ::std::cout<<"hello world from my game app!\n";

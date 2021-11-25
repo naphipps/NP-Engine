@@ -12,6 +12,7 @@
 #include "NP-Engine/Container/Container.hpp"
 #include "NP-Engine/Window/Window.hpp"
 #include "NP-Engine/Platform/Platform.hpp"
+#include "NP-Engine/Memory/Memory.hpp"
 
 #include "Layer.hpp"
 #include "ApplicationCloseEvent.hpp"
@@ -22,6 +23,7 @@ namespace np::app
 	{
     private:
 
+        memory::TraitAllocator _allocator;
         container::vector<window::Window*> _windows; //TODO: make this vector of pointers again...
         container::vector<void*> _native_windows;
 
@@ -51,12 +53,7 @@ namespace np::app
     public:
 
         WindowLayer(event::EventSubmitter& event_submitter):
-        WindowLayer(memory::DefaultTraitAllocator, event_submitter)
-        {}
-
-        WindowLayer(memory::Allocator& allocator, event::EventSubmitter& event_submitter):
-        Layer(event_submitter),
-        _windows(allocator)
+        Layer(event_submitter)
         {
             glfwInit();
         }
@@ -66,7 +63,7 @@ namespace np::app
             for (auto it = _windows.begin(); it != _windows.end(); it++)
             {
                 memory::Destruct(*it);
-                _windows.get_allocator().Deallocate(*it);
+                _allocator.Deallocate(*it);
             }
 
             glfwTerminate();

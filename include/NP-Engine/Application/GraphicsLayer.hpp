@@ -10,6 +10,9 @@
 #include "NP-Engine/Graphics/Graphics.hpp"
 #include "NP-Engine/Container/Container.hpp"
 #include "NP-Engine/Platform/Platform.hpp"
+#include "NP-Engine/Memory/Memory.hpp"
+
+#include "NP-Engine/Graphics/RHI/Vulkan/VulkanRenderer.hpp"
 
 #if NP_ENGINE_PLATFORM_IS_APPLE
 //TODO: implement
@@ -19,7 +22,6 @@
 
 #elif NP_ENGINE_PLATFORM_IS_WINDOWS
 #include "NP-Engine/Graphics/RHI/OpenGL/OpenGLRenderer.hpp"
-#include "NP-Engine/Graphics/RHI/Vulkan/VulkanRenderer.hpp"
 
 #endif
 
@@ -31,6 +33,7 @@ namespace np::app
 	{
 	protected:
 
+		memory::TraitAllocator _allocator;
 		container::vector<graphics::Renderer*> _renderers;
 
 		virtual void HandleCreateRendererForWindow(event::Event& event)
@@ -81,7 +84,7 @@ namespace np::app
 				}
 			}
 #endif
-#if /* NP_ENGINE_PLATFORM_IS_APPLE || NP_ENGINE_PLATFORM_IS_LINUX || */ NP_ENGINE_PLATFORM_IS_WINDOWS
+#if NP_ENGINE_PLATFORM_IS_APPLE || /* NP_ENGINE_PLATFORM_IS_LINUX || */ NP_ENGINE_PLATFORM_IS_WINDOWS
 			//TODO: try vulkan on apple and linux
 
 			block = allocator.Allocate(sizeof(graphics::rhi::VulkanRenderer));
@@ -149,12 +152,7 @@ namespace np::app
 	public:
 
         GraphicsLayer(event::EventSubmitter& event_submitter):
-        GraphicsLayer(memory::DefaultTraitAllocator, event_submitter)
-        {}
-
-        GraphicsLayer(memory::Allocator& allocator, event::EventSubmitter& event_submitter):
-        Layer(event_submitter),
-		_renderers(allocator)
+        Layer(event_submitter)
         {
 			ChooseRhi();
 		}
@@ -164,13 +162,13 @@ namespace np::app
 			for (auto it = _renderers.begin(); it != _renderers.end(); it++)
 			{
 				memory::Destruct(*it);
-				_renderers.get_allocator().Deallocate(*it);
+				_allocator.Deallocate(*it);
 			}
 		}
 
 		graphics::Renderer* CreateRenderer()
 		{
-			graphics::Renderer* renderer = graphics::Renderer::Create(_renderers.get_allocator());
+			graphics::Renderer* renderer = graphics::Renderer::Create(_allocator);
 			_renderers.emplace_back(renderer);
 			return renderer;
 		}
@@ -185,7 +183,7 @@ namespace np::app
 					graphics::Renderer* renderer = _renderers[i];
 					_renderers.erase(_renderers.begin() + i);
 					memory::Destruct(renderer);
-					_renderers.get_allocator().Deallocate(renderer);
+					_allocator.Deallocate(renderer);
 				}
 			}
 		}

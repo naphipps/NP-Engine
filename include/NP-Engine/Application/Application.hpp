@@ -36,7 +36,6 @@ namespace np::app
         struct Properties
         {
             str Title = "";
-            memory::Allocator& Allocator;
         };
 
     protected:
@@ -54,10 +53,8 @@ namespace np::app
         _application_event_submitter(_event_queue), //order matters
         Layer(_application_event_submitter),
         _properties(application_properties),
-        _window_layer(_properties.Allocator, _event_submitter),
-        _graphics_layer(_properties.Allocator, _event_submitter),
-        _layers(_properties.Allocator),
-        _overlays(_properties.Allocator),
+        _window_layer(_event_submitter),
+        _graphics_layer(_event_submitter),
         _running(false)
         {
             _layers.emplace_back(this);
@@ -187,11 +184,6 @@ namespace np::app
         str GetTitle() const
         {
             return _properties.Title;
-        }
-
-        memory::Allocator& GetAllocator() const
-        {
-            return _properties.Allocator;
         }
 
         void StopRunning()

@@ -21,19 +21,7 @@ set(NP_ENGINE_CONCURRENCY_HPP
 )
 
 set(NP_ENGINE_CONTAINER_HPP
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Container/array.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Container/Container.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Container/container_traits.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Container/deque.hpp
-	#${PROJECT_SOURCE_DIR}/include/NP-Engine/Container/deque_iterator.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Container/fixed_queue.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Container/init_list.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Container/iterator.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Container/oset.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Container/priority_queue.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Container/queue.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Container/uset.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Container/vector.hpp
 )
 
 set(NP_ENGINE_CORE_HPP
