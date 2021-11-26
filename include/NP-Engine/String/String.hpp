@@ -91,10 +91,27 @@ static str to_str(const chr* c)
     return str(c);
 }
 
+static str to_str(chr* c)
+{
+    return str(c);
+}
+
 template <class T>
 static str to_str(T t)
 {
     return ::std::to_string(t);
+}
+
+namespace std
+{
+    template<>
+    struct hash<str>
+    {
+        siz operator()(const str& s) const noexcept
+        {
+            return ::std::hash<str::std_type>{}((str::std_type)s);
+        }
+    };
 }
 
 
@@ -105,10 +122,27 @@ static wstr to_wstr(const wchr* c)
     return wstr(c);
 }
 
+static wstr to_wstr(wchr* c)
+{
+    return wstr(c);
+}
+
 template <class T>
 static wstr to_wstr(T t)
 {
     return ::std::to_wstring(t);
+}
+
+namespace std
+{
+    template<>
+    struct hash<wstr>
+    {
+        siz operator()(const wstr& s) const noexcept
+        {
+            return ::std::hash<wstr::std_type>{}((wstr::std_type)s);
+        }
+    };
 }
 
 //TODO: I'm not quite sure how I want to support u16str and u32str... they may replace wstr since wstr is 16bit on Windows and 32bit elsewhere....
