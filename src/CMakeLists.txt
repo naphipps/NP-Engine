@@ -8,6 +8,7 @@ set(NP_ENGINE_APPLICATION_HPP
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Application/Layer.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Application/WindowLayer.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Application/GraphicsLayer.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Application/Popup.hpp
 )
 
 set(NP_ENGINE_CONCURRENCY_HPP
@@ -216,8 +217,6 @@ set(NP_ENGINE_STRING_HPP
 
 set(NP_ENGINE_SYSTEM_HPP
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/System/System.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/System/SystemImpl.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/System/Popup.hpp
 )
 
 set(NP_ENGINE_TIME_HPP
@@ -271,6 +270,18 @@ set(NP_ENGINE_HEADER_FILES
 set(NP_ENGINE_APPPLICATION_CPP
 	Application/WindowLayer.cpp
 )
+
+if (APPLE)
+	set(NP_ENGINE_APPPLICATION_CPP
+		${NP_ENGINE_APPPLICATION_CPP}
+		Application/Popup.mm
+	)
+else()
+	set(NP_ENGINE_APPPLICATION_CPP
+		${NP_ENGINE_APPPLICATION_CPP}
+		Application/Popup.cpp
+	)
+endif()
 
 set(NP_ENGINE_GRAPHICS_CPP
 	#Graphics/Graphics.cpp
@@ -328,20 +339,6 @@ set(NP_ENGINE_PHYSICS_CPP
 	Physics/Physics.cpp
 )
 
-set(NP_ENGINE_SYSTEM_CPP)
-
-if (APPLE)
-	set(NP_ENGINE_SYSTEM_CPP
-		${NP_ENGINE_SYSTEM_CPP}
-		System/Popup.mm
-	)
-else()
-	set(NP_ENGINE_SYSTEM_CPP
-		${NP_ENGINE_SYSTEM_CPP}
-		System/Popup.cpp
-	)
-endif()
-
 set(NP_ENGINE_WINDOW_CPP
 	Window/Window.cpp
 )
@@ -353,7 +350,6 @@ set(NP_ENGINE_SOURCE_FILES
 	${NP_ENGINE_MEMORY_CPP}
 	${NP_ENGINE_NP_ENGINE_MAIN_CPP}
 	${NP_ENGINE_PHYSICS_CPP}
-	${NP_ENGINE_SYSTEM_CPP}
 	${NP_ENGINE_WINDOW_CPP}
 	${NP_ENGINE_GRAPHICS_RPI_CPP}
 	${NP_ENGINE_GRAPHICS_OPENGL_CPP}
@@ -451,6 +447,6 @@ source_group(Primitive FILES ${NP_ENGINE_PRIMITIVE_HPP})
 source_group(Random FILES ${NP_ENGINE_RANDOM_HPP})
 source_group(Serialization FILES ${NP_ENGINE_SERIALIZATION_HPP})
 source_group(String FILES ${NP_ENGINE_STRING_HPP})
-source_group(System FILES ${NP_ENGINE_SYSTEM_HPP} ${NP_ENGINE_SYSTEM_CPP})
+source_group(System FILES ${NP_ENGINE_SYSTEM_HPP})
 source_group(Time FILES ${NP_ENGINE_TIME_HPP})
 source_group(Window FILES ${NP_ENGINE_WINDOW_HPP} ${NP_ENGINE_WINDOW_CPP})

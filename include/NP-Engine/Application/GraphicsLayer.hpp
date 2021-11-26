@@ -26,6 +26,7 @@
 #endif
 
 #include "Layer.hpp"
+#include "Popup.hpp"
 
 namespace np::app
 {
@@ -118,22 +119,21 @@ namespace np::app
 
 			str title = "NP Engine";
 			str choose_message;
-			system::Popup::Select select = system::Popup::Select::Yes;
-			system::Popup::Buttons buttons = system::Popup::Buttons::YesNo;
+			Popup::Select select = Popup::Select::Yes;
+			Popup::Buttons buttons = Popup::Buttons::YesNo;
 
 			if (renderers.size() == 0)
 			{
-				system::Popup::Show(title, "Could not find suitible renderers.", system::Popup::Style::Error);
+				Popup::Show(title, "Could not find suitible renderers.", Popup::Style::Error);
 			}
 			else
 			{
 				while (true)
 				{
 					choose_message = "Click Yes for " + renderers.front()->GetName() + ", or click No to cycle to the next.";
-					select =
-						system::Popup::Show(title, "Available renderers:\n" + available_renderers + choose_message, buttons);
+					select = Popup::Show(title, "Available renderers:\n" + available_renderers + choose_message, buttons);
 
-					if (select == system::Popup::Select::Yes)
+					if (select == Popup::Select::Yes)
 					{
 						break;
 					}

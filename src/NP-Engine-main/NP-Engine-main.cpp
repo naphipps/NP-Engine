@@ -15,8 +15,8 @@ i32 main(i32 argc, chr** argv)
 {
 	i32 retval = 0;
 	str message;
-	::np::system::Popup::Style style = ::np::system::Popup::DefaultStyle;
-	::np::system::Popup::Buttons buttons = ::np::system::Popup::DefaultButtons;
+	::np::app::Popup::Style style = ::np::app::Popup::DefaultStyle;
+	::np::app::Popup::Buttons buttons = ::np::app::Popup::DefaultButtons;
 
 	try
 	{
@@ -39,7 +39,7 @@ i32 main(i32 argc, chr** argv)
 			retval = 3;
 			message = "WAS NOT ABLE TO ALLOCATE ENOUGH MEMORY\n";
 			message += "Log file can be found here: " + ::np::insight::Log::GetFileLoggerFilePath();
-			style = ::np::system::Popup::Style::Error;
+			style = ::np::app::Popup::Style::Error;
 			NP_LOG_ERROR(message);
 		}
 
@@ -51,7 +51,7 @@ i32 main(i32 argc, chr** argv)
 		retval = 1;
 		message = "STD EXCEPTION OCCURRED: \n" + to_str(e.what()) + "\n\n";
 		message += "Log file can be found here: " + ::np::insight::Log::GetFileLoggerFilePath();
-		style = ::np::system::Popup::Style::Error;
+		style = ::np::app::Popup::Style::Error;
 		NP_LOG_ERROR(message);
 	}
 	catch (...)
@@ -60,13 +60,13 @@ i32 main(i32 argc, chr** argv)
 		retval = 2;
 		message = "UNKNOWN EXCEPTION OCCURRED\n\n";
 		message += "Log file can be found here: " + ::np::insight::Log::GetFileLoggerFilePath();
-		style = ::np::system::Popup::Style::Error;
+		style = ::np::app::Popup::Style::Error;
 		NP_LOG_ERROR(message);
 	}
 
 	if (retval != 0)
 	{
-		::np::system::Popup::Show("NP-Engine Code: " + to_str(retval), message, style, buttons);
+		::np::app::Popup::Show("NP-Engine Code: " + to_str(retval), message, style, buttons);
 	}
 
 	return retval;

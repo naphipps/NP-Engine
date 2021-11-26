@@ -4,24 +4,27 @@
 //
 //##===----------------------------------------------------------------------===##//
 
-#include "NP-Engine/System/Popup.hpp"
+#include "NP-Engine/Application/Popup.hpp"
 
 #if NP_ENGINE_PLATFORM_IS_LINUX
 	#include <gtk/gtk.h>
 
 #elif NP_ENGINE_PLATFORM_IS_WINDOWS
-	#pragma comment( \
-		linker, \
-		"\"/manifestdependency:type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
+	// clang-format off
+	#pragma comment(linker,"\"/manifestdependency:type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
+	// clang-format on
 	#include <Windows.h>
+
+#else
+	#error This file should only be compiled on Linux or Windows machines
 
 #endif
 
 // TODO: add summary comments
 
-namespace np::system
+namespace np::app
 {
-	Popup::Select Popup::Show(::std::string title, ::std::string message, Popup::Style style, Popup::Buttons buttons)
+	Popup::Select Popup::Show(str title, str message, Popup::Style style, Popup::Buttons buttons)
 	{
 		Popup::Select select = Popup::Select::Error;
 
@@ -162,4 +165,4 @@ namespace np::system
 
 		return select;
 	}
-} // namespace np::system
+} // namespace np::app

@@ -24,9 +24,58 @@
 #include "Layer.hpp"
 #include "WindowLayer.hpp"
 #include "GraphicsLayer.hpp"
+#include "Popup.hpp"
 
 namespace np::app
 {
+	namespace __detail
+	{
+		static inline void HandleTerminate() noexcept
+		{
+			::std::cerr << "The terminate function was called.\nLog file can be found here : " +
+					insight::Log::GetFileLoggerFilePath()
+						<< "\n";
+			Popup::Show("NP-Engine Terminate Function Called",
+						"Probably an unhandled exception was thrown.\nLog file can be found here : " +
+							insight::Log::GetFileLoggerFilePath(),
+						Popup::Style::Error, Popup::Buttons::OK);
+		}
+
+		static inline void HandleSignal(i32 signal) noexcept
+		{
+			str signal_string = "";
+			switch (signal)
+			{
+			case SIGINT:
+				signal_string = "SIGINT";
+				break;
+			case SIGILL:
+				signal_string = "SIGILL";
+				break;
+			case SIGFPE:
+				signal_string = "SIGFPE";
+				break;
+			case SIGSEGV:
+				signal_string = "SIGSEGV";
+				break;
+			case SIGTERM:
+				signal_string = "SIGTERM";
+				break;
+			case SIGABRT:
+				signal_string = "SIGABRT";
+				break;
+			default:
+				signal_string = "UNKNOWN SIGNAL";
+				break;
+			}
+
+			str message = signal_string + " was raised.\nLog file can be found here : " + insight::Log::GetFileLoggerFilePath();
+
+			::std::cerr << message << "\n";
+			Popup::Show("NP-Engine Signal Raised", message, Popup::Style::Error, Popup::Buttons::OK);
+		}
+	} // namespace __detail
+
 	// TODO: add summary comments
 
 	class Application : public Layer
@@ -55,6 +104,9 @@ namespace np::app
 			_graphics_layer(_event_submitter),
 			_running(false)
 		{
+			system::SetTerminateHandler(__detail::HandleTerminate);
+			system::SetSignalHandler(__detail::HandleSignal);
+
 			_layers.emplace_back(this);
 			_layers.emplace_back(memory::AddressOf(_window_layer));
 			_layers.emplace_back(memory::AddressOf(_graphics_layer));

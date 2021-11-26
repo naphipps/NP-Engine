@@ -4,14 +4,14 @@
 //
 //##===----------------------------------------------------------------------===##//
 
-#include "NP-Engine/System/Popup.hpp"
+#include "NP-Engine/Application/Popup.hpp"
 
 #if NP_ENGINE_PLATFORM_IS_APPLE
 #import <Cocoa/Cocoa.h>
 
-namespace np::system
+namespace np::app
 {
-    Popup::Select Popup::Show(::std::string title, ::std::string message, Popup::Style style, Popup::Buttons buttons)
+    Popup::Select Popup::Show(str title, str message, Popup::Style style, Popup::Buttons buttons)
     {
         NSAlert *alert = [[NSAlert alloc] init];
         
@@ -136,5 +136,5 @@ namespace np::system
     }
 }
 #else
-#error This file should only be used on Apple machines
+    #error This file should only be used on Apple machines
 #endif

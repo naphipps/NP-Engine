@@ -4,20 +4,17 @@
 //
 //##===----------------------------------------------------------------------===##//
 
-// TODO: move popups to Application level
-
 #ifndef NP_ENGINE_POPUP_HPP
 #define NP_ENGINE_POPUP_HPP
-
-#include <string>
 
 #include "NP-Engine/Primitive/Primitive.hpp"
 #include "NP-Engine/Platform/Platform.hpp"
 #include "NP-Engine/Insight/Insight.hpp"
+#include "NP-Engine/String/String.hpp"
 
 // TODO: add summary comments
 
-namespace np::system
+namespace np::app
 {
 	class Popup
 	{
@@ -54,23 +51,23 @@ namespace np::system
 		constexpr static Style DefaultStyle = Style::Info;
 		constexpr static Buttons DefaultButtons = Buttons::OK;
 
-		static Select Show(::std::string title, ::std::string message, Style style, Buttons buttons);
+		static Select Show(str title, str message, Style style, Buttons buttons);
 
-		static inline Select Show(::std::string title, ::std::string message, Style style)
+		static inline Select Show(str title, str message, Style style)
 		{
 			return Show(title, message, style, DefaultButtons);
 		}
 
-		static inline Select Show(::std::string title, ::std::string message, Buttons buttons)
+		static inline Select Show(str title, str message, Buttons buttons)
 		{
 			return Show(title, message, DefaultStyle, buttons);
 		}
 
-		static inline Select Show(::std::string title, ::std::string message)
+		static inline Select Show(str title, str message)
 		{
 			return Show(title, message, DefaultStyle, DefaultButtons);
 		}
 	};
-} // namespace np::system
+} // namespace np::app
 
 #endif /* NP_ENGINE_POPUP_HPP */
