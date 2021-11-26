@@ -16,10 +16,10 @@
 
 namespace np
 {
-    namespace js
-    {
-        using JobPool = memory::ObjectPool<Job>;
-    }
-}
+	namespace js
+	{
+		using JobPool = memory::ObjectPool<Job>;
+	} // namespace js
+} // namespace np
 
 #endif /* NP_ENGINE_JOB_POOL_HPP */

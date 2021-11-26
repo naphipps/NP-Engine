@@ -8,7 +8,7 @@
 #ifndef NP_ENGINE_HPP
 #define NP_ENGINE_HPP
 
-//TODO: cleanup includes
+// TODO: cleanup includes
 
 #include "Foundation/Foundation.hpp"
 #include "Serialization/Serialization.hpp"

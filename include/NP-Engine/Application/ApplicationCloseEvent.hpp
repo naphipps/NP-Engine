@@ -11,24 +11,21 @@
 
 namespace np::app
 {
-    class ApplicationCloseEvent : public event::Event
-    {
-    public:
+	class ApplicationCloseEvent : public event::Event
+	{
+	public:
+		ApplicationCloseEvent(): event::Event() {}
 
-        ApplicationCloseEvent():
-        event::Event()
-        {}
+		virtual event::EventType GetType() const override
+		{
+			return event::EVENT_TYPE_APPLICATION_CLOSE;
+		}
 
-        virtual event::EventType GetType() const override
-        {
-            return event::EVENT_TYPE_APPLICATION_CLOSE;
-        }
-
-        virtual event::EventCategory GetCategory() const override
-        {
-            return event::EVENT_CATEGORY_APPLICATION;
-        }
-    };
-}
+		virtual event::EventCategory GetCategory() const override
+		{
+			return event::EVENT_CATEGORY_APPLICATION;
+		}
+	};
+} // namespace np::app
 
 #endif /* NP_ENGINE_APPLICATION_CLOSE_EVENT_HPP */

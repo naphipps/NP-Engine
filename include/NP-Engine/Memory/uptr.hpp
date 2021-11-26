@@ -14,17 +14,17 @@
 
 namespace np
 {
-    namespace memory
-    {
-        template <typename T>
-        using uptr = ::std::unique_ptr<T>;
+	namespace memory
+	{
+		template <typename T>
+		using uptr = ::std::unique_ptr<T>;
 
-        template <typename T, typename ... Args>
-        constexpr uptr<T> CreateUptr(Args&& ... args)
-        {
-            return ::std::make_unique<T>(::std::forward<Args>(args)...);
-        }
-    }
-}
+		template <typename T, typename... Args>
+		constexpr uptr<T> CreateUptr(Args&&... args)
+		{
+			return ::std::make_unique<T>(::std::forward<Args>(args)...);
+		}
+	} // namespace memory
+} // namespace np
 
 #endif /* NP_ENGINE_UPTR_HPP */

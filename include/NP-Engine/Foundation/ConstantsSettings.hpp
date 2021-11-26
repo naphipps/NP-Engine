@@ -18,16 +18,16 @@
 //===----------------------------------------------------------------------===//
 
 #ifndef NP_ENGINE_MAIN_MEMORY_SIZE
-#define NP_ENGINE_MAIN_MEMORY_SIZE (2000000000)
+	#define NP_ENGINE_MAIN_MEMORY_SIZE (2000000000)
 #endif
 
 //===----------------------------------------------------------------------===//
 
 #if DEBUG
 
-#define NP_PROFILE_ENABLE 1
-#define NP_LOG_ENABLE 1
-#define NP_ASSERT_ENABLE 1
+	#define NP_PROFILE_ENABLE 1
+	#define NP_LOG_ENABLE 1
+	#define NP_ASSERT_ENABLE 1
 
 #endif
 

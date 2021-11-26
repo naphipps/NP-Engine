@@ -15,17 +15,17 @@
 
 namespace np
 {
-    namespace time
-    {
-        using Milliseconds = ::std::chrono::milliseconds;
-        using Microseconds = ::std::chrono::microseconds;
-        
-        using SteadyClock = ::std::chrono::steady_clock;
-        using SteadyTimestamp = ::std::chrono::time_point<SteadyClock>;
-        
-        using DurationMilliseconds = ::std::chrono::duration<dbl, ::std::milli>;
-        using DurationMicroseconds = ::std::chrono::duration<dbl, ::std::micro>;
-    }
-}
+	namespace time
+	{
+		using Milliseconds = ::std::chrono::milliseconds;
+		using Microseconds = ::std::chrono::microseconds;
+
+		using SteadyClock = ::std::chrono::steady_clock;
+		using SteadyTimestamp = ::std::chrono::time_point<SteadyClock>;
+
+		using DurationMilliseconds = ::std::chrono::duration<dbl, ::std::milli>;
+		using DurationMicroseconds = ::std::chrono::duration<dbl, ::std::micro>;
+	} // namespace time
+} // namespace np
 
 #endif /* NP_ENGINE_TIME_HPP */

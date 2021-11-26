@@ -8,5 +8,4 @@
 #ifndef Input_h
 #define Input_h
 
-
 #endif /* Input_h */

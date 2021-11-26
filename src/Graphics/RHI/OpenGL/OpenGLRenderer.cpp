@@ -6,7 +6,7 @@
 
 #include "NP-Engine/Graphics/RHI/OpenGL/OpenGLRenderer.hpp"
 
-//TODO: add summary comments
+// TODO: add summary comments
 
 namespace np::graphics::rhi
 {
@@ -19,4 +19,4 @@ namespace np::graphics::rhi
 	{
 		return false;
 	}
-}
+} // namespace np::graphics::rhi

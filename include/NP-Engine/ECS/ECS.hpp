@@ -13,7 +13,7 @@
 
 namespace np::ecs::vendor::entt
 {
-    using namespace ::entt;
-}
+	using namespace ::entt;
+} // namespace np::ecs::vendor::entt
 
 #endif /* NP_ENGINE_ECS_HPP */

@@ -14,23 +14,27 @@
 #include "../../RPI/Renderer.hpp"
 #include "../../RPI/RhiType.hpp"
 
-//TODO: add summary comments
+// TODO: add summary comments
 
 namespace np::graphics::rhi
 {
 	class OpenGLRenderer : public Renderer
 	{
 	public:
+		OpenGLRenderer() {}
 
-		OpenGLRenderer()
-		{}
+		RhiType GetRhiType() const override
+		{
+			return RhiType::OpenGL;
+		}
 
-		RhiType GetRhiType() const override { return RhiType::OpenGL; }
-
-		str GetName() const override { return "OpenGL"; }
+		str GetName() const override
+		{
+			return "OpenGL";
+		}
 
 		void AttachToWindow(window::Window& window) override {}
 	};
-}
+} // namespace np::graphics::rhi
 
 #endif /* NP_ENGINE_GRAPHICS_OPENGL_RENDERER_HPP */

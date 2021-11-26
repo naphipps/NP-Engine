@@ -11,5 +11,5 @@ namespace np::graphics
 	namespace __detail
 	{
 		RhiType RegisteredRhiType = RhiType::None;
-	}
-}
+	} // namespace __detail
+} // namespace np::graphics

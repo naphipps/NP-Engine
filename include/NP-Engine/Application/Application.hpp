@@ -27,192 +27,198 @@
 
 namespace np::app
 {
-    //TODO: add summary comments
+	// TODO: add summary comments
 
-    class Application : public Layer
-    {
-    public:
+	class Application : public Layer
+	{
+	public:
+		struct Properties
+		{
+			str Title = "";
+		};
 
-        struct Properties
-        {
-            str Title = "";
-        };
+	protected:
+		Properties _properties;
+		event::EventQueue _event_queue;
+		event::EventSubmitter _application_event_submitter;
+		WindowLayer _window_layer;
+		GraphicsLayer _graphics_layer;
+		container::vector<Layer*> _layers;
+		container::vector<Layer*> _overlays;
+		atm_bl _running;
 
-    protected:
+		Application(const Application::Properties& application_properties):
+			_application_event_submitter(_event_queue), // order matters
+			Layer(_application_event_submitter),
+			_properties(application_properties),
+			_window_layer(_event_submitter),
+			_graphics_layer(_event_submitter),
+			_running(false)
+		{
+			_layers.emplace_back(this);
+			_layers.emplace_back(memory::AddressOf(_window_layer));
+			_layers.emplace_back(memory::AddressOf(_graphics_layer));
+		}
 
-        Properties _properties;
-        event::EventQueue _event_queue;
-        event::EventSubmitter _application_event_submitter;
-        WindowLayer _window_layer;
-        GraphicsLayer _graphics_layer;
-        container::vector<Layer*> _layers;
-        container::vector<Layer*> _overlays;
-        atm_bl _running;
+		virtual WindowLayer& GetWindowLayer()
+		{
+			return _window_layer;
+		}
 
-        Application(const Application::Properties& application_properties) :
-        _application_event_submitter(_event_queue), //order matters
-        Layer(_application_event_submitter),
-        _properties(application_properties),
-        _window_layer(_event_submitter),
-        _graphics_layer(_event_submitter),
-        _running(false)
-        {
-            _layers.emplace_back(this);
-            _layers.emplace_back(memory::AddressOf(_window_layer));
-            _layers.emplace_back(memory::AddressOf(_graphics_layer));
-        }
+		virtual GraphicsLayer& GetGraphicsLayer()
+		{
+			return _graphics_layer;
+		}
 
-        virtual WindowLayer& GetWindowLayer()
-        {
-            return _window_layer;
-        }
+		void HandleEvent(event::Event& event) override
+		{
+			switch (event.GetType())
+			{
+			case event::EVENT_TYPE_APPLICATION_CLOSE:
+				StopRunning();
+				event.SetHandled();
+				break;
+			}
+		}
 
-        virtual GraphicsLayer& GetGraphicsLayer()
-        {
-            return _graphics_layer;
-        }
+	public:
+		virtual ~Application() {}
 
-        void HandleEvent(event::Event& event) override
-        {
-            switch (event.GetType())
-            {
-            case event::EVENT_TYPE_APPLICATION_CLOSE:
-                StopRunning();
-                event.SetHandled();
-                break;
-            }
-        }
+		void Run()
+		{
+			Run(0, nullptr);
+		}
 
-    public:
+		virtual void Run(i32 argc, chr** argv)
+		{
+			_running.store(true, mo_release);
+			time::SteadyTimestamp current_timestamp;
+			time::SteadyTimestamp prev_timestamp;
+			time::DurationMilliseconds timestamp_diff;
+			time::DurationMilliseconds loop_duration(4);
+			time::DurationMilliseconds sleep_duration;
 
-        virtual ~Application()
-        {
-            
-        }
+			while (_running.load(mo_acquire))
+			{
+				current_timestamp = time::SteadyClock::now();
+				timestamp_diff = current_timestamp - prev_timestamp;
+				prev_timestamp = current_timestamp;
 
-        void Run()
-        {
-            Run(0, nullptr);
-        }
+				for (Layer* layer : _layers)
+					layer->BeforeUdpate();
+				for (Layer* overlay : _overlays)
+					overlay->BeforeUdpate();
 
-        virtual void Run(i32 argc, chr** argv)
-        {
-            _running.store(true, mo_release);
-            time::SteadyTimestamp current_timestamp;
-            time::SteadyTimestamp prev_timestamp;
-            time::DurationMilliseconds timestamp_diff;
-            time::DurationMilliseconds loop_duration(4);
-            time::DurationMilliseconds sleep_duration;
+				for (Layer* layer : _layers)
+					layer->Update(timestamp_diff);
+				for (Layer* overlay : _overlays)
+					overlay->Update(timestamp_diff);
 
-            while (_running.load(mo_acquire))
-            {
-                current_timestamp = time::SteadyClock::now();
-                timestamp_diff = current_timestamp - prev_timestamp;
-                prev_timestamp = current_timestamp;
+				for (Layer* layer : _layers)
+					layer->AfterUdpate();
+				for (Layer* overlay : _overlays)
+					overlay->AfterUdpate();
 
-                for (Layer* layer : _layers) layer->BeforeUdpate();
-                for (Layer* overlay : _overlays) overlay->BeforeUdpate();
+				/*
+				* //TODO: http://www.gameprogrammingpatterns.com/game-loop.html
+				*
+				* //TODO: figure out how to fix our loops to 60fps
+				//TODO: figure out how to force this into a fixed step loop - aka, set this to loop at 60fps or something with 0
+				being infinitely fast
 
-                for (Layer* layer : _layers) layer->Update(timestamp_diff);
-                for (Layer* overlay : _overlays) overlay->Update(timestamp_diff);
+				double previous = getCurrentTime();
+				double lag = 0.0;
+				while (true)
+				{
+					double current = getCurrentTime();
+					double elapsed = current - previous;
+					previous = current;
+					lag += elapsed;
 
-                for (Layer* layer : _layers) layer->AfterUdpate();
-                for (Layer* overlay : _overlays) overlay->AfterUdpate();
+					processInput();
 
-                /*
-                * //TODO: http://www.gameprogrammingpatterns.com/game-loop.html
-                * 
-                * //TODO: figure out how to fix our loops to 60fps
-                //TODO: figure out how to force this into a fixed step loop - aka, set this to loop at 60fps or something with 0 being infinitely fast
-                
-                double previous = getCurrentTime();
-                double lag = 0.0;
-                while (true)
-                {
-                    double current = getCurrentTime();
-                    double elapsed = current - previous;
-                    previous = current;
-                    lag += elapsed;
+					while (lag >= MS_PER_UPDATE)
+					{
+					update();
+					lag -= MS_PER_UPDATE;
+					}
 
-                    processInput();
+					render();
+				}
+				*/
 
-                    while (lag >= MS_PER_UPDATE)
-                    {
-                    update();
-                    lag -= MS_PER_UPDATE;
-                    }
+				for (event::Event* e = _event_queue.PopOther(); e != nullptr; e = _event_queue.PopOther())
+				{
+					for (auto it = _overlays.rbegin(); !e->IsHandled() && it != _overlays.rend(); it++)
+					{
+						(*it)->OnEvent(*e);
+					}
 
-                    render();
-                }
-                */
+					for (auto it = _layers.rbegin(); !e->IsHandled() && it != _layers.rend(); it++)
+					{
+						(*it)->OnEvent(*e);
+					}
 
-                for (event::Event* e = _event_queue.PopOther(); e != nullptr; e = _event_queue.PopOther())
-                {
-                    for (auto it = _overlays.rbegin(); !e->IsHandled() && it != _overlays.rend(); it++)
-                    {
-                        (*it)->OnEvent(*e);
-                    }
+					if (e->IsHandled())
+						_event_queue.DestroyEvent(e);
+					else
+						_event_queue.Emplace(e);
+				}
 
-                    for (auto it = _layers.rbegin(); !e->IsHandled() && it != _layers.rend(); it++)
-                    {
-                        (*it)->OnEvent(*e);
-                    }
+				_event_queue.SwapBuffers();
 
-                    if (e->IsHandled()) _event_queue.DestroyEvent(e);
-                    else _event_queue.Emplace(e);
-                }
+				for (Layer* layer : _layers)
+					layer->Cleanup();
+				for (Layer* overlay : _overlays)
+					overlay->Cleanup();
 
-                _event_queue.SwapBuffers();
+				sleep_duration = loop_duration - timestamp_diff;
+				if (sleep_duration.count() > 0)
+				{
+					concurrency::ThisThread::yield();
+					concurrency::ThisThread::sleep_for(sleep_duration);
+				}
+			}
+		}
 
-                for (Layer* layer : _layers) layer->Cleanup();
-                for (Layer* overlay : _overlays) overlay->Cleanup();
+		Properties GetProperties() const
+		{
+			return _properties;
+		}
 
-                sleep_duration = loop_duration - timestamp_diff;
-                if (sleep_duration.count() > 0)
-                {
-                    concurrency::ThisThread::yield();
-                    concurrency::ThisThread::sleep_for(sleep_duration);
-                }
-            }
-        }
+		str GetTitle() const
+		{
+			return _properties.Title;
+		}
 
-        Properties GetProperties() const
-        {
-            return _properties;
-        }
+		void StopRunning()
+		{
+			_running.store(false, mo_release);
+		}
 
-        str GetTitle() const
-        {
-            return _properties.Title;
-        }
+		void PushLayer(Layer* layer) // TODO: protected??
+		{
+			_layers.emplace_back(layer);
+		}
 
-        void StopRunning()
-        {
-            _running.store(false, mo_release);
-        }
+		void PushOverlay(Layer* overlay) // TODO: protected??
+		{
+			_overlays.emplace_back(overlay);
+		}
 
-        void PushLayer(Layer* layer) //TODO: protected??
-        {
-            _layers.emplace_back(layer);
-        }
+		event::EventCategory GetHandledCategories() const override
+		{
+			return event::EVENT_CATEGORY_APPLICATION;
+		}
 
-        void PushOverlay(Layer* overlay) //TODO: protected??
-        {
-            _overlays.emplace_back(overlay);
-        }
+		bl IsRunning() const
+		{
+			return _running.load(mo_acquire);
+		}
+	};
 
-        event::EventCategory GetHandledCategories() const override
-        {
-            return event::EVENT_CATEGORY_APPLICATION;
-        }
-
-        bl IsRunning() const
-        {
-            return _running.load(mo_acquire);
-        }
-    };
-
-    Application* CreateApplication(memory::Allocator& application_allocator); //TODO: make this a static function of Application?
-}
+	Application* CreateApplication(
+		memory::Allocator& application_allocator); // TODO: make this a static function of Application?
+} // namespace np::app
 
 #endif /* NP_ENGINE_APPLICATION_HPP */

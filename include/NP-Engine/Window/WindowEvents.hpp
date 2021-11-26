@@ -13,6 +13,6 @@
 #include "WindowCloseEvent.hpp"
 #include "WindowCreateEvent.hpp"
 
-//TODO: add events: WindowFocus, WindowLostFocus, WindowMoved
+// TODO: add events: WindowFocus, WindowLostFocus, WindowMoved
 
 #endif /* NP_ENGINE_WINDOW_EVENTS_HPP */

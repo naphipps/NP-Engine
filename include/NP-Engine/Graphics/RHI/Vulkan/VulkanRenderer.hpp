@@ -22,23 +22,18 @@
 
 #include "VulkanDevice.hpp"
 
-//TODO: add summary comments
+// TODO: add summary comments
 
 namespace np::graphics::rhi
 {
 	class VulkanRenderer : public Renderer
 	{
 	private:
-
 		memory::Allocator& _allocator;
 		VulkanDevice* _device;
 
 	public:
-
-		VulkanRenderer():
-		_allocator(memory::DefaultTraitAllocator),
-		_device(nullptr)
-		{}
+		VulkanRenderer(): _allocator(memory::DefaultTraitAllocator), _device(nullptr) {}
 
 		~VulkanRenderer()
 		{
@@ -66,11 +61,11 @@ namespace np::graphics::rhi
 			_device = (VulkanDevice*)block.ptr;
 
 			std::cout << "Renderer Attaching to Window\n";
-			//set up our surface
-			//create our device
-			//this is all tied together, so we might move all this to device...
+			// set up our surface
+			// create our device
+			// this is all tied together, so we might move all this to device...
 		}
 	};
-}
+} // namespace np::graphics::rhi
 
 #endif /* NP_ENGINE_GRAPHICS_VULKAN_RENDERER_HPP */

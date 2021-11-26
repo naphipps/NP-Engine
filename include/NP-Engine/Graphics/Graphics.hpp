@@ -9,7 +9,7 @@
 
 #include "NP-Engine/Foundation/Foundation.hpp"
 
-//TODO: move all contents of this file to Graphics.hpp, and Graphics.cpp
+// TODO: move all contents of this file to Graphics.hpp, and Graphics.cpp
 
 #include "NP-Engine/Primitive/Primitive.hpp"
 #include "NP-Engine/Platform/Platform.hpp"
@@ -23,19 +23,13 @@
 #include "GraphicsEvents.hpp"
 
 #include <vulkan/vulkan.hpp>
-#include <glm/glm.hpp>//TODO: move this to math
+#include <glm/glm.hpp> //TODO: move this to math
 
 namespace np::graphics
 {
-	static void Init()
-	{
+	static void Init() {}
 
-	}
-
-	static void Shutdown()
-	{
-
-	}
-}
+	static void Shutdown() {}
+} // namespace np::graphics
 
 #endif /* NP_ENGINE_GRAPHICS_HPP */

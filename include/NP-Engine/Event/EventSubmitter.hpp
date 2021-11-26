@@ -12,7 +12,7 @@
 #include "EventQueue.hpp"
 #include "EventImpl.hpp"
 
-//TODO: add summary comments
+// TODO: add summary comments
 
 namespace np::event
 {
@@ -22,22 +22,19 @@ namespace np::event
 		EventQueue& _queue;
 
 	public:
+		EventSubmitter(EventQueue& queue): _queue(queue) {}
 
-		EventSubmitter(EventQueue& queue):
-		_queue(queue)
-		{}
-
-        template <typename T, typename ... Args>
-        bl Emplace(Args&& ... args)
-        {
+		template <typename T, typename... Args>
+		bl Emplace(Args&&... args)
+		{
 			return _queue.Emplace<T>(::std::forward<Args>(args)...);
-        }
+		}
 
-        bl Emplace(const Event* event)
-        {
+		bl Emplace(const Event* event)
+		{
 			return _queue.Emplace(event);
-        }
+		}
 	};
-}
+} // namespace np::event
 
 #endif /* NP_EGNINE_EVENT_SUBMITTER_HPP */

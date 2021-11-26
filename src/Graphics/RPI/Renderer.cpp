@@ -9,13 +9,13 @@
 #include "NP-Engine/Graphics/RPI/Renderer.hpp"
 
 #if NP_ENGINE_PLATFORM_IS_APPLE
-//TODO: implement
+// TODO: implement
 
 #elif NP_ENGINE_PLATFORM_IS_LINUX
-//TODO: implement
+// TODO: implement
 
 #elif NP_ENGINE_PLATFORM_IS_WINDOWS
-#include "NP-Engine/Graphics/RHI/OpenGL/OpenGLRenderer.hpp"
+	#include "NP-Engine/Graphics/RHI/OpenGL/OpenGLRenderer.hpp"
 
 #endif
 
@@ -29,14 +29,14 @@ namespace np::graphics
 
 		switch (__detail::RegisteredRhiType)
 		{
-		case RhiType::Vulkan: //TODO: seems to work on all platforms...
+		case RhiType::Vulkan: // TODO: seems to work on all platforms...
 			block = allocator.Allocate(sizeof(rhi::VulkanRenderer));
 			memory::Construct<rhi::VulkanRenderer>(block);
 			break;
-        default:
-            break;
+		default:
+			break;
 		}
 
 		return (Renderer*)block.ptr;
 	}
-}
+} // namespace np::graphics

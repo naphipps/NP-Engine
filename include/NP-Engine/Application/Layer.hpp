@@ -12,34 +12,30 @@
 
 namespace np::app
 {
-    /*
-        Layer will represent a layer in our application
-    */
-    class Layer : public event::EventHandler
-    {
-    protected:
+	/*
+		Layer will represent a layer in our application
+	*/
+	class Layer : public event::EventHandler
+	{
+	protected:
+		virtual void HandleEvent(event::Event& event) {}
 
-        virtual void HandleEvent(event::Event& event) {}
+	public:
+		Layer(event::EventSubmitter& event_submitter): event::EventHandler(event_submitter) {}
 
-    public:
+		virtual void BeforeUdpate() {} // TODO: do we like this idea??
 
-        Layer(event::EventSubmitter& event_submitter):
-        event::EventHandler(event_submitter)
-        {}
+		virtual void Update(time::DurationMilliseconds time_delta) {}
 
-        virtual void BeforeUdpate() {} //TODO: do we like this idea??
+		virtual void AfterUdpate() {} // TODO: do we like this idea??
 
-        virtual void Update(time::DurationMilliseconds time_delta) {}
+		virtual void Cleanup() {}
 
-        virtual void AfterUdpate() {} //TODO: do we like this idea??
-
-        virtual void Cleanup() {}
-
-        virtual event::EventCategory GetHandledCategories() const
-        {
-            return event::EVENT_CATEGORY_NONE;
-        }
-    };
-}
+		virtual event::EventCategory GetHandledCategories() const
+		{
+			return event::EVENT_CATEGORY_NONE;
+		}
+	};
+} // namespace np::app
 
 #endif /* NP_ENGINE_LAYER_HPP */

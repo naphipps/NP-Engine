@@ -23,7 +23,7 @@ namespace np::graphics
 	namespace __detail
 	{
 		extern RhiType RegisteredRhiType;
-	}
-}
+	} // namespace __detail
+} // namespace np::graphics
 
 #endif /* NP_ENGINE_RHI_TYPE_HPP */

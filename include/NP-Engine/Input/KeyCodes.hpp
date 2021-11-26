@@ -11,10 +11,8 @@
 
 namespace np
 {
-    namespace input
-    {
-        
-    }
-}
+	namespace input
+	{}
+} // namespace np
 
 #endif /* NP_ENGINE_KEY_CODES_HPP */

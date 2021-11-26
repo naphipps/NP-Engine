@@ -14,17 +14,17 @@
 
 namespace np
 {
-    namespace memory
-    {
-        template <typename T>
-        using sptr = ::std::shared_ptr<T>;
-        
-        template <typename T, typename ... Args>
-        constexpr sptr<T> CreateSptr(Args&& ... args)
-        {
-            return ::std::make_shared<T>(::std::forward<Args>(args)...);
-        }
-    }
-}
+	namespace memory
+	{
+		template <typename T>
+		using sptr = ::std::shared_ptr<T>;
+
+		template <typename T, typename... Args>
+		constexpr sptr<T> CreateSptr(Args&&... args)
+		{
+			return ::std::make_shared<T>(::std::forward<Args>(args)...);
+		}
+	} // namespace memory
+} // namespace np
 
 #endif /* NP_ENGINE_SPTR_HPP */

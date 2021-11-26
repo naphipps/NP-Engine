@@ -1,4 +1,4 @@
-//TODO: missing header
+// TODO: missing header
 
 #ifndef NP_ENGINE_SYSTEM_HPP
 #define NP_ENGINE_SYSTEM_HPP

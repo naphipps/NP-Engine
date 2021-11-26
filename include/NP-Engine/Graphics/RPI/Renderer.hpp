@@ -20,11 +20,10 @@ namespace np::graphics
 	class Renderer
 	{
 	public:
-
 		static Renderer* Create(memory::Allocator& allocator);
 
 		virtual ~Renderer() {}
-		
+
 		virtual void RegisterRhiType() const
 		{
 			__detail::RegisteredRhiType = GetRhiType();
@@ -36,6 +35,6 @@ namespace np::graphics
 
 		virtual void AttachToWindow(window::Window& window) = 0;
 	};
-}
+} // namespace np::graphics
 
 #endif /* NP_ENGINE_GRAPHICS_RPI_RENDERER_HPP */

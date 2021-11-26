@@ -4,7 +4,7 @@
 //
 //##===----------------------------------------------------------------------===##//
 
-//TODO: move popups to Application level
+// TODO: move popups to Application level
 
 #ifndef NP_ENGINE_POPUP_HPP
 #define NP_ENGINE_POPUP_HPP
@@ -15,63 +15,62 @@
 #include "NP-Engine/Platform/Platform.hpp"
 #include "NP-Engine/Insight/Insight.hpp"
 
-//TODO: add summary comments
+// TODO: add summary comments
 
 namespace np::system
 {
-    class Popup
-    {
-    public:
-        
-        enum class Select
-        {
-            OK,
-            Cancel,
-            Yes,
-            No,
-            Quit,
-            None,
-            Error
-        };
-        
-        enum class Style
-        {
-            Info,
-            Warning,
-            Error,
-            Question
-        };
-        
-        enum class Buttons
-        {
-            OK,
-            OKCancel,
-            YesNo,
-            YesNoCancel,
-            Quit
-        };
-        
-        constexpr static Select DefaultSelect = Select::OK;
-        constexpr static Style DefaultStyle = Style::Info;
-        constexpr static Buttons DefaultButtons = Buttons::OK;
-        
-        static Select Show(::std::string title, ::std::string message, Style style, Buttons buttons);
-        
-        static inline Select Show(::std::string title, ::std::string message, Style style)
-        {
-            return Show(title, message, style, DefaultButtons);
-        }
-        
-        static inline Select Show(::std::string title, ::std::string message, Buttons buttons)
-        {
-            return Show(title, message, DefaultStyle, buttons);
-        }
-        
-        static inline Select Show(::std::string title, ::std::string message)
-        {
-            return Show(title, message, DefaultStyle, DefaultButtons);
-        }
-    };
-}
+	class Popup
+	{
+	public:
+		enum class Select
+		{
+			OK,
+			Cancel,
+			Yes,
+			No,
+			Quit,
+			None,
+			Error
+		};
+
+		enum class Style
+		{
+			Info,
+			Warning,
+			Error,
+			Question
+		};
+
+		enum class Buttons
+		{
+			OK,
+			OKCancel,
+			YesNo,
+			YesNoCancel,
+			Quit
+		};
+
+		constexpr static Select DefaultSelect = Select::OK;
+		constexpr static Style DefaultStyle = Style::Info;
+		constexpr static Buttons DefaultButtons = Buttons::OK;
+
+		static Select Show(::std::string title, ::std::string message, Style style, Buttons buttons);
+
+		static inline Select Show(::std::string title, ::std::string message, Style style)
+		{
+			return Show(title, message, style, DefaultButtons);
+		}
+
+		static inline Select Show(::std::string title, ::std::string message, Buttons buttons)
+		{
+			return Show(title, message, DefaultStyle, buttons);
+		}
+
+		static inline Select Show(::std::string title, ::std::string message)
+		{
+			return Show(title, message, DefaultStyle, DefaultButtons);
+		}
+	};
+} // namespace np::system
 
 #endif /* NP_ENGINE_POPUP_HPP */

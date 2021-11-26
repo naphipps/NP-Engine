@@ -13,28 +13,28 @@
 
 #include "NP-Engine/Memory/Memory.hpp"
 
-//TODO: add summary comments
+// TODO: add summary comments
 
 namespace np::concurrency
 {
-    namespace __detail
-    {
-        struct MpmcQueueTraits : public ::moodycamel::ConcurrentQueueDefaultTraits
-        {
-            static inline void* malloc(siz size)
-            {
-                return ::np::memory::TraitAllocator::malloc(size);
-            }
+	namespace __detail
+	{
+		struct MpmcQueueTraits : public ::moodycamel::ConcurrentQueueDefaultTraits
+		{
+			static inline void* malloc(siz size)
+			{
+				return ::np::memory::TraitAllocator::malloc(size);
+			}
 
-            static inline void free(void* ptr)
-            {
-                ::np::memory::TraitAllocator::free(ptr);
-            }
-        };
-    }
+			static inline void free(void* ptr)
+			{
+				::np::memory::TraitAllocator::free(ptr);
+			}
+		};
+	} // namespace __detail
 
-    template <class T>
-    using MpmcQueue = ::moodycamel::ConcurrentQueue<T, __detail::MpmcQueueTraits>;
-}
+	template <class T>
+	using MpmcQueue = ::moodycamel::ConcurrentQueue<T, __detail::MpmcQueueTraits>;
+} // namespace np::concurrency
 
 #endif /* NP_ENGINE_MPMC_QUEUE_HPP */

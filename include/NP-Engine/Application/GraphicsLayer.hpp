@@ -15,13 +15,13 @@
 #include "NP-Engine/Graphics/RHI/Vulkan/VulkanRenderer.hpp"
 
 #if NP_ENGINE_PLATFORM_IS_APPLE
-//TODO: implement
+	// TODO: implement
 
 #elif NP_ENGINE_PLATFORM_IS_LINUX
-//TODO: implement
+	// TODO: implement
 
 #elif NP_ENGINE_PLATFORM_IS_WINDOWS
-#include "NP-Engine/Graphics/RHI/OpenGL/OpenGLRenderer.hpp"
+	#include "NP-Engine/Graphics/RHI/OpenGL/OpenGLRenderer.hpp"
 
 #endif
 
@@ -32,7 +32,6 @@ namespace np::app
 	class GraphicsLayer : public Layer
 	{
 	protected:
-
 		memory::TraitAllocator _allocator;
 		container::vector<graphics::Renderer*> _renderers;
 
@@ -62,14 +61,15 @@ namespace np::app
 			graphics::Renderer* vulkan = nullptr;
 			memory::Allocator& allocator = memory::DefaultTraitAllocator;
 
-			//TODO: read graphics config file for renderer preference - then we could put our found renderers into multimap
+			// TODO: read graphics config file for renderer preference - then we could put our found renderers into multimap
 
-			//TODO: read from json file about which renderer was used last, if no file, or not available, ask user which renderer with popups
-			//TODO: where do we store our decision for which renderer we choose??
-			//TODO: read a config file to determine renderer order preference
+			// TODO: read from json file about which renderer was used last, if no file, or not available, ask user which
+			// renderer with popups
+			// TODO: where do we store our decision for which renderer we choose??
+			// TODO: read a config file to determine renderer order preference
 
 #if /* NP_ENGINE_PLATFORM_IS_LINUX || */ NP_ENGINE_PLATFORM_IS_WINDOWS
-		//TODO: try opengl on linux
+			// TODO: try opengl on linux
 
 			block = allocator.Allocate(sizeof(graphics::rhi::OpenGLRenderer));
 			if (block.IsValid())
@@ -85,7 +85,7 @@ namespace np::app
 			}
 #endif
 #if NP_ENGINE_PLATFORM_IS_APPLE || /* NP_ENGINE_PLATFORM_IS_LINUX || */ NP_ENGINE_PLATFORM_IS_WINDOWS
-			//TODO: try vulkan on apple and linux
+			// TODO: try vulkan on apple and linux
 
 			block = allocator.Allocate(sizeof(graphics::rhi::VulkanRenderer));
 			if (block.IsValid())
@@ -101,14 +101,16 @@ namespace np::app
 			}
 #endif
 
-			if (vulkan != nullptr) renderers.emplace_back(vulkan);
-			if (opengl != nullptr) renderers.emplace_back(opengl);
+			if (vulkan != nullptr)
+				renderers.emplace_back(vulkan);
+			if (opengl != nullptr)
+				renderers.emplace_back(opengl);
 
 			str available_renderers;
 
 			for (graphics::Renderer* renderer : renderers)
 			{
-				//if (renderer->IsEnabled()) //TODO: !!!
+				// if (renderer->IsEnabled()) //TODO: !!!
 				{
 					available_renderers += "\t- " + renderer->GetName() + "\n";
 				}
@@ -128,7 +130,8 @@ namespace np::app
 				while (true)
 				{
 					choose_message = "Click Yes for " + renderers.front()->GetName() + ", or click No to cycle to the next.";
-					select = system::Popup::Show(title, "Available renderers:\n" + available_renderers + choose_message, buttons);
+					select =
+						system::Popup::Show(title, "Available renderers:\n" + available_renderers + choose_message, buttons);
 
 					if (select == system::Popup::Select::Yes)
 					{
@@ -150,10 +153,8 @@ namespace np::app
 		}
 
 	public:
-
-        GraphicsLayer(event::EventSubmitter& event_submitter):
-        Layer(event_submitter)
-        {
+		GraphicsLayer(event::EventSubmitter& event_submitter): Layer(event_submitter)
+		{
 			ChooseRhi();
 		}
 
@@ -177,7 +178,7 @@ namespace np::app
 		{
 			for (i32 i = _renderers.size() - 1; i >= 0; i--)
 			{
-				//if (!_renderers[i]->IsEnabled()) //TODO: !!!
+				// if (!_renderers[i]->IsEnabled()) //TODO: !!!
 				if (false)
 				{
 					graphics::Renderer* renderer = _renderers[i];
@@ -193,7 +194,6 @@ namespace np::app
 			return event::EVENT_CATEGORY_GRAPHICS;
 		}
 	};
-}
-
+} // namespace np::app
 
 #endif /* NP_ENGINE_GRAPHICS_LAYER_HPP */

@@ -9,4 +9,4 @@
 namespace np::memory
 {
 	CAllocator DefaultAllocator;
-}
+} // namespace np::memory

@@ -10,4 +10,4 @@ namespace np::memory
 {
 	Allocator* TraitAllocator::_allocator = AddressOf(DefaultAllocator);
 	TraitAllocator DefaultTraitAllocator;
-}
+} // namespace np::memory
