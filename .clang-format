@@ -44,6 +44,8 @@ UseCRLF:    false
 UseTab: Always
 SortIncludes:   Never
 KeepEmptyLinesAtTheStartOfBlocks:   false
+EmptyLineAfterAccessModifier: Never
+EmptyLineBeforeAccessModifier: Always
 LambdaBodyIndentation: Signature
 IndentPPDirectives: BeforeHash
 PPIndentWidth:  -1
