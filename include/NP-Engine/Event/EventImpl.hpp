@@ -8,7 +8,7 @@
 #define NP_ENGINE_EVENT_IMPL_HPP
 
 #include "NP-Engine/Primitive/Primitive.hpp"
-#include "NP-Engine/Concurrency/Concurrency.hpp"
+#include "NP-Engine/Memory/Memory.hpp"
 
 namespace np::event
 {
@@ -29,6 +29,7 @@ namespace np::event
 	constexpr static EventType EVENT_TYPE_APPLICATION_CLOSE = 13;
 	constexpr static EventType EVENT_TYPE_WINDOW_CREATE = 14;
 	constexpr static EventType EVENT_TYPE_GRAPHICS_CREATE_RENDERER_FOR_WINDOW = 15;
+	constexpr static EventType EVENT_TYPE_APPLICATION_POPUP = 16;
 
 	/*
 		determines if EventType a matches b
@@ -56,16 +57,13 @@ namespace np::event
 		return (a & b) != EVENT_CATEGORY_NONE;
 	}
 
-	/*
-		represents an event
-	*/
-	class Event : public concurrency::PadObject
+	class Event : public memory::Delegate
 	{
 	protected:
 		bl _handled;
 
 	public:
-		Event(): concurrency::PadObject(), _handled(false) {}
+		Event(): memory::Delegate(), _handled(false) {}
 
 		virtual ~Event() {}
 

@@ -9,13 +9,13 @@ set(NP_ENGINE_APPLICATION_HPP
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Application/WindowLayer.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Application/GraphicsLayer.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Application/Popup.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Application/ApplicationPopupEvent.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Application/ApplicationEvents.hpp
 )
 
 set(NP_ENGINE_CONCURRENCY_HPP
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Concurrency/Concurrency.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Concurrency/ConcurrencyConstants.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Concurrency/MpmcQueue.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Concurrency/PadObject.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Concurrency/Thread.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Concurrency/ThreadPool.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Concurrency/ThreadToken.hpp
@@ -163,6 +163,8 @@ set(NP_ENGINE_MEMORY_HPP
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Memory/StdAllocator.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Memory/TraitAllocator.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Memory/uptr.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Memory/PadObject.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Memory/Delegate.hpp
 )
 
 set(NP_ENGINE_NOISE_HPP

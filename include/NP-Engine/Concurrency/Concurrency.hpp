@@ -11,11 +11,9 @@
 
 #include "NP-Engine/Foundation/Foundation.hpp"
 
-#include "ConcurrencyConstants.hpp"
 #include "ThreadPool.hpp"
 #include "ThreadToken.hpp"
 #include "Thread.hpp"
 #include "MpmcQueue.hpp"
-#include "PadObject.hpp"
 
 #endif /* NP_ENGINE_CONCURRENCY_HPP */

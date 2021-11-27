@@ -31,5 +31,7 @@
 #include "MemoryFunctions.hpp"
 #include "TraitAllocator.hpp"
 #include "StdAllocator.hpp"
+#include "PadObject.hpp"
+#include "Delegate.hpp"
 
 #endif /* NP_ENGINE_MEMORY_HPP */

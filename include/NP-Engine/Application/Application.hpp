@@ -20,7 +20,7 @@
 #include "NP-Engine/Time/Time.hpp"
 #include "NP-Engine/Window/Window.hpp"
 
-#include "ApplicationCloseEvent.hpp"
+#include "ApplicationEvents.hpp"
 #include "Layer.hpp"
 #include "WindowLayer.hpp"
 #include "GraphicsLayer.hpp"
@@ -122,13 +122,24 @@ namespace np::app
 			return _graphics_layer;
 		}
 
-		void HandleEvent(event::Event& event) override
+		void HandlePopup(event::Event& e)
 		{
-			switch (event.GetType())
+			ApplicationPopupEvent::DataType& data = e.RetrieveData<ApplicationPopupEvent::DataType>();
+			data.select = Popup::Show(GetTitle(), data.message, data.style, data.buttons);
+			e.InvokeConnectedFunction();
+			e.SetHandled();
+		}
+
+		void HandleEvent(event::Event& e) override
+		{
+			switch (e.GetType())
 			{
 			case event::EVENT_TYPE_APPLICATION_CLOSE:
 				StopRunning();
-				event.SetHandled();
+				e.SetHandled();
+				break;
+			case event::EVENT_TYPE_APPLICATION_POPUP:
+				HandlePopup(e);
 				break;
 			}
 		}

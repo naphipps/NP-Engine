@@ -40,7 +40,7 @@ namespace np
 				}
 
 				_dependent_job = nullptr;
-				_job_function.Invalidate();
+				_job_function.DisconnectFunction();
 				_dependency_count = -1;
 			}
 
@@ -151,7 +151,7 @@ namespace np
 			{
 				if (CanExecute())
 				{
-					_job_function(_job_function);
+                    _job_function.InvokeConnectedFunction();
 					_dependency_count--;
 
 					if (_dependent_job)
