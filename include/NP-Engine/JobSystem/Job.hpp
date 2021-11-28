@@ -151,7 +151,7 @@ namespace np
 			{
 				if (CanExecute())
 				{
-                    _job_function.InvokeConnectedFunction();
+					_job_function.InvokeConnectedFunction();
 					_dependency_count--;
 
 					if (_dependent_job)

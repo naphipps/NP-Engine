@@ -3,7 +3,7 @@
 //  Author: Nathan Phipps 2/9/21
 //
 //##===----------------------------------------------------------------------===##// //TODO: use these comment headers
-//everywhere
+// everywhere
 
 #include <exception>
 

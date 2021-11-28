@@ -11,7 +11,7 @@
 
 namespace np::js
 {
-	using JobFunction = memory::Delegate; //TODO: consider a design where this is removed
+	using JobFunction = memory::Delegate; // TODO: consider a design where this is removed
 } // namespace np::js
 
 #endif /* NP_ENGINE_JOB_FUNCTION_HPP */
