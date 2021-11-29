@@ -11,8 +11,6 @@
 
 #include "NP-Engine/Foundation/Foundation.hpp"
 
-#include "sptr.hpp"
-#include "uptr.hpp"
 #include "Allocator.hpp"
 #include "Block.hpp"
 #include "CAllocator.hpp"
@@ -33,5 +31,6 @@
 #include "StdAllocator.hpp"
 #include "PadObject.hpp"
 #include "Delegate.hpp"
+#include "SmartPtr.hpp"
 
 #endif /* NP_ENGINE_MEMORY_HPP */
