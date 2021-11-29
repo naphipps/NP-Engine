@@ -85,8 +85,6 @@ namespace np::app
 				}
 			}
 #endif
-#if NP_ENGINE_PLATFORM_IS_APPLE || /* NP_ENGINE_PLATFORM_IS_LINUX || */ NP_ENGINE_PLATFORM_IS_WINDOWS
-			// TODO: try vulkan on apple and linux
 
 			block = allocator.Allocate(sizeof(graphics::rhi::VulkanRenderer));
 			if (block.IsValid())
@@ -100,7 +98,6 @@ namespace np::app
 					allocator.Deallocate(block);
 				}
 			}
-#endif
 
 			if (vulkan != nullptr)
 				renderers.emplace_back(vulkan);
