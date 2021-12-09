@@ -90,7 +90,7 @@ namespace np
 		}
 
 		/**
-		 the alignment our allocators with adhere to
+		 the alignment our allocators will adhere to
 		 */
 		constexpr static siz ALIGNMENT = BIT(3);
 
