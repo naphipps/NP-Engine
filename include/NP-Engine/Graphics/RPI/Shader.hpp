@@ -7,11 +7,37 @@
 #ifndef NP_ENGINE_RPI_SHADER_HPP
 #define NP_ENGINE_RPI_SHADER_HPP
 
-namespace np::renderer::rpi
+#include <iostream> //TODO: remove
+
+#include "NP-Engine/Primitive/Primitive.hpp"
+#include "NP-Engine/String/String.hpp"
+
+namespace np::graphics
 {
+	class Shader
+	{
+	protected:
+		str _filename;
 
-	class Shader; // TODO: implement
+	public:
+		Shader(str filename): _filename(filename) {}
 
-} // namespace np::renderer::rpi
+		virtual void Load(str filename) = 0;
+
+		virtual void Reload()
+		{
+			Load(_filename);
+		}
+
+		str Filename() const
+		{
+			return _filename;
+		}
+
+		virtual siz Size() const = 0;
+
+		virtual void* Bytes() const = 0;
+	};
+} // namespace np::graphics
 
 #endif /* NP_ENGINE_RPI_SHADER_HPP */

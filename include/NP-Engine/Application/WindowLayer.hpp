@@ -7,12 +7,12 @@
 #ifndef NP_ENGINE_WINDOW_LAYER_HPP
 #define NP_ENGINE_WINDOW_LAYER_HPP
 
-#include <GLFW/glfw3.h>
-
 #include "NP-Engine/Container/Container.hpp"
 #include "NP-Engine/Window/Window.hpp"
 #include "NP-Engine/Platform/Platform.hpp"
 #include "NP-Engine/Memory/Memory.hpp"
+
+#include "NP-Engine/Vendor/GlfwInclude.hpp"
 
 #include "Layer.hpp"
 #include "ApplicationCloseEvent.hpp"

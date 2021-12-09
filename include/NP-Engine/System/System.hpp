@@ -68,6 +68,11 @@ namespace np::system
 		::std::signal(SIGSEGV, handler);
 		::std::signal(SIGTERM, handler);
 	}
+
+	static inline void Run(::std::string command)
+	{
+		::std::system(command.c_str());
+	}
 } // namespace np::system
 
 #endif /*NP_ENGINE_SYSTEM_HPP*/

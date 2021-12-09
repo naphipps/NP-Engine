@@ -4,8 +4,8 @@
 //
 //##===----------------------------------------------------------------------===##//
 
-#ifndef NP_ENGINE_GRAPHICS_RPI_RENDERER_HPP
-#define NP_ENGINE_GRAPHICS_RPI_RENDERER_HPP
+#ifndef NP_ENGINE_RPI_RENDERER_HPP
+#define NP_ENGINE_RPI_RENDERER_HPP
 
 #include "NP-Engine/Primitive/Primitive.hpp"
 #include "NP-Engine/String/String.hpp"
@@ -34,7 +34,8 @@ namespace np::graphics
 		virtual str GetName() const = 0;
 
 		virtual void AttachToWindow(window::Window& window) = 0;
+		virtual void DetachFromWindow(window::Window& window) = 0;
 	};
 } // namespace np::graphics
 
-#endif /* NP_ENGINE_GRAPHICS_RPI_RENDERER_HPP */
+#endif /* NP_ENGINE_RPI_RENDERER_HPP */

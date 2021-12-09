@@ -8,5 +8,6 @@
 #define NP_ENGINE_RPI_HPP
 
 #include "Renderer.hpp"
+#include "Shader.hpp"
 
 #endif /* NP_ENGINE_RPI_HPP */

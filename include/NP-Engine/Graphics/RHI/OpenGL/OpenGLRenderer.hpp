@@ -34,6 +34,8 @@ namespace np::graphics::rhi
 		}
 
 		void AttachToWindow(window::Window& window) override {}
+
+		void DetachFromWindow(window::Window& window) override {}
 	};
 } // namespace np::graphics::rhi
 

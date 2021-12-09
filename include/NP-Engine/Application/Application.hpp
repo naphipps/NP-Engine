@@ -87,9 +87,9 @@ namespace np::app
 		};
 
 	protected:
-		Properties _properties;
 		event::EventQueue _event_queue;
 		event::EventSubmitter _application_event_submitter;
+		Properties _properties;
 		WindowLayer _window_layer;
 		GraphicsLayer _graphics_layer;
 		container::vector<Layer*> _layers;
@@ -100,8 +100,8 @@ namespace np::app
 			_application_event_submitter(_event_queue), // order matters
 			Layer(_application_event_submitter),
 			_properties(application_properties),
-			_window_layer(_event_submitter),
-			_graphics_layer(_event_submitter),
+			_window_layer(_application_event_submitter),
+			_graphics_layer(_application_event_submitter),
 			_running(false)
 		{
 			system::SetTerminateHandler(__detail::HandleTerminate);

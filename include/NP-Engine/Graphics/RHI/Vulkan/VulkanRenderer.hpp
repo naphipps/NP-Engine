@@ -4,23 +4,28 @@
 //
 //##===----------------------------------------------------------------------===##//
 
-#ifndef NP_ENGINE_GRAPHICS_VULKAN_RENDERER_HPP
-#define NP_ENGINE_GRAPHICS_VULKAN_RENDERER_HPP
+#ifndef NP_ENGINE_VULKAN_RENDERER_HPP
+#define NP_ENGINE_VULKAN_RENDERER_HPP
 
 #include <iostream> //TODO: remove
-
-//#include <vulkan/vulkan.hpp>
-//#include <GLFW/glfw3.h>
+#include <utility>
 
 #include "NP-Engine/Primitive/Primitive.hpp"
 #include "NP-Engine/String/String.hpp"
 #include "NP-Engine/Memory/Memory.hpp"
 #include "NP-Engine/Window/Window.hpp"
+#include "NP-Engine/Container/Container.hpp"
+
+#include "NP-Engine/Vendor/VulkanInclude.hpp"
 
 #include "../../RPI/Renderer.hpp"
 #include "../../RPI/RhiType.hpp"
 
+#include "VulkanInstance.hpp"
+#include "VulkanSurface.hpp"
 #include "VulkanDevice.hpp"
+#include "VulkanShader.hpp"
+#include "VulkanPipeline.hpp"
 
 // TODO: add summary comments
 
@@ -30,18 +35,41 @@ namespace np::graphics::rhi
 	{
 	private:
 		memory::Allocator& _allocator;
-		VulkanDevice* _device;
+		container::vector<VulkanInstance*> _instances;
+		container::vector<VulkanSurface*> _surfaces;
+		container::vector<VulkanDevice*> _devices; // TODO: should these be sptr??
+		container::vector<VulkanPipeline*> _pipelines;
+
+		template <class T, class... Args>
+		T* Create(container::vector<T*>& v, Args&&... args)
+		{
+			memory::Block block = _allocator.Allocate(sizeof(T));
+			memory::Construct<T>(block, ::std::forward<Args>(args)...);
+			return v.emplace_back((T*)block.ptr);
+		}
+
+		template <class T>
+		void DestroyVector(container::vector<T*>& ptrs)
+		{
+			for (T* ptr : ptrs)
+			{
+				memory::Destruct(ptr);
+				_allocator.Deallocate(ptr);
+			}
+		}
 
 	public:
-		VulkanRenderer(): _allocator(memory::DefaultTraitAllocator), _device(nullptr) {}
+		VulkanRenderer(): _allocator(memory::DefaultTraitAllocator)
+		{
+			Create<VulkanInstance>(_instances);
+		}
 
 		~VulkanRenderer()
 		{
-			if (_device != nullptr)
-			{
-				memory::Destruct(_device);
-				_allocator.Deallocate(_device);
-			}
+			DestroyVector<VulkanPipeline>(_pipelines);
+			DestroyVector<VulkanDevice>(_devices);
+			DestroyVector<VulkanSurface>(_surfaces);
+			DestroyVector<VulkanInstance>(_instances);
 		}
 
 		RhiType GetRhiType() const override
@@ -56,16 +84,16 @@ namespace np::graphics::rhi
 
 		void AttachToWindow(window::Window& window) override
 		{
-			memory::Block block = _allocator.Allocate(sizeof(VulkanDevice));
-			memory::Construct<VulkanDevice>(block, window);
-			_device = (VulkanDevice*)block.ptr;
+			VulkanSurface& surface = *Create<VulkanSurface>(_surfaces, *_instances.front(), window);
+			VulkanDevice& device = *Create<VulkanDevice>(_devices, surface);
+			VulkanPipeline& pipeline = *Create<VulkanPipeline>(_pipelines, device);
+		}
 
-			std::cout << "Renderer Attaching to Window\n";
-			// set up our surface
-			// create our device
-			// this is all tied together, so we might move all this to device...
+		void DetachFromWindow(window::Window& window) override
+		{
+			std::cout << "implement VulkanRenderer::DetachFromWindow\n";
 		}
 	};
 } // namespace np::graphics::rhi
 
-#endif /* NP_ENGINE_GRAPHICS_VULKAN_RENDERER_HPP */
+#endif /* NP_ENGINE_VULKAN_RENDERER_HPP */

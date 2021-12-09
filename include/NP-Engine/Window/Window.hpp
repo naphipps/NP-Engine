@@ -9,8 +9,6 @@
 
 #include <utility>
 
-#include <GLFW/glfw3.h>
-
 #include "NP-Engine/Primitive/Primitive.hpp"
 #include "NP-Engine/Event/Event.hpp"
 #include "NP-Engine/Platform/Platform.hpp"
@@ -19,7 +17,9 @@
 #include "NP-Engine/String/String.hpp"
 #include "NP-Engine/Concurrency/Concurrency.hpp"
 
-// TODo: update comments
+#include "NP-Engine/Vendor/GlfwInclude.hpp"
+
+// TODO: update comments
 
 namespace np::window
 {

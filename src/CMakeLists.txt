@@ -55,6 +55,8 @@ set(NP_ENGINE_FOUNDATION_HPP
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Foundation/Constants.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Foundation/ConstantsSettings.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Foundation/Foundation.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Foundation/cmake_include.hpp.in
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Foundation/cmake_include.hpp
 )
 
 set(NP_ENGINE_GRAPHICS_HPP
@@ -65,16 +67,16 @@ set(NP_ENGINE_GRAPHICS_HPP
 
 set(NP_ENGINE_GRAPHICS_RPI_HPP
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/RPI.hpp
-	#${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/Renderer.hpp
-	#${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/Camera.hpp
-	#${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/Command.hpp
-	#${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/Buffer.hpp
-	#${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/Device.hpp
-	#${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/Image.hpp
-	#${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/Pipeline.hpp
-	#${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/Scene.hpp
-	#${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/Shader.hpp
-	#${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/Texture.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/Renderer.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/Camera.hpp
+	# ${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/Command.hpp
+	# ${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/Buffer.hpp
+	# ${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/Device.hpp
+	# ${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/Image.hpp
+	# ${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/Pipeline.hpp
+	# ${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/Scene.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/Shader.hpp
+	# ${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/Texture.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/RhiType.hpp
 )
 
@@ -85,6 +87,10 @@ set(NP_ENGINE_GRAPHICS_OPENGL_HPP
 set(NP_ENGINE_GRAPHICS_VULKAN_HPP
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RHI/Vulkan/VulkanRenderer.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RHI/Vulkan/VulkanDevice.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RHI/Vulkan/VulkanInstance.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RHI/Vulkan/VulkanSurface.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RHI/Vulkan/VulkanPipeline.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RHI/Vulkan/VulkanShader.hpp
 )
 
 set(NP_ENGINE_INPUT_HPP
@@ -224,6 +230,19 @@ set(NP_ENGINE_TIME_HPP
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Time/Time.hpp
 )
 
+set(NP_ENGINE_VENDOR_HPP
+	#${PROJECT_SOURCE_DIR}/include/NP-Engine/Vendor/Box2dInclude.hpp
+	#${PROJECT_SOURCE_DIR}/include/NP-Engine/Vendor/ConcurrentqueueInclude.hpp
+	#${PROJECT_SOURCE_DIR}/include/NP-Engine/Vendor/EnttInclude.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Vendor/GlfwInclude.hpp
+	#${PROJECT_SOURCE_DIR}/include/NP-Engine/Vendor/GlmInclude.hpp
+	#${PROJECT_SOURCE_DIR}/include/NP-Engine/Vendor/JsonInclude.hpp
+	#${PROJECT_SOURCE_DIR}/include/NP-Engine/Vendor/PcgCppInclude.hpp
+	#${PROJECT_SOURCE_DIR}/include/NP-Engine/Vendor/RandutilsInclude.hpp
+	#${PROJECT_SOURCE_DIR}/include/NP-Engine/Vendor/SpdlogInclude.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Vendor/VulkanInclude.hpp
+)
+
 set(NP_ENGINE_WINDOW_HPP
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Window/Window.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Window/WindowCloseEvent.hpp
@@ -261,6 +280,7 @@ set(NP_ENGINE_HEADER_FILES
 	${NP_ENGINE_STRING_HPP}
 	${NP_ENGINE_SYSTEM_HPP}
 	${NP_ENGINE_TIME_HPP}
+	${NP_ENGINE_VENDOR_HPP}
 	${NP_ENGINE_WINDOW_HPP}
 )
 
@@ -308,6 +328,12 @@ set(NP_ENGINE_GRAPHICS_OPENGL_CPP
 set(NP_ENGINE_GRAPHICS_VULKAN_CPP
 	#Graphics/RHI/Vulkan/VulkanDevice.cpp
 	#Graphics/RHI/Vulkan/VulkanRenderer.cpp
+	#Graphics/RHI/Vulkan/VulkanPipeline.cpp
+)
+
+set(NP_ENGINE_GRAPHICS_VULKAN_SHADERS_GLSL
+	${PROJECT_SOURCE_DIR}/src/Graphics/RHI/Vulkan/shaders/vertex.glsl
+	${PROJECT_SOURCE_DIR}/src/Graphics/RHI/Vulkan/shaders/fragment.glsl
 )
 
 set(NP_ENGINE_INSIGHT_CPP
@@ -355,6 +381,7 @@ set(NP_ENGINE_SOURCE_FILES
 	${NP_ENGINE_GRAPHICS_RPI_CPP}
 	${NP_ENGINE_GRAPHICS_OPENGL_CPP}
 	${NP_ENGINE_GRAPHICS_VULKAN_CPP}
+	${NP_ENGINE_GRAPHICS_VULKAN_SHADERS_GLSL}
 	${NP_ENGINE_GRAPHICS_CPP}
 	${NP_ENGINE_APPPLICATION_CPP}
 )
@@ -398,17 +425,21 @@ set_target_properties(
 )
 
 if (APPLE)
-   find_library(COCOA_LIBRARY Cocoa)
-   target_link_libraries(${PROJECT_NAME} PUBLIC ${COCOA_LIBRARY})
+	file(TO_NATIVE_PATH "$ENV{HOME}/.NP-Engine" NP_ENGINE_WORKING_DIR)
+	find_library(COCOA_LIBRARY Cocoa)
+	target_link_libraries(${PROJECT_NAME} PUBLIC ${COCOA_LIBRARY})
 elseif (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
-   find_package(PkgConfig REQUIRED)
-   pkg_check_modules(GTK3 REQUIRED gtk+-3.0)
-   if (NOT DEFINED GTK3_gtk+-3.0_VERSION)
-      message(FATAL_ERROR "Could not find gtk+-3.0, so install libgtk-3-dev.\nExample: sudo apt install libgtk-3-dev")
-   else()
+	file(TO_NATIVE_PATH "$ENV{HOME}/.NP-Engine" NP_ENGINE_WORKING_DIR)
+	find_package(PkgConfig REQUIRED)
+	pkg_check_modules(GTK3 REQUIRED gtk+-3.0)
+	if (NOT DEFINED GTK3_gtk+-3.0_VERSION)
+		message(FATAL_ERROR "Could not find gtk+-3.0, so install libgtk-3-dev.\nExample: sudo apt install libgtk-3-dev")
+	else()
 	   target_link_libraries(${PROJECT_NAME} PUBLIC ${GTK3_LIBRARIES})
 	   target_include_directories(${PROJECT_NAME} PUBLIC ${GTK3_INCLUDE_DIRS})
 	endif()
+elseif(MSVC)
+	file(TO_NATIVE_PATH "$ENV{ALLUSERSPROFILE}/NP-Engine" NP_ENGINE_WORKING_DIR)
 endif()
 
 find_package(Vulkan REQUIRED FATAL_ERROR)
@@ -417,7 +448,38 @@ if(NOT Vulkan_FOUND OR NOT DEFINED Vulkan_FOUND)
 else()
 	target_link_libraries(${PROJECT_NAME} PUBLIC ${Vulkan_LIBRARY})
 	target_include_directories(${PROJECT_NAME} PUBLIC ${Vulkan_INCLUDE_DIR})
+	file(TO_NATIVE_PATH ${Vulkan_GLSLC_EXECUTABLE} Vulkan_GLSLC_EXECUTABLE_NATIVE)
+	set(Vulkan_GLSLC_EXECUTABLE ${Vulkan_GLSLC_EXECUTABLE_NATIVE})
+	unset(Vulkan_GLSLC_EXECUTABLE_NATIVE)
 endif()
+
+if (NP_ENGINE_WORKING_DIR)
+#https://developer.blender.org/diffusion/B/browse/master/source/creator/CMakeLists.txt;9d5661c9e8b1ab383be4ae7b065f50d43310f6cb$175-211
+
+	file(TO_NATIVE_PATH "${NP_ENGINE_WORKING_DIR}/fake" NP_ENGINE_SHADERS_FAKE)
+	file(TO_NATIVE_PATH "${NP_ENGINE_GRAPHICS_VULKAN_SHADERS_GLSL}" NP_ENGINE_GRAPHICS_VULKAN_SHADERS_GLSL)
+	file(TO_NATIVE_PATH "${NP_ENGINE_WORKING_DIR}/Vulkan/shaders" NP_ENGINE_VULKAN_SHADERS_DIR)
+
+	if (EXISTS ${NP_ENGINE_SHADERS_FAKE})
+		message(FATAL_ERROR "ERROR: \"${NP_ENGINE_SHADERS_FAKE}\" found, this should never be created, remove!")
+	endif()
+
+	add_custom_target("${PROJECT_NAME}-Copy-Shaders" ALL DEPENDS ${NP_ENGINE_SHADERS_FAKE})
+
+	add_custom_command(OUTPUT ${NP_ENGINE_SHADERS_FAKE} # outputing the fake ensures we run our command(s)
+		COMMAND ${CMAKE_COMMAND} -E make_directory ${NP_ENGINE_VULKAN_SHADERS_DIR}
+		COMMAND ${CMAKE_COMMAND} -E copy ${NP_ENGINE_GRAPHICS_VULKAN_SHADERS_GLSL} ${NP_ENGINE_VULKAN_SHADERS_DIR}
+		COMMENT "adding shaders to ${NP_ENGINE_WORKING_DIR}"
+	)
+
+	unset(NP_ENGINE_VULKAN_SHADERS_DIR)
+	unset(NP_ENGINE_SHADERS_FAKE)
+endif()
+
+configure_file(
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Foundation/cmake_include.hpp.in
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Foundation/cmake_include.hpp
+)
 
 ##==--------------------------------------------------------==##
 
@@ -434,6 +496,7 @@ source_group(Graphics FILES ${NP_ENGINE_GRAPHICS_HPP} ${NP_ENGINE_GRAPHICS_CPP})
 source_group(Graphics/RPI FILES ${NP_ENGINE_GRAPHICS_RPI_HPP} ${NP_ENGINE_GRAPHICS_RPI_CPP})
 source_group(Graphics/RHI/OpenGL FILES ${NP_ENGINE_GRAPHICS_OPENGL_HPP} ${NP_ENGINE_GRAPHICS_OPENGL_CPP})
 source_group(Graphics/RHI/Vulkan FILES ${NP_ENGINE_GRAPHICS_VULKAN_HPP} ${NP_ENGINE_GRAPHICS_VULKAN_CPP})
+source_group(Graphics/RHI/Vulkan/shaders FILES ${NP_ENGINE_GRAPHICS_VULKAN_SHADERS_GLSL})
 source_group(Input FILES ${NP_ENGINE_INPUT_HPP})
 source_group(Insight FILES ${NP_ENGINE_INSIGHT_HPP} ${NP_ENGINE_INSIGHT_CPP})
 source_group(JobSystem FILES ${NP_ENGINE_JOBSYSTEM_HPP} ${NP_ENGINE_JOBSYSTEM_CPP})
@@ -450,4 +513,5 @@ source_group(Serialization FILES ${NP_ENGINE_SERIALIZATION_HPP})
 source_group(String FILES ${NP_ENGINE_STRING_HPP})
 source_group(System FILES ${NP_ENGINE_SYSTEM_HPP})
 source_group(Time FILES ${NP_ENGINE_TIME_HPP})
+source_group(Vendor FILES ${NP_ENGINE_VENDOR_HPP})
 source_group(Window FILES ${NP_ENGINE_WINDOW_HPP} ${NP_ENGINE_WINDOW_CPP})
