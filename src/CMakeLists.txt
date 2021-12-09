@@ -425,7 +425,7 @@ set_target_properties(
 )
 
 if (APPLE)
-	file(TO_NATIVE_PATH "$ENV{HOME}/.NP-Engine" NP_ENGINE_WORKING_DIR)
+	file(TO_NATIVE_PATH "$ENV{HOME}/Library/NP-Engine" NP_ENGINE_WORKING_DIR)
 	find_library(COCOA_LIBRARY Cocoa)
 	target_link_libraries(${PROJECT_NAME} PUBLIC ${COCOA_LIBRARY})
 elseif (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
