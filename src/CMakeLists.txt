@@ -469,7 +469,7 @@ if (NP_ENGINE_WORKING_DIR)
 	add_custom_command(OUTPUT ${NP_ENGINE_SHADERS_FAKE} # outputing the fake ensures we run our command(s)
 		COMMAND ${CMAKE_COMMAND} -E make_directory ${NP_ENGINE_VULKAN_SHADERS_DIR}
 		COMMAND ${CMAKE_COMMAND} -E copy ${NP_ENGINE_GRAPHICS_VULKAN_SHADERS_GLSL} ${NP_ENGINE_VULKAN_SHADERS_DIR}
-		COMMENT "adding shaders to ${NP_ENGINE_WORKING_DIR}"
+		COMMENT "Updating shaders in ${NP_ENGINE_WORKING_DIR}"
 	)
 
 	unset(NP_ENGINE_VULKAN_SHADERS_DIR)
