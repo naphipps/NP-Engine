@@ -24,51 +24,10 @@ namespace np::graphics::rhi
 {
 	class VulkanShader : public Shader
 	{
-	public:
-		enum class Type
-		{
-			VERTEX,
-			FRAGMENT,
-			TESSELATION_CONTROL,
-			TESSELATION_EVALUATION,
-			GEOMETRY,
-			COMPUTE
-		};
-
 	private:
 		siz _size;
 		str _filename_spv;
-		const Type _type;
 		container::vector<ui32> _bytes;
-
-		str GetShaderStage() const
-		{
-			str stage = "UNKNOWN";
-
-			switch (_type)
-			{
-			case Type::VERTEX:
-				stage = "vertex";
-				break;
-			case Type::FRAGMENT:
-				stage = "fragment";
-				break;
-			case Type::TESSELATION_CONTROL:
-				stage = "tesscontrol";
-				break;
-			case Type::TESSELATION_EVALUATION:
-				stage = "tesseval";
-				break;
-			case Type::GEOMETRY:
-				stage = "geometry";
-				break;
-			case Type::COMPUTE:
-				stage = "compute";
-				break;
-			}
-
-			return stage;
-		}
 
 		void CompileSpirV()
 		{
@@ -79,7 +38,7 @@ namespace np::graphics::rhi
 
 			if (fs::exists(_filename))
 			{
-				::std::cout << "Compiling: '" + cmd + "'\n'";
+				::std::cout << "Compiling: '" + cmd + "'\n";
 				system::Run(cmd);
 			}
 			else
@@ -90,7 +49,7 @@ namespace np::graphics::rhi
 		}
 
 	public:
-		VulkanShader(str filename, Type type): Shader(filename), _size(0), _type(type)
+		VulkanShader(str filename, Type type): Shader(filename, type), _size(0)
 		{
 			Load(_filename);
 		}
