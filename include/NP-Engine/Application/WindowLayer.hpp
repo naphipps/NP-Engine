@@ -83,6 +83,8 @@ namespace np::app
 			{
 				if (!_windows[i]->IsRunning())
 				{
+					memory::Destruct(_windows[i]);
+					_allocator.Deallocate(_windows[i]);
 					_windows.erase(_windows.begin() + i);
 				}
 			}

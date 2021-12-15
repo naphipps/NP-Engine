@@ -13,16 +13,16 @@ namespace np::window
 	{
 		if (event.RetrieveData<WindowCloseEvent::DataType>().window == this)
 		{
-			if (_glfw_window != nullptr)
+			if (!_show_procedure_is_complete.load(mo_acquire))
 			{
-				glfwSetWindowShouldClose(_glfw_window, GLFW_TRUE);
+				if (_glfw_window != nullptr && glfwWindowShouldClose(_glfw_window) == GLFW_FALSE)
+				{
+					glfwSetWindowShouldClose(_glfw_window, GLFW_TRUE);
+				}
 			}
-
-			if (_show_procedure_is_complete.load(mo_acquire))
+			else
 			{
 				_thread.Dispose();
-				glfwDestroyWindow(_glfw_window);
-				_glfw_window = nullptr;
 				event.SetHandled();
 			}
 		}

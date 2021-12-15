@@ -115,7 +115,9 @@ namespace np
 
 			bl DestroyEvent(Event* event)
 			{
-				return memory::Destruct(event) && _allocator.Deallocate(event);
+				bl destructed = memory::Destruct(event);
+				bl deallocated = _allocator.Deallocate(event);
+				return destructed && deallocated;
 			}
 		};
 	} // namespace event

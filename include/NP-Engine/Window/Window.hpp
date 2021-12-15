@@ -93,7 +93,7 @@ namespace np::window
 
 		virtual bl IsRunning() const
 		{
-			return !_show_procedure_is_complete.load(mo_acquire);
+			return !_show_procedure_is_complete.load(mo_acquire) || _thread.IsRunning();
 		}
 
 		virtual ui32 GetWidth() const
