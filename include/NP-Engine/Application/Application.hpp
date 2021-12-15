@@ -212,13 +212,15 @@ namespace np::app
 
 				for (event::Event* e = _event_queue.PopOther(); e != nullptr; e = _event_queue.PopOther())
 				{
+					e->SetCanBeHandled(false);
+
 					for (auto it = _overlays.rbegin(); !e->IsHandled() && it != _overlays.rend(); it++)
 						(*it)->OnEvent(*e);
 
 					for (auto it = _layers.rbegin(); !e->IsHandled() && it != _layers.rend(); it++)
 						(*it)->OnEvent(*e);
 
-					if (e->IsHandled())
+					if (!e->CanBeHandled())
 						_event_queue.DestroyEvent(e);
 					else
 						_event_queue.Emplace(e);

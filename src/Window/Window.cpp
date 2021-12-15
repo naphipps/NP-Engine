@@ -13,6 +13,8 @@ namespace np::window
 	{
 		if (event.RetrieveData<WindowCloseEvent::DataType>().window == this)
 		{
+			event.SetCanBeHandled();
+
 			if (!_show_procedure_is_complete.load(mo_acquire))
 			{
 				if (_glfw_window != nullptr && glfwWindowShouldClose(_glfw_window) == GLFW_FALSE)

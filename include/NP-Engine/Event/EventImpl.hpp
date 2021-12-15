@@ -61,9 +61,10 @@ namespace np::event
 	{
 	protected:
 		bl _handled;
+		bl _can_be_handled;
 
 	public:
-		Event(): memory::Delegate(), _handled(false) {}
+		Event(): memory::Delegate(), _handled(false), _can_be_handled(false) {}
 
 		virtual ~Event() {}
 
@@ -75,6 +76,19 @@ namespace np::event
 		bl IsHandled() const
 		{
 			return _handled;
+		}
+
+		void SetCanBeHandled(bl can_be_handled = true)
+		{
+			_can_be_handled = true;
+		}
+
+		/*
+			Note: handled events cannot be handled again
+		*/
+		bl CanBeHandled() const 
+		{
+			return !IsHandled() && _can_be_handled;
 		}
 
 		/*
