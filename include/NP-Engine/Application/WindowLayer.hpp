@@ -37,7 +37,7 @@ namespace np::app
 		{
 			switch (event.GetType())
 			{
-			case event::EVENT_TYPE_WINDOW_CREATE:
+			case event::EventType::WindowCreate:
 				HandleWindowCreate(event);
 				break;
 			}
@@ -99,7 +99,7 @@ namespace np::app
 
 		virtual event::EventCategory GetHandledCategories() const override
 		{
-			return event::EVENT_CATEGORY_WINDOW;
+			return event::EventCategory::Window;
 		}
 	};
 } // namespace np::app

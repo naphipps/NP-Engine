@@ -59,10 +59,10 @@ namespace np::app
 		{
 			switch (event.GetType())
 			{
-			case event::EVENT_TYPE_GRAPHICS_CREATE_RENDERER_FOR_WINDOW:
+			case event::EventType::GraphicsCreateRendererForWindow:
 				HandleCreateRendererForWindow(event);
 				break;
-			case event::EVENT_TYPE_WINDOW_CLOSE:
+			case event::EventType::WindowClose:
 				HandleWindowClose(event);
 				break;
 			}
@@ -202,7 +202,7 @@ namespace np::app
 
 		virtual event::EventCategory GetHandledCategories() const override
 		{
-			return event::EVENT_CATEGORY_GRAPHICS | event::EVENT_CATEGORY_WINDOW;
+			return (event::EventCategory)((ui64)event::EventCategory::Graphics | (ui64)event::EventCategory::Window);
 		}
 
 		void Draw(time::DurationMilliseconds time_delta) 

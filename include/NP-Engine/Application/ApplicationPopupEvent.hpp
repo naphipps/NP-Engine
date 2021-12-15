@@ -32,12 +32,12 @@ namespace np::app
 
 		event::EventType GetType() const override
 		{
-			return event::EVENT_TYPE_APPLICATION_POPUP;
+			return event::EventType::ApplicationPopup;
 		}
 
 		event::EventCategory GetCategory() const override
 		{
-			return event::EVENT_CATEGORY_APPLICATION;
+			return event::EventCategory::Application;
 		}
 	};
 } // namespace np::app

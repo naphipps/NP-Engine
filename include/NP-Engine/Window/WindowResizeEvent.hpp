@@ -42,12 +42,12 @@ namespace np::window
 
 		event::EventType GetType() const override
 		{
-			return event::EVENT_TYPE_WINDOW_RESIZE;
+			return event::EventType::WindowResize;
 		}
 
 		event::EventCategory GetCategory() const override
 		{
-			return event::EVENT_CATEGORY_WINDOW;
+			return event::EventCategory::Window;
 		}
 	};
 } // namespace np::window

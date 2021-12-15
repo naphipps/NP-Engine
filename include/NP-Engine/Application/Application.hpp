@@ -134,11 +134,11 @@ namespace np::app
 		{
 			switch (e.GetType())
 			{
-			case event::EVENT_TYPE_APPLICATION_CLOSE:
+			case event::EventType::ApplicationClose:
 				StopRunning();
 				e.SetHandled();
 				break;
-			case event::EVENT_TYPE_APPLICATION_POPUP:
+			case event::EventType::ApplicationPopup:
 				HandlePopup(e);
 				break;
 			}
@@ -271,7 +271,7 @@ namespace np::app
 
 		event::EventCategory GetHandledCategories() const override
 		{
-			return event::EVENT_CATEGORY_APPLICATION;
+			return event::EventCategory::Application;
 		}
 
 		bl IsRunning() const

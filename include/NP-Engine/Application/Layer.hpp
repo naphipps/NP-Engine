@@ -33,7 +33,7 @@ namespace np::app
 
 		virtual event::EventCategory GetHandledCategories() const
 		{
-			return event::EVENT_CATEGORY_NONE;
+			return event::EventCategory::None;
 		}
 	};
 } // namespace np::app

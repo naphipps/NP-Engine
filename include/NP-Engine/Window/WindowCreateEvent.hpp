@@ -28,12 +28,12 @@ namespace np::window
 
 		event::EventType GetType() const override
 		{
-			return event::EVENT_TYPE_WINDOW_CREATE;
+			return event::EventType::WindowCreate;
 		}
 
 		event::EventCategory GetCategory() const override
 		{
-			return event::EVENT_CATEGORY_WINDOW;
+			return event::EventCategory::Window;
 		}
 	};
 } // namespace np::window

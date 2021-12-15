@@ -27,12 +27,12 @@ namespace np::graphics
 
 		event::EventType GetType() const override
 		{
-			return event::EVENT_TYPE_GRAPHICS_CREATE_RENDERER_FOR_WINDOW;
+			return event::EventType::GraphicsCreateRendererForWindow;
 		}
 
 		event::EventCategory GetCategory() const override
 		{
-			return event::EVENT_CATEGORY_GRAPHICS;
+			return event::EventCategory::Graphics;
 		}
 	};
 } // namespace np::graphics
