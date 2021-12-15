@@ -120,7 +120,13 @@ namespace np::graphics::rhi
 
 		container::vector<str> GetRequiredDeviceExtensionNames() const
 		{
-			return {VK_KHR_SWAPCHAIN_EXTENSION_NAME};
+			container::vector<str> extensions{VK_KHR_SWAPCHAIN_EXTENSION_NAME};
+
+#if NP_ENGINE_PLATFORM_IS_APPLE
+			// Apple uses MoltenVK, hence insert VK_KHR_portability_subset
+			extensions.emplace_back("VK_KHR_portability_subset");
+#endif
+			return extensions;
 		}
 
 		container::vector<str> GetRequiredDeviceLayerNames() const

@@ -101,11 +101,6 @@ namespace np::graphics::rhi
 			for (ui32 i = 0; i < count; i++)
 				extension_set.emplace(glfw_required[i]);
 
-#if NP_ENGINE_PLATFORM_IS_APPLE
-			// Apple uses MoltenVK, hence insert VK_KHR_portability_subset
-			extension_set.emplace("VK_KHR_portability_subset");
-#endif
-
 			extension_set.emplace(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
 
 			container::vector<str> extensions;
