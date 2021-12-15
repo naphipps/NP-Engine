@@ -56,10 +56,15 @@ namespace np::window
 
 		virtual void ShowProcedure();
 
-		GLFWwindow* CreateGlfwWindow() const
+		void SetGlfwCallbacks(GLFWwindow* glfw_window);
+
+		GLFWwindow* CreateGlfwWindow()
 		{
 			glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-			return glfwCreateWindow(_properties.Width, _properties.Height, _properties.Title.c_str(), nullptr, nullptr);
+			GLFWwindow* glfw_window = glfwCreateWindow(_properties.Width, _properties.Height, _properties.Title.c_str(), nullptr, nullptr);
+			glfwSetWindowUserPointer(glfw_window, this);
+			SetGlfwCallbacks(glfw_window);
+			return glfw_window;
 		}
 
 	public:
@@ -74,7 +79,8 @@ namespace np::window
 
 		virtual ~Window()
 		{
-			glfwDestroyWindow(_glfw_window);
+			if (_glfw_window != nullptr)
+				glfwDestroyWindow(_glfw_window);
 		}
 
 		virtual void Show()
@@ -82,6 +88,8 @@ namespace np::window
 			_show_procedure_is_complete.store(false, mo_release);
 			_thread.Run(&Window::ShowProcedure, this);
 		}
+
+		virtual void Close();
 
 		virtual bl IsRunning() const
 		{

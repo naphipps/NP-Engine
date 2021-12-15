@@ -10,6 +10,7 @@
 #include "NP-Engine/Primitive/Primitive.hpp"
 #include "NP-Engine/String/String.hpp"
 #include "NP-Engine/Window/Window.hpp"
+#include "NP-Engine/Time/Time.hpp"
 
 #include "../../RPI/Renderer.hpp"
 #include "../../RPI/RhiType.hpp"
@@ -36,6 +37,8 @@ namespace np::graphics::rhi
 		void AttachToWindow(window::Window& window) override {}
 
 		void DetachFromWindow(window::Window& window) override {}
+		
+		void Draw(time::DurationMilliseconds time_delta) override {};
 	};
 } // namespace np::graphics::rhi
 

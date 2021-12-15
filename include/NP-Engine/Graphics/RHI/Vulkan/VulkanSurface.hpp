@@ -27,10 +27,9 @@ namespace np::graphics::rhi
 		{
 			VkSurfaceKHR surface = nullptr;
 
-			if (_instance.GetVkInstance() != nullptr)
+			if ((VkInstance)_instance != nullptr)
 			{
-				if (glfwCreateWindowSurface(_instance.GetVkInstance(), (GLFWwindow*)_window.GetNativeWindow(), nullptr,
-											&surface) != VK_SUCCESS)
+				if (glfwCreateWindowSurface(_instance, (GLFWwindow*)_window.GetNativeWindow(), nullptr, &surface) != VK_SUCCESS)
 				{
 					surface = nullptr;
 				}
@@ -50,38 +49,23 @@ namespace np::graphics::rhi
 		{
 			if (_surface != nullptr)
 			{
-				vkDestroySurfaceKHR(_instance.GetVkInstance(), _surface, nullptr);
+				vkDestroySurfaceKHR(_instance, _surface, nullptr);
 			}
 		}
 
-		VulkanInstance& GetInstance()
+		VulkanInstance& Instance() const
 		{
 			return _instance;
 		}
 
-		VulkanInstance& GetInstance() const
-		{
-			return _instance;
-		}
-
-		VkSurfaceKHR GetVkSurface()
-		{
-			return _surface;
-		}
-
-		VkSurfaceKHR GetVkSurface() const
-		{
-			return _surface;
-		}
-
-		window::Window& GetWindow()
+		const window::Window& Window() const
 		{
 			return _window;
 		}
 
-		const window::Window& GetWindow() const
+		operator VkSurfaceKHR() const
 		{
-			return _window;
+			return _surface;
 		}
 	};
 } // namespace np::graphics::rhi

@@ -231,6 +231,8 @@ namespace np::app
 				for (Layer* overlay : _overlays)
 					overlay->Cleanup();
 
+				_graphics_layer.Draw(timestamp_diff);
+
 				sleep_duration = loop_duration - timestamp_diff;
 				if (sleep_duration.count() > 0)
 				{

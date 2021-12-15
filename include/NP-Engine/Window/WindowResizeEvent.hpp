@@ -8,6 +8,7 @@
 #define NP_ENGINE_WINDOW_RESIZE_EVENT_HPP
 
 #include "NP-Engine/Primitive/Primitive.hpp"
+#include "NP-Engine/Memory/Memory.hpp"
 #include "NP-Engine/Event/Event.hpp"
 
 #include "Window.hpp"
@@ -24,9 +25,9 @@ namespace np::window
 			ui32 height;
 		};
 
-		WindowResizeEvent(Window* window, ui32 width, ui32 height): event::Event()
+		WindowResizeEvent(Window& window, ui32 width, ui32 height): event::Event()
 		{
-			AssignData<DataType>({window, width, height});
+			AssignData<DataType>({memory::AddressOf(window), width, height});
 		}
 
 		ui32 GetWidth() const

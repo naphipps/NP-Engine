@@ -30,6 +30,7 @@ namespace np::graphics
 	protected:
 		Type _type;
 		str _filename;
+		str _entrypoint;
 
 		str GetShaderStage() const
 		{
@@ -61,7 +62,7 @@ namespace np::graphics
 		}
 
 	public:
-		Shader(str filename, Type type): _filename(filename), _type(type) {}
+		Shader(str filename, Type type, str entrypoint): _filename(filename), _type(type), _entrypoint(entrypoint) {}
 
 		virtual siz Size() const = 0;
 
@@ -74,9 +75,29 @@ namespace np::graphics
 			Load(_filename);
 		}
 
-		str Filename() const
+		const str& Filename() const
 		{
 			return _filename;
+		}
+
+		str& Filename()
+		{
+			return _filename;
+		}
+
+		const str& Entrypoint() const
+		{
+			return _entrypoint;
+		}
+
+		str& Entrypoint()
+		{
+			return _entrypoint;
+		}
+
+		void SetEntrypoint(str entrypoint)
+		{
+			_entrypoint = entrypoint;
 		}
 
 		Type GetType() const

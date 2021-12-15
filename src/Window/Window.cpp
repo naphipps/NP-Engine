@@ -21,6 +21,8 @@ namespace np::window
 			if (_show_procedure_is_complete.load(mo_acquire))
 			{
 				_thread.Dispose();
+				glfwDestroyWindow(_glfw_window);
+				_glfw_window = nullptr;
 				event.SetHandled();
 			}
 		}
@@ -35,5 +37,23 @@ namespace np::window
 		}
 
 		_show_procedure_is_complete.store(true, mo_release);
+	}
+
+	void Window::Close()
+	{
+		if (IsRunning())
+		{
+			_event_submitter.Emplace<WindowCloseEvent>(*this);
+		}
+	}
+
+	void Window::SetGlfwCallbacks(GLFWwindow* glfw_window)
+	{
+		glfwSetWindowCloseCallback(glfw_window,
+			[](GLFWwindow* w)
+			{
+				((Window*)glfwGetWindowUserPointer(w))->Close();
+			}
+		);
 	}
 } // namespace np::window

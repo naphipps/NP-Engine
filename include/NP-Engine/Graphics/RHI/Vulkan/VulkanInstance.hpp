@@ -138,7 +138,7 @@ namespace np::graphics::rhi
 			return info;
 		}
 
-		VkDebugUtilsMessengerCreateInfoEXT CreateDebugMessagerCreateInfo()
+		VkDebugUtilsMessengerCreateInfoEXT CreateDebugMessagerInfo()
 		{
 			VkDebugUtilsMessengerCreateInfoEXT info{};
 			info.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
@@ -151,7 +151,7 @@ namespace np::graphics::rhi
 			return info;
 		}
 
-		VkInstanceCreateInfo CreateInstanceCreateInfo()
+		VkInstanceCreateInfo CreateInstanceInfo()
 		{
 			VkInstanceCreateInfo info{};
 			info.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
@@ -163,7 +163,7 @@ namespace np::graphics::rhi
 			VkInstance instance = nullptr;
 
 			VkApplicationInfo app_info = CreateApplicationInfo();
-			VkDebugUtilsMessengerCreateInfoEXT debug_msgr_create_info = CreateDebugMessagerCreateInfo();
+			VkDebugUtilsMessengerCreateInfoEXT debug_msgr_info = CreateDebugMessagerInfo();
 
 			container::vector<str> required_extensions = GetRequiredInstanceExtensionNames();
 			container::vector<const chr*> required_extension_names;
@@ -175,13 +175,13 @@ namespace np::graphics::rhi
 			for (const str& layer : required_layers)
 				required_layer_names.emplace_back(layer.c_str());
 
-			VkInstanceCreateInfo instance_create_info = CreateInstanceCreateInfo();
-			instance_create_info.pApplicationInfo = &app_info;
-			instance_create_info.enabledExtensionCount = required_extension_names.size();
-			instance_create_info.ppEnabledExtensionNames = required_extension_names.data();
-			instance_create_info.enabledLayerCount = required_layer_names.size();
-			instance_create_info.ppEnabledLayerNames = required_layer_names.data();
-			instance_create_info.pNext = &debug_msgr_create_info;
+			VkInstanceCreateInfo instance_info = CreateInstanceInfo();
+			instance_info.pApplicationInfo = &app_info;
+			instance_info.enabledExtensionCount = required_extension_names.size();
+			instance_info.ppEnabledExtensionNames = required_extension_names.data();
+			instance_info.enabledLayerCount = required_layer_names.size();
+			instance_info.ppEnabledLayerNames = required_layer_names.data();
+			instance_info.pNext = &debug_msgr_info;
 
 			container::uset<str> required_extension_set(required_extensions.begin(), required_extensions.end());
 			container::vector<str> supported_extensions = GetSupportedInstanceExtensionNames();
@@ -195,7 +195,7 @@ namespace np::graphics::rhi
 
 			bl layers_and_extensions_found = required_extension_set.empty() && required_layer_set.empty();
 
-			if (!layers_and_extensions_found || vkCreateInstance(&instance_create_info, nullptr, &instance) != VK_SUCCESS)
+			if (!layers_and_extensions_found || vkCreateInstance(&instance_info, nullptr, &instance) != VK_SUCCESS)
 			{
 				instance = nullptr;
 			}
@@ -214,8 +214,8 @@ namespace np::graphics::rhi
 
 				if (func != nullptr)
 				{
-					VkDebugUtilsMessengerCreateInfoEXT debug_msgr_create_info = CreateDebugMessagerCreateInfo();
-					func(_instance, &debug_msgr_create_info, nullptr, &messenger);
+					VkDebugUtilsMessengerCreateInfoEXT debug_msgr_info = CreateDebugMessagerInfo();
+					func(_instance, &debug_msgr_info, nullptr, &messenger);
 				}
 			}
 
@@ -244,12 +244,7 @@ namespace np::graphics::rhi
 			}
 		}
 
-		VkInstance GetVkInstance()
-		{
-			return _instance;
-		}
-
-		VkInstance GetVkInstance() const
+		operator VkInstance() const
 		{
 			return _instance;
 		}

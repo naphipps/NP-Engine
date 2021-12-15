@@ -8,6 +8,7 @@
 #define NP_ENGINE_WINDOW_CLOSE_EVENT_HPP
 
 #include "NP-Engine/Event/Event.hpp"
+#include "NP-Engine/Memory/Memory.hpp"
 
 #include "Window.hpp"
 
@@ -21,9 +22,9 @@ namespace np::window
 			Window* window;
 		};
 
-		WindowCloseEvent(Window* window): event::Event()
+		WindowCloseEvent(Window& window): event::Event()
 		{
-			AssignData<DataType>({window});
+			AssignData<DataType>({memory::AddressOf(window)});
 		}
 
 		event::EventType GetType() const override

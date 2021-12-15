@@ -35,6 +35,7 @@ namespace np::graphics
 
 		virtual void AttachToWindow(window::Window& window) = 0;
 		virtual void DetachFromWindow(window::Window& window) = 0;
+		virtual void Draw(time::DurationMilliseconds time_delta) = 0;
 	};
 } // namespace np::graphics
 

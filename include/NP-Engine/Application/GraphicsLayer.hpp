@@ -12,6 +12,8 @@
 #include "NP-Engine/Platform/Platform.hpp"
 #include "NP-Engine/Memory/Memory.hpp"
 
+#include "NP-Engine/Window/WindowEvents.hpp"
+
 #include "NP-Engine/Graphics/RHI/Vulkan/VulkanRenderer.hpp"
 
 #if NP_ENGINE_PLATFORM_IS_APPLE
@@ -44,12 +46,24 @@ namespace np::app
 			event.SetHandled();
 		}
 
+		virtual void HandleWindowClose(event::Event& event)
+		{
+			for (graphics::Renderer* renderer : _renderers)
+			{
+				window::Window* window = event.RetrieveData<window::WindowCloseEvent::DataType>().window;
+				renderer->DetachFromWindow(*window);
+			}
+		}
+
 		virtual void HandleEvent(event::Event& event) override
 		{
 			switch (event.GetType())
 			{
 			case event::EVENT_TYPE_GRAPHICS_CREATE_RENDERER_FOR_WINDOW:
 				HandleCreateRendererForWindow(event);
+				break;
+			case event::EVENT_TYPE_WINDOW_CLOSE:
+				HandleWindowClose(event);
 				break;
 			}
 		}
@@ -175,7 +189,7 @@ namespace np::app
 		{
 			for (i32 i = _renderers.size() - 1; i >= 0; i--)
 			{
-				// if (!_renderers[i]->IsEnabled()) //TODO: !!!
+				// if (!_renderers[i]->IsEnabled()) //TODO: ???
 				if (false)
 				{
 					graphics::Renderer* renderer = _renderers[i];
@@ -188,7 +202,15 @@ namespace np::app
 
 		virtual event::EventCategory GetHandledCategories() const override
 		{
-			return event::EVENT_CATEGORY_GRAPHICS;
+			return event::EVENT_CATEGORY_GRAPHICS | event::EVENT_CATEGORY_WINDOW;
+		}
+
+		void Draw(time::DurationMilliseconds time_delta) 
+		{
+			for (graphics::Renderer* renderer : _renderers)
+			{
+				renderer->Draw(time_delta);
+			}
 		}
 	};
 } // namespace np::app

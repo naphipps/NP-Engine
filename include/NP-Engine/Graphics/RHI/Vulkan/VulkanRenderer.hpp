@@ -15,6 +15,7 @@
 #include "NP-Engine/Memory/Memory.hpp"
 #include "NP-Engine/Window/Window.hpp"
 #include "NP-Engine/Container/Container.hpp"
+#include "NP-Engine/Time/Time.hpp"
 
 #include "NP-Engine/Vendor/VulkanInclude.hpp"
 
@@ -25,6 +26,7 @@
 #include "VulkanSurface.hpp"
 #include "VulkanDevice.hpp"
 #include "VulkanShader.hpp"
+#include "VulkanSwapchain.hpp"
 #include "VulkanPipeline.hpp"
 
 // TODO: add summary comments
@@ -38,6 +40,7 @@ namespace np::graphics::rhi
 		container::vector<VulkanInstance*> _instances;
 		container::vector<VulkanSurface*> _surfaces;
 		container::vector<VulkanDevice*> _devices; // TODO: should these be sptr??
+		container::vector<VulkanSwapchain*> _swapchains;
 		container::vector<VulkanPipeline*> _pipelines;
 
 		template <class T, class... Args>
@@ -46,6 +49,21 @@ namespace np::graphics::rhi
 			memory::Block block = _allocator.Allocate(sizeof(T));
 			memory::Construct<T>(block, ::std::forward<Args>(args)...);
 			return v.emplace_back((T*)block.ptr);
+		}
+
+		template <class T>
+		void DestroyInVector(container::vector<T*>& ptrs, const T* t)
+		{
+			for (auto it = ptrs.begin(); it != ptrs.end(); it++)
+			{
+				if (t == *it)
+				{
+					memory::Destruct(*it);
+					_allocator.Deallocate(*it);
+					ptrs.erase(it);
+					break;
+				}
+			}
 		}
 
 		template <class T>
@@ -66,7 +84,11 @@ namespace np::graphics::rhi
 
 		~VulkanRenderer()
 		{
+			for (VulkanDevice* device : _devices)
+				vkDeviceWaitIdle(*device);
+
 			DestroyVector<VulkanPipeline>(_pipelines);
+			DestroyVector<VulkanSwapchain>(_swapchains);
 			DestroyVector<VulkanDevice>(_devices);
 			DestroyVector<VulkanSurface>(_surfaces);
 			DestroyVector<VulkanInstance>(_instances);
@@ -86,12 +108,39 @@ namespace np::graphics::rhi
 		{
 			VulkanSurface& surface = *Create<VulkanSurface>(_surfaces, *_instances.front(), window);
 			VulkanDevice& device = *Create<VulkanDevice>(_devices, surface);
-			VulkanPipeline& pipeline = *Create<VulkanPipeline>(_pipelines, device);
+			VulkanSwapchain& swapchain = *Create<VulkanSwapchain>(_swapchains, device);
+			VulkanPipeline& pipeline = *Create<VulkanPipeline>(_pipelines, swapchain);
 		}
 
 		void DetachFromWindow(window::Window& window) override
 		{
-			std::cout << "implement VulkanRenderer::DetachFromWindow\n";
+			for (auto it = _pipelines.begin(); it != _pipelines.end(); it++)
+			{
+				if (memory::AddressOf((*it)->Surface().Window()) == memory::AddressOf(window))
+				{
+					VulkanPipeline* pipeline = *it;
+					VulkanSwapchain* swapchain = memory::AddressOf(pipeline->Swapchain());
+					VulkanDevice* device = memory::AddressOf(pipeline->Device());
+					VulkanSurface* surface = memory::AddressOf(pipeline->Surface());
+					VulkanInstance* instance = memory::AddressOf(pipeline->Instance());
+					
+					memory::Destruct(pipeline);
+					_allocator.Deallocate(pipeline);
+					_pipelines.erase(it);
+
+					DestroyInVector(_swapchains, swapchain);
+					DestroyInVector(_devices, device);
+					DestroyInVector(_surfaces, surface);
+					DestroyInVector(_instances, instance);
+					break;
+				}
+			}
+		}
+
+		void Draw(time::DurationMilliseconds time_delta) override
+		{
+			for (VulkanPipeline* pipeline : _pipelines)
+				pipeline->Draw(time_delta);
 		}
 	};
 } // namespace np::graphics::rhi

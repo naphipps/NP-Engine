@@ -20,17 +20,30 @@
 
 #include "../../RPI/Shader.hpp"
 
+#include "VulkanDevice.hpp"
+
 namespace np::graphics::rhi
 {
 	class VulkanShader : public Shader
 	{
 	private:
+		VulkanDevice& _device;
 		siz _size;
 		str _filename_spv;
 		container::vector<ui32> _bytes;
+		VkShaderModule _shader_module;
+
+		VkShaderModuleCreateInfo CreateShaderModuleInfo()
+		{
+			VkShaderModuleCreateInfo info{};
+			info.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
+			return info;
+		}
 
 		void CompileSpirV()
 		{
+			// TODO: do we want to do a hash check to see if we need to compile or not?
+
 			str cmd(NP_ENGINE_VULKAN_GLSLC);
 			cmd += " -fshader-stage=" + GetShaderStage();
 			cmd += " " + fs::append(".", _filename);
@@ -48,13 +61,7 @@ namespace np::graphics::rhi
 			}
 		}
 
-	public:
-		VulkanShader(str filename, Type type): Shader(filename, type), _size(0)
-		{
-			Load(_filename);
-		}
-
-		void Load(str filename) override
+		void Read(str filename)
 		{
 			_filename = filename;
 			_filename_spv = _filename + ".spv";
@@ -76,6 +83,67 @@ namespace np::graphics::rhi
 			}
 		}
 
+		void LoadModule()
+		{
+			DestroyModule();
+
+			if (Size() > 0)
+			{
+				VkShaderModuleCreateInfo shader_module_info = CreateShaderModuleInfo();
+				shader_module_info.codeSize = Size();
+				shader_module_info.pCode = (ui32*)Bytes();
+				if (vkCreateShaderModule(_device, &shader_module_info, nullptr, &_shader_module) != VK_SUCCESS)
+				{
+					_shader_module = nullptr;
+				}
+			}
+		}
+
+		void DestroyModule()
+		{
+			if (_shader_module != nullptr)
+			{
+				vkDestroyShaderModule(_device, _shader_module, nullptr);
+				_shader_module = nullptr;
+			}
+		}
+
+	public:
+		VulkanShader(VulkanDevice& device, str filename, Type type, str entrypoint = "main"):
+			Shader(filename, type, entrypoint),
+			_device(device),
+			_size(0),
+			_shader_module(nullptr)
+		{
+			Load(_filename);
+		}
+
+		~VulkanShader()
+		{
+			DestroyModule();
+		}
+
+		VulkanInstance& Instance() const
+		{
+			return _device.Instance();
+		}
+
+		VulkanSurface& Surface() const
+		{
+			return _device.Surface();
+		}
+
+		VulkanDevice& Device() const
+		{
+			return _device;
+		}
+
+		void Load(str filename) override
+		{
+			Read(filename);
+			LoadModule();
+		}
+
 		siz Size() const override
 		{
 			return _size;
@@ -86,9 +154,9 @@ namespace np::graphics::rhi
 			return _bytes.empty() ? nullptr : (void*)_bytes.data();
 		}
 
-		Type GetType() const
+		operator VkShaderModule() const
 		{
-			return _type;
+			return _shader_module;
 		}
 	};
 } // namespace np::graphics::rhi
