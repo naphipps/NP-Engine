@@ -84,7 +84,7 @@ namespace np::graphics::rhi
 		VkRect2D CreateScissor()
 		{
 			VkRect2D scissor{};
-			scissor.offset = { 0, 0 };
+			scissor.offset = {0, 0};
 			scissor.extent = Swapchain().Extent();
 			return scissor;
 		}
@@ -188,7 +188,7 @@ namespace np::graphics::rhi
 
 		container::vector<VkDynamicState> CreateDynamicStates()
 		{
-			return { VK_DYNAMIC_STATE_VIEWPORT, VK_DYNAMIC_STATE_LINE_WIDTH };
+			return {VK_DYNAMIC_STATE_VIEWPORT, VK_DYNAMIC_STATE_LINE_WIDTH};
 		}
 
 		VkPipelineDynamicStateCreateInfo CreatePipelineDynamicStateInfo()
@@ -321,7 +321,7 @@ namespace np::graphics::rhi
 			VkRenderPassBeginInfo info{};
 			info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
 			info.renderPass = _render_pass;
-			info.renderArea.offset = { 0, 0 };
+			info.renderArea.offset = {0, 0};
 			info.renderArea.extent = Swapchain().Extent();
 			return info;
 		}
@@ -330,9 +330,8 @@ namespace np::graphics::rhi
 		{
 			container::vector<VkClearValue> values;
 
-			VkClearValue clear_color = { {{0.0f, 0.0f, 0.0f, 1.0f}} };
+			VkClearValue clear_color = {{{0.0f, 0.0f, 0.0f, 1.0f}}};
 			values.emplace_back(clear_color);
-
 
 			return values;
 		}
@@ -358,15 +357,15 @@ namespace np::graphics::rhi
 		{
 			VkRenderPass render_pass = nullptr;
 
-			container::vector<VkAttachmentReference> attachment_references = { CreateAttachmentReference() };
+			container::vector<VkAttachmentReference> attachment_references = {CreateAttachmentReference()};
 
 			VkSubpassDescription subpass_description = CreateSubpassDescription();
 			subpass_description.colorAttachmentCount = attachment_references.size();
 			subpass_description.pColorAttachments = attachment_references.data();
 
-			container::vector<VkSubpassDescription> subpass_descriptions = { subpass_description };
+			container::vector<VkSubpassDescription> subpass_descriptions = {subpass_description};
 
-			container::vector<VkAttachmentDescription> attachment_descriptions = { CreateAttachmentDescription() };
+			container::vector<VkAttachmentDescription> attachment_descriptions = {CreateAttachmentDescription()};
 
 			container::vector<VkSubpassDependency> subpass_dependencies = CreateSubpassDependencies();
 
@@ -410,8 +409,8 @@ namespace np::graphics::rhi
 				VkPipelineInputAssemblyStateCreateInfo pipeline_input_assembly_state_info =
 					CreatePipelineInputAssemblyStateInfo();
 
-				container::vector<VkViewport> viewports = { CreateViewport() };
-				container::vector<VkRect2D> scissors = { CreateScissor() };
+				container::vector<VkViewport> viewports = {CreateViewport()};
+				container::vector<VkRect2D> scissors = {CreateScissor()};
 
 				VkPipelineViewportStateCreateInfo pipeline_viewport_state_info = CreatePipelineViewportStateInfo();
 				pipeline_viewport_state_info.viewportCount = viewports.size();
@@ -424,7 +423,7 @@ namespace np::graphics::rhi
 				VkPipelineMultisampleStateCreateInfo pipeline_multisample_state_info = CreatePipelineMultisampleStateInfo();
 
 				container::vector<VkPipelineColorBlendAttachmentState> pipeline_color_blend_attachment_states = {
-					CreatePipelineColorBlendAttachmentState() };
+					CreatePipelineColorBlendAttachmentState()};
 				VkPipelineColorBlendStateCreateInfo pipeline_color_blend_state_info = CreatePipelineColorBlendStateInfo();
 				pipeline_color_blend_state_info.attachmentCount = pipeline_color_blend_attachment_states.size();
 				pipeline_color_blend_state_info.pAttachments = pipeline_color_blend_attachment_states.data();
@@ -461,7 +460,7 @@ namespace np::graphics::rhi
 
 			for (siz i = 0; i < Swapchain().ImageViews().size(); i++)
 			{
-				container::vector<VkImageView> image_views = { Swapchain().ImageViews()[i] };
+				container::vector<VkImageView> image_views = {Swapchain().ImageViews()[i]};
 
 				VkFramebufferCreateInfo framebuffer_info = CreateFramebufferInfo();
 				framebuffer_info.renderPass = _render_pass;
@@ -509,7 +508,6 @@ namespace np::graphics::rhi
 					command_buffers.clear();
 					break;
 				}
-
 
 				container::vector<VkClearValue> clear_values = CreateClearValues();
 
@@ -578,16 +576,16 @@ namespace np::graphics::rhi
 		}
 
 	public:
-		VulkanPipeline(VulkanSwapchain& swapchain) :
+		VulkanPipeline(VulkanSwapchain& swapchain):
 			_swapchain(swapchain),
 			_vertex_shader(Device(), fs::append(fs::append("Vulkan", "shaders"), "vertex.glsl"), VulkanShader::Type::VERTEX),
 			_fragment_shader(Device(), fs::append(fs::append("Vulkan", "shaders"), "fragment.glsl"),
-				VulkanShader::Type::FRAGMENT),
+							 VulkanShader::Type::FRAGMENT),
 			_render_pass(CreateRenderPass()),
 			_pipeline_layout(CreatePipelineLayout()),
 			_pipeline(CreatePipeline()),
-			_framebuffers(CreateFramebuffers()), //TODO: can we put this in a VulkanFramebuffer? I don't think so
-			_command_pool(CreateCommandPool()), //TODO: can we put this in a VulkanCommand_____?? maybe....?
+			_framebuffers(CreateFramebuffers()), // TODO: can we put this in a VulkanFramebuffer? I don't think so
+			_command_pool(CreateCommandPool()), // TODO: can we put this in a VulkanCommand_____?? maybe....?
 			_command_buffers(CreateCommandBuffers()),
 			_current_frame(0),
 			_image_available_semaphores(CreateSemaphores(MAX_FRAMES)),
@@ -652,27 +650,28 @@ namespace np::graphics::rhi
 			vkWaitForFences(Device(), 1, &_fences[_current_frame], VK_TRUE, UI64_MAX);
 
 			ui32 image_index;
-			vkAcquireNextImageKHR(Device(), Swapchain(), UI64_MAX, _image_available_semaphores[_current_frame], nullptr, &image_index);
+			vkAcquireNextImageKHR(Device(), Swapchain(), UI64_MAX, _image_available_semaphores[_current_frame], nullptr,
+								  &image_index);
 
 			// Check if a previous frame is using this image (i.e. there is its fence to wait on)
-			if (_image_fences[image_index] != nullptr) 
+			if (_image_fences[image_index] != nullptr)
 			{
 				vkWaitForFences(Device(), 1, &_image_fences[image_index], VK_TRUE, UI64_MAX);
 			}
 			// Mark the image as now being in use by this frame
 			_image_fences[image_index] = _fences[_current_frame];
 
-			container::vector<VkSemaphore> wait_semaphores{ _image_available_semaphores[_current_frame] };
-			container::vector<VkPipelineStageFlags> wait_stages{ VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
-			container::vector<VkSemaphore> signal_semaphores{ _render_finished_semaphores[_current_frame] };
-			container::vector<VkSwapchainKHR> swapchains{ Swapchain() };
+			container::vector<VkSemaphore> wait_semaphores{_image_available_semaphores[_current_frame]};
+			container::vector<VkPipelineStageFlags> wait_stages{VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
+			container::vector<VkSemaphore> signal_semaphores{_render_finished_semaphores[_current_frame]};
+			container::vector<VkSwapchainKHR> swapchains{Swapchain()};
 
 			VkSubmitInfo submit_info{};
 			submit_info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 			submit_info.waitSemaphoreCount = wait_semaphores.size();
 			submit_info.pWaitSemaphores = wait_semaphores.data();
 			submit_info.pWaitDstStageMask = wait_stages.data();
-			submit_info.commandBufferCount = 1;// _command_buffers.size();
+			submit_info.commandBufferCount = 1; // _command_buffers.size();
 			submit_info.pCommandBuffers = &_command_buffers[image_index];
 			submit_info.signalSemaphoreCount = signal_semaphores.size();
 			submit_info.pSignalSemaphores = signal_semaphores.data();

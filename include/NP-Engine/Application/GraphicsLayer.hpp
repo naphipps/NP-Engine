@@ -205,7 +205,7 @@ namespace np::app
 			return (event::EventCategory)((ui64)event::EventCategory::Graphics | (ui64)event::EventCategory::Window);
 		}
 
-		void Draw(time::DurationMilliseconds time_delta) 
+		void Draw(time::DurationMilliseconds time_delta)
 		{
 			for (graphics::Renderer* renderer : _renderers)
 			{

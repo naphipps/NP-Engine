@@ -61,7 +61,8 @@ namespace np::window
 		GLFWwindow* CreateGlfwWindow()
 		{
 			glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-			GLFWwindow* glfw_window = glfwCreateWindow(_properties.Width, _properties.Height, _properties.Title.c_str(), nullptr, nullptr);
+			GLFWwindow* glfw_window =
+				glfwCreateWindow(_properties.Width, _properties.Height, _properties.Title.c_str(), nullptr, nullptr);
 			glfwSetWindowUserPointer(glfw_window, this);
 			SetGlfwCallbacks(glfw_window);
 			return glfw_window;

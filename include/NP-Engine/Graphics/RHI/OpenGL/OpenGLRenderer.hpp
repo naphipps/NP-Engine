@@ -37,8 +37,8 @@ namespace np::graphics::rhi
 		void AttachToWindow(window::Window& window) override {}
 
 		void DetachFromWindow(window::Window& window) override {}
-		
-		void Draw(time::DurationMilliseconds time_delta) override {};
+
+		void Draw(time::DurationMilliseconds time_delta) override{};
 	};
 } // namespace np::graphics::rhi
 

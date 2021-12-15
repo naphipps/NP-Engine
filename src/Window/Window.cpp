@@ -52,10 +52,9 @@ namespace np::window
 	void Window::SetGlfwCallbacks(GLFWwindow* glfw_window)
 	{
 		glfwSetWindowCloseCallback(glfw_window,
-			[](GLFWwindow* w)
-			{
-				((Window*)glfwGetWindowUserPointer(w))->Close();
-			}
-		);
+								   [](GLFWwindow* w)
+								   {
+									   ((Window*)glfwGetWindowUserPointer(w))->Close();
+								   });
 	}
 } // namespace np::window

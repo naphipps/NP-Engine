@@ -12,7 +12,7 @@
 
 namespace np::event
 {
-	enum class EventType  : ui64
+	enum class EventType : ui64
 	{
 		None,
 
@@ -31,7 +31,7 @@ namespace np::event
 		MouseButtonReleased,
 		MouseMoved,
 		MouseScrolled,
-		
+
 		ApplicationClose,
 		ApplicationPopup,
 
@@ -95,7 +95,7 @@ namespace np::event
 		/*
 			Note: handled events cannot be handled again
 		*/
-		bl CanBeHandled() const 
+		bl CanBeHandled() const
 		{
 			return !IsHandled() && _can_be_handled;
 		}

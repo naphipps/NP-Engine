@@ -123,7 +123,7 @@ namespace np::graphics::rhi
 					VulkanDevice* device = memory::AddressOf(pipeline->Device());
 					VulkanSurface* surface = memory::AddressOf(pipeline->Surface());
 					VulkanInstance* instance = memory::AddressOf(pipeline->Instance());
-					
+
 					memory::Destruct(pipeline);
 					_allocator.Deallocate(pipeline);
 					_pipelines.erase(it);
