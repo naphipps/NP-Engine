@@ -7,8 +7,6 @@
 #ifndef NP_ENGINE_VULKAN_PIPELINE_HPP
 #define NP_ENGINE_VULKAN_PIPELINE_HPP
 
-#include <iostream> //TODO: remove
-
 #include "NP-Engine/Filesystem/Filesystem.hpp"
 
 #include "NP-Engine/Vendor/VulkanInclude.hpp"
@@ -608,29 +606,6 @@ namespace np::graphics::rhi
 			_command_buffers = CreateCommandBuffers();
 		}
 
-		void Dispose()
-		{
-			vkDeviceWaitIdle(Device());
-
-			for (VkSemaphore& semaphore : _render_finished_semaphores)
-				vkDestroySemaphore(Device(), semaphore, nullptr);
-
-			for (VkSemaphore& semaphore : _image_available_semaphores)
-				vkDestroySemaphore(Device(), semaphore, nullptr);
-
-			for (VkFence& fence : _fences)
-				vkDestroyFence(Device(), fence, nullptr);
-
-			vkDestroyCommandPool(Device(), _command_pool, nullptr);
-
-			for (auto framebuffer : _framebuffers)
-				vkDestroyFramebuffer(Device(), framebuffer, nullptr);
-
-			vkDestroyPipeline(Device(), _pipeline, nullptr);
-			vkDestroyPipelineLayout(Device(), _pipeline_layout, nullptr);
-			vkDestroyRenderPass(Device(), _render_pass, nullptr);
-		}
-
 	public:
 		VulkanPipeline(VulkanDevice& device):
 			_swapchain(device),
@@ -651,11 +626,29 @@ namespace np::graphics::rhi
 			_rebuild_swapchain(false)
 		{
 			Surface().Window().SetResizeCallback(this, WindowResizeCallback);
-		}
+		} 
 
 		~VulkanPipeline()
 		{
-			Dispose();
+			vkDeviceWaitIdle(Device());
+
+			for (VkSemaphore& semaphore : _render_finished_semaphores)
+				vkDestroySemaphore(Device(), semaphore, nullptr);
+
+			for (VkSemaphore& semaphore : _image_available_semaphores)
+				vkDestroySemaphore(Device(), semaphore, nullptr);
+
+			for (VkFence& fence : _fences)
+				vkDestroyFence(Device(), fence, nullptr);
+
+			vkDestroyCommandPool(Device(), _command_pool, nullptr);
+
+			for (auto framebuffer : _framebuffers)
+				vkDestroyFramebuffer(Device(), framebuffer, nullptr);
+
+			vkDestroyPipeline(Device(), _pipeline, nullptr);
+			vkDestroyPipelineLayout(Device(), _pipeline_layout, nullptr);
+			vkDestroyRenderPass(Device(), _render_pass, nullptr);
 		}
 
 		VulkanInstance& Instance() const
