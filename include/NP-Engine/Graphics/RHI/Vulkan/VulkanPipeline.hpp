@@ -49,6 +49,7 @@ namespace np::graphics::rhi
 
 		static void WindowResizeCallback(void* pipeline, ui32 width, ui32 height)
 		{
+			((VulkanPipeline*)pipeline)->SetRebuildSwapchain();
 			((VulkanPipeline*)pipeline)->Draw(time::DurationMilliseconds(0));
 		}
 
