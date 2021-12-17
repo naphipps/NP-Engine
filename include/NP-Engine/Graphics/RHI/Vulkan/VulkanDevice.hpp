@@ -460,8 +460,11 @@ namespace np::graphics::rhi
 			return _physical_device;
 		}
 
-		const VkSurfaceCapabilitiesKHR& Capabilities() const
+		const VkSurfaceCapabilitiesKHR& Capabilities()
 		{
+			if (PhysicalDevice() != nullptr)
+				vkGetPhysicalDeviceSurfaceCapabilitiesKHR(PhysicalDevice(), Surface(), &_surface_capabilities);
+
 			return _surface_capabilities;
 		}
 

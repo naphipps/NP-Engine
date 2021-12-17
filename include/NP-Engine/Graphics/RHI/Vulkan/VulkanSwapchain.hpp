@@ -31,8 +31,8 @@ namespace np::graphics::rhi
 			VkSwapchainCreateInfoKHR info{};
 			info.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
 			info.surface = Surface();
-			info.imageFormat = _device.SurfaceFormat().format;
-			info.imageColorSpace = _device.SurfaceFormat().colorSpace;
+			info.imageFormat = Device().SurfaceFormat().format;
+			info.imageColorSpace = Device().SurfaceFormat().colorSpace;
 			info.imageExtent = _extent;
 			info.imageArrayLayers = 1;
 			info.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
@@ -44,7 +44,7 @@ namespace np::graphics::rhi
 			VkImageViewCreateInfo info{};
 			info.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
 			info.viewType = VK_IMAGE_VIEW_TYPE_2D;
-			info.format = _device.SurfaceFormat().format;
+			info.format = Device().SurfaceFormat().format;
 			info.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
 			info.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
 			info.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
@@ -61,17 +61,17 @@ namespace np::graphics::rhi
 		{
 			VkExtent2D extent{};
 
-			if (_device.Capabilities().currentExtent.width != UI32_MAX)
+			if (Device().Capabilities().currentExtent.width != UI32_MAX)
 			{
-				extent = _device.Capabilities().currentExtent;
+				extent = Device().Capabilities().currentExtent;
 			}
 			else
 			{
 				i32 width, height;
 				glfwGetFramebufferSize((GLFWwindow*)Surface().Window().GetNativeWindow(), &width, &height);
 
-				VkExtent2D min_extent = _device.Capabilities().minImageExtent;
-				VkExtent2D max_extent = _device.Capabilities().maxImageExtent;
+				VkExtent2D min_extent = Device().Capabilities().minImageExtent;
+				VkExtent2D max_extent = Device().Capabilities().maxImageExtent;
 
 				extent = {::std::clamp((ui32)width, min_extent.width, max_extent.width),
 						  ::std::clamp((ui32)height, min_extent.height, max_extent.height)};
@@ -84,16 +84,16 @@ namespace np::graphics::rhi
 		{
 			VkSwapchainKHR swapchain = nullptr;
 
-			ui32 min_image_count = _device.Capabilities().minImageCount + 1;
-			if (_device.Capabilities().maxImageCount != 0)
-				min_image_count = ::std::min(min_image_count, _device.Capabilities().maxImageCount);
+			ui32 min_image_count = Device().Capabilities().minImageCount + 1;
+			if (Device().Capabilities().maxImageCount != 0)
+				min_image_count = ::std::min(min_image_count, Device().Capabilities().maxImageCount);
 
-			container::vector<ui32> indices = _device.QueueFamilyIndices().to_vector();
+			container::vector<ui32> indices = Device().QueueFamilyIndices().to_vector();
 
 			VkSwapchainCreateInfoKHR swapchain_info = CreateSwapchainInfo();
 			swapchain_info.minImageCount = min_image_count;
 
-			if (_device.QueueFamilyIndices().graphics != _device.QueueFamilyIndices().present)
+			if (Device().QueueFamilyIndices().graphics != Device().QueueFamilyIndices().present)
 			{
 				swapchain_info.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
 				swapchain_info.queueFamilyIndexCount = (ui32)indices.size();
@@ -105,13 +105,13 @@ namespace np::graphics::rhi
 			}
 
 			// says that we don't want any local transform
-			swapchain_info.preTransform = _device.Capabilities().currentTransform;
+			swapchain_info.preTransform = Device().Capabilities().currentTransform;
 			swapchain_info.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
-			swapchain_info.presentMode = _device.PresentMode();
+			swapchain_info.presentMode = Device().PresentMode();
 			swapchain_info.clipped = VK_TRUE;
 			swapchain_info.oldSwapchain = nullptr;
 
-			if (vkCreateSwapchainKHR(_device, &swapchain_info, nullptr, &swapchain) != VK_SUCCESS)
+			if (vkCreateSwapchainKHR(Device(), &swapchain_info, nullptr, &swapchain) != VK_SUCCESS)
 			{
 				swapchain = nullptr;
 			}
@@ -126,9 +126,9 @@ namespace np::graphics::rhi
 			if (_swapchain != nullptr)
 			{
 				ui32 count;
-				vkGetSwapchainImagesKHR(_device, _swapchain, &count, nullptr);
+				vkGetSwapchainImagesKHR(Device(), _swapchain, &count, nullptr);
 				images.resize(count);
-				vkGetSwapchainImagesKHR(_device, _swapchain, &count, images.data());
+				vkGetSwapchainImagesKHR(Device(), _swapchain, &count, images.data());
 			}
 
 			return images;
@@ -142,7 +142,7 @@ namespace np::graphics::rhi
 			{
 				VkImageViewCreateInfo image_view_info = CreateImageViewInfo();
 				image_view_info.image = _images[i];
-				if (vkCreateImageView(_device, &image_view_info, nullptr, &views[i]) != VK_SUCCESS)
+				if (vkCreateImageView(Device(), &image_view_info, nullptr, &views[i]) != VK_SUCCESS)
 				{
 					views.clear();
 					break;
@@ -150,6 +150,15 @@ namespace np::graphics::rhi
 			}
 
 			return views;
+		}
+
+		void Dispose()
+		{
+			for (VkImageView& view : _image_views)
+				vkDestroyImageView(Device(), view, nullptr);
+
+			if (_swapchain != nullptr)
+				vkDestroySwapchainKHR(Device(), _swapchain, nullptr);
 		}
 
 	public:
@@ -163,11 +172,7 @@ namespace np::graphics::rhi
 
 		~VulkanSwapchain()
 		{
-			for (VkImageView& view : _image_views)
-				vkDestroyImageView(_device, view, nullptr);
-
-			if (_swapchain != nullptr)
-				vkDestroySwapchainKHR(_device, _swapchain, nullptr);
+			Dispose();
 		}
 
 		VulkanInstance& Instance() const
@@ -183,6 +188,15 @@ namespace np::graphics::rhi
 		VulkanDevice& Device() const
 		{
 			return _device;
+		}
+
+		void Rebuild()
+		{
+			Dispose();
+			_extent = ChooseExtent();
+			_swapchain = CreateSwapchain();
+			_images = RetrieveImages();
+			_image_views = CreateImageViews();
 		}
 
 		const container::vector<VkImage>& Images() const

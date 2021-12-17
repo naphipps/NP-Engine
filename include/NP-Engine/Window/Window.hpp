@@ -16,6 +16,7 @@
 #include "NP-Engine/Time/Time.hpp"
 #include "NP-Engine/String/String.hpp"
 #include "NP-Engine/Concurrency/Concurrency.hpp"
+#include "NP-Engine/Container/Container.hpp"
 
 #include "NP-Engine/Vendor/GlfwInclude.hpp"
 
@@ -36,13 +37,37 @@ namespace np::window
 			ui32 Height = DEFAULT_HEIGHT;
 		};
 
+		using ResizeCallback = void (*)(void* caller, ui32 width, ui32 height);
+
 	protected:
 		Properties _properties;
 		GLFWwindow* _glfw_window;
 		concurrency::Thread _thread;
 		atm_bl _show_procedure_is_complete;
+		container::omap<void*, ResizeCallback> _resize_callbacks;
+
+		static void WindowCloseCallback(GLFWwindow* glfw_window)
+		{
+			((Window*)glfwGetWindowUserPointer(glfw_window))->Close();
+		}
+
+		static void WindowSizeCallback(GLFWwindow* glfw_window, i32 width, i32 height)
+		{
+			Window* window = (Window*)glfwGetWindowUserPointer(glfw_window);
+			window->InvokeResizeCallbacks(width, height);
+		}
+
+		void InvokeResizeCallbacks(ui32 width, ui32 height)
+		{
+			for (auto it = _resize_callbacks.begin(); it != _resize_callbacks.end(); it++)
+			{
+				it->second(it->first, width, height);
+			}
+		}
 
 		virtual void HandleClose(event::Event& event);
+
+		virtual void HandleResize(event::Event& event);
 
 		virtual void HandleEvent(event::Event& event) override
 		{
@@ -50,6 +75,9 @@ namespace np::window
 			{
 			case event::EventType::WindowClose:
 				HandleClose(event);
+				break;
+			case event::EventType::WindowResize:
+				HandleResize(event);
 				break;
 			}
 		}
@@ -61,6 +89,7 @@ namespace np::window
 		GLFWwindow* CreateGlfwWindow()
 		{
 			glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+			glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
 			GLFWwindow* glfw_window =
 				glfwCreateWindow(_properties.Width, _properties.Height, _properties.Title.c_str(), nullptr, nullptr);
 			glfwSetWindowUserPointer(glfw_window, this);
@@ -91,6 +120,8 @@ namespace np::window
 		}
 
 		virtual void Close();
+
+		virtual void Resize(ui32 width, ui32 height);
 
 		virtual bl IsRunning() const
 		{
@@ -148,6 +179,16 @@ namespace np::window
 		virtual bl IsMinimized() const
 		{
 			return false;
+		}
+
+		void SetResizeCallback(void* caller, ResizeCallback callback)
+		{
+			_resize_callbacks[caller] = callback;
+		}
+
+		void UnsetResizeCallback(void* caller)
+		{
+			_resize_callbacks.erase(caller);
 		}
 
 		virtual event::EventCategory GetHandledCategories() const override

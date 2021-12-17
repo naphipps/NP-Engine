@@ -30,6 +30,14 @@ namespace np::window
 		}
 	}
 
+	void Window::HandleResize(event::Event& event)
+	{
+		if (event.RetrieveData<WindowResizeEvent::DataType>().window == this)
+		{
+			event.SetHandled();
+		}
+	}
+
 	void Window::ShowProcedure()
 	{
 		while (!glfwWindowShouldClose(_glfw_window))
@@ -49,12 +57,22 @@ namespace np::window
 		}
 	}
 
+	void Window::Resize(ui32 width, ui32 height)
+	{
+		if (IsRunning())
+		{
+			_properties.Width = width;
+			_properties.Height = height;
+
+			glfwSetWindowSize(_glfw_window, (i32)width, (i32)height);
+
+			_event_submitter.Emplace<WindowResizeEvent>(*this, width, height);
+		}
+	}
+
 	void Window::SetGlfwCallbacks(GLFWwindow* glfw_window)
 	{
-		glfwSetWindowCloseCallback(glfw_window,
-								   [](GLFWwindow* w)
-								   {
-									   ((Window*)glfwGetWindowUserPointer(w))->Close();
-								   });
+		glfwSetWindowCloseCallback(glfw_window, WindowCloseCallback);
+		glfwSetWindowSizeCallback(glfw_window, WindowSizeCallback);
 	}
 } // namespace np::window

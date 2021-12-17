@@ -38,7 +38,9 @@ namespace np::graphics::rhi
 
 		void DetachFromWindow(window::Window& window) override {}
 
-		void Draw(time::DurationMilliseconds time_delta) override{};
+		void Draw(time::DurationMilliseconds time_delta) override {}
+
+		void AdjustForWindowResize(window::Window& window) override {}
 	};
 } // namespace np::graphics::rhi
 

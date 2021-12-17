@@ -41,17 +41,23 @@ namespace np::app
 		virtual void HandleCreateRendererForWindow(event::Event& event)
 		{
 			graphics::Renderer* renderer = CreateRenderer();
-			window::Window* window = event.RetrieveData<graphics::GraphicsCreateRendererForWindowEvent::DataType>().window;
-			renderer->AttachToWindow(*window);
+			renderer->AttachToWindow(*event.RetrieveData<graphics::GraphicsCreateRendererForWindowEvent::DataType>().window);
 			event.SetHandled();
 		}
 
-		virtual void HandleWindowClose(event::Event& event)
+		virtual void AdjustForWindowClose(event::Event& event)
 		{
 			for (graphics::Renderer* renderer : _renderers)
 			{
-				window::Window* window = event.RetrieveData<window::WindowCloseEvent::DataType>().window;
-				renderer->DetachFromWindow(*window);
+				renderer->DetachFromWindow(*event.RetrieveData<window::WindowCloseEvent::DataType>().window);
+			}
+		}
+
+		virtual void AdjustForWindowResize(event::Event& event)
+		{
+			for (graphics::Renderer* renderer : _renderers)
+			{
+				renderer->AdjustForWindowResize(*event.RetrieveData<window::WindowResizeEvent::DataType>().window);
 			}
 		}
 
@@ -63,7 +69,10 @@ namespace np::app
 				HandleCreateRendererForWindow(event);
 				break;
 			case event::EventType::WindowClose:
-				HandleWindowClose(event);
+				AdjustForWindowClose(event);
+				break;
+			case event::EventType::WindowResize:
+				AdjustForWindowResize(event);
 				break;
 			}
 		}

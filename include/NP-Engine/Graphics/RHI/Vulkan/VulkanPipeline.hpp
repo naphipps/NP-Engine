@@ -12,6 +12,7 @@
 #include "NP-Engine/Filesystem/Filesystem.hpp"
 
 #include "NP-Engine/Vendor/VulkanInclude.hpp"
+#include "NP-Engine/Vendor/GlfwInclude.hpp"
 
 #include "VulkanInstance.hpp"
 #include "VulkanSurface.hpp"
@@ -24,25 +25,32 @@ namespace np::graphics::rhi
 	class VulkanPipeline
 	{
 	private:
-		VulkanSwapchain& _swapchain;
+		constexpr static siz MAX_FRAMES = 2;
+
+		VulkanSwapchain _swapchain;
 		VulkanShader _vertex_shader;
 		VulkanShader _fragment_shader;
 		VkRenderPass _render_pass;
 		VkPipelineLayout _pipeline_layout;
 		VkPipeline _pipeline;
+		bl _rebuild_swapchain;
 
 		container::vector<VkFramebuffer> _framebuffers;
 
 		VkCommandPool _command_pool;
 		container::vector<VkCommandBuffer> _command_buffers;
 
-		constexpr static siz MAX_FRAMES = 2;
 		siz _current_frame;
 
 		container::vector<VkSemaphore> _image_available_semaphores;
 		container::vector<VkSemaphore> _render_finished_semaphores;
 		container::vector<VkFence> _fences;
 		container::vector<VkFence> _image_fences;
+
+		static void WindowResizeCallback(void* pipeline, ui32 width, ui32 height)
+		{
+			((VulkanPipeline*)pipeline)->Draw(time::DurationMilliseconds(0));
+		}
 
 		VkPipelineShaderStageCreateInfo CreatePipelineShaderStageInfo()
 		{
@@ -575,27 +583,34 @@ namespace np::graphics::rhi
 			return fences;
 		}
 
-	public:
-		VulkanPipeline(VulkanSwapchain& swapchain):
-			_swapchain(swapchain),
-			_vertex_shader(Device(), fs::append(fs::append("Vulkan", "shaders"), "vertex.glsl"), VulkanShader::Type::VERTEX),
-			_fragment_shader(Device(), fs::append(fs::append("Vulkan", "shaders"), "fragment.glsl"),
-							 VulkanShader::Type::FRAGMENT),
-			_render_pass(CreateRenderPass()),
-			_pipeline_layout(CreatePipelineLayout()),
-			_pipeline(CreatePipeline()),
-			_framebuffers(CreateFramebuffers()), // TODO: can we put this in a VulkanFramebuffer? I don't think so
-			_command_pool(CreateCommandPool()), // TODO: can we put this in a VulkanCommand_____?? maybe....?
-			_command_buffers(CreateCommandBuffers()),
-			_current_frame(0),
-			_image_available_semaphores(CreateSemaphores(MAX_FRAMES)),
-			_render_finished_semaphores(CreateSemaphores(MAX_FRAMES)),
-			_fences(CreateFences(MAX_FRAMES)),
-			_image_fences(CreateFences(Swapchain().Images().size(), false))
-		{}
-
-		~VulkanPipeline()
+		void RebuildSwapchain()
 		{
+			SetRebuildSwapchain(false);
+
+			vkDeviceWaitIdle(Device());
+
+			vkFreeCommandBuffers(Device(), _command_pool, (ui32)_command_buffers.size(), _command_buffers.data());
+
+			for (auto framebuffer : _framebuffers)
+				vkDestroyFramebuffer(Device(), framebuffer, nullptr);
+
+			vkDestroyPipeline(Device(), _pipeline, nullptr);
+			vkDestroyPipelineLayout(Device(), _pipeline_layout, nullptr);
+			vkDestroyRenderPass(Device(), _render_pass, nullptr);
+
+			_swapchain.Rebuild();
+
+			_render_pass = CreateRenderPass();
+			_pipeline_layout = CreatePipelineLayout();
+			_pipeline = CreatePipeline();
+			_framebuffers = CreateFramebuffers();
+			_command_buffers = CreateCommandBuffers();
+		}
+
+		void Dispose()
+		{
+			vkDeviceWaitIdle(Device());
+
 			for (VkSemaphore& semaphore : _render_finished_semaphores)
 				vkDestroySemaphore(Device(), semaphore, nullptr);
 
@@ -615,6 +630,33 @@ namespace np::graphics::rhi
 			vkDestroyRenderPass(Device(), _render_pass, nullptr);
 		}
 
+	public:
+		VulkanPipeline(VulkanDevice& device):
+			_swapchain(device),
+			_vertex_shader(Device(), fs::append(fs::append("Vulkan", "shaders"), "vertex.glsl"), VulkanShader::Type::VERTEX),
+			_fragment_shader(Device(), fs::append(fs::append("Vulkan", "shaders"), "fragment.glsl"),
+							 VulkanShader::Type::FRAGMENT),
+			_render_pass(CreateRenderPass()),
+			_pipeline_layout(CreatePipelineLayout()),
+			_pipeline(CreatePipeline()),
+			_framebuffers(CreateFramebuffers()), // TODO: can we put this in a VulkanFramebuffer? I don't think so
+			_command_pool(CreateCommandPool()), // TODO: can we put this in a VulkanCommand_____?? maybe....?
+			_command_buffers(CreateCommandBuffers()),
+			_current_frame(0),
+			_image_available_semaphores(CreateSemaphores(MAX_FRAMES)),
+			_render_finished_semaphores(CreateSemaphores(MAX_FRAMES)),
+			_fences(CreateFences(MAX_FRAMES)),
+			_image_fences(CreateFences(Swapchain().Images().size(), false)),
+			_rebuild_swapchain(false)
+		{
+			Surface().Window().SetResizeCallback(this, WindowResizeCallback);
+		}
+
+		~VulkanPipeline()
+		{
+			Dispose();
+		}
+
 		VulkanInstance& Instance() const
 		{
 			return _swapchain.Instance();
@@ -630,7 +672,7 @@ namespace np::graphics::rhi
 			return _swapchain.Device();
 		}
 
-		VulkanSwapchain& Swapchain() const
+		const VulkanSwapchain& Swapchain() const
 		{
 			return _swapchain;
 		}
@@ -645,13 +687,36 @@ namespace np::graphics::rhi
 			return _fragment_shader;
 		}
 
+		void SetRebuildSwapchain(bl rebuild_swapchain = true)
+		{
+			_rebuild_swapchain = rebuild_swapchain;
+		}
+
 		void Draw(time::DurationMilliseconds time_delta)
 		{
+			i32 width = 0;
+			i32 height = 0;
+			glfwGetFramebufferSize((GLFWwindow*)Surface().Window().GetNativeWindow(), &width, &height);
+			if (width == 0 || height == 0)
+			{
+				return;
+			}
+
 			vkWaitForFences(Device(), 1, &_fences[_current_frame], VK_TRUE, UI64_MAX);
 
 			ui32 image_index;
-			vkAcquireNextImageKHR(Device(), Swapchain(), UI64_MAX, _image_available_semaphores[_current_frame], nullptr,
-								  &image_index);
+			VkResult acquire_result = vkAcquireNextImageKHR(Device(), Swapchain(), UI64_MAX,
+															_image_available_semaphores[_current_frame], nullptr, &image_index);
+
+			if (acquire_result == VK_ERROR_OUT_OF_DATE_KHR)
+			{
+				RebuildSwapchain();
+				return;
+			}
+			else if (acquire_result != VK_SUCCESS && acquire_result != VK_SUBOPTIMAL_KHR)
+			{
+				NP_ASSERT(false, "vkAcquireNextImageKHR error");
+			}
 
 			// Check if a previous frame is using this image (i.e. there is its fence to wait on)
 			if (_image_fences[image_index] != nullptr)
@@ -692,7 +757,17 @@ namespace np::graphics::rhi
 			present_info.pImageIndices = &image_index;
 			present_info.pResults = nullptr; // Optional
 
-			vkQueuePresentKHR(Device().PresentDeviceQueue(), &present_info);
+			VkResult present_result = vkQueuePresentKHR(Device().PresentDeviceQueue(), &present_info);
+
+			if (present_result == VK_ERROR_OUT_OF_DATE_KHR || present_result == VK_SUBOPTIMAL_KHR || _rebuild_swapchain)
+			{
+				RebuildSwapchain();
+			}
+			else if (present_result != VK_SUCCESS)
+			{
+				NP_ASSERT(false, "vkQueuePresentKHR error");
+			}
+
 			vkQueueWaitIdle(Device().PresentDeviceQueue());
 
 			_current_frame = (_current_frame + 1) % MAX_FRAMES;

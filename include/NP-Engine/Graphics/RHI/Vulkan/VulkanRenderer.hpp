@@ -40,7 +40,6 @@ namespace np::graphics::rhi
 		container::vector<VulkanInstance*> _instances;
 		container::vector<VulkanSurface*> _surfaces;
 		container::vector<VulkanDevice*> _devices; // TODO: should these be sptr??
-		container::vector<VulkanSwapchain*> _swapchains;
 		container::vector<VulkanPipeline*> _pipelines;
 
 		template <class T, class... Args>
@@ -88,7 +87,6 @@ namespace np::graphics::rhi
 				vkDeviceWaitIdle(*device);
 
 			DestroyVector<VulkanPipeline>(_pipelines);
-			DestroyVector<VulkanSwapchain>(_swapchains);
 			DestroyVector<VulkanDevice>(_devices);
 			DestroyVector<VulkanSurface>(_surfaces);
 			DestroyVector<VulkanInstance>(_instances);
@@ -108,8 +106,7 @@ namespace np::graphics::rhi
 		{
 			VulkanSurface& surface = *Create<VulkanSurface>(_surfaces, *_instances.front(), window);
 			VulkanDevice& device = *Create<VulkanDevice>(_devices, surface);
-			VulkanSwapchain& swapchain = *Create<VulkanSwapchain>(_swapchains, device);
-			VulkanPipeline& pipeline = *Create<VulkanPipeline>(_pipelines, swapchain);
+			VulkanPipeline& pipeline = *Create<VulkanPipeline>(_pipelines, device);
 		}
 
 		void DetachFromWindow(window::Window& window) override
@@ -119,7 +116,6 @@ namespace np::graphics::rhi
 				if (memory::AddressOf((*it)->Surface().Window()) == memory::AddressOf(window))
 				{
 					VulkanPipeline* pipeline = *it;
-					VulkanSwapchain* swapchain = memory::AddressOf(pipeline->Swapchain());
 					VulkanDevice* device = memory::AddressOf(pipeline->Device());
 					VulkanSurface* surface = memory::AddressOf(pipeline->Surface());
 					VulkanInstance* instance = memory::AddressOf(pipeline->Instance());
@@ -128,7 +124,6 @@ namespace np::graphics::rhi
 					_allocator.Deallocate(pipeline);
 					_pipelines.erase(it);
 
-					DestroyInVector(_swapchains, swapchain);
 					DestroyInVector(_devices, device);
 					DestroyInVector(_surfaces, surface);
 					DestroyInVector(_instances, instance);
@@ -142,6 +137,8 @@ namespace np::graphics::rhi
 			for (VulkanPipeline* pipeline : _pipelines)
 				pipeline->Draw(time_delta);
 		}
+
+		void AdjustForWindowResize(window::Window& window) override {}
 	};
 } // namespace np::graphics::rhi
 

@@ -58,7 +58,7 @@ namespace np::graphics::rhi
 			return _instance;
 		}
 
-		const window::Window& Window() const
+		window::Window& Window() const
 		{
 			return _window;
 		}

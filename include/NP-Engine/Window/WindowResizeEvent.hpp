@@ -30,12 +30,12 @@ namespace np::window
 			AssignData<DataType>({memory::AddressOf(window), width, height});
 		}
 
-		ui32 GetWidth() const
+		i32 GetWidth() const
 		{
 			return RetrieveData<DataType>().width;
 		}
 
-		ui32 GetHeight() const
+		i32 GetHeight() const
 		{
 			return RetrieveData<DataType>().height;
 		}
