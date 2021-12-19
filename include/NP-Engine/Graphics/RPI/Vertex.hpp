@@ -13,4 +13,4 @@ namespace np::graphics
 		::glm::vec2 Position;
 		::glm::vec3 Color;
 	};
-}
+} // namespace np::graphics

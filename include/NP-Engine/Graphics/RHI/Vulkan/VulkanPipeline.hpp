@@ -35,7 +35,7 @@ namespace np::graphics::rhi
 		VkRenderPass _render_pass;
 		VkPipelineLayout _pipeline_layout;
 		VkPipeline _pipeline;
-		
+
 		bl _rebuild_swapchain;
 
 		container::vector<VkFramebuffer> _framebuffers;
@@ -453,7 +453,7 @@ namespace np::graphics::rhi
 			if (_pipeline_layout != nullptr && _render_pass != nullptr)
 			{
 				container::vector<VkVertexInputBindingDescription> vertex_binding_descs = VulkanVertex::BindingDescriptions();
-				container::array<VkVertexInputAttributeDescription, 2> vertex_attribute_descs = 
+				container::array<VkVertexInputAttributeDescription, 2> vertex_attribute_descs =
 					VulkanVertex::AttributeDescriptions();
 
 				VkPipelineVertexInputStateCreateInfo vertex_input_state_info = CreatePipelineVertexInputStateInfo();
@@ -463,8 +463,7 @@ namespace np::graphics::rhi
 				vertex_input_state_info.pVertexAttributeDescriptions = vertex_attribute_descs.data();
 
 				container::vector<VkPipelineShaderStageCreateInfo> shader_stages = CreateShaderStages();
-				VkPipelineInputAssemblyStateCreateInfo input_assembly_state_info =
-					CreatePipelineInputAssemblyStateInfo();
+				VkPipelineInputAssemblyStateCreateInfo input_assembly_state_info = CreatePipelineInputAssemblyStateInfo();
 
 				container::vector<VkViewport> viewports = {CreateViewport()};
 				container::vector<VkRect2D> scissors = {CreateScissor()};
@@ -475,8 +474,7 @@ namespace np::graphics::rhi
 				viewport_state_info.scissorCount = scissors.size();
 				viewport_state_info.pScissors = scissors.data();
 
-				VkPipelineRasterizationStateCreateInfo rasterization_state_info =
-					CreatePipelineRasterizationStateInfo();
+				VkPipelineRasterizationStateCreateInfo rasterization_state_info = CreatePipelineRasterizationStateInfo();
 				VkPipelineMultisampleStateCreateInfo multisample_state_info = CreatePipelineMultisampleStateInfo();
 
 				container::vector<VkPipelineColorBlendAttachmentState> color_blend_attachment_states = {
@@ -573,12 +571,13 @@ namespace np::graphics::rhi
 				render_pass_begin_info.clearValueCount = clear_values.size();
 				render_pass_begin_info.pClearValues = clear_values.data();
 
-				container::vector<VkBuffer> vertex_buffers{ _vertex_buffer };
-				container::vector<VkDeviceSize> offsets{ 0 };
+				container::vector<VkBuffer> vertex_buffers{_vertex_buffer};
+				container::vector<VkDeviceSize> offsets{0};
 
 				vkCmdBeginRenderPass(command_buffers[i], &render_pass_begin_info, VK_SUBPASS_CONTENTS_INLINE);
 				vkCmdBindPipeline(command_buffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, _pipeline);
-				vkCmdBindVertexBuffers(command_buffers[i], 0, (ui32)vertex_buffers.size(), vertex_buffers.data(), offsets.data());
+				vkCmdBindVertexBuffers(command_buffers[i], 0, (ui32)vertex_buffers.size(), vertex_buffers.data(),
+									   offsets.data());
 				vkCmdDraw(command_buffers[i], (ui32)_vertices.size(), 1, 0, 0);
 				vkCmdEndRenderPass(command_buffers[i]);
 
@@ -657,8 +656,8 @@ namespace np::graphics::rhi
 
 			VkMemoryAllocateInfo allocate_info = CreateMemoryAllocateInfo();
 			allocate_info.allocationSize = requirements.size;
-			allocate_info.memoryTypeIndex = ChooseMemoryTypeIndex(requirements.memoryTypeBits, 
-				VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+			allocate_info.memoryTypeIndex = ChooseMemoryTypeIndex(
+				requirements.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 
 			if (vkAllocateMemory(Device(), &allocate_info, nullptr, &buffer_memory) != VK_SUCCESS)
 			{
@@ -697,20 +696,20 @@ namespace np::graphics::rhi
 		}
 
 	public:
-		VulkanPipeline(VulkanDevice& device) :
+		VulkanPipeline(VulkanDevice& device):
 			_swapchain(device),
 			_vertices(3),
 			_vertex_buffer(CreateVertexBuffer()),
 			_vertex_buffer_memory(CreateVertexBufferMemory()),
 			_vertex_shader(Device(), fs::append(fs::append("Vulkan", "shaders"), "vertex.glsl"), VulkanShader::Type::VERTEX),
 			_fragment_shader(Device(), fs::append(fs::append("Vulkan", "shaders"), "fragment.glsl"),
-				VulkanShader::Type::FRAGMENT),
+							 VulkanShader::Type::FRAGMENT),
 			_render_pass(CreateRenderPass()),
 			_pipeline_layout(CreatePipelineLayout()),
 			_pipeline(CreatePipeline()),
 			_framebuffers(CreateFramebuffers()), // TODO: can we put this in a VulkanFramebuffer? I don't think so
 			_command_pool(CreateCommandPool()), // TODO: can we put this in a VulkanCommand_____?? maybe....?
-			
+
 			_command_buffers(CreateCommandBuffers()),
 			_current_frame(0),
 			_image_available_semaphores(CreateSemaphores(MAX_FRAMES)),
@@ -722,17 +721,14 @@ namespace np::graphics::rhi
 			Surface().Window().SetResizeCallback(this, WindowResizeCallback);
 
 			const container::vector<Vertex> vertices = {
-				{{0.0f, -0.5f}, {1.0f, 0.0f, 1.0f}},
-				{{0.5f, 0.5f}, {1.0f, 1.0f, 0.0f}},
-				{{-0.5f, 0.5f}, {0.0f, 1.0f, 1.0f}}
-			};
+				{{0.0f, -0.5f}, {1.0f, 0.0f, 1.0f}}, {{0.5f, 0.5f}, {1.0f, 1.0f, 0.0f}}, {{-0.5f, 0.5f}, {0.0f, 1.0f, 1.0f}}};
 
 			siz data_size = sizeof(_vertices[0]) * _vertices.size();
 			void* data;
 			vkMapMemory(device, _vertex_buffer_memory, 0, data_size, 0, &data);
 			memcpy(data, vertices.data(), data_size);
 			vkUnmapMemory(device, _vertex_buffer_memory);
-		} 
+		}
 
 		~VulkanPipeline()
 		{

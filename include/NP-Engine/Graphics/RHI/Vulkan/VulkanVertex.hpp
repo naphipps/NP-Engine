@@ -16,7 +16,7 @@ namespace np::graphics::rhi
 {
 	struct VulkanVertex : public Vertex
 	{
-		static container::vector<VkVertexInputBindingDescription> BindingDescriptions() 
+		static container::vector<VkVertexInputBindingDescription> BindingDescriptions()
 		{
 			container::vector<VkVertexInputBindingDescription> descs{};
 
@@ -46,4 +46,4 @@ namespace np::graphics::rhi
 			return descs;
 		}
 	};
-}
+} // namespace np::graphics::rhi
