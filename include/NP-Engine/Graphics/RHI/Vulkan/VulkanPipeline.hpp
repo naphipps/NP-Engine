@@ -17,6 +17,7 @@
 #include "VulkanDevice.hpp"
 #include "VulkanSwapchain.hpp"
 #include "VulkanShader.hpp"
+#include "VulkanVertex.hpp"
 
 namespace np::graphics::rhi
 {
@@ -26,15 +27,18 @@ namespace np::graphics::rhi
 		constexpr static siz MAX_FRAMES = 2;
 
 		VulkanSwapchain _swapchain;
+		container::vector<VulkanVertex> _vertices;
+		VkBuffer _vertex_buffer;
+		VkDeviceMemory _vertex_buffer_memory;
 		VulkanShader _vertex_shader;
 		VulkanShader _fragment_shader;
 		VkRenderPass _render_pass;
 		VkPipelineLayout _pipeline_layout;
 		VkPipeline _pipeline;
+		
 		bl _rebuild_swapchain;
 
 		container::vector<VkFramebuffer> _framebuffers;
-
 		VkCommandPool _command_pool;
 		container::vector<VkCommandBuffer> _command_buffers;
 
@@ -360,6 +364,43 @@ namespace np::graphics::rhi
 			return dependencies;
 		}
 
+		VkBufferCreateInfo CreateBufferInfo()
+		{
+			VkBufferCreateInfo info{};
+			info.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+			info.usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
+			info.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+			return info;
+		}
+
+		VkMemoryAllocateInfo CreateMemoryAllocateInfo()
+		{
+			VkMemoryAllocateInfo info{};
+			info.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+			return info;
+		}
+
+		ui32 ChooseMemoryTypeIndex(ui32 type_filter, VkMemoryPropertyFlags property_flags)
+		{
+			VkPhysicalDeviceMemoryProperties memory_properties;
+			vkGetPhysicalDeviceMemoryProperties(Device().PhysicalDevice(), &memory_properties);
+
+			bl found = false;
+			ui32 memory_type_index = 0;
+
+			for (ui32 i = 0; i < memory_properties.memoryTypeCount; i++)
+			{
+				if ((type_filter & (1 << i)) &&
+					(memory_properties.memoryTypes[i].propertyFlags & property_flags) == property_flags)
+				{
+					found = true;
+					memory_type_index = i;
+				}
+			}
+
+			return found ? memory_type_index : -1;
+		}
+
 		VkRenderPass CreateRenderPass()
 		{
 			VkRenderPass render_pass = nullptr;
@@ -411,40 +452,49 @@ namespace np::graphics::rhi
 
 			if (_pipeline_layout != nullptr && _render_pass != nullptr)
 			{
+				container::vector<VkVertexInputBindingDescription> vertex_binding_descs = VulkanVertex::BindingDescriptions();
+				container::array<VkVertexInputAttributeDescription, 2> vertex_attribute_descs = 
+					VulkanVertex::AttributeDescriptions();
+
+				VkPipelineVertexInputStateCreateInfo vertex_input_state_info = CreatePipelineVertexInputStateInfo();
+				vertex_input_state_info.vertexBindingDescriptionCount = (ui32)vertex_binding_descs.size();
+				vertex_input_state_info.pVertexBindingDescriptions = vertex_binding_descs.data();
+				vertex_input_state_info.vertexAttributeDescriptionCount = (ui32)vertex_attribute_descs.size();
+				vertex_input_state_info.pVertexAttributeDescriptions = vertex_attribute_descs.data();
+
 				container::vector<VkPipelineShaderStageCreateInfo> shader_stages = CreateShaderStages();
-				VkPipelineVertexInputStateCreateInfo pipeline_vertex_input_state_info = CreatePipelineVertexInputStateInfo();
-				VkPipelineInputAssemblyStateCreateInfo pipeline_input_assembly_state_info =
+				VkPipelineInputAssemblyStateCreateInfo input_assembly_state_info =
 					CreatePipelineInputAssemblyStateInfo();
 
 				container::vector<VkViewport> viewports = {CreateViewport()};
 				container::vector<VkRect2D> scissors = {CreateScissor()};
 
-				VkPipelineViewportStateCreateInfo pipeline_viewport_state_info = CreatePipelineViewportStateInfo();
-				pipeline_viewport_state_info.viewportCount = viewports.size();
-				pipeline_viewport_state_info.pViewports = viewports.data();
-				pipeline_viewport_state_info.scissorCount = scissors.size();
-				pipeline_viewport_state_info.pScissors = scissors.data();
+				VkPipelineViewportStateCreateInfo viewport_state_info = CreatePipelineViewportStateInfo();
+				viewport_state_info.viewportCount = viewports.size();
+				viewport_state_info.pViewports = viewports.data();
+				viewport_state_info.scissorCount = scissors.size();
+				viewport_state_info.pScissors = scissors.data();
 
-				VkPipelineRasterizationStateCreateInfo pipeline_rasterization_state_info =
+				VkPipelineRasterizationStateCreateInfo rasterization_state_info =
 					CreatePipelineRasterizationStateInfo();
-				VkPipelineMultisampleStateCreateInfo pipeline_multisample_state_info = CreatePipelineMultisampleStateInfo();
+				VkPipelineMultisampleStateCreateInfo multisample_state_info = CreatePipelineMultisampleStateInfo();
 
-				container::vector<VkPipelineColorBlendAttachmentState> pipeline_color_blend_attachment_states = {
+				container::vector<VkPipelineColorBlendAttachmentState> color_blend_attachment_states = {
 					CreatePipelineColorBlendAttachmentState()};
-				VkPipelineColorBlendStateCreateInfo pipeline_color_blend_state_info = CreatePipelineColorBlendStateInfo();
-				pipeline_color_blend_state_info.attachmentCount = pipeline_color_blend_attachment_states.size();
-				pipeline_color_blend_state_info.pAttachments = pipeline_color_blend_attachment_states.data();
+				VkPipelineColorBlendStateCreateInfo color_blend_state_info = CreatePipelineColorBlendStateInfo();
+				color_blend_state_info.attachmentCount = color_blend_attachment_states.size();
+				color_blend_state_info.pAttachments = color_blend_attachment_states.data();
 
 				VkGraphicsPipelineCreateInfo pipeline_info = CreateGraphicsPipelineInfo();
 				pipeline_info.stageCount = shader_stages.size();
 				pipeline_info.pStages = shader_stages.data();
-				pipeline_info.pVertexInputState = &pipeline_vertex_input_state_info;
-				pipeline_info.pInputAssemblyState = &pipeline_input_assembly_state_info;
-				pipeline_info.pViewportState = &pipeline_viewport_state_info;
-				pipeline_info.pRasterizationState = &pipeline_rasterization_state_info;
-				pipeline_info.pMultisampleState = &pipeline_multisample_state_info;
+				pipeline_info.pVertexInputState = &vertex_input_state_info;
+				pipeline_info.pInputAssemblyState = &input_assembly_state_info;
+				pipeline_info.pViewportState = &viewport_state_info;
+				pipeline_info.pRasterizationState = &rasterization_state_info;
+				pipeline_info.pMultisampleState = &multisample_state_info;
 				pipeline_info.pDepthStencilState = nullptr; // Optional
-				pipeline_info.pColorBlendState = &pipeline_color_blend_state_info;
+				pipeline_info.pColorBlendState = &color_blend_state_info;
 				pipeline_info.pDynamicState = nullptr; // Optional
 				pipeline_info.layout = _pipeline_layout;
 				pipeline_info.renderPass = _render_pass;
@@ -523,12 +573,13 @@ namespace np::graphics::rhi
 				render_pass_begin_info.clearValueCount = clear_values.size();
 				render_pass_begin_info.pClearValues = clear_values.data();
 
+				container::vector<VkBuffer> vertex_buffers{ _vertex_buffer };
+				container::vector<VkDeviceSize> offsets{ 0 };
+
 				vkCmdBeginRenderPass(command_buffers[i], &render_pass_begin_info, VK_SUBPASS_CONTENTS_INLINE);
-
 				vkCmdBindPipeline(command_buffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, _pipeline);
-
-				vkCmdDraw(command_buffers[i], 3, 1, 0, 0);
-
+				vkCmdBindVertexBuffers(command_buffers[i], 0, (ui32)vertex_buffers.size(), vertex_buffers.data(), offsets.data());
+				vkCmdDraw(command_buffers[i], (ui32)_vertices.size(), 1, 0, 0);
 				vkCmdEndRenderPass(command_buffers[i]);
 
 				if (vkEndCommandBuffer(command_buffers[i]) != VK_SUCCESS)
@@ -582,6 +633,45 @@ namespace np::graphics::rhi
 			return fences;
 		}
 
+		VkBuffer CreateVertexBuffer()
+		{
+			VkBuffer buffer = nullptr;
+
+			VkBufferCreateInfo buffer_info = CreateBufferInfo();
+			buffer_info.size = sizeof(_vertices[0]) * _vertices.size();
+
+			if (vkCreateBuffer(Device(), &buffer_info, nullptr, &buffer) != VK_SUCCESS)
+			{
+				buffer = nullptr;
+			}
+
+			return buffer;
+		}
+
+		VkDeviceMemory CreateVertexBufferMemory()
+		{
+			VkDeviceMemory buffer_memory = nullptr;
+
+			VkMemoryRequirements requirements;
+			vkGetBufferMemoryRequirements(Device(), _vertex_buffer, &requirements);
+
+			VkMemoryAllocateInfo allocate_info = CreateMemoryAllocateInfo();
+			allocate_info.allocationSize = requirements.size;
+			allocate_info.memoryTypeIndex = ChooseMemoryTypeIndex(requirements.memoryTypeBits, 
+				VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+
+			if (vkAllocateMemory(Device(), &allocate_info, nullptr, &buffer_memory) != VK_SUCCESS)
+			{
+				buffer_memory = nullptr;
+			}
+			else
+			{
+				vkBindBufferMemory(Device(), _vertex_buffer, buffer_memory, 0);
+			}
+
+			return buffer_memory;
+		}
+
 		void RebuildSwapchain()
 		{
 			SetRebuildSwapchain(false);
@@ -607,16 +697,20 @@ namespace np::graphics::rhi
 		}
 
 	public:
-		VulkanPipeline(VulkanDevice& device):
+		VulkanPipeline(VulkanDevice& device) :
 			_swapchain(device),
+			_vertices(3),
+			_vertex_buffer(CreateVertexBuffer()),
+			_vertex_buffer_memory(CreateVertexBufferMemory()),
 			_vertex_shader(Device(), fs::append(fs::append("Vulkan", "shaders"), "vertex.glsl"), VulkanShader::Type::VERTEX),
 			_fragment_shader(Device(), fs::append(fs::append("Vulkan", "shaders"), "fragment.glsl"),
-							 VulkanShader::Type::FRAGMENT),
+				VulkanShader::Type::FRAGMENT),
 			_render_pass(CreateRenderPass()),
 			_pipeline_layout(CreatePipelineLayout()),
 			_pipeline(CreatePipeline()),
 			_framebuffers(CreateFramebuffers()), // TODO: can we put this in a VulkanFramebuffer? I don't think so
 			_command_pool(CreateCommandPool()), // TODO: can we put this in a VulkanCommand_____?? maybe....?
+			
 			_command_buffers(CreateCommandBuffers()),
 			_current_frame(0),
 			_image_available_semaphores(CreateSemaphores(MAX_FRAMES)),
@@ -626,11 +720,26 @@ namespace np::graphics::rhi
 			_rebuild_swapchain(false)
 		{
 			Surface().Window().SetResizeCallback(this, WindowResizeCallback);
+
+			const container::vector<Vertex> vertices = {
+				{{0.0f, -0.5f}, {1.0f, 0.0f, 1.0f}},
+				{{0.5f, 0.5f}, {1.0f, 1.0f, 0.0f}},
+				{{-0.5f, 0.5f}, {0.0f, 1.0f, 1.0f}}
+			};
+
+			siz data_size = sizeof(_vertices[0]) * _vertices.size();
+			void* data;
+			vkMapMemory(device, _vertex_buffer_memory, 0, data_size, 0, &data);
+			memcpy(data, vertices.data(), data_size);
+			vkUnmapMemory(device, _vertex_buffer_memory);
 		} 
 
 		~VulkanPipeline()
 		{
 			vkDeviceWaitIdle(Device());
+
+			vkDestroyBuffer(Device(), _vertex_buffer, nullptr);
+			vkFreeMemory(Device(), _vertex_buffer_memory, nullptr);
 
 			for (VkSemaphore& semaphore : _render_finished_semaphores)
 				vkDestroySemaphore(Device(), semaphore, nullptr);

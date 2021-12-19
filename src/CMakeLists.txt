@@ -78,6 +78,7 @@ set(NP_ENGINE_GRAPHICS_RPI_HPP
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/Shader.hpp
 	# ${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/Texture.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/RhiType.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/Vertex.hpp
 )
 
 set(NP_ENGINE_GRAPHICS_OPENGL_HPP
@@ -92,6 +93,7 @@ set(NP_ENGINE_GRAPHICS_VULKAN_HPP
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RHI/Vulkan/VulkanPipeline.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RHI/Vulkan/VulkanShader.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RHI/Vulkan/VulkanSwapchain.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RHI/Vulkan/VulkanVertex.hpp
 )
 
 set(NP_ENGINE_INPUT_HPP
@@ -236,7 +238,7 @@ set(NP_ENGINE_VENDOR_HPP
 	#${PROJECT_SOURCE_DIR}/include/NP-Engine/Vendor/ConcurrentqueueInclude.hpp
 	#${PROJECT_SOURCE_DIR}/include/NP-Engine/Vendor/EnttInclude.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Vendor/GlfwInclude.hpp
-	#${PROJECT_SOURCE_DIR}/include/NP-Engine/Vendor/GlmInclude.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Vendor/GlmInclude.hpp
 	#${PROJECT_SOURCE_DIR}/include/NP-Engine/Vendor/JsonInclude.hpp
 	#${PROJECT_SOURCE_DIR}/include/NP-Engine/Vendor/PcgCppInclude.hpp
 	#${PROJECT_SOURCE_DIR}/include/NP-Engine/Vendor/RandutilsInclude.hpp

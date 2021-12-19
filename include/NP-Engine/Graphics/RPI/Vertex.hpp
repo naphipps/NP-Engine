@@ -4,11 +4,13 @@
 //
 //##===----------------------------------------------------------------------===##//
 
-#ifndef NP_ENGINE_VENDOR_GLM_INCLUDE_HPP
-#define NP_ENGINE_VENDOR_GLM_INCLUDE_HPP
+#include "NP-Engine/Vendor/GlmInclude.hpp"
 
-#include "NP-Engine/Foundation/Foundation.hpp"
-
-#include <glm/glm.hpp>
-
-#endif /* NP_ENGINE_VENDOR_GLM_INCLUDE_HPP */
+namespace np::graphics
+{
+	struct Vertex
+	{
+		::glm::vec2 Position;
+		::glm::vec3 Color;
+	};
+}
