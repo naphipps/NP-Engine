@@ -154,6 +154,34 @@ namespace np::app
 
 		virtual void Run(i32 argc, chr** argv)
 		{
+			/*
+			* //TODO: http://www.gameprogrammingpatterns.com/game-loop.html
+			*
+			* //TODO: figure out how to fix our loops to 60fps
+			//TODO: figure out how to force this into a fixed step loop - aka, set this to loop at 60fps or something with 0
+			being infinitely fast
+
+			double previous = getCurrentTime();
+			double lag = 0.0;
+			while (true)
+			{
+				double current = getCurrentTime();
+				double elapsed = current - previous;
+				previous = current;
+				lag += elapsed;
+
+				processInput();
+
+				while (lag >= MS_PER_UPDATE)
+				{
+				update();
+				lag -= MS_PER_UPDATE;
+				}
+
+				render();
+			}
+			*/
+
 			_running.store(true, mo_release);
 			time::SteadyTimestamp current_timestamp;
 			time::SteadyTimestamp prev_timestamp;
@@ -181,34 +209,6 @@ namespace np::app
 					layer->AfterUdpate();
 				for (Layer* overlay : _overlays)
 					overlay->AfterUdpate();
-
-				/*
-				* //TODO: http://www.gameprogrammingpatterns.com/game-loop.html
-				*
-				* //TODO: figure out how to fix our loops to 60fps
-				//TODO: figure out how to force this into a fixed step loop - aka, set this to loop at 60fps or something with 0
-				being infinitely fast
-
-				double previous = getCurrentTime();
-				double lag = 0.0;
-				while (true)
-				{
-					double current = getCurrentTime();
-					double elapsed = current - previous;
-					previous = current;
-					lag += elapsed;
-
-					processInput();
-
-					while (lag >= MS_PER_UPDATE)
-					{
-					update();
-					lag -= MS_PER_UPDATE;
-					}
-
-					render();
-				}
-				*/
 
 				for (event::Event* e = _event_queue.PopOther(); e != nullptr; e = _event_queue.PopOther())
 				{
