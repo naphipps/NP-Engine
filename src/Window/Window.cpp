@@ -74,5 +74,6 @@ namespace np::window
 	{
 		glfwSetWindowCloseCallback(glfw_window, WindowCloseCallback);
 		glfwSetWindowSizeCallback(glfw_window, WindowSizeCallback);
+		glfwSetWindowPosCallback(glfw_window, WindowPositionCallback);
 	}
 } // namespace np::window

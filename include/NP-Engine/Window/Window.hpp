@@ -38,6 +38,7 @@ namespace np::window
 		};
 
 		using ResizeCallback = void (*)(void* caller, ui32 width, ui32 height);
+		using PositionCallback = void(*)(void* caller, i32 x, i32 y);
 
 	protected:
 		Properties _properties;
@@ -45,6 +46,7 @@ namespace np::window
 		concurrency::Thread _thread;
 		atm_bl _show_procedure_is_complete;
 		container::omap<void*, ResizeCallback> _resize_callbacks;
+		container::omap<void*, PositionCallback> _position_callbacks;
 
 		static void WindowCloseCallback(GLFWwindow* glfw_window)
 		{
@@ -57,11 +59,25 @@ namespace np::window
 			window->InvokeResizeCallbacks(width, height);
 		}
 
+		static void WindowPositionCallback(GLFWwindow* glfw_window, i32 x, i32 y)
+		{
+			Window* window = (Window*)glfwGetWindowUserPointer(glfw_window);
+			window->InvokePositionCallbacks(x, y);
+		}
+
 		void InvokeResizeCallbacks(ui32 width, ui32 height)
 		{
 			for (auto it = _resize_callbacks.begin(); it != _resize_callbacks.end(); it++)
 			{
 				it->second(it->first, width, height);
+			}
+		}
+
+		void InvokePositionCallbacks(i32 x, i32 y)
+		{
+			for (auto it = _position_callbacks.begin(); it != _position_callbacks.end(); it++)
+			{
+				it->second(it->first, x, y);
 			}
 		}
 
@@ -189,6 +205,22 @@ namespace np::window
 		void UnsetResizeCallback(void* caller)
 		{
 			_resize_callbacks.erase(caller);
+		}
+
+		void SetPositionCallback(void* caller, PositionCallback callback)
+		{
+			_position_callbacks[caller] = callback;
+		}
+
+		void UnsetPositionCallback(void* caller)
+		{
+			_position_callbacks.erase(caller);
+		}
+
+		void UnsetAllCallbacks(void* caller)
+		{
+			UnsetResizeCallback(caller);
+			UnsetPositionCallback(caller);
 		}
 
 		virtual event::EventCategory GetHandledCategories() const override

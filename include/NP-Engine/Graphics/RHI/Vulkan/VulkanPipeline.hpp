@@ -49,7 +49,18 @@ namespace np::graphics::rhi
 		container::vector<VkFence> _fences;
 		container::vector<VkFence> _image_fences;
 
+		void SetRebuildSwapchain(bl rebuild_swapchain = true)
+		{
+			_rebuild_swapchain = rebuild_swapchain;
+		}
+
 		static void WindowResizeCallback(void* pipeline, ui32 width, ui32 height)
+		{
+			((VulkanPipeline*)pipeline)->SetRebuildSwapchain();
+			((VulkanPipeline*)pipeline)->Draw(time::DurationMilliseconds(0));
+		}
+
+		static void WindowPositionCallback(void* pipeline, i32 x, i32 y)
 		{
 			((VulkanPipeline*)pipeline)->SetRebuildSwapchain();
 			((VulkanPipeline*)pipeline)->Draw(time::DurationMilliseconds(0));
@@ -719,6 +730,7 @@ namespace np::graphics::rhi
 			_rebuild_swapchain(false)
 		{
 			Surface().Window().SetResizeCallback(this, WindowResizeCallback);
+			Surface().Window().SetPositionCallback(this, WindowPositionCallback);
 
 			const container::vector<Vertex> vertices = {
 				{{0.0f, -0.5f}, {1.0f, 0.0f, 1.0f}}, {{0.5f, 0.5f}, {1.0f, 1.0f, 0.0f}}, {{-0.5f, 0.5f}, {0.0f, 1.0f, 1.0f}}};
@@ -784,11 +796,6 @@ namespace np::graphics::rhi
 		const VulkanShader& FragmentShader() const
 		{
 			return _fragment_shader;
-		}
-
-		void SetRebuildSwapchain(bl rebuild_swapchain = true)
-		{
-			_rebuild_swapchain = rebuild_swapchain;
 		}
 
 		void Draw(time::DurationMilliseconds time_delta)
