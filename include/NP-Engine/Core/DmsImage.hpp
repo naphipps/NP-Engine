@@ -1515,10 +1515,10 @@ namespace np
 			virtual ostrm& Insertion(ostrm& os, str filepath) const override
 			{
 				nlohmann::json json;
-				str ui16_drawable_image_path = fs::Append(fs::get_parent_path(filepath), "ui16_drawable_image_path");
+				str ui16_drawable_image_path = fs::Append(fs::GetParentPath(filepath), "ui16_drawable_image_path");
 				json["ui16_drawable_image_path"] = ui16_drawable_image_path;
 
-				os << json; //.dump(NP_JSON_SPACING);
+				os << json; //.dump(NP_ENGINE_JSON_SPACING);
 				base::SaveTo(ui16_drawable_image_path);
 
 				return os;

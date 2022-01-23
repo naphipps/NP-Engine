@@ -474,9 +474,9 @@ namespace np
 				json["aabb"]["UpperRight"].push_back(_aabb.UpperRight.x);
 				json["aabb"]["UpperRight"].push_back(_aabb.UpperRight.y);
 
-				json[BaseImageDir] = fs::Append(fs::get_parent_path(filepath), BaseImageDir);
+				json[BaseImageDir] = fs::Append(fs::GetParentPath(filepath), BaseImageDir);
 
-				os << json.dump(NP_JSON_SPACING);
+				os << json.dump(NP_ENGINE_JSON_SPACING);
 				base::SaveTo(json[BaseImageDir]);
 
 				return os;

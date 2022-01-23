@@ -202,7 +202,7 @@ namespace np
 				}
 				else if constexpr (::std::is_base_of_v<T, serialization::Serializable>)
 				{
-					str dirpath = fs::get_parent_path(filepath);
+					str dirpath = fs::GetParentPath(filepath);
 					nlohmann::json json;
 
 					for (ui32 i = 0; i < _value.size(); i++)
@@ -212,7 +212,7 @@ namespace np
 						_value[i].SaveTo(json[i_dir]);
 					}
 
-					os << json.dump(NP_JSON_SPACING);
+					os << json.dump(NP_ENGINE_JSON_SPACING);
 				}
 
 				return os;

@@ -108,7 +108,7 @@ namespace np
 					_simplex[i].SaveTo(json[simplex_dir]);
 				}
 
-				os << json; //.dump(NP_JSON_SPACING);
+				os << json; //.dump(NP_ENGINE_JSON_SPACING);
 				return os;
 			}
 
