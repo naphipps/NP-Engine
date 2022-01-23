@@ -7,6 +7,8 @@
 #ifndef NP_ENGINE_VENDOR_JSON_INCLUDE_HPP
 #define NP_ENGINE_VENDOR_JSON_INCLUDE_HPP
 
+#include "NP-Engine/Foundation/Foundation.hpp"
+
 #include <nlohmann/json.hpp>
 
 #define NP_ENGINE_JSON_SPACING 4
