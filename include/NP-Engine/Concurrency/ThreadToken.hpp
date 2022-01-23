@@ -1,10 +1,8 @@
+//##===----------------------------------------------------------------------===##//
 //
-//  ThreadToken.hpp
-//  Project Space
+//  Author: Nathan Phipps 8/27/20
 //
-//  Created by Nathan Phipps on 8/27/20.
-//  Copyright © 2020 Nathan Phipps. All rights reserved.
-//
+//##===----------------------------------------------------------------------===##//
 
 #ifndef NP_ENGINE_THREAD_TOKEN_HPP
 #define NP_ENGINE_THREAD_TOKEN_HPP
@@ -13,105 +11,64 @@
 
 #include "Thread.hpp"
 
-namespace np
+namespace np::concurrency
 {
-	namespace concurrency
+	/*
+		contains a Thread pointer so outside objects cannot manipulate it
+	*/
+	class ThreadToken
 	{
-		/**
-		 contains a Thread pointer so outside objects cannot manipulate it
-		 */
-		class ThreadToken
+	private:
+		Thread* _thread;
+
+	public:
+		ThreadToken(): _thread(nullptr) {}
+
+		ThreadToken(Thread* thread): _thread(thread) {}
+
+		ThreadToken(const ThreadToken& token): _thread(token._thread) {}
+
+		ThreadToken(ThreadToken&& token) noexcept: _thread(token._thread) {}
+
+		inline bl IsValid() const
 		{
-		private:
-			Thread* _thread;
+			return _thread != nullptr;
+		}
 
-		public:
-			/**
-			 constructor
-			 */
-			ThreadToken(): _thread(nullptr) {}
+		void Invalidate()
+		{
+			_thread = nullptr;
+		}
 
-			/**
-			 constructor - setting our Thread pointer to given Thread pointer
-			 */
-			ThreadToken(Thread* thread): _thread(thread) {}
+		inline Thread& GetThread()
+		{
+			NP_ASSERT(IsValid(), "we require a valid token when getting the thread");
+			return *_thread;
+		}
 
-			/**
-			 copy constructor
-			 */
-			ThreadToken(const ThreadToken& token): _thread(token._thread) {}
+		inline const Thread& GetThread() const
+		{
+			NP_ASSERT(IsValid(), "we require a valid token when getting the thread");
+			return *_thread;
+		}
 
-			/**
-			 move constructor - acts like copy
-			 */
-			ThreadToken(ThreadToken&& token): _thread(token._thread) {}
+		ThreadToken& operator=(const ThreadToken& token)
+		{
+			_thread = token._thread;
+			return *this;
+		}
 
-			/**
-			 deconstructor
-			 */
-			~ThreadToken() {}
+		ThreadToken& operator=(ThreadToken&& token) noexcept
+		{
+			_thread = token._thread;
+			return *this;
+		}
 
-			/**
-			 checks if our Thread pointer is nullptr or not
-			 */
-			inline bl IsValid() const
-			{
-				return _thread != nullptr;
-			}
-
-			/**
-			 invalidates our Thread pointer bu setting it to nullptr
-			 */
-			void Invalidate()
-			{
-				_thread = nullptr;
-			}
-
-			/**
-			 gets the job associated with this token
-			 */
-			inline Thread& GetThread()
-			{
-				NP_ASSERT(IsValid(), "we require a valid token when getting the thread");
-				return *_thread;
-			}
-
-			/**
-			 gets the job associated with this token
-			 */
-			inline const Thread& GetThread() const
-			{
-				NP_ASSERT(IsValid(), "we require a valid token when getting the thread");
-				return *_thread;
-			}
-
-			/**
-			 copy assignment
-			 */
-			ThreadToken& operator=(const ThreadToken& token)
-			{
-				_thread = token._thread;
-				return *this;
-			}
-
-			/**
-			 move assignment - acts like copy assignment
-			 */
-			ThreadToken& operator=(ThreadToken&& token)
-			{
-				_thread = token._thread;
-				return *this;
-			}
-
-			/**
-			 equality operator checks if our Thread pointer equals the other Thread pointer
-			 */
-			bl operator==(const ThreadToken& other) const
-			{
-				return _thread == other._thread;
-			}
-		};
-	} // namespace concurrency
-} // namespace np
+		bl operator==(const ThreadToken& other) const
+		{
+			return _thread == other._thread;
+		}
+	};
+} // namespace np::concurrency
 
 #endif /* NP_ENGINE_THREAD_TOKEN_HPP */

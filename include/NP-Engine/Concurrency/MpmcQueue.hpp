@@ -1,10 +1,8 @@
+//##===----------------------------------------------------------------------===##//
 //
-//  mpmc_queue.hpp
-//  Project Space
+//  Author: Nathan Phipps 9/28/20
 //
-//  Created by Nathan Phipps on 9/28/20.
-//  Copyright © 2020 Nathan Phipps. All rights reserved.
-//
+//##===----------------------------------------------------------------------===##//
 
 #ifndef NP_ENGINE_MPMC_QUEUE_HPP
 #define NP_ENGINE_MPMC_QUEUE_HPP
@@ -12,8 +10,6 @@
 #include <concurrentqueue.h>
 
 #include "NP-Engine/Memory/Memory.hpp"
-
-// TODO: add summary comments
 
 namespace np::concurrency
 {
