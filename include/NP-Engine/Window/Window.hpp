@@ -81,19 +81,21 @@ namespace np::window
 			}
 		}
 
-		virtual void HandleClose(event::Event& event);
+		virtual void HandleClose(event::Event& e);
 
-		virtual void HandleResize(event::Event& event);
+		virtual void HandleResize(event::Event& e);
 
-		virtual void HandleEvent(event::Event& event) override
+		virtual void HandleEvent(event::Event& e) override
 		{
-			switch (event.GetType())
+			switch (e.GetType())
 			{
 			case event::EventType::WindowClose:
-				HandleClose(event);
+				HandleClose(e);
 				break;
 			case event::EventType::WindowResize:
-				HandleResize(event);
+				HandleResize(e);
+				break;
+			default:
 				break;
 			}
 		}

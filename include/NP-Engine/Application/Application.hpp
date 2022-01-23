@@ -141,6 +141,8 @@ namespace np::app
 			case event::EventType::ApplicationPopup:
 				HandlePopup(e);
 				break;
+			default:
+				break;
 			}
 		}
 

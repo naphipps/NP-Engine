@@ -58,18 +58,20 @@ namespace np::app
 			}
 		}
 
-		virtual void HandleEvent(event::Event& event) override
+		virtual void HandleEvent(event::Event& e) override
 		{
-			switch (event.GetType())
+			switch (e.GetType())
 			{
 			case event::EventType::GraphicsCreateRendererForWindow:
-				HandleCreateRendererForWindow(event);
+				HandleCreateRendererForWindow(e);
 				break;
 			case event::EventType::WindowClose:
-				AdjustForWindowClose(event);
+				AdjustForWindowClose(e);
 				break;
 			case event::EventType::WindowResize:
-				AdjustForWindowResize(event);
+				AdjustForWindowResize(e);
+				break;
+			default:
 				break;
 			}
 		}
