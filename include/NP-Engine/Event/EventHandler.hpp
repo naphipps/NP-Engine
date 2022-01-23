@@ -10,8 +10,6 @@
 #include "EventImpl.hpp"
 #include "EventSubmitter.hpp"
 
-// TODO: add summary comments
-
 namespace np::event
 {
 	class EventHandler
@@ -19,16 +17,16 @@ namespace np::event
 	protected:
 		EventSubmitter& _event_submitter;
 
-		virtual void HandleEvent(Event& event) = 0;
+		virtual void HandleEvent(Event& e) = 0;
 
 	public:
 		EventHandler(EventSubmitter& event_submitter): _event_submitter(event_submitter) {}
 
-		virtual void OnEvent(Event& event)
+		virtual void OnEvent(Event& e)
 		{
-			if (EventCategoryContains(GetHandledCategories(), event.GetCategory()))
+			if (EventCategoryContains(GetHandledCategories(), e.GetCategory()))
 			{
-				HandleEvent(event);
+				HandleEvent(e);
 			}
 		}
 

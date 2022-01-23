@@ -12,8 +12,6 @@
 #include "EventQueue.hpp"
 #include "EventImpl.hpp"
 
-// TODO: add summary comments
-
 namespace np::event
 {
 	class EventSubmitter
@@ -30,9 +28,9 @@ namespace np::event
 			return _queue.Emplace<T>(::std::forward<Args>(args)...);
 		}
 
-		bl Emplace(const Event* event)
+		bl Emplace(const Event* e)
 		{
-			return _queue.Emplace(event);
+			return _queue.Emplace(e);
 		}
 	};
 } // namespace np::event
