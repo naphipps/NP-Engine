@@ -38,7 +38,7 @@ namespace np::window
 		};
 
 		using ResizeCallback = void (*)(void* caller, ui32 width, ui32 height);
-		using PositionCallback = void(*)(void* caller, i32 x, i32 y);
+		using PositionCallback = void (*)(void* caller, i32 x, i32 y);
 
 	protected:
 		Properties _properties;

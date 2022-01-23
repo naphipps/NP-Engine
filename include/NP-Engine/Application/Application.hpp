@@ -169,7 +169,7 @@ namespace np::app
 		*/
 		virtual void Run(i32 argc, chr** argv)
 		{
-			//TODO: this into a fixed step loop - aka, set this to loop at 60fps or something with 0 being infinitely fast
+			// TODO: this into a fixed step loop - aka, set this to loop at 60fps or something with 0 being infinitely fast
 
 			_running.store(true, mo_release);
 			const time::DurationMilliseconds max_loop_duration(NP_ENGINE_APPLICATION_LOOP_DURATION);
@@ -181,7 +181,7 @@ namespace np::app
 			time::SteadyTimestamp update_next_timestamp = time::SteadyClock::now();
 			time::SteadyTimestamp update_prev_timestamp = time::SteadyClock::now();
 			time::DurationMilliseconds update_duration(0);
-			
+
 			while (_running.load(mo_acquire))
 			{
 				update_next_timestamp = time::SteadyClock::now();

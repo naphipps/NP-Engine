@@ -83,12 +83,13 @@ namespace np::app
 			memory::Allocator& allocator = memory::DefaultTraitAllocator;
 
 			// TODO: read graphics config file for renderer preference - then we could put our found renderers into multimap
-			// TODO: read from config file about which renderer was used last, if not available, ask user which renderer with popups
+			// TODO: read from config file about which renderer was used last, if not available, ask user which renderer with
+			// popups
 			// TODO: store chosen renderer in config file
 			// TODO: read a config file to determine renderer order preference
 
 #if NP_ENGINE_PLATFORM_IS_WINDOWS
-			//TODO: we're keeping this here for testing purposes - when renderer is complete we can probably remove
+			// TODO: we're keeping this here for testing purposes - when renderer is complete we can probably remove
 			block = allocator.Allocate(sizeof(graphics::rhi::OpenGLRenderer));
 			if (block.IsValid())
 			{

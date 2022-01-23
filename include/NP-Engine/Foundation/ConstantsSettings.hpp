@@ -21,7 +21,7 @@
 	#define NP_ASSERT_ENABLE 1
 #endif
 
-//The following durations are milliseconds
+// The following durations are milliseconds
 #define NP_ENGINE_APPLICATION_LOOP_DURATION 4
 #define NP_ENGINE_WINDOW_LOOP_DURATION 8
 
