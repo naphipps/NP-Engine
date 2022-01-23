@@ -23,7 +23,7 @@ namespace np::app
 	{
 	private:
 		memory::TraitAllocator _allocator;
-		container::vector<window::Window*> _windows; // TODO: make this vector of pointers again...
+		container::vector<window::Window*> _windows;
 		container::vector<void*> _native_windows;
 
 	protected:
@@ -69,7 +69,7 @@ namespace np::app
 
 		virtual void Update(time::DurationMilliseconds time_delta) override
 		{
-			glfwPollEvents(); // TODO: how do we move this to the main thread
+			glfwPollEvents();
 
 			for (window::Window* window : _windows)
 			{

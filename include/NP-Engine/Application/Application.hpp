@@ -144,6 +144,16 @@ namespace np::app
 			}
 		}
 
+		void PushLayer(Layer* layer)
+		{
+			_layers.emplace_back(layer);
+		}
+
+		void PushOverlay(Layer* overlay)
+		{
+			_overlays.emplace_back(overlay);
+		}
+
 	public:
 		virtual ~Application() {}
 
@@ -152,48 +162,31 @@ namespace np::app
 			Run(0, nullptr);
 		}
 
+		/*
+			inspired by the following:
+				- http://www.gameprogrammingpatterns.com/game-loop.html
+				- https://gafferongames.com/post/fix_your_timestep/
+		*/
 		virtual void Run(i32 argc, chr** argv)
 		{
-			/*
-			* //TODO: http://www.gameprogrammingpatterns.com/game-loop.html
-			*
-			* //TODO: figure out how to fix our loops to 60fps
-			//TODO: figure out how to force this into a fixed step loop - aka, set this to loop at 60fps or something with 0
-			being infinitely fast
-
-			double previous = getCurrentTime();
-			double lag = 0.0;
-			while (true)
-			{
-				double current = getCurrentTime();
-				double elapsed = current - previous;
-				previous = current;
-				lag += elapsed;
-
-				processInput();
-
-				while (lag >= MS_PER_UPDATE)
-				{
-				update();
-				lag -= MS_PER_UPDATE;
-				}
-
-				render();
-			}
-			*/
+			//TODO: this into a fixed step loop - aka, set this to loop at 60fps or something with 0 being infinitely fast
 
 			_running.store(true, mo_release);
-			time::SteadyTimestamp current_timestamp;
-			time::SteadyTimestamp prev_timestamp;
-			time::DurationMilliseconds timestamp_diff;
-			time::DurationMilliseconds loop_duration(4);
-			time::DurationMilliseconds sleep_duration;
+			const time::DurationMilliseconds max_loop_duration(NP_ENGINE_APPLICATION_LOOP_DURATION);
 
+			time::SteadyTimestamp loop_next_timestamp = time::SteadyClock::now();
+			time::SteadyTimestamp loop_prev_timestamp = time::SteadyClock::now();
+			time::DurationMilliseconds loop_duration(0);
+
+			time::SteadyTimestamp update_next_timestamp = time::SteadyClock::now();
+			time::SteadyTimestamp update_prev_timestamp = time::SteadyClock::now();
+			time::DurationMilliseconds update_duration(0);
+			
 			while (_running.load(mo_acquire))
 			{
-				current_timestamp = time::SteadyClock::now();
-				timestamp_diff = current_timestamp - prev_timestamp;
-				prev_timestamp = current_timestamp;
+				update_next_timestamp = time::SteadyClock::now();
+				update_duration = update_next_timestamp - update_prev_timestamp;
+				update_prev_timestamp = update_next_timestamp;
 
 				for (Layer* layer : _layers)
 					layer->BeforeUdpate();
@@ -201,9 +194,9 @@ namespace np::app
 					overlay->BeforeUdpate();
 
 				for (Layer* layer : _layers)
-					layer->Update(timestamp_diff);
+					layer->Update(update_duration);
 				for (Layer* overlay : _overlays)
-					overlay->Update(timestamp_diff);
+					overlay->Update(update_duration);
 
 				for (Layer* layer : _layers)
 					layer->AfterUdpate();
@@ -225,7 +218,6 @@ namespace np::app
 					else
 						_event_queue.Emplace(e);
 				}
-
 				_event_queue.SwapBuffers();
 
 				for (Layer* layer : _layers)
@@ -233,13 +225,15 @@ namespace np::app
 				for (Layer* overlay : _overlays)
 					overlay->Cleanup();
 
-				_graphics_layer.Draw(timestamp_diff);
+				_graphics_layer.Draw();
 
-				sleep_duration = loop_duration - timestamp_diff;
-				if (sleep_duration.count() > 0)
+				loop_next_timestamp = time::SteadyClock::now();
+				loop_duration = loop_next_timestamp - loop_prev_timestamp;
+				loop_prev_timestamp = loop_next_timestamp;
+				if (loop_duration < max_loop_duration)
 				{
 					concurrency::ThisThread::yield();
-					concurrency::ThisThread::sleep_for(sleep_duration);
+					concurrency::ThisThread::sleep_for(max_loop_duration - loop_duration);
 				}
 			}
 		}
@@ -259,16 +253,6 @@ namespace np::app
 			_running.store(false, mo_release);
 		}
 
-		void PushLayer(Layer* layer) // TODO: protected??
-		{
-			_layers.emplace_back(layer);
-		}
-
-		void PushOverlay(Layer* overlay) // TODO: protected??
-		{
-			_overlays.emplace_back(overlay);
-		}
-
 		event::EventCategory GetHandledCategories() const override
 		{
 			return event::EventCategory::Application;
@@ -280,8 +264,7 @@ namespace np::app
 		}
 	};
 
-	Application* CreateApplication(
-		memory::Allocator& application_allocator); // TODO: make this a static function of Application?
+	Application* CreateApplication(memory::Allocator& application_allocator);
 } // namespace np::app
 
 #endif /* NP_ENGINE_APPLICATION_HPP */

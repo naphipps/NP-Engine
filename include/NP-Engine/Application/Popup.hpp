@@ -12,8 +12,6 @@
 #include "NP-Engine/Insight/Insight.hpp"
 #include "NP-Engine/String/String.hpp"
 
-// TODO: add summary comments
-
 namespace np::app
 {
 	class Popup

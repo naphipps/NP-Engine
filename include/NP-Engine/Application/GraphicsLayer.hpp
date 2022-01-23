@@ -16,11 +16,8 @@
 
 #include "NP-Engine/Graphics/RHI/Vulkan/VulkanRenderer.hpp"
 
-#if NP_ENGINE_PLATFORM_IS_APPLE
-	// TODO: implement
-
-#elif NP_ENGINE_PLATFORM_IS_LINUX
-	// TODO: implement
+#if NP_ENGINE_PLATFORM_IS_APPLE || NP_ENGINE_PLATFORM_IS_LINUX
+	// TODO: determine if we need this after our renderer is complete
 
 #elif NP_ENGINE_PLATFORM_IS_WINDOWS
 	#include "NP-Engine/Graphics/RHI/OpenGL/OpenGLRenderer.hpp"
@@ -86,15 +83,12 @@ namespace np::app
 			memory::Allocator& allocator = memory::DefaultTraitAllocator;
 
 			// TODO: read graphics config file for renderer preference - then we could put our found renderers into multimap
-
-			// TODO: read from json file about which renderer was used last, if no file, or not available, ask user which
-			// renderer with popups
-			// TODO: where do we store our decision for which renderer we choose??
+			// TODO: read from config file about which renderer was used last, if not available, ask user which renderer with popups
+			// TODO: store chosen renderer in config file
 			// TODO: read a config file to determine renderer order preference
 
-#if /* NP_ENGINE_PLATFORM_IS_LINUX || */ NP_ENGINE_PLATFORM_IS_WINDOWS
-			// TODO: try opengl on linux
-
+#if NP_ENGINE_PLATFORM_IS_WINDOWS
+			//TODO: we're keeping this here for testing purposes - when renderer is complete we can probably remove
 			block = allocator.Allocate(sizeof(graphics::rhi::OpenGLRenderer));
 			if (block.IsValid())
 			{
@@ -131,10 +125,7 @@ namespace np::app
 
 			for (graphics::Renderer* renderer : renderers)
 			{
-				// if (renderer->IsEnabled()) //TODO: !!!
-				{
-					available_renderers += "\t- " + renderer->GetName() + "\n";
-				}
+				available_renderers += "\t- " + renderer->GetName() + "\n";
 			}
 
 			str title = "NP Engine";
@@ -194,32 +185,15 @@ namespace np::app
 			return renderer;
 		}
 
-		virtual void Cleanup() override
-		{
-			for (i32 i = _renderers.size() - 1; i >= 0; i--)
-			{
-				// if (!_renderers[i]->IsEnabled()) //TODO: ???
-				if (false)
-				{
-					graphics::Renderer* renderer = _renderers[i];
-					_renderers.erase(_renderers.begin() + i);
-					memory::Destruct(renderer);
-					_allocator.Deallocate(renderer);
-				}
-			}
-		}
-
 		virtual event::EventCategory GetHandledCategories() const override
 		{
 			return (event::EventCategory)((ui64)event::EventCategory::Graphics | (ui64)event::EventCategory::Window);
 		}
 
-		void Draw(time::DurationMilliseconds time_delta)
+		void Draw()
 		{
 			for (graphics::Renderer* renderer : _renderers)
-			{
-				renderer->Draw(time_delta);
-			}
+				renderer->Draw();
 		}
 	};
 } // namespace np::app

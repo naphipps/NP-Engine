@@ -15,7 +15,7 @@ namespace np::graphics
 	{
 		Device* device = nullptr;
 
-		switch (__detail::RegisteredRhiType)
+		switch (__detail::RegisteredRhiType.load(mo_acquire))
 		{
 		case RhiType::Vulkan:
 			memory::Block block = allocator.Allocate(sizeof(rhi::VulkanDevice));

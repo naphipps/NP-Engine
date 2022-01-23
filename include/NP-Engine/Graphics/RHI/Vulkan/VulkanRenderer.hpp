@@ -132,10 +132,10 @@ namespace np::graphics::rhi
 			}
 		}
 
-		void Draw(time::DurationMilliseconds time_delta) override
+		void Draw() override
 		{
 			for (VulkanPipeline* pipeline : _pipelines)
-				pipeline->Draw(time_delta);
+				pipeline->Draw();
 		}
 
 		void AdjustForWindowResize(window::Window& window) override {}

@@ -23,11 +23,11 @@ namespace np::app
 	public:
 		Layer(event::EventSubmitter& event_submitter): event::EventHandler(event_submitter) {}
 
-		virtual void BeforeUdpate() {} // TODO: do we like this idea??
+		virtual void BeforeUdpate() {} //TODO: I think we'll decide if we like this idea if it works with imgui
 
 		virtual void Update(time::DurationMilliseconds time_delta) {}
 
-		virtual void AfterUdpate() {} // TODO: do we like this idea??
+		virtual void AfterUdpate() {}
 
 		virtual void Cleanup() {}
 

@@ -11,7 +11,7 @@
 
 namespace np::graphics
 {
-	enum class RhiType
+	enum class RhiType : ui32
 	{
 		None,
 		Vulkan,
@@ -22,7 +22,7 @@ namespace np::graphics
 
 	namespace __detail
 	{
-		extern RhiType RegisteredRhiType;
+		extern atm<RhiType> RegisteredRhiType;
 	} // namespace __detail
 } // namespace np::graphics
 

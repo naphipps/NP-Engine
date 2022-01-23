@@ -6,10 +6,7 @@
 
 #include "NP-Engine/Graphics/RPI/RhiType.hpp"
 
-namespace np::graphics
+namespace np::graphics::__detail
 {
-	namespace __detail
-	{
-		RhiType RegisteredRhiType = RhiType::None;
-	} // namespace __detail
-} // namespace np::graphics
+	atm<RhiType> RegisteredRhiType(RhiType::None);
+} // namespace np::graphics::__detail

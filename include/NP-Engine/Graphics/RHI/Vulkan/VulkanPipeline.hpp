@@ -57,13 +57,13 @@ namespace np::graphics::rhi
 		static void WindowResizeCallback(void* pipeline, ui32 width, ui32 height)
 		{
 			((VulkanPipeline*)pipeline)->SetRebuildSwapchain();
-			((VulkanPipeline*)pipeline)->Draw(time::DurationMilliseconds(0));
+			((VulkanPipeline*)pipeline)->Draw();
 		}
 
 		static void WindowPositionCallback(void* pipeline, i32 x, i32 y)
 		{
 			((VulkanPipeline*)pipeline)->SetRebuildSwapchain();
-			((VulkanPipeline*)pipeline)->Draw(time::DurationMilliseconds(0));
+			((VulkanPipeline*)pipeline)->Draw();
 		}
 
 		VkPipelineShaderStageCreateInfo CreatePipelineShaderStageInfo()
@@ -798,7 +798,7 @@ namespace np::graphics::rhi
 			return _fragment_shader;
 		}
 
-		void Draw(time::DurationMilliseconds time_delta)
+		void Draw()
 		{
 			i32 width = 0;
 			i32 height = 0;

@@ -43,7 +43,7 @@ namespace np::window
 		while (!glfwWindowShouldClose(_glfw_window))
 		{
 			concurrency::ThisThread::yield();
-			concurrency::ThisThread::sleep_for(time::Milliseconds(8));
+			concurrency::ThisThread::sleep_for(time::Milliseconds(NP_ENGINE_WINDOW_LOOP_DURATION));
 		}
 
 		_show_procedure_is_complete.store(true, mo_release);

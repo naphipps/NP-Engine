@@ -26,7 +26,7 @@ namespace np::graphics
 
 		virtual void RegisterRhiType() const
 		{
-			__detail::RegisteredRhiType = GetRhiType();
+			__detail::RegisteredRhiType.store(GetRhiType(), mo_release);
 		}
 
 		virtual RhiType GetRhiType() const = 0;
@@ -35,7 +35,7 @@ namespace np::graphics
 
 		virtual void AttachToWindow(window::Window& window) = 0;
 		virtual void DetachFromWindow(window::Window& window) = 0;
-		virtual void Draw(time::DurationMilliseconds time_delta) = 0;
+		virtual void Draw() = 0;
 		virtual void AdjustForWindowResize(window::Window& window) = 0;
 	};
 } // namespace np::graphics
