@@ -7,6 +7,7 @@
 #include "NP-Engine/Math/Math.hpp"
 #include "NP-Engine/String/String.hpp"
 #include "NP-Engine/Serialization/Serialization.hpp"
+#include "NP-Engine/Filesystem/Filesystem.hpp"
 
 #include "NP-Engine/Vendor/JsonInclude.hpp"
 
@@ -174,7 +175,7 @@ namespace np
 			{
 				nlohmann::json json;
 
-				str random32base_path = fs::append(fs::get_parent_path(filepath), "random32base_path");
+				str random32base_path = fs::Append(fs::GetParentPath(filepath), "random32base_path");
 				json["random32base_path"] = random32base_path;
 
 				json["frequency"] = _frequency;
@@ -240,7 +241,7 @@ namespace np
 			 */
 			virtual bl SaveTo(str dirpath) const override
 			{
-				return Perlin::template SaveAs<Perlin>(fs::append(dirpath, AsFilename), this);
+				return Perlin::template SaveAs<Perlin>(fs::Append(dirpath, AsFilename), this);
 			}
 
 			/**
@@ -249,7 +250,7 @@ namespace np
 			 */
 			virtual bl LoadFrom(str dirpath) override
 			{
-				return Perlin::template LoadAs<Perlin>(fs::append(dirpath, AsFilename), this);
+				return Perlin::template LoadAs<Perlin>(fs::Append(dirpath, AsFilename), this);
 			}
 
 			//---------------------------------------------------------------------------

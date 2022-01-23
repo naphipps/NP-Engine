@@ -12,6 +12,7 @@
 #include "NP-Engine/Primitive/Primitive.hpp"
 #include "NP-Engine/Random/Random.hpp"
 #include "NP-Engine/String/String.hpp"
+#include "NP-Engine/Filesystem/Filesystem.hpp"
 
 #include "NP-Engine/Vendor/JsonInclude.hpp"
 
@@ -95,7 +96,7 @@ namespace np
 				for (i32 i = 0; i < PERLIN_DIMENSION_COUNT; i++)
 				{
 					str perlin_dir = perlin_prefix + to_str(i);
-					json[perlin_dir] = fs::append(fs::get_parent_path(filepath), perlin_dir);
+					json[perlin_dir] = fs::Append(fs::GetParentPath(filepath), perlin_dir);
 					_perlin[i].SaveTo(json[perlin_dir]);
 				}
 
@@ -103,7 +104,7 @@ namespace np
 				for (i32 i = 0; i < SIMPLEX_DIMENSION_COUNT; i++)
 				{
 					str simplex_dir = simplex_prefix + to_str(i);
-					json[simplex_dir] = fs::append(fs::get_parent_path(filepath), simplex_dir);
+					json[simplex_dir] = fs::Append(fs::GetParentPath(filepath), simplex_dir);
 					_simplex[i].SaveTo(json[simplex_dir]);
 				}
 
@@ -145,7 +146,7 @@ namespace np
 			 */
 			virtual bl SaveTo(str dirpath) const override
 			{
-				return Turbulence::template SaveAs<Turbulence>(fs::append(dirpath, AsFilename), this);
+				return Turbulence::template SaveAs<Turbulence>(fs::Append(dirpath, AsFilename), this);
 			}
 
 			/**
@@ -154,7 +155,7 @@ namespace np
 			 */
 			virtual bl LoadFrom(str dirpath) override
 			{
-				return Turbulence::template LoadAs<Turbulence>(fs::append(dirpath, AsFilename), this);
+				return Turbulence::template LoadAs<Turbulence>(fs::Append(dirpath, AsFilename), this);
 			}
 
 			/**

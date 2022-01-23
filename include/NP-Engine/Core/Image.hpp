@@ -16,6 +16,7 @@
 #include "NP-Engine/Primitive/Primitive.hpp"
 #include "NP-Engine/Container/Container.hpp"
 #include "NP-Engine/Math/Math.hpp"
+#include "NP-Engine/Filesystem/Filesystem.hpp"
 
 namespace np
 {
@@ -207,7 +208,7 @@ namespace np
 					for (ui32 i = 0; i < _value.size(); i++)
 					{
 						str i_dir = to_str(i);
-						json[i_dir] = fs::append(dirpath, i_dir);
+						json[i_dir] = fs::Append(dirpath, i_dir);
 						_value[i].SaveTo(json[i_dir]);
 					}
 
@@ -260,7 +261,7 @@ namespace np
 			 */
 			virtual bl SaveTo(str dirpath) const override
 			{
-				return Image<T, SIZE>::template SaveAs<Image<T, SIZE>>(fs::append(dirpath, GetFilename()), this);
+				return Image<T, SIZE>::template SaveAs<Image<T, SIZE>>(fs::Append(dirpath, GetFilename()), this);
 			}
 
 			/**
@@ -269,7 +270,7 @@ namespace np
 			 */
 			virtual bl LoadFrom(str dirpath) override
 			{
-				return Image<T, SIZE>::template LoadAs<Image<T, SIZE>>(fs::append(dirpath, GetFilename()), this);
+				return Image<T, SIZE>::template LoadAs<Image<T, SIZE>>(fs::Append(dirpath, GetFilename()), this);
 			}
 		};
 

@@ -6,6 +6,7 @@
 #include "NP-Engine/Random/Random.hpp"
 #include "NP-Engine/Math/Math.hpp"
 #include "NP-Engine/String/String.hpp"
+#include "NP-Engine/Filesystem/Filesystem.hpp"
 
 #include "NP-Engine/Vendor/JsonInclude.hpp"
 
@@ -210,7 +211,7 @@ namespace np
 			{
 				nlohmann::json json;
 
-				str random32base_path = fs::append(fs::get_parent_path(filepath), "random32base_path");
+				str random32base_path = fs::Append(fs::GetParentPath(filepath), "random32base_path");
 				json["random32base_path"] = random32base_path;
 
 				json["frequency"] = _frequency;
@@ -275,7 +276,7 @@ namespace np
 			 */
 			virtual bl SaveTo(str dirpath) const override
 			{
-				return Simplex::template SaveAs<Simplex>(fs::append(dirpath, AsFilename), this);
+				return Simplex::template SaveAs<Simplex>(fs::Append(dirpath, AsFilename), this);
 			}
 
 			/**
@@ -284,7 +285,7 @@ namespace np
 			 */
 			virtual bl LoadFrom(str dirpath) override
 			{
-				return Simplex::template LoadAs<Simplex>(fs::append(dirpath, AsFilename), this);
+				return Simplex::template LoadAs<Simplex>(fs::Append(dirpath, AsFilename), this);
 			}
 
 			//---------------------------------------------------------------------------

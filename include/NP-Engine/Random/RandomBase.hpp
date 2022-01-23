@@ -14,6 +14,7 @@
 #include "NP-Engine/Primitive/Primitive.hpp"
 #include "NP-Engine/Insight/Insight.hpp"
 #include "NP-Engine/Serialization/Serialization.hpp"
+#include "NP-Engine/Filesystem/Filesystem.hpp"
 
 #include "RandomEngine.hpp"
 
@@ -199,7 +200,7 @@ namespace np
 			virtual bl SaveTo(str dirpath) const override
 			{
 				str filename = "Random" + to_str(sizeof(typename T::result_type) * 8) + "base.bin";
-				return RandomBase<T>::template SaveAs<RandomBase<T>>(fs::append(dirpath, filename), this);
+				return RandomBase<T>::template SaveAs<RandomBase<T>>(fs::Append(dirpath, filename), this);
 			}
 
 			/**
@@ -209,7 +210,7 @@ namespace np
 			virtual bl LoadFrom(str dirpath) override
 			{
 				str filename = "Random" + to_str(sizeof(typename T::result_type) * 8) + "base.bin";
-				return RandomBase<T>::template LoadAs<RandomBase<T>>(fs::append(dirpath, filename), this);
+				return RandomBase<T>::template LoadAs<RandomBase<T>>(fs::Append(dirpath, filename), this);
 			}
 
 			/**

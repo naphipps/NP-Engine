@@ -48,7 +48,6 @@ set(NP_ENGINE_EVENT_HPP
 
 set(NP_ENGINE_FILESYSTEM_HPP
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Filesystem/Filesystem.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Filesystem/filesystem_functions.hpp
 )
 
 set(NP_ENGINE_FOUNDATION_HPP

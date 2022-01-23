@@ -35,14 +35,14 @@ namespace np
 			{
 				bl saved = false;
 
-				str parent_path = fs::get_parent_path(filepath);
+				str parent_path = fs::GetParentPath(filepath);
 
 				if (parent_path.size() > 0)
 				{
-					fs::create_directories(parent_path);
+					fs::CreateDirectories(parent_path);
 				}
 
-				if ((parent_path.size() == 0 && filepath.size() > 0) || fs::exists(parent_path))
+				if ((parent_path.size() == 0 && filepath.size() > 0) || fs::Exists(parent_path))
 				{
 					ofstrm os;
 					os.open(filepath);
@@ -63,7 +63,7 @@ namespace np
 			{
 				bl loaded = false;
 
-				if (fs::exists(filepath))
+				if (fs::Exists(filepath))
 				{
 					ifstrm is;
 					is.open(filepath);
@@ -101,14 +101,14 @@ namespace np
 			{
 				bl saved = false;
 
-				str parent_path = fs::get_parent_path(filepath);
+				str parent_path = fs::GetParentPath(filepath);
 
 				if (parent_path.size() > 0)
 				{
-					fs::create_directories(parent_path);
+					fs::CreateDirectories(parent_path);
 				}
 
-				if ((parent_path.size() == 0 && filepath.size() > 0) || fs::exists(parent_path))
+				if ((parent_path.size() == 0 && filepath.size() > 0) || fs::Exists(parent_path))
 				{
 					ofstrm os;
 					os.open(filepath);
@@ -129,7 +129,7 @@ namespace np
 			{
 				bl loaded = false;
 
-				if (fs::exists(filepath))
+				if (fs::Exists(filepath))
 				{
 					ifstrm is;
 					is.open(filepath);

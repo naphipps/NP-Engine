@@ -60,7 +60,7 @@ namespace np
 			/**
 			 private constructor - intentional singleton
 			 */
-			Instrumentor(): Instrumentor(fs::append(fs::get_current_path(), "result.json")) {}
+			Instrumentor(): Instrumentor(fs::Append(fs::GetCurrentPath(), "result.json")) {}
 
 			/**
 			 private constructor - intentional singleton

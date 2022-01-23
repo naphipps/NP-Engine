@@ -12,6 +12,7 @@
 #include "NP-Engine/Serialization/Serialization.hpp"
 #include "NP-Engine/Primitive/Primitive.hpp"
 #include "NP-Engine/Math/Math.hpp"
+#include "NP-Engine/Filesystem/Filesystem.hpp"
 
 #include "DrawableImage.hpp"
 #include "DmsLineSegment.hpp"
@@ -1514,7 +1515,7 @@ namespace np
 			virtual ostrm& Insertion(ostrm& os, str filepath) const override
 			{
 				nlohmann::json json;
-				str ui16_drawable_image_path = fs::append(fs::get_parent_path(filepath), "ui16_drawable_image_path");
+				str ui16_drawable_image_path = fs::Append(fs::get_parent_path(filepath), "ui16_drawable_image_path");
 				json["ui16_drawable_image_path"] = ui16_drawable_image_path;
 
 				os << json; //.dump(NP_JSON_SPACING);
@@ -1543,7 +1544,7 @@ namespace np
 			 */
 			virtual bl SaveTo(str dirpath) const override
 			{
-				return self_type::template SaveAs<self_type>(fs::append(dirpath, GetFilename()), this);
+				return self_type::template SaveAs<self_type>(fs::Append(dirpath, GetFilename()), this);
 			}
 
 			/**
@@ -1552,7 +1553,7 @@ namespace np
 			 */
 			virtual bl LoadFrom(str dirpath) override
 			{
-				return self_type::template LoadAs<self_type>(fs::append(dirpath, GetFilename()), this);
+				return self_type::template LoadAs<self_type>(fs::Append(dirpath, GetFilename()), this);
 			}
 		};
 

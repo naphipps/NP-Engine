@@ -34,21 +34,21 @@ namespace np::system
 	static inline ::std::string GetDefaultWorkingDir()
 	{
 #if NP_ENGINE_PLATFORM_IS_APPLE
-		return fs::append(GetEnv("HOME"), fs::append("Library", "NP-Engine"));
+		return fs::Append(fs::Append(GetEnv("HOME"), "Library"), "NP-Engine");
 
 #elif NP_ENGINE_PLATFORM_IS_LINUX
-		return fs::append(GetEnv("HOME"), ".NP-Engine");
+		return fs::Append(GetEnv("HOME"), ".NP-Engine");
 
 #elif NP_ENGINE_PLATFORM_IS_WINDOWS
-		return fs::append(GetEnv("ALLUSERSPROFILE"), "NP-Engine");
+		return fs::Append(GetEnv("ALLUSERSPROFILE"), "NP-Engine");
 #endif
 	}
 
 	static inline void Init()
 	{
 		::std::string working_dir = GetDefaultWorkingDir();
-		fs::create_directories(working_dir);
-		fs::set_current_path(working_dir);
+		fs::CreateDirectories(working_dir);
+		fs::SetCurrentPath(working_dir);
 	}
 
 	using TerminateHandler = ::std::terminate_handler;

@@ -85,7 +85,7 @@ namespace np
 			*/
 			static inline ::std::string GetFileLoggerFilePath()
 			{
-				return fs::append(fs::get_current_path(), "NP-Engine-Log.log");
+				return fs::Append(fs::GetCurrentPath(), "NP-Engine-Log.log");
 			}
 
 			/**

@@ -13,6 +13,7 @@
 #include "NP-Engine/Container/Container.hpp"
 #include "NP-Engine/Math/Math.hpp"
 #include "NP-Engine/Serialization/Serialization.hpp"
+#include "NP-Engine/Filesystem/Filesystem.hpp"
 
 #include "Image.hpp"
 
@@ -473,7 +474,7 @@ namespace np
 				json["aabb"]["UpperRight"].push_back(_aabb.UpperRight.x);
 				json["aabb"]["UpperRight"].push_back(_aabb.UpperRight.y);
 
-				json[BaseImageDir] = fs::append(fs::get_parent_path(filepath), BaseImageDir);
+				json[BaseImageDir] = fs::Append(fs::get_parent_path(filepath), BaseImageDir);
 
 				os << json.dump(NP_JSON_SPACING);
 				base::SaveTo(json[BaseImageDir]);
@@ -509,7 +510,7 @@ namespace np
 			 */
 			virtual bl SaveTo(str dirpath) const override
 			{
-				return DrawableImage<T, SIZE>::template SaveAs<DrawableImage<T, SIZE>>(fs::append(dirpath, GetFilename()),
+				return DrawableImage<T, SIZE>::template SaveAs<DrawableImage<T, SIZE>>(fs::Append(dirpath, GetFilename()),
 																					   this);
 			}
 
@@ -519,7 +520,7 @@ namespace np
 			 */
 			virtual bl LoadFrom(str dirpath) override
 			{
-				return DrawableImage<T, SIZE>::template LoadAs<DrawableImage<T, SIZE>>(fs::append(dirpath, GetFilename()),
+				return DrawableImage<T, SIZE>::template LoadAs<DrawableImage<T, SIZE>>(fs::Append(dirpath, GetFilename()),
 																					   this);
 			}
 		};
