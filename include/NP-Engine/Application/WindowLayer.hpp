@@ -89,12 +89,10 @@ namespace np::app
 				}
 			}
 
-			//#if !NP_ENGINE_PLATFORM_IS_APPLE //TODO: ?
 			if (_windows.size() == 0)
 			{
 				_event_submitter.Emplace<ApplicationCloseEvent>();
 			}
-			//#endif
 		}
 
 		virtual event::EventCategory GetHandledCategories() const override
