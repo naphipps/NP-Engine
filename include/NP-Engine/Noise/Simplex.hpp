@@ -5,8 +5,9 @@
 #include "NP-Engine/Primitive/Primitive.hpp"
 #include "NP-Engine/Random/Random.hpp"
 #include "NP-Engine/Math/Math.hpp"
-#include "NP-Engine/JSON/JSON.hpp"
 #include "NP-Engine/String/String.hpp"
+
+#include "NP-Engine/Vendor/JsonInclude.hpp"
 
 namespace np
 {
@@ -230,7 +231,7 @@ namespace np
 					json["permutation"].push_back(_permutation[i]);
 				}
 
-				os << json.dump(NP_JSON_SPACING);
+				os << json.dump(NP_ENGINE_JSON_SPACING);
 				random::Random32Base::SaveTo(random32base_path);
 
 				return os;
