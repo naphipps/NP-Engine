@@ -4,9 +4,9 @@
 //
 //##===----------------------------------------------------------------------===##//
 
-#ifndef NP_ENGINE_VENDOR_CONCURRENTQUEUE_HPP
-#define NP_ENGINE_VENDOR_CONCURRENTQUEUE_HPP
+#ifndef NP_ENGINE_VENDOR_CONCURRENTQUEUE_INCLUDE_HPP
+#define NP_ENGINE_VENDOR_CONCURRENTQUEUE_INCLUDE_HPP
 
 #include <concurrentqueue.h>
 
-#endif /* NP_ENGINE_VENDOR_CONCURRENTQUEUE_HPP */
+#endif /* NP_ENGINE_VENDOR_CONCURRENTQUEUE_INCLUDE_HPP */

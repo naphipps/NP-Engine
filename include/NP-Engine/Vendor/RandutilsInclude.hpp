@@ -4,9 +4,9 @@
 //
 //##===----------------------------------------------------------------------===##//
 
-#ifndef NP_ENGINE_VENDOR_RANDUTILS_HPP
-#define NP_ENGINE_VENDOR_RANDUTILS_HPP
+#ifndef NP_ENGINE_VENDOR_RANDUTILS_INCLUDE_HPP
+#define NP_ENGINE_VENDOR_RANDUTILS_INCLUDE_HPP
 
 #include <randutils.hpp>
 
-#endif /* NP_ENGINE_VENDOR_RANDUTILS_HPP */
+#endif /* NP_ENGINE_VENDOR_RANDUTILS_INCLUDE_HPP */
