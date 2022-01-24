@@ -19,13 +19,11 @@
 #include "NP-Engine/Primitive/Primitive.hpp"
 #include "NP-Engine/Insight/Insight.hpp"
 
-// TODO: add summary comments
-
 namespace np::system
 {
-	/**
-	 gets the value of the given env variable
-	*/
+	using TerminateHandler = ::std::terminate_handler;
+	typedef void (*SignalHandler)(i32 signal);
+
 	static inline ::std::string GetEnv(::std::string variable)
 	{
 		return ::std::getenv(variable.c_str());
@@ -51,9 +49,6 @@ namespace np::system
 		fs::SetCurrentPath(working_dir);
 	}
 
-	using TerminateHandler = ::std::terminate_handler;
-	typedef void (*SignalHandler)(i32 signal);
-
 	static inline void SetTerminateHandler(TerminateHandler handler)
 	{
 		::std::set_terminate(handler);
@@ -75,4 +70,4 @@ namespace np::system
 	}
 } // namespace np::system
 
-#endif /*NP_ENGINE_SYSTEM_HPP*/
+#endif /* NP_ENGINE_SYSTEM_HPP */
