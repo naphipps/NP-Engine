@@ -107,9 +107,11 @@ set(NP_ENGINE_INSIGHT_HPP
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Insight/Assert.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Insight/Insight.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Insight/Instrumentor.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Insight/InstrumentorTimer.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Insight/Log.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Insight/ScopedTimer.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Insight/Timer.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Insight/TraceEvent.hpp
 )
 
 set(NP_ENGINE_JOBSYSTEM_HPP
@@ -237,7 +239,7 @@ set(NP_ENGINE_VENDOR_HPP
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Vendor/JsonInclude.hpp
 	#${PROJECT_SOURCE_DIR}/include/NP-Engine/Vendor/PcgCppInclude.hpp
 	#${PROJECT_SOURCE_DIR}/include/NP-Engine/Vendor/RandutilsInclude.hpp
-	#${PROJECT_SOURCE_DIR}/include/NP-Engine/Vendor/SpdlogInclude.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Vendor/SpdlogInclude.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Vendor/VulkanInclude.hpp
 )
 

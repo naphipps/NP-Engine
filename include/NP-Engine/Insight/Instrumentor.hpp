@@ -1,16 +1,13 @@
+//##===----------------------------------------------------------------------===##//
 //
-//  Instrumentor.hpp
-//  Project Space
+//  Author: Nathan Phipps 5/19/20
 //
-//  Created by Nathan Phipps on 5/19/20.
-//  Copyright © 2020 Nathan Phipps. All rights reserved.
-//
+//##===----------------------------------------------------------------------===##//
 
 #ifndef NP_ENGINE_INSTRUMENTOR_HPP
 #define NP_ENGINE_INSTRUMENTOR_HPP
 
 #include <fstream>
-#include <mutex>
 #include <thread>
 #include <sstream>
 #include <string>
@@ -22,209 +19,119 @@
 
 #include "NP-Engine/Vendor/JsonInclude.hpp"
 
+#include "TraceEvent.hpp"
 #include "Timer.hpp"
-#include "ScopedTimer.hpp"
 
-namespace np
+namespace np::insight
 {
-	namespace insight
+	class Instrumentor
 	{
-		/**
-		 trace_event will be used by the Instrumentor to store event details that we want to trace
-		 */
-		struct TraceEvent
+	private:
+		static const ::std::string OtherData;
+		static const ::std::string TraceEvents;
+		static Instrumentor _instance;
+
+		nlohmann::json _json;
+		::std::string _filepath;
+		Timer _trace_timer;
+		Mutex _mutex;
+
+		Instrumentor(): Instrumentor(fs::Append(fs::GetCurrentPath(), "result.json")) {}
+
+		Instrumentor(::std::string filepath): _filepath(filepath)
 		{
-			::std::string Name;
-			time::SteadyTimestamp StartTimestamp;
-			time::DurationMicroseconds ElapsedMicroseconds;
-			time::DurationMilliseconds ElapsedMilliseconds;
-			::std::thread::id ThreadId;
-		};
+			_json[OtherData] = nlohmann::json::object();
+			_json[TraceEvents] = nlohmann::json::array();
+			_trace_timer.Stop();
+		}
 
-		/**
-		 Instrumentor will keep track of all given trace_events and save them to our given filepath during every trace event add
-		 and deconstruction we will save the trace events in a json file
-		 */
-		class Instrumentor
+		void InternalSave()
 		{
-		private:
-			static const ::std::string OtherData;
-			static const ::std::string TraceEvents;
-			static Instrumentor _instance;
-
-			nlohmann::json _json;
-			::std::string _filepath;
-			Timer _trace_timer;
-			::std::mutex _mutex;
-
-			/**
-			 private constructor - intentional singleton
-			 */
-			Instrumentor(): Instrumentor(fs::Append(fs::GetCurrentPath(), "result.json")) {}
-
-			/**
-			 private constructor - intentional singleton
-			 */
-			Instrumentor(::std::string filepath): _filepath(filepath)
+			if (_filepath.size() > 0)
 			{
-				_json[OtherData] = nlohmann::json::object();
-				_json[TraceEvents] = nlohmann::json::array();
-				_trace_timer.Stop();
-			}
+				ofstrm out_stream;
+				out_stream.open(_filepath);
 
-			/**
-			 saves the json file to our filepath
-			 */
-			void InternalSave()
-			{
-				if (_filepath.size() > 0)
+				if (out_stream.is_open())
 				{
-					ofstrm out_stream;
-					out_stream.open(_filepath);
-
-					if (out_stream.is_open())
-					{
-						out_stream << _json;
-						out_stream.flush();
-						out_stream.close();
-					}
+					out_stream << _json;
+					out_stream.flush();
+					out_stream.close();
 				}
 			}
+		}
 
-		public:
-			/**
-			 singleton getter for the static instance
-			 */
-			static Instrumentor& Get()
+	public:
+		static Instrumentor& Get()
+		{
+			return _instance;
+		}
+
+		~Instrumentor()
+		{
+			Save();
+		}
+
+		void Save(const ::std::string filepath = "")
+		{
+			Lock lock(_mutex);
+
+			if (filepath.size() > 0)
 			{
-				return _instance;
+				SetFilepath(filepath);
 			}
 
-			/**
-			 deconstructor
-			 */
-			~Instrumentor()
-			{
-				Save();
-			}
+			InternalSave();
+		}
 
-			/**
-			 saves the json file to the filepath we already have or the given one if specified
-			 */
-			void Save(const ::std::string filepath = "")
-			{
-				::std::lock_guard<::std::mutex> lock(_mutex); // TODO: update this
+		void SetFilepath(const ::std::string filepath)
+		{
+			_filepath = filepath;
+		}
 
-				if (filepath.size() > 0)
-				{
-					SetFilepath(filepath);
-				}
+		::std::string GetFilepath()
+		{
+			return _filepath;
+		}
 
-				InternalSave();
-			}
+		void AddTraceEvent(TraceEvent& event, bl save = false)
+		{
+			Lock lock(_mutex);
 
-			/**
-			 sets the filepath of the json file we will save
-			 */
-			void SetFilepath(const ::std::string filepath)
-			{
-				_filepath = filepath;
-			}
+			::std::stringstream ss;
+			nlohmann::json trace;
 
-			/**
-			 gets the filepath of the json file we will save
-			 */
-			::std::string GetFilepath()
-			{
-				return _filepath;
-			}
+			trace["cat"] = "function";
+			trace["dur"] = event.ElapsedMicroseconds.count();
+			trace["name"] = event.Name;
+			trace["ph"] = "X";
+			trace["pid"] = "0";
+			ss << event.ThreadId;
+			trace["tid"] = ss.str();
+			ss.str(""); // clear ss
+			trace["ts"] = time::DurationMicroseconds(event.StartTimestamp.time_since_epoch()).count();
 
-			/**
-			 adds the given trace event to our json file
-			 */
-			void AddTraceEvent(TraceEvent& event, bl save = false)
-			{
-				::std::lock_guard<::std::mutex> lock(_mutex);
-
-				::std::stringstream ss;
-				nlohmann::json trace;
-
-				trace["cat"] = "function";
-				trace["dur"] = event.ElapsedMicroseconds.count();
-				trace["name"] = event.Name;
-				trace["ph"] = "X";
-				trace["pid"] = "0";
-				ss << event.ThreadId;
-				trace["tid"] = ss.str();
-				ss.str(""); // clear ss
-				trace["ts"] = time::DurationMicroseconds(event.StartTimestamp.time_since_epoch()).count();
-
-				_json[TraceEvents].push_back(trace);
+			_json[TraceEvents].push_back(trace);
 
 #ifndef NP_PROFILE_FORCE_SAVE_ON_TRACE_ADD
-				if (save)
+			if (save)
 #endif
-				{
-					InternalSave();
-				}
-			}
-		};
-
-		/**
-		 InstrumentorTimer is a scoped timer that profiles our code by submitting a traced event to the Instrumentor upon
-		 deconstruction
-		 */
-		class InstrumentorTimer : public ScopedTimer
-		{
-		private:
-			/**
-			 the instrumentor timer action
-			 this collects the trace event context from given timer and current thread then adds the trace event to the
-			 Instrumentor
-			 */
-			static void AddTraceEventAction(ScopedTimer& timer)
 			{
-				TraceEvent event;
-				event.Name = timer.GetName();
-				event.ElapsedMilliseconds = timer.GetElapsedMilliseconds();
-				event.ElapsedMicroseconds = timer.GetElapsedMicroseconds();
-				event.StartTimestamp = timer.GetStartTimestamp();
-				event.ThreadId = ::std::this_thread::get_id();
-				np::insight::Instrumentor::Get().AddTraceEvent(event);
+				InternalSave();
 			}
-
-		public:
-			/**
-			 constructor
-			 */
-			InstrumentorTimer(::std::string name): ScopedTimer(name, AddTraceEventAction) {}
-
-			/**
-			 deconstructor
-			 */
-			~InstrumentorTimer() {}
-		};
-	} // namespace insight
-} // namespace np
+		}
+	};
+} // namespace np::insight
 
 // check if NP_PROFILE_ENABLE is defined
 #ifndef NP_PROFILE_ENABLE
 	#define NP_PROFILE_ENABLE 0
 #endif
 
-// set our Instrumentor-based macros
 #if NP_PROFILE_ENABLE
-
-	#define NP_PROFILE_SCOPE(name) ::np::insight::InstrumentorTimer timer##__LINE__(name)
-	#define NP_PROFILE_FUNCTION() NP_PROFILE_SCOPE(NP_FUNCTION)
 	#define NP_PROFILE_SAVE() ::np::insight::Instrumentor::Get().Save();
-
 #else
-
-	#define NP_PROFILE_SCOPE(name)
-	#define NP_PROFILE_FUNCTION()
 	#define NP_PROFILE_SAVE()
-
 #endif // NP_PROFILE_ENABLE
 
 #endif /* NP_ENGINE_INSTRUMENTOR_HPP */

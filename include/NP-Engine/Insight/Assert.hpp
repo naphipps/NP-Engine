@@ -1,10 +1,8 @@
+//##===----------------------------------------------------------------------===##//
 //
-//  Assert.hpp
-//  Project Space
+//  Author: Nathan Phipps 5/21/20
 //
-//  Created by Nathan Phipps on 5/21/20.
-//  Copyright © 2020 Nathan Phipps. All rights reserved.
-//
+//##===----------------------------------------------------------------------===##//
 
 #ifndef NP_ENGINE_ASSERT_HPP
 #define NP_ENGINE_ASSERT_HPP
@@ -17,24 +15,17 @@
 
 #include "Log.hpp"
 
-namespace np
+namespace np::insight
 {
-	namespace insight
+	static void Assert(bl expression, ::std::string message)
 	{
-		/**
-		 this static assert method will be used as our assert function
-		 this forces a log to file and console
-		 */
-		static void Assert(bl expression, ::std::string message)
+		if (!expression)
 		{
-			if (!expression)
-			{
-				Log::GetLogger()->error(message);
-				assert(expression); // will always fail
-			}
+			Log::GetLogger()->error(message);
+			assert(false);
 		}
-	} // namespace insight
-} // namespace np
+	}
+} // namespace np::insight
 
 #ifndef NP_ASSERT_ENABLE
 	#define NP_ASSERT_ENABLE 0

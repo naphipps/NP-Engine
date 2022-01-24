@@ -1,10 +1,8 @@
+//##===----------------------------------------------------------------------===##//
 //
-//  Insight.hpp
-//  Project Space
+//  Author: Nathan Phipps 5/19/20
 //
-//  Created by Nathan Phipps on 5/19/20.
-//  Copyright © 2020 Nathan Phipps. All rights reserved.
-//
+//##===----------------------------------------------------------------------===##//
 
 #ifndef NP_ENGINE_INSIGHT_HPP
 #define NP_ENGINE_INSIGHT_HPP
@@ -15,5 +13,7 @@
 #include "ScopedTimer.hpp"
 #include "Timer.hpp"
 #include "Assert.hpp"
+#include "InstrumentorTimer.hpp"
+#include "TraceEvent.hpp"
 
 #endif /* NP_ENGINE_INSIGHT_HPP */

@@ -1,10 +1,8 @@
+//##===----------------------------------------------------------------------===##//
 //
-//  Timer.hpp
-//  Project Space
+//  Author: Nathan Phipps 5/19/20
 //
-//  Created by Nathan Phipps on 5/19/20.
-//  Copyright © 2020 Nathan Phipps. All rights reserved.
-//
+//##===----------------------------------------------------------------------===##//
 
 #ifndef NP_ENGINE_TIMER_HPP
 #define NP_ENGINE_TIMER_HPP
@@ -14,107 +12,66 @@
 #include "NP-Engine/Primitive/Primitive.hpp"
 #include "NP-Engine/Time/Time.hpp"
 
-namespace np
+namespace np::insight
 {
-	namespace insight
+	class Timer
 	{
-		/**
-		 timer class is our standard timer that collects the start time upon construction, and end time on Stop()
-		 */
-		class Timer
+	protected:
+		::std::string _name;
+		time::SteadyTimestamp _start_timestamp;
+		time::SteadyTimestamp _end_timestamp;
+
+	public:
+		Timer(::std::string name = ""): _start_timestamp(time::SteadyClock::now()), _name(name)
 		{
-		protected:
-			::std::string _name;
-			time::SteadyTimestamp _start_timestamp;
-			time::SteadyTimestamp _end_timestamp;
+			_end_timestamp = _start_timestamp;
+		}
 
-		public:
-			/**
-			 constructor
-			 */
-			Timer(::std::string name = ""): _start_timestamp(time::SteadyClock::now()), _name(name)
-			{
-				_end_timestamp = _start_timestamp;
-			}
+		virtual void Restart()
+		{
+			_start_timestamp = time::SteadyClock::now();
+			_end_timestamp = _start_timestamp;
+		}
 
-			/**
-			 deconstructor
-			 */
-			virtual ~Timer() {}
+		virtual void Stop()
+		{
+			_end_timestamp = time::SteadyClock::now();
+		}
 
-			/**
-			 restarts the timer
-			 */
-			virtual void Restart()
-			{
-				_start_timestamp = time::SteadyClock::now();
-				_end_timestamp = _start_timestamp;
-			}
+		time::SteadyTimestamp GetStartTimestamp()
+		{
+			return _start_timestamp;
+		}
 
-			/**
-			 stops the timer
-			 */
-			virtual void Stop()
-			{
-				_end_timestamp = time::SteadyClock::now();
-			}
+		time::SteadyTimestamp GetEndTimestamp()
+		{
+			return _end_timestamp;
+		}
 
-			/**
-			 gets the start time point
-			 */
-			time::SteadyTimestamp GetStartTimestamp()
-			{
-				return _start_timestamp;
-			}
+		void SetName(::std::string name)
+		{
+			_name = name;
+		}
 
-			/**
-			 gets the end time point
-			 this will equal the start time point until the timer has stopped
-			 */
-			time::SteadyTimestamp GetEndTimestamp()
-			{
-				return _end_timestamp;
-			}
+		::std::string GetName()
+		{
+			return _name;
+		}
 
-			/**
-			 sets the name of this timer
-			 */
-			void SetName(::std::string name)
-			{
-				_name = name;
-			}
+		time::DurationMilliseconds GetElapsedMilliseconds()
+		{
+			time::DurationMilliseconds start(_start_timestamp.time_since_epoch());
+			time::DurationMilliseconds end(_end_timestamp.time_since_epoch());
+			return end - start;
+		}
 
-			/**
-			 gets the name of this timer
-			 */
-			::std::string GetName()
-			{
-				return _name;
-			}
-
-			/**
-			 get the milliseconds duration that this time has elapsed
-			 this will be zero until the timer has been stopped
-			 */
-			time::DurationMilliseconds GetElapsedMilliseconds()
-			{
-				time::DurationMilliseconds start(_start_timestamp.time_since_epoch());
-				time::DurationMilliseconds end(_end_timestamp.time_since_epoch());
-				return end - start;
-			}
-
-			/**
-			 get the microseconds duration that this time has elapsed
-			 this will be zero until the timer has been stopped
-			 */
-			time::DurationMicroseconds GetElapsedMicroseconds()
-			{
-				time::DurationMicroseconds start(_start_timestamp.time_since_epoch());
-				time::DurationMicroseconds end(_end_timestamp.time_since_epoch());
-				return end - start;
-			}
-		};
-	} // namespace insight
-} // namespace np
+		time::DurationMicroseconds GetElapsedMicroseconds()
+		{
+			time::DurationMicroseconds start(_start_timestamp.time_since_epoch());
+			time::DurationMicroseconds end(_end_timestamp.time_since_epoch());
+			return end - start;
+		}
+	};
+} // namespace np::insight
 
 #endif /* NP_ENGINE_TIMER_HPP */
