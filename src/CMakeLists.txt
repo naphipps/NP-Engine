@@ -364,6 +364,10 @@ set(NP_ENGINE_PHYSICS_CPP
 	Physics/Physics.cpp
 )
 
+set(NP_ENGINE_RANDOM_CPP
+	Random/RandomEngine.cpp
+)
+
 set(NP_ENGINE_WINDOW_CPP
 	Window/Window.cpp
 )
@@ -375,6 +379,7 @@ set(NP_ENGINE_SOURCE_FILES
 	${NP_ENGINE_MEMORY_CPP}
 	${NP_ENGINE_NP_ENGINE_MAIN_CPP}
 	${NP_ENGINE_PHYSICS_CPP}
+	${NP_ENGINE_RANDOM_CPP}
 	${NP_ENGINE_WINDOW_CPP}
 	${NP_ENGINE_GRAPHICS_RPI_CPP}
 	${NP_ENGINE_GRAPHICS_OPENGL_CPP}
@@ -505,7 +510,7 @@ source_group(NP-Engine-main FILES ${NP_ENGINE_NP_ENGINE_MAIN_CPP})
 source_group(Physics FILES ${NP_ENGINE_PHYSICS_HPP} ${NP_ENGINE_PHYSICS_CPP})
 source_group(Platform FILES ${NP_ENGINE_PLATFORM_HPP})
 source_group(Primitive FILES ${NP_ENGINE_PRIMITIVE_HPP})
-source_group(Random FILES ${NP_ENGINE_RANDOM_HPP})
+source_group(Random FILES ${NP_ENGINE_RANDOM_HPP} ${NP_ENGINE_RANDOM_CPP})
 source_group(Serialization FILES ${NP_ENGINE_SERIALIZATION_HPP})
 source_group(String FILES ${NP_ENGINE_STRING_HPP})
 source_group(System FILES ${NP_ENGINE_SYSTEM_HPP})

@@ -236,10 +236,13 @@ namespace np::random
 		}
 	};
 
-	typedef RandomEngine<::pcg32> Random32;
-	typedef RandomEngine<::pcg64> Random64;
-	typedef Random32::SeedType Random32seed;
-	typedef Random64::SeedType Random64seed;
+	using Random32 = RandomEngine<::pcg32>;
+	using Random64 = RandomEngine<::pcg64>;
+	using Random32Seed = Random32::SeedType;
+	using Random64Seed = Random64::SeedType;
+
+	extern Random32 DefaultRandom32;
+	extern Random64 DefaultRandom64;
 } // namespace np::random
 
 #endif /* NP_ENGINE_RANDOM_ENGINE_HPP */
