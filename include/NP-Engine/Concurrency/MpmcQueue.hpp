@@ -7,9 +7,9 @@
 #ifndef NP_ENGINE_MPMC_QUEUE_HPP
 #define NP_ENGINE_MPMC_QUEUE_HPP
 
-#include <concurrentqueue.h>
-
 #include "NP-Engine/Memory/Memory.hpp"
+
+#include "NP-Engine/Vendor/ConcurrentqueueInclude.hpp"
 
 namespace np::concurrency
 {
