@@ -121,7 +121,7 @@ namespace np::js
 
 		void WorkerThreadProcedure()
 		{
-			NP_PROFILE_SCOPE("WorkerThreadProcedure: " + (ui64)this);
+			NP_PROFILE_SCOPE("WorkerThreadProcedure: " + to_str((ui64)this));
 
 			_work_procedure_incomplete.store(true, mo_release);
 
