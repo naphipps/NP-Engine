@@ -1,10 +1,8 @@
+//##===----------------------------------------------------------------------===##//
 //
-//  Memory.hpp
-//  Project Space
+//  Author: Nathan Phipps 2/7/21
 //
-//  Created by Nathan Phipps on 2/7/21.
-//  Copyright © 2021 Nathan Phipps. All rights reserved.
-//
+//##===----------------------------------------------------------------------===##//
 
 #ifndef NP_ENGINE_MEMORY_HPP
 #define NP_ENGINE_MEMORY_HPP
@@ -14,23 +12,23 @@
 #include "Allocator.hpp"
 #include "Block.hpp"
 #include "CAllocator.hpp"
-#include "SizedAllocator.hpp"
-#include "LinearAllocator.hpp"
-#include "PoolAllocator.hpp"
-#include "ObjectPool.hpp"
-#include "Margin.hpp"
-#include "ImplicitListAllocator.hpp"
+#include "Delegate.hpp"
 #include "ExplicitListAllocator.hpp"
 #include "ExplicitSegListAllocator.hpp"
-#include "RedBlackTreeAllocator.hpp"
-#include "LockingPoolAllocator.hpp"
 #include "FallbackAllocator.hpp"
-#include "SegregatedAllocator.hpp"
+#include "ImplicitListAllocator.hpp"
+#include "LinearAllocator.hpp"
+#include "LockingPoolAllocator.hpp"
+#include "Margin.hpp"
 #include "MemoryFunctions.hpp"
-#include "TraitAllocator.hpp"
-#include "StdAllocator.hpp"
+#include "ObjectPool.hpp"
 #include "PadObject.hpp"
-#include "Delegate.hpp"
+#include "PoolAllocator.hpp"
+#include "RedBlackTreeAllocator.hpp"
+#include "SegregatedAllocator.hpp"
+#include "SizedAllocator.hpp"
 #include "SmartPtr.hpp"
+#include "StdAllocator.hpp"
+#include "TraitAllocator.hpp"
 
 #endif /* NP_ENGINE_MEMORY_HPP */

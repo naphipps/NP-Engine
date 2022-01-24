@@ -1,74 +1,49 @@
+//##===----------------------------------------------------------------------===##//
 //
-//  Margin.hpp
-//  NP-Engine
+//  Author: Nathan Phipps 3/2/21
 //
-//  Created by Nathan Phipps on 3/2/21.
-//
+//##===----------------------------------------------------------------------===##//
 
 #ifndef NP_ENGINE_MARGIN_HPP
 #define NP_ENGINE_MARGIN_HPP
 
 #include "NP-Engine/Primitive/Primitive.hpp"
 
-namespace np
+namespace np::memory::__detail
 {
-	namespace memory
+	struct Margin
 	{
-		namespace __detail
+		siz Value = 0;
+
+		bl IsAllocated() const
 		{
-			/**
-			 represents the margins we use as our header and footers for allocations
-			 */
-			struct Margin
-			{
-				siz Value = 0;
+			return Value & 1;
+		}
 
-				/**
-				 checks if this margin is allocated or not
-				 */
-				bl IsAllocated() const
-				{
-					return Value & 1;
-				}
+		siz GetSize() const
+		{
+			return (Value >> 1) << 1;
+		}
 
-				/**
-				 gets the size of the allocation
-				 */
-				siz GetSize() const
-				{
-					return (Value >> 1) << 1;
-				}
+		void SetSize(siz size)
+		{
+			Value = IsAllocated() ? size & 1 : size;
+		}
 
-				/**
-				 sets the size of the margin and maintains the allocation bit
-				 */
-				void SetSize(siz size)
-				{
-					Value = IsAllocated() ? size & 1 : size;
-				}
+		void SetAllocated()
+		{
+			Value |= 1;
+		}
 
-				/**
-				 sets the bit indicating this margin as allocated
-				 */
-				void SetAllocated()
-				{
-					Value |= 1;
-				}
+		void SetDeallocated()
+		{
+			Value = GetSize();
+		}
+	};
 
-				/**
-				 clears the bit indicating this margin as allocated
-				 */
-				void SetDeallocated()
-				{
-					Value = GetSize();
-				}
-			};
+	using MarginPtr = Margin*;
 
-			using MarginPtr = Margin*;
-
-			const static siz MARGIN_ALIGNED_SIZE = CalcAlignedSize(sizeof(Margin));
-		} // namespace __detail
-	} // namespace memory
-} // namespace np
+	const static siz MARGIN_ALIGNED_SIZE = CalcAlignedSize(sizeof(Margin));
+} // namespace np::memory::__detail
 
 #endif /* NP_ENGINE_MARGIN_HPP */

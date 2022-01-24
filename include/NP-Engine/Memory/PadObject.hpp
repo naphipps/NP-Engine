@@ -7,10 +7,10 @@
 #ifndef NP_ENGINE_PAD_OBJECT_HPP
 #define NP_ENGINE_PAD_OBJECT_HPP
 
+#include <string>
+
 #include "NP-Engine/Primitive/Primitive.hpp"
 #include "NP-Engine/Insight/Insight.hpp"
-
-#include <string>
 
 namespace np::memory
 {
@@ -22,9 +22,6 @@ namespace np::memory
 	protected:
 		CacheLinePadding _padding;
 
-		/*
-			copies padding from other
-		*/
 		void CopyFrom(const PadObject& other)
 		{
 			for (siz i = 0; i < CACHE_LINE_SIZE; i++)
@@ -44,19 +41,11 @@ namespace np::memory
 			CopyFrom(other);
 		}
 
-		/*
-			move behaves like copy
-		*/
 		PadObject(PadObject&& other)
 		{
 			CopyFrom(other);
 		}
 
-		virtual ~PadObject(){};
-
-		/*
-			assigns the given value or struct into the padding
-		*/
 		template <typename T>
 		void AssignData(const T& object)
 		{
@@ -68,35 +57,23 @@ namespace np::memory
 			_padding[0] = 1;
 		}
 
-		/*
-			retrieves the value or struct from the padding
-		*/
 		template <typename T>
 		const T& RetrieveData() const
 		{
 			return *(T*)(&_padding[1]);
 		}
 
-		/*
-			retrieves the value or struct from the padding
-		*/
 		template <typename T>
 		T& RetrieveData()
 		{
 			return *(T*)(&_padding[1]);
 		}
 
-		/*
-			indicates if our padding is dirty aka we have data stored there
-		*/
 		bl IsDirty() const
 		{
 			return _padding[0] != 0;
 		}
 
-		/*
-			zeroizes our padding
-		*/
 		void Clear()
 		{
 			for (siz i = 0; i < CACHE_LINE_SIZE; i++)
@@ -111,9 +88,6 @@ namespace np::memory
 			return *this;
 		}
 
-		/*
-			move assignment - behaves like copy
-		*/
 		PadObject& operator=(PadObject&& other)
 		{
 			CopyFrom(other);

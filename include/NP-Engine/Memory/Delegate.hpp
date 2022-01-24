@@ -38,9 +38,6 @@ namespace np::memory
 			return (static_cast<C*>(instance)->*Function)(delegate);
 		}
 
-		/*
-			copies from the given other Delegate
-		*/
 		inline void CopyFrom(const Delegate& other)
 		{
 			PadObject::CopyFrom(other);
@@ -56,15 +53,10 @@ namespace np::memory
 			CopyFrom(other);
 		}
 
-		/*
-			move constructor acts like copy
-		*/
 		Delegate(Delegate&& other)
 		{
 			CopyFrom(other);
 		}
-
-		virtual ~Delegate() {}
 
 		/*
 			connects a static function to our function pointer
@@ -86,9 +78,6 @@ namespace np::memory
 			_function_ptr = &wrap<C, Method>;
 		}
 
-		/*
-			invokes our function if valid
-		*/
 		inline void InvokeConnectedFunction()
 		{
 			if (IsConnected())
@@ -97,31 +86,16 @@ namespace np::memory
 			}
 		}
 
-		/*
-			checks if our function pointer is nullptr or not
-		*/
 		bl IsConnected() const
 		{
 			return _function_ptr != nullptr;
 		}
 
-		/*
-			disconnects our instance and function pointers by setting them to nullptr
-		*/
 		inline void DisconnectFunction()
 		{
 			_instance_ptr = nullptr;
 			_function_ptr = nullptr;
 		}
-
-		/*
-			call operator calls our invoke method
-		*
-		inline void operator()()
-		{
-			Invoke();
-		}
-		*/
 
 		inline Delegate& operator=(const Delegate& other)
 		{
@@ -129,9 +103,6 @@ namespace np::memory
 			return *this;
 		}
 
-		/*
-			move assignment - act like copy assignment
-		*/
 		Delegate& operator=(Delegate&& other)
 		{
 			CopyFrom(other);

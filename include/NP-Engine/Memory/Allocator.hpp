@@ -1,9 +1,8 @@
+//##===----------------------------------------------------------------------===##//
 //
-//  Allocator.hpp
-//  NP-Engine
+//  Author: Nathan Phipps 2/16/21
 //
-//  Created by Nathan Phipps on 2/16/21.
-//
+//##===----------------------------------------------------------------------===##//
 
 #ifndef NP_ENGINE_ALLOCATOR_HPP
 #define NP_ENGINE_ALLOCATOR_HPP
@@ -14,137 +13,102 @@
 
 #include "Block.hpp"
 
-namespace np
+namespace np::memory
 {
-	namespace memory
+	/*
+		constructs the given type using the given args inside given block
+	*/
+	template <typename T, typename... Args>
+	constexpr bl Construct(const Block& block, Args&&... args)
 	{
-		/**
-		 constructs the given type using the given args
-		 */
-		template <typename T, typename... Args>
-		constexpr bl Construct(const Block& block, Args&&... args)
-		{
-			bl constructed = false;
+		bl constructed = false;
 
-			if (block.IsValid() && block.size >= sizeof(T))
+		if (block.IsValid() && block.size >= sizeof(T))
+		{
+			new (block.ptr) T(::std::forward<Args>(args)...);
+			constructed = true;
+		}
+
+		return constructed;
+	}
+
+	/*
+		constructs the given type using the given args inside given block
+	*/
+	template <typename T>
+	constexpr bl ConstructArray(const Block& block, siz size)
+	{
+		bl constructed = false;
+
+		if (block.IsValid() && block.size >= sizeof(T))
+		{
+			new (block.ptr) T[size];
+			constructed = true;
+		}
+
+		return constructed;
+	}
+
+	/*
+		destructs the object given it's pointer
+	*/
+	template <typename T>
+	constexpr bl Destruct(const T* t)
+	{
+		bl destructed = false;
+
+		if (t != nullptr)
+		{
+			t->~T();
+			destructed = true;
+		}
+
+		return destructed;
+	}
+
+	/*
+		destructs the object given it's pointer
+	*/
+	template <typename T>
+	constexpr bl DestructArray(const T* t, siz size)
+	{
+		bl destructed = false;
+
+		if (t != nullptr)
+		{
+			for (siz i = 0; i < size; i++)
 			{
-				new (block.ptr) T(::std::forward<Args>(args)...);
-				constructed = true;
+				t[i].~T();
 			}
-
-			return constructed;
+			destructed = true;
 		}
 
-		/**
-		 constructs the given type using the given args
-		 */
-		template <typename T>
-		constexpr bl ConstructArray(const Block& block, siz size)
-		{
-			bl constructed = false;
+		return destructed;
+	}
 
-			if (block.IsValid() && block.size >= sizeof(T))
-			{
-				new (block.ptr) T[size];
-				constructed = true;
-			}
+	/*
+		the alignment our allocators will adhere to
+	*/
+	constexpr static siz ALIGNMENT = BIT(3);
 
-			return constructed;
-		}
+	constexpr static siz CalcAlignedSize(const siz size)
+	{
+		return ((size + ALIGNMENT - 1) / ALIGNMENT) * ALIGNMENT;
+	}
 
-		/**
-		 destructs the object given it's pointer
-		 */
-		template <typename T>
-		constexpr bl Destruct(const T* t)
-		{
-			bl destructed = false;
+	class Allocator
+	{
+	public:
+		virtual bl Contains(const Block& block) const = 0;
 
-			if (t != nullptr)
-			{
-				t->~T();
-				destructed = true;
-			}
+		virtual bl Contains(const void* ptr) const = 0;
 
-			return destructed;
-		}
+		virtual Block Allocate(siz size) = 0;
 
-		/**
-		 destructs the object given it's pointer
-		 */
-		template <typename T>
-		constexpr bl DestructArray(const T* t, siz size)
-		{
-			bl destructed = false;
+		virtual bl Deallocate(Block& block) = 0;
 
-			if (t != nullptr)
-			{
-				for (siz i = 0; i < size; i++)
-				{
-					t[i].~T();
-				}
-				destructed = true;
-			}
-
-			return destructed;
-		}
-
-		/**
-		 the alignment our allocators will adhere to
-		 */
-		constexpr static siz ALIGNMENT = BIT(3);
-
-		/**
-		 calculates an aligned size given an arbitary size
-		 aka: calculates the next multple of ALIGNMENT if given size is not already a multiple of ALIGNMENT
-		 */
-		constexpr static siz CalcAlignedSize(const siz size)
-		{
-			return ((size + ALIGNMENT - 1) / ALIGNMENT) * ALIGNMENT;
-		}
-
-		/**
-		 Allocator represents the interface all our allocators will adhere to
-		 */
-		class Allocator
-		{
-		public:
-			/**
-			 constructor
-			 */
-			Allocator() = default;
-
-			/**
-			 deconstructor
-			 */
-			virtual ~Allocator() = default;
-
-			/**
-			 check if we contain block
-			 */
-			virtual bl Contains(const Block& block) const = 0;
-
-			/**
-			 check if we contain ptr
-			 */
-			virtual bl Contains(const void* ptr) const = 0;
-
-			/**
-			 allocates a Block of given size
-			 */
-			virtual Block Allocate(siz size) = 0;
-
-			/**
-			 deallocates a given Block
-			 */
-			virtual bl Deallocate(Block& block) = 0;
-
-			/**
-			 deallocates a block given the ptr
-			 */
-			virtual bl Deallocate(void* ptr) = 0;
-		};
-	} // namespace memory
-} // namespace np
+		virtual bl Deallocate(void* ptr) = 0;
+	};
+} // namespace np::memory
 
 #endif /* NP_ENGINE_ALLOCATOR_HPP */

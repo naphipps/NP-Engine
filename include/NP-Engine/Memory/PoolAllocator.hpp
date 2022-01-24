@@ -1,9 +1,8 @@
+//##===----------------------------------------------------------------------===##//
 //
-//  PoolAllocator.hpp
-//  NP-Engine
+//  Author: Nathan Phipps 2/15/21
 //
-//  Created by Nathan Phipps on 2/15/21.
-//
+//##===----------------------------------------------------------------------===##//
 
 #ifndef NP_ENGINE_POOL_ALLOCATOR_HPP
 #define NP_ENGINE_POOL_ALLOCATOR_HPP
@@ -12,162 +11,121 @@
 
 #include "SizedAllocator.hpp"
 
-namespace np
+namespace np::memory
 {
-	namespace memory
+	template <typename T>
+	class PoolAllocator : public SizedAllocator
 	{
-		template <typename T>
-		class PoolAllocator : public SizedAllocator
+	public:
+		constexpr static siz CHUNK_ALIGNED_SIZE = CalcAlignedSize(sizeof(T));
+
+	private:
+		atm<void*> _alloc_iterator;
+
+		bl IsChunkPtr(void* ptr) const
 		{
-		public:
-			constexpr static siz CHUNK_ALIGNED_SIZE = CalcAlignedSize(sizeof(T));
+			return Contains(ptr) && ((ui8*)ptr - (ui8*)_block.Begin()) % CHUNK_ALIGNED_SIZE == 0;
+		}
 
-		private:
-			atm<void*> _alloc_iterator;
+		void Init()
+		{
+			Block block{nullptr, CHUNK_ALIGNED_SIZE};
 
-			/**
-			 evaluates if the given ptr points to the beginning of a chunk or not
-			 */
-			bl IsChunkPtr(void* ptr) const
+			for (ui32 i = 0; i < ChunkCount() - 1; i++)
 			{
-				return Contains(ptr) && ((ui8*)ptr - (ui8*)_block.Begin()) % CHUNK_ALIGNED_SIZE == 0;
+				block.ptr = &static_cast<ui8*>(_block.ptr)[i * CHUNK_ALIGNED_SIZE];
+				Construct<void*>(block, &static_cast<ui8*>(_block.ptr)[(i + 1) * CHUNK_ALIGNED_SIZE]);
 			}
 
-			/**
-			 initializes this pool
-			 */
-			void Init()
-			{
-				Block block{nullptr, CHUNK_ALIGNED_SIZE};
+			block.ptr = &static_cast<ui8*>(_block.ptr)[(ChunkCount() - 1) * CHUNK_ALIGNED_SIZE];
+			Construct<void*>(block, nullptr);
 
-				for (ui32 i = 0; i < ChunkCount() - 1; i++)
+			_alloc_iterator.store(_block.ptr, mo_release);
+		}
+
+	public:
+		PoolAllocator(Block block): SizedAllocator(block)
+		{
+			Init();
+		}
+
+		PoolAllocator(siz size): SizedAllocator(size)
+		{
+			Init();
+		}
+
+		siz ChunkCount() const
+		{
+			return _block.size / CHUNK_ALIGNED_SIZE;
+		}
+
+		siz ChunkSize() const
+		{
+			return CHUNK_ALIGNED_SIZE;
+		}
+
+		void Zeroize() override
+		{
+			_alloc_iterator.store(nullptr, mo_release);
+			SizedAllocator::Zeroize();
+			Init();
+		}
+
+		Block Allocate(siz size) override
+		{
+			Block block;
+
+			if (size <= CHUNK_ALIGNED_SIZE)
+			{
+				void* allocated = _alloc_iterator.load(mo_acquire);
+
+				while (allocated &&
+					   !_alloc_iterator.compare_exchange_weak(allocated, *(void**)(&static_cast<ui8*>(allocated)[0]),
+															  mo_release, mo_relaxed))
+					;
+
+				if (allocated)
 				{
-					block.ptr = &static_cast<ui8*>(_block.ptr)[i * CHUNK_ALIGNED_SIZE];
-					Construct<void*>(block, &static_cast<ui8*>(_block.ptr)[(i + 1) * CHUNK_ALIGNED_SIZE]);
+					block.ptr = allocated;
+					block.size = CHUNK_ALIGNED_SIZE;
 				}
-
-				block.ptr = &static_cast<ui8*>(_block.ptr)[(ChunkCount() - 1) * CHUNK_ALIGNED_SIZE];
-				Construct<void*>(block, nullptr);
-
-				_alloc_iterator.store(_block.ptr, mo_release);
 			}
 
-		public:
-			/**
-			 constructor
-			 */
-			PoolAllocator(Block block): SizedAllocator(block)
+			return block;
+		}
+
+		bl Deallocate(Block& block) override
+		{
+			bl deallocated = false;
+
+			if (IsChunkPtr(block.ptr) && block.size == CHUNK_ALIGNED_SIZE)
 			{
-				Init();
+				Construct<void*>(block, _alloc_iterator.load(mo_acquire));
+
+				while (!_alloc_iterator.compare_exchange_weak(*(void**)(&static_cast<ui8*>(block.ptr)[0]), block.ptr,
+															  mo_release, mo_relaxed))
+					;
+
+				block.Invalidate();
+				deallocated = true;
 			}
 
-			/**
-			 constructor
-			 */
-			PoolAllocator(siz size): SizedAllocator(size)
-			{
-				Init();
-			}
+			return deallocated;
+		}
 
-			/**
-			 deconstructor
-			 */
-			~PoolAllocator() = default;
+		bl Deallocate(void* ptr) override
+		{
+			Block dealloc_block{ptr, CHUNK_ALIGNED_SIZE};
+			return Deallocate(dealloc_block);
+		}
 
-			/**
-			 gets the count of chunk in this pool
-			 */
-			siz ChunkCount() const
-			{
-				return _block.size / CHUNK_ALIGNED_SIZE;
-			}
-
-			/**
-			 gets the chunk size
-			 */
-			siz ChunkSize() const
-			{
-				return CHUNK_ALIGNED_SIZE;
-			}
-
-			/**
-			 zeroizes our block and initializes the chunks
-			 */
-			void Zeroize() override
-			{
-				_alloc_iterator.store(nullptr, mo_release);
-				SizedAllocator::Zeroize();
-				Init();
-			}
-
-			/**
-			 allocates a chunk sized block that the given size can fit inside, or returns an invalid block
-			 */
-			Block Allocate(siz size) override
-			{
-				Block block;
-
-				if (size <= CHUNK_ALIGNED_SIZE)
-				{
-					void* allocated = _alloc_iterator.load(mo_acquire);
-
-					while (allocated &&
-						   !_alloc_iterator.compare_exchange_weak(allocated, *(void**)(&static_cast<ui8*>(allocated)[0]),
-																  mo_release, mo_relaxed))
-						;
-
-					if (allocated)
-					{
-						block.ptr = allocated;
-						block.size = CHUNK_ALIGNED_SIZE;
-					}
-				}
-
-				return block;
-			}
-
-			/**
-			 deallocates the given block if we contain it
-			 */
-			bl Deallocate(Block& block) override
-			{
-				bl deallocated = false;
-
-				if (IsChunkPtr(block.ptr) && block.size == CHUNK_ALIGNED_SIZE)
-				{
-					Construct<void*>(block, _alloc_iterator.load(mo_acquire));
-
-					while (!_alloc_iterator.compare_exchange_weak(*(void**)(&static_cast<ui8*>(block.ptr)[0]), block.ptr,
-																  mo_release, mo_relaxed))
-						;
-
-					block.Invalidate();
-					deallocated = true;
-				}
-
-				return deallocated;
-			}
-
-			/**
-			 deallocates a block given the ptr
-			 */
-			bl Deallocate(void* ptr) override
-			{
-				Block dealloc_block{ptr, CHUNK_ALIGNED_SIZE};
-				return Deallocate(dealloc_block);
-			}
-
-			/**
-			 deallocates
-			 */
-			bl DeallocateAll() override
-			{
-				_alloc_iterator.store(nullptr, mo_release);
-				Init();
-				return true;
-			}
-		};
-	} // namespace memory
-} // namespace np
+		bl DeallocateAll() override
+		{
+			_alloc_iterator.store(nullptr, mo_release);
+			Init();
+			return true;
+		}
+	};
+} // namespace np::memory
 
 #endif /* NP_ENGINE_POOL_ALLOCATOR_HPP */

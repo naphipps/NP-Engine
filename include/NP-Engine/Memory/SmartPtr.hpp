@@ -7,14 +7,14 @@
 #ifndef NP_ENGINE_SMART_PTR_HPP
 #define NP_ENGINE_SMART_PTR_HPP
 
+#include <memory>
+#include <type_traits>
+#include <utility>
+
 #include "NP-Engine/Primitive/Primitive.hpp"
 #include "NP-Engine/Insight/Insight.hpp"
 
 #include "TraitAllocator.hpp"
-
-#include <memory>
-#include <type_traits>
-#include <utility>
 
 namespace np::memory
 {
@@ -45,7 +45,9 @@ namespace np::memory
 	constexpr uptr<T> CreateUptr(Args&&... args)
 	{
 		Block block = DefaultTraitAllocator.Allocate(sizeof(T));
-		memory::Construct<T>(block, ::std::forward<Args>(args)...); // TODO: NP_ASSERT??
+		NP_ASSERT((::std::is_constructible_v<T, Args...>), "T must be constructible with the given args.");
+		bl constructed = memory::Construct<T>(block, ::std::forward<Args>(args)...);
+		NP_ASSERT(constructed, "We require a successful construction here.");
 		return uptr<T>((T*)block.ptr);
 	}
 
@@ -56,7 +58,9 @@ namespace np::memory
 	constexpr sptr<T> CreateSptr(Args&&... args)
 	{
 		Block block = DefaultTraitAllocator.Allocate(sizeof(T));
-		memory::Construct<T>(block, ::std::forward<Args>(args)...); // TODO: NP_ASSERT??
+		NP_ASSERT((::std::is_constructible_v<T, Args...>), "T must be constructible with the given args.");
+		bl constructed = memory::Construct<T>(block, ::std::forward<Args>(args)...);
+		NP_ASSERT(constructed, "We require a successful construction here.");
 		return sptr<T>((T*)block.ptr, __detail::SmartPtrDeleter<T>{});
 	}
 } // namespace np::memory
