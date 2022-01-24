@@ -20,8 +20,6 @@
 
 #include "NP-Engine/Vendor/GlfwInclude.hpp"
 
-// TODO: update comments
-
 namespace np::window
 {
 	class Window : public event::EventHandler
@@ -166,10 +164,7 @@ namespace np::window
 			return _properties;
 		}
 
-		virtual void Update(time::DurationMilliseconds duration_milliseconds)
-		{
-			// TODO: implement
-		}
+		virtual void Update(time::DurationMilliseconds duration_milliseconds) {}
 
 		virtual void SetTitle(str title)
 		{
@@ -180,23 +175,11 @@ namespace np::window
 			}
 		}
 
-		// virtual void AttachToRenderer() = 0; //TODO: we need to attach/detach from our renderer
-
 		virtual void SetEnableVSync(bl enabled = true) {}
-
-		virtual bl IsVSync() const
-		{
-			return false;
-		}
 
 		virtual void* GetNativeWindow() const
 		{
 			return _glfw_window;
-		}
-
-		virtual bl IsMinimized() const
-		{
-			return false;
 		}
 
 		void SetResizeCallback(void* caller, ResizeCallback callback)
