@@ -12,9 +12,11 @@
 #include <algorithm>
 #include <vector>
 #include <iostream>
-#include <Box2D/Box2D.h>
 #include <typeinfo>
+
 #include "Constants.h"
+
+#include "NP-Engine/Vendor/Box2dInclude.hpp"
 
 namespace np
 {

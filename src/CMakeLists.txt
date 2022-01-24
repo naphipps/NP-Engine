@@ -230,7 +230,7 @@ set(NP_ENGINE_TIME_HPP
 )
 
 set(NP_ENGINE_VENDOR_HPP
-	#${PROJECT_SOURCE_DIR}/include/NP-Engine/Vendor/Box2dInclude.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Vendor/Box2dInclude.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Vendor/ConcurrentqueueInclude.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Vendor/EnttInclude.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Vendor/GlfwInclude.hpp

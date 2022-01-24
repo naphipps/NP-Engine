@@ -9,8 +9,6 @@
 
 #include "cmake_include.hpp"
 
-#define B2_USE_16_BIT_PARTICLE_INDICES
-
 #ifndef NP_ENGINE_MAIN_MEMORY_SIZE
 	#define NP_ENGINE_MAIN_MEMORY_SIZE (2000000000)
 #endif

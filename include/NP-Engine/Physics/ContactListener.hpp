@@ -9,10 +9,11 @@
 #ifndef PhysicsContactListener_hpp
 #define PhysicsContactListener_hpp
 
-#include <Box2D/Box2D.h>
 #include <set>
 #include "Body.hpp"
 #include "ParticleSystem.hpp"
+
+#include "NP-Engine/Vendor/Box2dInclude.hpp"
 
 namespace np
 {

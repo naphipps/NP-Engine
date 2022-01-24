@@ -9,11 +9,12 @@
 #ifndef Physics_hpp
 #define Physics_hpp
 
-#include <Box2D/Box2D.h>
 #include <iostream>
 #include "Body.hpp"
 #include "ContactListener.hpp"
 #include "Constants.h"
+
+#include "NP-Engine/Vendor/Box2dInclude.hpp"
 
 namespace np
 {

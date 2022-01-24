@@ -9,9 +9,10 @@
 #ifndef ParticleSystem_hpp
 #define ParticleSystem_hpp
 
-#include <Box2D/Box2D.h>
 #include <vector>
 #include <iostream>
+
+#include "NP-Engine/Vendor/Box2dInclude.hpp"
 
 namespace np
 {
