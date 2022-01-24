@@ -20,8 +20,6 @@
 
 #endif
 
-// TODO: add summary comments
-
 namespace np::app
 {
 	Popup::Select Popup::Show(str title, str message, Popup::Style style, Popup::Buttons buttons)
