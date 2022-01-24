@@ -1,25 +1,19 @@
+//##===----------------------------------------------------------------------===##//
 //
-//  JobPool.hpp
-//  Project Space
+//  Author: Nathan Phipps 8/26/20
 //
-//  Created by Nathan Phipps on 8/26/20.
-//  Copyright © 2020 Nathan Phipps. All rights reserved.
-//
+//##===----------------------------------------------------------------------===##//
 
 #ifndef NP_ENGINE_JOB_POOL_HPP
 #define NP_ENGINE_JOB_POOL_HPP
 
-#include "NP-Engine/Primitive/Primitive.hpp"
 #include "NP-Engine/Memory/Memory.hpp"
 
 #include "Job.hpp"
 
-namespace np
+namespace np::js
 {
-	namespace js
-	{
-		using JobPool = memory::ObjectPool<Job>;
-	} // namespace js
-} // namespace np
+	using JobPool = memory::ObjectPool<Job>;
+} // namespace np::js
 
 #endif /* NP_ENGINE_JOB_POOL_HPP */

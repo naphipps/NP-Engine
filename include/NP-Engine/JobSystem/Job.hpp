@@ -1,10 +1,8 @@
+//##===----------------------------------------------------------------------===##//
 //
-//  Job.hpp
-//  Project Space
+//  Author: Nathan Phipps 8/25/20
 //
-//  Created by Nathan Phipps on 8/25/20.
-//  Copyright © 2020 Nathan Phipps. All rights reserved.
-//
+//##===----------------------------------------------------------------------===##//
 
 #ifndef NP_ENGINE_JOB_HPP
 #define NP_ENGINE_JOB_HPP
@@ -12,197 +10,129 @@
 #include "NP-Engine/Primitive/Primitive.hpp"
 #include "NP-Engine/Insight/Insight.hpp"
 #include "NP-Engine/Concurrency/Concurrency.hpp"
+#include "NP-Engine/Memory/Memory.hpp"
 
-#include "JobFunction.hpp"
-
-namespace np
+namespace np::js
 {
-	namespace js
+	class Job
 	{
-		/**
-		 represents a Job to be executred
-		 */
-		class Job
+	public:
+		using Function = memory::Delegate;
+
+	private:
+		Job* _dependent_job; // job depending on this
+		atm_i32 _dependency_count;
+		Function _function;
+
+		void Dispose()
 		{
-		private:
-			Job* _dependent_job; // job depending on this
-			atm_i32 _dependency_count;
-			JobFunction _job_function;
-
-			/**
-			 disposes this Job so it can be used again to represent another Job
-			 */
-			void Dispose()
+			if (_dependent_job && !IsComplete())
 			{
-				if (_dependent_job && !IsComplete())
+				_dependent_job->_dependency_count--;
+			}
+
+			_dependent_job = nullptr;
+			_function.DisconnectFunction();
+			_dependency_count = -1;
+		}
+
+		inline void CopyFrom(const Job& other)
+		{
+			_dependency_count.store(other._dependency_count);
+
+			if (other.IsEnabled())
+			{
+				_dependent_job = other._dependent_job;
+				_function = other._function;
+			}
+		}
+
+	public:
+		Job(): _dependent_job(nullptr), _dependency_count(-1) {}
+
+		Job(Function& function, Job& dependent): Job(function)
+		{
+			dependent.DependOn(*this);
+		}
+
+		Job(Function& function): _dependent_job(nullptr), _dependency_count(1), _function(function) {}
+
+		Job(Job& other)
+		{
+			CopyFrom(other);
+		}
+
+		Job(Job&&) = delete;
+
+		~Job()
+		{
+			Dispose();
+		}
+
+		Job& operator=(const Job& other)
+		{
+			if (_dependent_job && !IsComplete())
+			{
+				_dependent_job->_dependency_count--;
+				_dependent_job = nullptr;
+			}
+
+			NP_ASSERT(CanExecute(), "You are overwriting a Job that has dependents. Only overwrite jobs that can execute.");
+
+			CopyFrom(other);
+			return *this;
+		}
+
+		Job& operator=(Job&&) = delete;
+
+		bl CanExecute() const
+		{
+			return _dependency_count.load(mo_acquire) == 1;
+		}
+
+		void Execute()
+		{
+			if (CanExecute())
+			{
+				_function.InvokeConnectedFunction();
+				_dependency_count--;
+
+				if (_dependent_job)
 				{
 					_dependent_job->_dependency_count--;
 				}
-
-				_dependent_job = nullptr;
-				_job_function.DisconnectFunction();
-				_dependency_count = -1;
 			}
+		}
 
-			/**
-			 copies from the given other Job
-			 */
-			inline void CopyFrom(const Job& other)
+		bl IsComplete() const
+		{
+			return _dependency_count.load(mo_acquire) == 0;
+		}
+
+		bl IsEnabled() const
+		{
+			return _dependency_count.load(mo_acquire) > -1;
+		}
+
+		inline explicit operator bl() const
+		{
+			return IsEnabled();
+		}
+
+		void DependOn(Job& job)
+		{
+			if (IsEnabled())
 			{
-				_dependency_count.store(other._dependency_count);
-
-				if (other.IsEnabled())
+				if (job._dependent_job)
 				{
-					_dependent_job = other._dependent_job;
-					_job_function = other._job_function;
-				}
-			}
-
-		public:
-			/**
-			 constructor
-			 */
-			Job(): _dependent_job(nullptr), _dependency_count(-1) {}
-
-			/**
-			 constructor - sets this Job's function to the given function
-			 */
-			Job(JobFunction& function)
-			{
-				Init(function);
-			}
-
-			/**
-			 copy constructor
-			 */
-			Job(Job& other)
-			{
-				CopyFrom(other);
-			}
-
-			/**
-			 copy assignment
-			 */
-			Job& operator=(const Job& other)
-			{
-				if (_dependent_job && !IsComplete())
-				{
-					_dependent_job->_dependency_count--;
-					_dependent_job = nullptr;
+					job._dependent_job->_dependency_count--;
 				}
 
-				// TODO: investigate the following assert
-				NP_ASSERT(CanExecute(), "You are overwriting a Job that has dependents. Only overwrite jobs that can execute.");
-
-				CopyFrom(other);
-				return *this;
+				job._dependent_job = this;
+				_dependency_count++;
 			}
-
-			/**
-			 delete move constructor
-			 */
-			Job(Job&&) = delete;
-
-			/**
-			 delete move assignment
-			 */
-			Job& operator=(Job&&) = delete;
-
-			/**
-			 deconstructor
-			 */
-			~Job()
-			{
-				Dispose();
-			}
-
-			/**
-			 initializes this Job given the parent-Job, and function
-			 */
-			void Init(JobFunction& function)
-			{
-				_dependent_job = nullptr;
-				_job_function = function;
-				_dependency_count = 1;
-			}
-
-			/**
-			 initializes this Job given the parent-Job, and function
-			 */
-			void Init(JobFunction& function,
-					  Job& dependent) // TODO: should we remove this dependent param?? -- just seems like a weird param for init
-			{
-				Init(function);
-				dependent.DependOn(*this);
-			}
-
-			/**
-			 indicates whether or not this Job can execute
-			 */
-			bl CanExecute() const
-			{
-				return _dependency_count == 1;
-			}
-
-			/**
-			 executes this Job's function
-			 */
-			void Execute()
-			{
-				if (CanExecute())
-				{
-					_job_function.InvokeConnectedFunction();
-					_dependency_count--;
-
-					if (_dependent_job)
-					{
-						_dependent_job->_dependency_count--;
-					}
-				}
-			}
-
-			/**
-			 indicates whether or not this Job is complete
-			 */
-			bl IsComplete() const
-			{
-				return _dependency_count == 0;
-			}
-
-			/**
-			 indicates whether or not this Job is enabled
-			 */
-			bl IsEnabled() const
-			{
-				return _dependency_count > -1;
-			}
-
-			/**
-			 indicates if this Job is enabled or not
-			 */
-			inline explicit operator bl() const
-			{
-				return IsEnabled();
-			}
-
-			/**
-			 sets this Job dependent to the given Job
-			 */
-			void DependOn(Job& job)
-			{
-				if (IsEnabled())
-				{
-					if (job._dependent_job)
-					{
-						job._dependent_job->_dependency_count--;
-					}
-
-					job._dependent_job = this;
-					_dependency_count++;
-				}
-			}
-		};
-	} // namespace js
-} // namespace np
+		}
+	};
+} // namespace np::js
 
 #endif /* NP_ENGINE_JOB_HPP */

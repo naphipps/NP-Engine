@@ -1,67 +1,59 @@
+//##===----------------------------------------------------------------------===##//
 //
-//  JobPriority.hpp
-//  Project Space
+//  Author: Nathan Phipps 8/31/20
 //
-//  Created by Nathan Phipps on 8/31/20.
-//  Copyright © 2020 Nathan Phipps. All rights reserved.
-//
+//##===----------------------------------------------------------------------===##//
 
 #ifndef NP_ENGINE_JOB_PRIORITY_HPP
 #define NP_ENGINE_JOB_PRIORITY_HPP
 
-namespace np
+#include "NP-Engine/Primitive/Primitive.hpp"
+#include "NP-Engine/Insight/Insight.hpp"
+
+namespace np::js
 {
-	namespace js
+	enum class JobPriority : ui32
 	{
-		/**
-		 job priority enum provides priority levels for jobs in the system
-		 */
-		enum class JobPriority
+		HIGHEST,
+		HIGHER,
+		NORMAL,
+		LOWER,
+		LOWEST
+	};
+
+	static inline JobPriority NormalizePriority(JobPriority priority)
+	{
+		JobPriority return_priority = priority;
+
+		switch (priority)
 		{
-			HIGHEST,
-			HIGHER,
-			NORMAL,
-			LOWER,
-			LOWEST
-		};
+		case JobPriority::HIGHEST:
+			return_priority = JobPriority::HIGHER;
+			break;
 
-		/**
-		 "normalizes" the given priority - returns the immediate priority next in the direction of normal
-		 */
-		static inline JobPriority NormalizePriority(JobPriority priority)
-		{
-			JobPriority return_priority = priority;
+		case JobPriority::HIGHER:
+			return_priority = JobPriority::NORMAL;
+			break;
 
-			switch (priority)
-			{
-			case JobPriority::HIGHEST:
-				return_priority = JobPriority::HIGHER;
-				break;
+		case JobPriority::NORMAL:
+			return_priority = JobPriority::NORMAL;
+			break;
 
-			case JobPriority::HIGHER:
-				return_priority = JobPriority::NORMAL;
-				break;
+		case JobPriority::LOWER:
+			return_priority = JobPriority::NORMAL;
+			break;
 
-			case JobPriority::NORMAL:
-				return_priority = JobPriority::NORMAL;
-				break;
+		case JobPriority::LOWEST:
+			return_priority = JobPriority::LOWER;
+			break;
 
-			case JobPriority::LOWER:
-				return_priority = JobPriority::NORMAL;
-				break;
-
-			case JobPriority::LOWEST:
-				return_priority = JobPriority::LOWER;
-				break;
-
-			default:
-				NP_ASSERT(false, "requested incorrect priority");
-				break;
-			}
-
-			return return_priority;
+		default:
+			NP_ASSERT(false, "requested incorrect priority");
+			break;
 		}
-	} // namespace js
-} // namespace np
+
+		return return_priority;
+	}
+} // namespace np::js
 
 #endif /* NP_ENGINE_JOB_PRIORITY_HPP */

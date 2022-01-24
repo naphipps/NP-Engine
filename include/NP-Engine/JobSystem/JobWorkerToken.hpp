@@ -1,10 +1,8 @@
+//##===----------------------------------------------------------------------===##//
 //
-//  JobWOrkerToken.hpp
-//  Project Space
+//  Author: Nathan Phipps 9/9/20
 //
-//  Created by Nathan Phipps on 9/9/20.
-//  Copyright © 2020 Nathan Phipps. All rights reserved.
-//
+//##===----------------------------------------------------------------------===##//
 
 #ifndef NP_ENGINE_JOB_WORKER_TOKEN_HPP
 #define NP_ENGINE_JOB_WORKER_TOKEN_HPP
@@ -14,132 +12,85 @@
 #include "JobWorker.hpp"
 #include "JobToken.hpp"
 
-namespace np
+namespace np::js
 {
-	namespace js
+	class JobWorkerToken
 	{
-		/**
-		 contains a pointer to a Job worker so that outside objects cannot manipulate it
-		 */
-		class JobWorkerToken
+	private:
+		JobWorker* _worker;
+
+	public:
+		JobWorkerToken(): JobWorkerToken(nullptr) {}
+
+		JobWorkerToken(JobWorker* worker): _worker(worker) {}
+
+		JobWorkerToken(JobWorkerToken& other): _worker(other._worker) {}
+
+		JobWorkerToken(JobWorkerToken&& other): _worker(other._worker) {}
+
+		JobWorkerToken& operator=(const JobWorkerToken& other)
 		{
-		private:
-			JobWorker* _worker;
+			_worker = other._worker;
+			return *this;
+		}
 
-		public:
-			/**
-			 constructor
-			 */
-			JobWorkerToken(): JobWorkerToken(nullptr) {}
+		JobWorkerToken& operator=(JobWorkerToken&& other)
+		{
+			_worker = other._worker;
+			return *this;
+		}
 
-			/**
-			 constructor - set worker pointer to given pointer
-			 */
-			JobWorkerToken(JobWorker* worker): _worker(worker) {}
+		bl IsValid() const
+		{
+			return _worker != nullptr;
+		}
 
-			/**
-			 copy constructor
-			 */
-			JobWorkerToken(JobWorkerToken& other): _worker(other._worker) {}
+		void Invalidate()
+		{
+			_worker = nullptr;
+		}
 
-			/**
-			 move constructor -acts like copy constructor
-			 */
-			JobWorkerToken(JobWorkerToken&& other): _worker(other._worker) {}
+		JobToken CreateJobToken(Job::Function& function, JobToken dependent = JobToken())
+		{
+			JobToken token;
 
-			/**
-			 deconstructor
-			 */
-			~JobWorkerToken() {}
-
-			/**
-			 checks if our worker pointer is nullptr or not
-			 */
-			bl IsValid() const
+			if (IsValid())
 			{
-				return _worker != nullptr;
+				token = _worker->CreateJobToken(function, dependent);
 			}
 
-			/**
-			 invalidate worker pointer by setting it to nullptr
-			 */
-			void Invalidate()
+			return token;
+		}
+
+		JobRecord AddJob(JobPriority priority, JobToken token)
+		{
+			JobRecord record;
+
+			if (IsValid())
 			{
-				_worker = nullptr;
+				record = _worker->AddJob(priority, token);
 			}
 
-			/**
-			 calls JobWorker::CreateJob on our worker pointer
-			 */
-			JobToken CreateJobToken(JobFunction& function, JobToken dependent = JobToken())
+			return record;
+		}
+
+		JobRecord AddJob(JobPriority priority, Job::Function function, JobToken dependent = JobToken())
+		{
+			JobRecord record;
+
+			if (IsValid())
 			{
-				JobToken token;
-
-				if (IsValid())
-				{
-					token = _worker->CreateJobToken(function, dependent);
-				}
-
-				return token;
+				record = _worker->AddJob(priority, function, dependent);
 			}
 
-			/**
-			 calls JobWorker::AddJob on our worker pointer
-			 */
-			JobRecord AddJob(JobPriority priority, JobToken token)
-			{
-				JobRecord record;
+			return record;
+		}
 
-				if (IsValid())
-				{
-					record = _worker->AddJob(priority, token);
-				}
-
-				return record;
-			}
-
-			/**
-			 calls JobWorker::AddJob on our worker pointer
-			 */
-			JobRecord AddJob(JobPriority priority, JobFunction function, JobToken dependent = JobToken())
-			{
-				JobRecord record;
-
-				if (IsValid())
-				{
-					record = _worker->AddJob(priority, function, dependent);
-				}
-
-				return record;
-			}
-
-			/**
-			 indicates if our token is valid or not
-			 */
-			explicit operator bl() const
-			{
-				return IsValid();
-			}
-
-			/**
-			 copy assignment
-			 */
-			JobWorkerToken& operator=(const JobWorkerToken& other)
-			{
-				_worker = other._worker;
-				return *this;
-			}
-
-			/**
-			 move assignment - acts as copy assignment
-			 */
-			JobWorkerToken& operator=(JobWorkerToken&& other)
-			{
-				_worker = other._worker;
-				return *this;
-			}
-		};
-	} // namespace js
-} // namespace np
+		explicit operator bl() const
+		{
+			return IsValid();
+		}
+	};
+} // namespace np::js
 
 #endif /* NP_ENGINE_JOB_WORKER_TOKEN_HPP */

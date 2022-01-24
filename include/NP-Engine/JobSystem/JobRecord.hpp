@@ -1,10 +1,8 @@
+//##===----------------------------------------------------------------------===##//
 //
-//  JobRecord.hpp
-//  Project Space
+//  Author: Nathan Phipps 8/31/20
 //
-//  Created by Nathan Phipps on 8/31/20.
-//  Copyright © 2020 Nathan Phipps. All rights reserved.
-//
+//##===----------------------------------------------------------------------===##//
 
 #ifndef NP_ENGINE_JOB_RECORD_HPP
 #define NP_ENGINE_JOB_RECORD_HPP
@@ -14,114 +12,71 @@
 #include "Job.hpp"
 #include "JobPriority.hpp"
 
-namespace np
+namespace np::js
 {
-	namespace js
+	class JobRecord
 	{
-		/**
-		 job record associtates a job to a priority
-		 */
-		class JobRecord
+	private:
+		JobPriority _priority;
+		Job* _job;
+
+	public:
+		JobRecord(): JobRecord(JobPriority::NORMAL, nullptr) {}
+
+		JobRecord(JobPriority priority, const Job* job): _priority(priority), _job(const_cast<Job*>(job)) {}
+
+		JobRecord(const JobRecord& record): JobRecord(record._priority, record._job) {}
+
+		JobRecord(JobRecord&& record): JobRecord(record._priority, record._job) {}
+
+		JobRecord& operator=(const JobRecord& other)
 		{
-		private:
-			JobPriority _priority;
-			Job* _job;
+			_priority = other._priority;
+			_job = other._job;
+			return *this;
+		}
 
-		public:
-			/**
-			 constuctor - normal priority with nullptr job
-			 */
-			JobRecord(): JobRecord(JobPriority::NORMAL, nullptr) {}
+		JobRecord& operator=(JobRecord&& other)
+		{
+			_priority = other._priority;
+			_job = other._job;
+			return *this;
+		}
 
-			/**
-			 constructor - accepts given priority and job
-			 */
-			JobRecord(JobPriority priority, const Job* job): _priority(priority), _job(const_cast<Job*>(job)) {}
+		bl IsValid() const
+		{
+			return _job != nullptr;
+		}
 
-			/**
-			 copy constructor
-			 */
-			JobRecord(const JobRecord& record): JobRecord(record._priority, record._job) {}
+		void Invalidate()
+		{
+			_job = nullptr;
+		}
 
-			/**
-			 move constructor - behave like copy constructor
-			 */
-			JobRecord(JobRecord&& record): JobRecord(record._priority, record._job) {}
+		const Job& GetJob() const
+		{
+			NP_ASSERT(IsValid(), "do not call this if we have an invalid job");
 
-			/**
-			 checks if our job is nullptr or not
-			 */
-			bl IsValid() const
-			{
-				return _job != nullptr;
-			}
+			return *_job;
+		}
 
-			/**
-			 invalidates our job by setting it to nullptr
-			 */
-			void Invalidate()
-			{
-				_job = nullptr;
-			}
+		void Execute()
+		{
+			NP_ASSERT(IsValid(), "do not call this if we have an invalid job");
 
-			/**
-			 gets the job this record pertains to
-			 this will assert that the job is valid so you should check if the record is valid before calling this
-			 */
-			const Job& GetJob() const
-			{
-				NP_ASSERT(IsValid(), "do not call this if we have an invalid job");
+			_job->Execute();
+		}
 
-				return *_job;
-			}
+		JobPriority GetPriority() const
+		{
+			return _priority;
+		}
 
-			/**
-			 executes the job
-			 */
-			void Execute()
-			{
-				NP_ASSERT(IsValid(), "do not call this if we have an invalid job");
-
-				_job->Execute();
-			}
-
-			/**
-			 gets the priority of this record
-			 */
-			JobPriority GetPriority() const
-			{
-				return _priority;
-			}
-
-			/**
-			 bl operator checks if we have a nullptr job or not
-			 */
-			explicit operator bl() const
-			{
-				return IsValid();
-			}
-
-			/**
-			 copy assignment
-			 */
-			JobRecord& operator=(const JobRecord& other)
-			{
-				_priority = other._priority;
-				_job = other._job;
-				return *this;
-			}
-
-			/**
-			 move assignment is treated as copy assignment
-			 */
-			JobRecord& operator=(JobRecord&& other)
-			{
-				_priority = other._priority;
-				_job = other._job;
-				return *this;
-			}
-		};
-	} // namespace js
-} // namespace np
+		explicit operator bl() const
+		{
+			return IsValid();
+		}
+	};
+} // namespace np::js
 
 #endif /* NP_ENGINE_JOB_RECORD_HPP */
