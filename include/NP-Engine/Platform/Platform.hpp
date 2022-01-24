@@ -1,9 +1,8 @@
+//##===----------------------------------------------------------------------===##//
 //
-//  Platform.hpp
-//  NP-Engine
+//  Author: Nathan Phipps 2/10/21
 //
-//  Created by Nathan Phipps on 2/10/21.
-//
+//##===----------------------------------------------------------------------===##//
 
 #ifndef NP_ENGINE_PLATFORM_HPP
 #define NP_ENGINE_PLATFORM_HPP
