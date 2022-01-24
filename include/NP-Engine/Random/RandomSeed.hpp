@@ -1,10 +1,8 @@
+//##===----------------------------------------------------------------------===##//
 //
-//  RandomSeed.hpp
-//  Project Space
+//  Author: Nathan Phipps 12/7/20
 //
-//  Created by Nathan Phipps on 12/7/20.
-//  Copyright © 2020 Nathan Phipps. All rights reserved.
-//
+//##===----------------------------------------------------------------------===##//
 
 #ifndef NP_ENGINE_RANDOM_SEED_HPP
 #define NP_ENGINE_RANDOM_SEED_HPP
@@ -16,125 +14,77 @@
 
 #include "PcgRandutils.hpp"
 
-namespace np
+namespace np::random
 {
-	namespace random
+	template <typename T>
+	class RandomSeed
 	{
-		/**
-		 RandomSeed shall be used to store the interal state of a random_engine
-		 */
-		template <typename T>
-		class RandomSeed
+	private:
+		NP_STATIC_ASSERT((::std::is_same_v<T, ui64> || ::std::is_same_v<T, ::pcg_extras::pcg128_t>),
+						 "RandomSeed<T> requires T to be ui64 or ::pcg_extras::pcg128_t");
+
+		T _inc;
+		T _state;
+
+		void ForceOddInc()
 		{
-		private:
-			NP_STATIC_ASSERT((::std::is_same_v<T, ui64> || ::std::is_same_v<T, ::pcg_extras::pcg128_t>),
-							 "RandomSeed<T> requires T to be ui64 or ::pcg_extras::pcg128_t");
+			_inc |= 1;
+		}
 
-			T _inc;
-			T _state;
+		void CopyFrom(const RandomSeed<T>& other)
+		{
+			_inc = other._inc;
+			_state = other._state;
+		}
 
-			/**
-			 forces an odd value on inc
-			 */
-			void ForceOddInc()
-			{
-				_inc |= 1;
-			}
+	public:
+		RandomSeed() {}
 
-			/**
-			 copies from other seed
-			 */
-			void CopyFrom(const RandomSeed<T>& other)
-			{
-				_inc = other._inc;
-				_state = other._state;
-			}
+		RandomSeed(T inc, T state): _inc(inc), _state(state) {}
 
-		public:
-			/**
-			 constructor
-			 */
-			RandomSeed() {}
+		RandomSeed(const RandomSeed<T>& seed)
+		{
+			CopyFrom(seed);
+		}
 
-			/**
-			 constructor
-			 */
-			RandomSeed(T inc, T state): _inc(inc), _state(state) {}
+		RandomSeed(RandomSeed<T>&& seed)
+		{
+			CopyFrom(seed);
+		}
 
-			/**
-			 copy constructor
-			 */
-			RandomSeed(const RandomSeed<T>& seed)
-			{
-				CopyFrom(seed);
-			}
+		RandomSeed<T>& operator=(const RandomSeed<T>& other)
+		{
+			CopyFrom(other);
+			return *this;
+		}
 
-			/**
-			 move constructor - acts like copy
-			 */
-			RandomSeed(RandomSeed<T>&& seed)
-			{
-				CopyFrom(seed);
-			}
+		RandomSeed<T>& operator=(RandomSeed<T>&& other)
+		{
+			CopyFrom(other);
+			return *this;
+		}
 
-			/**
-			 deconstructor
-			 */
-			~RandomSeed() {}
+		T GetInc() const
+		{
+			return _inc;
+		}
 
-			/**
-			 copy assignment
-			 */
-			RandomSeed<T>& operator=(const RandomSeed<T>& other)
-			{
-				CopyFrom(other);
-				return *this;
-			}
+		T GetState() const
+		{
+			return _state;
+		}
 
-			/**
-			 move assignment - acts like copy
-			 */
-			RandomSeed<T>& operator=(RandomSeed<T>&& other)
-			{
-				CopyFrom(other);
-				return *this;
-			}
+		void SetInc(T inc_)
+		{
+			_inc = inc_;
+			ForceOddInc();
+		}
 
-			/**
-			 gets the inc value
-			 */
-			T GetInc() const
-			{
-				return _inc;
-			}
-
-			/**
-			 gets the state value
-			 */
-			T GetState() const
-			{
-				return _state;
-			}
-
-			/**
-			 sets the inc value for this seed
-			 this always forces the given value to be odd by or-ing it with 1
-			 */
-			void SetInc(T inc_)
-			{
-				_inc = inc_;
-				ForceOddInc();
-			}
-
-			/**
-			 sets the state value for this seed
-			 */
-			void SetState(T state_)
-			{
-				_state = state_;
-			}
-		};
-	} // namespace random
-} // namespace np
+		void SetState(T state_)
+		{
+			_state = state_;
+		}
+	};
+} // namespace np::random
 
 #endif /* NP_ENGINE_RANDOM_SEED_HPP */

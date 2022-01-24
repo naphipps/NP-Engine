@@ -1,10 +1,8 @@
+//##===----------------------------------------------------------------------===##//
 //
-//  Random.hpp
-//  Project Space
+//  Author: Nathan Phipps 4/18/20
 //
-//  Created by Nathan Phipps on 4/18/20.
-//  Copyright © 2020 Nathan Phipps. All rights reserved.
-//
+//##===----------------------------------------------------------------------===##//
 
 #ifndef NP_ENGINE_RANDOM_HPP
 #define NP_ENGINE_RANDOM_HPP
@@ -14,6 +12,6 @@
 #include "RandomEngine.hpp"
 #include "RandomBase.hpp"
 #include "RandomSeed.hpp"
-#include "RandomDistribution.hpp"
+#include "SampleDistribution.hpp"
 
 #endif /* NP_ENGINE_RANDOM_HPP */

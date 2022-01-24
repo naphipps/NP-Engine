@@ -208,7 +208,7 @@ set(NP_ENGINE_RANDOM_HPP
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Random/PcgRandutils.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Random/Random.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Random/RandomBase.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Random/RandomDistribution.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Random/SampleDistribution.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Random/RandomEngine.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Random/RandomSeed.hpp
 )
@@ -237,8 +237,8 @@ set(NP_ENGINE_VENDOR_HPP
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Vendor/GlfwInclude.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Vendor/GlmInclude.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Vendor/JsonInclude.hpp
-	#${PROJECT_SOURCE_DIR}/include/NP-Engine/Vendor/PcgCppInclude.hpp
-	#${PROJECT_SOURCE_DIR}/include/NP-Engine/Vendor/RandutilsInclude.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Vendor/PcgCppInclude.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Vendor/RandutilsInclude.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Vendor/SpdlogInclude.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Vendor/VulkanInclude.hpp
 )
