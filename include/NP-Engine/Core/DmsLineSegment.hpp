@@ -11,7 +11,6 @@
 
 #include "NP-Engine/Primitive/Primitive.hpp"
 #include "NP-Engine/Math/Math.hpp"
-#include "NP-Engine/Serialization/Serialization.hpp"
 #include "NP-Engine/Memory/Memory.hpp"
 #include "NP-Engine/Filesystem/Filesystem.hpp"
 
@@ -23,7 +22,7 @@ namespace np
 		 DmsLineSegment represents the line segments that are produced within DmsImage
 		 this contains a begining and ending point, an associated point, and midpoint for the line segment
 		 */
-		class DmsLineSegment : public serialization::Serializable
+		class DmsLineSegment
 		{
 		private:
 			math::fltPoint _begin;
@@ -95,48 +94,6 @@ namespace np
 			inline bl operator==(const DmsLineSegment& other) const
 			{
 				return Begin() == other.Begin() && End() == other.End();
-			}
-
-			/**
-			 serialization method for us to write
-			 we require our objects to know which filepath they are a part of
-			 */
-			virtual ostrm& Insertion(ostrm& os, str filepath) const override
-			{
-				// TODO: finish Insertion method
-				return os;
-			}
-
-			/**
-			 deserialization method for us to read
-			 we require our objects to know which filepath they are a part of
-			 */
-			virtual istrm& Extraction(istrm& is, str filepath) override
-			{
-				// TODO: finish Extraction method
-				return is;
-			}
-
-			/**
-			 save oursellves inside the given dirpath
-			 return if the save was successful or not
-			 */
-			virtual bl SaveTo(str dirpath) const override
-			{
-				// TODO: finish saveto
-				// return Climate::template SaveAs<Climate>(fs::Append(dirpath, AsFilename), this);
-				return false;
-			}
-
-			/**
-			 load outselves from the given dirpath
-			 return if the load was successful or not
-			 */
-			virtual bl LoadFrom(str dirpath) override
-			{
-				// TODO: finish loadfrom
-				// return Climate::template LoadAs<Climate>(fs::Append(dirpath, AsFilename), this);
-				return false;
 			}
 		};
 

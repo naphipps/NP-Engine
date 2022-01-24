@@ -49,7 +49,7 @@ namespace np::insight
 		{
 			if (_filepath.size() > 0)
 			{
-				ofstrm out_stream;
+				::std::ofstream out_stream;
 				out_stream.open(_filepath);
 
 				if (out_stream.is_open())

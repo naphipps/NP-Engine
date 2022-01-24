@@ -9,7 +9,6 @@
 #ifndef NP_ENGINE_DMS_IMAGE_HPP
 #define NP_ENGINE_DMS_IMAGE_HPP
 
-#include "NP-Engine/Serialization/Serialization.hpp"
 #include "NP-Engine/Primitive/Primitive.hpp"
 #include "NP-Engine/Math/Math.hpp"
 #include "NP-Engine/Filesystem/Filesystem.hpp"
@@ -72,10 +71,6 @@ namespace np
 				else if constexpr (::std::is_same_v<T, bl>)
 				{
 					filename = "blDmsImage" + to_str(SIZE) + ".json";
-				}
-				else if constexpr (::std::is_base_of_v<T, serialization::Serializable>)
-				{
-					filename = "DmsImage.json";
 				}
 
 				return filename;
@@ -1507,53 +1502,6 @@ namespace np
 
 				return shapes_with_holes;
 				// return temp_return;
-			}
-
-			/**
-			 serialize method
-			 */
-			virtual ostrm& Insertion(ostrm& os, str filepath) const override
-			{
-				nlohmann::json json;
-				str ui16_drawable_image_path = fs::Append(fs::GetParentPath(filepath), "ui16_drawable_image_path");
-				json["ui16_drawable_image_path"] = ui16_drawable_image_path;
-
-				os << json; //.dump(NP_ENGINE_JSON_SPACING);
-				base::SaveTo(ui16_drawable_image_path);
-
-				return os;
-			}
-
-			/**
-			 deserialize method
-			*/
-			virtual istrm& Extraction(istrm& is, str filepath) override
-			{
-				nlohmann::json json;
-				is >> json;
-
-				str ui16_drawable_image_path = json["ui16_drawable_image_path"];
-				base::LoadFrom(ui16_drawable_image_path);
-
-				return is;
-			}
-
-			/**
-			 save oursellves inside the given dirpath
-			 return if the save was successful or not
-			 */
-			virtual bl SaveTo(str dirpath) const override
-			{
-				return self_type::template SaveAs<self_type>(fs::Append(dirpath, GetFilename()), this);
-			}
-
-			/**
-			 load outselves from the given dirpath
-			 return if the load was successful or not
-			 */
-			virtual bl LoadFrom(str dirpath) override
-			{
-				return self_type::template LoadAs<self_type>(fs::Append(dirpath, GetFilename()), this);
 			}
 		};
 

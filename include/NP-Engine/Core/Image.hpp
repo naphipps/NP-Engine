@@ -11,7 +11,6 @@
 
 #include <type_traits>
 
-#include "NP-Engine/Serialization/Serialization.hpp"
 #include "NP-Engine/Insight/Insight.hpp"
 #include "NP-Engine/Primitive/Primitive.hpp"
 #include "NP-Engine/Container/Container.hpp"
@@ -27,15 +26,14 @@ namespace np
 		 Image inner array is created on init method
 		 */
 		template <typename T, ui16 SIZE>
-		class Image :
-			public serialization::Serializable // TODO: I think we should move this to some sort of Image-based project??
+		class Image // TODO: I think we should move this to some sort of Image-based project??
 		{
 		private:
 			NP_STATIC_ASSERT((::std::is_same_v<T, ui8> || ::std::is_same_v<T, ui16> || ::std::is_same_v<T, ui32> ||
 							  ::std::is_same_v<T, ui64> || ::std::is_same_v<T, i8> || ::std::is_same_v<T, i16> ||
 							  ::std::is_same_v<T, i32> || ::std::is_same_v<T, i64> || ::std::is_same_v<T, flt> ||
 							  ::std::is_same_v<T, dbl> || ::std::is_same_v<T, chr> || ::std::is_same_v<T, uchr> ||
-							  ::std::is_same_v<T, bl> || ::std::is_base_of_v<serialization::Serializable, T>),
+							  ::std::is_same_v<T, bl>),
 							 "Image<T, SIZE> requires T to be types listed in Image.hpp");
 
 			/**
@@ -74,10 +72,6 @@ namespace np
 				else if constexpr (::std::is_same_v<T, bl>)
 				{
 					filename = "blImage" + to_str(SIZE) + ".bin";
-				}
-				else if constexpr (::std::is_base_of_v<T, serialization::Serializable>)
-				{
-					filename = "Image.json";
 				}
 
 				return filename;
@@ -176,101 +170,6 @@ namespace np
 			inline virtual void SetValue(const ui16 x, const ui16 y, const T& value)
 			{
 				_value[x + _width * y] = value;
-			}
-
-			/**
-			 serialize method
-			 */
-			virtual ostrm& Insertion(ostrm& os, str filepath) const override
-			{
-				if constexpr (::std::is_same_v<T, ui8> || ::std::is_same_v<T, ui16> || ::std::is_same_v<T, ui32> ||
-							  ::std::is_same_v<T, ui64> || ::std::is_same_v<T, i8> || ::std::is_same_v<T, i16> ||
-							  ::std::is_same_v<T, i32> || ::std::is_same_v<T, i64> || ::std::is_same_v<T, flt> ||
-							  ::std::is_same_v<T, dbl> || ::std::is_same_v<T, chr> || ::std::is_same_v<T, uchr> ||
-							  ::std::is_same_v<T, bl>)
-				{
-					// TODO: test to make sure this works - especially for flt and dbl
-					//                    T* data_ptr = const_cast<T*>(_value.data());
-					//                    chr* bytes = data_ptr;
-					//                    ui32 bytes_size = _value.size() * sizeof(T);
-					//                    os.write(bytes, bytes_size);
-
-					for (ui32 i = 0; i < _value.size(); i++)
-					{
-						os << _value[i];
-					}
-				}
-				else if constexpr (::std::is_base_of_v<T, serialization::Serializable>)
-				{
-					str dirpath = fs::GetParentPath(filepath);
-					nlohmann::json json;
-
-					for (ui32 i = 0; i < _value.size(); i++)
-					{
-						str i_dir = to_str(i);
-						json[i_dir] = fs::Append(dirpath, i_dir);
-						_value[i].SaveTo(json[i_dir]);
-					}
-
-					os << json.dump(NP_ENGINE_JSON_SPACING);
-				}
-
-				return os;
-			}
-
-			/**
-			 deserialize method
-			*/
-			virtual istrm& Extraction(istrm& is, str filepath) override
-			{
-				if constexpr (::std::is_same_v<T, ui8> || ::std::is_same_v<T, ui16> || ::std::is_same_v<T, ui32> ||
-							  ::std::is_same_v<T, ui64> || ::std::is_same_v<T, i8> || ::std::is_same_v<T, i16> ||
-							  ::std::is_same_v<T, i32> || ::std::is_same_v<T, i64> || ::std::is_same_v<T, flt> ||
-							  ::std::is_same_v<T, dbl> || ::std::is_same_v<T, chr> || ::std::is_same_v<T, uchr> ||
-							  ::std::is_same_v<T, bl>)
-				{
-					// TODO: test to make sure this works - especially for flt and dbl
-					//                    const chr* const_bytes = static_cast<const chr*>(_value.data());
-					//                    chr* bytes = const_cast<chr*>(const_bytes);
-					//                    ui32 bytes_size = _value.size() * sizeof(T);
-					//                    is.read(bytes, bytes_size);
-
-					for (ui32 i = 0; i < _value.size(); i++)
-					{
-						is >> _value[i];
-					}
-				}
-				else if constexpr (::std::is_base_of_v<T, serialization::Serializable>)
-				{
-					nlohmann::json json;
-					is >> json;
-
-					for (ui32 i = 0; i < _value.size(); i++)
-					{
-						str i_dir = to_str(i);
-						_value[i].LoadFrom(json[i_dir]);
-					}
-				}
-
-				return is;
-			}
-
-			/**
-			 save oursellves inside the given dirpath
-			 return if the save was successful or not
-			 */
-			virtual bl SaveTo(str dirpath) const override
-			{
-				return Image<T, SIZE>::template SaveAs<Image<T, SIZE>>(fs::Append(dirpath, GetFilename()), this);
-			}
-
-			/**
-			 load outselves from the given dirpath
-			 return if the load was successful or not
-			 */
-			virtual bl LoadFrom(str dirpath) override
-			{
-				return Image<T, SIZE>::template LoadAs<Image<T, SIZE>>(fs::Append(dirpath, GetFilename()), this);
 			}
 		};
 

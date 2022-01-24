@@ -1,17 +1,15 @@
+//##===----------------------------------------------------------------------===##//
 //
-//  atomic_types.hpp
-//  Project Space
+//  Author: Nathan Phipps 1/3/21
 //
-//  Created by Nathan Phipps on 1/3/21.
-//  Copyright © 2021 Nathan Phipps. All rights reserved.
-//
+//##===----------------------------------------------------------------------===##//
 
 #ifndef NP_ENGINE_ATOMIC_TYPES_HPP
 #define NP_ENGINE_ATOMIC_TYPES_HPP
 
 #include <atomic>
 
-#include "primitive_types.hpp"
+#include "PrimitiveTypes.hpp"
 
 template <typename T>
 using atm = ::std::atomic<T>;

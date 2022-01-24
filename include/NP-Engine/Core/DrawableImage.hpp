@@ -12,7 +12,6 @@
 #include "NP-Engine/Primitive/Primitive.hpp"
 #include "NP-Engine/Container/Container.hpp"
 #include "NP-Engine/Math/Math.hpp"
-#include "NP-Engine/Serialization/Serialization.hpp"
 #include "NP-Engine/Filesystem/Filesystem.hpp"
 
 #include "Image.hpp"
@@ -72,10 +71,6 @@ namespace np
 				else if constexpr (::std::is_same_v<T, bl>)
 				{
 					filename = "blDrawableImage" + to_str(SIZE) + ".json";
-				}
-				else if constexpr (::std::is_base_of_v<T, serialization::Serializable>)
-				{
-					filename = "DrawableImage.json";
 				}
 
 				return filename;
@@ -453,75 +448,6 @@ namespace np
 			inline math::fltPointVector FloodFillWithNeighbors(const ui16 x, const ui16 y, const T& oldValue, const T& newValue)
 			{
 				return FloodFillWithNeighbors(math::ui16Point{.x = x, .y = y}, oldValue, newValue);
-			}
-
-			/**
-			 serialize method
-			 */
-			virtual ostrm& Insertion(ostrm& os, str filepath) const override
-			{
-				nlohmann::json json;
-				json["origin"] = nlohmann::json::array();
-				json["origin"].push_back(_origin.x);
-				json["origin"].push_back(_origin.y);
-
-				json["aabb"] = nlohmann::json::object();
-				json["aabb"]["LowerLeft"] = nlohmann::json::array();
-				json["aabb"]["LowerLeft"].push_back(_aabb.LowerLeft.x);
-				json["aabb"]["LowerLeft"].push_back(_aabb.LowerLeft.y);
-
-				json["aabb"]["UpperRight"] = nlohmann::json::array();
-				json["aabb"]["UpperRight"].push_back(_aabb.UpperRight.x);
-				json["aabb"]["UpperRight"].push_back(_aabb.UpperRight.y);
-
-				json[BaseImageDir] = fs::Append(fs::GetParentPath(filepath), BaseImageDir);
-
-				os << json.dump(NP_ENGINE_JSON_SPACING);
-				base::SaveTo(json[BaseImageDir]);
-
-				return os;
-			}
-
-			/**
-			 deserialize method
-			*/
-			virtual istrm& Extraction(istrm& is, str filepath) override
-			{
-				nlohmann::json json;
-				is >> json;
-
-				_origin.x = json["origin"][0];
-				_origin.y = json["origin"][1];
-
-				_aabb.LowerLeft.x = json["aabb"]["LowerLeft"][0];
-				_aabb.LowerLeft.y = json["aabb"]["LowerLeft"][1];
-
-				_aabb.UpperRight.x = json["aabb"]["UpperRight"][0];
-				_aabb.UpperRight.y = json["aabb"]["UpperRight"][1];
-
-				base::LoadFrom(json[BaseImageDir]);
-
-				return is;
-			}
-
-			/**
-			 save oursellves inside the given dirpath
-			 return if the save was successful or not
-			 */
-			virtual bl SaveTo(str dirpath) const override
-			{
-				return DrawableImage<T, SIZE>::template SaveAs<DrawableImage<T, SIZE>>(fs::Append(dirpath, GetFilename()),
-																					   this);
-			}
-
-			/**
-			 load outselves from the given dirpath
-			 return if the load was successful or not
-			 */
-			virtual bl LoadFrom(str dirpath) override
-			{
-				return DrawableImage<T, SIZE>::template LoadAs<DrawableImage<T, SIZE>>(fs::Append(dirpath, GetFilename()),
-																					   this);
 			}
 		};
 

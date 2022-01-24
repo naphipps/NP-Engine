@@ -1,12 +1,8 @@
+//##===----------------------------------------------------------------------===##//
 //
-//  primitive_types.hpp
-//  Project Space
+//  Author: Nathan Phipps 12/30/20
 //
-//  Created by Nathan Phipps on 12/30/20.
-//  Copyright © 2020 Nathan Phipps. All rights reserved.
-//
-
-// TODO: refactor these "primitive_types" files to Pascal casing
+//##===----------------------------------------------------------------------===##//
 
 #ifndef NP_ENGINE_PRIMITIVE_TYPES_HPP
 #define NP_ENGINE_PRIMITIVE_TYPES_HPP
@@ -58,7 +54,5 @@ using bl = bool;
 #define I32_MAX INT32_MAX
 #define I64_MIN INT64_MIN
 #define I64_MAX INT64_MAX
-
-// TODO: add MIN and MAX for flt, dbl, siz, dif, chr, uchr, wchr, u16chr, u32chr, bl, etc
 
 #endif /* NP_ENGINE_PRIMITIVE_TYPES_HPP */

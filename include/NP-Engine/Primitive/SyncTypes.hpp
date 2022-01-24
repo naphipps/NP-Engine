@@ -1,9 +1,8 @@
+//##===----------------------------------------------------------------------===##//
 //
-//  sync_types.hpp
-//  NP-Engine
+//  Author: Nathan Phipps 2/23/21
 //
-//  Created by Nathan Phipps on 2/23/21.
-//
+//##===----------------------------------------------------------------------===##//
 
 #ifndef NP_ENGINE_SYNC_TYPES_HPP
 #define NP_ENGINE_SYNC_TYPES_HPP

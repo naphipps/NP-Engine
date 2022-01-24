@@ -9,6 +9,8 @@
 #ifndef NP_ENGINE_SERIALIZABLE_HPP
 #define NP_ENGINE_SERIALIZABLE_HPP
 
+#include <fstream>
+
 #include "NP-Engine/Primitive/Primitive.hpp"
 #include "NP-Engine/Filesystem/Filesystem.hpp"
 #include "NP-Engine/String/String.hpp"
@@ -110,7 +112,7 @@ namespace np
 
 				if ((parent_path.size() == 0 && filepath.size() > 0) || fs::Exists(parent_path))
 				{
-					ofstrm os;
+					::std::ofstream os;
 					os.open(filepath);
 					Insertion(os, filepath);
 					os.close();
@@ -131,7 +133,7 @@ namespace np
 
 				if (fs::Exists(filepath))
 				{
-					ifstrm is;
+					::std::ifstream is;
 					is.open(filepath);
 					Extraction(is, filepath);
 					is.close();
@@ -146,13 +148,13 @@ namespace np
 			 serialization method for us to write
 			 we require our objects to know which filepath they are a part of
 			 */
-			virtual ostrm& Insertion(ostrm& os, str filepath) const = 0;
+			virtual ::std::ostream& Insertion(::std::ostream& os, str filepath) const = 0;
 
 			/**
 			 deserialization method for us to read
 			 we require our objects to know which filepath they are a part of
 			 */
-			virtual istrm& Extraction(istrm& is, str filepath) = 0;
+			virtual ::std::istream& Extraction(::std::istream& is, str filepath) = 0;
 
 			/**
 			 save oursellves inside the given dirpath

@@ -196,12 +196,11 @@ set(NP_ENGINE_PLATFORM_HPP
 )
 
 set(NP_ENGINE_PRIMITIVE_HPP
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Primitive/atomic_types.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Primitive/AtomicTypes.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Primitive/Primitive.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Primitive/primitive_types.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Primitive/primitive_values.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Primitive/stream_types.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Primitive/sync_types.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Primitive/PrimitiveTypes.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Primitive/PrimitiveValues.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Primitive/SyncTypes.hpp
 )
 
 set(NP_ENGINE_RANDOM_HPP
