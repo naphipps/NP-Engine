@@ -76,8 +76,6 @@ namespace np::app
 		}
 	} // namespace __detail
 
-	// TODO: add summary comments
-
 	class Application : public Layer
 	{
 	public:
@@ -157,8 +155,6 @@ namespace np::app
 		}
 
 	public:
-		virtual ~Application() {}
-
 		void Run()
 		{
 			Run(0, nullptr);
