@@ -9,21 +9,8 @@
 
 #include <thread>
 
-#if NP_ENGINE_PLATFORM_IS_LINUX
-
-	// TODO: cleanup headers
-	#include <pthread.h> //pthread_setaffinity_np
-	#include <unistd.h> //may not be needed
-	#include <sched.h> //cpu_set_t
-
-#elif NP_ENGINE_PLATFORM_IS_WINDOWS
-
-	// TODO: cleanup headers
-	#include <Windows.h>
-
-#endif
-
 #include "NP-Engine/Primitive/Primitive.hpp"
+#include "NP-Engine/Platform/Platform.hpp"
 
 namespace np::concurrency
 {
@@ -103,33 +90,7 @@ namespace np::concurrency
 			}
 		}
 
-		bl SetAffinity(const ui8 core_number)
-		{
-			// TODO: implement thread affinity support
-			bl set = false;
-
-			if (!IsThreadAllocationClear())
-			{
-                // Apple does NOT support thread affinity - not even the pthread.h implementation supports it
-#if NP_ENGINE_PLATFORM_IS_LINUX
-                //TODO: implement something like this...
-                ::std::thread* std_thread = GetStdThreadPtr();
-                cpu_set_t cpuset;
-                CPU_ZERO(&cpuset);
-                CPU_SET((ui32)core_number, &cpuset);
-                i32 rc = pthread_setaffinity_np(std_thread->native_handle(), sizeof(cpu_set_t), &cpuset);
-                
-#elif NP_ENGINE_PLATFORM_IS_WINDOWS
-                //TODO: implement something like this...
-                ::std::thread* std_thread = GetStdThreadPtr();
-                DWORD_PTR mask = 1ull << core_number;
-                SetThreadAffinityMask(_handle, mask);
-                
-#endif
-			}
-
-			return set;
-		}
+		bl SetAffinity(const i32 core_number);
 
 		bl IsRunning() const
 		{
@@ -146,10 +107,7 @@ namespace np::concurrency
 	{
 		using namespace ::std::this_thread;
 
-		static inline bl SetAffinity(ui8 core_number)
-		{
-			return false; // TODO: implement
-		}
+		bl SetAffinity(const i32 core_number);
 	} // namespace ThisThread
 } // namespace np::concurrency
 

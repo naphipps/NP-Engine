@@ -301,6 +301,10 @@ else()
 	)
 endif()
 
+set(NP_ENGINE_CONCURRENCY_CPP
+	Concurrency/Thread.cpp
+)
+
 set(NP_ENGINE_GRAPHICS_CPP
 	#Graphics/Graphics.cpp
 )
@@ -364,6 +368,7 @@ set(NP_ENGINE_WINDOW_CPP
 )
 
 set(NP_ENGINE_SOURCE_FILES
+	${NP_ENGINE_CONCURRENCY_CPP}
 	${NP_ENGINE_INSIGHT_CPP}
 	${NP_ENGINE_MATH_CPP}
 	${NP_ENGINE_MEMORY_CPP}
@@ -477,7 +482,7 @@ configure_file(
 
 source_group("" FILES ${NP_ENGINE_HPP})
 source_group(Application FILES ${NP_ENGINE_APPLICATION_HPP} ${NP_ENGINE_APPPLICATION_CPP})
-source_group(Concurrency FILES ${NP_ENGINE_CONCURRENCY_HPP})
+source_group(Concurrency FILES ${NP_ENGINE_CONCURRENCY_HPP} ${NP_ENGINE_CONCURRENCY_CPP})
 source_group(Container FILES ${NP_ENGINE_CONTAINER_HPP})
 source_group(Core FILES ${NP_ENGINE_CORE_HPP})
 source_group(ECS FILES ${NP_ENGINE_ECS_HPP})
