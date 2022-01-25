@@ -15,6 +15,8 @@ namespace np
 {
 	namespace math
 	{
+		//TODO: I think we should create a separate repo to house code like this that have their own citation comments, then we can include them via vendor include
+
 		/*
 		 Implementation of the Sobkow-Pospisil-Yang clipping algorithm, with fixed clipping functions,
 		 and a return struct providing more insight.
