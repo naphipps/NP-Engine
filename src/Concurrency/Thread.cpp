@@ -34,8 +34,7 @@ namespace np::concurrency
 			cpu_set_t cpuset;
 			CPU_ZERO(&cpuset);
 			CPU_SET((ui32)core_number, &cpuset);
-			i32 rc = pthread_setaffinity_np(std_thread->native_handle(), sizeof(cpu_set_t), &cpuset);
-			set = rc == 0;
+			set = 0 == pthread_setaffinity_np(std_thread->native_handle(), sizeof(cpu_set_t), &cpuset);
 
 	#elif NP_ENGINE_PLATFORM_IS_WINDOWS
 			::std::thread* std_thread = GetStdThreadPtr();
@@ -67,8 +66,7 @@ namespace np::concurrency
 				cpu_set_t cpuset;
 				CPU_ZERO(&cpuset);
 				CPU_SET((ui32)core_number, &cpuset);
-				i32 rc = pthread_setaffinity_np(pthread_self(), sizeof(cpu_set_t), &cpuset);
-				set = rc == 0;
+				set = 0 == pthread_setaffinity_np(pthread_self(), sizeof(cpu_set_t), &cpuset);
 
 	#elif NP_ENGINE_PLATFORM_IS_WINDOWS
 				HANDLE current_thread = GetCurrentThread();

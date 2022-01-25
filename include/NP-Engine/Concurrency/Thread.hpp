@@ -77,8 +77,6 @@ namespace np::concurrency
 		{
 			if (!IsThreadAllocationClear())
 			{
-				// TODO: do we need to handle affinity here??
-
 				// deallocate std::Thread -- should always be joinable here
 				::std::thread* std_thread = GetStdThreadPtr();
 				if (std_thread->joinable())
