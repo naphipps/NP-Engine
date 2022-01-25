@@ -90,7 +90,7 @@ namespace np::concurrency
 			}
 		}
 
-		bl SetAffinity(const i32 core_number);
+		bl SetAffinity(i32 core_number);
 
 		bl IsRunning() const
 		{
@@ -107,7 +107,7 @@ namespace np::concurrency
 	{
 		using namespace ::std::this_thread;
 
-		bl SetAffinity(const i32 core_number);
+		bl SetAffinity(i32 core_number);
 	} // namespace ThisThread
 } // namespace np::concurrency
 
