@@ -240,9 +240,6 @@ namespace np::random
 	using Random64 = RandomEngine<::pcg64>;
 	using Random32Seed = Random32::SeedType;
 	using Random64Seed = Random64::SeedType;
-
-	extern Random32 DefaultRandom32;
-	extern Random64 DefaultRandom64;
 } // namespace np::random
 
 #endif /* NP_ENGINE_RANDOM_ENGINE_HPP */

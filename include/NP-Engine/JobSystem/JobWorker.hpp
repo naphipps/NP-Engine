@@ -49,6 +49,7 @@ namespace np::js
 		container::vector<JobWorker*> _coworkers;
 		ui32 _coworker_index;
 		time::DurationMilliseconds _bad_steal_sleep_duration;
+		random::Random32 _random_engine;
 
 		JobRecordQueue& GetQueueFromPriority(JobPriority priority)
 		{
@@ -284,7 +285,7 @@ namespace np::js
 			NP_PROFILE_FUNCTION();
 			_keep_working.store(true, mo_release);
 			_thread_pool = &pool;
-			_coworker_index = random::DefaultRandom32.GetLemireWithinRange(_coworkers.size());
+			_coworker_index = _random_engine.GetLemireWithinRange(_coworkers.size());
 			_thread_token = _thread_pool->CreateThread(thread_affinity, &JobWorker::WorkerThreadProcedure, this);
 		}
 
