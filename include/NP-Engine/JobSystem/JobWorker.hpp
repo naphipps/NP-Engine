@@ -33,7 +33,7 @@ namespace np::js
 
 	private:
 		atm_bl _keep_working;
-		atm_bl _work_procedure_incomplete;
+		atm_bl _work_procedure_complete;
 		concurrency::ThreadToken _thread_token;
 		concurrency::ThreadPool* _thread_pool;
 
@@ -124,8 +124,6 @@ namespace np::js
 		{
 			NP_PROFILE_SCOPE("WorkerThreadProcedure: " + to_str((ui64)this));
 
-			_work_procedure_incomplete.store(true, mo_release);
-
 			while (_keep_working.load(mo_acquire))
 			{
 				JobRecord record = GetNextJob();
@@ -168,7 +166,7 @@ namespace np::js
 				}
 			}
 
-			_work_procedure_incomplete.store(false, mo_release);
+			_work_procedure_complete.store(true, mo_release);
 		}
 
 		Job* CreateJob(Job::Function& function, Job* dependent = nullptr)
@@ -215,7 +213,7 @@ namespace np::js
 			_lower_job_deque(JOB_DEQUEUE_SIZE),
 			_lowest_job_deque(JOB_DEQUEUE_SIZE),
 			_keep_working(false),
-			_work_procedure_incomplete(false),
+			_work_procedure_complete(true),
 			_thread_pool(nullptr),
 			_coworker_index(0),
 			_bad_steal_sleep_duration(NP_ENGINE_APPLICATION_LOOP_DURATION)
@@ -283,8 +281,9 @@ namespace np::js
 		void StartWork(concurrency::ThreadPool& pool, i32 thread_affinity = -1)
 		{
 			NP_PROFILE_FUNCTION();
-			_keep_working.store(true, mo_release);
 			_thread_pool = &pool;
+			_keep_working.store(true, mo_release);
+			_work_procedure_complete.store(false, mo_release);
 			_coworker_index = _random_engine.GetLemireWithinRange(_coworkers.size());
 			_thread_token = _thread_pool->CreateThread(thread_affinity, &JobWorker::WorkerThreadProcedure, this);
 		}
@@ -298,7 +297,7 @@ namespace np::js
 			{
 				concurrency::ThisThread::yield();
 			}
-			while (_work_procedure_incomplete);
+			while (!_work_procedure_complete.load(mo_acquire));
 
 			if (_thread_pool && _thread_token.IsValid())
 			{
