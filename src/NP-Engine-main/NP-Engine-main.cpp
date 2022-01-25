@@ -12,6 +12,8 @@ extern ::np::app::Application* ::np::app::CreateApplication(::np::memory::Alloca
 
 i32 main(i32 argc, chr** argv)
 {
+	::np::concurrency::ThisThread::SetAffinity(0);
+
 	i32 retval = 0;
 	str message;
 	::np::app::Popup::Style style = ::np::app::Popup::DefaultStyle;
