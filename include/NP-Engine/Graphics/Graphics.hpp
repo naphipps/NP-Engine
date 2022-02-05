@@ -9,8 +9,6 @@
 
 #include "NP-Engine/Foundation/Foundation.hpp"
 
-// TODO: move all contents of this file to Graphics.hpp, and Graphics.cpp
-
 #include "NP-Engine/Primitive/Primitive.hpp"
 #include "NP-Engine/Platform/Platform.hpp"
 #include "NP-Engine/Container/Container.hpp"
@@ -19,14 +17,15 @@
 #include "NP-Engine/System/System.hpp"
 #include "NP-Engine/String/String.hpp"
 
+#include "NP-Engine/Vendor/VulkanInclude.hpp"
+#include "NP-Engine/Vendor/GlmInclude.hpp"
+
 #include "RPI/RPI.hpp"
 #include "GraphicsEvents.hpp"
 
-#include <vulkan/vulkan.hpp>
-#include <glm/glm.hpp> //TODO: move this to math
-
 namespace np::graphics
 {
+	// TODO: figure out if we need these functions, and if so, should be put them in Graphics.cpp?
 	static void Init() {}
 
 	static void Shutdown() {}
