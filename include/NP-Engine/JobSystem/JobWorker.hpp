@@ -85,24 +85,33 @@ namespace np::js
 			return *deque;
 		}
 
+		/*
+			returns a valid && CanExecute() job, or invalid job
+		*/
 		JobRecord GetNextJob()
 		{
 			JobRecord next_job;
-
-			if (_highest_job_deque.try_dequeue(next_job)) {}
-			else if (_higher_job_deque.try_dequeue(next_job))
-			{}
-			else if (_normal_job_deque.try_dequeue(next_job))
-			{}
-			else if (_lower_job_deque.try_dequeue(next_job))
-			{}
-			else if (_lowest_job_deque.try_dequeue(next_job))
-			{}
-			else
+			for (siz i = 0; i < JobPrioritiesHighToLow.size() && !next_job.IsValid(); i++)
 			{
-				next_job.Invalidate();
-			}
+				JobRecordQueue& queue = GetQueueFromPriority(JobPrioritiesHighToLow[i]);
+				queue.try_dequeue(next_job);
 
+				if (next_job.IsValid())
+				{
+					if (next_job.GetJob().IsEnabled())
+					{
+						if (!next_job.GetJob().CanExecute())
+						{
+							AddJob(NormalizePriority(next_job.GetPriority()), memory::AddressOf(next_job.GetJob()));
+							next_job.Invalidate();
+						}
+					}
+					else
+					{
+						NP_ASSERT(false, "next_job must be enabled when valid at all times - probable memory leak");
+					}
+				}
+			}
 			return next_job;
 		}
 
@@ -127,7 +136,7 @@ namespace np::js
 			while (_keep_working.load(mo_acquire))
 			{
 				JobRecord record = GetNextJob();
-				if (record.IsValid() && record.GetJob().CanExecute())
+				if (record.IsValid())
 				{
 					NP_PROFILE_SCOPE("executing my Job");
 					record.Execute();
@@ -135,13 +144,9 @@ namespace np::js
 				}
 				else
 				{
-					if (record.IsValid() && record.GetJob().IsEnabled())
-					{
-						AddJob(NormalizePriority(record.GetPriority()), &record.GetJob());
-					}
-
+					// we did not find next job so we steal from coworker
 					JobRecord stolen = GetStolenJob();
-					if (stolen.IsValid() && stolen.GetJob().CanExecute())
+					if (stolen.IsValid())
 					{
 						NP_PROFILE_SCOPE("executing stolen Job");
 						stolen.Execute();
@@ -149,19 +154,12 @@ namespace np::js
 					}
 					else
 					{
-						if (stolen.IsValid() && stolen.GetJob().IsEnabled())
-						{
-							AddJob(NormalizePriority(stolen.GetPriority()), &stolen.GetJob());
-						}
-						else
-						{
-							// we did not steal a good job thus we want to steal from someone else
-							_coworker_index = (_coworker_index + 1) % _coworkers.size();
+						// we did not steal a good job thus we want to steal from someone else
+						_coworker_index = (_coworker_index + 1) % _coworkers.size();
 
-							// we yield/sleep just in case all jobs are done
-							concurrency::ThisThread::yield();
-							concurrency::ThisThread::sleep_for(_bad_steal_sleep_duration);
-						}
+						// we yield/sleep just in case all jobs are done
+						concurrency::ThisThread::yield();
+						concurrency::ThisThread::sleep_for(_bad_steal_sleep_duration);
 					}
 				}
 			}
