@@ -57,23 +57,23 @@ namespace np::js
 
 			switch (priority)
 			{
-			case JobPriority::HIGHEST:
+			case JobPriority::Highest:
 				deque = &_highest_job_deque;
 				break;
 
-			case JobPriority::HIGHER:
+			case JobPriority::Higher:
 				deque = &_higher_job_deque;
 				break;
 
-			case JobPriority::NORMAL:
+			case JobPriority::Normal:
 				deque = &_normal_job_deque;
 				break;
 
-			case JobPriority::LOWER:
+			case JobPriority::Lower:
 				deque = &_lower_job_deque;
 				break;
 
-			case JobPriority::LOWEST:
+			case JobPriority::Lowest:
 				deque = &_lowest_job_deque;
 				break;
 

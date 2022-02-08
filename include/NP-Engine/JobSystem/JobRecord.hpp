@@ -21,7 +21,7 @@ namespace np::js
 		Job* _job;
 
 	public:
-		JobRecord(): JobRecord(JobPriority::NORMAL, nullptr) {}
+		JobRecord(): JobRecord(JobPriority::Normal, nullptr) {}
 
 		JobRecord(JobPriority priority, const Job* job): _priority(priority), _job(const_cast<Job*>(job)) {}
 

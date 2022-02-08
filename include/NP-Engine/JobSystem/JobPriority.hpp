@@ -8,17 +8,18 @@
 #define NP_ENGINE_JOB_PRIORITY_HPP
 
 #include "NP-Engine/Primitive/Primitive.hpp"
+#include "NP-Engine/Container/Container.hpp"
 #include "NP-Engine/Insight/Insight.hpp"
 
 namespace np::js
 {
 	enum class JobPriority : ui32
 	{
-		HIGHEST,
-		HIGHER,
-		NORMAL,
-		LOWER,
-		LOWEST
+		Highest,
+		Higher,
+		Normal,
+		Lower,
+		Lowest
 	};
 
 	static inline JobPriority NormalizePriority(JobPriority priority)
@@ -27,24 +28,24 @@ namespace np::js
 
 		switch (priority)
 		{
-		case JobPriority::HIGHEST:
-			return_priority = JobPriority::HIGHER;
+		case JobPriority::Highest:
+			return_priority = JobPriority::Higher;
 			break;
 
-		case JobPriority::HIGHER:
-			return_priority = JobPriority::NORMAL;
+		case JobPriority::Higher:
+			return_priority = JobPriority::Normal;
 			break;
 
-		case JobPriority::NORMAL:
-			return_priority = JobPriority::NORMAL;
+		case JobPriority::Normal:
+			return_priority = JobPriority::Normal;
 			break;
 
-		case JobPriority::LOWER:
-			return_priority = JobPriority::NORMAL;
+		case JobPriority::Lower:
+			return_priority = JobPriority::Normal;
 			break;
 
-		case JobPriority::LOWEST:
-			return_priority = JobPriority::LOWER;
+		case JobPriority::Lowest:
+			return_priority = JobPriority::Lower;
 			break;
 
 		default:
@@ -54,6 +55,11 @@ namespace np::js
 
 		return return_priority;
 	}
+
+	constexpr static container::array<JobPriority, 5> JobPrioritiesHighToLow{
+		JobPriority::Highest, JobPriority::Higher, JobPriority::Normal, JobPriority::Lower, JobPriority::Lowest};
+	constexpr static container::array<JobPriority, 5> JobPrioritiesLowToHigh{
+		JobPriority::Lowest, JobPriority::Lower, JobPriority::Normal, JobPriority::Higher, JobPriority::Highest};
 } // namespace np::js
 
 #endif /* NP_ENGINE_JOB_PRIORITY_HPP */
