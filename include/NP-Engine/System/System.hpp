@@ -64,9 +64,9 @@ namespace np::system
 		::std::signal(SIGTERM, handler);
 	}
 
-	static inline void Run(::std::string command)
+	static inline i32 Run(::std::string command)
 	{
-		::std::system(command.c_str());
+		return ::std::system(command.c_str());
 	}
 } // namespace np::system
 
