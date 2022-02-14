@@ -191,7 +191,6 @@ set(NP_ENGINE_PHYSICS_HPP
 
 set(NP_ENGINE_PLATFORM_HPP
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Platform/Platform.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Platform/PlatformConstants.hpp
 )
 
 set(NP_ENGINE_PRIMITIVE_HPP
