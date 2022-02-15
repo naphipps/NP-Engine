@@ -7,6 +7,8 @@
 #ifndef NP_EGNINE_EVENT_SUBMITTER_HPP
 #define NP_EGNINE_EVENT_SUBMITTER_HPP
 
+#include <utility>
+
 #include "NP-Engine/Primitive/Primitive.hpp"
 
 #include "EventQueue.hpp"
