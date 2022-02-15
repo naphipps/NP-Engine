@@ -44,7 +44,7 @@ namespace np::app
 
 			for (auto it = _scenes.begin(); it != _scenes.end(); it++)
 			{
-				if ((*it)->Renderer().IsAttachedToWindow(window))
+				if ((*it)->GetRenderer().IsAttachedToWindow(window))
 				{
 					_unacquired_scenes.erase(*it);
 					_acquired_scenes.erase(*it);
@@ -74,7 +74,7 @@ namespace np::app
 
 			for (graphics::Scene*& scene : _scenes)
 			{
-				if (scene->Renderer().IsAttachedToWindow(window))
+				if (scene->GetRenderer().IsAttachedToWindow(window))
 				{
 					scene->AdjustForWindowResize(window);
 					break;

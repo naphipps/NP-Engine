@@ -43,13 +43,13 @@ namespace np::graphics
 			return _renderer != nullptr;
 		}
 
-		graphics::Renderer& Renderer()
+		graphics::Renderer& GetRenderer()
 		{
 			NP_ASSERT(HasRenderer(), "Cannot get renderer when one is not attached to this scene.");
 			return *_renderer;
 		}
 
-		const graphics::Renderer& Renderer() const
+		const graphics::Renderer& GetRenderer() const
 		{
 			NP_ASSERT(HasRenderer(), "Cannot get renderer when one is not attached to this scene.");
 			return *_renderer;
@@ -59,7 +59,7 @@ namespace np::graphics
 		{
 			NP_ASSERT(HasRenderer(), "Cannot draw scene without renderer.");
 
-			Renderer().Draw();
+			GetRenderer().Draw();
 
 			// TODO: loop through Entities to get camera, and objects to renderer, etc
 		}
