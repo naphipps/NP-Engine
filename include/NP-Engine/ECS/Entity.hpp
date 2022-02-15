@@ -67,19 +67,9 @@ namespace np::ecs
 			}
 		}
 
-		operator bl() const
-		{
-			return IsValid();
-		}
-
 		operator ::entt::entity() const
 		{
 			return _entity;
-		}
-
-		operator ui32() const
-		{
-			return (ui32)_entity;
 		}
 
 		void Clear()
@@ -107,7 +97,7 @@ namespace np::ecs
 		template <typename T, typename... Args>
 		T& Add(Args&&... args)
 		{
-			NP_ASSERT(Has<T>(), "Cannot add a component we already have.");
+			NP_ASSERT(!Has<T>(), "Cannot add a component we already have.");
 			return _registry->emplace<T>(_entity, ::std::forward<Args>(args)...);
 		}
 	};

@@ -11,6 +11,4 @@
 
 #include "Entity.hpp"
 
-// TODO: figure out how we want to handle ECS
-
 #endif /* NP_ENGINE_ECS_HPP */
