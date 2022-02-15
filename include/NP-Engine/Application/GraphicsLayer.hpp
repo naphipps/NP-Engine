@@ -35,26 +35,26 @@ namespace np::app
 		memory::TraitAllocator _allocator;
 		container::vector<graphics::Renderer*> _renderers;
 
-		virtual void HandleCreateRendererForWindow(event::Event& event)
+		virtual void HandleCreateRendererForWindow(event::Event& e)
 		{
 			graphics::Renderer* renderer = CreateRenderer();
-			renderer->AttachToWindow(*event.RetrieveData<graphics::GraphicsCreateRendererForWindowEvent::DataType>().window);
-			event.SetHandled();
+			renderer->AttachToWindow(*e.RetrieveData<graphics::GraphicsCreateRendererForWindowEvent::DataType>().window);
+			e.SetHandled();
 		}
 
-		virtual void AdjustForWindowClose(event::Event& event)
+		virtual void AdjustForWindowClose(event::Event& e)
 		{
 			for (graphics::Renderer* renderer : _renderers)
 			{
-				renderer->DetachFromWindow(*event.RetrieveData<window::WindowCloseEvent::DataType>().window);
+				renderer->DetachFromWindow(*e.RetrieveData<window::WindowCloseEvent::DataType>().window);
 			}
 		}
 
-		virtual void AdjustForWindowResize(event::Event& event)
+		virtual void AdjustForWindowResize(event::Event& e)
 		{
 			for (graphics::Renderer* renderer : _renderers)
 			{
-				renderer->AdjustForWindowResize(*event.RetrieveData<window::WindowResizeEvent::DataType>().window);
+				renderer->AdjustForWindowResize(*e.RetrieveData<window::WindowResizeEvent::DataType>().window);
 			}
 		}
 

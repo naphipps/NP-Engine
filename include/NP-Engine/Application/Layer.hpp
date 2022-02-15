@@ -18,7 +18,7 @@ namespace np::app
 	class Layer : public event::EventHandler
 	{
 	protected:
-		virtual void HandleEvent(event::Event& event) {}
+		virtual void HandleEvent(event::Event& e) {}
 
 	public:
 		Layer(event::EventSubmitter& event_submitter): event::EventHandler(event_submitter) {}

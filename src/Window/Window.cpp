@@ -9,11 +9,11 @@
 
 namespace np::window
 {
-	void Window::HandleClose(event::Event& event)
+	void Window::HandleClose(event::Event& e)
 	{
-		if (event.RetrieveData<WindowCloseEvent::DataType>().window == this)
+		if (e.RetrieveData<WindowCloseEvent::DataType>().window == this)
 		{
-			event.SetCanBeHandled();
+			e.SetCanBeHandled();
 
 			if (!_show_procedure_is_complete.load(mo_acquire))
 			{
@@ -25,16 +25,16 @@ namespace np::window
 			else
 			{
 				_thread.Dispose();
-				event.SetHandled();
+				e.SetHandled();
 			}
 		}
 	}
 
-	void Window::HandleResize(event::Event& event)
+	void Window::HandleResize(event::Event& e)
 	{
-		if (event.RetrieveData<WindowResizeEvent::DataType>().window == this)
+		if (e.RetrieveData<WindowResizeEvent::DataType>().window == this)
 		{
-			event.SetHandled();
+			e.SetHandled();
 		}
 	}
 
