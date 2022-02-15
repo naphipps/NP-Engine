@@ -7,7 +7,9 @@
 #ifndef NP_ENGINE_ECS_HPP
 #define NP_ENGINE_ECS_HPP
 
-#include "NP-Engine/Vendor/EnttInclude.hpp"
+#include "NP-Engine/Foundation/Foundation.hpp"
+
+#include "Entity.hpp"
 
 // TODO: figure out how we want to handle ECS
 
