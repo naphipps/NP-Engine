@@ -102,6 +102,22 @@ namespace np::graphics::rhi
 			return "Vulkan";
 		}
 
+		virtual bl IsAttachedToWindow(window::Window& window) const override
+		{
+			bl is_attached = false;
+
+			for (auto it = _pipelines.begin(); it != _pipelines.end(); it++)
+			{
+				if (memory::AddressOf((*it)->Surface().Window()) == memory::AddressOf(window))
+				{
+					is_attached = true;
+					break;
+				}
+			}
+
+			return is_attached;
+		}
+
 		void AttachToWindow(window::Window& window) override
 		{
 			VulkanSurface& surface = *Create<VulkanSurface>(_surfaces, *_instances.front(), window);

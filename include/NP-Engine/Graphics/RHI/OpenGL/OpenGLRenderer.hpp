@@ -22,8 +22,6 @@ namespace np::graphics::rhi
 	class OpenGLRenderer : public Renderer
 	{
 	public:
-		OpenGLRenderer() {}
-
 		RhiType GetRhiType() const override
 		{
 			return RhiType::OpenGL;
@@ -41,6 +39,11 @@ namespace np::graphics::rhi
 		void Draw() override {}
 
 		void AdjustForWindowResize(window::Window& window) override {}
+
+		virtual bl IsAttachedToWindow(window::Window& window) const override
+		{
+			return false;
+		}
 	};
 } // namespace np::graphics::rhi
 

@@ -61,8 +61,6 @@ set(NP_ENGINE_FOUNDATION_HPP
 
 set(NP_ENGINE_GRAPHICS_HPP
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/Graphics.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/GraphicsEvents.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/GraphicsCreateRendererForWindowEvent.hpp
 )
 
 set(NP_ENGINE_GRAPHICS_RPI_HPP
@@ -74,7 +72,7 @@ set(NP_ENGINE_GRAPHICS_RPI_HPP
 	# ${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/Device.hpp
 	# ${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/Image.hpp
 	# ${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/Pipeline.hpp
-	# ${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/Scene.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/Scene.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/Shader.hpp
 	# ${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/Texture.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/RhiType.hpp
@@ -285,9 +283,7 @@ set(NP_ENGINE_HEADER_FILES
 #NP_ENGINE Source Files
 ##==--------------------------------------------------------==##
 
-set(NP_ENGINE_APPPLICATION_CPP
-	Application/WindowLayer.cpp
-)
+set(NP_ENGINE_APPPLICATION_CPP)
 
 if (APPLE)
 	set(NP_ENGINE_APPPLICATION_CPP

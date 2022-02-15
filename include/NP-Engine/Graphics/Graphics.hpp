@@ -21,7 +21,6 @@
 #include "NP-Engine/Vendor/GlmInclude.hpp"
 
 #include "RPI/RPI.hpp"
-#include "GraphicsEvents.hpp"
 
 namespace np::graphics
 {

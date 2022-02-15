@@ -9,5 +9,6 @@
 
 #include "Renderer.hpp"
 #include "Shader.hpp"
+#include "Scene.hpp"
 
 #endif /* NP_ENGINE_RPI_HPP */

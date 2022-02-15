@@ -22,8 +22,6 @@ namespace np::graphics
 	public:
 		static Renderer* Create(memory::Allocator& allocator);
 
-		virtual ~Renderer() {}
-
 		virtual void RegisterRhiType() const
 		{
 			__detail::RegisteredRhiType.store(GetRhiType(), mo_release);
@@ -37,6 +35,7 @@ namespace np::graphics
 		virtual void DetachFromWindow(window::Window& window) = 0;
 		virtual void Draw() = 0;
 		virtual void AdjustForWindowResize(window::Window& window) = 0;
+		virtual bl IsAttachedToWindow(window::Window& window) const = 0;
 	};
 } // namespace np::graphics
 

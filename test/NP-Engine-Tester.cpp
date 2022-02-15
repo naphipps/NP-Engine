@@ -10,16 +10,64 @@
 
 namespace np::app
 {
+	class GameLayer : public Layer
+	{
+	private:
+		graphics::Scene* _scene;
+
+		virtual void AdjustForWindowClose(event::Event& e)
+		{
+			if (_scene != nullptr &&
+				_scene->Renderer().IsAttachedToWindow(*e.RetrieveData<window::WindowCloseEvent::DataType>().window))
+			{
+				_scene = nullptr; // TODO: destroy content for scene
+			}
+		}
+
+		virtual void HandleEvent(event::Event& e) override
+		{
+			switch (e.GetType())
+			{
+			case event::EventType::WindowClose:
+				AdjustForWindowClose(e);
+				break;
+			default:
+				break;
+			}
+		}
+
+	public:
+		GameLayer(event::EventSubmitter& event_submitter): Layer(event_submitter), _scene(nullptr) {}
+
+		void SetScene(graphics::Scene& scene)
+		{
+			_scene = memory::AddressOf(scene);
+			// TODO: init scene, and destroy content for last scene??
+		}
+
+		void Update(time::DurationMilliseconds time_delta) override
+		{
+			if (_scene != nullptr)
+			{
+				// TODO: do stuff with the scene?
+			}
+		}
+	};
+
 	class GameApp : public Application
 	{
 	private:
 		memory::Allocator& _allocator;
+		GameLayer _game_layer;
 
 	public:
 		GameApp(memory::Allocator& application_allocator):
 			Application(Application::Properties{"My Game App"}),
-			_allocator(application_allocator)
-		{}
+			_allocator(application_allocator),
+			_game_layer(_event_submitter)
+		{
+			PushLayer(memory::AddressOf(_game_layer));
+		}
 
 		void Run(i32 argc, chr** argv) override
 		{
@@ -27,11 +75,9 @@ namespace np::app
 			::std::cout << "my title is '" << GetTitle() << "'\n";
 
 			window::Window::Properties window_properties;
-			for (siz i = 0; i < 1; i++)
-			{
-				window_properties.Title = "My Game Window >:D - " + to_str(i);
-				window::Window* window = GetWindowLayer().CreateWindow(window_properties);
-			}
+			window_properties.Title = "My Game Window >:D";
+			graphics::Scene* scene = CreateWindowScene(window_properties);
+			_game_layer.SetScene(*scene);
 
 			Application::Run(argc, argv);
 		}

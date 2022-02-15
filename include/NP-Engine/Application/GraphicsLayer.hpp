@@ -34,27 +34,60 @@ namespace np::app
 	protected:
 		memory::TraitAllocator _allocator;
 		container::vector<graphics::Renderer*> _renderers;
-
-		virtual void HandleCreateRendererForWindow(event::Event& e)
-		{
-			graphics::Renderer* renderer = CreateRenderer();
-			renderer->AttachToWindow(*e.RetrieveData<graphics::GraphicsCreateRendererForWindowEvent::DataType>().window);
-			e.SetHandled();
-		}
+		container::vector<graphics::Scene*> _scenes;
+		container::oset<graphics::Scene*> _unacquired_scenes;
+		container::oset<graphics::Scene*> _acquired_scenes;
 
 		virtual void AdjustForWindowClose(event::Event& e)
 		{
-			for (graphics::Renderer* renderer : _renderers)
+			window::Window& window = *e.RetrieveData<window::WindowCloseEvent::DataType>().window;
+
+			for (auto it = _scenes.begin(); it != _scenes.end(); it++)
 			{
-				renderer->DetachFromWindow(*e.RetrieveData<window::WindowCloseEvent::DataType>().window);
+				if ((*it)->Renderer().IsAttachedToWindow(window))
+				{
+					_unacquired_scenes.erase(*it);
+					_acquired_scenes.erase(*it);
+					memory::Destruct(*it);
+					_allocator.Deallocate(*it);
+					_scenes.erase(it);
+					break;
+				}
+			}
+
+			for (auto it = _renderers.begin(); it != _renderers.end(); it++)
+			{
+				if ((*it)->IsAttachedToWindow(window))
+				{
+					(*it)->DetachFromWindow(window);
+					memory::Destruct(*it);
+					_allocator.Deallocate(*it);
+					_renderers.erase(it);
+					break;
+				}
 			}
 		}
 
 		virtual void AdjustForWindowResize(event::Event& e)
 		{
-			for (graphics::Renderer* renderer : _renderers)
+			window::Window& window = *e.RetrieveData<window::WindowCloseEvent::DataType>().window;
+
+			for (graphics::Scene*& scene : _scenes)
 			{
-				renderer->AdjustForWindowResize(*e.RetrieveData<window::WindowResizeEvent::DataType>().window);
+				if (scene->Renderer().IsAttachedToWindow(window))
+				{
+					scene->AdjustForWindowResize(window);
+					break;
+				}
+			}
+
+			for (graphics::Renderer*& renderer : _renderers)
+			{
+				if (renderer->IsAttachedToWindow(window))
+				{
+					renderer->AdjustForWindowResize(window);
+					break;
+				}
 			}
 		}
 
@@ -62,9 +95,6 @@ namespace np::app
 		{
 			switch (e.GetType())
 			{
-			case event::EventType::GraphicsCreateRendererForWindow:
-				HandleCreateRendererForWindow(e);
-				break;
 			case event::EventType::WindowClose:
 				AdjustForWindowClose(e);
 				break;
@@ -166,6 +196,14 @@ namespace np::app
 			}
 		}
 
+		graphics::Scene* CreateScene(graphics::Renderer& renderer)
+		{
+			memory::Block block = _allocator.Allocate(sizeof(graphics::Scene));
+			memory::Construct<graphics::Scene>(block, renderer);
+			_unacquired_scenes.insert(static_cast<graphics::Scene*>(block.ptr));
+			return _scenes.emplace_back(static_cast<graphics::Scene*>(block.ptr));
+		}
+
 	public:
 		GraphicsLayer(event::EventSubmitter& event_submitter): Layer(event_submitter)
 		{
@@ -174,6 +212,12 @@ namespace np::app
 
 		virtual ~GraphicsLayer()
 		{
+			for (auto it = _scenes.begin(); it != _scenes.end(); it++)
+			{
+				memory::Destruct(*it);
+				_allocator.Deallocate(*it);
+			}
+
 			for (auto it = _renderers.begin(); it != _renderers.end(); it++)
 			{
 				memory::Destruct(*it);
@@ -181,9 +225,12 @@ namespace np::app
 			}
 		}
 
-		graphics::Renderer* CreateRenderer()
+		graphics::Renderer* CreateRenderer(window::Window& window)
 		{
-			return _renderers.emplace_back(graphics::Renderer::Create(_allocator));
+			graphics::Renderer* renderer = graphics::Renderer::Create(_allocator);
+			renderer->AttachToWindow(window);
+			CreateScene(*renderer);
+			return _renderers.emplace_back(renderer);
 		}
 
 		virtual event::EventCategory GetHandledCategories() const override
@@ -191,10 +238,33 @@ namespace np::app
 			return (event::EventCategory)((ui64)event::EventCategory::Graphics | (ui64)event::EventCategory::Window);
 		}
 
+		graphics::Scene* AcquireScene()
+		{
+			graphics::Scene* scene = nullptr;
+
+			if (!_unacquired_scenes.empty())
+			{
+				scene = *_unacquired_scenes.begin();
+				_unacquired_scenes.erase(scene);
+				_acquired_scenes.insert(scene);
+			}
+
+			return scene;
+		}
+
+		void ReleaseScene(graphics::Scene* scene)
+		{
+			if (_acquired_scenes.find(scene) != _acquired_scenes.end())
+			{
+				_acquired_scenes.erase(scene);
+				_unacquired_scenes.insert(scene);
+			}
+		}
+
 		void Draw()
 		{
-			for (graphics::Renderer* renderer : _renderers)
-				renderer->Draw();
+			for (auto it = _acquired_scenes.begin(); it != _acquired_scenes.end(); it++)
+				(*it)->Draw();
 		}
 	};
 } // namespace np::app
