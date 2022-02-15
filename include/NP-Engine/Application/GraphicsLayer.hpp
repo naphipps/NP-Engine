@@ -183,9 +183,7 @@ namespace np::app
 
 		graphics::Renderer* CreateRenderer()
 		{
-			graphics::Renderer* renderer = graphics::Renderer::Create(_allocator);
-			_renderers.emplace_back(renderer);
-			return renderer;
+			return _renderers.emplace_back(graphics::Renderer::Create(_allocator));
 		}
 
 		virtual event::EventCategory GetHandledCategories() const override
