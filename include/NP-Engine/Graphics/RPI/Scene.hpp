@@ -7,64 +7,40 @@
 #ifndef NP_ENGINE_RPI_SCENE_HPP
 #define NP_ENGINE_RPI_SCENE_HPP
 
+#include "NP-Engine/Primitive/Primitive.hpp"
 #include "NP-Engine/ECS/ECS.hpp"
 #include "NP-Engine/Memory/Memory.hpp"
 #include "NP-Engine/Insight/Insight.hpp"
+#include "NP-Engine/Platform/Platform.hpp"
 
 #include "NP-Engine/Vendor/EnttInclude.hpp"
 
+#include "RhiType.hpp"
 #include "Renderer.hpp"
 
 namespace np::graphics
 {
-	// TODO: Scene needs to become a pure virtual class since implmentations are RHI dependent
-
 	class Scene
 	{
-	private:
+	protected:
 		::entt::registry _registry;
-
 		Renderer* _renderer;
 
 	public:
+		
+		static Scene* Create(memory::Allocator& allocator, Renderer& renderer);
+		
 		Scene(Renderer& renderer): _renderer(memory::AddressOf(renderer)) {}
-
-		Scene(): _renderer(nullptr) {}
 
 		// TODO: this should end needing a Create function like we do in Renderer, then having RHI implementation
 
-		void AttachRenderer(Renderer& renderer)
+		graphics::Renderer* GetRenderer() const
 		{
-			_renderer = memory::AddressOf(renderer);
+			return _renderer;
 		}
 
-		bl HasRenderer() const
-		{
-			return _renderer != nullptr;
-		}
-
-		graphics::Renderer& GetRenderer()
-		{
-			NP_ASSERT(HasRenderer(), "Cannot get renderer when one is not attached to this scene.");
-			return *_renderer;
-		}
-
-		const graphics::Renderer& GetRenderer() const
-		{
-			NP_ASSERT(HasRenderer(), "Cannot get renderer when one is not attached to this scene.");
-			return *_renderer;
-		}
-
-		void Draw()
-		{
-			NP_ASSERT(HasRenderer(), "Cannot draw scene without renderer.");
-
-			GetRenderer().Draw();
-
-			// TODO: loop through Entities to get camera, and objects to renderer, etc
-		}
-
-		virtual void AdjustForWindowResize(window::Window& window) {} // TODO: make this pure virtual
+		virtual void Draw() = 0;
+		virtual void AdjustForWindowResize(window::Window& window) = 0;
 	};
 } // namespace np::graphics
 

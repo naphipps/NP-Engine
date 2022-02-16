@@ -14,7 +14,7 @@
 
 #include "NP-Engine/Window/WindowEvents.hpp"
 
-#include "NP-Engine/Graphics/RHI/Vulkan/VulkanRenderer.hpp"
+#include "NP-Engine/Graphics/RHI/Vulkan/VulkanGraphics.hpp"
 
 #if NP_ENGINE_PLATFORM_IS_APPLE || NP_ENGINE_PLATFORM_IS_LINUX
 	// TODO: determine if we need this after our renderer is complete
@@ -44,7 +44,7 @@ namespace np::app
 
 			for (auto it = _scenes.begin(); it != _scenes.end(); it++)
 			{
-				if ((*it)->GetRenderer().IsAttachedToWindow(window))
+				if ((*it)->GetRenderer()->IsAttachedToWindow(window))
 				{
 					_unacquired_scenes.erase(*it);
 					_acquired_scenes.erase(*it);
@@ -74,7 +74,7 @@ namespace np::app
 
 			for (graphics::Scene*& scene : _scenes)
 			{
-				if (scene->GetRenderer().IsAttachedToWindow(window))
+				if (scene->GetRenderer()->IsAttachedToWindow(window))
 				{
 					scene->AdjustForWindowResize(window);
 					break;
@@ -198,10 +198,9 @@ namespace np::app
 
 		graphics::Scene* CreateScene(graphics::Renderer& renderer)
 		{
-			memory::Block block = _allocator.Allocate(sizeof(graphics::Scene));
-			memory::Construct<graphics::Scene>(block, renderer);
-			_unacquired_scenes.insert(static_cast<graphics::Scene*>(block.ptr));
-			return _scenes.emplace_back(static_cast<graphics::Scene*>(block.ptr));
+			graphics::Scene* scene = graphics::Scene::Create(_allocator, renderer);
+			_unacquired_scenes.insert(scene);
+			return _scenes.emplace_back(scene);
 		}
 
 	public:

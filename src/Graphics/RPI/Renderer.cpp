@@ -4,22 +4,13 @@
 //
 //##===----------------------------------------------------------------------===##//
 
-#include <iostream> //TODO: remove
-
 #include "NP-Engine/Graphics/RPI/Renderer.hpp"
 
-#if NP_ENGINE_PLATFORM_IS_APPLE
-// TODO: implement
-
-#elif NP_ENGINE_PLATFORM_IS_LINUX
-// TODO: implement
-
-#elif NP_ENGINE_PLATFORM_IS_WINDOWS
-	#include "NP-Engine/Graphics/RHI/OpenGL/OpenGLRenderer.hpp"
-
+#if NP_ENGINE_PLATFORM_IS_LINUX || NP_ENGINE_PLATFORM_IS_WINDOWS
+	#include "NP-Engine/Graphics/RHI/OpenGL/OpenGLRenderer.hpp" //TODO: create OpenGLGraphics.hpp
 #endif
 
-#include "NP-Engine/Graphics/RHI/Vulkan/VulkanRenderer.hpp"
+#include "NP-Engine/Graphics/RHI/Vulkan/VulkanGraphics.hpp"
 
 namespace np::graphics
 {
@@ -37,6 +28,6 @@ namespace np::graphics
 			break;
 		}
 
-		return (Renderer*)block.ptr;
+		return static_cast<Renderer*>(block.ptr);
 	}
 } // namespace np::graphics

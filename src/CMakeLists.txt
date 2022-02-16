@@ -84,6 +84,7 @@ set(NP_ENGINE_GRAPHICS_OPENGL_HPP
 )
 
 set(NP_ENGINE_GRAPHICS_VULKAN_HPP
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RHI/Vulkan/VulkanGraphics.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RHI/Vulkan/VulkanRenderer.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RHI/Vulkan/VulkanDevice.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RHI/Vulkan/VulkanInstance.hpp
@@ -92,6 +93,7 @@ set(NP_ENGINE_GRAPHICS_VULKAN_HPP
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RHI/Vulkan/VulkanShader.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RHI/Vulkan/VulkanSwapchain.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RHI/Vulkan/VulkanVertex.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RHI/Vulkan/VulkanScene.hpp
 )
 
 set(NP_ENGINE_INPUT_HPP
@@ -312,7 +314,7 @@ set(NP_ENGINE_GRAPHICS_RPI_CPP
 	#Graphics/RPI/Buffer.cpp
 	#Graphics/RPI/Image.cpp
 	#Graphics/RPI/Pipeline.cpp
-	#Graphics/RPI/Scene.cpp
+	Graphics/RPI/Scene.cpp
 	#Graphics/RPI/Shader.cpp
 	#Graphics/RPI/Texture.cpp
 	Graphics/RPI/Renderer.cpp
