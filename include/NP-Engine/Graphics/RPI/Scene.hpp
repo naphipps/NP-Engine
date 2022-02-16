@@ -30,6 +30,8 @@ namespace np::graphics
 		static Scene* Create(memory::Allocator& allocator, Renderer& renderer);
 
 		Scene(Renderer& renderer): _renderer(memory::AddressOf(renderer)) {}
+        
+        virtual ~Scene() = default; // suppress warning
 
 		graphics::Renderer* GetRenderer() const
 		{

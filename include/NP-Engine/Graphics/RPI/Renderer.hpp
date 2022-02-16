@@ -22,7 +22,7 @@ namespace np::graphics
 	public:
 		static Renderer* Create(memory::Allocator& allocator);
 
-		virtual ~Renderer() = default; // here to prevent warning
+		virtual ~Renderer() = default; // suppress warning
 
 		virtual void RegisterRhiType() const
 		{
