@@ -4,6 +4,9 @@
 //
 //##===----------------------------------------------------------------------===##//
 
+#ifndef NP_ENGINE_VULKAN_VERTEX_HPP
+#define NP_ENGINE_VULKAN_VERTEX_HPP
+
 #include <cstddef>
 
 #include "NP-Engine/Container/Container.hpp"
@@ -47,3 +50,5 @@ namespace np::graphics::rhi
 		}
 	};
 } // namespace np::graphics::rhi
+
+#endif /* NP_ENGINE_VULKAN_VERTEX_HPP */

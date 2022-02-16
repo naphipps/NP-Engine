@@ -4,6 +4,9 @@
 //
 //##===----------------------------------------------------------------------===##//
 
+#ifndef NP_ENGINE_RPI_VERTEX_HPP
+#define NP_ENGINE_RPI_VERTEX_HPP
+
 #include "NP-Engine/Vendor/GlmInclude.hpp"
 
 namespace np::graphics
@@ -14,3 +17,5 @@ namespace np::graphics
 		::glm::vec3 Color;
 	};
 } // namespace np::graphics
+
+#endif /* NP_ENGINE_RPI_VERTEX_HPP */
