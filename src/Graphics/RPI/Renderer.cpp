@@ -20,7 +20,7 @@ namespace np::graphics
 
 		switch (__detail::RegisteredRhiType.load(mo_acquire))
 		{
-		case RhiType::Vulkan: // TODO: seems to work on all platforms...
+		case RhiType::Vulkan:
 			block = allocator.Allocate(sizeof(rhi::VulkanRenderer));
 			memory::Construct<rhi::VulkanRenderer>(block);
 			break;
