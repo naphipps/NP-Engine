@@ -22,6 +22,8 @@ namespace np::graphics
 	public:
 		static Renderer* Create(memory::Allocator& allocator);
 
+		virtual ~Renderer() = default; // here to prevent warning
+
 		virtual void RegisterRhiType() const
 		{
 			__detail::RegisteredRhiType.store(GetRhiType(), mo_release);
