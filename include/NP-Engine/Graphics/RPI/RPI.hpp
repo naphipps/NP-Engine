@@ -11,4 +11,6 @@
 #include "Shader.hpp"
 #include "Scene.hpp"
 
+// TODO: when we complete our renderer, we need to cleanup/remove files we are not using
+
 #endif /* NP_ENGINE_RPI_HPP */
