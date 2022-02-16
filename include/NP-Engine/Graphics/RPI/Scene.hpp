@@ -27,12 +27,9 @@ namespace np::graphics
 		Renderer* _renderer;
 
 	public:
-		
 		static Scene* Create(memory::Allocator& allocator, Renderer& renderer);
-		
-		Scene(Renderer& renderer): _renderer(memory::AddressOf(renderer)) {}
 
-		// TODO: this should end needing a Create function like we do in Renderer, then having RHI implementation
+		Scene(Renderer& renderer): _renderer(memory::AddressOf(renderer)) {}
 
 		graphics::Renderer* GetRenderer() const
 		{

@@ -20,13 +20,8 @@ namespace np::graphics::rhi
 	{
 	private:
 
-
 	public:
-
-		VulkanScene(Renderer& renderer) : Scene(renderer)
-		{
-
-		}
+		VulkanScene(Renderer& renderer): Scene(renderer) {}
 
 		virtual void Draw() override
 		{
@@ -37,11 +32,8 @@ namespace np::graphics::rhi
 			// TODO: loop through Entities to get camera, and objects to renderer, etc
 		}
 
-		virtual void AdjustForWindowResize(window::Window& window) override
-		{
-
-		}
+		virtual void AdjustForWindowResize(window::Window& window) override {}
 	};
-}
+} // namespace np::graphics::rhi
 
 #endif /* NP_ENGINE_VULKAN_SCENE_HPP */
