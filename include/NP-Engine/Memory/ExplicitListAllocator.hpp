@@ -70,8 +70,8 @@ namespace np::memory
 				Block footer_block{(ui8*)block.End() - __detail::MARGIN_ALIGNED_SIZE, __detail::MARGIN_ALIGNED_SIZE};
 				Construct<Margin>(header_block);
 				Construct<Margin>(footer_block);
-				MarginPtr header = (MarginPtr)header_block.Begin();
-				MarginPtr footer = (MarginPtr)footer_block.Begin();
+				MarginPtr header = static_cast<MarginPtr>(header_block.ptr);
+				MarginPtr footer = static_cast<MarginPtr>(footer_block.ptr);
 				header->SetSize(block.size);
 				header->SetDeallocated();
 				footer->Value = header->Value;

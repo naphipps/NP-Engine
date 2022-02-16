@@ -23,7 +23,7 @@ namespace np::memory
 	public:
 		bl Contains(const Block& block) const override
 		{
-			return Contains(block.Begin());
+			return Contains(block.ptr);
 		}
 
 		bl Contains(const void* ptr) const override
@@ -52,7 +52,7 @@ namespace np::memory
 		static inline void* malloc(siz size)
 		{
 			NP_ASSERT(_allocator != nullptr, "Registered TraitAllocator is nullptr");
-			return _allocator->Allocate(size).Begin();
+			return _allocator->Allocate(size).ptr;
 		}
 
 		static inline void free(void* ptr)

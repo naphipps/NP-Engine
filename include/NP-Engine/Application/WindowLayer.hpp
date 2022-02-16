@@ -71,7 +71,7 @@ namespace np::app
 		{
 			memory::Block block = _allocator.Allocate(sizeof(window::Window));
 			memory::Construct<window::Window>(block, properties, _event_submitter);
-			return _windows.emplace_back(static_cast<window::Window*>(block.Begin()));
+			return _windows.emplace_back(static_cast<window::Window*>(block.ptr));
 		}
 
 		virtual void Update(time::DurationMilliseconds time_delta) override

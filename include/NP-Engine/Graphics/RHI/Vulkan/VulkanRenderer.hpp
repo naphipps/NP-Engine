@@ -47,7 +47,7 @@ namespace np::graphics::rhi
 		{
 			memory::Block block = _allocator.Allocate(sizeof(T));
 			memory::Construct<T>(block, ::std::forward<Args>(args)...);
-			return v.emplace_back((T*)block.ptr);
+			return v.emplace_back(static_cast<T*>(block.ptr));
 		}
 
 		template <class T>

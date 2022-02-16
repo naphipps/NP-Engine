@@ -65,7 +65,7 @@ namespace np::event
 			{
 				if (memory::Construct<T>(block, ::std::forward<Args>(args)...))
 				{
-					e = static_cast<Event*>(block.Begin());
+					e = static_cast<Event*>(block.ptr);
 					if (!buffer.enqueue(e))
 					{
 						memory::Destruct(static_cast<T*>(e));
