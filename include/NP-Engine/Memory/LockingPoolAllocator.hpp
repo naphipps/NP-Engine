@@ -142,13 +142,13 @@ namespace np::memory
 
 		bl Deallocate(void* ptr, bl true_sort_false_constant)
 		{
-			Block dealloc_block{.ptr = ptr, .size = CHUNK_ALIGNED_SIZE};
+			Block dealloc_block{ptr, CHUNK_ALIGNED_SIZE};
 			return Deallocate(dealloc_block, true_sort_false_constant);
 		}
 
 		bl Deallocate(void* ptr) override
 		{
-			Block dealloc_block{.ptr = ptr, .size = CHUNK_ALIGNED_SIZE};
+			Block dealloc_block{ptr, CHUNK_ALIGNED_SIZE};
 			return Deallocate(dealloc_block);
 		}
 
