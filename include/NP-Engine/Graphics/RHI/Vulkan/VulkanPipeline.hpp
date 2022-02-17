@@ -732,8 +732,8 @@ namespace np::graphics::rhi
 			Surface().Window().SetResizeCallback(this, WindowResizeCallback);
 			Surface().Window().SetPositionCallback(this, WindowPositionCallback);
 
-			const container::vector<Vertex> vertices = {
-				{{0.0f, -0.5f}, {1.0f, 0.0f, 1.0f}}, {{0.5f, 0.5f}, {1.0f, 1.0f, 0.0f}}, {{-0.5f, 0.5f}, {0.0f, 1.0f, 1.0f}}};
+			const container::vector<VulkanVertex> vertices = {
+				{{{0.0f, -0.5f}, {1.0f, 0.0f, 1.0f}}}, {{{0.5f, 0.5f}, {1.0f, 1.0f, 0.0f}}}, {{{-0.5f, 0.5f}, {0.0f, 1.0f, 1.0f}}}};
 
 			siz data_size = sizeof(_vertices[0]) * _vertices.size();
 			void* data;
