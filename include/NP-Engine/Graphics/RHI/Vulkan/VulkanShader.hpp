@@ -123,17 +123,17 @@ namespace np::graphics::rhi
 			DestroyModule();
 		}
 
-		VulkanInstance& Instance() const
+		VulkanInstance& GetInstance() const
 		{
-			return _device.Instance();
+			return _device.GetInstance();
 		}
 
-		VulkanSurface& Surface() const
+		VulkanSurface& GetSurface() const
 		{
-			return _device.Surface();
+			return _device.GetSurface();
 		}
 
-		VulkanDevice& Device() const
+		VulkanDevice& GetDevice() const
 		{
 			return _device;
 		}

@@ -75,22 +75,22 @@ namespace np::graphics
 			Load(_filename);
 		}
 
-		const str& Filename() const
+		const str& GetFilename() const
 		{
 			return _filename;
 		}
 
-		str& Filename()
+		str& GetFilename()
 		{
 			return _filename;
 		}
 
-		const str& Entrypoint() const
+		const str& GetEntrypoint() const
 		{
 			return _entrypoint;
 		}
 
-		str& Entrypoint()
+		str& GetEntrypoint()
 		{
 			return _entrypoint;
 		}

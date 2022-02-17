@@ -96,8 +96,8 @@ namespace np::graphics::rhi
 			VkViewport viewport{};
 			viewport.x = 0.0f;
 			viewport.y = 0.0f;
-			viewport.width = (flt)Swapchain().Extent().width;
-			viewport.height = (flt)Swapchain().Extent().height;
+			viewport.width = (flt)GetSwapchain().GetExtent().width;
+			viewport.height = (flt)GetSwapchain().GetExtent().height;
 			viewport.minDepth = 0.0f;
 			viewport.maxDepth = 1.0f;
 			return viewport;
@@ -107,7 +107,7 @@ namespace np::graphics::rhi
 		{
 			VkRect2D scissor{};
 			scissor.offset = {0, 0};
-			scissor.extent = Swapchain().Extent();
+			scissor.extent = GetSwapchain().GetExtent();
 			return scissor;
 		}
 
@@ -225,7 +225,7 @@ namespace np::graphics::rhi
 		VkAttachmentDescription CreateAttachmentDescription()
 		{
 			VkAttachmentDescription desc{};
-			desc.format = Device().SurfaceFormat().format;
+			desc.format = GetDevice().GetSurfaceFormat().format;
 			desc.samples = VK_SAMPLE_COUNT_1_BIT; // TODO: multisampling
 			// TODO: The loadOp and storeOp determine what to do with the data in the
 			//	attachment before rendering and after rendering
@@ -278,13 +278,13 @@ namespace np::graphics::rhi
 			VkPipelineShaderStageCreateInfo vertex_stage = CreatePipelineShaderStageInfo();
 			vertex_stage.stage = VK_SHADER_STAGE_VERTEX_BIT;
 			vertex_stage.module = _vertex_shader;
-			vertex_stage.pName = _vertex_shader.Entrypoint().c_str();
+			vertex_stage.pName = _vertex_shader.GetEntrypoint().c_str();
 			stages.emplace_back(vertex_stage);
 
 			VkPipelineShaderStageCreateInfo fragment_stage = CreatePipelineShaderStageInfo();
 			fragment_stage.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
 			fragment_stage.module = _fragment_shader;
-			fragment_stage.pName = _fragment_shader.Entrypoint().c_str();
+			fragment_stage.pName = _fragment_shader.GetEntrypoint().c_str();
 			stages.emplace_back(fragment_stage);
 
 			return stages;
@@ -305,8 +305,8 @@ namespace np::graphics::rhi
 		{
 			VkFramebufferCreateInfo info{};
 			info.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-			info.width = Swapchain().Extent().width;
-			info.height = Swapchain().Extent().height;
+			info.width = GetSwapchain().GetExtent().width;
+			info.height = GetSwapchain().GetExtent().height;
 			info.layers = 1;
 			return info;
 		}
@@ -315,7 +315,7 @@ namespace np::graphics::rhi
 		{
 			VkCommandPoolCreateInfo info{};
 			info.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
-			info.queueFamilyIndex = Device().QueueFamilyIndices().graphics.value();
+			info.queueFamilyIndex = GetDevice().GetQueueFamilyIndices().graphics.value();
 			info.flags = 0; // Optional
 			return info;
 		}
@@ -344,7 +344,7 @@ namespace np::graphics::rhi
 			info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
 			info.renderPass = _render_pass;
 			info.renderArea.offset = {0, 0};
-			info.renderArea.extent = Swapchain().Extent();
+			info.renderArea.extent = GetSwapchain().GetExtent();
 			return info;
 		}
 
@@ -394,7 +394,7 @@ namespace np::graphics::rhi
 		ui32 ChooseMemoryTypeIndex(ui32 type_filter, VkMemoryPropertyFlags property_flags)
 		{
 			VkPhysicalDeviceMemoryProperties memory_properties;
-			vkGetPhysicalDeviceMemoryProperties(Device().PhysicalDevice(), &memory_properties);
+			vkGetPhysicalDeviceMemoryProperties(GetDevice().GetPhysicalDevice(), &memory_properties);
 
 			bl found = false;
 			ui32 memory_type_index = 0;
@@ -436,7 +436,7 @@ namespace np::graphics::rhi
 			render_pass_info.dependencyCount = subpass_dependencies.size();
 			render_pass_info.pDependencies = subpass_dependencies.data();
 
-			if (vkCreateRenderPass(Device(), &render_pass_info, nullptr, &render_pass) != VK_SUCCESS)
+			if (vkCreateRenderPass(GetDevice(), &render_pass_info, nullptr, &render_pass) != VK_SUCCESS)
 			{
 				render_pass = nullptr;
 			}
@@ -449,7 +449,7 @@ namespace np::graphics::rhi
 			VkPipelineLayout pipeline_layout = nullptr;
 
 			VkPipelineLayoutCreateInfo pipeline_layout_info = CreatePipelineLayoutInfo();
-			if (vkCreatePipelineLayout(Device(), &pipeline_layout_info, nullptr, &pipeline_layout) != VK_SUCCESS)
+			if (vkCreatePipelineLayout(GetDevice(), &pipeline_layout_info, nullptr, &pipeline_layout) != VK_SUCCESS)
 			{
 				pipeline_layout = nullptr;
 			}
@@ -511,7 +511,7 @@ namespace np::graphics::rhi
 				pipeline_info.basePipelineHandle = VK_NULL_HANDLE; // Optional
 				pipeline_info.basePipelineIndex = -1; // Optional
 
-				if (vkCreateGraphicsPipelines(Device(), nullptr, 1, &pipeline_info, nullptr, &pipeline) != VK_SUCCESS)
+				if (vkCreateGraphicsPipelines(GetDevice(), nullptr, 1, &pipeline_info, nullptr, &pipeline) != VK_SUCCESS)
 				{
 					pipeline = nullptr;
 				}
@@ -522,18 +522,18 @@ namespace np::graphics::rhi
 
 		container::vector<VkFramebuffer> CreateFramebuffers()
 		{
-			container::vector<VkFramebuffer> framebuffers(Swapchain().ImageViews().size());
+			container::vector<VkFramebuffer> framebuffers(GetSwapchain().GetImageViews().size());
 
-			for (siz i = 0; i < Swapchain().ImageViews().size(); i++)
+			for (siz i = 0; i < GetSwapchain().GetImageViews().size(); i++)
 			{
-				container::vector<VkImageView> image_views = {Swapchain().ImageViews()[i]};
+				container::vector<VkImageView> image_views = {GetSwapchain().GetImageViews()[i]};
 
 				VkFramebufferCreateInfo framebuffer_info = CreateFramebufferInfo();
 				framebuffer_info.renderPass = _render_pass;
 				framebuffer_info.attachmentCount = image_views.size();
 				framebuffer_info.pAttachments = image_views.data();
 
-				if (vkCreateFramebuffer(Device(), &framebuffer_info, nullptr, &framebuffers[i]) != VK_SUCCESS)
+				if (vkCreateFramebuffer(GetDevice(), &framebuffer_info, nullptr, &framebuffers[i]) != VK_SUCCESS)
 				{
 					framebuffers[i] = nullptr;
 				}
@@ -546,7 +546,7 @@ namespace np::graphics::rhi
 		{
 			VkCommandPool command_pool = nullptr;
 			VkCommandPoolCreateInfo command_pool_info = CreateCommandPoolInfo();
-			if (vkCreateCommandPool(Device(), &command_pool_info, nullptr, &command_pool) != VK_SUCCESS)
+			if (vkCreateCommandPool(GetDevice(), &command_pool_info, nullptr, &command_pool) != VK_SUCCESS)
 			{
 				command_pool = nullptr;
 			}
@@ -560,7 +560,7 @@ namespace np::graphics::rhi
 			VkCommandBufferAllocateInfo command_buffer_allocate_info = CreateCommandBufferAllocateInfo();
 			command_buffer_allocate_info.commandBufferCount = (ui32)command_buffers.size();
 
-			if (vkAllocateCommandBuffers(Device(), &command_buffer_allocate_info, command_buffers.data()) != VK_SUCCESS)
+			if (vkAllocateCommandBuffers(GetDevice(), &command_buffer_allocate_info, command_buffers.data()) != VK_SUCCESS)
 			{
 				command_buffers.clear();
 			}
@@ -610,7 +610,7 @@ namespace np::graphics::rhi
 			{
 				VkSemaphoreCreateInfo semaphore_info{};
 				semaphore_info.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
-				if (vkCreateSemaphore(Device(), &semaphore_info, nullptr, &semaphores[i]) != VK_SUCCESS)
+				if (vkCreateSemaphore(GetDevice(), &semaphore_info, nullptr, &semaphores[i]) != VK_SUCCESS)
 				{
 					semaphores.clear();
 					break;
@@ -632,7 +632,7 @@ namespace np::graphics::rhi
 					fence_info.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
 					fence_info.flags = VK_FENCE_CREATE_SIGNALED_BIT;
 
-					if (vkCreateFence(Device(), &fence_info, nullptr, &fences[i]) != VK_SUCCESS)
+					if (vkCreateFence(GetDevice(), &fence_info, nullptr, &fences[i]) != VK_SUCCESS)
 					{
 						fences.clear();
 						break;
@@ -650,7 +650,7 @@ namespace np::graphics::rhi
 			VkBufferCreateInfo buffer_info = CreateBufferInfo();
 			buffer_info.size = sizeof(_vertices[0]) * _vertices.size();
 
-			if (vkCreateBuffer(Device(), &buffer_info, nullptr, &buffer) != VK_SUCCESS)
+			if (vkCreateBuffer(GetDevice(), &buffer_info, nullptr, &buffer) != VK_SUCCESS)
 			{
 				buffer = nullptr;
 			}
@@ -663,20 +663,20 @@ namespace np::graphics::rhi
 			VkDeviceMemory buffer_memory = nullptr;
 
 			VkMemoryRequirements requirements;
-			vkGetBufferMemoryRequirements(Device(), _vertex_buffer, &requirements);
+			vkGetBufferMemoryRequirements(GetDevice(), _vertex_buffer, &requirements);
 
 			VkMemoryAllocateInfo allocate_info = CreateMemoryAllocateInfo();
 			allocate_info.allocationSize = requirements.size;
 			allocate_info.memoryTypeIndex = ChooseMemoryTypeIndex(
 				requirements.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 
-			if (vkAllocateMemory(Device(), &allocate_info, nullptr, &buffer_memory) != VK_SUCCESS)
+			if (vkAllocateMemory(GetDevice(), &allocate_info, nullptr, &buffer_memory) != VK_SUCCESS)
 			{
 				buffer_memory = nullptr;
 			}
 			else
 			{
-				vkBindBufferMemory(Device(), _vertex_buffer, buffer_memory, 0);
+				vkBindBufferMemory(GetDevice(), _vertex_buffer, buffer_memory, 0);
 			}
 
 			return buffer_memory;
@@ -686,16 +686,16 @@ namespace np::graphics::rhi
 		{
 			SetRebuildSwapchain(false);
 
-			vkDeviceWaitIdle(Device());
+			vkDeviceWaitIdle(GetDevice());
 
-			vkFreeCommandBuffers(Device(), _command_pool, (ui32)_command_buffers.size(), _command_buffers.data());
+			vkFreeCommandBuffers(GetDevice(), _command_pool, (ui32)_command_buffers.size(), _command_buffers.data());
 
 			for (auto framebuffer : _framebuffers)
-				vkDestroyFramebuffer(Device(), framebuffer, nullptr);
+				vkDestroyFramebuffer(GetDevice(), framebuffer, nullptr);
 
-			vkDestroyPipeline(Device(), _pipeline, nullptr);
-			vkDestroyPipelineLayout(Device(), _pipeline_layout, nullptr);
-			vkDestroyRenderPass(Device(), _render_pass, nullptr);
+			vkDestroyPipeline(GetDevice(), _pipeline, nullptr);
+			vkDestroyPipelineLayout(GetDevice(), _pipeline_layout, nullptr);
+			vkDestroyRenderPass(GetDevice(), _render_pass, nullptr);
 
 			_swapchain.Rebuild();
 
@@ -712,8 +712,8 @@ namespace np::graphics::rhi
 			_vertices(3),
 			_vertex_buffer(CreateVertexBuffer()),
 			_vertex_buffer_memory(CreateVertexBufferMemory()),
-			_vertex_shader(Device(), fs::Append(fs::Append("Vulkan", "shaders"), "vertex.glsl"), VulkanShader::Type::VERTEX),
-			_fragment_shader(Device(), fs::Append(fs::Append("Vulkan", "shaders"), "fragment.glsl"),
+			_vertex_shader(GetDevice(), fs::Append(fs::Append("Vulkan", "shaders"), "vertex.glsl"), VulkanShader::Type::VERTEX),
+			_fragment_shader(GetDevice(), fs::Append(fs::Append("Vulkan", "shaders"), "fragment.glsl"),
 							 VulkanShader::Type::FRAGMENT),
 			_render_pass(CreateRenderPass()),
 			_pipeline_layout(CreatePipelineLayout()),
@@ -726,11 +726,11 @@ namespace np::graphics::rhi
 			_image_available_semaphores(CreateSemaphores(MAX_FRAMES)),
 			_render_finished_semaphores(CreateSemaphores(MAX_FRAMES)),
 			_fences(CreateFences(MAX_FRAMES)),
-			_image_fences(CreateFences(Swapchain().Images().size(), false)),
+			_image_fences(CreateFences(GetSwapchain().GetImages().size(), false)),
 			_rebuild_swapchain(false)
 		{
-			Surface().Window().SetResizeCallback(this, WindowResizeCallback);
-			Surface().Window().SetPositionCallback(this, WindowPositionCallback);
+			GetSurface().GetWindow().SetResizeCallback(this, WindowResizeCallback);
+			GetSurface().GetWindow().SetPositionCallback(this, WindowPositionCallback);
 
 			const container::vector<VulkanVertex> vertices = {
 				{{{0.0f, -0.5f}, {1.0f, 0.0f, 1.0f}}}, {{{0.5f, 0.5f}, {1.0f, 1.0f, 0.0f}}}, {{{-0.5f, 0.5f}, {0.0f, 1.0f, 1.0f}}}};
@@ -744,56 +744,56 @@ namespace np::graphics::rhi
 
 		~VulkanPipeline()
 		{
-			vkDeviceWaitIdle(Device());
+			vkDeviceWaitIdle(GetDevice());
 
-			vkDestroyBuffer(Device(), _vertex_buffer, nullptr);
-			vkFreeMemory(Device(), _vertex_buffer_memory, nullptr);
+			vkDestroyBuffer(GetDevice(), _vertex_buffer, nullptr);
+			vkFreeMemory(GetDevice(), _vertex_buffer_memory, nullptr);
 
 			for (VkSemaphore& semaphore : _render_finished_semaphores)
-				vkDestroySemaphore(Device(), semaphore, nullptr);
+				vkDestroySemaphore(GetDevice(), semaphore, nullptr);
 
 			for (VkSemaphore& semaphore : _image_available_semaphores)
-				vkDestroySemaphore(Device(), semaphore, nullptr);
+				vkDestroySemaphore(GetDevice(), semaphore, nullptr);
 
 			for (VkFence& fence : _fences)
-				vkDestroyFence(Device(), fence, nullptr);
+				vkDestroyFence(GetDevice(), fence, nullptr);
 
-			vkDestroyCommandPool(Device(), _command_pool, nullptr);
+			vkDestroyCommandPool(GetDevice(), _command_pool, nullptr);
 
 			for (auto framebuffer : _framebuffers)
-				vkDestroyFramebuffer(Device(), framebuffer, nullptr);
+				vkDestroyFramebuffer(GetDevice(), framebuffer, nullptr);
 
-			vkDestroyPipeline(Device(), _pipeline, nullptr);
-			vkDestroyPipelineLayout(Device(), _pipeline_layout, nullptr);
-			vkDestroyRenderPass(Device(), _render_pass, nullptr);
+			vkDestroyPipeline(GetDevice(), _pipeline, nullptr);
+			vkDestroyPipelineLayout(GetDevice(), _pipeline_layout, nullptr);
+			vkDestroyRenderPass(GetDevice(), _render_pass, nullptr);
 		}
 
-		VulkanInstance& Instance() const
+		VulkanInstance& GetInstance() const
 		{
-			return _swapchain.Instance();
+			return _swapchain.GetInstance();
 		}
 
-		VulkanSurface& Surface() const
+		VulkanSurface& GetSurface() const
 		{
-			return _swapchain.Surface();
+			return _swapchain.GetSurface();
 		}
 
-		VulkanDevice& Device() const
+		VulkanDevice& GetDevice() const
 		{
-			return _swapchain.Device();
+			return _swapchain.GetDevice();
 		}
 
-		const VulkanSwapchain& Swapchain() const
+		const VulkanSwapchain& GetSwapchain() const
 		{
 			return _swapchain;
 		}
 
-		const VulkanShader& VertexShader() const
+		const VulkanShader& GetVertexShader() const
 		{
 			return _vertex_shader;
 		}
 
-		const VulkanShader& FragmentShader() const
+		const VulkanShader& GetFragmentShader() const
 		{
 			return _fragment_shader;
 		}
@@ -802,16 +802,16 @@ namespace np::graphics::rhi
 		{
 			i32 width = 0;
 			i32 height = 0;
-			glfwGetFramebufferSize((GLFWwindow*)Surface().Window().GetNativeWindow(), &width, &height);
+			glfwGetFramebufferSize((GLFWwindow*)GetSurface().GetWindow().GetNativeWindow(), &width, &height);
 			if (width == 0 || height == 0)
 			{
 				return;
 			}
 
-			vkWaitForFences(Device(), 1, &_fences[_current_frame], VK_TRUE, UI64_MAX);
+			vkWaitForFences(GetDevice(), 1, &_fences[_current_frame], VK_TRUE, UI64_MAX);
 
 			ui32 image_index;
-			VkResult acquire_result = vkAcquireNextImageKHR(Device(), Swapchain(), UI64_MAX,
+			VkResult acquire_result = vkAcquireNextImageKHR(GetDevice(), GetSwapchain(), UI64_MAX,
 															_image_available_semaphores[_current_frame], nullptr, &image_index);
 
 			if (acquire_result == VK_ERROR_OUT_OF_DATE_KHR)
@@ -827,7 +827,7 @@ namespace np::graphics::rhi
 			// Check if a previous frame is using this image (i.e. there is its fence to wait on)
 			if (_image_fences[image_index] != nullptr)
 			{
-				vkWaitForFences(Device(), 1, &_image_fences[image_index], VK_TRUE, UI64_MAX);
+				vkWaitForFences(GetDevice(), 1, &_image_fences[image_index], VK_TRUE, UI64_MAX);
 			}
 			// Mark the image as now being in use by this frame
 			_image_fences[image_index] = _fences[_current_frame];
@@ -835,7 +835,7 @@ namespace np::graphics::rhi
 			container::vector<VkSemaphore> wait_semaphores{_image_available_semaphores[_current_frame]};
 			container::vector<VkPipelineStageFlags> wait_stages{VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
 			container::vector<VkSemaphore> signal_semaphores{_render_finished_semaphores[_current_frame]};
-			container::vector<VkSwapchainKHR> swapchains{Swapchain()};
+			container::vector<VkSwapchainKHR> swapchains{ GetSwapchain()};
 
 			VkSubmitInfo submit_info{};
 			submit_info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
@@ -847,9 +847,9 @@ namespace np::graphics::rhi
 			submit_info.signalSemaphoreCount = signal_semaphores.size();
 			submit_info.pSignalSemaphores = signal_semaphores.data();
 
-			vkResetFences(Device(), 1, &_fences[_current_frame]);
+			vkResetFences(GetDevice(), 1, &_fences[_current_frame]);
 
-			if (vkQueueSubmit(Device().GraphicsDeviceQueue(), 1, &submit_info, _fences[_current_frame]) != VK_SUCCESS)
+			if (vkQueueSubmit(GetDevice().GetGraphicsDeviceQueue(), 1, &submit_info, _fences[_current_frame]) != VK_SUCCESS)
 			{
 				NP_ASSERT(false, "failed to submit draw command buffer!");
 			}
@@ -863,7 +863,7 @@ namespace np::graphics::rhi
 			present_info.pImageIndices = &image_index;
 			present_info.pResults = nullptr; // Optional
 
-			VkResult present_result = vkQueuePresentKHR(Device().PresentDeviceQueue(), &present_info);
+			VkResult present_result = vkQueuePresentKHR(GetDevice().GetPresentDeviceQueue(), &present_info);
 
 			if (present_result == VK_ERROR_OUT_OF_DATE_KHR || present_result == VK_SUBOPTIMAL_KHR || _rebuild_swapchain)
 			{
@@ -874,7 +874,7 @@ namespace np::graphics::rhi
 				NP_ASSERT(false, "vkQueuePresentKHR error");
 			}
 
-			vkQueueWaitIdle(Device().PresentDeviceQueue());
+			vkQueueWaitIdle(GetDevice().GetPresentDeviceQueue());
 
 			_current_frame = (_current_frame + 1) % MAX_FRAMES;
 		}

@@ -103,9 +103,9 @@ namespace np::graphics::rhi
 		container::vector<VkPhysicalDevice> GetPhysicalDevices() const
 		{
 			ui32 count = 0;
-			vkEnumeratePhysicalDevices(Surface().Instance(), &count, nullptr);
+			vkEnumeratePhysicalDevices(GetSurface().GetInstance(), &count, nullptr);
 			container::vector<VkPhysicalDevice> devices(count);
-			vkEnumeratePhysicalDevices(Surface().Instance(), &count, devices.data());
+			vkEnumeratePhysicalDevices(GetSurface().GetInstance(), &count, devices.data());
 			return devices;
 		}
 
@@ -138,7 +138,7 @@ namespace np::graphics::rhi
 		{
 			ui32 score = 0;
 
-			if (physical_device != nullptr && (VkSurfaceKHR)Surface() != nullptr)
+			if (physical_device != nullptr && (VkSurfaceKHR)GetSurface() != nullptr)
 			{
 				VkPhysicalDeviceProperties properties{};
 				VkPhysicalDeviceFeatures features{};
@@ -183,7 +183,7 @@ namespace np::graphics::rhi
 						if (!has_queue_present_bit)
 						{
 							VkBool32 supported = false;
-							vkGetPhysicalDeviceSurfaceSupportKHR(physical_device, i, Surface(), &supported);
+							vkGetPhysicalDeviceSurfaceSupportKHR(physical_device, i, GetSurface(), &supported);
 							has_queue_present_bit = (bl)supported;
 						}
 					}
@@ -311,7 +311,7 @@ namespace np::graphics::rhi
 			for (VkPhysicalDevice device : GetPhysicalDevices())
 				candidates.emplace(GetPhysicalDeviceScore(device), device);
 
-			if ((VkSurfaceKHR)Surface() != nullptr && candidates.size() > 0)
+			if ((VkSurfaceKHR)GetSurface() != nullptr && candidates.size() > 0)
 			{
 				ui32 count = 0;
 				container::vector<VkQueueFamilyProperties> queue_families;
@@ -334,22 +334,22 @@ namespace np::graphics::rhi
 						if (!_queue_family_indices.present.has_value())
 						{
 							VkBool32 supported = VK_FALSE;
-							vkGetPhysicalDeviceSurfaceSupportKHR(it->second, i, Surface(), &supported);
+							vkGetPhysicalDeviceSurfaceSupportKHR(it->second, i, GetSurface(), &supported);
 							if (supported == VK_TRUE)
 								_queue_family_indices.present = (ui32)i;
 						}
 					}
 
-					vkGetPhysicalDeviceSurfaceCapabilitiesKHR(it->second, Surface(), &_surface_capabilities);
+					vkGetPhysicalDeviceSurfaceCapabilitiesKHR(it->second, GetSurface(), &_surface_capabilities);
 
 					ui32 count;
-					vkGetPhysicalDeviceSurfaceFormatsKHR(it->second, Surface(), &count, nullptr);
+					vkGetPhysicalDeviceSurfaceFormatsKHR(it->second, GetSurface(), &count, nullptr);
 					surface_formats.resize(count);
-					vkGetPhysicalDeviceSurfaceFormatsKHR(it->second, Surface(), &count, surface_formats.data());
+					vkGetPhysicalDeviceSurfaceFormatsKHR(it->second, GetSurface(), &count, surface_formats.data());
 
-					vkGetPhysicalDeviceSurfacePresentModesKHR(it->second, Surface(), &count, nullptr);
+					vkGetPhysicalDeviceSurfacePresentModesKHR(it->second, GetSurface(), &count, nullptr);
 					present_modes.resize(count);
-					vkGetPhysicalDeviceSurfacePresentModesKHR(it->second, Surface(), &count, present_modes.data());
+					vkGetPhysicalDeviceSurfacePresentModesKHR(it->second, GetSurface(), &count, present_modes.data());
 
 					if (_queue_family_indices.is_complete() && !surface_formats.empty() && !present_modes.empty())
 					{
@@ -376,7 +376,7 @@ namespace np::graphics::rhi
 		{
 			VkDevice logical_device = nullptr;
 
-			if (_physical_device != nullptr && (VkSurfaceKHR)Surface() != nullptr)
+			if (_physical_device != nullptr && (VkSurfaceKHR)GetSurface() != nullptr)
 			{
 				VkPhysicalDeviceFeatures physical_features{};
 				vkGetPhysicalDeviceFeatures(_physical_device, &physical_features);
@@ -431,7 +431,7 @@ namespace np::graphics::rhi
 				vkDestroyDevice(_device, nullptr);
 		}
 
-		str PhysicalDeviceName() const
+		str GetPhysicalDeviceName() const
 		{
 			str name = "";
 
@@ -445,45 +445,45 @@ namespace np::graphics::rhi
 			return name;
 		}
 
-		VulkanInstance& Instance() const
+		VulkanInstance& GetInstance() const
 		{
-			return _surface.Instance();
+			return _surface.GetInstance();
 		}
 
-		VulkanSurface& Surface() const
+		VulkanSurface& GetSurface() const
 		{
 			return _surface;
 		}
 
-		VkPhysicalDevice PhysicalDevice() const
+		VkPhysicalDevice GetPhysicalDevice() const
 		{
 			return _physical_device;
 		}
 
-		const VkSurfaceCapabilitiesKHR& Capabilities()
+		const VkSurfaceCapabilitiesKHR& GetCapabilities()
 		{
-			if (PhysicalDevice() != nullptr)
-				vkGetPhysicalDeviceSurfaceCapabilitiesKHR(PhysicalDevice(), Surface(), &_surface_capabilities);
+			if (GetPhysicalDevice() != nullptr)
+				vkGetPhysicalDeviceSurfaceCapabilitiesKHR(GetPhysicalDevice(), GetSurface(), &_surface_capabilities);
 
 			return _surface_capabilities;
 		}
 
-		const VkSurfaceFormatKHR& SurfaceFormat() const
+		const VkSurfaceFormatKHR& GetSurfaceFormat() const
 		{
 			return _surface_format;
 		}
 
-		const VkPresentModeKHR& PresentMode() const
+		const VkPresentModeKHR& GetPresentMode() const
 		{
 			return _present_mode;
 		}
 
-		const QueueFamilyIndices_T& QueueFamilyIndices() const
+		const QueueFamilyIndices_T& GetQueueFamilyIndices() const
 		{
 			return _queue_family_indices;
 		}
 
-		VkQueue GraphicsDeviceQueue() const
+		VkQueue GetGraphicsDeviceQueue() const
 		{
 			VkQueue queue = nullptr;
 			if (_device != nullptr)
@@ -493,7 +493,7 @@ namespace np::graphics::rhi
 			return queue;
 		}
 
-		VkQueue PresentDeviceQueue() const
+		VkQueue GetPresentDeviceQueue() const
 		{
 			VkQueue queue = nullptr;
 			if (_device != nullptr)

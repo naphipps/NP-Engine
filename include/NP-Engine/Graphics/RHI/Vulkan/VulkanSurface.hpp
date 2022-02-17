@@ -53,12 +53,12 @@ namespace np::graphics::rhi
 			}
 		}
 
-		VulkanInstance& Instance() const
+		VulkanInstance& GetInstance() const
 		{
 			return _instance;
 		}
 
-		window::Window& Window() const
+		window::Window& GetWindow() const
 		{
 			return _window;
 		}

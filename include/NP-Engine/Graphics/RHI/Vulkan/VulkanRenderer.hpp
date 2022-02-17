@@ -108,7 +108,7 @@ namespace np::graphics::rhi
 
 			for (auto it = _pipelines.begin(); it != _pipelines.end(); it++)
 			{
-				if (memory::AddressOf((*it)->Surface().Window()) == memory::AddressOf(window))
+				if (memory::AddressOf((*it)->GetSurface().GetWindow()) == memory::AddressOf(window))
 				{
 					is_attached = true;
 					break;
@@ -129,12 +129,12 @@ namespace np::graphics::rhi
 		{
 			for (auto it = _pipelines.begin(); it != _pipelines.end(); it++)
 			{
-				if (memory::AddressOf((*it)->Surface().Window()) == memory::AddressOf(window))
+				if (memory::AddressOf((*it)->GetSurface().GetWindow()) == memory::AddressOf(window))
 				{
 					VulkanPipeline* pipeline = *it;
-					VulkanDevice* device = memory::AddressOf(pipeline->Device());
-					VulkanSurface* surface = memory::AddressOf(pipeline->Surface());
-					VulkanInstance* instance = memory::AddressOf(pipeline->Instance());
+					VulkanDevice* device = memory::AddressOf(pipeline->GetDevice());
+					VulkanSurface* surface = memory::AddressOf(pipeline->GetSurface());
+					VulkanInstance* instance = memory::AddressOf(pipeline->GetInstance());
 
 					memory::Destruct(pipeline);
 					_allocator.Deallocate(pipeline);
