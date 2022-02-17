@@ -33,7 +33,7 @@ namespace np::graphics
         
         virtual ~Scene() = default; // suppress warning
 
-		graphics::Renderer* GetRenderer() const
+		Renderer* GetRenderer() const
 		{
 			return _renderer;
 		}
