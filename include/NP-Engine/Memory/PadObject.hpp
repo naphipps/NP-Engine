@@ -8,6 +8,7 @@
 #define NP_ENGINE_PAD_OBJECT_HPP
 
 #include <string>
+#include <type_traits>
 
 #include "NP-Engine/Primitive/Primitive.hpp"
 #include "NP-Engine/Insight/Insight.hpp"
@@ -16,8 +17,6 @@ namespace np::memory
 {
 	constexpr static siz CACHE_LINE_SIZE = 64;
 	using CacheLinePadding = ui8[CACHE_LINE_SIZE];
-
-	// TODO: for alignment sake, store assigned data at &_padding[0], then check _padding[CACHE_LINE_SIZE-1] for dirty
 
 	class PadObject
 	{
@@ -55,25 +54,28 @@ namespace np::memory
 					  "cannot assign padding struct of size (" + ::std::to_string(sizeof(T)) + ")\nplease keep it <= (" +
 						  ::std::to_string(CACHE_LINE_SIZE - 1) + ")");
 
-			*(T*)(&_padding[1]) = object;
-			_padding[0] = 1;
+			// TODO: I'm pretty sure T needs to be copy assignable
+			NP_ASSERT(::std::is_copy_assignable_v<T>, "T must be copy assignable");
+
+			*(T*)(_padding) = object;
+			_padding[CACHE_LINE_SIZE - 1] = 1;
 		}
 
 		template <typename T>
 		const T& RetrieveData() const
 		{
-			return *(T*)(&_padding[1]);
+			return *(T*)(_padding);
 		}
 
 		template <typename T>
 		T& RetrieveData()
 		{
-			return *(T*)(&_padding[1]);
+			return *(T*)(_padding);
 		}
 
 		bl IsDirty() const
 		{
-			return _padding[0] != 0;
+			return _padding[CACHE_LINE_SIZE - 1] != 0;
 		}
 
 		void Clear()
