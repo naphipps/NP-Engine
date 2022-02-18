@@ -17,6 +17,8 @@ namespace np::memory
 	constexpr static siz CACHE_LINE_SIZE = 64;
 	using CacheLinePadding = ui8[CACHE_LINE_SIZE];
 
+	// TODO: for alignment sake, store assigned data at &_padding[0], then check _padding[CACHE_LINE_SIZE-1] for dirty
+
 	class PadObject
 	{
 	protected:
