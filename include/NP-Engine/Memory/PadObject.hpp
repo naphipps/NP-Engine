@@ -54,7 +54,6 @@ namespace np::memory
 					  "cannot assign padding struct of size (" + ::std::to_string(sizeof(T)) + ")\nplease keep it <= (" +
 						  ::std::to_string(CACHE_LINE_SIZE - 1) + ")");
 
-			// TODO: I'm pretty sure T needs to be copy assignable
 			NP_ASSERT(::std::is_copy_assignable_v<T>, "T must be copy assignable");
 
 			*(T*)(_padding) = object;
