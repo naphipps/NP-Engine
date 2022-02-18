@@ -56,20 +56,20 @@ namespace np::memory
 
 			NP_ASSERT(::std::is_copy_assignable_v<T>, "T must be copy assignable");
 
-			*(T*)(_padding) = object;
+			*((T*)_padding) = object;
 			_padding[CACHE_LINE_SIZE - 1] = 1;
 		}
 
 		template <typename T>
 		const T& RetrieveData() const
 		{
-			return *(T*)(_padding);
+			return *((T*)_padding);
 		}
 
 		template <typename T>
 		T& RetrieveData()
 		{
-			return *(T*)(_padding);
+			return *((T*)_padding);
 		}
 
 		bl IsDirty() const
