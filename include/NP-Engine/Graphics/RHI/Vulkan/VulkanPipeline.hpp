@@ -732,8 +732,9 @@ namespace np::graphics::rhi
 			GetSurface().GetWindow().SetResizeCallback(this, WindowResizeCallback);
 			GetSurface().GetWindow().SetPositionCallback(this, WindowPositionCallback);
 
-			const container::vector<VulkanVertex> vertices = {
-				{{{0.0f, -0.5f}, {1.0f, 0.0f, 1.0f}}}, {{{0.5f, 0.5f}, {1.0f, 1.0f, 0.0f}}}, {{{-0.5f, 0.5f}, {0.0f, 1.0f, 1.0f}}}};
+			const container::vector<VulkanVertex> vertices = {{{{0.0f, -0.5f}, {1.0f, 0.0f, 1.0f}}},
+															  {{{0.5f, 0.5f}, {1.0f, 1.0f, 0.0f}}},
+															  {{{-0.5f, 0.5f}, {0.0f, 1.0f, 1.0f}}}};
 
 			siz data_size = sizeof(_vertices[0]) * _vertices.size();
 			void* data;
@@ -835,7 +836,7 @@ namespace np::graphics::rhi
 			container::vector<VkSemaphore> wait_semaphores{_image_available_semaphores[_current_frame]};
 			container::vector<VkPipelineStageFlags> wait_stages{VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
 			container::vector<VkSemaphore> signal_semaphores{_render_finished_semaphores[_current_frame]};
-			container::vector<VkSwapchainKHR> swapchains{ GetSwapchain()};
+			container::vector<VkSwapchainKHR> swapchains{GetSwapchain()};
 
 			VkSubmitInfo submit_info{};
 			submit_info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
