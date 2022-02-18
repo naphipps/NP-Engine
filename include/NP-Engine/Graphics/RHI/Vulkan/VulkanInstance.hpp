@@ -224,8 +224,8 @@ namespace np::graphics::rhi
 		{
 			if (_debug_messenger != nullptr)
 			{
-				auto func =
-					(PFN_vkDestroyDebugUtilsMessengerEXT)vkGetInstanceProcAddr(_instance, "vkDestroyDebugUtilsMessengerEXT");
+				using F = PFN_vkDestroyDebugUtilsMessengerEXT;
+				F func = (F)vkGetInstanceProcAddr(_instance, "vkDestroyDebugUtilsMessengerEXT");
 
 				if (func != nullptr)
 				{
