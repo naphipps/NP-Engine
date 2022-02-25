@@ -1,10 +1,8 @@
+//##===----------------------------------------------------------------------===##//
 //
-//  Time.hpp
-//  Project Space
+//  Author: Nathan Phipps 1/5/21
 //
-//  Created by Nathan Phipps on 1/5/21.
-//  Copyright © 2021 Nathan Phipps. All rights reserved.
-//
+//##===----------------------------------------------------------------------===##//
 
 #ifndef NP_ENGINE_TIME_HPP
 #define NP_ENGINE_TIME_HPP
@@ -13,19 +11,16 @@
 
 #include "NP-Engine/Primitive/Primitive.hpp"
 
-namespace np
+namespace np::time
 {
-	namespace time
-	{
-		using Milliseconds = ::std::chrono::milliseconds;
-		using Microseconds = ::std::chrono::microseconds;
+	using Milliseconds = ::std::chrono::milliseconds;
+	using Microseconds = ::std::chrono::microseconds;
 
-		using SteadyClock = ::std::chrono::steady_clock;
-		using SteadyTimestamp = ::std::chrono::time_point<SteadyClock>;
+	using SteadyClock = ::std::chrono::steady_clock;
+	using SteadyTimestamp = ::std::chrono::time_point<SteadyClock>;
 
-		using DurationMilliseconds = ::std::chrono::duration<dbl, ::std::milli>;
-		using DurationMicroseconds = ::std::chrono::duration<dbl, ::std::micro>;
-	} // namespace time
-} // namespace np
+	using DurationMilliseconds = ::std::chrono::duration<dbl, ::std::milli>;
+	using DurationMicroseconds = ::std::chrono::duration<dbl, ::std::micro>;
+} // namespace np::time
 
 #endif /* NP_ENGINE_TIME_HPP */
