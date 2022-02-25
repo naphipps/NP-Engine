@@ -559,6 +559,7 @@ namespace np::graphics::rhi
 				vkCmdBindVertexBuffers(command_buffers[i], 0, (ui32)vertex_buffers.size(), vertex_buffers.data(),
 									   offsets.data());
 				vkCmdBindIndexBuffer(command_buffers[i], *_index_buffer, 0, VK_INDEX_TYPE_UINT16);
+				// TODO: ideally, we will have our vertices and indices on one buffer, and make use of offset parameters
 				vkCmdDrawIndexed(command_buffers[i], (ui32)_indices.size(), 1, 0, 0, 0);
 				vkCmdEndRenderPass(command_buffers[i]);
 
