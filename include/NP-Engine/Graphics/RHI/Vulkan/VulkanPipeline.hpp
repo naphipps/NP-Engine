@@ -33,7 +33,9 @@ namespace np::graphics::rhi
 		VulkanSwapchain _swapchain;
 		container::vector<VulkanVertex> _vertices;
 		VulkanBuffer* _vertex_buffer;
-		VulkanBuffer* _staging_vertex_buffer;
+		container::vector<ui16> _indices;
+		VulkanBuffer* _index_buffer;
+		VulkanBuffer* _staging_buffer;
 		VulkanShader _vertex_shader;
 		VulkanShader _fragment_shader;
 		VkRenderPass _render_pass;
@@ -556,7 +558,8 @@ namespace np::graphics::rhi
 				vkCmdBindPipeline(command_buffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, _pipeline);
 				vkCmdBindVertexBuffers(command_buffers[i], 0, (ui32)vertex_buffers.size(), vertex_buffers.data(),
 									   offsets.data());
-				vkCmdDraw(command_buffers[i], (ui32)_vertices.size(), 1, 0, 0);
+				vkCmdBindIndexBuffer(command_buffers[i], *_index_buffer, 0, VK_INDEX_TYPE_UINT16);
+				vkCmdDrawIndexed(command_buffers[i], (ui32)_indices.size(), 1, 0, 0, 0);
 				vkCmdEndRenderPass(command_buffers[i]);
 
 				if (vkEndCommandBuffer(command_buffers[i]) != VK_SUCCESS)
@@ -703,25 +706,45 @@ namespace np::graphics::rhi
 			GetSurface().GetWindow().SetResizeCallback(this, WindowResizeCallback);
 			GetSurface().GetWindow().SetPositionCallback(this, WindowPositionCallback);
 
-			_vertices = {{{{0.0f, -0.5f}, {1.0f, 0.0f, 1.0f}}},
-						 {{{0.5f, 0.5f}, {1.0f, 1.0f, 0.0f}}},
-						 {{{-0.5f, 0.5f}, {0.0f, 1.0f, 1.0f}}}};
+			// vertex buffer
+			_vertices = {{{{-0.5f, -0.5f}, {1.0f, 0.0f, 1.0f}}},
+						 {{{0.5f, -0.5f}, {1.0f, 1.0f, 0.0f}}},
+						 {{{0.5f, 0.5f}, {0.0f, 1.0f, 1.0f}}},
+						 {{{-0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}}}};
 
 			VkDeviceSize data_size = sizeof(_vertices[0]) * _vertices.size();
 
-			_staging_vertex_buffer = CreateBuffer(data_size, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-												  VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+			_staging_buffer = CreateBuffer(data_size, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+										   VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 
 			_vertex_buffer = CreateBuffer(data_size, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
 										  VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 
 			void* data;
-			vkMapMemory(device, _staging_vertex_buffer->GetDeviceMemory(), 0, data_size, 0, &data);
+			vkMapMemory(device, _staging_buffer->GetDeviceMemory(), 0, data_size, 0, &data);
 			memcpy(data, _vertices.data(), data_size);
-			vkUnmapMemory(device, _staging_vertex_buffer->GetDeviceMemory());
+			vkUnmapMemory(device, _staging_buffer->GetDeviceMemory());
 
-			CopyBuffer(*_vertex_buffer, *_staging_vertex_buffer, data_size);
-			DestroyBuffer(_staging_vertex_buffer);
+			CopyBuffer(*_vertex_buffer, *_staging_buffer, data_size);
+			DestroyBuffer(_staging_buffer);
+
+			// index buffer
+			_indices = {0, 1, 2, 2, 3, 0};
+
+			data_size = sizeof(_indices[0]) * _indices.size();
+
+			_staging_buffer = CreateBuffer(data_size, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+										   VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+
+			_index_buffer = CreateBuffer(data_size, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
+										 VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+
+			vkMapMemory(device, _staging_buffer->GetDeviceMemory(), 0, data_size, 0, &data);
+			memcpy(data, _indices.data(), data_size);
+			vkUnmapMemory(device, _staging_buffer->GetDeviceMemory());
+
+			CopyBuffer(*_index_buffer, *_staging_buffer, data_size);
+			DestroyBuffer(_staging_buffer);
 
 			_command_buffers = CreateCommandBuffers();
 		}
@@ -731,6 +754,7 @@ namespace np::graphics::rhi
 			vkDeviceWaitIdle(GetDevice());
 
 			DestroyBuffer(_vertex_buffer);
+			DestroyBuffer(_index_buffer);
 
 			for (VkSemaphore& semaphore : _render_finished_semaphores)
 				vkDestroySemaphore(GetDevice(), semaphore, nullptr);
