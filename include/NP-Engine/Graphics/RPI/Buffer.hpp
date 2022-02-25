@@ -3,3 +3,9 @@
 //  Author: Nathan Phipps 11/19/21
 //
 //##===----------------------------------------------------------------------===##//
+
+namespace np::graphics
+{
+	class Buffer
+	{};
+} // namespace np::graphics

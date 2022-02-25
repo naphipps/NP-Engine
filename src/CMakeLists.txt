@@ -68,7 +68,7 @@ set(NP_ENGINE_GRAPHICS_RPI_HPP
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/Renderer.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/Camera.hpp
 	# ${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/Command.hpp
-	# ${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/Buffer.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/Buffer.hpp
 	# ${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/Device.hpp
 	# ${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/Image.hpp
 	# ${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/Pipeline.hpp
@@ -94,6 +94,7 @@ set(NP_ENGINE_GRAPHICS_VULKAN_HPP
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RHI/Vulkan/VulkanSwapchain.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RHI/Vulkan/VulkanVertex.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RHI/Vulkan/VulkanScene.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RHI/Vulkan/VulkanBuffer.hpp
 )
 
 set(NP_ENGINE_INPUT_HPP

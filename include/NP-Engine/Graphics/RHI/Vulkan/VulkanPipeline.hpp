@@ -8,6 +8,7 @@
 #define NP_ENGINE_VULKAN_PIPELINE_HPP
 
 #include "NP-Engine/Filesystem/Filesystem.hpp"
+#include "NP-Engine/Memory/Memory.hpp"
 
 #include "NP-Engine/Vendor/VulkanInclude.hpp"
 #include "NP-Engine/Vendor/GlfwInclude.hpp"
@@ -18,6 +19,9 @@
 #include "VulkanSwapchain.hpp"
 #include "VulkanShader.hpp"
 #include "VulkanVertex.hpp"
+#include "VulkanBuffer.hpp"
+
+// TODO: there might be some methods with zero references...
 
 namespace np::graphics::rhi
 {
@@ -28,8 +32,8 @@ namespace np::graphics::rhi
 
 		VulkanSwapchain _swapchain;
 		container::vector<VulkanVertex> _vertices;
-		VkBuffer _vertex_buffer;
-		VkDeviceMemory _vertex_buffer_memory;
+		VulkanBuffer* _vertex_buffer;
+		VulkanBuffer* _staging_vertex_buffer;
 		VulkanShader _vertex_shader;
 		VulkanShader _fragment_shader;
 		VkRenderPass _render_pass;
@@ -375,43 +379,6 @@ namespace np::graphics::rhi
 			return dependencies;
 		}
 
-		VkBufferCreateInfo CreateBufferInfo()
-		{
-			VkBufferCreateInfo info{};
-			info.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-			info.usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
-			info.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-			return info;
-		}
-
-		VkMemoryAllocateInfo CreateMemoryAllocateInfo()
-		{
-			VkMemoryAllocateInfo info{};
-			info.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-			return info;
-		}
-
-		ui32 ChooseMemoryTypeIndex(ui32 type_filter, VkMemoryPropertyFlags property_flags)
-		{
-			VkPhysicalDeviceMemoryProperties memory_properties;
-			vkGetPhysicalDeviceMemoryProperties(GetDevice().GetPhysicalDevice(), &memory_properties);
-
-			bl found = false;
-			ui32 memory_type_index = 0;
-
-			for (ui32 i = 0; i < memory_properties.memoryTypeCount; i++)
-			{
-				if ((type_filter & (1 << i)) &&
-					(memory_properties.memoryTypes[i].propertyFlags & property_flags) == property_flags)
-				{
-					found = true;
-					memory_type_index = i;
-				}
-			}
-
-			return found ? memory_type_index : -1;
-		}
-
 		VkRenderPass CreateRenderPass()
 		{
 			VkRenderPass render_pass = nullptr;
@@ -582,7 +549,7 @@ namespace np::graphics::rhi
 				render_pass_begin_info.clearValueCount = clear_values.size();
 				render_pass_begin_info.pClearValues = clear_values.data();
 
-				container::vector<VkBuffer> vertex_buffers{_vertex_buffer};
+				container::vector<VkBuffer> vertex_buffers{*_vertex_buffer};
 				container::vector<VkDeviceSize> offsets{0};
 
 				vkCmdBeginRenderPass(command_buffers[i], &render_pass_begin_info, VK_SUBPASS_CONTENTS_INLINE);
@@ -643,43 +610,50 @@ namespace np::graphics::rhi
 			return fences;
 		}
 
-		VkBuffer CreateVertexBuffer()
+		VulkanBuffer* CreateBuffer(VkDeviceSize size, VkBufferUsageFlags buffer_usage_flags,
+								   VkMemoryPropertyFlags memory_property_flags)
 		{
-			VkBuffer buffer = nullptr;
-
-			VkBufferCreateInfo buffer_info = CreateBufferInfo();
-			buffer_info.size = sizeof(_vertices[0]) * _vertices.size();
-
-			if (vkCreateBuffer(GetDevice(), &buffer_info, nullptr, &buffer) != VK_SUCCESS)
-			{
-				buffer = nullptr;
-			}
-
-			return buffer;
+			memory::Block block = memory::DefaultTraitAllocator.Allocate(sizeof(VulkanBuffer));
+			memory::Construct<VulkanBuffer>(block, GetDevice(), size, buffer_usage_flags, memory_property_flags);
+			return (VulkanBuffer*)block.ptr;
 		}
 
-		VkDeviceMemory CreateVertexBufferMemory()
+		void DestroyBuffer(VulkanBuffer* buffer)
 		{
-			VkDeviceMemory buffer_memory = nullptr;
+			memory::Destruct(buffer);
+			memory::DefaultTraitAllocator.Deallocate(buffer);
+		}
 
-			VkMemoryRequirements requirements;
-			vkGetBufferMemoryRequirements(GetDevice(), _vertex_buffer, &requirements);
+		void CopyBuffer(VulkanBuffer& dst, VulkanBuffer& src, VkDeviceSize size)
+		{
+			container::vector<VkCommandBuffer> command_buffers{nullptr};
 
-			VkMemoryAllocateInfo allocate_info = CreateMemoryAllocateInfo();
-			allocate_info.allocationSize = requirements.size;
-			allocate_info.memoryTypeIndex = ChooseMemoryTypeIndex(
-				requirements.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+			VkCommandBufferAllocateInfo command_buffer_allocate_info = CreateCommandBufferAllocateInfo();
+			command_buffer_allocate_info.commandBufferCount = (ui32)command_buffers.size();
+			vkAllocateCommandBuffers(GetDevice(), &command_buffer_allocate_info, command_buffers.data());
 
-			if (vkAllocateMemory(GetDevice(), &allocate_info, nullptr, &buffer_memory) != VK_SUCCESS)
-			{
-				buffer_memory = nullptr;
-			}
-			else
-			{
-				vkBindBufferMemory(GetDevice(), _vertex_buffer, buffer_memory, 0);
-			}
+			VkCommandBufferBeginInfo command_buffer_begin_info = CreateCommandBufferBeginInfo();
+			command_buffer_begin_info.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+			vkBeginCommandBuffer(command_buffers.front(), &command_buffer_begin_info);
 
-			return buffer_memory;
+			container::vector<VkBufferCopy> buffer_copies{{}};
+			buffer_copies.front().dstOffset = 0; // TODO: optional
+			buffer_copies.front().srcOffset = 0; // TODO: optional
+			buffer_copies.front().size = size;
+			vkCmdCopyBuffer(command_buffers.front(), src, dst, (ui32)buffer_copies.size(), buffer_copies.data());
+
+			vkEndCommandBuffer(command_buffers.front());
+
+			container::vector<VkSubmitInfo> submit_infos{{}};
+			submit_infos.front().sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+			submit_infos.front().pCommandBuffers = command_buffers.data();
+			submit_infos.front().commandBufferCount = (ui32)command_buffers.size();
+
+			vkQueueSubmit(GetDevice().GetGraphicsDeviceQueue(), submit_infos.size(), submit_infos.data(), nullptr);
+			vkQueueWaitIdle(GetDevice().GetGraphicsDeviceQueue()); // TODO: use a fence so we can submit multiple simultaneously
+																   // - this makes it one by one
+
+			vkFreeCommandBuffers(GetDevice(), _command_pool, (ui32)command_buffers.size(), command_buffers.data());
 		}
 
 		void RebuildSwapchain()
@@ -709,9 +683,7 @@ namespace np::graphics::rhi
 	public:
 		VulkanPipeline(VulkanDevice& device):
 			_swapchain(device),
-			_vertices(3),
-			_vertex_buffer(CreateVertexBuffer()),
-			_vertex_buffer_memory(CreateVertexBufferMemory()),
+			_vertex_buffer(nullptr),
 			_vertex_shader(GetDevice(), fs::Append(fs::Append("Vulkan", "shaders"), "vertex.glsl"), VulkanShader::Type::VERTEX),
 			_fragment_shader(GetDevice(), fs::Append(fs::Append("Vulkan", "shaders"), "fragment.glsl"),
 							 VulkanShader::Type::FRAGMENT),
@@ -721,7 +693,6 @@ namespace np::graphics::rhi
 			_framebuffers(CreateFramebuffers()), // TODO: can we put this in a VulkanFramebuffer? I don't think so
 			_command_pool(CreateCommandPool()), // TODO: can we put this in a VulkanCommand_____?? maybe....?
 
-			_command_buffers(CreateCommandBuffers()),
 			_current_frame(0),
 			_image_available_semaphores(CreateSemaphores(MAX_FRAMES)),
 			_render_finished_semaphores(CreateSemaphores(MAX_FRAMES)),
@@ -732,23 +703,34 @@ namespace np::graphics::rhi
 			GetSurface().GetWindow().SetResizeCallback(this, WindowResizeCallback);
 			GetSurface().GetWindow().SetPositionCallback(this, WindowPositionCallback);
 
-			const container::vector<VulkanVertex> vertices = {{{{0.0f, -0.5f}, {1.0f, 0.0f, 1.0f}}},
-															  {{{0.5f, 0.5f}, {1.0f, 1.0f, 0.0f}}},
-															  {{{-0.5f, 0.5f}, {0.0f, 1.0f, 1.0f}}}};
+			_vertices = {{{{0.0f, -0.5f}, {1.0f, 0.0f, 1.0f}}},
+						 {{{0.5f, 0.5f}, {1.0f, 1.0f, 0.0f}}},
+						 {{{-0.5f, 0.5f}, {0.0f, 1.0f, 1.0f}}}};
 
-			siz data_size = sizeof(_vertices[0]) * _vertices.size();
+			VkDeviceSize data_size = sizeof(_vertices[0]) * _vertices.size();
+
+			_staging_vertex_buffer = CreateBuffer(data_size, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+												  VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+
+			_vertex_buffer = CreateBuffer(data_size, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
+										  VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+
 			void* data;
-			vkMapMemory(device, _vertex_buffer_memory, 0, data_size, 0, &data);
-			memcpy(data, vertices.data(), data_size);
-			vkUnmapMemory(device, _vertex_buffer_memory);
+			vkMapMemory(device, _staging_vertex_buffer->GetDeviceMemory(), 0, data_size, 0, &data);
+			memcpy(data, _vertices.data(), data_size);
+			vkUnmapMemory(device, _staging_vertex_buffer->GetDeviceMemory());
+
+			CopyBuffer(*_vertex_buffer, *_staging_vertex_buffer, data_size);
+			DestroyBuffer(_staging_vertex_buffer);
+
+			_command_buffers = CreateCommandBuffers();
 		}
 
 		~VulkanPipeline()
 		{
 			vkDeviceWaitIdle(GetDevice());
 
-			vkDestroyBuffer(GetDevice(), _vertex_buffer, nullptr);
-			vkFreeMemory(GetDevice(), _vertex_buffer_memory, nullptr);
+			DestroyBuffer(_vertex_buffer);
 
 			for (VkSemaphore& semaphore : _render_finished_semaphores)
 				vkDestroySemaphore(GetDevice(), semaphore, nullptr);
