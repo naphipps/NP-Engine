@@ -13,6 +13,7 @@
 
 #define NP_ENGINE_JSON_SPACING 4
 
+// TODO: add JSON.hpp under Filesystem maybe? I don't know since we will need to depend on Memory for TraitAllocator...
 // TODO: investigate boost json stuff -- apparenty it's much faster?
 // TODO: investigate rapidjson -- boost json is apparently on a newer version and may not be viable -- jason turner has great
 // youtube video on this

@@ -25,7 +25,7 @@ namespace np
 		 Image is to be treated as a 2D array of ui16 elements
 		 Image inner array is created on init method
 		 */
-		template <typename T, ui16 SIZE>
+		template <typename T, ui16 SIZE> // TODO: I don't think we need the size param since we have vector working
 		class Image // TODO: I think we should move this to some sort of Image-based project??
 		{
 		private:
