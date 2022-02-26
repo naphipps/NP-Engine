@@ -66,7 +66,8 @@ namespace np::graphics::rhi
 			_rebuild_swapchain = rebuild_swapchain;
 		}
 
-		//TODO: WindowResizeCallback and WindowPositionCallback can be called very fast in succession - add a threshold for when these actually draw so we don't get so bogged down with draw calls
+		// TODO: WindowResizeCallback and WindowPositionCallback can be called very fast in succession - add a threshold for
+		// when these actually draw so we don't get so bogged down with draw calls
 
 		static void WindowResizeCallback(void* pipeline, ui32 width, ui32 height)
 		{
@@ -460,12 +461,12 @@ namespace np::graphics::rhi
 		{
 			VkPipelineLayout pipeline_layout = nullptr;
 
-            container::vector<VkDescriptorSetLayout> set_layouts{_descriptor_set_layout};
-            
+			container::vector<VkDescriptorSetLayout> set_layouts{_descriptor_set_layout};
+
 			VkPipelineLayoutCreateInfo pipeline_layout_info = CreatePipelineLayoutInfo();
-            pipeline_layout_info.setLayoutCount = (ui32)set_layouts.size();
-            pipeline_layout_info.pSetLayouts = set_layouts.data();
-            
+			pipeline_layout_info.setLayoutCount = (ui32)set_layouts.size();
+			pipeline_layout_info.pSetLayouts = set_layouts.data();
+
 			if (vkCreatePipelineLayout(GetDevice(), &pipeline_layout_info, nullptr, &pipeline_layout) != VK_SUCCESS)
 			{
 				pipeline_layout = nullptr;
@@ -607,7 +608,8 @@ namespace np::graphics::rhi
 				vkCmdBindVertexBuffers(command_buffers[i], 0, (ui32)vertex_buffers.size(), vertex_buffers.data(),
 									   offsets.data());
 				vkCmdBindIndexBuffer(command_buffers[i], *_index_buffer, 0, VK_INDEX_TYPE_UINT16);
-				vkCmdBindDescriptorSets(command_buffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, _pipeline_layout, 0, 1, &_descriptor_sets[i], 0, nullptr);
+				vkCmdBindDescriptorSets(command_buffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, _pipeline_layout, 0, 1,
+										&_descriptor_sets[i], 0, nullptr);
 				vkCmdDrawIndexed(command_buffers[i], (ui32)_indices.size(), 1, 0, 0, 0);
 				vkCmdEndRenderPass(command_buffers[i]);
 
@@ -708,14 +710,15 @@ namespace np::graphics::rhi
 			vkFreeCommandBuffers(GetDevice(), _command_pool, (ui32)command_buffers.size(), command_buffers.data());
 		}
 
-		container::vector<VulkanBuffer*> CreateUniformBuffers() //TODO: return vector of ubo's
+		container::vector<VulkanBuffer*> CreateUniformBuffers() // TODO: return vector of ubo's
 		{
 			container::vector<VulkanBuffer*> uniform_buffers;
-			
+
 			for (siz i = 0; i < (ui32)GetSwapchain().GetImageViews().size(); i++)
 			{
-				uniform_buffers.emplace_back(CreateBuffer(sizeof(UniformBufferObject), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
-					VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT));
+				uniform_buffers.emplace_back(
+					CreateBuffer(sizeof(UniformBufferObject), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+								 VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT));
 			}
 
 			return uniform_buffers;
@@ -729,18 +732,21 @@ namespace np::graphics::rhi
 			UniformBufferObject ubo{};
 			ubo.Model = glm::rotate(glm::mat4(1.0f), seconds * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 			ubo.View = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-			ubo.Projection = glm::perspective(glm::radians(45.0f), (flt)GetSwapchain().GetExtent().width / (flt)GetSwapchain().GetExtent().height, 0.1f, 10.0f);
-			ubo.Projection[1][1] *= -1; //glm was made for OpenGL, so Y is inverted. We fix/invert Y here.
+			ubo.Projection =
+				glm::perspective(glm::radians(45.0f),
+								 (flt)GetSwapchain().GetExtent().width / (flt)GetSwapchain().GetExtent().height, 0.1f, 10.0f);
+			ubo.Projection[1][1] *= -1; // glm was made for OpenGL, so Y is inverted. We fix/invert Y here.
 
 			void* data;
-			vkMapMemory(GetDevice(), _uniform_buffers[current_image]->GetDeviceMemory(), 0, sizeof(UniformBufferObject), 0, &data);
+			vkMapMemory(GetDevice(), _uniform_buffers[current_image]->GetDeviceMemory(), 0, sizeof(UniformBufferObject), 0,
+						&data);
 			memcpy(data, &ubo, sizeof(UniformBufferObject));
 			vkUnmapMemory(GetDevice(), _uniform_buffers[current_image]->GetDeviceMemory());
 
-			//TODO: using UBO's this way is not efficient - we should use push constants
+			// TODO: using UBO's this way is not efficient - we should use push constants
 		}
 
-		void DestroyUniformBuffers() //TODO: I don't know if we need this...
+		void DestroyUniformBuffers() // TODO: I don't know if we need this...
 		{
 			for (auto it = _uniform_buffers.begin(); it != _uniform_buffers.end(); it++)
 				DestroyBuffer(*it);
@@ -750,11 +756,11 @@ namespace np::graphics::rhi
 		{
 			VkDescriptorPool descriptor_pool = nullptr;
 
-			container::vector<VkDescriptorPoolSize> descriptor_pool_sizes{ {} }; //TODO: have method create this?
+			container::vector<VkDescriptorPoolSize> descriptor_pool_sizes{{}}; // TODO: have method create this?
 			descriptor_pool_sizes.front().type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
 			descriptor_pool_sizes.front().descriptorCount = (ui32)GetSwapchain().GetImageViews().size();
 
-			VkDescriptorPoolCreateInfo descriptor_pool_create_info{}; //TODO: have method create this?
+			VkDescriptorPoolCreateInfo descriptor_pool_create_info{}; // TODO: have method create this?
 			descriptor_pool_create_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
 			descriptor_pool_create_info.poolSizeCount = (ui32)descriptor_pool_sizes.size();
 			descriptor_pool_create_info.pPoolSizes = descriptor_pool_sizes.data();
@@ -777,9 +783,10 @@ namespace np::graphics::rhi
 		{
 			container::vector<VkDescriptorSet> descriptor_sets;
 
-			container::vector<VkDescriptorSetLayout> descriptor_set_layouts((ui32)GetSwapchain().GetImageViews().size(), _descriptor_set_layout);
+			container::vector<VkDescriptorSetLayout> descriptor_set_layouts((ui32)GetSwapchain().GetImageViews().size(),
+																			_descriptor_set_layout);
 
-			VkDescriptorSetAllocateInfo descriptor_set_allocate_info{}; //TODO: make method create this?
+			VkDescriptorSetAllocateInfo descriptor_set_allocate_info{}; // TODO: make method create this?
 			descriptor_set_allocate_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
 			descriptor_set_allocate_info.descriptorPool = _descriptor_pool;
 			descriptor_set_allocate_info.descriptorSetCount = (ui32)descriptor_set_layouts.size();
@@ -793,12 +800,12 @@ namespace np::graphics::rhi
 
 			for (siz i = 0; i < descriptor_sets.size(); i++)
 			{
-				VkDescriptorBufferInfo descriptor_buffer_info{}; //TODO: have method create this?
+				VkDescriptorBufferInfo descriptor_buffer_info{}; // TODO: have method create this?
 				descriptor_buffer_info.buffer = *_uniform_buffers[i];
 				descriptor_buffer_info.offset = 0;
 				descriptor_buffer_info.range = sizeof(UniformBufferObject);
 
-				VkWriteDescriptorSet write_descriptor_set{}; //TODO: have method create this?
+				VkWriteDescriptorSet write_descriptor_set{}; // TODO: have method create this?
 				write_descriptor_set.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
 				write_descriptor_set.dstSet = descriptor_sets[i];
 				write_descriptor_set.dstBinding = 0;
@@ -806,8 +813,8 @@ namespace np::graphics::rhi
 				write_descriptor_set.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
 				write_descriptor_set.descriptorCount = 1;
 				write_descriptor_set.pBufferInfo = &descriptor_buffer_info;
-				write_descriptor_set.pImageInfo = nullptr; //TODO: optional
-				write_descriptor_set.pTexelBufferView = nullptr; //TODO: optional
+				write_descriptor_set.pImageInfo = nullptr; // TODO: optional
+				write_descriptor_set.pTexelBufferView = nullptr; // TODO: optional
 
 				vkUpdateDescriptorSets(GetDevice(), 1, &write_descriptor_set, 0, nullptr);
 			}
@@ -922,7 +929,7 @@ namespace np::graphics::rhi
 
 			DestroyBuffer(_vertex_buffer);
 			DestroyBuffer(_index_buffer);
-			
+
 			for (VkSemaphore& semaphore : _render_finished_semaphores)
 				vkDestroySemaphore(GetDevice(), semaphore, nullptr);
 
@@ -942,7 +949,7 @@ namespace np::graphics::rhi
 			vkDestroyPipeline(GetDevice(), _pipeline, nullptr);
 			vkDestroyPipelineLayout(GetDevice(), _pipeline_layout, nullptr);
 			vkDestroyRenderPass(GetDevice(), _render_pass, nullptr);
-            vkDestroyDescriptorSetLayout(GetDevice(), _descriptor_set_layout, nullptr);
+			vkDestroyDescriptorSetLayout(GetDevice(), _descriptor_set_layout, nullptr);
 		}
 
 		VulkanInstance& GetInstance() const
