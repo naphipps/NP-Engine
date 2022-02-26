@@ -66,6 +66,8 @@ namespace np::graphics::rhi
 			_rebuild_swapchain = rebuild_swapchain;
 		}
 
+		//TODO: WindowResizeCallback and WindowPositionCallback can be called very fast in succession - add a threshold for when these actually draw so we don't get so bogged down with draw calls
+
 		static void WindowResizeCallback(void* pipeline, ui32 width, ui32 height)
 		{
 			((VulkanPipeline*)pipeline)->SetRebuildSwapchain();
