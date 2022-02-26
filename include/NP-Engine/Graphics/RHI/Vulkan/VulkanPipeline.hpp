@@ -9,6 +9,7 @@
 
 #include "NP-Engine/Filesystem/Filesystem.hpp"
 #include "NP-Engine/Memory/Memory.hpp"
+#include "NP-Engine/Time/Time.hpp"
 
 #include "NP-Engine/Vendor/VulkanInclude.hpp"
 #include "NP-Engine/Vendor/GlfwInclude.hpp"
@@ -36,9 +37,13 @@ namespace np::graphics::rhi
 		container::vector<ui16> _indices;
 		VulkanBuffer* _index_buffer;
 		VulkanBuffer* _staging_buffer;
+		container::vector<VulkanBuffer*> _uniform_buffers;
+		time::SteadyTimestamp _start_timestamp;
 		VulkanShader _vertex_shader;
 		VulkanShader _fragment_shader;
 		VkDescriptorSetLayout _descriptor_set_layout;
+		VkDescriptorPool _descriptor_pool;
+		container::vector<VkDescriptorSet> _descriptor_sets;
 		VkRenderPass _render_pass;
 		VkPipelineLayout _pipeline_layout;
 		VkPipeline _pipeline;
@@ -142,7 +147,7 @@ namespace np::graphics::rhi
 			info.polygonMode = VK_POLYGON_MODE_FILL; // TODO: or VK_POLYGON_MODE_LINE or VK_POLYGON_MODE_POINT
 			info.lineWidth = 1.0f; // TODO: any larger value required enabling wideLines GPU feature
 			info.cullMode = VK_CULL_MODE_BACK_BIT;
-			info.frontFace = VK_FRONT_FACE_CLOCKWISE;
+			info.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
 
 			/*
 			//TODO:
@@ -600,6 +605,7 @@ namespace np::graphics::rhi
 				vkCmdBindVertexBuffers(command_buffers[i], 0, (ui32)vertex_buffers.size(), vertex_buffers.data(),
 									   offsets.data());
 				vkCmdBindIndexBuffer(command_buffers[i], *_index_buffer, 0, VK_INDEX_TYPE_UINT16);
+				vkCmdBindDescriptorSets(command_buffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, _pipeline_layout, 0, 1, &_descriptor_sets[i], 0, nullptr);
 				vkCmdDrawIndexed(command_buffers[i], (ui32)_indices.size(), 1, 0, 0, 0);
 				vkCmdEndRenderPass(command_buffers[i]);
 
@@ -700,6 +706,113 @@ namespace np::graphics::rhi
 			vkFreeCommandBuffers(GetDevice(), _command_pool, (ui32)command_buffers.size(), command_buffers.data());
 		}
 
+		container::vector<VulkanBuffer*> CreateUniformBuffers() //TODO: return vector of ubo's
+		{
+			container::vector<VulkanBuffer*> uniform_buffers;
+			
+			for (siz i = 0; i < MAX_FRAMES; i++)
+			{
+				uniform_buffers.emplace_back(CreateBuffer(sizeof(UniformBufferObject), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+					VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT));
+			}
+
+			return uniform_buffers;
+		}
+
+		void UpdateUniformBuffer(ui32 current_image)
+		{
+			time::DurationMilliseconds duration = time::SteadyClock::now() - _start_timestamp;
+			flt seconds = duration.count() / 1000.0f;
+
+			UniformBufferObject ubo{};
+			ubo.Model = glm::rotate(glm::mat4(1.0f), seconds * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+			ubo.View = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+			ubo.Projection = glm::perspective(glm::radians(45.0f), (flt)GetSwapchain().GetExtent().width / (flt)GetSwapchain().GetExtent().height, 0.1f, 10.0f);
+			ubo.Projection[1][1] *= -1; //glm was made for OpenGL, so Y is inverted. We fix/invert Y here.
+
+			void* data;
+			vkMapMemory(GetDevice(), _uniform_buffers[current_image]->GetDeviceMemory(), 0, sizeof(UniformBufferObject), 0, &data);
+			memcpy(data, &ubo, sizeof(UniformBufferObject));
+			vkUnmapMemory(GetDevice(), _uniform_buffers[current_image]->GetDeviceMemory());
+
+			//TODO: using UBO's this way is not efficient - we should use push constants
+		}
+
+		void DestroyUniformBuffers() //TODO: I don't know if we need this...
+		{
+			for (auto it = _uniform_buffers.begin(); it != _uniform_buffers.end(); it++)
+				DestroyBuffer(*it);
+		}
+
+		VkDescriptorPool CreateDescriptorPool()
+		{
+			VkDescriptorPool descriptor_pool = nullptr;
+
+			container::vector<VkDescriptorPoolSize> descriptor_pool_sizes{ {} }; //TODO: have method create this?
+			descriptor_pool_sizes.front().type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+			descriptor_pool_sizes.front().descriptorCount = (ui32)MAX_FRAMES;
+
+			VkDescriptorPoolCreateInfo descriptor_pool_create_info{}; //TODO: have method create this?
+			descriptor_pool_create_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+			descriptor_pool_create_info.poolSizeCount = (ui32)descriptor_pool_sizes.size();
+			descriptor_pool_create_info.pPoolSizes = descriptor_pool_sizes.data();
+			descriptor_pool_create_info.maxSets = (ui32)MAX_FRAMES;
+
+			if (vkCreateDescriptorPool(GetDevice(), &descriptor_pool_create_info, nullptr, &descriptor_pool) != VK_SUCCESS)
+			{
+				descriptor_pool = nullptr;
+			}
+
+			return descriptor_pool;
+		}
+
+		void DestroyDescriptorPool()
+		{
+			vkDestroyDescriptorPool(GetDevice(), _descriptor_pool, nullptr);
+		}
+
+		container::vector<VkDescriptorSet> CreateDescriptorSets()
+		{
+			container::vector<VkDescriptorSet> descriptor_sets;
+
+			container::vector<VkDescriptorSetLayout> descriptor_set_layouts(MAX_FRAMES, _descriptor_set_layout);
+
+			VkDescriptorSetAllocateInfo descriptor_set_allocate_info{}; //TODO: make method create this?
+			descriptor_set_allocate_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+			descriptor_set_allocate_info.descriptorPool = _descriptor_pool;
+			descriptor_set_allocate_info.descriptorSetCount = (ui32)descriptor_set_layouts.size();
+			descriptor_set_allocate_info.pSetLayouts = descriptor_set_layouts.data();
+
+			descriptor_sets.resize(MAX_FRAMES);
+			if (vkAllocateDescriptorSets(GetDevice(), &descriptor_set_allocate_info, descriptor_sets.data()) != VK_SUCCESS)
+			{
+				descriptor_sets.clear();
+			}
+
+			for (siz i = 0; i < descriptor_sets.size(); i++)
+			{
+				VkDescriptorBufferInfo descriptor_buffer_info{}; //TODO: have method create this?
+				descriptor_buffer_info.buffer = *_uniform_buffers[i];
+				descriptor_buffer_info.offset = 0;
+				descriptor_buffer_info.range = sizeof(UniformBufferObject);
+
+				VkWriteDescriptorSet write_descriptor_set{}; //TODO: have method create this?
+				write_descriptor_set.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+				write_descriptor_set.dstSet = descriptor_sets[i];
+				write_descriptor_set.dstBinding = 0;
+				write_descriptor_set.dstArrayElement = 0;
+				write_descriptor_set.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+				write_descriptor_set.descriptorCount = 1;
+				write_descriptor_set.pBufferInfo = &descriptor_buffer_info;
+				write_descriptor_set.pImageInfo = nullptr; //TODO: optional
+				write_descriptor_set.pTexelBufferView = nullptr; //TODO: optional
+
+				vkUpdateDescriptorSets(GetDevice(), 1, &write_descriptor_set, 0, nullptr);
+			}
+
+			return descriptor_sets;
+		}
+
 		void RebuildSwapchain()
 		{
 			SetRebuildSwapchain(false);
@@ -707,6 +820,9 @@ namespace np::graphics::rhi
 			vkDeviceWaitIdle(GetDevice());
 
 			vkFreeCommandBuffers(GetDevice(), _command_pool, (ui32)_command_buffers.size(), _command_buffers.data());
+
+			DestroyDescriptorPool();
+			DestroyUniformBuffers();
 
 			for (auto framebuffer : _framebuffers)
 				vkDestroyFramebuffer(GetDevice(), framebuffer, nullptr);
@@ -721,6 +837,9 @@ namespace np::graphics::rhi
 			_pipeline_layout = CreatePipelineLayout();
 			_pipeline = CreatePipeline();
 			_framebuffers = CreateFramebuffers();
+			_uniform_buffers = CreateUniformBuffers();
+			_descriptor_pool = CreateDescriptorPool();
+			_descriptor_sets = CreateDescriptorSets();
 			_command_buffers = CreateCommandBuffers();
 		}
 
@@ -728,6 +847,7 @@ namespace np::graphics::rhi
 		VulkanPipeline(VulkanDevice& device):
 			_swapchain(device),
 			_vertex_buffer(nullptr),
+			_start_timestamp(time::SteadyClock::now()),
 			_vertex_shader(GetDevice(), fs::Append(fs::Append("Vulkan", "shaders"), "vertex.glsl"), VulkanShader::Type::VERTEX),
 			_fragment_shader(GetDevice(), fs::Append(fs::Append("Vulkan", "shaders"), "fragment.glsl"),
 							 VulkanShader::Type::FRAGMENT),
@@ -787,6 +907,10 @@ namespace np::graphics::rhi
 			CopyBuffer(*_index_buffer, *_staging_buffer, data_size);
 			DestroyBuffer(_staging_buffer);
 
+			_uniform_buffers = CreateUniformBuffers();
+			_descriptor_pool = CreateDescriptorPool();
+			_descriptor_sets = CreateDescriptorSets();
+
 			_command_buffers = CreateCommandBuffers();
 		}
 
@@ -796,7 +920,7 @@ namespace np::graphics::rhi
 
 			DestroyBuffer(_vertex_buffer);
 			DestroyBuffer(_index_buffer);
-
+			
 			for (VkSemaphore& semaphore : _render_finished_semaphores)
 				vkDestroySemaphore(GetDevice(), semaphore, nullptr);
 
@@ -807,6 +931,8 @@ namespace np::graphics::rhi
 				vkDestroyFence(GetDevice(), fence, nullptr);
 
 			vkDestroyCommandPool(GetDevice(), _command_pool, nullptr);
+			DestroyDescriptorPool();
+			DestroyUniformBuffers();
 
 			for (auto framebuffer : _framebuffers)
 				vkDestroyFramebuffer(GetDevice(), framebuffer, nullptr);
@@ -885,6 +1011,8 @@ namespace np::graphics::rhi
 			container::vector<VkPipelineStageFlags> wait_stages{VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
 			container::vector<VkSemaphore> signal_semaphores{_render_finished_semaphores[_current_frame]};
 			container::vector<VkSwapchainKHR> swapchains{GetSwapchain()};
+
+			UpdateUniformBuffer(image_index);
 
 			VkSubmitInfo submit_info{};
 			submit_info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
