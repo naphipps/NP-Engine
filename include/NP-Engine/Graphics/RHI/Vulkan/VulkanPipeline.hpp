@@ -710,7 +710,7 @@ namespace np::graphics::rhi
 		{
 			container::vector<VulkanBuffer*> uniform_buffers;
 			
-			for (siz i = 0; i < MAX_FRAMES; i++)
+			for (siz i = 0; i < (ui32)GetSwapchain().GetImageViews().size(); i++)
 			{
 				uniform_buffers.emplace_back(CreateBuffer(sizeof(UniformBufferObject), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
 					VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT));
@@ -750,13 +750,13 @@ namespace np::graphics::rhi
 
 			container::vector<VkDescriptorPoolSize> descriptor_pool_sizes{ {} }; //TODO: have method create this?
 			descriptor_pool_sizes.front().type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-			descriptor_pool_sizes.front().descriptorCount = (ui32)MAX_FRAMES;
+			descriptor_pool_sizes.front().descriptorCount = (ui32)GetSwapchain().GetImageViews().size();
 
 			VkDescriptorPoolCreateInfo descriptor_pool_create_info{}; //TODO: have method create this?
 			descriptor_pool_create_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
 			descriptor_pool_create_info.poolSizeCount = (ui32)descriptor_pool_sizes.size();
 			descriptor_pool_create_info.pPoolSizes = descriptor_pool_sizes.data();
-			descriptor_pool_create_info.maxSets = (ui32)MAX_FRAMES;
+			descriptor_pool_create_info.maxSets = (ui32)GetSwapchain().GetImageViews().size();
 
 			if (vkCreateDescriptorPool(GetDevice(), &descriptor_pool_create_info, nullptr, &descriptor_pool) != VK_SUCCESS)
 			{
@@ -775,7 +775,7 @@ namespace np::graphics::rhi
 		{
 			container::vector<VkDescriptorSet> descriptor_sets;
 
-			container::vector<VkDescriptorSetLayout> descriptor_set_layouts(MAX_FRAMES, _descriptor_set_layout);
+			container::vector<VkDescriptorSetLayout> descriptor_set_layouts((ui32)GetSwapchain().GetImageViews().size(), _descriptor_set_layout);
 
 			VkDescriptorSetAllocateInfo descriptor_set_allocate_info{}; //TODO: make method create this?
 			descriptor_set_allocate_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
@@ -783,7 +783,7 @@ namespace np::graphics::rhi
 			descriptor_set_allocate_info.descriptorSetCount = (ui32)descriptor_set_layouts.size();
 			descriptor_set_allocate_info.pSetLayouts = descriptor_set_layouts.data();
 
-			descriptor_sets.resize(MAX_FRAMES);
+			descriptor_sets.resize((ui32)GetSwapchain().GetImageViews().size());
 			if (vkAllocateDescriptorSets(GetDevice(), &descriptor_set_allocate_info, descriptor_sets.data()) != VK_SUCCESS)
 			{
 				descriptor_sets.clear();
