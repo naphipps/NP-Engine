@@ -38,6 +38,7 @@ namespace np::graphics::rhi
 		VulkanBuffer* _staging_buffer;
 		VulkanShader _vertex_shader;
 		VulkanShader _fragment_shader;
+		VkDescriptorSetLayout _descriptor_set_layout;
 		VkRenderPass _render_pass;
 		VkPipelineLayout _pipeline_layout;
 		VkPipeline _pipeline;
@@ -381,6 +382,41 @@ namespace np::graphics::rhi
 			return dependencies;
 		}
 
+		VkDescriptorSetLayoutCreateInfo CreateDescriptorSetLayoutCreateInfo()
+		{
+			VkDescriptorSetLayoutCreateInfo descriptor_set_layout_create_info{};
+			descriptor_set_layout_create_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+
+			return descriptor_set_layout_create_info;
+		}
+
+		VkDescriptorSetLayout CreateDescriptorSetLayout()
+		{
+			VkDescriptorSetLayout descriptor_set_layout = nullptr;
+
+			VkDescriptorSetLayoutBinding descriptor_set_layout_binding{};
+			descriptor_set_layout_binding.binding = 0;
+			descriptor_set_layout_binding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+			descriptor_set_layout_binding.descriptorCount = 1;
+
+			descriptor_set_layout_binding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+			descriptor_set_layout_binding.pImmutableSamplers = nullptr; // TODO: optional
+
+			container::vector<VkDescriptorSetLayoutBinding> descriptor_set_layout_bindings{descriptor_set_layout_binding};
+
+			VkDescriptorSetLayoutCreateInfo descriptor_set_layout_create_info = CreateDescriptorSetLayoutCreateInfo();
+			descriptor_set_layout_create_info.bindingCount = (ui32)descriptor_set_layout_bindings.size();
+			descriptor_set_layout_create_info.pBindings = descriptor_set_layout_bindings.data();
+
+			if (vkCreateDescriptorSetLayout(GetDevice(), &descriptor_set_layout_create_info, nullptr, &descriptor_set_layout) !=
+				VK_SUCCESS)
+			{
+				descriptor_set_layout = nullptr;
+			}
+
+			return descriptor_set_layout;
+		}
+
 		VkRenderPass CreateRenderPass()
 		{
 			VkRenderPass render_pass = nullptr;
@@ -417,7 +453,12 @@ namespace np::graphics::rhi
 		{
 			VkPipelineLayout pipeline_layout = nullptr;
 
+            container::vector<VkDescriptorSetLayout> set_layouts{_descriptor_set_layout};
+            
 			VkPipelineLayoutCreateInfo pipeline_layout_info = CreatePipelineLayoutInfo();
+            pipeline_layout_info.setLayoutCount = (ui32)set_layouts.size();
+            pipeline_layout_info.pSetLayouts = set_layouts.data();
+            
 			if (vkCreatePipelineLayout(GetDevice(), &pipeline_layout_info, nullptr, &pipeline_layout) != VK_SUCCESS)
 			{
 				pipeline_layout = nullptr;
@@ -559,7 +600,6 @@ namespace np::graphics::rhi
 				vkCmdBindVertexBuffers(command_buffers[i], 0, (ui32)vertex_buffers.size(), vertex_buffers.data(),
 									   offsets.data());
 				vkCmdBindIndexBuffer(command_buffers[i], *_index_buffer, 0, VK_INDEX_TYPE_UINT16);
-				// TODO: ideally, we will have our vertices and indices on one buffer, and make use of offset parameters
 				vkCmdDrawIndexed(command_buffers[i], (ui32)_indices.size(), 1, 0, 0, 0);
 				vkCmdEndRenderPass(command_buffers[i]);
 
@@ -691,12 +731,12 @@ namespace np::graphics::rhi
 			_vertex_shader(GetDevice(), fs::Append(fs::Append("Vulkan", "shaders"), "vertex.glsl"), VulkanShader::Type::VERTEX),
 			_fragment_shader(GetDevice(), fs::Append(fs::Append("Vulkan", "shaders"), "fragment.glsl"),
 							 VulkanShader::Type::FRAGMENT),
+			_descriptor_set_layout(CreateDescriptorSetLayout()),
 			_render_pass(CreateRenderPass()),
 			_pipeline_layout(CreatePipelineLayout()),
 			_pipeline(CreatePipeline()),
 			_framebuffers(CreateFramebuffers()), // TODO: can we put this in a VulkanFramebuffer? I don't think so
 			_command_pool(CreateCommandPool()), // TODO: can we put this in a VulkanCommand_____?? maybe....?
-
 			_current_frame(0),
 			_image_available_semaphores(CreateSemaphores(MAX_FRAMES)),
 			_render_finished_semaphores(CreateSemaphores(MAX_FRAMES)),
@@ -774,6 +814,7 @@ namespace np::graphics::rhi
 			vkDestroyPipeline(GetDevice(), _pipeline, nullptr);
 			vkDestroyPipelineLayout(GetDevice(), _pipeline_layout, nullptr);
 			vkDestroyRenderPass(GetDevice(), _render_pass, nullptr);
+            vkDestroyDescriptorSetLayout(GetDevice(), _descriptor_set_layout, nullptr);
 		}
 
 		VulkanInstance& GetInstance() const
