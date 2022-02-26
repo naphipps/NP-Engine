@@ -13,7 +13,7 @@
 
 #include "NP-Engine/Vendor/VulkanInclude.hpp"
 
-#include "../../RPI/Vertex.hpp"
+#include "../../RPI/RPI.hpp"
 
 namespace np::graphics::rhi
 {

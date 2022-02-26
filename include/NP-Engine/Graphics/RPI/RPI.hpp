@@ -10,6 +10,11 @@
 #include "Renderer.hpp"
 #include "Shader.hpp"
 #include "Scene.hpp"
+#include "Buffer.hpp"
+#include "RhiType.hpp"
+#include "UniformBufferObject.hpp"
+#include "Vertex.hpp"
+#include "Camera.hpp"
 
 // TODO: when we complete our renderer, we need to cleanup/remove files we are not using
 

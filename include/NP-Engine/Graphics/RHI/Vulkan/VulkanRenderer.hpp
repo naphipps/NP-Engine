@@ -19,8 +19,7 @@
 
 #include "NP-Engine/Vendor/VulkanInclude.hpp"
 
-#include "../../RPI/Renderer.hpp"
-#include "../../RPI/RhiType.hpp"
+#include "../../RPI/RPI.hpp"
 
 #include "VulkanInstance.hpp"
 #include "VulkanSurface.hpp"
