@@ -18,6 +18,7 @@ add_subdirectory(vendor/skypjack_entt)
 add_subdirectory(vendor/gabime_spdlog)
 add_subdirectory(vendor/g-truc_glm)
 add_subdirectory(vendor/glfw_glfw)
+add_subdirectory(vendor/naphipps_stb)
 add_subdirectory(src)
 
 option(NP_ENGINE_BUILD_TESTER "Build the tester for NP-Engine" true)

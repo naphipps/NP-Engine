@@ -241,6 +241,7 @@ set(NP_ENGINE_VENDOR_HPP
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Vendor/RandutilsInclude.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Vendor/SpdlogInclude.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Vendor/VulkanInclude.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Vendor/StbInclude.hpp
 )
 
 set(NP_ENGINE_WINDOW_HPP
@@ -406,6 +407,7 @@ target_link_libraries(
 	EnTT::EnTT
 	glm
 	glfw
+	stb
 )
 
 target_include_directories(
