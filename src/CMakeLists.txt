@@ -455,24 +455,24 @@ endif()
 if (NP_ENGINE_WORKING_DIR)
 #https://developer.blender.org/diffusion/B/browse/master/source/creator/CMakeLists.txt;9d5661c9e8b1ab383be4ae7b065f50d43310f6cb$175-211
 
-	file(TO_NATIVE_PATH "${NP_ENGINE_WORKING_DIR}/fake" NP_ENGINE_SHADERS_FAKE)
+	file(TO_NATIVE_PATH "${NP_ENGINE_WORKING_DIR}/fake" NP_ENGINE_FAKE)
 	file(TO_NATIVE_PATH "${NP_ENGINE_GRAPHICS_VULKAN_SHADERS_GLSL}" NP_ENGINE_GRAPHICS_VULKAN_SHADERS_GLSL)
 	file(TO_NATIVE_PATH "${NP_ENGINE_WORKING_DIR}/Vulkan/shaders" NP_ENGINE_VULKAN_SHADERS_DIR)
 
-	if (EXISTS ${NP_ENGINE_SHADERS_FAKE})
-		message(FATAL_ERROR "ERROR: \"${NP_ENGINE_SHADERS_FAKE}\" found, this should never be created, remove!")
+	if (EXISTS ${NP_ENGINE_FAKE})
+		message(FATAL_ERROR "ERROR: \"${NP_ENGINE_FAKE}\" found, this should never be created, remove!")
 	endif()
 
-	add_custom_target("${PROJECT_NAME}-Copy-Shaders" ALL DEPENDS ${NP_ENGINE_SHADERS_FAKE})
+	add_custom_target("${PROJECT_NAME}-Copy-Shaders" ALL DEPENDS ${NP_ENGINE_FAKE})
 
-	add_custom_command(OUTPUT ${NP_ENGINE_SHADERS_FAKE} # outputing the fake ensures we run our command(s)
+	add_custom_command(OUTPUT ${NP_ENGINE_FAKE} # outputing the fake ensures we run our command(s)
 		COMMAND ${CMAKE_COMMAND} -E make_directory ${NP_ENGINE_VULKAN_SHADERS_DIR}
 		COMMAND ${CMAKE_COMMAND} -E copy ${NP_ENGINE_GRAPHICS_VULKAN_SHADERS_GLSL} ${NP_ENGINE_VULKAN_SHADERS_DIR}
 		COMMENT "Updating shaders in ${NP_ENGINE_WORKING_DIR}"
 	)
 
 	unset(NP_ENGINE_VULKAN_SHADERS_DIR)
-	unset(NP_ENGINE_SHADERS_FAKE)
+	unset(NP_ENGINE_FAKE)
 endif()
 
 configure_file(
