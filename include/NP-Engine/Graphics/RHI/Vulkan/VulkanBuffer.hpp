@@ -82,6 +82,7 @@ namespace np::graphics::rhi
 	public:
 		VulkanBuffer(VulkanDevice& device, VkDeviceSize size, VkBufferUsageFlags buffer_usage_flags,
 					 VkMemoryPropertyFlags memory_property_flags):
+			Buffer(),
 			_device(device),
 			_buffer(CreateBuffer(size, buffer_usage_flags)),
 			_device_memory(CreateDeviceMemory(memory_property_flags))
