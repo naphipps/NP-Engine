@@ -14,7 +14,8 @@
 #include "NP-Engine/Memory/Memory.hpp"
 #include "NP-Engine/Insight/Insight.hpp"
 
-#define STBI_ASSERT(expression) NP_ASSERT(expression, ::std::string("STB encounted an asserted issue here: ") + ::std::string(NP_FUNCTION))
+#define STBI_ASSERT(expression) \
+	NP_ASSERT(expression, ::std::string("STB encounted an asserted issue here: ") + ::std::string(NP_FUNCTION))
 
 #define STBI_MALLOC(size) ::np::memory::DefaultTraitAllocator.Allocate(size).ptr
 #define STBI_FREE(ptr) ::np::memory::DefaultTraitAllocator.Deallocate(ptr)
@@ -26,7 +27,7 @@ namespace np::memory::__detail
 		STBI_FREE(ptr);
 		return STBI_MALLOC(size);
 	}
-}
+} // namespace np::memory::__detail
 
 #define STBI_REALLOC(ptr, size) ::np::memory::__detail::StbRealloc(ptr, size)
 
