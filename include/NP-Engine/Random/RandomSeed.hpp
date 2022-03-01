@@ -38,9 +38,12 @@ namespace np::random
 		}
 
 	public:
-		RandomSeed() {}
+		RandomSeed(): RandomSeed(0, 0) {}
 
-		RandomSeed(T inc, T state): _inc(inc), _state(state) {}
+		RandomSeed(T inc, T state): _inc(inc), _state(state)
+		{
+			ForceOddInc();
+		}
 
 		RandomSeed(const RandomSeed<T>& seed)
 		{
@@ -74,15 +77,15 @@ namespace np::random
 			return _state;
 		}
 
-		void SetInc(T inc_)
+		void SetInc(T inc)
 		{
-			_inc = inc_;
+			_inc = inc;
 			ForceOddInc();
 		}
 
-		void SetState(T state_)
+		void SetState(T state)
 		{
-			_state = state_;
+			_state = state;
 		}
 	};
 } // namespace np::random
