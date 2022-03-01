@@ -503,6 +503,27 @@ namespace np::graphics::rhi
 			return queue;
 		}
 
+		ui32 GetMemoryTypeIndex(ui32 type_filter, VkMemoryPropertyFlags memory_property_flags)
+		{
+			VkPhysicalDeviceMemoryProperties memory_properties;
+			vkGetPhysicalDeviceMemoryProperties(GetPhysicalDevice(), &memory_properties);
+
+			bl found = false;
+			ui32 memory_type_index = 0;
+
+			for (ui32 i = 0; i < memory_properties.memoryTypeCount; i++)
+			{
+				if ((type_filter & (1 << i)) &&
+					(memory_properties.memoryTypes[i].propertyFlags & memory_property_flags) == memory_property_flags)
+				{
+					found = true;
+					memory_type_index = i;
+				}
+			}
+
+			return found ? memory_type_index : -1;
+		}
+
 		operator VkDevice() const
 		{
 			return _device;

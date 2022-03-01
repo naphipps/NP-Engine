@@ -40,27 +40,6 @@ namespace np::graphics::rhi
 			return info;
 		}
 
-		ui32 ChooseMemoryTypeIndex(ui32 type_filter, VkMemoryPropertyFlags memory_property_flags)
-		{
-			VkPhysicalDeviceMemoryProperties memory_properties;
-			vkGetPhysicalDeviceMemoryProperties(GetDevice().GetPhysicalDevice(), &memory_properties);
-
-			bl found = false;
-			ui32 memory_type_index = 0;
-
-			for (ui32 i = 0; i < memory_properties.memoryTypeCount; i++)
-			{
-				if ((type_filter & (1 << i)) &&
-					(memory_properties.memoryTypes[i].propertyFlags & memory_property_flags) == memory_property_flags)
-				{
-					found = true;
-					memory_type_index = i;
-				}
-			}
-
-			return found ? memory_type_index : -1;
-		}
-
 		VkBuffer CreateBuffer(VkDeviceSize size, VkBufferUsageFlags buffer_usage_flags)
 		{
 			VkBuffer buffer = nullptr;
@@ -86,7 +65,7 @@ namespace np::graphics::rhi
 
 			VkMemoryAllocateInfo allocate_info = CreateMemoryAllocateInfo();
 			allocate_info.allocationSize = requirements.size;
-			allocate_info.memoryTypeIndex = ChooseMemoryTypeIndex(requirements.memoryTypeBits, memory_property_flags);
+			allocate_info.memoryTypeIndex = GetDevice().GetMemoryTypeIndex(requirements.memoryTypeBits, memory_property_flags);
 
 			if (vkAllocateMemory(GetDevice(), &allocate_info, nullptr, &device_memory) != VK_SUCCESS)
 			{
