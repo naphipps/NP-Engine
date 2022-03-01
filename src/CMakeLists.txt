@@ -79,6 +79,8 @@ set(NP_ENGINE_GRAPHICS_RPI_HPP
 	# ${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/Texture.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/RhiType.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/Vertex.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/Color.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/Image.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/UniformBufferObject.hpp
 )
 

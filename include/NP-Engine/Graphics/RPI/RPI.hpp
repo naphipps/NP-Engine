@@ -15,6 +15,8 @@
 #include "UniformBufferObject.hpp"
 #include "Vertex.hpp"
 #include "Camera.hpp"
+#include "Image.hpp"
+#include "Color.hpp"
 
 // TODO: when we complete our renderer, we need to cleanup/remove files we are not using
 
