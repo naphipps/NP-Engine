@@ -25,7 +25,7 @@ namespace np::graphics::rhi
 
 		virtual void Draw() override
 		{
-			_renderer->Draw();
+			_renderer.Draw();
 
 			// TODO: telling the renderer to draw may require the usage of Command objects...
 

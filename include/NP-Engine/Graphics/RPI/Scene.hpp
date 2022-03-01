@@ -24,16 +24,21 @@ namespace np::graphics
 	{
 	protected:
 		::entt::registry _registry;
-		Renderer* _renderer;
+		Renderer& _renderer;
 
 	public:
 		static Scene* Create(memory::Allocator& allocator, Renderer& renderer);
 
-		Scene(Renderer& renderer): _renderer(memory::AddressOf(renderer)) {}
+		Scene(Renderer& renderer): _renderer(renderer) {}
 
 		virtual ~Scene() = default; // suppress warning
 
-		Renderer* GetRenderer() const
+		Renderer& GetRenderer()
+		{
+			return _renderer;
+		}
+
+		Renderer& GetRenderer() const
 		{
 			return _renderer;
 		}
