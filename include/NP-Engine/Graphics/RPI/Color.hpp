@@ -47,7 +47,7 @@ namespace np::graphics
 			r = (i >> 24) & 255;
 			g = (i >> 16) & 255;
 			b = (i >> 8) & 255;
-			a = (i)&255;
+			a = i & 255;
 			return *this;
 		}
 	};
