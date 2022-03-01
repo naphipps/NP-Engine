@@ -21,7 +21,7 @@
 
 namespace np::memory::__detail
 {
-	void* StbRealloc(void* ptr, siz size)
+	static void* StbRealloc(void* ptr, siz size)
 	{
 		STBI_FREE(ptr);
 		return STBI_MALLOC(size);
@@ -35,7 +35,9 @@ namespace np::memory::__detail
 #define STBIW_FREE(ptr) STBI_FREE(ptr)
 #define STBIW_REALLOC(ptr, size) STBI_REALLOC(ptr, size)
 
+#define STB_IMAGE_STATIC
 #define STB_IMAGE_IMPLEMENTATION
+#define STB_IMAGE_WRITE_STATIC
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 
 #include <stb_image.h>
