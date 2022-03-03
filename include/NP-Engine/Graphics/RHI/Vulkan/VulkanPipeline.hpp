@@ -21,6 +21,7 @@
 #include "VulkanShader.hpp"
 #include "VulkanVertex.hpp"
 #include "VulkanBuffer.hpp"
+#include "VulkanCommandPool.hpp"
 
 // TODO: there might be some methods with zero references...
 
@@ -51,7 +52,7 @@ namespace np::graphics::rhi
 		bl _rebuild_swapchain;
 
 		container::vector<VkFramebuffer> _framebuffers;
-		VkCommandPool _command_pool;
+		VulkanCommandPool _command_pool;
 		container::vector<VkCommandBuffer> _command_buffers;
 
 		siz _current_frame;
@@ -326,15 +327,6 @@ namespace np::graphics::rhi
 			return info;
 		}
 
-		VkCommandPoolCreateInfo CreateCommandPoolInfo()
-		{
-			VkCommandPoolCreateInfo info{};
-			info.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
-			info.queueFamilyIndex = GetDevice().GetQueueFamilyIndices().graphics.value();
-			info.flags = 0; // Optional
-			return info;
-		}
-
 		VkCommandBufferAllocateInfo CreateCommandBufferAllocateInfo()
 		{
 			VkCommandBufferAllocateInfo info{};
@@ -558,17 +550,6 @@ namespace np::graphics::rhi
 			}
 
 			return framebuffers;
-		}
-
-		VkCommandPool CreateCommandPool()
-		{
-			VkCommandPool command_pool = nullptr;
-			VkCommandPoolCreateInfo command_pool_info = CreateCommandPoolInfo();
-			if (vkCreateCommandPool(GetDevice(), &command_pool_info, nullptr, &command_pool) != VK_SUCCESS)
-			{
-				command_pool = nullptr;
-			}
-			return command_pool;
 		}
 
 		container::vector<VkCommandBuffer> CreateCommandBuffers()
@@ -865,7 +846,7 @@ namespace np::graphics::rhi
 			_pipeline_layout(CreatePipelineLayout()),
 			_pipeline(CreatePipeline()),
 			_framebuffers(CreateFramebuffers()), // TODO: can we put this in a VulkanFramebuffer? I don't think so
-			_command_pool(CreateCommandPool()), // TODO: can we put this in a VulkanCommand_____?? maybe....?
+			_command_pool(device),
 			_current_frame(0),
 			_image_available_semaphores(CreateSemaphores(MAX_FRAMES)),
 			_render_finished_semaphores(CreateSemaphores(MAX_FRAMES)),
@@ -939,7 +920,6 @@ namespace np::graphics::rhi
 			for (VkFence& fence : _fences)
 				vkDestroyFence(GetDevice(), fence, nullptr);
 
-			vkDestroyCommandPool(GetDevice(), _command_pool, nullptr);
 			DestroyDescriptorPool();
 			DestroyUniformBuffers();
 

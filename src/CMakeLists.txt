@@ -100,6 +100,7 @@ set(NP_ENGINE_GRAPHICS_VULKAN_HPP
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RHI/Vulkan/VulkanVertex.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RHI/Vulkan/VulkanScene.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RHI/Vulkan/VulkanBuffer.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RHI/Vulkan/VulkanCommandPool.hpp
 )
 
 set(NP_ENGINE_INPUT_HPP

@@ -16,5 +16,6 @@
 #include "VulkanShader.hpp"
 #include "VulkanSwapchain.hpp"
 #include "VulkanVertex.hpp"
+#include "VulkanCommandPool.hpp"
 
 #endif /* NP_ENGINE_VULKAN_GRAPHICS_HPP */
