@@ -9,7 +9,8 @@
 
 namespace np::graphics
 {
-	class Buffer {};
+	class Buffer
+	{};
 } // namespace np::graphics
 
 #endif /* NP_ENGINE_RPI_BUFFER_HPP */

@@ -17,7 +17,7 @@ namespace np::graphics
 	class Shader
 	{
 	public:
-		enum class Type //TODO: refactor to Pascal case
+		enum class Type // TODO: refactor to Pascal case
 		{
 			VERTEX,
 			FRAGMENT,

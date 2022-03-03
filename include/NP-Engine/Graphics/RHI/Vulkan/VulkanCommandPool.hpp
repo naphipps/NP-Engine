@@ -16,7 +16,6 @@ namespace np::graphics::rhi
 	class VulkanCommandPool
 	{
 	private:
-
 		VulkanDevice& _device;
 		VkCommandPool _command_pool;
 
@@ -41,13 +40,10 @@ namespace np::graphics::rhi
 		}
 
 	public:
-
-		VulkanCommandPool(VulkanDevice& device, VkCommandPoolCreateFlags command_pool_create_flags = 0) :
+		VulkanCommandPool(VulkanDevice& device, VkCommandPoolCreateFlags command_pool_create_flags = 0):
 			_device(device),
 			_command_pool(CreateCommandPool(command_pool_create_flags))
-		{
-
-		}
+		{}
 
 		~VulkanCommandPool()
 		{
@@ -64,6 +60,6 @@ namespace np::graphics::rhi
 			return _command_pool;
 		}
 	};
-}
+} // namespace np::graphics::rhi
 
 #endif /* NP_ENGINE_VULKAN_COMMAND_POOL_HPP */
