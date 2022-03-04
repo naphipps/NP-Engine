@@ -69,7 +69,7 @@ set(NP_ENGINE_GRAPHICS_RPI_HPP
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/RPI.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/Renderer.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/Camera.hpp
-	# ${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/Command.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/Command.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/Buffer.hpp
 	# ${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/Device.hpp
 	# ${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/Image.hpp
@@ -101,6 +101,16 @@ set(NP_ENGINE_GRAPHICS_VULKAN_HPP
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RHI/Vulkan/VulkanScene.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RHI/Vulkan/VulkanBuffer.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RHI/Vulkan/VulkanCommandPool.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RHI/Vulkan/VulkanCommandBuffer.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RHI/Vulkan/VulkanCommand.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RHI/Vulkan/VulkanCommands.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RHI/Vulkan/VulkanCommandBeginRenderPass.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RHI/Vulkan/VulkanCommandBindPipeline.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RHI/Vulkan/VulkanCommandBindVertexBuffers.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RHI/Vulkan/VulkanCommandBindIndexBuffer.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RHI/Vulkan/VulkanCommandBindDescriptorSets.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RHI/Vulkan/VulkanCommandDrawIndexed.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RHI/Vulkan/VulkanCommandEndRenderPass.hpp
 )
 
 set(NP_ENGINE_INPUT_HPP

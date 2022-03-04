@@ -22,6 +22,8 @@
 #include "VulkanVertex.hpp"
 #include "VulkanBuffer.hpp"
 #include "VulkanCommandPool.hpp"
+#include "VulkanCommands.hpp"
+#include "VulkanCommandBuffer.hpp"
 
 // TODO: there might be some methods with zero references...
 
@@ -53,7 +55,7 @@ namespace np::graphics::rhi
 
 		container::vector<VkFramebuffer> _framebuffers;
 		VulkanCommandPool _command_pool;
-		container::vector<VkCommandBuffer> _command_buffers;
+		container::vector<VulkanCommandBuffer> _command_buffers;
 
 		siz _current_frame;
 
@@ -552,49 +554,51 @@ namespace np::graphics::rhi
 			return framebuffers;
 		}
 
-		container::vector<VkCommandBuffer> CreateCommandBuffers()
+		container::vector<VulkanCommandBuffer> CreateCommandBuffers()
 		{
-			container::vector<VkCommandBuffer> command_buffers(_framebuffers.size());
-
 			VkCommandBufferAllocateInfo command_buffer_allocate_info = CreateCommandBufferAllocateInfo();
-			command_buffer_allocate_info.commandBufferCount = (ui32)command_buffers.size();
+			command_buffer_allocate_info.commandBufferCount = (ui32)_framebuffers.size();
+			container::vector<VulkanCommandBuffer> command_buffers =
+				_command_pool.AllocateCommandBuffers(command_buffer_allocate_info);
 
-			if (vkAllocateCommandBuffers(GetDevice(), &command_buffer_allocate_info, command_buffers.data()) != VK_SUCCESS)
-			{
-				command_buffers.clear();
-			}
+			// TODO: I think we can pull the following out of the loop for now...
+			VkCommandBufferBeginInfo command_buffer_begin_info = CreateCommandBufferBeginInfo();
+			container::vector<VkClearValue> clear_values = CreateClearValues();
+			container::vector<VkBuffer> vertex_buffers{*_vertex_buffer};
+			container::vector<VkDeviceSize> offsets{0};
+
+			VkRenderPassBeginInfo render_pass_begin_info = CreateRenderPassBeginInfo();
+			render_pass_begin_info.clearValueCount = clear_values.size();
+			render_pass_begin_info.pClearValues = clear_values.data();
+
+			VulkanCommandBeginRenderPass begin_render_pass(render_pass_begin_info, VK_SUBPASS_CONTENTS_INLINE);
+			VulkanCommandBindPipeline bind_pipeline(VK_PIPELINE_BIND_POINT_GRAPHICS, _pipeline);
+			VulkanCommandBindVertexBuffers bind_vertex_buffers(0, (ui32)vertex_buffers.size(), vertex_buffers.data(), offsets.data());
+			VulkanCommandBindIndexBuffer bind_index_buffer(*_index_buffer, 0, VK_INDEX_TYPE_UINT16);
+			VulkanCommandBindDescriptorSets bind_descriptor_sets(VK_PIPELINE_BIND_POINT_GRAPHICS, _pipeline_layout, 0, 1, nullptr, 0, nullptr);
+			VulkanCommandDrawIndexed draw_indexed((ui32)_indices.size(), 1, 0, 0, 0);
+			VulkanCommandEndRenderPass end_render_pass;
 
 			for (siz i = 0; i < command_buffers.size(); i++)
 			{
-				VkCommandBufferBeginInfo command_buffer_begin_info = CreateCommandBufferBeginInfo();
-
-				if (vkBeginCommandBuffer(command_buffers[i], &command_buffer_begin_info) != VK_SUCCESS)
+				if (command_buffers[i].Begin(command_buffer_begin_info) != VK_SUCCESS)
 				{
 					command_buffers.clear();
 					break;
 				}
 
-				container::vector<VkClearValue> clear_values = CreateClearValues();
+				begin_render_pass.RenderPassBeginInfo.framebuffer = _framebuffers[i];
+				bind_descriptor_sets.DescriptorSets = &_descriptor_sets[i];
+				
+				command_buffers[i].Add(begin_render_pass);
+				command_buffers[i].Add(bind_pipeline);
+				command_buffers[i].Add(bind_vertex_buffers);
+				command_buffers[i].Add(bind_index_buffer);
+				command_buffers[i].Add(bind_descriptor_sets);
+				command_buffers[i].Add(draw_indexed);
+				command_buffers[i].Add(end_render_pass);
 
-				VkRenderPassBeginInfo render_pass_begin_info = CreateRenderPassBeginInfo();
-				render_pass_begin_info.framebuffer = _framebuffers[i];
-				render_pass_begin_info.clearValueCount = clear_values.size();
-				render_pass_begin_info.pClearValues = clear_values.data();
-
-				container::vector<VkBuffer> vertex_buffers{*_vertex_buffer};
-				container::vector<VkDeviceSize> offsets{0};
-
-				vkCmdBeginRenderPass(command_buffers[i], &render_pass_begin_info, VK_SUBPASS_CONTENTS_INLINE);
-				vkCmdBindPipeline(command_buffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, _pipeline);
-				vkCmdBindVertexBuffers(command_buffers[i], 0, (ui32)vertex_buffers.size(), vertex_buffers.data(),
-									   offsets.data());
-				vkCmdBindIndexBuffer(command_buffers[i], *_index_buffer, 0, VK_INDEX_TYPE_UINT16);
-				vkCmdBindDescriptorSets(command_buffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, _pipeline_layout, 0, 1,
-										&_descriptor_sets[i], 0, nullptr);
-				vkCmdDrawIndexed(command_buffers[i], (ui32)_indices.size(), 1, 0, 0, 0);
-				vkCmdEndRenderPass(command_buffers[i]);
-
-				if (vkEndCommandBuffer(command_buffers[i]) != VK_SUCCESS)
+				if (command_buffers[i].End() != VK_SUCCESS)
 				{
 					command_buffers.clear();
 					break;
@@ -661,12 +665,11 @@ namespace np::graphics::rhi
 
 		void CopyBuffer(VulkanBuffer& dst, VulkanBuffer& src, VkDeviceSize size)
 		{
-			container::vector<VkCommandBuffer> command_buffers{nullptr};
-
 			VkCommandBufferAllocateInfo command_buffer_allocate_info = CreateCommandBufferAllocateInfo();
-			command_buffer_allocate_info.commandBufferCount = (ui32)command_buffers.size();
-			vkAllocateCommandBuffers(GetDevice(), &command_buffer_allocate_info, command_buffers.data());
-
+			command_buffer_allocate_info.commandBufferCount = 1;
+			container::vector<VulkanCommandBuffer> command_buffers = _command_pool.AllocateCommandBuffers(command_buffer_allocate_info);
+			container::vector<VkCommandBuffer> buffers(command_buffers.begin(), command_buffers.end());
+			
 			VkCommandBufferBeginInfo command_buffer_begin_info = CreateCommandBufferBeginInfo();
 			command_buffer_begin_info.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
 			vkBeginCommandBuffer(command_buffers.front(), &command_buffer_begin_info);
@@ -681,14 +684,14 @@ namespace np::graphics::rhi
 
 			container::vector<VkSubmitInfo> submit_infos{{}};
 			submit_infos.front().sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-			submit_infos.front().pCommandBuffers = command_buffers.data();
-			submit_infos.front().commandBufferCount = (ui32)command_buffers.size();
+			submit_infos.front().pCommandBuffers = buffers.data();
+			submit_infos.front().commandBufferCount = (ui32)buffers.size();
 
 			vkQueueSubmit(GetDevice().GetGraphicsDeviceQueue(), submit_infos.size(), submit_infos.data(), nullptr);
 			vkQueueWaitIdle(GetDevice().GetGraphicsDeviceQueue()); // TODO: use a fence so we can submit multiple simultaneously
 																   // - this makes it one by one
 
-			vkFreeCommandBuffers(GetDevice(), _command_pool, (ui32)command_buffers.size(), command_buffers.data());
+			_command_pool.FreeCommandBuffers(command_buffers);
 		}
 
 		container::vector<VulkanBuffer*> CreateUniformBuffers() // TODO: return vector of ubo's
@@ -809,7 +812,7 @@ namespace np::graphics::rhi
 
 			vkDeviceWaitIdle(GetDevice());
 
-			vkFreeCommandBuffers(GetDevice(), _command_pool, (ui32)_command_buffers.size(), _command_buffers.data());
+			_command_pool.FreeCommandBuffers(_command_buffers);
 
 			DestroyDescriptorPool();
 			DestroyUniformBuffers();
@@ -1003,13 +1006,15 @@ namespace np::graphics::rhi
 
 			UpdateUniformBuffer(image_index);
 
+			VkCommandBuffer buffer = _command_buffers[image_index];
+
 			VkSubmitInfo submit_info{};
 			submit_info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 			submit_info.waitSemaphoreCount = wait_semaphores.size();
 			submit_info.pWaitSemaphores = wait_semaphores.data();
 			submit_info.pWaitDstStageMask = wait_stages.data();
 			submit_info.commandBufferCount = 1; // _command_buffers.size();
-			submit_info.pCommandBuffers = &_command_buffers[image_index];
+			submit_info.pCommandBuffers = &buffer;
 			submit_info.signalSemaphoreCount = signal_semaphores.size();
 			submit_info.pSignalSemaphores = signal_semaphores.data();
 
