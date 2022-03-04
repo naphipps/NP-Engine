@@ -9,7 +9,8 @@
 
 namespace np::graphics
 {
-	struct Command {};
-}
+	struct Command
+	{};
+} // namespace np::graphics
 
 #endif /* NP_ENGINE_RPI_COMMAND_HPP */

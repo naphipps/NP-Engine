@@ -25,8 +25,8 @@ namespace np::graphics::rhi
 		ui32* DynamicOffsets;
 
 		VulkanCommandBindDescriptorSets(VkPipelineBindPoint pipeline_bind_point, VkPipelineLayout layout, ui32 first_set,
-			ui32 descriptor_set_count, VkDescriptorSet* descriptor_sets,
-			ui32 dynamic_offset_count, ui32* dynamic_offsets):
+										ui32 descriptor_set_count, VkDescriptorSet* descriptor_sets, ui32 dynamic_offset_count,
+										ui32* dynamic_offsets):
 			PipelineBindPoint(pipeline_bind_point),
 			PipelineLayout(layout),
 			FirstSet(first_set),

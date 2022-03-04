@@ -23,6 +23,6 @@ namespace np::graphics::rhi
 			vkCmdEndRenderPass(command_buffer);
 		}
 	};
-}
+} // namespace np::graphics::rhi
 
 #endif /* NP_ENGINE_VULKAN_COMMAND_END_RENDER_PASS_HPP */

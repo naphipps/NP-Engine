@@ -573,9 +573,11 @@ namespace np::graphics::rhi
 
 			VulkanCommandBeginRenderPass begin_render_pass(render_pass_begin_info, VK_SUBPASS_CONTENTS_INLINE);
 			VulkanCommandBindPipeline bind_pipeline(VK_PIPELINE_BIND_POINT_GRAPHICS, _pipeline);
-			VulkanCommandBindVertexBuffers bind_vertex_buffers(0, (ui32)vertex_buffers.size(), vertex_buffers.data(), offsets.data());
+			VulkanCommandBindVertexBuffers bind_vertex_buffers(0, (ui32)vertex_buffers.size(), vertex_buffers.data(),
+															   offsets.data());
 			VulkanCommandBindIndexBuffer bind_index_buffer(*_index_buffer, 0, VK_INDEX_TYPE_UINT16);
-			VulkanCommandBindDescriptorSets bind_descriptor_sets(VK_PIPELINE_BIND_POINT_GRAPHICS, _pipeline_layout, 0, 1, nullptr, 0, nullptr);
+			VulkanCommandBindDescriptorSets bind_descriptor_sets(VK_PIPELINE_BIND_POINT_GRAPHICS, _pipeline_layout, 0, 1,
+																 nullptr, 0, nullptr);
 			VulkanCommandDrawIndexed draw_indexed((ui32)_indices.size(), 1, 0, 0, 0);
 			VulkanCommandEndRenderPass end_render_pass;
 
@@ -589,7 +591,7 @@ namespace np::graphics::rhi
 
 				begin_render_pass.RenderPassBeginInfo.framebuffer = _framebuffers[i];
 				bind_descriptor_sets.DescriptorSets = &_descriptor_sets[i];
-				
+
 				command_buffers[i].Add(begin_render_pass);
 				command_buffers[i].Add(bind_pipeline);
 				command_buffers[i].Add(bind_vertex_buffers);
@@ -667,9 +669,10 @@ namespace np::graphics::rhi
 		{
 			VkCommandBufferAllocateInfo command_buffer_allocate_info = CreateCommandBufferAllocateInfo();
 			command_buffer_allocate_info.commandBufferCount = 1;
-			container::vector<VulkanCommandBuffer> command_buffers = _command_pool.AllocateCommandBuffers(command_buffer_allocate_info);
+			container::vector<VulkanCommandBuffer> command_buffers =
+				_command_pool.AllocateCommandBuffers(command_buffer_allocate_info);
 			container::vector<VkCommandBuffer> buffers(command_buffers.begin(), command_buffers.end());
-			
+
 			VkCommandBufferBeginInfo command_buffer_begin_info = CreateCommandBufferBeginInfo();
 			command_buffer_begin_info.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
 			vkBeginCommandBuffer(command_buffers.front(), &command_buffer_begin_info);

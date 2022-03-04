@@ -22,11 +22,8 @@ namespace np::graphics::rhi
 		i32 VertexOffset;
 		ui32 FirstInstance;
 
-		VulkanCommandDrawIndexed(ui32 index_count,
-			ui32 instance_count,
-			ui32 first_index,
-			i32 vertex_offset,
-			ui32 first_instance):
+		VulkanCommandDrawIndexed(ui32 index_count, ui32 instance_count, ui32 first_index, i32 vertex_offset,
+								 ui32 first_instance):
 			IndexCount(index_count),
 			InstanceCount(instance_count),
 			FirstIndex(first_index),
@@ -39,6 +36,6 @@ namespace np::graphics::rhi
 			vkCmdDrawIndexed(command_buffer, IndexCount, InstanceCount, FirstIndex, VertexOffset, FirstInstance);
 		}
 	};
-}
+} // namespace np::graphics::rhi
 
 #endif /* NP_ENGINE_VULKAN_COMMAND_DRAW_INDEXED_HPP */
