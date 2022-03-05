@@ -11,7 +11,7 @@
 
 #include "NP-Engine/Vendor/VulkanInclude.hpp"
 
-#include "../../RPI/RPI.hpp"
+#include "NP-Engine/Graphics/RPI/RPI.hpp"
 
 #include "VulkanDevice.hpp"
 

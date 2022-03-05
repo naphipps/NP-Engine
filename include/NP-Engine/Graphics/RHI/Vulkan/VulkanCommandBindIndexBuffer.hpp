@@ -16,7 +16,7 @@ namespace np::graphics::rhi
 	class VulkanCommandBindIndexBuffer : public VulkanCommand
 	{
 	public:
-		VkBuffer Buffer; // TODO: if this builds on Linux then we can remove this todo
+		VkBuffer Buffer;
 		VkDeviceSize Offset;
 		VkIndexType IndexType;
 

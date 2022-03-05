@@ -9,7 +9,7 @@
 
 namespace np::graphics
 {
-	class Buffer
+	struct Buffer
 	{};
 } // namespace np::graphics
 

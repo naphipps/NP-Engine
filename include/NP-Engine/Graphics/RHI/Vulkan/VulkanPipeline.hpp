@@ -906,7 +906,6 @@ namespace np::graphics::rhi
 			_uniform_buffers = CreateUniformBuffers();
 			_descriptor_pool = CreateDescriptorPool();
 			_descriptor_sets = CreateDescriptorSets();
-
 			_command_buffers = CreateCommandBuffers();
 		}
 
@@ -1016,7 +1015,7 @@ namespace np::graphics::rhi
 			submit_info.waitSemaphoreCount = wait_semaphores.size();
 			submit_info.pWaitSemaphores = wait_semaphores.data();
 			submit_info.pWaitDstStageMask = wait_stages.data();
-			submit_info.commandBufferCount = 1; // _command_buffers.size();
+			submit_info.commandBufferCount = 1; // _command_buffers.size(); //TODO: what is going on here?? I think we're fine
 			submit_info.pCommandBuffers = &buffer;
 			submit_info.signalSemaphoreCount = signal_semaphores.size();
 			submit_info.pSignalSemaphores = signal_semaphores.data();

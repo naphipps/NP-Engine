@@ -18,4 +18,6 @@
 #include "VulkanVertex.hpp"
 #include "VulkanCommandPool.hpp"
 
+// TODO: make sure we have everything here
+
 #endif /* NP_ENGINE_VULKAN_GRAPHICS_HPP */
