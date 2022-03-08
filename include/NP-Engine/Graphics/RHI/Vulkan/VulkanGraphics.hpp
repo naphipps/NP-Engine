@@ -16,7 +16,10 @@
 #include "VulkanShader.hpp"
 #include "VulkanSwapchain.hpp"
 #include "VulkanVertex.hpp"
+#include "VulkanImage.hpp"
+#include "VulkanImageView.hpp"
 #include "VulkanCommandPool.hpp"
+#include "VulkanCommands.hpp"
 
 // TODO: make sure we have everything here
 
