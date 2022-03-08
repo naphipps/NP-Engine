@@ -8,6 +8,7 @@
 #define NP_ENGINE_VULKAN_BUFFER_HPP
 
 #include <iostream> //TODO: remove
+#include <utility>
 
 #include "NP-Engine/Vendor/VulkanInclude.hpp"
 
@@ -23,32 +24,13 @@ namespace np::graphics::rhi
 		VulkanDevice& _device;
 		VkBuffer _buffer;
 		VkDeviceMemory _device_memory;
-		VkDeviceSize _size;
+		VkDeviceSize _size; // TODO: do we need this??
 
-		VkBufferCreateInfo CreateBufferInfo()
-		{
-			VkBufferCreateInfo info{};
-			info.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-			info.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-			return info;
-		}
-
-		VkMemoryAllocateInfo CreateMemoryAllocateInfo()
-		{
-			VkMemoryAllocateInfo info{};
-			info.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-			return info;
-		}
-
-		VkBuffer CreateBuffer(VkDeviceSize size, VkBufferUsageFlags buffer_usage_flags)
+		VkBuffer CreateBuffer(VkBufferCreateInfo& info)
 		{
 			VkBuffer buffer = nullptr;
 
-			VkBufferCreateInfo buffer_info = CreateBufferInfo();
-			buffer_info.size = size;
-			buffer_info.usage = buffer_usage_flags;
-
-			if (vkCreateBuffer(GetDevice(), &buffer_info, nullptr, &buffer) != VK_SUCCESS)
+			if (vkCreateBuffer(GetDevice(), &info, nullptr, &buffer) != VK_SUCCESS)
 			{
 				buffer = nullptr;
 			}
@@ -63,7 +45,8 @@ namespace np::graphics::rhi
 			VkMemoryRequirements requirements;
 			vkGetBufferMemoryRequirements(GetDevice(), _buffer, &requirements);
 
-			VkMemoryAllocateInfo allocate_info = CreateMemoryAllocateInfo();
+			VkMemoryAllocateInfo allocate_info{};
+			allocate_info.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
 			allocate_info.allocationSize = requirements.size;
 			allocate_info.memoryTypeIndex = GetDevice().GetMemoryTypeIndex(requirements.memoryTypeBits, memory_property_flags);
 
@@ -80,18 +63,41 @@ namespace np::graphics::rhi
 		}
 
 	public:
-		VulkanBuffer(VulkanDevice& device, VkDeviceSize size, VkBufferUsageFlags buffer_usage_flags,
-					 VkMemoryPropertyFlags memory_property_flags):
+		static VkBufferCreateInfo CreateInfo()
+		{
+			VkBufferCreateInfo info{};
+			info.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+			info.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+			return info;
+		}
+
+		VulkanBuffer(VulkanDevice& device, VkBufferCreateInfo& buffer_create_info, VkMemoryPropertyFlags memory_property_flags):
 			Buffer(),
 			_device(device),
-			_buffer(CreateBuffer(size, buffer_usage_flags)),
+			_buffer(CreateBuffer(buffer_create_info)),
 			_device_memory(CreateDeviceMemory(memory_property_flags))
 		{}
 
+		VulkanBuffer(const VulkanBuffer&) = delete;
+
+		VulkanBuffer(VulkanBuffer&& other) noexcept:
+			_device(::std::move(other._device)),
+			_buffer(::std::move(other._buffer)),
+			_device_memory(::std::move(other._device_memory)),
+			_size(::std::move(other._size))
+		{
+			other._buffer = nullptr;
+			other._device_memory = nullptr;
+			other._size = 0;
+		}
+
 		~VulkanBuffer()
 		{
-			vkDestroyBuffer(GetDevice(), _buffer, nullptr);
-			vkFreeMemory(GetDevice(), _device_memory, nullptr);
+			if (_buffer)
+				vkDestroyBuffer(GetDevice(), _buffer, nullptr);
+
+			if (_device_memory)
+				vkFreeMemory(GetDevice(), _device_memory, nullptr);
 		}
 
 		VulkanInstance& GetInstance() const

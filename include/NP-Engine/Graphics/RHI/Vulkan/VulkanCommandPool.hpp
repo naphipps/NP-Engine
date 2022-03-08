@@ -23,30 +23,31 @@ namespace np::graphics::rhi
 		VulkanDevice& _device;
 		VkCommandPool _command_pool;
 
-		VkCommandPoolCreateInfo CreateCommandPoolInfo()
-		{
-			VkCommandPoolCreateInfo info{};
-			info.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
-			info.queueFamilyIndex = GetDevice().GetQueueFamilyIndices().graphics.value();
-			return info;
-		}
-
-		VkCommandPool CreateCommandPool(VkCommandPoolCreateFlags command_pool_create_flags)
+		VkCommandPool CreateCommandPool(VkCommandPoolCreateInfo& info)
 		{
 			VkCommandPool command_pool = nullptr;
-			VkCommandPoolCreateInfo command_pool_info = CreateCommandPoolInfo();
-			command_pool_info.flags = command_pool_create_flags;
-			if (vkCreateCommandPool(GetDevice(), &command_pool_info, nullptr, &command_pool) != VK_SUCCESS)
+
+			info.queueFamilyIndex = GetDevice().GetQueueFamilyIndices().graphics.value();
+
+			if (vkCreateCommandPool(GetDevice(), &info, nullptr, &command_pool) != VK_SUCCESS)
 			{
 				command_pool = nullptr;
 			}
+
 			return command_pool;
 		}
 
 	public:
-		VulkanCommandPool(VulkanDevice& device, VkCommandPoolCreateFlags command_pool_create_flags = 0):
+		static VkCommandPoolCreateInfo CreateInfo()
+		{
+			VkCommandPoolCreateInfo info{};
+			info.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+			return info;
+		}
+
+		VulkanCommandPool(VulkanDevice& device, VkCommandPoolCreateInfo& command_pool_create_info):
 			_device(device),
-			_command_pool(CreateCommandPool(command_pool_create_flags))
+			_command_pool(CreateCommandPool(command_pool_create_info))
 		{}
 
 		~VulkanCommandPool()
@@ -68,16 +69,13 @@ namespace np::graphics::rhi
 			const VkCommandBufferAllocateInfo& command_buffer_allocate_info)
 		{
 			container::vector<VkCommandBuffer> buffers(command_buffer_allocate_info.commandBufferCount);
-			container::vector<VulkanCommandBuffer> command_buffers;
 
 			if (vkAllocateCommandBuffers(GetDevice(), &command_buffer_allocate_info, buffers.data()) != VK_SUCCESS)
 			{
 				buffers.clear();
 			}
 
-			command_buffers.insert(command_buffers.begin(), buffers.begin(), buffers.end());
-
-			return command_buffers;
+			return container::vector<VulkanCommandBuffer>(buffers.begin(), buffers.end());
 		}
 
 		void FreeCommandBuffers(const container::vector<VulkanCommandBuffer>& command_buffers)
