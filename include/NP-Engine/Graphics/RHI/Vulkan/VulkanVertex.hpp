@@ -48,8 +48,8 @@ namespace np::graphics::rhi
 
 			descs[2].binding = 0;
 			descs[2].location = 2;
-			descs[2].format = VK_FORMAT_R32G32B32_SFLOAT;
 			descs[2].offset = offsetof(Vertex, TextureCoordinate);
+			descs[2].format = VK_FORMAT_R32G32_SFLOAT;
 
 			return descs;
 		}
