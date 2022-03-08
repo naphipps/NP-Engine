@@ -52,7 +52,7 @@ namespace np::graphics::rhi
 		VulkanTexture(const VulkanTexture&) = delete;
 
 		VulkanTexture(VulkanTexture&& other) noexcept:
-			_device(::std::move(other._device)),
+			_device(other._device),
 			_image(::std::move(other._image)),
 			_image_view(::std::move(other._image_view))
 		{}

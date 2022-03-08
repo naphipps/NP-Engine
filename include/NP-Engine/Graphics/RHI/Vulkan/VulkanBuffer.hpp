@@ -81,7 +81,7 @@ namespace np::graphics::rhi
 		VulkanBuffer(const VulkanBuffer&) = delete;
 
 		VulkanBuffer(VulkanBuffer&& other) noexcept:
-			_device(::std::move(other._device)),
+			_device(other._device),
 			_buffer(::std::move(other._buffer)),
 			_device_memory(::std::move(other._device_memory)),
 			_size(::std::move(other._size))

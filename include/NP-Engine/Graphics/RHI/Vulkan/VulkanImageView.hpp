@@ -59,9 +59,7 @@ namespace np::graphics::rhi
 
 		VulkanImageView(const VulkanImageView&) = delete;
 
-		VulkanImageView(VulkanImageView&& other) noexcept:
-			_device(::std::move(other._device)),
-			_image_view(::std::move(other._image_view))
+		VulkanImageView(VulkanImageView&& other) noexcept: _device(other._device), _image_view(::std::move(other._image_view))
 		{
 			other._image_view = nullptr;
 		}

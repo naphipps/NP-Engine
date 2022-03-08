@@ -92,7 +92,7 @@ namespace np::graphics::rhi
 		VulkanImage(const VulkanImage&) = delete;
 
 		VulkanImage(VulkanImage&& other) noexcept:
-			_device(::std::move(other._device)),
+			_device(other._device),
 			_image(::std::move(other._image)),
 			_device_memory(::std::move(other._device_memory))
 		{
