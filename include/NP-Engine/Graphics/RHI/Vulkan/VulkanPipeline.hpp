@@ -675,8 +675,9 @@ namespace np::graphics::rhi
 
 		VulkanCommandPool* CreateCommandPool()
 		{
+			VkCommandPoolCreateInfo info = VulkanCommandPool::CreateInfo();
 			memory::Block block = memory::DefaultTraitAllocator.Allocate(sizeof(VulkanCommandPool));
-			memory::Construct<VulkanCommandPool>(block, GetDevice(), VulkanCommandPool::CreateInfo());
+			memory::Construct<VulkanCommandPool>(block, GetDevice(), info);
 			return (VulkanCommandPool*)block.ptr;
 		}
 
@@ -753,8 +754,9 @@ namespace np::graphics::rhi
 				dst_pipeline_stage_flags = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
 			}
 
-			command_buffer.Add(VulkanCommandPipelineBarrier(src_pipeline_stage_flags, dst_pipeline_stage_flags, 0, 0, nullptr,
-															0, nullptr, 1, &image_memory_barrier));
+			VulkanCommandPipelineBarrier pipeline_barrier(src_pipeline_stage_flags, dst_pipeline_stage_flags, 0, 0, nullptr, 0,
+														  nullptr, 1, &image_memory_barrier);
+			command_buffer.Add(pipeline_barrier);
 
 			container::vector<VulkanCommandBuffer> buffers{command_buffer};
 			EndSingleUseCommandBuffers(buffers);
@@ -777,8 +779,9 @@ namespace np::graphics::rhi
 			buffer_image_copy.imageOffset = {0, 0, 0};
 			buffer_image_copy.imageExtent = {width, height, 1};
 
-			command_buffer.Add(
-				VulkanCommandCopyBufferToImage(buffer, image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &buffer_image_copy));
+			VulkanCommandCopyBufferToImage copy_buffer_to_image(buffer, image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1,
+																&buffer_image_copy);
+			command_buffer.Add(copy_buffer_to_image);
 
 			container::vector<VulkanCommandBuffer> buffers{command_buffer};
 			EndSingleUseCommandBuffers(buffers);
@@ -803,7 +806,8 @@ namespace np::graphics::rhi
 			VkBufferCopy buffer_copy{};
 			buffer_copy.size = size;
 
-			command_buffer.Add(VulkanCommandCopyBuffers(src, dst, 1, &buffer_copy));
+			VulkanCommandCopyBuffers copy_buffers(src, dst, 1, &buffer_copy);
+			command_buffer.Add(copy_buffers);
 
 			container::vector<VulkanCommandBuffer> buffers{command_buffer};
 			EndSingleUseCommandBuffers(buffers);
