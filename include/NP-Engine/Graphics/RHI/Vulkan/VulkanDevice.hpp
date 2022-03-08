@@ -163,6 +163,11 @@ namespace np::graphics::rhi
 
 				// TODO: go through all properties and features to determine best score...
 
+				if (features.samplerAnisotropy == VK_TRUE)
+				{
+					score += 200;
+				}
+
 				bl has_queuegraphics_bit = false; // we require the VK_QUEUEgraphics_BIT
 				bl has_queue_present_bit = false; // we require KHR present support
 				bl supports_required_extensions = false;
@@ -402,11 +407,11 @@ namespace np::graphics::rhi
 
 				VkDeviceCreateInfo device_info = CreateDeviceInfo();
 				device_info.pEnabledFeatures = &physical_features;
-				device_info.queueCreateInfoCount = queue_infos.size();
+				device_info.queueCreateInfoCount = (ui32)queue_infos.size();
 				device_info.pQueueCreateInfos = queue_infos.data();
-				device_info.enabledExtensionCount = enabled_extension_names.size();
+				device_info.enabledExtensionCount = (ui32)enabled_extension_names.size();
 				device_info.ppEnabledExtensionNames = enabled_extension_names.data();
-				device_info.enabledLayerCount = enabled_layer_names.size();
+				device_info.enabledLayerCount = (ui32)enabled_layer_names.size();
 				device_info.ppEnabledLayerNames = enabled_layer_names.data();
 
 				if (vkCreateDevice(_physical_device, &device_info, nullptr, &logical_device) != VK_SUCCESS)
