@@ -15,6 +15,7 @@ namespace np::graphics
 	{
 		::glm::vec2 Position;
 		::glm::vec3 Color;
+		::glm::vec2 TextureCoordinate;
 	};
 } // namespace np::graphics
 

@@ -15,5 +15,8 @@
 #include "VulkanCommandBindVertexBuffers.hpp"
 #include "VulkanCommandDrawIndexed.hpp"
 #include "VulkanCommandEndRenderPass.hpp"
+#include "VulkanCommandCopyBuffers.hpp"
+#include "VulkanCommandPipelineBarrier.hpp"
+#include "VulkanCommandCopyBufferToImage.hpp"
 
 #endif /* NP_ENGINE_VULKAN_COMMANDS_HPP */

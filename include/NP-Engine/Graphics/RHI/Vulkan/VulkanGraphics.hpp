@@ -18,6 +18,8 @@
 #include "VulkanVertex.hpp"
 #include "VulkanImage.hpp"
 #include "VulkanImageView.hpp"
+#include "VulkanSampler.hpp"
+#include "VulkanTexture.hpp"
 #include "VulkanCommandPool.hpp"
 #include "VulkanCommands.hpp"
 
