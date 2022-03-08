@@ -510,8 +510,8 @@ namespace np::graphics::rhi
 				container::vector<VkPipelineShaderStageCreateInfo> shader_stages = CreateShaderStages();
 				VkPipelineInputAssemblyStateCreateInfo input_assembly_state_info = CreatePipelineInputAssemblyStateInfo();
 
-				container::vector<VkViewport> viewports = {CreateViewport()};
-				container::vector<VkRect2D> scissors = {CreateScissor()};
+				container::vector<VkViewport> viewports{CreateViewport()};
+				container::vector<VkRect2D> scissors{CreateScissor()};
 
 				VkPipelineViewportStateCreateInfo viewport_state_info = CreatePipelineViewportStateInfo();
 				viewport_state_info.viewportCount = viewports.size();
