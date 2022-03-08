@@ -14,6 +14,7 @@
 #include "VulkanInstance.hpp"
 #include "VulkanSurface.hpp"
 #include "VulkanDevice.hpp"
+#include "VulkanImageView.hpp"
 
 namespace np::graphics::rhi
 {
@@ -23,8 +24,8 @@ namespace np::graphics::rhi
 		VulkanDevice& _device;
 		VkExtent2D _extent;
 		VkSwapchainKHR _swapchain;
-		container::vector<VkImage> _images;
-		container::vector<VkImageView> _image_views;
+		container::vector<VkImage> _images; // we do not have device memory for these so we'll keep VkImage type
+		container::vector<VulkanImageView> _image_views;
 
 		VkSwapchainCreateInfoKHR CreateSwapchainInfo()
 		{
@@ -134,30 +135,26 @@ namespace np::graphics::rhi
 			return images;
 		}
 
-		container::vector<VkImageView> CreateImageViews()
+		void CreateImageViews() // TODO: could we make use of ::std::move here??
 		{
-			container::vector<VkImageView> views(_images.size());
+			if (!_image_views.empty())
+				_image_views.clear();
 
-			for (siz i = 0; i < _images.size(); i++)
+			VkImageViewCreateInfo info = VulkanImageView::CreateInfo();
+			info.format = GetDevice().GetSurfaceFormat().format;
+
+			for (VkImage& image : _images)
 			{
-				VkImageViewCreateInfo image_view_info = CreateImageViewInfo();
-				image_view_info.image = _images[i];
-				if (vkCreateImageView(GetDevice(), &image_view_info, nullptr, &views[i]) != VK_SUCCESS)
-				{
-					views.clear();
-					break;
-				}
+				info.image = image;
+				_image_views.emplace_back(GetDevice(), info);
 			}
-
-			return views;
 		}
 
 		void Dispose()
 		{
-			for (VkImageView& view : _image_views)
-				vkDestroyImageView(GetDevice(), view, nullptr);
+			_image_views.clear();
 
-			if (_swapchain != nullptr)
+			if (_swapchain) // TODO: we need this in every Vulkan class...
 				vkDestroySwapchainKHR(GetDevice(), _swapchain, nullptr);
 		}
 
@@ -166,9 +163,10 @@ namespace np::graphics::rhi
 			_device(device),
 			_extent(ChooseExtent()),
 			_swapchain(CreateSwapchain()),
-			_images(RetrieveImages()),
-			_image_views(CreateImageViews())
-		{}
+			_images(RetrieveImages())
+		{
+			CreateImageViews();
+		}
 
 		~VulkanSwapchain()
 		{
@@ -196,7 +194,7 @@ namespace np::graphics::rhi
 			_extent = ChooseExtent();
 			_swapchain = CreateSwapchain();
 			_images = RetrieveImages();
-			_image_views = CreateImageViews();
+			CreateImageViews();
 		}
 
 		const container::vector<VkImage>& GetImages() const
@@ -204,7 +202,7 @@ namespace np::graphics::rhi
 			return _images;
 		}
 
-		const container::vector<VkImageView>& GetImageViews() const
+		const container::vector<VulkanImageView>& GetImageViews() const
 		{
 			return _image_views;
 		}
