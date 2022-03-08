@@ -100,7 +100,7 @@ namespace np::graphics::rhi
 				vkFreeMemory(GetDevice(), _device_memory, nullptr);
 		}
 
-		VulkanInstance& GetInstance() const
+		VulkanInstance& GetInstance() const // TODO: the following methods should be added to every Vulkan class possible
 		{
 			return _device.GetInstance();
 		}

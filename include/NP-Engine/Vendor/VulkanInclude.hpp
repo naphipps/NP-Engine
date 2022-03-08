@@ -11,4 +11,6 @@
 
 #include <vulkan/vulkan.hpp>
 
+// TODO: add a bunch of helper functions like CreateSubmitInfo that sets "our default" SubmitInfo values
+
 #endif /* NP_ENGINE_VENDOR_VULKAN_INCLUDE_HPP */
