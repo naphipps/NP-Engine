@@ -35,7 +35,7 @@ namespace np::graphics::rhi
 			VkBool32 retval = VK_TRUE;
 			if ((msg_severity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT) == 0)
 			{
-				::std::cerr << "Validation Layer: " << callback_data->pMessage << ::std::endl;
+				::std::cerr << ::std::endl << "Validation Layer: " << callback_data->pMessage << ::std::endl << ::std::endl;
 				retval = VK_FALSE;
 			}
 			return retval;
