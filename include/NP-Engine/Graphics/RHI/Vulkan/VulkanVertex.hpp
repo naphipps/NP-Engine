@@ -25,7 +25,7 @@ namespace np::graphics::rhi
 
 			VkVertexInputBindingDescription desc{};
 			desc.binding = 0;
-			desc.stride = sizeof(Vertex);
+			desc.stride = sizeof(VulkanVertex);
 			desc.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
 			descs.emplace_back(desc);
 
@@ -39,16 +39,16 @@ namespace np::graphics::rhi
 			descs[0].binding = 0;
 			descs[0].location = 0;
 			descs[0].format = VK_FORMAT_R32G32_SFLOAT;
-			descs[0].offset = offsetof(Vertex, Position);
+			descs[0].offset = offsetof(VulkanVertex, Position);
 
 			descs[1].binding = 0;
 			descs[1].location = 1;
 			descs[1].format = VK_FORMAT_R32G32B32_SFLOAT;
-			descs[1].offset = offsetof(Vertex, Color);
+			descs[1].offset = offsetof(VulkanVertex, Color);
 
 			descs[2].binding = 0;
 			descs[2].location = 2;
-			descs[2].offset = offsetof(Vertex, TextureCoordinate);
+			descs[2].offset = offsetof(VulkanVertex, TextureCoordinate);
 			descs[2].format = VK_FORMAT_R32G32_SFLOAT;
 
 			return descs;
