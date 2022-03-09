@@ -529,7 +529,8 @@ namespace np::graphics::rhi
 			return found ? memory_type_index : -1;
 		}
 
-		VkFormat GetSupportedFormat(const container::vector<VkFormat>& format_candidates, VkImageTiling image_tiling, VkFormatFeatureFlags format_features)
+		VkFormat GetSupportedFormat(const container::vector<VkFormat>& format_candidates, VkImageTiling image_tiling,
+									VkFormatFeatureFlags format_features)
 		{
 			VkFormat format = VK_FORMAT_UNDEFINED;
 

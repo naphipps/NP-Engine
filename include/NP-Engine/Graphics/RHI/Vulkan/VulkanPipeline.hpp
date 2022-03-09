@@ -97,8 +97,8 @@ namespace np::graphics::rhi
 		VkFormat GetDepthFormat()
 		{
 			return GetDevice().GetSupportedFormat(
-				{ VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT },
-				VK_IMAGE_TILING_OPTIMAL, VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT);
+				{VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT}, VK_IMAGE_TILING_OPTIMAL,
+				VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT);
 		}
 
 		bl HasStencilComponent(VkFormat format)
@@ -420,7 +420,7 @@ namespace np::graphics::rhi
 			clear_color.color = {{0.0f, 0.0f, 0.0f, 1.0f}};
 
 			VkClearValue depth_stencil{};
-			depth_stencil.depthStencil = { 1.0f, 0 };
+			depth_stencil.depthStencil = {1.0f, 0};
 
 			values.emplace_back(clear_color);
 			values.emplace_back(depth_stencil);
@@ -435,9 +435,11 @@ namespace np::graphics::rhi
 			VkSubpassDependency dependency{};
 			dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
 			dependency.dstSubpass = 0;
-			dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
+			dependency.srcStageMask =
+				VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
 			dependency.srcAccessMask = 0;
-			dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
+			dependency.dstStageMask =
+				VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
 			dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
 
 			dependencies.emplace_back(dependency);
@@ -506,7 +508,8 @@ namespace np::graphics::rhi
 
 			container::vector<VkSubpassDescription> subpass_descriptions = {subpass_description};
 
-			container::vector<VkAttachmentDescription> attachment_descriptions = {CreateColorAttachmentDescription(), CreateDepthAttachmentDescription()};
+			container::vector<VkAttachmentDescription> attachment_descriptions = {CreateColorAttachmentDescription(),
+																				  CreateDepthAttachmentDescription()};
 
 			container::vector<VkSubpassDependency> subpass_dependencies = CreateSubpassDependencies();
 
@@ -810,14 +813,15 @@ namespace np::graphics::rhi
 				dst_pipeline_stage_flags = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
 			}
 			else if (old_image_layout == VK_IMAGE_LAYOUT_UNDEFINED &&
-				new_image_layout == VK_IMAGE_LAYOUT_STENCIL_ATTACHMENT_OPTIMAL)
+					 new_image_layout == VK_IMAGE_LAYOUT_STENCIL_ATTACHMENT_OPTIMAL)
 			{
 				image_memory_barrier.srcAccessMask = 0;
-				image_memory_barrier.dstAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+				image_memory_barrier.dstAccessMask =
+					VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
 				src_pipeline_stage_flags = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
 				dst_pipeline_stage_flags = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
 			}
-			
+
 			if (new_image_layout == VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL)
 			{
 				image_memory_barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
@@ -1108,7 +1112,7 @@ namespace np::graphics::rhi
 
 			/*
 			the following transition is covered in the render pass, but here it is for reference
-			
+
 			TransitionImageLayout(_depth_texture->GetImage(), depth_format, VK_IMAGE_LAYOUT_UNDEFINED,
 				VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
 			*/
@@ -1139,8 +1143,9 @@ namespace np::graphics::rhi
 			// texture image
 			Image image(fs::Append(fs::Append(fs::Append(NP_ENGINE_WORKING_DIR, "test"), "assets"), "statue-512x512.jpg"));
 
-			VulkanBuffer* _staging_buffer = CreateBuffer(image.Size(), VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-										   VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+			VulkanBuffer* _staging_buffer =
+				CreateBuffer(image.Size(), VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+							 VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 
 			VkImageCreateInfo texture_image_create_info = VulkanImage::CreateInfo();
 			texture_image_create_info.extent.width = image.GetWidth();
@@ -1171,16 +1176,15 @@ namespace np::graphics::rhi
 			_sampler = CreateSampler(sampler_create_info);
 
 			// vertex buffer
-			_vertices = { {{{-0.5f, -0.5f, 0.0f}, {1.0f, 0.0f, 1.0f}, {1.0f, 0.0f}}},
+			_vertices = {{{{-0.5f, -0.5f, 0.0f}, {1.0f, 0.0f, 1.0f}, {1.0f, 0.0f}}},
 						 {{{0.5f, -0.5f, 0.0f}, {1.0f, 1.0f, 0.0f}, {0.0f, 0.0f}}},
 						 {{{0.5f, 0.5f, 0.0f}, {0.0f, 1.0f, 1.0f}, {0.0f, 1.0f}}},
 						 {{{-0.5f, 0.5f, 0.0f}, {1.0f, 1.0f, 1.0f}, {1.0f, 1.0f}}},
 
-				{{{-0.5f, -0.5f, -0.5f}, {1.0f, 0.0f, 1.0f}, {1.0f, 0.0f}}},
+						 {{{-0.5f, -0.5f, -0.5f}, {1.0f, 0.0f, 1.0f}, {1.0f, 0.0f}}},
 						 {{{0.5f, -0.5f, -0.5f}, {1.0f, 1.0f, 0.0f}, {0.0f, 0.0f}}},
 						 {{{0.5f, 0.5f, -0.5f}, {0.0f, 1.0f, 1.0f}, {0.0f, 1.0f}}},
-						 {{{-0.5f, 0.5f, -0.5f}, {1.0f, 1.0f, 1.0f}, {1.0f, 1.0f}}}
-			};
+						 {{{-0.5f, 0.5f, -0.5f}, {1.0f, 1.0f, 1.0f}, {1.0f, 1.0f}}}};
 
 			VkDeviceSize data_size = sizeof(_vertices[0]) * _vertices.size();
 
@@ -1198,8 +1202,7 @@ namespace np::graphics::rhi
 			Destroy<VulkanBuffer>(_staging_buffer);
 
 			// index buffer
-			_indices = {0, 1, 2, 2, 3, 0, 
-				4, 5, 6, 6, 7, 4};
+			_indices = {0, 1, 2, 2, 3, 0, 4, 5, 6, 6, 7, 4};
 
 			data_size = sizeof(_indices[0]) * _indices.size();
 
@@ -1217,7 +1220,7 @@ namespace np::graphics::rhi
 			Destroy<VulkanBuffer>(_staging_buffer);
 
 			// depth buffer
-			_depth_texture = nullptr; //priming value for calling RecreateDepthResources
+			_depth_texture = nullptr; // priming value for calling RecreateDepthResources
 			RecreateDepthTexture();
 
 			// others
