@@ -1063,10 +1063,10 @@ namespace np::graphics::rhi
 			_sampler = CreateSampler(sampler_create_info);
 
 			// vertex buffer
-			_vertices = {{{{-0.5f, -0.5f}, {1.0f, 0.0f, 1.0f}, {1.0f, 0.0f}}},
-						 {{{0.5f, -0.5f}, {1.0f, 1.0f, 0.0f}, {0.0f, 0.0f}}},
-						 {{{0.5f, 0.5f}, {0.0f, 1.0f, 1.0f}, {0.0f, 1.0f}}},
-						 {{{-0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}, {1.0f, 1.0f}}}};
+			_vertices = {{{{-0.5f, -0.5f, 0.0f}, {1.0f, 0.0f, 1.0f}, {1.0f, 0.0f}}},
+						 {{{0.5f, -0.5f, 0.0f}, {1.0f, 1.0f, 0.0f}, {0.0f, 0.0f}}},
+						 {{{0.5f, 0.5f, 0.0f}, {0.0f, 1.0f, 1.0f}, {0.0f, 1.0f}}},
+						 {{{-0.5f, 0.5f, 0.0f}, {1.0f, 1.0f, 1.0f}, {1.0f, 1.0f}}}};
 
 			VkDeviceSize data_size = sizeof(_vertices[0]) * _vertices.size();
 
