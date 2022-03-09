@@ -44,12 +44,12 @@ namespace np::graphics::rhi
 
 		VulkanSwapchain _swapchain;
 		VulkanTexture* _texture;
+		VulkanTexture* _depth_texture;
 		VulkanSampler* _sampler;
 		container::vector<VulkanVertex> _vertices;
 		VulkanBuffer* _vertex_buffer;
 		container::vector<ui16> _indices;
 		VulkanBuffer* _index_buffer;
-		VulkanBuffer* _staging_buffer;
 		container::vector<VulkanBuffer*> _uniform_buffers;
 		time::SteadyTimestamp _start_timestamp;
 		VulkanShader _vertex_shader;
@@ -92,6 +92,18 @@ namespace np::graphics::rhi
 		{
 			((VulkanPipeline*)pipeline)->SetRebuildSwapchain();
 			((VulkanPipeline*)pipeline)->Draw();
+		}
+
+		VkFormat GetDepthFormat()
+		{
+			return GetDevice().GetSupportedFormat(
+				{ VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT },
+				VK_IMAGE_TILING_OPTIMAL, VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT);
+		}
+
+		bl HasStencilComponent(VkFormat format)
+		{
+			return format == VK_FORMAT_D32_SFLOAT_S8_UINT || format == VK_FORMAT_D24_UNORM_S8_UINT;
 		}
 
 		VkPipelineShaderStageCreateInfo CreatePipelineShaderStageInfo()
@@ -236,6 +248,20 @@ namespace np::graphics::rhi
 			return info;
 		}
 
+		VkPipelineDepthStencilStateCreateInfo CreatePipelineDepthStencilStateInfo()
+		{
+			VkPipelineDepthStencilStateCreateInfo info{};
+			info.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
+			info.depthTestEnable = VK_TRUE;
+			info.depthWriteEnable = VK_TRUE;
+			info.depthCompareOp = VK_COMPARE_OP_LESS;
+			info.depthBoundsTestEnable = VK_FALSE;
+			info.minDepthBounds = 0.0f;
+			info.maxDepthBounds = 1.0f;
+			info.stencilTestEnable = VK_FALSE;
+			return info;
+		}
+
 		container::vector<VkDynamicState> CreateDynamicStates()
 		{
 			return {VK_DYNAMIC_STATE_VIEWPORT, VK_DYNAMIC_STATE_LINE_WIDTH};
@@ -250,7 +276,7 @@ namespace np::graphics::rhi
 			return info;
 		}
 
-		VkAttachmentDescription CreateAttachmentDescription()
+		VkAttachmentDescription CreateColorAttachmentDescription()
 		{
 			VkAttachmentDescription desc{};
 			desc.format = GetDevice().GetSurfaceFormat().format;
@@ -262,14 +288,26 @@ namespace np::graphics::rhi
 			// TODO: we don't do anything with the stencil buffer
 			desc.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
 			desc.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-
 			desc.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 			desc.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
-
 			return desc;
 		}
 
-		VkAttachmentReference CreateAttachmentReference()
+		VkAttachmentDescription CreateDepthAttachmentDescription()
+		{
+			VkAttachmentDescription desc{};
+			desc.format = GetDepthFormat();
+			desc.samples = VK_SAMPLE_COUNT_1_BIT;
+			desc.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+			desc.storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+			desc.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+			desc.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+			desc.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+			desc.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+			return desc;
+		}
+
+		VkAttachmentReference CreateColorAttachmentReference()
 		{
 			VkAttachmentReference ref{};
 			ref.attachment = 0;
@@ -277,11 +315,18 @@ namespace np::graphics::rhi
 			return ref;
 		}
 
+		VkAttachmentReference CreateDepthAttachmentReference()
+		{
+			VkAttachmentReference ref{};
+			ref.attachment = 1;
+			ref.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+			return ref;
+		}
+
 		VkSubpassDescription CreateSubpassDescription()
 		{
 			VkSubpassDescription desc{};
 			desc.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
-
 			return desc;
 		}
 
@@ -371,8 +416,14 @@ namespace np::graphics::rhi
 		{
 			container::vector<VkClearValue> values;
 
-			VkClearValue clear_color = {{{0.0f, 0.0f, 0.0f, 1.0f}}};
+			VkClearValue clear_color{};
+			clear_color.color = {{0.0f, 0.0f, 0.0f, 1.0f}};
+
+			VkClearValue depth_stencil{};
+			depth_stencil.depthStencil = { 1.0f, 0 };
+
 			values.emplace_back(clear_color);
+			values.emplace_back(depth_stencil);
 
 			return values;
 		}
@@ -384,10 +435,10 @@ namespace np::graphics::rhi
 			VkSubpassDependency dependency{};
 			dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
 			dependency.dstSubpass = 0;
-			dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+			dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
 			dependency.srcAccessMask = 0;
-			dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-			dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+			dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
+			dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
 
 			dependencies.emplace_back(dependency);
 
@@ -445,24 +496,26 @@ namespace np::graphics::rhi
 		{
 			VkRenderPass render_pass = nullptr;
 
-			container::vector<VkAttachmentReference> attachment_references = {CreateAttachmentReference()};
+			VkAttachmentReference color_attachment_reference = CreateColorAttachmentReference();
+			VkAttachmentReference depth_attachment_reference = CreateDepthAttachmentReference();
 
 			VkSubpassDescription subpass_description = CreateSubpassDescription();
-			subpass_description.colorAttachmentCount = attachment_references.size();
-			subpass_description.pColorAttachments = attachment_references.data();
+			subpass_description.colorAttachmentCount = 1;
+			subpass_description.pColorAttachments = &color_attachment_reference;
+			subpass_description.pDepthStencilAttachment = &depth_attachment_reference;
 
 			container::vector<VkSubpassDescription> subpass_descriptions = {subpass_description};
 
-			container::vector<VkAttachmentDescription> attachment_descriptions = {CreateAttachmentDescription()};
+			container::vector<VkAttachmentDescription> attachment_descriptions = {CreateColorAttachmentDescription(), CreateDepthAttachmentDescription()};
 
 			container::vector<VkSubpassDependency> subpass_dependencies = CreateSubpassDependencies();
 
 			VkRenderPassCreateInfo render_pass_info = CreateRenderPassInfo();
-			render_pass_info.attachmentCount = attachment_descriptions.size();
+			render_pass_info.attachmentCount = (ui32)attachment_descriptions.size();
 			render_pass_info.pAttachments = attachment_descriptions.data();
-			render_pass_info.subpassCount = subpass_descriptions.size();
+			render_pass_info.subpassCount = (ui32)subpass_descriptions.size();
 			render_pass_info.pSubpasses = subpass_descriptions.data();
-			render_pass_info.dependencyCount = subpass_dependencies.size();
+			render_pass_info.dependencyCount = (ui32)subpass_dependencies.size();
 			render_pass_info.pDependencies = subpass_dependencies.data();
 
 			if (vkCreateRenderPass(GetDevice(), &render_pass_info, nullptr, &render_pass) != VK_SUCCESS)
@@ -528,6 +581,8 @@ namespace np::graphics::rhi
 				color_blend_state_info.attachmentCount = color_blend_attachment_states.size();
 				color_blend_state_info.pAttachments = color_blend_attachment_states.data();
 
+				VkPipelineDepthStencilStateCreateInfo depth_stencil_state_info = CreatePipelineDepthStencilStateInfo();
+
 				VkGraphicsPipelineCreateInfo pipeline_info = CreateGraphicsPipelineInfo();
 				pipeline_info.stageCount = shader_stages.size();
 				pipeline_info.pStages = shader_stages.data();
@@ -544,6 +599,7 @@ namespace np::graphics::rhi
 				pipeline_info.subpass = 0;
 				pipeline_info.basePipelineHandle = VK_NULL_HANDLE; // Optional
 				pipeline_info.basePipelineIndex = -1; // Optional
+				pipeline_info.pDepthStencilState = &depth_stencil_state_info;
 
 				if (vkCreateGraphicsPipelines(GetDevice(), nullptr, 1, &pipeline_info, nullptr, &pipeline) != VK_SUCCESS)
 				{
@@ -560,7 +616,7 @@ namespace np::graphics::rhi
 
 			for (siz i = 0; i < GetSwapchain().GetImageViews().size(); i++)
 			{
-				container::vector<VkImageView> image_views{GetSwapchain().GetImageViews()[i]};
+				container::vector<VkImageView> image_views{GetSwapchain().GetImageViews()[i], _depth_texture->GetImageView()};
 
 				VkFramebufferCreateInfo framebuffer_info = CreateFramebufferInfo();
 				framebuffer_info.renderPass = _render_pass;
@@ -590,7 +646,7 @@ namespace np::graphics::rhi
 			container::vector<VkDeviceSize> offsets{0};
 
 			VkRenderPassBeginInfo render_pass_begin_info = CreateRenderPassBeginInfo();
-			render_pass_begin_info.clearValueCount = clear_values.size();
+			render_pass_begin_info.clearValueCount = (ui32)clear_values.size();
 			render_pass_begin_info.pClearValues = clear_values.data();
 
 			VulkanCommandBeginRenderPass begin_render_pass(render_pass_begin_info, VK_SUBPASS_CONTENTS_INLINE);
@@ -752,6 +808,28 @@ namespace np::graphics::rhi
 				image_memory_barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
 				src_pipeline_stage_flags = VK_PIPELINE_STAGE_TRANSFER_BIT;
 				dst_pipeline_stage_flags = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+			}
+			else if (old_image_layout == VK_IMAGE_LAYOUT_UNDEFINED &&
+				new_image_layout == VK_IMAGE_LAYOUT_STENCIL_ATTACHMENT_OPTIMAL)
+			{
+				image_memory_barrier.srcAccessMask = 0;
+				image_memory_barrier.dstAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+				src_pipeline_stage_flags = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
+				dst_pipeline_stage_flags = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
+			}
+			
+			if (new_image_layout == VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL)
+			{
+				image_memory_barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
+
+				if (HasStencilComponent(format))
+				{
+					image_memory_barrier.subresourceRange.aspectMask |= VK_IMAGE_ASPECT_STENCIL_BIT;
+				}
+			}
+			else
+			{
+				image_memory_barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
 			}
 
 			VulkanCommandPipelineBarrier pipeline_barrier(src_pipeline_stage_flags, dst_pipeline_stage_flags, 0, 0, nullptr, 0,
@@ -997,11 +1075,43 @@ namespace np::graphics::rhi
 			_render_pass = CreateRenderPass();
 			_pipeline_layout = CreatePipelineLayout();
 			_pipeline = CreatePipeline();
+			RecreateDepthTexture();
 			_framebuffers = CreateFramebuffers();
 			_uniform_buffers = CreateUniformBuffers();
 			_descriptor_pool = CreateDescriptorPool();
 			_descriptor_sets = CreateDescriptorSets();
 			_command_buffers = CreateCommandBuffers();
+		}
+
+		void RecreateDepthTexture()
+		{
+			VkFormat depth_format = GetDepthFormat();
+
+			VkImageCreateInfo depth_image_create_info = VulkanImage::CreateInfo();
+			depth_image_create_info.extent.width = GetSwapchain().GetExtent().width;
+			depth_image_create_info.extent.height = GetSwapchain().GetExtent().height;
+			depth_image_create_info.format = depth_format;
+			depth_image_create_info.tiling = VK_IMAGE_TILING_OPTIMAL;
+			depth_image_create_info.usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
+			VkMemoryPropertyFlags depth_memory_property_flags = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
+			VkImageViewCreateInfo depth_image_view_create_info = VulkanImageView::CreateInfo();
+			depth_image_view_create_info.format = depth_image_create_info.format;
+			depth_image_view_create_info.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
+
+			if (_depth_texture)
+			{
+				Destroy<VulkanTexture>(_depth_texture);
+				_depth_texture = nullptr;
+			}
+
+			_depth_texture = CreateTexture(depth_image_create_info, depth_memory_property_flags, depth_image_view_create_info);
+
+			/*
+			the following transition is covered in the render pass, but here it is for reference
+			
+			TransitionImageLayout(_depth_texture->GetImage(), depth_format, VK_IMAGE_LAYOUT_UNDEFINED,
+				VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
+			*/
 		}
 
 	public:
@@ -1015,7 +1125,6 @@ namespace np::graphics::rhi
 			_render_pass(CreateRenderPass()),
 			_pipeline_layout(CreatePipelineLayout()),
 			_pipeline(CreatePipeline()),
-			_framebuffers(CreateFramebuffers()), // TODO: can we put this in a VulkanFrameBuffer? I don't think so
 			_command_pool(CreateCommandPool()),
 			_current_frame(0),
 			_image_available_semaphores(CreateSemaphores(MAX_FRAMES)),
@@ -1030,7 +1139,7 @@ namespace np::graphics::rhi
 			// texture image
 			Image image(fs::Append(fs::Append(fs::Append(NP_ENGINE_WORKING_DIR, "test"), "assets"), "statue-512x512.jpg"));
 
-			_staging_buffer = CreateBuffer(image.Size(), VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+			VulkanBuffer* _staging_buffer = CreateBuffer(image.Size(), VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
 										   VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 
 			VkImageCreateInfo texture_image_create_info = VulkanImage::CreateInfo();
@@ -1058,15 +1167,20 @@ namespace np::graphics::rhi
 			Destroy<VulkanBuffer>(_staging_buffer);
 
 			// sampler
-
 			VkSamplerCreateInfo sampler_create_info = VulkanSampler::CreateInfo();
 			_sampler = CreateSampler(sampler_create_info);
 
 			// vertex buffer
-			_vertices = {{{{-0.5f, -0.5f, 0.0f}, {1.0f, 0.0f, 1.0f}, {1.0f, 0.0f}}},
+			_vertices = { {{{-0.5f, -0.5f, 0.0f}, {1.0f, 0.0f, 1.0f}, {1.0f, 0.0f}}},
 						 {{{0.5f, -0.5f, 0.0f}, {1.0f, 1.0f, 0.0f}, {0.0f, 0.0f}}},
 						 {{{0.5f, 0.5f, 0.0f}, {0.0f, 1.0f, 1.0f}, {0.0f, 1.0f}}},
-						 {{{-0.5f, 0.5f, 0.0f}, {1.0f, 1.0f, 1.0f}, {1.0f, 1.0f}}}};
+						 {{{-0.5f, 0.5f, 0.0f}, {1.0f, 1.0f, 1.0f}, {1.0f, 1.0f}}},
+
+				{{{-0.5f, -0.5f, -0.5f}, {1.0f, 0.0f, 1.0f}, {1.0f, 0.0f}}},
+						 {{{0.5f, -0.5f, -0.5f}, {1.0f, 1.0f, 0.0f}, {0.0f, 0.0f}}},
+						 {{{0.5f, 0.5f, -0.5f}, {0.0f, 1.0f, 1.0f}, {0.0f, 1.0f}}},
+						 {{{-0.5f, 0.5f, -0.5f}, {1.0f, 1.0f, 1.0f}, {1.0f, 1.0f}}}
+			};
 
 			VkDeviceSize data_size = sizeof(_vertices[0]) * _vertices.size();
 
@@ -1084,7 +1198,8 @@ namespace np::graphics::rhi
 			Destroy<VulkanBuffer>(_staging_buffer);
 
 			// index buffer
-			_indices = {0, 1, 2, 2, 3, 0};
+			_indices = {0, 1, 2, 2, 3, 0, 
+				4, 5, 6, 6, 7, 4};
 
 			data_size = sizeof(_indices[0]) * _indices.size();
 
@@ -1101,6 +1216,12 @@ namespace np::graphics::rhi
 			CopyBuffer(*_index_buffer, *_staging_buffer, data_size);
 			Destroy<VulkanBuffer>(_staging_buffer);
 
+			// depth buffer
+			_depth_texture = nullptr; //priming value for calling RecreateDepthResources
+			RecreateDepthTexture();
+
+			// others
+			_framebuffers = CreateFramebuffers(); // TODO: can we put this in a VulkanFrameBuffer? I don't think so
 			_uniform_buffers = CreateUniformBuffers();
 			_descriptor_pool = CreateDescriptorPool();
 			_descriptor_sets = CreateDescriptorSets();
@@ -1113,6 +1234,7 @@ namespace np::graphics::rhi
 
 			Destroy<VulkanSampler>(_sampler);
 			Destroy<VulkanTexture>(_texture);
+			Destroy<VulkanTexture>(_depth_texture);
 			Destroy<VulkanBuffer>(_vertex_buffer);
 			Destroy<VulkanBuffer>(_index_buffer);
 

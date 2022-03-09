@@ -529,6 +529,31 @@ namespace np::graphics::rhi
 			return found ? memory_type_index : -1;
 		}
 
+		VkFormat GetSupportedFormat(const container::vector<VkFormat>& format_candidates, VkImageTiling image_tiling, VkFormatFeatureFlags format_features)
+		{
+			VkFormat format = VK_FORMAT_UNDEFINED;
+
+			for (const VkFormat& format_candidate : format_candidates)
+			{
+				VkFormatProperties format_properties;
+				vkGetPhysicalDeviceFormatProperties(GetPhysicalDevice(), format_candidate, &format_properties);
+
+				bl found = image_tiling == VK_IMAGE_TILING_LINEAR &&
+					(format_properties.linearTilingFeatures & format_features) == format_features;
+
+				found |= image_tiling == VK_IMAGE_TILING_OPTIMAL &&
+					(format_properties.optimalTilingFeatures & format_features) == format_features;
+
+				if (found)
+				{
+					format = format_candidate;
+					break;
+				}
+			}
+
+			return format;
+		}
+
 		operator VkDevice() const
 		{
 			return _device;
