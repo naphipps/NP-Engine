@@ -17,7 +17,7 @@
 #include "NP-Engine/Time/Time.hpp"
 #include "NP-Engine/Filesystem/Filesystem.hpp"
 
-#include "NP-Engine/Vendor/JsonInclude.hpp"
+#include "NP-Engine/Vendor/RapidJsonInclude.hpp"
 
 #include "TraceEvent.hpp"
 #include "Timer.hpp"
@@ -31,7 +31,7 @@ namespace np::insight
 		static const ::std::string TraceEvents;
 		static Instrumentor _instance;
 
-		nlohmann::json _json;
+		::rapidjson::Document _json;
 		::std::string _filepath;
 		Timer _trace_timer;
 		Mutex _mutex;
@@ -40,8 +40,8 @@ namespace np::insight
 
 		Instrumentor(::std::string filepath): _filepath(filepath)
 		{
-			_json[OtherData] = nlohmann::json::object();
-			_json[TraceEvents] = nlohmann::json::array();
+			_json[OtherData.c_str()].SetObject();
+			_json[TraceEvents.c_str()].SetArray();
 			_trace_timer.Stop();
 		}
 
@@ -54,7 +54,12 @@ namespace np::insight
 
 				if (out_stream.is_open())
 				{
-					out_stream << _json;
+					::rapidjson::StringBuffer buffer;
+					buffer.Clear(); // TODO: don't know if this is needed...
+					::rapidjson::Writer<::rapidjson::StringBuffer> writer(buffer);
+					_json.Accept(writer);
+
+					out_stream << buffer.GetString();
 					out_stream.flush();
 					out_stream.close();
 				}
@@ -99,19 +104,21 @@ namespace np::insight
 			Lock lock(_mutex);
 
 			::std::stringstream ss;
-			nlohmann::json trace;
-
-			trace["cat"] = "function";
-			trace["dur"] = event.ElapsedMicroseconds.count();
-			trace["name"] = event.Name;
-			trace["ph"] = "X";
-			trace["pid"] = "0";
 			ss << event.ThreadId;
-			trace["tid"] = ss.str();
+			::std::string tid = ss.str();
 			ss.str(""); // clear ss
-			trace["ts"] = time::DurationMicroseconds(event.StartTimestamp.time_since_epoch()).count();
+			::rapidjson::Document trace;
+			trace.SetObject();
 
-			_json[TraceEvents].push_back(trace);
+			trace["cat"].SetString("function", 8);
+			trace["dur"].SetDouble(event.ElapsedMicroseconds.count());
+			trace["name"].SetString(event.Name.c_str(), event.Name.size());
+			trace["ph"].SetString("X", 1);
+			trace["pid"].SetString("0", 1);
+			trace["tid"].SetString(tid.c_str(), tid.size());
+			trace["ts"].SetDouble(time::DurationMicroseconds(event.StartTimestamp.time_since_epoch()).count());
+
+			_json[TraceEvents.c_str()].GetArray().PushBack(trace.GetObject(), _json.GetAllocator());
 
 #ifndef NP_PROFILE_FORCE_SAVE_ON_TRACE_ADD
 			if (save)

@@ -258,12 +258,12 @@ set(NP_ENGINE_VENDOR_HPP
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Vendor/EnttInclude.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Vendor/GlfwInclude.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Vendor/GlmInclude.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Vendor/JsonInclude.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Vendor/PcgCppInclude.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Vendor/RandutilsInclude.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Vendor/SpdlogInclude.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Vendor/VulkanInclude.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Vendor/StbInclude.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Vendor/RapidJsonInclude.hpp
 )
 
 set(NP_ENGINE_WINDOW_HPP
@@ -410,6 +410,8 @@ set(NP_ENGINE_SOURCE_FILES
 
 add_library(${PROJECT_NAME} STATIC ${NP_ENGINE_SOURCE_FILES} ${NP_ENGINE_HEADER_FILES})
 
+find_package(RapidJSON REQUIRED)
+
 if (MSVC)
 	set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /DDEBUG=1")
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /D_USE_MATH_DEFINES=1")
@@ -425,17 +427,18 @@ target_link_libraries(
 	Box2D
 	pcg-cpp
 	randutils
-	nlohmann_json::nlohmann_json
 	EnTT::EnTT
 	glm
 	glfw
 	stb
+	${RapidJSON_LIBRARY}
 )
 
 target_include_directories(
 	${PROJECT_NAME} PUBLIC
 	${PROJECT_SOURCE_DIR}/include
 	${Box2D_SOURCE_DIR}
+	${RapidJSON_INCLUDE_DIR}
 )
 
 set_target_properties(

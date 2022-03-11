@@ -15,7 +15,7 @@
 #include "NP-Engine/Filesystem/Filesystem.hpp"
 #include "NP-Engine/String/String.hpp"
 
-#include "NP-Engine/Vendor/JsonInclude.hpp"
+#include "NP-Engine/Vendor/RapidJsonInclude.hpp"
 
 namespace np::serialization
 {
@@ -80,7 +80,7 @@ namespace np::serialization
 		/**
 		 save ourselves to the given json object
 		 */
-		virtual bl SaveToJson(nlohmann::json& json) const
+		virtual bl SaveToJson(::rapidjson::Document& json) const
 		{
 			return false;
 		}
@@ -88,7 +88,7 @@ namespace np::serialization
 		/**
 		 load ourselves from the given json object
 		 */
-		virtual bl LoadFromJson(const nlohmann::json& json)
+		virtual bl LoadFromJson(const ::rapidjson::Document& json)
 		{
 			return false;
 		}

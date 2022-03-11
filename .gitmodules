@@ -1,6 +1,3 @@
-[submodule "vendor/nlohmann_json"]
-	path = vendor/nlohmann_json
-	url = git@github.com:nlohmann/json.git
 [submodule "vendor/gabime_spdlog"]
 	path = vendor/gabime_spdlog
 	url = git@github.com:gabime/spdlog.git
@@ -28,3 +25,6 @@
 [submodule "vendor/naphipps_stb"]
 	path = vendor/naphipps_stb
 	url = git@github.com:naphipps/stb.git
+[submodule "vendor/Tencent_rapidjson"]
+	path = vendor/Tencent_rapidjson
+	url = git@github.com:Tencent/rapidjson.git
