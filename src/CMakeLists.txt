@@ -410,7 +410,7 @@ set(NP_ENGINE_SOURCE_FILES
 
 add_library(${PROJECT_NAME} STATIC ${NP_ENGINE_SOURCE_FILES} ${NP_ENGINE_HEADER_FILES})
 
-find_package(RapidJSON REQUIRED)
+find_package(RapidJSON REQUIRED) # TODO: cleanup this file, it's getting a little messy
 
 if (MSVC)
 	set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /DDEBUG=1")
