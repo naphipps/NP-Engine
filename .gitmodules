@@ -28,3 +28,6 @@
 [submodule "vendor/Tencent_rapidjson"]
 	path = vendor/Tencent_rapidjson
 	url = git@github.com:Tencent/rapidjson.git
+[submodule "vendor/tinyobjloader_tinyobjloader"]
+	path = vendor/tinyobjloader_tinyobjloader
+	url = git@github.com:tinyobjloader/tinyobjloader.git

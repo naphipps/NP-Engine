@@ -264,6 +264,7 @@ set(NP_ENGINE_VENDOR_HPP
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Vendor/VulkanInclude.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Vendor/StbInclude.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Vendor/RapidJsonInclude.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Vendor/TinyObjLoaderInclude.hpp
 )
 
 set(NP_ENGINE_WINDOW_HPP
@@ -432,6 +433,7 @@ target_link_libraries(
 	glfw
 	stb
 	${RapidJSON_LIBRARY}
+	tinyobjloader
 )
 
 target_include_directories(
