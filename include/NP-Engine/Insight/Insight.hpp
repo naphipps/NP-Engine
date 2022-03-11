@@ -12,7 +12,6 @@
 #include "Instrumentor.hpp"
 #include "ScopedTimer.hpp"
 #include "Timer.hpp"
-#include "Assert.hpp"
 #include "InstrumentorTimer.hpp"
 #include "TraceEvent.hpp"
 

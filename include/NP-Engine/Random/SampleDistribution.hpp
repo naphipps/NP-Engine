@@ -7,10 +7,10 @@
 #ifndef NP_ENGINE_SAMPLE_DISTRIBUTION_HPP
 #define NP_ENGINE_SAMPLE_DISTRIBUTION_HPP
 
+#include "NP-Engine/Foundation/Foundation.hpp"
 #include "NP-Engine/Container/Container.hpp"
 #include "NP-Engine/Primitive/Primitive.hpp"
 #include "NP-Engine/Math/Math.hpp"
-#include "NP-Engine/Insight/Insight.hpp"
 
 namespace np::random
 {
@@ -40,7 +40,7 @@ namespace np::random
 
 		inline void Init()
 		{
-			NP_ASSERT(_min_result < _max_result, "min must always be < max");
+			NP_ENGINE_ASSERT(_min_result < _max_result, "min must always be < max");
 			i32 powOfTwo = math::fastfloor(math::sqrt((flt)_sample.size()));
 
 			for (ui64 i = 0; i < _sample.size(); i++)
@@ -50,7 +50,8 @@ namespace np::random
 
 				if (i > 0)
 				{
-					NP_ASSERT(_sample[i - 1].probability <= _sample[i].probability, "our probability must always increase");
+					NP_ENGINE_ASSERT(_sample[i - 1].probability <= _sample[i].probability,
+									 "our probability must always increase");
 				}
 			}
 		}
@@ -143,8 +144,8 @@ namespace np::random
 				}
 			}
 
-			NP_ASSERT(value >= _min_result && value <= _max_result,
-					  "our result must be within [" + to_str(_min_result) + ", " + to_str(_max_result) + "]");
+			NP_ENGINE_ASSERT(value >= _min_result && value <= _max_result,
+							 "our result must be within [" + to_str(_min_result) + ", " + to_str(_max_result) + "]");
 
 			return value;
 		}

@@ -15,7 +15,7 @@
 #include "NP-Engine/Insight/Insight.hpp"
 
 #define STBI_ASSERT(expression) \
-	NP_ASSERT(expression, ::std::string("STB encounted an asserted issue here: ") + ::std::string(NP_FUNCTION))
+	NP_ENGINE_ASSERT(expression, ::std::string("STB encounted an asserted issue here: ") + ::std::string(NP_FUNCTION))
 
 #define STBI_MALLOC(size) ::np::memory::DefaultTraitAllocator.Allocate(size).ptr
 #define STBI_FREE(ptr) ::np::memory::DefaultTraitAllocator.Deallocate(ptr)

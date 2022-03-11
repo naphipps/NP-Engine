@@ -10,8 +10,8 @@
 #include <string>
 #include <type_traits>
 
+#include "NP-Engine/Foundation/Foundation.hpp"
 #include "NP-Engine/Primitive/Primitive.hpp"
-#include "NP-Engine/Insight/Insight.hpp"
 
 namespace np::memory
 {
@@ -50,11 +50,11 @@ namespace np::memory
 		template <typename T>
 		void AssignData(const T& object)
 		{
-			NP_ASSERT(sizeof(T) <= CACHE_LINE_SIZE - 1,
-					  "cannot assign padding struct of size (" + ::std::to_string(sizeof(T)) + ")\nplease keep it <= (" +
-						  ::std::to_string(CACHE_LINE_SIZE - 1) + ")");
+			NP_ENGINE_ASSERT(sizeof(T) <= CACHE_LINE_SIZE - 1,
+							 "cannot assign padding struct of size (" + ::std::to_string(sizeof(T)) + ")\nplease keep it <= (" +
+								 ::std::to_string(CACHE_LINE_SIZE - 1) + ")");
 
-			NP_ASSERT(::std::is_copy_assignable_v<T>, "T must be copy assignable");
+			NP_ENGINE_ASSERT(::std::is_copy_assignable_v<T>, "T must be copy assignable");
 
 			*((T*)_padding) = object;
 			_padding[CACHE_LINE_SIZE - 1] = 1;

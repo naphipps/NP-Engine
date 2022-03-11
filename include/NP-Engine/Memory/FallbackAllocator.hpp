@@ -7,8 +7,8 @@
 #ifndef NP_ENGINE_FALLBACK_ALLOCATOR_HHPP
 #define NP_ENGINE_FALLBACK_ALLOCATOR_HHPP
 
+#include "NP-Engine/Foundation/Foundation.hpp"
 #include "NP-Engine/Primitive/Primitive.hpp"
-#include "NP-Engine/Insight/Insight.hpp"
 
 #include "Allocator.hpp"
 
@@ -23,8 +23,8 @@ namespace np::memory
 	public:
 		FallbackAllocator(Allocator* primary, Allocator* fallback): _primary(primary), _fallback(fallback)
 		{
-			NP_ASSERT(_primary != nullptr, "we must get a valid primary allocator");
-			NP_ASSERT(_fallback != nullptr, "we must get a valid fallback allocator");
+			NP_ENGINE_ASSERT(_primary != nullptr, "we must get a valid primary allocator");
+			NP_ENGINE_ASSERT(_fallback != nullptr, "we must get a valid fallback allocator");
 		}
 
 		virtual Allocator& GetPrimary()

@@ -11,7 +11,7 @@
 
 #include <type_traits>
 
-#include "NP-Engine/Insight/Insight.hpp"
+#include "NP-Engine/Foundation/Foundation.hpp"
 #include "NP-Engine/Primitive/Primitive.hpp"
 #include "NP-Engine/Container/Container.hpp"
 #include "NP-Engine/Math/Math.hpp"
@@ -29,12 +29,12 @@ namespace np
 		class Image // TODO: I think we should move this to some sort of Image-based project??
 		{
 		private:
-			NP_STATIC_ASSERT((::std::is_same_v<T, ui8> || ::std::is_same_v<T, ui16> || ::std::is_same_v<T, ui32> ||
-							  ::std::is_same_v<T, ui64> || ::std::is_same_v<T, i8> || ::std::is_same_v<T, i16> ||
-							  ::std::is_same_v<T, i32> || ::std::is_same_v<T, i64> || ::std::is_same_v<T, flt> ||
-							  ::std::is_same_v<T, dbl> || ::std::is_same_v<T, chr> || ::std::is_same_v<T, uchr> ||
-							  ::std::is_same_v<T, bl>),
-							 "Image<T, SIZE> requires T to be types listed in Image.hpp");
+			NP_ENGINE_STATIC_ASSERT((::std::is_same_v<T, ui8> || ::std::is_same_v<T, ui16> || ::std::is_same_v<T, ui32> ||
+									 ::std::is_same_v<T, ui64> || ::std::is_same_v<T, i8> || ::std::is_same_v<T, i16> ||
+									 ::std::is_same_v<T, i32> || ::std::is_same_v<T, i64> || ::std::is_same_v<T, flt> ||
+									 ::std::is_same_v<T, dbl> || ::std::is_same_v<T, chr> || ::std::is_same_v<T, uchr> ||
+									 ::std::is_same_v<T, bl>),
+									"Image<T, SIZE> requires T to be types listed in Image.hpp");
 
 			/**
 			 gets the filename based on T

@@ -7,6 +7,7 @@
 #ifndef NP_ENGINE_JOB_PRIORITY_HPP
 #define NP_ENGINE_JOB_PRIORITY_HPP
 
+#include "NP-Engine/Foundation/Foundation.hpp"
 #include "NP-Engine/Primitive/Primitive.hpp"
 #include "NP-Engine/Container/Container.hpp"
 #include "NP-Engine/Insight/Insight.hpp"
@@ -49,7 +50,7 @@ namespace np::js
 			break;
 
 		default:
-			NP_ASSERT(false, "requested incorrect priority");
+			NP_ENGINE_ASSERT(false, "requested incorrect priority");
 			break;
 		}
 

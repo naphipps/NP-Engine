@@ -9,6 +9,7 @@
 
 #include <utility>
 
+#include "NP-Engine/Foundation/Foundation.hpp"
 #include "NP-Engine/Container/Container.hpp"
 #include "NP-Engine/Concurrency/Concurrency.hpp"
 #include "NP-Engine/Insight/Insight.hpp"
@@ -78,7 +79,7 @@ namespace np::js
 				break;
 
 			default:
-				NP_ASSERT(false, "requested incorrect priority");
+				NP_ENGINE_ASSERT(false, "requested incorrect priority");
 				break;
 			}
 
@@ -108,7 +109,7 @@ namespace np::js
 					}
 					else
 					{
-						NP_ASSERT(false, "next_job must be enabled when valid at all times - probable memory leak");
+						NP_ENGINE_ASSERT(false, "next_job must be enabled when valid at all times - probable memory leak");
 					}
 				}
 			}
@@ -190,8 +191,8 @@ namespace np::js
 
 		JobRecord AddJob(JobRecord record)
 		{
-			NP_ASSERT(record.IsValid(), "attempted to add an invalid Job -- do not do that my guy");
-			NP_ASSERT(record.GetJob().IsEnabled(), "the dude not enabled bro - why it do");
+			NP_ENGINE_ASSERT(record.IsValid(), "attempted to add an invalid Job -- do not do that my guy");
+			NP_ENGINE_ASSERT(record.GetJob().IsEnabled(), "the dude not enabled bro - why it do");
 
 			JobRecord return_record;
 

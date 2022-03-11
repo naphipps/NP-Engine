@@ -9,8 +9,8 @@
 
 #include <cstdlib> //aligned_alloc and free
 
+#include "NP-Engine/Foundation/Foundation.hpp"
 #include "NP-Engine/Primitive/Primitive.hpp"
-#include "NP-Engine/Insight/Insight.hpp"
 
 #include "Allocator.hpp"
 #include "Block.hpp"
@@ -32,7 +32,7 @@ namespace np::memory
 
 		virtual Block Allocate(siz size) override
 		{
-			NP_ASSERT(size > 0, "given size must be greater than 0");
+			NP_ENGINE_ASSERT(size > 0, "given size must be greater than 0");
 
 			size = CalcAlignedSize(size);
 			Block block;

@@ -6,6 +6,7 @@
 #ifndef NP_ENGINE_CLIP_LINE_HPP
 #define NP_ENGINE_CLIP_LINE_HPP
 
+#include "NP-Engine/Foundation/Foundation.hpp"
 #include "NP-Engine/Primitive/Primitive.hpp"
 #include "NP-Engine/Insight/Insight.hpp"
 
@@ -808,7 +809,7 @@ namespace np
 				break;
 
 			default:
-				NP_ASSERT(false, "We arrived at an undefined case(" + to_str((i32)line_code) + ") in ClipLine.");
+				NP_ENGINE_ASSERT(false, "We arrived at an undefined case(" + to_str((i32)line_code) + ") in ClipLine.");
 				break;
 			};
 

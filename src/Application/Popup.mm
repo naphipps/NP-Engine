@@ -30,7 +30,7 @@ namespace np::app
                 nsstyle = NSAlertStyleWarning;
                 break;
             default:
-                NP_ASSERT(false, "Popup was given an invalid style.");
+                NP_ENGINE_ASSERT(false, "Popup was given an invalid style.");
                 break;
         }
         
@@ -74,7 +74,7 @@ namespace np::app
                 [alert addButtonWithTitle:kQuitStr];
                 break;
             default:
-                NP_ASSERT(false, "Popup was given invalid buttons.");
+                NP_ENGINE_ASSERT(false, "Popup was given invalid buttons.");
                 break;
         }
         

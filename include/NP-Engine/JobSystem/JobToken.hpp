@@ -7,6 +7,7 @@
 #ifndef NP_ENGINE_JOB_TOKEN_HPP
 #define NP_ENGINE_JOB_TOKEN_HPP
 
+#include "NP-Engine/Foundation/Foundation.hpp"
 #include "NP-Engine/Primitive/Primitive.hpp"
 #include "NP-Engine/Insight/Insight.hpp"
 
@@ -34,13 +35,13 @@ namespace np::js
 
 		inline Job& GetJob()
 		{
-			NP_ASSERT(IsValid(), "we require a valid token when getting the job");
+			NP_ENGINE_ASSERT(IsValid(), "we require a valid token when getting the job");
 			return *_job;
 		}
 
 		inline const Job& GetJob() const
 		{
-			NP_ASSERT(IsValid(), "we require a valid token when getting the job");
+			NP_ENGINE_ASSERT(IsValid(), "we require a valid token when getting the job");
 			return *_job;
 		}
 	};

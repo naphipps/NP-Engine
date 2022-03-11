@@ -9,6 +9,7 @@
 #ifndef NP_ENGINE_DMS_IMAGE_HPP
 #define NP_ENGINE_DMS_IMAGE_HPP
 
+#include "NP-Engine/Foundation/Foundation.hpp"
 #include "NP-Engine/Primitive/Primitive.hpp"
 #include "NP-Engine/Math/Math.hpp"
 #include "NP-Engine/Filesystem/Filesystem.hpp"
@@ -16,7 +17,7 @@
 #include "DrawableImage.hpp"
 #include "DmsLineSegment.hpp"
 
-// TODO: resolve all NP_ASSERTs here
+// TODO: resolve all NP_ENGINE_ASSERTs here
 
 namespace np
 {
@@ -246,7 +247,7 @@ namespace np
 					isovalue = GetBorderIsovalue(*this, point);
 				}
 
-				NP_ASSERT(isovalue != bad_iso, "we need to guarantee we return valid isovalue");
+				NP_ENGINE_ASSERT(isovalue != bad_iso, "we need to guarantee we return valid isovalue");
 
 				return isovalue;
 			}
@@ -324,7 +325,7 @@ namespace np
 					else
 					{
 						// we received incorrect point
-						NP_ASSERT(false, "we received an incorrect point in DmsImage::GetBorderLineSegmentsAroundPoint");
+						NP_ENGINE_ASSERT(false, "we received an incorrect point in DmsImage::GetBorderLineSegmentsAroundPoint");
 					}
 				}
 			}
@@ -446,7 +447,7 @@ namespace np
 							begin = end;
 							end = temp;
 						}
-						NP_ASSERT(begin < end, "edge line error");
+						NP_ENGINE_ASSERT(begin < end, "edge line error");
 
 						edge_begin = urPoint;
 						edge_begin.x += 0.5f;
@@ -469,7 +470,7 @@ namespace np
 							}
 							else
 							{
-								NP_ASSERT(false, "we should have been on edge");
+								NP_ENGINE_ASSERT(false, "we should have been on edge");
 							}
 						}
 					}
@@ -546,7 +547,7 @@ namespace np
 							begin = end;
 							end = temp;
 						}
-						NP_ASSERT(begin < end, "our begin and end are reversed");
+						NP_ENGINE_ASSERT(begin < end, "our begin and end are reversed");
 
 						edge_begin = urPoint;
 						edge_begin.y += 0.5f;
@@ -568,7 +569,7 @@ namespace np
 							}
 							else
 							{
-								NP_ASSERT(false, "we should have been on edge");
+								NP_ENGINE_ASSERT(false, "we should have been on edge");
 							}
 						}
 					}
@@ -631,7 +632,7 @@ namespace np
 							begin = end;
 							end = temp;
 						}
-						NP_ASSERT(begin < end, "our points are reversed");
+						NP_ENGINE_ASSERT(begin < end, "our points are reversed");
 
 						edge_begin = lrPoint;
 						edge_begin.y += 0.5f;
@@ -653,7 +654,7 @@ namespace np
 							}
 							else
 							{
-								NP_ASSERT(false, "points should have been an edge");
+								NP_ENGINE_ASSERT(false, "points should have been an edge");
 							}
 						}
 					}
@@ -730,7 +731,7 @@ namespace np
 							begin = end;
 							end = temp;
 						}
-						NP_ASSERT(begin < end, "points are reversed");
+						NP_ENGINE_ASSERT(begin < end, "points are reversed");
 
 						edge_begin = ulPoint;
 						edge_begin.x += 0.5f;
@@ -752,7 +753,7 @@ namespace np
 							}
 							else
 							{
-								NP_ASSERT(false, "our points should have been edge");
+								NP_ENGINE_ASSERT(false, "our points should have been edge");
 							}
 						}
 					}
@@ -1160,8 +1161,8 @@ namespace np
 			 */
 			inline virtual flt GetBorderIsovalue(const self_type& reference_image, const math::fltPoint point)
 			{
-				NP_ASSERT(point.x < 0.f || point.x >= base::GetWidth() || point.y < 0.f || point.y >= base::GetHeight(),
-						  "we should not call this if we don't need to");
+				NP_ENGINE_ASSERT(point.x < 0.f || point.x >= base::GetWidth() || point.y < 0.f || point.y >= base::GetHeight(),
+								 "we should not call this if we don't need to");
 
 				// get edge point for border point
 				math::ui16Point edgePoint;
@@ -1257,7 +1258,7 @@ namespace np
 			math::fltPointVector3D* GetPolygonVector3D(const flt isohreshold)
 			// container::vector<DmsLineSegmentUset>* GetPolygonVector3D(const flt isohreshold)
 			{
-				NP_ASSERT(isohreshold >= 0.0 && isohreshold <= 1.0, "isothreshold must be on range [0, 1]");
+				NP_ENGINE_ASSERT(isohreshold >= 0.0 && isohreshold <= 1.0, "isothreshold must be on range [0, 1]");
 
 				Image<bl, SIZE> visited(false);
 				math::fltPointVector3D* shapes_with_holes;
@@ -1444,7 +1445,7 @@ namespace np
 
 							if (enable && !segments->empty())
 							{
-								NP_ASSERT(false, "we should have points in our segments");
+								NP_ENGINE_ASSERT(false, "we should have points in our segments");
 							}
 
 							::std::sort(line_loops.begin(), line_loops.end(),

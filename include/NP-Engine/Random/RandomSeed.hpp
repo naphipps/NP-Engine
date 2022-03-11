@@ -9,8 +9,8 @@
 
 #include <type_traits>
 
+#include "NP-Engine/Foundation/Foundation.hpp"
 #include "NP-Engine/Primitive/Primitive.hpp"
-#include "NP-Engine/Insight/Insight.hpp"
 
 #include "PcgRandutils.hpp"
 
@@ -20,8 +20,8 @@ namespace np::random
 	class RandomSeed
 	{
 	private:
-		NP_STATIC_ASSERT((::std::is_same_v<T, ui64> || ::std::is_same_v<T, ::pcg_extras::pcg128_t>),
-						 "RandomSeed<T> requires T to be ui64 or ::pcg_extras::pcg128_t");
+		NP_ENGINE_STATIC_ASSERT((::std::is_same_v<T, ui64> || ::std::is_same_v<T, ::pcg_extras::pcg128_t>),
+								"RandomSeed<T> requires T to be ui64 or ::pcg_extras::pcg128_t");
 
 		T _inc;
 		T _state;

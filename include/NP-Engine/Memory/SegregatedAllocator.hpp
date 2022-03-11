@@ -7,8 +7,8 @@
 #ifndef NP_ENGINE_SEGEREGATED_ALLOCATOR_HPP
 #define NP_ENGINE_SEGEREGATED_ALLOCATOR_HPP
 
+#include "NP-Engine/Foundation/Foundation.hpp"
 #include "NP-Engine/Primitive/Primitive.hpp"
-#include "NP-Engine/Insight/Insight.hpp"
 
 #include "Allocator.hpp"
 
@@ -27,9 +27,9 @@ namespace np::memory
 			_fallback(fallback),
 			_size_threshold(size_threshold)
 		{
-			NP_ASSERT(_primary != nullptr, "we must get a valid primary allocator");
-			NP_ASSERT(_fallback != nullptr, "we must get a valid fallback allocator");
-			NP_ASSERT(_size_threshold > 0, "we must have a nonzero size threshold");
+			NP_ENGINE_ASSERT(_primary != nullptr, "we must get a valid primary allocator");
+			NP_ENGINE_ASSERT(_fallback != nullptr, "we must get a valid fallback allocator");
+			NP_ENGINE_ASSERT(_size_threshold > 0, "we must have a nonzero size threshold");
 		}
 
 		virtual siz GetSizeThreshold() const

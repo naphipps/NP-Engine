@@ -7,6 +7,7 @@
 #ifndef NP_ENGINE_JOB_RECORD_HPP
 #define NP_ENGINE_JOB_RECORD_HPP
 
+#include "NP-Engine/Foundation/Foundation.hpp"
 #include "NP-Engine/Primitive/Primitive.hpp"
 
 #include "Job.hpp"
@@ -55,14 +56,14 @@ namespace np::js
 
 		const Job& GetJob() const
 		{
-			NP_ASSERT(IsValid(), "do not call this if we have an invalid job");
+			NP_ENGINE_ASSERT(IsValid(), "do not call this if we have an invalid job");
 
 			return *_job;
 		}
 
 		void Execute()
 		{
-			NP_ASSERT(IsValid(), "do not call this if we have an invalid job");
+			NP_ENGINE_ASSERT(IsValid(), "do not call this if we have an invalid job");
 
 			_job->Execute();
 		}

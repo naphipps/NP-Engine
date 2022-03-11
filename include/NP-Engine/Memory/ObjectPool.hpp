@@ -10,7 +10,7 @@
 #include <type_traits>
 #include <utility>
 
-#include "NP-Engine/Insight/Insight.hpp"
+#include "NP-Engine/Foundation/Foundation.hpp"
 
 #include "PoolAllocator.hpp"
 #include "LockingPoolAllocator.hpp"
@@ -21,8 +21,8 @@ namespace np::memory
 	class ObjectPool
 	{
 	private:
-		NP_STATIC_ASSERT((::std::is_base_of_v<PoolAllocator<T>, A> || ::std::is_base_of_v<LockingPoolAllocator<T>, A>),
-						 "our given allocator must be our PoolAllocator or LockingPoolAllocator");
+		NP_ENGINE_STATIC_ASSERT((::std::is_base_of_v<PoolAllocator<T>, A> || ::std::is_base_of_v<LockingPoolAllocator<T>, A>),
+								"our given allocator must be our PoolAllocator or LockingPoolAllocator");
 
 	public:
 		using ObjectType = T;

@@ -9,8 +9,8 @@
 
 #include <limits>
 
+#include "NP-Engine/Foundation/Foundation.hpp"
 #include "NP-Engine/Primitive/Primitive.hpp"
-#include "NP-Engine/Insight/Insight.hpp"
 
 #include "SizedAllocator.hpp"
 #include "Margin.hpp"
@@ -501,7 +501,7 @@ namespace np::memory
 				_nil.Right = nullptr;
 				_nil.SetParent(nullptr);
 				_nil.SetBlack();
-				NP_ASSERT(_nil.GetSize() == 0, "our nil size must always be 0");
+				NP_ENGINE_ASSERT(_nil.GetSize() == 0, "our nil size must always be 0");
 				_root = &_nil;
 			}
 		};
@@ -554,7 +554,7 @@ namespace np::memory
 		void StowFreeBlock(Block& block)
 		{
 			bl init_success = InitFreeBlock(block);
-			NP_ASSERT(init_success, "our init here should always succeed");
+			NP_ENGINE_ASSERT(init_success, "our init here should always succeed");
 
 			NodePtr node = (NodePtr)((ui8*)block.Begin() + __detail::MARGIN_ALIGNED_SIZE);
 			_tree.Insert(node);
@@ -611,7 +611,7 @@ namespace np::memory
 					StowFreeBlock(split_block);
 
 					bl alloc_success = InitFreeBlock(alloc_block);
-					NP_ASSERT(alloc_success, "alloc_success must happen here");
+					NP_ENGINE_ASSERT(alloc_success, "alloc_success must happen here");
 				}
 
 				header->SetAllocated();

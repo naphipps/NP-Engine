@@ -59,6 +59,7 @@ set(NP_ENGINE_FOUNDATION_HPP
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Foundation/Foundation.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Foundation/cmake_include.hpp.in
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Foundation/cmake_include.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Foundation/Assert.hpp
 )
 
 set(NP_ENGINE_GRAPHICS_HPP
@@ -129,7 +130,6 @@ set(NP_ENGINE_INPUT_HPP
 )
 
 set(NP_ENGINE_INSIGHT_HPP
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Insight/Assert.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Insight/Insight.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Insight/Instrumentor.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Insight/InstrumentorTimer.hpp

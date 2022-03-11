@@ -10,7 +10,7 @@
 #include <iostream> //TODO: remove
 #include <utility> //TODO: may not need...
 
-#include "NP-Engine/Filesystem/Filesystem.hpp"
+#include "NP-Engine/Foundation/Foundation.hpp"
 #include "NP-Engine/Memory/Memory.hpp"
 #include "NP-Engine/Time/Time.hpp"
 #include "NP-Engine/Filesystem/Filesystem.hpp"
@@ -1316,7 +1316,7 @@ namespace np::graphics::rhi
 			}
 			else if (acquire_result != VK_SUCCESS && acquire_result != VK_SUBOPTIMAL_KHR)
 			{
-				NP_ASSERT(false, "vkAcquireNextImageKHR error");
+				NP_ENGINE_ASSERT(false, "vkAcquireNextImageKHR error");
 			}
 
 			// Check if a previous frame is using this image (i.e. there is its fence to wait on)
@@ -1350,7 +1350,7 @@ namespace np::graphics::rhi
 
 			if (vkQueueSubmit(GetDevice().GetGraphicsDeviceQueue(), 1, &submit_info, _fences[_current_frame]) != VK_SUCCESS)
 			{
-				NP_ASSERT(false, "failed to submit draw command buffer!");
+				NP_ENGINE_ASSERT(false, "failed to submit draw command buffer!");
 			}
 
 			VkPresentInfoKHR present_info{};
@@ -1370,7 +1370,7 @@ namespace np::graphics::rhi
 			}
 			else if (present_result != VK_SUCCESS)
 			{
-				NP_ASSERT(false, "vkQueuePresentKHR error");
+				NP_ENGINE_ASSERT(false, "vkQueuePresentKHR error");
 			}
 
 			vkQueueWaitIdle(GetDevice().GetPresentDeviceQueue());

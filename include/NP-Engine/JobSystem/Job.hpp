@@ -7,6 +7,7 @@
 #ifndef NP_ENGINE_JOB_HPP
 #define NP_ENGINE_JOB_HPP
 
+#include "NP-Engine/Foundation/Foundation.hpp"
 #include "NP-Engine/Primitive/Primitive.hpp"
 #include "NP-Engine/Insight/Insight.hpp"
 #include "NP-Engine/Concurrency/Concurrency.hpp"
@@ -77,7 +78,8 @@ namespace np::js
 				_dependent_job = nullptr;
 			}
 
-			NP_ASSERT(CanExecute(), "You are overwriting a Job that has dependents. Only overwrite jobs that can execute.");
+			NP_ENGINE_ASSERT(CanExecute(),
+							 "You are overwriting a Job that has dependents. Only overwrite jobs that can execute.");
 
 			CopyFrom(other);
 			return *this;

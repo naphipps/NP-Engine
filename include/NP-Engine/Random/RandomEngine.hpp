@@ -9,7 +9,7 @@
 
 #include <type_traits>
 
-#include "NP-Engine/Insight/Insight.hpp"
+#include "NP-Engine/Foundation/Foundation.hpp"
 #include "NP-Engine/Container/Container.hpp"
 #include "NP-Engine/Primitive/Primitive.hpp"
 
@@ -22,8 +22,8 @@ namespace np::random
 	class RandomEngine : public T
 	{
 	private:
-		NP_STATIC_ASSERT((::std::is_same_v<T, ::pcg32> || ::std::is_same_v<T, ::pcg64>),
-						 "random_engine<T> requires T to be ::pcg32 or ::pcg64");
+		NP_ENGINE_STATIC_ASSERT((::std::is_same_v<T, ::pcg32> || ::std::is_same_v<T, ::pcg64>),
+								"random_engine<T> requires T to be ::pcg32 or ::pcg64");
 
 	public:
 		using ResultType = typename T::result_type;

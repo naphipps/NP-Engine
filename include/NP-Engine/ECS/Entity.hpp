@@ -9,6 +9,7 @@
 
 #include <utility>
 
+#include "NP-Engine/Foundation/Foundation.hpp"
 #include "NP-Engine/Primitive/Primitive.hpp"
 #include "NP-Engine/Insight/Insight.hpp"
 #include "NP-Engine/Memory/Memory.hpp"
@@ -91,14 +92,14 @@ namespace np::ecs
 		template <typename T>
 		T& Get()
 		{
-			NP_ASSERT(Has<T>(), "Cannot get a component we do not have.");
+			NP_ENGINE_ASSERT(Has<T>(), "Cannot get a component we do not have.");
 			return _registry->get<T>(_entity);
 		}
 
 		template <typename T, typename... Args>
 		T& Add(Args&&... args)
 		{
-			NP_ASSERT(!Has<T>(), "Cannot add a component we already have.");
+			NP_ENGINE_ASSERT(!Has<T>(), "Cannot add a component we already have.");
 			return _registry->emplace<T>(_entity, ::std::forward<Args>(args)...);
 		}
 	};

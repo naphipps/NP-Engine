@@ -7,6 +7,7 @@
 #ifndef NP_ENGINE_LOCKING_POOL_ALLOCATOR_HPP
 #define NP_ENGINE_LOCKING_POOL_ALLOCATOR_HPP
 
+#include "NP-Engine/Foundation/Foundation.hpp"
 #include "NP-Engine/Primitive/Primitive.hpp"
 
 #include "SizedAllocator.hpp"
@@ -119,7 +120,7 @@ namespace np::memory
 						}
 					}
 
-					NP_ASSERT(deallocation_address != nullptr, "our sorted insert failed");
+					NP_ENGINE_ASSERT(deallocation_address != nullptr, "our sorted insert failed");
 				}
 				else
 				{

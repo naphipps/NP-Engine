@@ -11,6 +11,7 @@
 #ifndef NP_ENGINE_STATISTIC_FUNCTION_HPP
 #define NP_ENGINE_STATISTIC_FUNCTION_HPP
 
+#include "NP-Engine/Foundation/Foundation.hpp"
 #include "NP-Engine/Insight/Insight.hpp"
 #include "NP-Engine/Primitive/Primitive.hpp"
 
@@ -120,8 +121,8 @@ namespace np
 		 */
 		static inline flt calc_skew(const flt scale, const flt location, const flt mean = 0.f)
 		{
-			NP_ASSERT(is_calc_skew_real(scale, location, mean),
-					  "skew must be real - s:" + to_str(scale) + ", l:" + to_str(location) + ", m:" + to_str(mean));
+			NP_ENGINE_ASSERT(is_calc_skew_real(scale, location, mean),
+							 "skew must be real - s:" + to_str(scale) + ", l:" + to_str(location) + ", m:" + to_str(mean));
 
 			return (mean < 0.f ? -1.f : 1.f) * sqrt(1.f / (((2.f * pow2(scale)) / (M_PI * pow2(mean - location))) - 1.f));
 		}
@@ -189,10 +190,10 @@ namespace np
 		 */
 		static inline dbl calc_skew(const dbl scale, const dbl location, const dbl mean = 0.0)
 		{
-			NP_ASSERT(is_calc_skew_real(
-						  scale, location,
-						  mean), // TODO: do we still want to return something reasonable, say 0, when skew is imaginary?
-					  "skew must be real - s:" + to_str(scale) + ", l:" + to_str(location) + ", m:" + to_str(mean));
+			NP_ENGINE_ASSERT(is_calc_skew_real(
+								 scale, location,
+								 mean), // TODO: do we still want to return something reasonable, say 0, when skew is imaginary?
+							 "skew must be real - s:" + to_str(scale) + ", l:" + to_str(location) + ", m:" + to_str(mean));
 
 			return (mean < 0.0 ? -1.0 : 1.0) * sqrt(1.0 / (((2.0 * pow2(scale)) / (M_PI * pow2(mean - location))) - 1.0));
 		}

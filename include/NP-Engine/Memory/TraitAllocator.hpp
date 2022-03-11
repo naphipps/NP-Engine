@@ -7,6 +7,7 @@
 #ifndef NP_ENGINE_TRAIT_ALLOCATOR_HPP
 #define NP_ENGINE_TRAIT_ALLOCATOR_HPP
 
+#include "NP-Engine/Foundation/Foundation.hpp"
 #include "NP-Engine/Primitive/Primitive.hpp"
 
 #include "Allocator.hpp"
@@ -28,13 +29,13 @@ namespace np::memory
 
 		bl Contains(const void* ptr) const override
 		{
-			NP_ASSERT(_allocator != nullptr, "Registered TraitAllocator is nullptr");
+			NP_ENGINE_ASSERT(_allocator != nullptr, "Registered TraitAllocator is nullptr");
 			return _allocator->Contains(ptr);
 		}
 
 		Block Allocate(siz size) override
 		{
-			NP_ASSERT(_allocator != nullptr, "Registered TraitAllocator is nullptr");
+			NP_ENGINE_ASSERT(_allocator != nullptr, "Registered TraitAllocator is nullptr");
 			return _allocator->Allocate(size);
 		}
 
@@ -45,19 +46,19 @@ namespace np::memory
 
 		bl Deallocate(void* ptr) override
 		{
-			NP_ASSERT(_allocator != nullptr, "Registered TraitAllocator is nullptr");
+			NP_ENGINE_ASSERT(_allocator != nullptr, "Registered TraitAllocator is nullptr");
 			return _allocator->Deallocate(ptr);
 		}
 
 		static inline void* malloc(siz size)
 		{
-			NP_ASSERT(_allocator != nullptr, "Registered TraitAllocator is nullptr");
+			NP_ENGINE_ASSERT(_allocator != nullptr, "Registered TraitAllocator is nullptr");
 			return _allocator->Allocate(size).ptr;
 		}
 
 		static inline void free(void* ptr)
 		{
-			NP_ASSERT(_allocator != nullptr, "Registered TraitAllocator is nullptr");
+			NP_ENGINE_ASSERT(_allocator != nullptr, "Registered TraitAllocator is nullptr");
 			_allocator->Deallocate(ptr);
 		}
 

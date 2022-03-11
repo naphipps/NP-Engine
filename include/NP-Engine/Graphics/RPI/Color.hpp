@@ -7,6 +7,7 @@
 #ifndef NP_ENGINE_RPI_COLOR_HPP
 #define NP_ENGINE_RPI_COLOR_HPP
 
+#include "NP-Engine/Foundation/Foundation.hpp"
 #include "NP-Engine/Primitive/Primitive.hpp"
 #include "NP-Engine/Memory/Memory.hpp"
 #include "NP-Engine/Insight/Insight.hpp"
@@ -52,7 +53,7 @@ namespace np::graphics
 		}
 	};
 
-	NP_STATIC_ASSERT(sizeof(Color) == 4, "Color must have size equaling 4.");
+	NP_ENGINE_STATIC_ASSERT(sizeof(Color) == 4, "Color must have size equaling 4.");
 } // namespace np::graphics
 
 #endif /* NP_ENGINE_RPI_COLOR_HPP */

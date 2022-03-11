@@ -9,6 +9,7 @@
 
 #include <utility>
 
+#include "NP-Engine/Foundation/Foundation.hpp"
 #include "NP-Engine/Primitive/Primitive.hpp"
 #include "NP-Engine/Memory/Memory.hpp"
 #include "NP-Engine/Concurrency/Concurrency.hpp"
@@ -56,7 +57,7 @@ namespace np::event
 		template <typename T, typename... Args>
 		bl Emplace(Args&&... args)
 		{
-			NP_STATIC_ASSERT((::std::is_base_of_v<event::Event, T>), "T is requried to be a base of event:Event");
+			NP_ENGINE_STATIC_ASSERT((::std::is_base_of_v<event::Event, T>), "T is requried to be a base of event:Event");
 			Event* e = nullptr;
 			concurrency::MpmcQueue<Event*>& buffer = GetBuffer();
 

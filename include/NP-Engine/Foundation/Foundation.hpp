@@ -9,5 +9,6 @@
 
 #include "ConstantsSettings.hpp"
 #include "Constants.hpp"
+#include "Assert.hpp"
 
 #endif /* NP_ENGINE_FOUNDATION_HPP */

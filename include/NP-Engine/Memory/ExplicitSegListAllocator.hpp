@@ -7,8 +7,8 @@
 #ifndef NP_ENGINE_EXPLICIT_SEG_LIST_ALLOCATOR_HPP
 #define NP_ENGINE_EXPLICIT_SEG_LIST_ALLOCATOR_HPP
 
+#include "NP-Engine/Foundation/Foundation.hpp"
 #include "NP-Engine/Primitive/Primitive.hpp"
-#include "NP-Engine/Insight/Insight.hpp"
 
 #include "ExplicitListAllocator.hpp"
 #include "SizedAllocator.hpp"
@@ -133,7 +133,7 @@ namespace np::memory
 		{
 			// init our block as free
 			bl init_success = InitFreeBlock(block);
-			NP_ASSERT(init_success, "our init here should always succeed");
+			NP_ENGINE_ASSERT(init_success, "our init here should always succeed");
 			NodePtr node = (NodePtr)((ui8*)block.Begin() + __detail::MARGIN_ALIGNED_SIZE);
 
 			// store block in next_free's list
@@ -237,7 +237,7 @@ namespace np::memory
 					StowFreeBlock(split_block);
 
 					bl alloc_success = InitFreeBlock(alloc_block);
-					NP_ASSERT(alloc_success, "alloc_success must happen here");
+					NP_ENGINE_ASSERT(alloc_success, "alloc_success must happen here");
 				}
 
 				header->SetAllocated();

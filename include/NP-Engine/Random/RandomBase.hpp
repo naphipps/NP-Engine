@@ -10,8 +10,8 @@
 #include <fstream>
 #include <type_traits>
 
+#include "NP-Engine/Foundation/Foundation.hpp"
 #include "NP-Engine/Primitive/Primitive.hpp"
-#include "NP-Engine/Insight/Insight.hpp"
 #include "NP-Engine/Filesystem/Filesystem.hpp"
 
 #include "RandomEngine.hpp"
@@ -22,8 +22,8 @@ namespace np::random
 	class RandomBase
 	{
 	private:
-		NP_STATIC_ASSERT((::std::is_same_v<T, Random32> || ::std::is_same_v<T, Random64>),
-						 "RandomBase<T> requires T to be random32 or random64");
+		NP_ENGINE_STATIC_ASSERT((::std::is_same_v<T, Random32> || ::std::is_same_v<T, Random64>),
+								"RandomBase<T> requires T to be random32 or random64");
 
 		T _original_random_engine;
 		T _random_engine;

@@ -7,7 +7,8 @@
 #ifndef NP_ENGINE_IMPLICIT_ALLOCATOR_HPP
 #define NP_ENGINE_IMPLICIT_ALLOCATOR_HPP
 
-#include "NP-Engine/Insight/Insight.hpp"
+#include "NP-Engine/Foundation/Foundation.hpp"
+#include "NP-Engine/Primitive/Primitive.hpp"
 
 #include "SizedAllocator.hpp"
 #include "Margin.hpp"
@@ -105,14 +106,14 @@ namespace np::memory
 				{
 					Block split_block{alloc + required_alloc_size, header->GetSize() - required_alloc_size};
 					bl split_success = InitFreeBlock(split_block);
-					NP_ASSERT(split_success, "split must succeed here");
+					NP_ENGINE_ASSERT(split_success, "split must succeed here");
 					alloc_block.size -= split_block.size;
 				}
 
 				if (header->GetSize() != alloc_block.size)
 				{
 					bl alloc_success = InitFreeBlock(alloc_block);
-					NP_ASSERT(alloc_success, "alloc_success must happen here");
+					NP_ENGINE_ASSERT(alloc_success, "alloc_success must happen here");
 				}
 
 				header->SetAllocated();
@@ -207,7 +208,7 @@ namespace np::memory
 
 				Block dealloc_block{header, (ui8*)footer - (ui8*)header + __detail::MARGIN_ALIGNED_SIZE};
 				bl dealloc_success = InitFreeBlock(dealloc_block);
-				NP_ASSERT(dealloc_success, "we should have a successful deallocation here");
+				NP_ENGINE_ASSERT(dealloc_success, "we should have a successful deallocation here");
 				deallocated = true;
 			}
 

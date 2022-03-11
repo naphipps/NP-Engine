@@ -42,13 +42,13 @@ namespace np::concurrency
 
 		inline Thread& GetThread()
 		{
-			NP_ASSERT(IsValid(), "we require a valid token when getting the thread");
+			NP_ENGINE_ASSERT(IsValid(), "we require a valid token when getting the thread");
 			return *_thread;
 		}
 
 		inline const Thread& GetThread() const
 		{
-			NP_ASSERT(IsValid(), "we require a valid token when getting the thread");
+			NP_ENGINE_ASSERT(IsValid(), "we require a valid token when getting the thread");
 			return *_thread;
 		}
 
