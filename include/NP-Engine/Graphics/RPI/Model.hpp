@@ -12,7 +12,7 @@
 #include "NP-Engine/Container/Container.hpp"
 #include "NP-Engine/Primitive/Primitive.hpp"
 
-#include "NP-Engine/Vendor/tinyobjLoaderInclude.hpp"
+#include "NP-Engine/Vendor/TinyObjLoaderInclude.hpp"
 #include "NP-Engine/Vendor/GlmInclude.hpp"
 
 #include "Image.hpp"
