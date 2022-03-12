@@ -262,7 +262,7 @@ set(NP_ENGINE_VENDOR_HPP
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Vendor/RandutilsInclude.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Vendor/SpdlogInclude.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Vendor/VulkanInclude.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Vendor/StbInclude.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Vendor/LodePngInclude.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Vendor/RapidJsonInclude.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Vendor/TinyObjLoaderInclude.hpp
 )
@@ -431,9 +431,9 @@ target_link_libraries(
 	EnTT::EnTT
 	glm
 	glfw
-	stb
 	${RapidJSON_LIBRARY}
 	tinyobjloader
+	lodepng
 )
 
 target_include_directories(

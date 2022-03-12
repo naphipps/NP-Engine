@@ -22,12 +22,12 @@
 [submodule "vendor/glfw_glfw"]
 	path = vendor/glfw_glfw
 	url = git@github.com:glfw/glfw.git
-[submodule "vendor/naphipps_stb"]
-	path = vendor/naphipps_stb
-	url = git@github.com:naphipps/stb.git
 [submodule "vendor/Tencent_rapidjson"]
 	path = vendor/Tencent_rapidjson
 	url = git@github.com:Tencent/rapidjson.git
 [submodule "vendor/tinyobjloader_tinyobjloader"]
 	path = vendor/tinyobjloader_tinyobjloader
 	url = git@github.com:tinyobjloader/tinyobjloader.git
+[submodule "vendor/naphipps_lodepng"]
+	path = vendor/naphipps_lodepng
+	url = git@github.com:naphipps/lodepng.git

@@ -9,10 +9,11 @@
 
 #include <utility>
 
+#include "NP-Engine/Foundation/Foundation.hpp"
 #include "NP-Engine/Container/Container.hpp"
 #include "NP-Engine/String/String.hpp"
 
-#include "NP-Engine/Vendor/StbInclude.hpp"
+#include "NP-Engine/Vendor/LodePngInclude.hpp"
 
 #include "Color.hpp"
 
@@ -24,6 +25,8 @@ namespace np::graphics
 		ui32 _width;
 		ui32 _height;
 		container::vector<ui8> _pixels;
+
+		//TODO: do we want to save the filename?
 
 	public:
 		Image(str filename)
@@ -66,32 +69,19 @@ namespace np::graphics
 
 		bl Load(str filename) // TODO: add Load from stream and/or memory??
 		{
-			bl loaded = false;
-			i32 x, y, components;
-			uchr* image = stbi_load(filename.c_str(), &x, &y, &components, STBI_rgb_alpha);
+			// TODO: is there a way for us to pass our _pixels in?
+			::std::vector<ui8> pixels;
+			ui32 error_code = ::lodepng::decode(pixels, _width, _height, filename.c_str());
+			_pixels.assign(::std::make_move_iterator(pixels.begin()), ::std::make_move_iterator(pixels.end()));
 
-			if (image != nullptr)
-			{
-				_width = x;
-				_height = y;
-				SetSize(_width, _height);
-
-				if (!_pixels.empty())
-				{
-					memcpy(_pixels.data(), image, _pixels.size());
-				}
-
-				stbi_image_free(image);
-				loaded = true;
-			}
-			else
+			if (error_code)
 			{
 				Clear();
+				NP_ENGINE_ASSERT(!error_code, "Image did not load '" + filename + "', LODEPNG REASON: '" + 
+					str(lodepng_error_text(error_code)) + "'\n");
 			}
 
-			// TODO: we could log stb's failure reason in an else block here
-
-			return loaded;
+			return error_code == 0;
 		}
 
 		void SetSize(ui32 width, ui32 height)

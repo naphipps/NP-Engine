@@ -51,7 +51,7 @@ if (EXISTS ${NP_ENGINE_WORKING_DIR})
 #https://developer.blender.org/diffusion/B/browse/master/source/creator/CMakeLists.txt;9d5661c9e8b1ab383be4ae7b065f50d43310f6cb$175-211
 
 	set(NP_ENGINE_TEST_ASSETS_FILES
-		${PROJECT_SOURCE_DIR}/test/assets/statue-512x512.jpg
+		${PROJECT_SOURCE_DIR}/test/assets/statue-512x512.png
 	)
 
 	file(TO_NATIVE_PATH "${NP_ENGINE_WORKING_DIR}/fake" NP_ENGINE_FAKE)
