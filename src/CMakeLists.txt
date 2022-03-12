@@ -73,7 +73,6 @@ set(NP_ENGINE_GRAPHICS_RPI_HPP
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/Command.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/Buffer.hpp
 	# ${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/Device.hpp
-	# ${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/Image.hpp
 	# ${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/Pipeline.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/Scene.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/Shader.hpp
