@@ -52,6 +52,8 @@ if (EXISTS ${NP_ENGINE_WORKING_DIR})
 
 	set(NP_ENGINE_TEST_ASSETS_FILES
 		${PROJECT_SOURCE_DIR}/test/assets/statue-512x512.png
+		${PROJECT_SOURCE_DIR}/test/assets/viking_room.obj
+		${PROJECT_SOURCE_DIR}/test/assets/viking_room.png
 	)
 
 	file(TO_NATIVE_PATH "${NP_ENGINE_WORKING_DIR}/fake" NP_ENGINE_FAKE)

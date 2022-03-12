@@ -19,6 +19,21 @@ namespace np::graphics::rhi
 {
 	struct VulkanVertex : public Vertex
 	{
+		VulkanVertex(const Vertex& other)
+		{
+			Position = other.Position;
+			Color = other.Color;
+			TextureCoordinate = other.TextureCoordinate;
+		}
+
+		VulkanVertex& operator=(const Vertex& other)
+		{
+			Position = other.Position;
+			Color = other.Color;
+			TextureCoordinate = other.TextureCoordinate;
+			return *this;
+		}
+
 		static container::vector<VkVertexInputBindingDescription> BindingDescriptions()
 		{
 			container::vector<VkVertexInputBindingDescription> descs{};

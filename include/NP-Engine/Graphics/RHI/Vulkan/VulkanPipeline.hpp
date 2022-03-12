@@ -48,7 +48,7 @@ namespace np::graphics::rhi
 		VulkanSampler* _sampler;
 		container::vector<VulkanVertex> _vertices;
 		VulkanBuffer* _vertex_buffer;
-		container::vector<ui16> _indices;
+		container::vector<ui32> _indices;
 		VulkanBuffer* _index_buffer;
 		container::vector<VulkanBuffer*> _uniform_buffers;
 		time::SteadyTimestamp _start_timestamp;
@@ -656,7 +656,7 @@ namespace np::graphics::rhi
 			VulkanCommandBindPipeline bind_pipeline(VK_PIPELINE_BIND_POINT_GRAPHICS, _pipeline);
 			VulkanCommandBindVertexBuffers bind_vertex_buffers(0, (ui32)vertex_buffers.size(), vertex_buffers.data(),
 															   offsets.data());
-			VulkanCommandBindIndexBuffer bind_index_buffer(*_index_buffer, 0, VK_INDEX_TYPE_UINT16);
+			VulkanCommandBindIndexBuffer bind_index_buffer(*_index_buffer, 0, VK_INDEX_TYPE_UINT32);
 			VulkanCommandBindDescriptorSets bind_descriptor_sets(VK_PIPELINE_BIND_POINT_GRAPHICS, _pipeline_layout, 0, 1,
 																 nullptr, 0, nullptr);
 			VulkanCommandDrawIndexed draw_indexed((ui32)_indices.size(), 1, 0, 0, 0);
@@ -949,7 +949,7 @@ namespace np::graphics::rhi
 			flt seconds = duration.count() / 1000.0f;
 
 			UniformBufferObject ubo{};
-			ubo.Model = glm::rotate(glm::mat4(1.0f), seconds * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+			ubo.Model = glm::rotate(glm::mat4(1.0f), seconds * glm::radians(90.0f) / 4.0f, glm::vec3(0.0f, 0.0f, 1.0f));
 			ubo.View = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 			ubo.Projection =
 				glm::perspective(glm::radians(45.0f),
@@ -1140,16 +1140,26 @@ namespace np::graphics::rhi
 			GetSurface().GetWindow().SetResizeCallback(this, WindowResizeCallback);
 			GetSurface().GetWindow().SetPositionCallback(this, WindowPositionCallback);
 
+			// load model
+			str model_filename = fs::Append(fs::Append(fs::Append(NP_ENGINE_WORKING_DIR, "test"), "assets"), "viking_room.obj");
+			str model_texture_filename =
+				fs::Append(fs::Append(fs::Append(NP_ENGINE_WORKING_DIR, "test"), "assets"), "viking_room.png");
+
+			Model model(model_filename, model_texture_filename);
+
+			_vertices.assign(model.GetVertices().begin(), model.GetVertices().end());
+			_indices.assign(model.GetIndices().begin(), model.GetIndices().end());
+
 			// texture image
-			Image image(fs::Append(fs::Append(fs::Append(NP_ENGINE_WORKING_DIR, "test"), "assets"), "statue-512x512.jpg"));
+			// Image image(fs::Append(fs::Append(fs::Append(NP_ENGINE_WORKING_DIR, "test"), "assets"), "statue-512x512.jpg"));
 
 			VulkanBuffer* _staging_buffer =
-				CreateBuffer(image.Size(), VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+				CreateBuffer(model.GetTextureImage().Size(), VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
 							 VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 
 			VkImageCreateInfo texture_image_create_info = VulkanImage::CreateInfo();
-			texture_image_create_info.extent.width = image.GetWidth();
-			texture_image_create_info.extent.height = image.GetHeight();
+			texture_image_create_info.extent.width = model.GetTextureImage().GetWidth();
+			texture_image_create_info.extent.height = model.GetTextureImage().GetHeight();
 			texture_image_create_info.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
 			VkMemoryPropertyFlags texture_memory_property_flags = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
 			VkImageViewCreateInfo texture_image_view_create_info = VulkanImageView::CreateInfo();
@@ -1157,14 +1167,15 @@ namespace np::graphics::rhi
 			_texture = CreateTexture(texture_image_create_info, texture_memory_property_flags, texture_image_view_create_info);
 
 			void* data;
-			vkMapMemory(device, _staging_buffer->GetDeviceMemory(), 0, image.Size(), 0, &data);
-			memcpy(data, image.Data(), image.Size());
+			vkMapMemory(device, _staging_buffer->GetDeviceMemory(), 0, model.GetTextureImage().Size(), 0, &data);
+			memcpy(data, model.GetTextureImage().Data(), model.GetTextureImage().Size());
 			vkUnmapMemory(device, _staging_buffer->GetDeviceMemory());
 
 			TransitionImageLayout(_texture->GetImage(), VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_UNDEFINED,
 								  VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
 
-			CopyBufferToImage(*_staging_buffer, _texture->GetImage(), image.GetWidth(), image.GetHeight());
+			CopyBufferToImage(*_staging_buffer, _texture->GetImage(), model.GetTextureImage().GetWidth(),
+							  model.GetTextureImage().GetHeight());
 
 			TransitionImageLayout(_texture->GetImage(), VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
 								  VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
@@ -1176,6 +1187,7 @@ namespace np::graphics::rhi
 			_sampler = CreateSampler(sampler_create_info);
 
 			// vertex buffer
+			/*
 			_vertices = {{{{-0.5f, -0.5f, 0.0f}, {1.0f, 0.0f, 1.0f}, {1.0f, 0.0f}}},
 						 {{{0.5f, -0.5f, 0.0f}, {1.0f, 1.0f, 0.0f}, {0.0f, 0.0f}}},
 						 {{{0.5f, 0.5f, 0.0f}, {0.0f, 1.0f, 1.0f}, {0.0f, 1.0f}}},
@@ -1185,6 +1197,7 @@ namespace np::graphics::rhi
 						 {{{0.5f, -0.5f, -0.5f}, {1.0f, 1.0f, 0.0f}, {0.0f, 0.0f}}},
 						 {{{0.5f, 0.5f, -0.5f}, {0.0f, 1.0f, 1.0f}, {0.0f, 1.0f}}},
 						 {{{-0.5f, 0.5f, -0.5f}, {1.0f, 1.0f, 1.0f}, {1.0f, 1.0f}}}};
+			*/
 
 			VkDeviceSize data_size = sizeof(_vertices[0]) * _vertices.size();
 
@@ -1202,7 +1215,7 @@ namespace np::graphics::rhi
 			Destroy<VulkanBuffer>(_staging_buffer);
 
 			// index buffer
-			_indices = {0, 1, 2, 2, 3, 0, 4, 5, 6, 6, 7, 4};
+			//_indices = {0, 1, 2, 2, 3, 0, 4, 5, 6, 6, 7, 4};
 
 			data_size = sizeof(_indices[0]) * _indices.size();
 

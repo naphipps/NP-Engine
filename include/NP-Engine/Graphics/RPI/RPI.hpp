@@ -19,6 +19,7 @@
 #include "Color.hpp"
 #include "Texture.hpp"
 #include "Command.hpp"
+#include "Model.hpp"
 
 // TODO: when we complete our renderer, we need to cleanup/remove files we are not using
 
