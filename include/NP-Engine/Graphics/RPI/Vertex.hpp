@@ -16,7 +16,7 @@ namespace np::graphics
 	struct Vertex
 	{
 		::glm::vec3 Position;
-		::glm::vec3 Color;
+		::glm::vec3 Color; // TODO: added alpha channel support
 		::glm::vec2 TextureCoordinate;
 
 		bl operator==(const Vertex& other) const

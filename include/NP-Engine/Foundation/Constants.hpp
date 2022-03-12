@@ -38,7 +38,7 @@
 #elif defined(__cplusplus) && (__cplusplus >= 201103)
 	#define NP_FUNCTION __func__
 #else
-	#define NP_FUNCTION NP_FILE_AND_LINE
+	#define NP_FUNCTION NP_FILE_AND_LINE // TODO: does windows not have a fancy function macro??
 #endif // NP_FUNCTION
 // concat NP_FUNCTION via str(NP_FUNCTION)
 
