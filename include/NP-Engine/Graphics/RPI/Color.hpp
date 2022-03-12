@@ -14,6 +14,8 @@
 
 namespace np::graphics
 {
+	// TODO: add implicit cast to vec4? and assign operator to vec4?
+
 	struct Color
 	{
 		union {
@@ -32,7 +34,7 @@ namespace np::graphics
 		};
 
 		union {
-			ui8 a = 0;
+			ui8 a = 255;
 			ui8 Alpha;
 		};
 
@@ -53,7 +55,7 @@ namespace np::graphics
 		}
 	};
 
-	NP_ENGINE_STATIC_ASSERT(sizeof(Color) == 4, "Color must have size equaling 4.");
+	NP_ENGINE_STATIC_ASSERT(sizeof(Color) == 4, "Color must have size of 4.");
 } // namespace np::graphics
 
 #endif /* NP_ENGINE_RPI_COLOR_HPP */
