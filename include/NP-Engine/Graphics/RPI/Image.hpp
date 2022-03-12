@@ -26,7 +26,7 @@ namespace np::graphics
 		ui32 _height;
 		container::vector<ui8> _pixels;
 
-		//TODO: do we want to save the filename?
+		// TODO: do we want to save the filename?
 
 	public:
 		Image(str filename)
@@ -77,8 +77,9 @@ namespace np::graphics
 			if (error_code)
 			{
 				Clear();
-				NP_ENGINE_ASSERT(!error_code, "Image did not load '" + filename + "', LODEPNG REASON: '" + 
-					str(lodepng_error_text(error_code)) + "'\n");
+				NP_ENGINE_ASSERT(!error_code,
+								 "Image did not load '" + filename + "', LODEPNG REASON: '" +
+									 str(lodepng_error_text(error_code)) + "'\n");
 			}
 
 			return error_code == 0;
