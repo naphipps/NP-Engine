@@ -13,6 +13,7 @@
 #include "NP-Engine/Memory/Memory.hpp"
 
 #include "NP-Engine/Vendor/GlfwInclude.hpp"
+#include "NP-Engine/Vendor/EnttInclude.hpp"
 
 #include "Layer.hpp"
 #include "ApplicationCloseEvent.hpp"
@@ -51,7 +52,8 @@ namespace np::app
 		}
 
 	public:
-		WindowLayer(event::EventSubmitter& event_submitter): Layer(event_submitter)
+		WindowLayer(event::EventSubmitter& event_submitter, ::entt::registry& ecs_registry):
+			Layer(event_submitter, ecs_registry)
 		{
 			glfwInit();
 		}

@@ -18,6 +18,7 @@
 #include "NP-Engine/Time/Time.hpp"
 
 #include "NP-Engine/Vendor/VulkanInclude.hpp"
+#include "NP-Engine/Vendor/EnttInclude.hpp"
 
 #include "../../RPI/RPI.hpp"
 
@@ -75,7 +76,7 @@ namespace np::graphics::rhi
 		}
 
 	public:
-		VulkanRenderer(): _allocator(memory::DefaultTraitAllocator)
+		VulkanRenderer(::entt::registry& ecs_registry): Renderer(ecs_registry), _allocator(memory::DefaultTraitAllocator)
 		{
 			Create<VulkanInstance>(_instances);
 		}

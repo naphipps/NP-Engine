@@ -12,16 +12,14 @@
 #include "NP-Engine/Platform/Platform.hpp"
 #include "NP-Engine/Memory/Memory.hpp"
 
+#include "NP-Engine/Vendor/EnttInclude.hpp"
+
 #include "NP-Engine/Window/WindowEvents.hpp"
 
 #include "NP-Engine/Graphics/RHI/Vulkan/VulkanGraphics.hpp"
 
-#if NP_ENGINE_PLATFORM_IS_APPLE || NP_ENGINE_PLATFORM_IS_LINUX
-	// TODO: determine if we need this after our renderer is complete
-
-#elif NP_ENGINE_PLATFORM_IS_WINDOWS
-	#include "NP-Engine/Graphics/RHI/OpenGL/OpenGLRenderer.hpp"
-
+#if NP_ENGINE_PLATFORM_IS_LINUX || NP_ENGINE_PLATFORM_IS_WINDOWS
+	#include "NP-Engine/Graphics/RHI/OpenGL/OpenGLRenderer.hpp" //TODO: create OpenGLGraphics.hpp
 #endif
 
 #include "Layer.hpp"
@@ -125,7 +123,7 @@ namespace np::app
 			block = allocator.Allocate(sizeof(graphics::rhi::OpenGLRenderer));
 			if (block.IsValid())
 			{
-				if (memory::Construct<graphics::rhi::OpenGLRenderer>(block))
+				if (memory::Construct<graphics::rhi::OpenGLRenderer>(block, _ecs_registry))
 				{
 					opengl = static_cast<graphics::Renderer*>(block.ptr);
 				}
@@ -139,7 +137,7 @@ namespace np::app
 			block = allocator.Allocate(sizeof(graphics::rhi::VulkanRenderer));
 			if (block.IsValid())
 			{
-				if (memory::Construct<graphics::rhi::VulkanRenderer>(block))
+				if (memory::Construct<graphics::rhi::VulkanRenderer>(block, _ecs_registry))
 				{
 					vulkan = static_cast<graphics::Renderer*>(block.ptr);
 				}
@@ -204,7 +202,8 @@ namespace np::app
 		}
 
 	public:
-		GraphicsLayer(event::EventSubmitter& event_submitter): Layer(event_submitter)
+		GraphicsLayer(event::EventSubmitter& event_submitter, ::entt::registry& ecs_registry):
+			Layer(event_submitter, ecs_registry)
 		{
 			ChooseRhi();
 		}
@@ -226,7 +225,7 @@ namespace np::app
 
 		graphics::Renderer* CreateRenderer(window::Window& window)
 		{
-			graphics::Renderer* renderer = graphics::Renderer::Create(_allocator);
+			graphics::Renderer* renderer = graphics::Renderer::Create(_allocator, _ecs_registry);
 			renderer->AttachToWindow(window);
 			CreateScene(*renderer);
 			return _renderers.emplace_back(renderer);

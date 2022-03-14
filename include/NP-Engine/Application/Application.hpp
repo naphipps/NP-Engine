@@ -20,6 +20,8 @@
 #include "NP-Engine/Time/Time.hpp"
 #include "NP-Engine/Window/Window.hpp"
 
+#include "NP-Engine/Vendor/EnttInclude.hpp"
+
 #include "ApplicationEvents.hpp"
 #include "Layer.hpp"
 #include "WindowLayer.hpp"
@@ -85,6 +87,7 @@ namespace np::app
 		};
 
 	protected:
+		::entt::registry _ecs_registry;
 		event::EventQueue _event_queue;
 		event::EventSubmitter _application_event_submitter;
 		Properties _properties;
@@ -96,10 +99,10 @@ namespace np::app
 
 		Application(const Application::Properties& application_properties):
 			_application_event_submitter(_event_queue), // order matters
-			Layer(_application_event_submitter),
+			Layer(_application_event_submitter, _ecs_registry),
 			_properties(application_properties),
-			_window_layer(_application_event_submitter),
-			_graphics_layer(_application_event_submitter),
+			_window_layer(_application_event_submitter, _ecs_registry),
+			_graphics_layer(_application_event_submitter, _ecs_registry),
 			_running(false)
 		{
 			system::SetTerminateHandler(__detail::HandleTerminate);

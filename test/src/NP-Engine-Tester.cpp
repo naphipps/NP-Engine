@@ -35,7 +35,10 @@ namespace np::app
 		}
 
 	public:
-		GameLayer(event::EventSubmitter& event_submitter): Layer(event_submitter), _scene(nullptr) {}
+		GameLayer(event::EventSubmitter& event_submitter, ::entt::registry& ecs_registry):
+			Layer(event_submitter, ecs_registry),
+			_scene(nullptr)
+		{}
 
 		void SetScene(graphics::Scene& scene)
 		{
@@ -62,7 +65,7 @@ namespace np::app
 		GameApp(memory::Allocator& application_allocator):
 			Application(Application::Properties{"My Game App"}),
 			_allocator(application_allocator),
-			_game_layer(_event_submitter)
+			_game_layer(_event_submitter, _ecs_registry)
 		{
 			PushLayer(memory::AddressOf(_game_layer));
 		}

@@ -12,8 +12,9 @@
 #include "NP-Engine/Window/Window.hpp"
 #include "NP-Engine/Time/Time.hpp"
 
-#include "../../RPI/Renderer.hpp"
-#include "../../RPI/RhiType.hpp"
+#include "NP-Engine/Vendor/EnttInclude.hpp"
+
+#include "NP-Engine/Graphics/RPI/RPI.hpp"
 
 // TODO: add summary comments
 
@@ -22,6 +23,8 @@ namespace np::graphics::rhi
 	class OpenGLRenderer : public Renderer
 	{
 	public:
+		OpenGLRenderer(::entt::registry& ecs_registry): Renderer(ecs_registry) {}
+
 		RhiType GetRhiType() const override
 		{
 			return RhiType::OpenGL;

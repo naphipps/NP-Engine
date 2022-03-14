@@ -13,14 +13,21 @@
 #include "NP-Engine/Platform/Platform.hpp"
 #include "NP-Engine/Window/Window.hpp"
 
+#include "NP-Engine/Vendor/EnttInclude.hpp"
+
 #include "RhiType.hpp"
 
 namespace np::graphics
 {
 	class Renderer
 	{
+	protected:
+		::entt::registry& _ecs_registry;
+
+		Renderer(::entt::registry& ecs_registry): _ecs_registry(ecs_registry) {}
+
 	public:
-		static Renderer* Create(memory::Allocator& allocator);
+		static Renderer* Create(memory::Allocator& allocator, ::entt::registry& ecs_registry);
 
 		virtual ~Renderer() = default; // suppress warning
 
