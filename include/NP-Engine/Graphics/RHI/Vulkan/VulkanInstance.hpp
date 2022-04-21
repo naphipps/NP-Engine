@@ -37,6 +37,8 @@ namespace np::graphics::rhi
 			{
 				::std::cerr << ::std::endl << "Validation Layer: " << callback_data->pMessage << ::std::endl << ::std::endl;
 				retval = VK_FALSE;
+
+				NP_ENGINE_ASSERT(false, "vulkan error");
 			}
 			return retval;
 		}

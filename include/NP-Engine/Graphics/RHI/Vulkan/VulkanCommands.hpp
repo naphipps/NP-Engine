@@ -18,5 +18,6 @@
 #include "VulkanCommandCopyBuffers.hpp"
 #include "VulkanCommandPipelineBarrier.hpp"
 #include "VulkanCommandCopyBufferToImage.hpp"
+#include "VulkanCommandPushConstants.hpp"
 
 #endif /* NP_ENGINE_VULKAN_COMMANDS_HPP */

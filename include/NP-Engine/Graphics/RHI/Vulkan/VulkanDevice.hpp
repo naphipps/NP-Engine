@@ -7,7 +7,6 @@
 #ifndef NP_ENGINE_VULKAN_DEVICE_HPP
 #define NP_ENGINE_VULKAN_DEVICE_HPP
 
-#include <iostream> //TODO: remove
 #include <optional>
 #include <algorithm>
 
@@ -20,13 +19,14 @@
 
 #include "VulkanInstance.hpp"
 #include "VulkanSurface.hpp"
+#include "VulkanCommandPool.hpp"
 
 namespace np::graphics::rhi
 {
 	class VulkanDevice
 	{
 	public:
-		struct QueueFamilyIndices_T
+		struct QueueFamilyIndices_T // TODO: do we need the suffix _T?
 		{
 			::std::optional<ui32> graphics;
 			::std::optional<ui32> present;
@@ -63,6 +63,8 @@ namespace np::graphics::rhi
 		VkPresentModeKHR _present_mode;
 		VkPhysicalDevice _physical_device;
 		VkDevice _device;
+		VulkanCommandPool* _command_pool;
+		VkExtent2D _extent; //TODO: move this to RenderPass??
 
 		container::vector<VkExtensionProperties> GetSupportedDeviceExtensions(VkPhysicalDevice physical_device) const
 		{
@@ -95,8 +97,8 @@ namespace np::graphics::rhi
 		{
 			container::vector<VkLayerProperties> layers = GetSupportedDeviceLayers(physical_device);
 			container::vector<str> names;
-			for (auto e : layers) // TODO: can these be references?
-				names.emplace_back(e.layerName);
+			for (VkLayerProperties& layer : layers)
+				names.emplace_back(layer.layerName);
 			return names;
 		}
 
@@ -267,11 +269,11 @@ namespace np::graphics::rhi
 			return info;
 		}
 
-		void ChooseSurfaceFormat(container::vector<VkSurfaceFormatKHR>& surface_formats)
+		void ChooseSurfaceFormat(container::vector<VkSurfaceFormatKHR>& surface_formats, VkPhysicalDevice physical_device)
 		{
 			_surface_format = {};
 
-			if (_physical_device != nullptr)
+			if (physical_device != nullptr)
 			{
 				_surface_format = surface_formats[0];
 
@@ -287,11 +289,11 @@ namespace np::graphics::rhi
 			}
 		}
 
-		void ChoosePresentMode(container::vector<VkPresentModeKHR>& present_modes)
+		void ChoosePresentMode(container::vector<VkPresentModeKHR>& present_modes, VkPhysicalDevice physical_device)
 		{
 			_present_mode = {};
 
-			if (_physical_device != nullptr)
+			if (physical_device != nullptr)
 			{
 				_present_mode = VK_PRESENT_MODE_FIFO_KHR;
 
@@ -370,8 +372,8 @@ namespace np::graphics::rhi
 			}
 			else
 			{
-				ChooseSurfaceFormat(surface_formats);
-				ChoosePresentMode(present_modes);
+				ChooseSurfaceFormat(surface_formats, physical_device);
+				ChoosePresentMode(present_modes, physical_device);
 			}
 
 			return physical_device;
@@ -423,17 +425,63 @@ namespace np::graphics::rhi
 			return logical_device;
 		}
 
+		VkCommandPoolCreateInfo CreateCommandPoolInfo() const
+		{
+			VkCommandPoolCreateInfo info = VulkanCommandPool::CreateInfo();
+			info.queueFamilyIndex = GetQueueFamilyIndices().graphics.value();
+			info.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
+			return info;
+		}
+
+		VulkanCommandPool* CreateCommandPool()
+		{
+			return memory::Create<VulkanCommandPool>(memory::DefaultTraitAllocator, _device, CreateCommandPoolInfo());
+		}
+
+		VkExtent2D ChooseExtent()
+		{
+			VkExtent2D extent{};
+
+			if (GetCapabilities().currentExtent.width != UI32_MAX)
+			{
+				extent = GetCapabilities().currentExtent;
+			}
+			else
+			{
+				i32 width, height;
+				glfwGetFramebufferSize((GLFWwindow*)GetSurface().GetWindow().GetNativeWindow(), &width, &height);
+
+				VkExtent2D min_extent = GetCapabilities().minImageExtent;
+				VkExtent2D max_extent = GetCapabilities().maxImageExtent;
+
+				extent = { ::std::clamp((ui32)width, min_extent.width, max_extent.width),
+							::std::clamp((ui32)height, min_extent.height, max_extent.height) };
+			}
+
+			return extent;
+		}
+
 	public:
 		VulkanDevice(VulkanSurface& surface):
 			_surface(surface),
 			_physical_device(ChoosePhysicalDevice()),
-			_device(CreateLogicalDevice())
+			_device(CreateLogicalDevice()),
+			_command_pool(CreateCommandPool()), //TODO: I think I'd rather keep an actual object instead of a pointer
+			_extent(ChooseExtent())
 		{}
 
 		~VulkanDevice()
 		{
+			//TODO: I think I'd rather just call _command_pool.Dispose() or something
+			memory::Destroy<VulkanCommandPool>(memory::DefaultTraitAllocator, _command_pool); 
+
 			if (_device != nullptr)
 				vkDestroyDevice(_device, nullptr);
+		}
+
+		operator VkDevice() const // TODO: I think all these operators should be after the destructor
+		{
+			return _device;
 		}
 
 		str GetPhysicalDeviceName() const
@@ -463,6 +511,16 @@ namespace np::graphics::rhi
 		VkPhysicalDevice GetPhysicalDevice() const
 		{
 			return _physical_device;
+		}
+
+		VulkanCommandPool& GetCommandPool()
+		{
+			return *_command_pool;
+		}
+
+		const VulkanCommandPool& GetCommandPool() const
+		{
+			return *_command_pool;
 		}
 
 		const VkSurfaceCapabilitiesKHR& GetCapabilities()
@@ -508,6 +566,21 @@ namespace np::graphics::rhi
 			return queue;
 		}
 
+		void Rebuild()
+		{
+			_extent = ChooseExtent();
+		}
+
+		VkExtent2D GetExtent()
+		{
+			return _extent;
+		}
+
+		flt GetAspectRatio()
+		{
+			return (flt)_extent.width / (flt)_extent.height;
+		}
+
 		ui32 GetMemoryTypeIndex(ui32 type_filter, VkMemoryPropertyFlags memory_property_flags)
 		{
 			VkPhysicalDeviceMemoryProperties memory_properties;
@@ -530,7 +603,7 @@ namespace np::graphics::rhi
 		}
 
 		VkFormat GetSupportedFormat(const container::vector<VkFormat>& format_candidates, VkImageTiling image_tiling,
-									VkFormatFeatureFlags format_features)
+									VkFormatFeatureFlags format_features) const
 		{
 			VkFormat format = VK_FORMAT_UNDEFINED;
 
@@ -555,9 +628,38 @@ namespace np::graphics::rhi
 			return format;
 		}
 
-		operator VkDevice() const
+		container::vector<VulkanCommandBuffer> BeginSingleUseCommandBuffers(siz count)
 		{
-			return _device;
+			VkCommandBufferAllocateInfo command_buffer_allocate_info = _command_pool->CreateCommandBufferAllocateInfo();
+			command_buffer_allocate_info.commandBufferCount = count;
+			container::vector<VulkanCommandBuffer> command_buffers =
+				_command_pool->AllocateCommandBuffers(command_buffer_allocate_info);
+
+			VkCommandBufferBeginInfo command_buffer_begin_info = VulkanCommandBuffer::CreateBeginInfo();
+			command_buffer_begin_info.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+
+			for (VulkanCommandBuffer& command_buffer : command_buffers)
+				command_buffer.Begin(command_buffer_begin_info);
+
+			return command_buffers;
+		}
+
+		void EndSingleUseCommandBuffers(container::vector<VulkanCommandBuffer>& command_buffers)
+		{
+			for (VulkanCommandBuffer& command_buffer : command_buffers)
+				command_buffer.End();
+
+			container::vector<VkCommandBuffer> buffers(command_buffers.begin(), command_buffers.end());
+			VkSubmitInfo submit_info{};
+			submit_info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+			submit_info.commandBufferCount = (ui32)buffers.size();
+			submit_info.pCommandBuffers = buffers.data();
+
+			vkQueueSubmit(GetGraphicsDeviceQueue(), 1, &submit_info, nullptr);
+			vkQueueWaitIdle(GetGraphicsDeviceQueue()); // TODO: figure out how to use a fence so we can submit
+													   // multiple simultaneously - this makes it one by one
+
+			_command_pool->FreeCommandBuffers(command_buffers);
 		}
 	};
 } // namespace np::graphics::rhi

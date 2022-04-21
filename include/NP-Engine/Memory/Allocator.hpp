@@ -109,6 +109,23 @@ namespace np::memory
 
 		virtual bl Deallocate(void* ptr) = 0;
 	};
+
+	template <typename T, typename... Args>
+	T* Create(Allocator& allocator, Args&&... args)
+	{
+		Block block = allocator.Allocate(sizeof(T));
+		bl constructed = Construct<T>(block, ::std::forward<Args>(args)...);
+		NP_ENGINE_ASSERT(constructed, "We require object of T to be constructed.");
+		return (T*)block.ptr;
+	}
+
+	template <typename T>
+	void Destroy(Allocator& allocator, T* ptr)
+	{
+		bl destructed = Destruct<T>(ptr);
+		bl deallocated = allocator.Deallocate((void*)ptr);
+		NP_ENGINE_ASSERT(destructed && deallocated, "We required object of T to be destructed and deallocated.");
+	}
 } // namespace np::memory
 
 #endif /* NP_ENGINE_ALLOCATOR_HPP */

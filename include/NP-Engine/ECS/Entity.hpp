@@ -22,7 +22,7 @@ namespace np::ecs
 	{
 	private:
 		::entt::entity _entity;
-		::entt::registry* _registry;
+		::entt::registry* _registry; // TODO: should we add a getter for this?
 
 	public:
 		Entity(): _entity(::entt::null), _registry(nullptr) {}
@@ -33,12 +33,12 @@ namespace np::ecs
 
 		Entity(const Entity& other): Entity(other._entity, *other._registry) {}
 
-		Entity(Entity&& other): _entity(::std::move(other._entity)), _registry(::std::move(other._registry)) {}
-
-		~Entity()
+		Entity(Entity&& other) noexcept: _entity(::std::move(other._entity)), _registry(::std::move(other._registry))
 		{
-			Invalidate();
+			other.Invalidate();
 		}
+
+		~Entity() = default;
 
 		Entity& operator=(const Entity& other)
 		{
@@ -47,11 +47,17 @@ namespace np::ecs
 			return *this;
 		}
 
-		Entity& operator=(Entity&& other)
+		Entity& operator=(Entity&& other) noexcept
 		{
 			_entity = ::std::move(other._entity);
 			_registry = ::std::move(other._registry);
+			other.Invalidate();
 			return *this;
+		}
+
+		operator ::entt::entity() const
+		{
+			return _entity;
 		}
 
 		bl IsValid() const
@@ -63,15 +69,9 @@ namespace np::ecs
 		{
 			if (IsValid())
 			{
-				_registry->destroy(_entity);
 				_entity = ::entt::null;
 				_registry = nullptr;
 			}
-		}
-
-		operator ::entt::entity() const
-		{
-			return _entity;
 		}
 
 		void Clear()

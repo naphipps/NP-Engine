@@ -16,6 +16,10 @@
 #include "NP-Engine/Vendor/EnttInclude.hpp"
 
 #include "RhiType.hpp"
+#include "Model.hpp"
+#include "Frame.hpp"
+#include "RenderableLight.hpp"
+#include "RenderableObject.hpp"
 
 namespace np::graphics
 {
@@ -42,7 +46,11 @@ namespace np::graphics
 
 		virtual void AttachToWindow(window::Window& window) = 0;
 		virtual void DetachFromWindow(window::Window& window) = 0;
-		virtual void Draw() = 0;
+
+		virtual Frame* BeginFrame() = 0;
+		virtual void EndFrame() = 0;
+		virtual void DrawFrame() = 0;
+
 		virtual void AdjustForWindowResize(window::Window& window) = 0;
 		virtual bl IsAttachedToWindow(window::Window& window) const = 0;
 	};

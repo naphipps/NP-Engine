@@ -22,6 +22,9 @@
 #include "VulkanTexture.hpp"
 #include "VulkanCommandPool.hpp"
 #include "VulkanCommands.hpp"
+#include "VulkanRenderableImage.hpp"
+#include "VulkanRenderableLight.hpp"
+#include "VulkanRenderableModel.hpp"
 
 // TODO: make sure we have everything here
 

@@ -11,9 +11,11 @@
 
 namespace np::graphics
 {
+	// TODO: I don't like the term "UniformBufferObject"... I think we should choose something that better represents what it
+	// does
+	// TODO: try out RendererMetaValues or PipelineMetaValues - I like the later since they exist in the pipeline
 	struct UniformBufferObject
 	{
-		glm::mat4 Model;
 		glm::mat4 View;
 		glm::mat4 Projection;
 	};

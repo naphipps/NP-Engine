@@ -30,4 +30,5 @@ namespace np::graphics
 
 		return static_cast<Renderer*>(block.ptr);
 	}
+
 } // namespace np::graphics

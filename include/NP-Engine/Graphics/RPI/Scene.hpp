@@ -17,19 +17,20 @@
 
 #include "RhiType.hpp"
 #include "Renderer.hpp"
+#include "Camera.hpp"
 
 namespace np::graphics
 {
 	class Scene
 	{
 	protected:
-		::entt::registry _registry;
+		::entt::registry& _ecs_registry;
 		Renderer& _renderer;
 
 	public:
-		static Scene* Create(memory::Allocator& allocator, Renderer& renderer);
+		static Scene* Create(memory::Allocator& allocator, ::entt::registry& ecs_registry, Renderer& renderer);
 
-		Scene(Renderer& renderer): _renderer(renderer) {}
+		Scene(::entt::registry& ecs_registry, Renderer& renderer): _ecs_registry(ecs_registry), _renderer(renderer) {}
 
 		virtual ~Scene() = default; // suppress warning
 
@@ -38,12 +39,15 @@ namespace np::graphics
 			return _renderer;
 		}
 
-		Renderer& GetRenderer() const
+		const Renderer& GetRenderer() const
 		{
 			return _renderer;
 		}
 
 		virtual void Draw() = 0;
+		virtual void Prepare() = 0;
+		virtual void Dispose() = 0;
+		virtual void SetCamera(Camera& camera) = 0;
 		virtual void AdjustForWindowResize(window::Window& window) = 0;
 	};
 } // namespace np::graphics

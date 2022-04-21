@@ -9,7 +9,7 @@
 
 #include <utility>
 
-#include "NP-Engine/Foundation/Foundation.hpp"
+#include "NP-Engine/Primitive/Primitive.hpp"
 #include "NP-Engine/Container/Container.hpp"
 #include "NP-Engine/String/String.hpp"
 
@@ -25,8 +25,7 @@ namespace np::graphics
 		ui32 _width;
 		ui32 _height;
 		container::vector<ui8> _pixels;
-
-		// TODO: do we want to save the filename?
+		str _filename;
 
 	public:
 		Image(str filename)
@@ -41,21 +40,28 @@ namespace np::graphics
 
 		Image(): Image(0, 0) {}
 
-		Image(const Image& other): _width(other._width), _height(other._height), _pixels(other._pixels) {}
+		Image(const Image& other):
+			_width(other._width),
+			_height(other._height),
+			_pixels(other._pixels),
+			_filename(other._filename)
+		{}
 
 		Image(Image&& other) noexcept:
 			_width(::std::move(other._width)),
 			_height(::std::move(other._height)),
-			_pixels(::std::move(other._pixels))
-		{}
-
-		~Image() = default; // TODO: do we need this??
+			_pixels(::std::move(other._pixels)),
+			_filename(::std::move(other._filename))
+		{
+			other.Clear();
+		}
 
 		Image& operator=(const Image& other)
 		{
 			_width = other._width;
 			_height = other._height;
 			_pixels = other._pixels;
+			_filename = other._filename;
 			return *this;
 		}
 
@@ -64,21 +70,25 @@ namespace np::graphics
 			_width = ::std::move(other._width);
 			_height = ::std::move(other._height);
 			_pixels = ::std::move(other._pixels);
+			_filename = ::std::move(other._filename);
+			other.Clear();
 			return *this;
 		}
 
 		bl Load(str filename) // TODO: add Load from stream and/or memory??
 		{
+			_filename = filename;
+
 			// TODO: is there a way for us to pass our _pixels in?
 			::std::vector<ui8> pixels;
-			ui32 error_code = ::lodepng::decode(pixels, _width, _height, filename.c_str());
+			ui32 error_code = ::lodepng::decode(pixels, _width, _height, _filename.c_str());
 			_pixels.assign(::std::make_move_iterator(pixels.begin()), ::std::make_move_iterator(pixels.end()));
 
 			if (error_code)
 			{
 				Clear();
 				NP_ENGINE_ASSERT(!error_code,
-								 "Image did not load '" + filename + "', LODEPNG REASON: '" +
+								 "Image did not load '" + _filename + "', LODEPNG REASON: '" +
 									 str(lodepng_error_text(error_code)) + "'\n");
 			}
 
@@ -97,6 +107,12 @@ namespace np::graphics
 		void Clear()
 		{
 			SetSize(0, 0);
+			_filename.clear();
+		}
+
+		str GetFilename() const
+		{
+			return _filename;
 		}
 
 		ui32 GetWidth() const

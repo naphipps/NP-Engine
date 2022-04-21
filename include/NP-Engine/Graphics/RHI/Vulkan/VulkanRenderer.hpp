@@ -14,13 +14,11 @@
 #include "NP-Engine/String/String.hpp"
 #include "NP-Engine/Memory/Memory.hpp"
 #include "NP-Engine/Window/Window.hpp"
-#include "NP-Engine/Container/Container.hpp"
-#include "NP-Engine/Time/Time.hpp"
 
 #include "NP-Engine/Vendor/VulkanInclude.hpp"
 #include "NP-Engine/Vendor/EnttInclude.hpp"
 
-#include "../../RPI/RPI.hpp"
+#include "NP-Engine/Graphics/RPI/RPI.hpp"
 
 #include "VulkanInstance.hpp"
 #include "VulkanSurface.hpp"
@@ -28,68 +26,135 @@
 #include "VulkanShader.hpp"
 #include "VulkanSwapchain.hpp"
 #include "VulkanPipeline.hpp"
-
-// TODO: add summary comments
+#include "VulkanRenderPass.hpp"
+#include "VulkanFrame.hpp"
 
 namespace np::graphics::rhi
 {
 	class VulkanRenderer : public Renderer
 	{
 	private:
-		memory::Allocator& _allocator;
-		container::vector<VulkanInstance*> _instances;
-		container::vector<VulkanSurface*> _surfaces;
-		container::vector<VulkanDevice*> _devices; // TODO: should these be sptr??
-		container::vector<VulkanPipeline*> _pipelines;
+		VulkanInstance* _instance;
+		VulkanSurface* _surface;
+		VulkanDevice* _device;
+		VulkanRenderPass* _render_pass;
+		VulkanSwapchain* _swapchain;
+		container::vector<VulkanCommandBuffer> _command_buffers;
+		str _object_vertex_shader_filename;
+		str _object_fragment_shader_filename;
+		VulkanShader* _object_vertex_shader;
+		VulkanShader* _object_fragment_shader;
+		VulkanPipeline* _object_pipeline;
+		str _light_vertex_shader_filename;
+		str _light_fragment_shader_filename;
+		VulkanShader* _light_vertex_shader;
+		VulkanShader* _light_fragment_shader;
+		VulkanPipeline* _light_pipeline;
+		container::vector<VkClearValue> _clear_values;
+		VkRenderPassBeginInfo _render_pass_begin_info;
+		container::vector<VulkanFrame> _frames;
+		bl _is_out_of_date;
 
-		template <class T, class... Args>
-		T* Create(container::vector<T*>& v, Args&&... args)
+		void AdjustForOutOfDate()
 		{
-			memory::Block block = _allocator.Allocate(sizeof(T));
-			memory::Construct<T>(block, ::std::forward<Args>(args)...);
-			return v.emplace_back(static_cast<T*>(block.ptr));
-		}
-
-		template <class T>
-		void DestroyInVector(container::vector<T*>& ptrs, const T* t)
-		{
-			for (auto it = ptrs.begin(); it != ptrs.end(); it++)
+			if (_device)
 			{
-				if (t == *it)
-				{
-					memory::Destruct(*it);
-					_allocator.Deallocate(*it);
-					ptrs.erase(it);
-					break;
-				}
+				SetOutOfDate(false);
+				//_frame.Invalidate();
+				::std::cout << "adjusting_- ";
+				vkDeviceWaitIdle(GetDevice());
+				GetDevice().Rebuild();
+				_render_pass->Rebuild(); //TODO: don't know why swapchain's rebuild hates it when this line is GetRenderPass() instead
+				GetSwapchain().Rebuild();
+				GetDevice().GetCommandPool().FreeCommandBuffers(_command_buffers);
+				_command_buffers = CreateCommandBuffers();
+				GetObjectPipeline().Rebuild();
+				GetLightPipeline().Rebuild();
+				_frames.resize(GetSwapchain().GetImages().size());
+				::std::cout << "done_adjusting ";
 			}
 		}
 
-		template <class T>
-		void DestroyVector(container::vector<T*>& ptrs)
+		container::vector<VulkanCommandBuffer> CreateCommandBuffers()
 		{
-			for (T* ptr : ptrs)
-			{
-				memory::Destruct(ptr);
-				_allocator.Deallocate(ptr);
-			}
+			VkCommandBufferAllocateInfo command_buffer_allocate_info =
+				GetDevice().GetCommandPool().CreateCommandBufferAllocateInfo();
+			command_buffer_allocate_info.commandPool = GetDevice().GetCommandPool();
+			command_buffer_allocate_info.commandBufferCount = GetSwapchain().GetImages().size();
+			return GetDevice().GetCommandPool().AllocateCommandBuffers(command_buffer_allocate_info);
+		}
+
+		VkRenderPassBeginInfo CreateRenderPassBeginInfo()
+		{
+			VkRenderPassBeginInfo info = VulkanRenderPass::CreateRenderPassBeginInfo();
+			info.clearValueCount = (ui32)_clear_values.size();
+			info.pClearValues = _clear_values.data();
+			return info;
 		}
 
 	public:
-		VulkanRenderer(::entt::registry& ecs_registry): Renderer(ecs_registry), _allocator(memory::DefaultTraitAllocator)
-		{
-			Create<VulkanInstance>(_instances);
-		}
+		VulkanRenderer(::entt::registry& ecs_registry):
+			Renderer(ecs_registry),
+			_instance(memory::Create<VulkanInstance>(memory::DefaultTraitAllocator)),
+			_surface(nullptr),
+			_device(nullptr),
+			_render_pass(nullptr),
+			_swapchain(nullptr),
+			_object_vertex_shader_filename(fs::Append(fs::Append("Vulkan", "shaders"), "object_vertex.glsl")),
+			_object_fragment_shader_filename(fs::Append(fs::Append("Vulkan", "shaders"), "object_fragment.glsl")),
+			_object_vertex_shader(nullptr),
+			_object_fragment_shader(nullptr),
+			_object_pipeline(nullptr),
+			_light_vertex_shader_filename(fs::Append(fs::Append("Vulkan", "shaders"), "light_vertex.glsl")),
+			_light_fragment_shader_filename(fs::Append(fs::Append("Vulkan", "shaders"), "light_fragment.glsl")),
+			_light_vertex_shader(nullptr),
+			_light_fragment_shader(nullptr),
+			_light_pipeline(nullptr),
+			_clear_values(VulkanRenderPass::CreateClearValues()),
+			_render_pass_begin_info(CreateRenderPassBeginInfo()),
+			_is_out_of_date(false)
+		{}
 
 		~VulkanRenderer()
 		{
-			for (VulkanDevice* device : _devices)
-				vkDeviceWaitIdle(*device);
+			if (_device)
+				vkDeviceWaitIdle(*_device);
 
-			DestroyVector<VulkanPipeline>(_pipelines);
-			DestroyVector<VulkanDevice>(_devices);
-			DestroyVector<VulkanSurface>(_surfaces);
-			DestroyVector<VulkanInstance>(_instances);
+			if (_light_pipeline)
+				memory::Destroy<VulkanPipeline>(memory::DefaultTraitAllocator, _light_pipeline);
+
+			if (_light_fragment_shader)
+				memory::Destroy<VulkanShader>(memory::DefaultTraitAllocator, _light_fragment_shader);
+
+			if (_light_vertex_shader)
+				memory::Destroy<VulkanShader>(memory::DefaultTraitAllocator, _light_vertex_shader);
+
+			if (_object_pipeline)
+				memory::Destroy<VulkanPipeline>(memory::DefaultTraitAllocator, _object_pipeline);
+
+			if (_object_fragment_shader)
+				memory::Destroy<VulkanShader>(memory::DefaultTraitAllocator, _object_fragment_shader);
+
+			if (_object_vertex_shader)
+				memory::Destroy<VulkanShader>(memory::DefaultTraitAllocator, _object_vertex_shader);
+
+			if (_swapchain)
+				memory::Destroy<VulkanSwapchain>(memory::DefaultTraitAllocator, _swapchain);
+
+			if (_render_pass)
+				memory::Destroy<VulkanRenderPass>(memory::DefaultTraitAllocator, _render_pass);
+
+			if (_device)
+			{
+				_device->GetCommandPool().FreeCommandBuffers(_command_buffers);
+				memory::Destroy<VulkanDevice>(memory::DefaultTraitAllocator, _device);
+			}
+
+			if (_surface)
+				memory::Destroy<VulkanSurface>(memory::DefaultTraitAllocator, _surface);
+
+			if (_instance)
+				memory::Destroy<VulkanInstance>(memory::DefaultTraitAllocator, _instance);
 		}
 
 		RhiType GetRhiType() const override
@@ -104,57 +169,257 @@ namespace np::graphics::rhi
 
 		virtual bl IsAttachedToWindow(window::Window& window) const override
 		{
-			bl is_attached = false;
-
-			for (auto it = _pipelines.begin(); it != _pipelines.end(); it++)
-			{
-				if (memory::AddressOf((*it)->GetSurface().GetWindow()) == memory::AddressOf(window))
-				{
-					is_attached = true;
-					break;
-				}
-			}
-
-			return is_attached;
+			return _surface && memory::AddressOf(_surface->GetWindow()) == memory::AddressOf(window);
 		}
 
 		void AttachToWindow(window::Window& window) override
 		{
-			VulkanSurface& surface = *Create<VulkanSurface>(_surfaces, *_instances.front(), window);
-			VulkanDevice& device = *Create<VulkanDevice>(_devices, surface);
-			VulkanPipeline& pipeline = *Create<VulkanPipeline>(_pipelines, device);
+			_surface = memory::Create<VulkanSurface>(memory::DefaultTraitAllocator, *_instance, window);
+			_device = memory::Create<VulkanDevice>(memory::DefaultTraitAllocator, *_surface);
+			_render_pass = memory::Create<VulkanRenderPass>(memory::DefaultTraitAllocator, *_device);
+			_swapchain = memory::Create<VulkanSwapchain>(memory::DefaultTraitAllocator, *_render_pass);
+
+			_command_buffers = CreateCommandBuffers();
+			
+			_object_vertex_shader = memory::Create<VulkanShader>(memory::DefaultTraitAllocator, *_device,
+																 _object_vertex_shader_filename, VulkanShader::Type::VERTEX);
+			_object_fragment_shader = memory::Create<VulkanShader>(
+				memory::DefaultTraitAllocator, *_device, _object_fragment_shader_filename, VulkanShader::Type::FRAGMENT);
+			_object_pipeline = memory::Create<VulkanPipeline>(memory::DefaultTraitAllocator, *_swapchain, *_render_pass,
+															  *_object_vertex_shader, *_object_fragment_shader);
+
+			_light_vertex_shader = memory::Create<VulkanShader>(memory::DefaultTraitAllocator, *_device,
+																_light_vertex_shader_filename, VulkanShader::Type::VERTEX);
+			_light_fragment_shader = memory::Create<VulkanShader>(
+				memory::DefaultTraitAllocator, *_device, _light_fragment_shader_filename, VulkanShader::Type::FRAGMENT);
+			_light_pipeline = memory::Create<VulkanPipeline>(memory::DefaultTraitAllocator, *_swapchain, *_render_pass,
+															 *_light_vertex_shader, *_light_fragment_shader);
+
+			_frames.resize(_swapchain->GetImages().size());
 		}
 
 		void DetachFromWindow(window::Window& window) override
 		{
-			for (auto it = _pipelines.begin(); it != _pipelines.end(); it++)
+			if (IsAttachedToWindow(window))
 			{
-				if (memory::AddressOf((*it)->GetSurface().GetWindow()) == memory::AddressOf(window))
-				{
-					VulkanPipeline* pipeline = *it;
-					VulkanDevice* device = memory::AddressOf(pipeline->GetDevice());
-					VulkanSurface* surface = memory::AddressOf(pipeline->GetSurface());
-					VulkanInstance* instance = memory::AddressOf(pipeline->GetInstance());
-
-					memory::Destruct(pipeline);
-					_allocator.Deallocate(pipeline);
-					_pipelines.erase(it);
-
-					DestroyInVector(_devices, device);
-					DestroyInVector(_surfaces, surface);
-					DestroyInVector(_instances, instance);
-					break;
-				}
+				vkDeviceWaitIdle(*_device);
+				memory::Destroy<VulkanPipeline>(memory::DefaultTraitAllocator, _light_pipeline);
+				memory::Destroy<VulkanShader>(memory::DefaultTraitAllocator, _light_vertex_shader);
+				memory::Destroy<VulkanShader>(memory::DefaultTraitAllocator, _light_fragment_shader);
+				memory::Destroy<VulkanPipeline>(memory::DefaultTraitAllocator, _object_pipeline);
+				memory::Destroy<VulkanShader>(memory::DefaultTraitAllocator, _object_vertex_shader);
+				memory::Destroy<VulkanShader>(memory::DefaultTraitAllocator, _object_fragment_shader);
+				memory::Destroy<VulkanSwapchain>(memory::DefaultTraitAllocator, _swapchain);
+				memory::Destroy<VulkanRenderPass>(memory::DefaultTraitAllocator, _render_pass);
+				//_device->GetCommandPool().FreeCommandBuffers(_command_buffers); //TODO: do we need this??
+				memory::Destroy<VulkanDevice>(memory::DefaultTraitAllocator, _device);
+				memory::Destroy<VulkanSurface>(memory::DefaultTraitAllocator, _surface);
+				_light_pipeline = nullptr;
+				_light_vertex_shader = nullptr;
+				_light_fragment_shader = nullptr;
+				_object_pipeline = nullptr;
+				_object_vertex_shader = nullptr;
+				_object_fragment_shader = nullptr;
+				_swapchain = nullptr;
+				_render_pass = nullptr;
+				_device = nullptr;
+				_surface = nullptr;
+				_frames.clear();
 			}
 		}
 
-		void Draw() override
+		void BeginRenderPassOnFrame(VulkanFrame& frame)
 		{
-			for (VulkanPipeline* pipeline : _pipelines)
-				pipeline->Draw();
+			_render_pass_begin_info.framebuffer = GetSwapchain().GetFramebuffers()[GetSwapchain().GetAcquiredImageIndex()];
+			_render_pass->Begin(_render_pass_begin_info, frame);
+		}
+
+		void EndRenderPassOnFrame(VulkanFrame& frame)
+		{
+			_render_pass->End(frame);
+		}
+
+		void SetOutOfDate(bl out_of_date = true)
+		{
+			_is_out_of_date = out_of_date;
+		}
+
+		bl IsOutOfDate() const
+		{
+			return _is_out_of_date;
+		}
+
+		VkCommandBufferBeginInfo _command_buffer_begin_info = VulkanCommandBuffer::CreateBeginInfo();
+
+		Frame* BeginFrame() override
+		{
+			::std::cout << "begin ";
+			VulkanFrame* frame = nullptr;
+			i32 width = 0;
+			i32 height = 0;
+			glfwGetFramebufferSize((GLFWwindow*)GetSurface().GetWindow().GetNativeWindow(), &width, &height);
+			if (width != 0 && height != 0)
+			{
+				VkResult result = GetSwapchain().AcquireImage();
+				if (result == VK_SUCCESS || result == VK_SUBOPTIMAL_KHR)
+				{
+					GetSwapchain().MarkAcquiredImageForUse();
+					frame = &_frames[GetSwapchain().GetCurrentImageIndex()];
+					*frame = VulkanFrame(GetDevice(), _command_buffers[GetSwapchain().GetCurrentImageIndex()]);
+					//VkCommandBufferBeginInfo command_buffer_begin_info = VulkanCommandBuffer::CreateBeginInfo();
+					//_frame.Begin(command_buffer_begin_info);
+					//frame = &_frame;
+					frame->Begin(_command_buffer_begin_info);
+					
+					NP_ENGINE_ASSERT(frame->IsValid(), "frame must be valid here");
+				}
+				else if (result == VK_ERROR_OUT_OF_DATE_KHR)
+				{
+					::std::cout << "@acquire: ";
+					AdjustForOutOfDate();
+				}
+			}
+
+			return frame;
+		}
+
+		void EndFrame() override
+		{
+			::std::cout << "end ";
+			_frames[GetSwapchain().GetCurrentImageIndex()].End();
+			//_frame.End();
+		}
+
+		void DrawFrame() override
+		{
+			::std::cout << "draw ";
+
+			ui32 image_index = GetSwapchain().GetAcquiredImageIndex();
+			ui32 current_index = GetSwapchain().GetCurrentImageIndex();
+			VkCommandBuffer buffer = _command_buffers[current_index];
+
+			container::vector<VkSemaphore> wait_semaphores{ GetSwapchain().GetImageAvailableSemaphores()[current_index] };
+			container::vector<VkPipelineStageFlags> wait_stages{ VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
+			container::vector<VkSemaphore> signal_semaphores{ GetSwapchain().GetRenderFinishedSemaphores()[current_index] };
+			container::vector<VkSwapchainKHR> swapchains{ GetSwapchain() };
+
+			VkSubmitInfo submit_info{};
+			submit_info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+			submit_info.waitSemaphoreCount = wait_semaphores.size();
+			submit_info.pWaitSemaphores = wait_semaphores.data();
+			submit_info.pWaitDstStageMask = wait_stages.data();
+			submit_info.commandBufferCount = 1; // _command_buffers.size(); //TODO: what is going on here?? I think we're fine
+			submit_info.pCommandBuffers = &buffer;
+			submit_info.signalSemaphoreCount = (ui32)signal_semaphores.size();
+			submit_info.pSignalSemaphores = signal_semaphores.data();
+
+			vkResetFences(GetDevice(), 1, &GetSwapchain().GetFences()[current_index]);
+
+			if (vkQueueSubmit(GetDevice().GetGraphicsDeviceQueue(), 1, &submit_info,
+				GetSwapchain().GetFences()[current_index]) != VK_SUCCESS)
+			{
+				NP_ENGINE_ASSERT(false, "failed to submit draw command buffer!");
+			}
+
+			VkPresentInfoKHR present_info{};
+			present_info.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
+			present_info.waitSemaphoreCount = signal_semaphores.size();
+			present_info.pWaitSemaphores = signal_semaphores.data();
+			present_info.swapchainCount = swapchains.size();
+			present_info.pSwapchains = swapchains.data();
+			present_info.pImageIndices = &image_index;
+			present_info.pResults = nullptr; // Optional
+
+			VkResult present_result = vkQueuePresentKHR(GetDevice().GetPresentDeviceQueue(), &present_info);
+
+			if (present_result == VK_ERROR_OUT_OF_DATE_KHR || present_result == VK_SUBOPTIMAL_KHR || IsOutOfDate())
+			{
+				::std::cout << "@present: ";
+				AdjustForOutOfDate();
+			}
+			else if (present_result != VK_SUCCESS)
+			{
+				NP_ENGINE_ASSERT(false, "vkQueuePresentKHR error");
+			}
+
+			vkQueueWaitIdle(GetDevice().GetPresentDeviceQueue());
+			GetSwapchain().IncCurrentImage();
+			//_frame.Invalidate();
 		}
 
 		void AdjustForWindowResize(window::Window& window) override {}
+
+		// TODO: make getters use references, asserting we actually have the objects
+
+		VulkanInstance& GetInstance()
+		{
+			return *_instance;
+		}
+
+		const VulkanInstance& GetInstance() const
+		{
+			return *_instance;
+		}
+
+		VulkanSurface& GetSurface()
+		{
+			return *_surface;
+		}
+
+		const VulkanSurface& GetSurface() const
+		{
+			return *_surface;
+		}
+
+		VulkanDevice& GetDevice()
+		{
+			return *_device;
+		}
+
+		const VulkanDevice& GetDevice() const
+		{
+			return *_device;
+		}
+
+		VulkanRenderPass GetRenderPass()
+		{
+			return *_render_pass;
+		}
+
+		const VulkanRenderPass GetRenderPass() const
+		{
+			return *_render_pass;
+		}
+
+		VulkanSwapchain& GetSwapchain()
+		{
+			return *_swapchain;
+		}
+
+		const VulkanSwapchain& GetSwapchain() const
+		{
+			return *_swapchain;
+		}
+
+		VulkanPipeline& GetObjectPipeline()
+		{
+			return *_object_pipeline;
+		}
+
+		const VulkanPipeline& GetObjectPipeline() const
+		{
+			return *_object_pipeline;
+		}
+
+		VulkanPipeline& GetLightPipeline()
+		{
+			return *_light_pipeline;
+		}
+
+		const VulkanPipeline& GetLightPipeline() const
+		{
+			return *_light_pipeline;
+		}
 	};
 } // namespace np::graphics::rhi
 

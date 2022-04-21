@@ -39,7 +39,14 @@ namespace np::graphics::rhi
 
 		void DetachFromWindow(window::Window& window) override {}
 
-		void Draw() override {}
+		Frame* BeginFrame() override
+		{
+			return nullptr;
+		}
+
+		void EndFrame() override {}
+
+		void DrawFrame() override {}
 
 		void AdjustForWindowResize(window::Window& window) override {}
 

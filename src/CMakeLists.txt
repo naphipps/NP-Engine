@@ -73,7 +73,7 @@ set(NP_ENGINE_GRAPHICS_RPI_HPP
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/Command.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/Buffer.hpp
 	# ${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/Device.hpp
-	# ${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/Pipeline.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/Pipeline.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/Scene.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/Shader.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/Texture.hpp
@@ -83,6 +83,14 @@ set(NP_ENGINE_GRAPHICS_RPI_HPP
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/Image.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/UniformBufferObject.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/Model.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/Frame.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/Light.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/RenderableObject.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/RenderableLightObject.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/RenderableImage.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/RenderableModel.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/RenderableLight.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/ObjectMetaValues.hpp
 )
 
 set(NP_ENGINE_GRAPHICS_OPENGL_HPP
@@ -92,6 +100,7 @@ set(NP_ENGINE_GRAPHICS_OPENGL_HPP
 set(NP_ENGINE_GRAPHICS_VULKAN_HPP
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RHI/Vulkan/VulkanGraphics.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RHI/Vulkan/VulkanRenderer.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RHI/Vulkan/VulkanRenderPass.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RHI/Vulkan/VulkanDevice.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RHI/Vulkan/VulkanInstance.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RHI/Vulkan/VulkanSurface.hpp
@@ -106,7 +115,16 @@ set(NP_ENGINE_GRAPHICS_VULKAN_HPP
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RHI/Vulkan/VulkanSampler.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RHI/Vulkan/VulkanCommandPool.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RHI/Vulkan/VulkanCommandBuffer.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RHI/Vulkan/VulkanDescriptorSets.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RHI/Vulkan/VulkanDescriptorSetLayout.hpp
+	# ${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RHI/Vulkan/VulkanDescriptor.hpp
+	# ${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RHI/Vulkan/VulkanDescriptorSlot.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RHI/Vulkan/VulkanTexture.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RHI/Vulkan/VulkanFrame.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RHI/Vulkan/VulkanCamera.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RHI/Vulkan/VulkanRenderableModel.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RHI/Vulkan/VulkanRenderableImage.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RHI/Vulkan/VulkanRenderableLight.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RHI/Vulkan/VulkanCommand.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RHI/Vulkan/VulkanCommands.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RHI/Vulkan/VulkanCommandBeginRenderPass.hpp
@@ -119,6 +137,7 @@ set(NP_ENGINE_GRAPHICS_VULKAN_HPP
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RHI/Vulkan/VulkanCommandCopyBuffers.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RHI/Vulkan/VulkanCommandPipelineBarrier.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RHI/Vulkan/VulkanCommandCopyBufferToImage.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RHI/Vulkan/VulkanCommandPushConstants.hpp
 )
 
 set(NP_ENGINE_INPUT_HPP
@@ -338,7 +357,9 @@ set(NP_ENGINE_GRAPHICS_RPI_CPP
 	#Graphics/RPI/Camera.cpp
 	#Graphics/RPI/Command.cpp
 	#Graphics/RPI/Buffer.cpp
-	#Graphics/RPI/Image.cpp
+	Graphics/RPI/RenderableImage.cpp
+	Graphics/RPI/RenderableModel.cpp
+	Graphics/RPI/RenderableLight.cpp
 	#Graphics/RPI/Pipeline.cpp
 	Graphics/RPI/Scene.cpp
 	#Graphics/RPI/Shader.cpp
@@ -357,8 +378,10 @@ set(NP_ENGINE_GRAPHICS_VULKAN_CPP
 )
 
 set(NP_ENGINE_GRAPHICS_VULKAN_SHADERS_GLSL
-	${PROJECT_SOURCE_DIR}/src/Graphics/RHI/Vulkan/shaders/vertex.glsl
-	${PROJECT_SOURCE_DIR}/src/Graphics/RHI/Vulkan/shaders/fragment.glsl
+	${PROJECT_SOURCE_DIR}/src/Graphics/RHI/Vulkan/shaders/object_vertex.glsl
+	${PROJECT_SOURCE_DIR}/src/Graphics/RHI/Vulkan/shaders/object_fragment.glsl
+	${PROJECT_SOURCE_DIR}/src/Graphics/RHI/Vulkan/shaders/light_vertex.glsl
+	${PROJECT_SOURCE_DIR}/src/Graphics/RHI/Vulkan/shaders/light_fragment.glsl
 )
 
 set(NP_ENGINE_INSIGHT_CPP

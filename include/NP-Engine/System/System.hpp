@@ -7,13 +7,12 @@
 #ifndef NP_ENGINE_SYSTEM_HPP
 #define NP_ENGINE_SYSTEM_HPP
 
-#include "NP-Engine/Foundation/Foundation.hpp"
-
 #include <cstdlib>
 #include <iostream>
 #include <csignal>
 #include <exception>
 
+#include "NP-Engine/Foundation/Foundation.hpp"
 #include "NP-Engine/Filesystem/Filesystem.hpp"
 #include "NP-Engine/Platform/Platform.hpp"
 #include "NP-Engine/Primitive/Primitive.hpp"

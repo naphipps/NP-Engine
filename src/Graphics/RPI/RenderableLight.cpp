@@ -1,10 +1,10 @@
 //##===----------------------------------------------------------------------===##//
 //
-//  Author: Nathan Phipps 11/19/21
+//  Author: Nathan Phipps 3/15/22
 //
 //##===----------------------------------------------------------------------===##//
 
-#include "NP-Engine/Graphics/RPI/Scene.hpp"
+#include "NP-Engine/Graphics/RPI/RenderableLight.hpp"
 
 #if NP_ENGINE_PLATFORM_IS_LINUX || NP_ENGINE_PLATFORM_IS_WINDOWS
 	#include "NP-Engine/Graphics/RHI/OpenGL/OpenGLRenderer.hpp" //TODO: create OpenGLGraphics.hpp
@@ -14,19 +14,19 @@
 
 namespace np::graphics
 {
-	Scene* Scene::Create(memory::Allocator& allocator, ::entt::registry& ecs_registry, Renderer& renderer)
+	RenderableLight* RenderableLight::Create(memory::Allocator& allocator, Light& light)
 	{
-		Scene* scene = nullptr;
+		RenderableLight* renderable_light = nullptr;
 
 		switch (__detail::RegisteredRhiType.load(mo_acquire))
 		{
 		case RhiType::Vulkan:
-			scene = memory::Create<rhi::VulkanScene>(allocator, ecs_registry, renderer);
+			renderable_light = memory::Create<rhi::VulkanRenderableLight>(allocator, light);
 			break;
 		default:
 			break;
 		}
 
-		return scene;
+		return renderable_light;
 	}
 } // namespace np::graphics

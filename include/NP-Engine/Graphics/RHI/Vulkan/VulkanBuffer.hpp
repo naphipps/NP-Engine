@@ -63,6 +63,20 @@ namespace np::graphics::rhi
 		}
 
 	public:
+		static void Copy(VulkanBuffer& dst, VulkanBuffer& src,
+						 siz size) // TODO: I think we should opt for a CopyTo or CopyFrom method instead
+		{
+			// TODO: figure out a way to include fence/semaphore parameters/returns/etc
+
+			VkBufferCopy buffer_copy{};
+			buffer_copy.size = size;
+			VulkanCommandCopyBuffers copy_buffers(src, dst, 1, &buffer_copy);
+
+			container::vector<VulkanCommandBuffer> command_buffers = dst.GetDevice().BeginSingleUseCommandBuffers(1);
+			command_buffers.front().Add(copy_buffers);
+			dst.GetDevice().EndSingleUseCommandBuffers(command_buffers);
+		}
+
 		static VkBufferCreateInfo CreateInfo()
 		{
 			VkBufferCreateInfo info{};

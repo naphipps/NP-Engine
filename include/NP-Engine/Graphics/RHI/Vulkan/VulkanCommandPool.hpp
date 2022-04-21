@@ -12,7 +12,6 @@
 
 #include "NP-Engine/Vendor/VulkanInclude.hpp"
 
-#include "VulkanDevice.hpp"
 #include "VulkanCommandBuffer.hpp"
 
 namespace np::graphics::rhi
@@ -20,20 +19,16 @@ namespace np::graphics::rhi
 	class VulkanCommandPool
 	{
 	private:
-		VulkanDevice& _device;
+		VkDevice& _device;
 		VkCommandPool _command_pool;
 
-		VkCommandPool CreateCommandPool(VkCommandPoolCreateInfo& info)
+		VkCommandPool CreateCommandPool(VkCommandPoolCreateInfo& info) const
 		{
 			VkCommandPool command_pool = nullptr;
-
-			info.queueFamilyIndex = GetDevice().GetQueueFamilyIndices().graphics.value();
-
-			if (vkCreateCommandPool(GetDevice(), &info, nullptr, &command_pool) != VK_SUCCESS)
+			if (vkCreateCommandPool(_device, &info, nullptr, &command_pool) != VK_SUCCESS)
 			{
 				command_pool = nullptr;
 			}
-
 			return command_pool;
 		}
 
@@ -45,19 +40,14 @@ namespace np::graphics::rhi
 			return info;
 		}
 
-		VulkanCommandPool(VulkanDevice& device, VkCommandPoolCreateInfo& command_pool_create_info):
+		VulkanCommandPool(VkDevice& device, VkCommandPoolCreateInfo& command_pool_create_info):
 			_device(device),
 			_command_pool(CreateCommandPool(command_pool_create_info))
 		{}
 
 		~VulkanCommandPool()
 		{
-			vkDestroyCommandPool(GetDevice(), _command_pool, nullptr);
-		}
-
-		VulkanDevice& GetDevice() const
-		{
-			return _device;
+			vkDestroyCommandPool(_device, _command_pool, nullptr);
 		}
 
 		operator VkCommandPool() const
@@ -65,12 +55,21 @@ namespace np::graphics::rhi
 			return _command_pool;
 		}
 
+		VkCommandBufferAllocateInfo CreateCommandBufferAllocateInfo() const
+		{
+			VkCommandBufferAllocateInfo info{};
+			info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+			info.commandPool = _command_pool;
+			info.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+			return info;
+		}
+
 		container::vector<VulkanCommandBuffer> AllocateCommandBuffers(
 			const VkCommandBufferAllocateInfo& command_buffer_allocate_info)
 		{
 			container::vector<VkCommandBuffer> buffers(command_buffer_allocate_info.commandBufferCount);
 
-			if (vkAllocateCommandBuffers(GetDevice(), &command_buffer_allocate_info, buffers.data()) != VK_SUCCESS)
+			if (vkAllocateCommandBuffers(_device, &command_buffer_allocate_info, buffers.data()) != VK_SUCCESS)
 			{
 				buffers.clear();
 			}
@@ -81,7 +80,7 @@ namespace np::graphics::rhi
 		void FreeCommandBuffers(const container::vector<VulkanCommandBuffer>& command_buffers)
 		{
 			container::vector<VkCommandBuffer> buffers(command_buffers.begin(), command_buffers.end());
-			vkFreeCommandBuffers(GetDevice(), _command_pool, (ui32)buffers.size(), buffers.data());
+			vkFreeCommandBuffers(_device, _command_pool, (ui32)buffers.size(), buffers.data());
 		}
 	};
 } // namespace np::graphics::rhi

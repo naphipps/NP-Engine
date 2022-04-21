@@ -33,8 +33,8 @@ namespace np::app
 		memory::TraitAllocator _allocator;
 		container::vector<graphics::Renderer*> _renderers;
 		container::vector<graphics::Scene*> _scenes;
-		container::oset<graphics::Scene*> _unacquired_scenes;
-		container::oset<graphics::Scene*> _acquired_scenes;
+		container::uset<graphics::Scene*> _unacquired_scenes;
+		container::uset<graphics::Scene*> _acquired_scenes;
 
 		virtual void AdjustForWindowClose(event::Event& e)
 		{
@@ -196,7 +196,7 @@ namespace np::app
 
 		graphics::Scene* CreateScene(graphics::Renderer& renderer)
 		{
-			graphics::Scene* scene = graphics::Scene::Create(_allocator, renderer);
+			graphics::Scene* scene = graphics::Scene::Create(_allocator, _ecs_registry, renderer);
 			_unacquired_scenes.insert(scene);
 			return _scenes.emplace_back(scene);
 		}

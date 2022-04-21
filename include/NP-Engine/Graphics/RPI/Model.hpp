@@ -7,7 +7,8 @@
 #ifndef NP_ENGINE_RPI_MODEL_HPP
 #define NP_ENGINE_RPI_MODEL_HPP
 
-#include "NP-Engine/Foundation/Foundation.hpp"
+#include <utility>
+
 #include "NP-Engine/String/String.hpp"
 #include "NP-Engine/Container/Container.hpp"
 #include "NP-Engine/Primitive/Primitive.hpp"
@@ -28,6 +29,7 @@ namespace np::graphics
 
 	protected:
 		Image _texture_image;
+		str _filename;
 		::tinyobj::attrib_t _attributes;
 		container::vector<::tinyobj::shape_t> _shapes;
 		container::vector<::tinyobj::material_t> _materials;
@@ -35,27 +37,35 @@ namespace np::graphics
 		container::vector<ui32> _indices;
 
 	public:
-		Model(str model_filename, str texture_image_filename): _texture_image(texture_image_filename)
+		Model(str model_filename, Image&& texture_image): _texture_image(::std::move(texture_image))
 		{
+			Load(model_filename);
+		}
+
+		// TODO: add copy and move constructors, and assignments
+
+		bl Load(str filename)
+		{
+			_filename = filename;
 			::std::vector<::tinyobj::shape_t> shapes;
 			::std::vector<::tinyobj::material_t> materials;
 			::std::string warning_message;
 			::std::string error_message;
 
 			bl loaded =
-				::tinyobj::LoadObj(&_attributes, &shapes, &materials, &warning_message, &error_message, model_filename.c_str());
+				::tinyobj::LoadObj(&_attributes, &shapes, &materials, &warning_message, &error_message, _filename.c_str());
 
 			NP_ENGINE_ASSERT(loaded,
-							 "Model '" + model_filename + "' did not load. WARNING: '" + warning_message + "', ERROR: '" +
+							 "Model '" + _filename + "' did not load. WARNING: '" + warning_message + "', ERROR: '" +
 								 error_message + "'.");
 
 			if (loaded)
 			{
-				_shapes.assign(shapes.begin(), shapes.end());
-				_materials.assign(materials.begin(), materials.end());
+				_shapes.assign(::std::make_move_iterator(shapes.begin()), ::std::make_move_iterator(shapes.end()));
+				_materials.assign(::std::make_move_iterator(materials.begin()), ::std::make_move_iterator(materials.end()));
 				container::umap<Vertex, ui32> vertexIndexMap;
 
-				for (const ::tinyobj::shape_t& shape : shapes)
+				for (const ::tinyobj::shape_t& shape : _shapes)
 				{
 					for (const ::tinyobj::index_t& index : shape.mesh.indices)
 					{
@@ -81,9 +91,20 @@ namespace np::graphics
 					}
 				}
 			}
+
+			return loaded;
 		}
 
-		~Model() = default; // TODO: may not need
+		void Clear()
+		{
+			_texture_image.Clear();
+			_attributes = {};
+			_shapes.clear();
+			_materials.clear();
+			_vertices.clear();
+			_indices.clear();
+			_filename.clear();
+		}
 
 		Image& GetTextureImage()
 		{

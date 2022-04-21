@@ -21,6 +21,15 @@ namespace np::graphics::rhi
 		VkCommandBuffer _command_buffer;
 
 	public:
+		static VkCommandBufferBeginInfo CreateBeginInfo()
+		{
+			VkCommandBufferBeginInfo info{};
+			info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+			return info;
+		}
+
+		VulkanCommandBuffer(): VulkanCommandBuffer(nullptr) {}
+
 		VulkanCommandBuffer(VkCommandBuffer command_buffer): _command_buffer(command_buffer) {}
 
 		VulkanCommandBuffer(const VulkanCommandBuffer& other): _command_buffer(other._command_buffer) {}
@@ -50,18 +59,31 @@ namespace np::graphics::rhi
 			return _command_buffer;
 		}
 
+		bl IsValid() const
+		{
+			return _command_buffer != nullptr;
+		}
+
+		void Invalidate()
+		{
+			_command_buffer = nullptr;
+		}
+
 		VkResult Begin(VkCommandBufferBeginInfo& command_buffer_begin_info)
 		{
+			NP_ENGINE_ASSERT(IsValid(), "VulkanCommandBuffer must be valid before Begin is called.");
 			return vkBeginCommandBuffer(_command_buffer, &command_buffer_begin_info);
 		}
 
 		VkResult End()
 		{
+			NP_ENGINE_ASSERT(IsValid(), "VulkanCommandBuffer must be valid before End is called.");
 			return vkEndCommandBuffer(_command_buffer);
 		}
 
-		void Add(VulkanCommand& command)
+		void Add(VulkanCommand& command) const // TODO: should this return a VkResult?
 		{
+			NP_ENGINE_ASSERT(IsValid(), "VulkanCommandBuffer must be valid before Add is called.");
 			command.ApplyTo(_command_buffer);
 		}
 	};

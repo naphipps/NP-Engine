@@ -16,8 +16,6 @@ namespace np::graphics::rhi
 	class VulkanCommandEndRenderPass : public VulkanCommand
 	{
 	public:
-		VulkanCommandEndRenderPass() {}
-
 		void ApplyTo(VkCommandBuffer command_buffer) override
 		{
 			vkCmdEndRenderPass(command_buffer);
