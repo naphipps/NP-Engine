@@ -62,7 +62,7 @@ namespace np::graphics::rhi
 			return info;
 		}
 
-		VulkanSampler(VulkanDevice& device, VkSamplerCreateInfo& sampler_create_info):
+		VulkanSampler(VulkanDevice& device, VkSamplerCreateInfo sampler_create_info):
 			_device(device),
 			_sampler(CreateSampler(sampler_create_info))
 		{}

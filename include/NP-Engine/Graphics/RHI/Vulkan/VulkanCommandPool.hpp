@@ -40,7 +40,7 @@ namespace np::graphics::rhi
 			return info;
 		}
 
-		VulkanCommandPool(VkDevice& device, VkCommandPoolCreateInfo& command_pool_create_info):
+		VulkanCommandPool(VkDevice& device, VkCommandPoolCreateInfo command_pool_create_info):
 			_device(device),
 			_command_pool(CreateCommandPool(command_pool_create_info))
 		{}
