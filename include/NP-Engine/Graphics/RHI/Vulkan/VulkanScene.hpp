@@ -47,7 +47,7 @@ namespace np::graphics::rhi
 			::std::cout << "@resize-" << __detail::resize_count++<<" ";
 			VulkanScene& vulkan_scene = (VulkanScene&)*((VulkanScene*)scene);
 			VulkanRenderer& vulkan_renderer = (VulkanRenderer&)vulkan_scene.GetRenderer();
-			//vulkan_renderer.SetOutOfDate();
+			vulkan_renderer.SetOutOfDate();
 			vulkan_scene.Draw();
 		}
 
@@ -58,7 +58,7 @@ namespace np::graphics::rhi
 			::std::cout << "@position-" << __detail::position_count++<<" ";
 			VulkanScene& vulkan_scene = (VulkanScene&)*((VulkanScene*)scene);
 			VulkanRenderer& vulkan_renderer = (VulkanRenderer&)vulkan_scene.GetRenderer();
-			//vulkan_renderer.SetOutOfDate();
+			vulkan_renderer.SetOutOfDate();
 			vulkan_scene.Draw();
 		}
 
