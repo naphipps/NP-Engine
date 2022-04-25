@@ -164,7 +164,7 @@ namespace np::graphics::rhi
 			// TODO: still not completely happy with how this method is setup, the contents are fine, but the design
 			time::DurationMilliseconds duration = time::SteadyClock::now() - _start_timestamp;
 			flt seconds = duration.count() / 1000.0f;
-			_meta_values.Model =
+			_meta_values.object.Model =
 				glm::rotate(glm::mat4(1.0f), seconds * glm::radians(90.0f) / 4.0f, glm::vec3(0.0f, 0.0f, 1.0f));
 		}
 

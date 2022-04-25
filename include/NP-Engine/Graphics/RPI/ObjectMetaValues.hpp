@@ -21,14 +21,14 @@ namespace np::graphics
 			{
 				::glm::mat4 Model;
 				::glm::mat4 Normal;
-			};
+			} object;
 
 			struct
 			{
 				::glm::vec4 Color;
 				::glm::vec3 Position;
 				flt Radius;
-			};
+			} light;
 		};
 	};
 
