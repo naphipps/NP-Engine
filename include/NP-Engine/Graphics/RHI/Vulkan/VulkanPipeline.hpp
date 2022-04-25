@@ -383,7 +383,7 @@ namespace np::graphics::rhi
 
 		void UpdateUboBuffer()
 		{
-			ui32 index = GetSwapchain().GetAcquiredImageIndex();
+			ui32 index = GetSwapchain().GetCurrentImageIndex();
 			VkDeviceMemory device_memory = _ubo_buffers[index]->GetDeviceMemory();
 			void* data;
 			vkMapMemory(GetDevice(), device_memory, 0, sizeof(UniformBufferObject), 0, &data);
