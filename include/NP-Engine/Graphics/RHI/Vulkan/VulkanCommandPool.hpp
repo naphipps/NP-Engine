@@ -47,6 +47,11 @@ namespace np::graphics::rhi
 
 		~VulkanCommandPool()
 		{
+			Dispose();
+		}
+
+		void Dispose()
+		{
 			if (_command_pool)
 			{
 				vkDestroyCommandPool(_device, _command_pool, nullptr);

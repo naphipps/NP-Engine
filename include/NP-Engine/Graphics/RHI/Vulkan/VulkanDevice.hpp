@@ -460,7 +460,7 @@ namespace np::graphics::rhi
 
 		~VulkanDevice()
 		{
-			_command_pool.~VulkanCommandPool(); // TODO: I don't really like this
+			_command_pool.Dispose(); // TODO: I don't really like this
 
 			if (_device)
 				vkDestroyDevice(_device, nullptr);
