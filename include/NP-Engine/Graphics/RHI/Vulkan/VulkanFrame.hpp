@@ -7,7 +7,6 @@
 #ifndef NP_ENGINE_VULKAN_FRAME_HPP
 #define NP_ENGINE_VULKAN_FRAME_HPP
 
-#include <iostream> //TODO: remove
 #include <utility>
 
 #include "NP-Engine/Container/Container.hpp"
@@ -19,7 +18,6 @@
 #include "NP-Engine/Graphics/RPI/RPI.hpp"
 
 #include "VulkanCommandBuffer.hpp"
-#include "VulkanDevice.hpp"
 
 namespace np::graphics::rhi
 {
@@ -27,7 +25,6 @@ namespace np::graphics::rhi
 	{
 	private:
 		VulkanCommandBuffer _command_buffer;
-		VulkanDevice* _device;
 		container::vector<VulkanCommand*> _commands;
 
 	public:
@@ -36,29 +33,27 @@ namespace np::graphics::rhi
 			Invalidate();
 		}
 
-		VulkanFrame(VulkanDevice& device, VulkanCommandBuffer& command_buffer):
-			_device(memory::AddressOf(device)),
-			_command_buffer(command_buffer)
-		{}
+		VulkanFrame(VulkanCommandBuffer& command_buffer): _command_buffer(command_buffer) {}
 
-		VulkanFrame(const VulkanFrame& other):
-			_device(other._device),
-			_command_buffer(other._command_buffer),
-			_commands(other._commands)
-		{}
+		VulkanFrame(const VulkanFrame& other): _command_buffer(other._command_buffer), _commands(other._commands) {}
 
 		VulkanFrame(VulkanFrame&& other) noexcept:
-			_device(::std::move(other._device)),
 			_command_buffer(::std::move(other._command_buffer)),
 			_commands(::std::move(other._commands))
 		{
 			other.Invalidate();
 		}
 
+		VulkanFrame& operator=(VulkanCommandBuffer& command_buffer)
+		{
+			_command_buffer = command_buffer;
+			_commands.clear();
+			return *this;
+		}
+
 		VulkanFrame& operator=(const VulkanFrame& other)
 		{
 			_command_buffer = other._command_buffer;
-			_device = other._device;
 			_commands = other._commands;
 			return *this;
 		}
@@ -66,7 +61,6 @@ namespace np::graphics::rhi
 		VulkanFrame& operator=(VulkanFrame&& other) noexcept
 		{
 			_command_buffer = ::std::move(other._command_buffer);
-			_device = ::std::move(other._device);
 			_commands = ::std::move(other._commands);
 			other.Invalidate();
 			return *this;
@@ -74,14 +68,13 @@ namespace np::graphics::rhi
 
 		bl IsValid() const override
 		{
-			return _command_buffer.IsValid() && _device != nullptr;
+			return _command_buffer.IsValid();
 		}
 
 		void Invalidate() override
 		{
 			_command_buffer.Invalidate();
 			_commands.clear();
-			_device = nullptr;
 		}
 
 		void Begin(VkCommandBufferBeginInfo& command_buffer_begin_info)
@@ -94,18 +87,6 @@ namespace np::graphics::rhi
 		{
 			NP_ENGINE_ASSERT(IsValid(), "frame must be valid to call this.");
 			_command_buffer.End();
-		}
-
-		VulkanDevice& GetDevice()
-		{
-			NP_ENGINE_ASSERT(IsValid(), "frame must be valid to call this.");
-			return *_device;
-		}
-
-		const VulkanDevice& GetDevice() const
-		{
-			NP_ENGINE_ASSERT(IsValid(), "frame must be valid to call this.");
-			return *_device;
 		}
 
 		siz GetStagedSlot()

@@ -7,7 +7,6 @@
 #ifndef NP_ENGINE_VULKAN_RENDERER_HPP
 #define NP_ENGINE_VULKAN_RENDERER_HPP
 
-#include <iostream> //TODO: remove
 #include <utility>
 
 #include "NP-Engine/Primitive/Primitive.hpp"
@@ -51,8 +50,9 @@ namespace np::graphics::rhi
 		VulkanShader* _light_fragment_shader;
 		VulkanPipeline* _light_pipeline;
 		container::vector<VkClearValue> _clear_values;
+		VkCommandBufferBeginInfo _command_buffer_begin_info;
 		VkRenderPassBeginInfo _render_pass_begin_info;
-		container::vector<VulkanFrame> _frames;
+		VulkanFrame _frame;
 		bl _is_out_of_date;
 
 		void AdjustForOutOfDate()
@@ -60,18 +60,16 @@ namespace np::graphics::rhi
 			if (_device)
 			{
 				SetOutOfDate(false);
-				//_frame.Invalidate();
-				::std::cout << "adjusting_- ";
 				vkDeviceWaitIdle(GetDevice());
 				GetDevice().Rebuild();
-				_render_pass->Rebuild(); //TODO: don't know why swapchain's rebuild hates it when this line is GetRenderPass() instead
+				_render_pass
+					->Rebuild(); // TODO: don't know why swapchain's rebuild hates it when this line is GetRenderPass() instead
 				GetSwapchain().Rebuild();
 				GetDevice().GetCommandPool().FreeCommandBuffers(_command_buffers);
 				_command_buffers = CreateCommandBuffers();
 				GetObjectPipeline().Rebuild();
 				GetLightPipeline().Rebuild();
-				_frames.resize(GetSwapchain().GetImages().size());
-				::std::cout << "done_adjusting ";
+				_frame.Invalidate();
 			}
 		}
 
@@ -111,6 +109,7 @@ namespace np::graphics::rhi
 			_light_fragment_shader(nullptr),
 			_light_pipeline(nullptr),
 			_clear_values(VulkanRenderPass::CreateClearValues()),
+			_command_buffer_begin_info(VulkanCommandBuffer::CreateBeginInfo()),
 			_render_pass_begin_info(CreateRenderPassBeginInfo()),
 			_is_out_of_date(false)
 		{}
@@ -180,7 +179,7 @@ namespace np::graphics::rhi
 			_swapchain = memory::Create<VulkanSwapchain>(memory::DefaultTraitAllocator, *_render_pass);
 
 			_command_buffers = CreateCommandBuffers();
-			
+
 			_object_vertex_shader = memory::Create<VulkanShader>(memory::DefaultTraitAllocator, *_device,
 																 _object_vertex_shader_filename, VulkanShader::Type::VERTEX);
 			_object_fragment_shader = memory::Create<VulkanShader>(
@@ -194,8 +193,6 @@ namespace np::graphics::rhi
 				memory::DefaultTraitAllocator, *_device, _light_fragment_shader_filename, VulkanShader::Type::FRAGMENT);
 			_light_pipeline = memory::Create<VulkanPipeline>(memory::DefaultTraitAllocator, *_swapchain, *_render_pass,
 															 *_light_vertex_shader, *_light_fragment_shader);
-
-			_frames.resize(_swapchain->GetImages().size());
 		}
 
 		void DetachFromWindow(window::Window& window) override
@@ -211,7 +208,6 @@ namespace np::graphics::rhi
 				memory::Destroy<VulkanShader>(memory::DefaultTraitAllocator, _object_fragment_shader);
 				memory::Destroy<VulkanSwapchain>(memory::DefaultTraitAllocator, _swapchain);
 				memory::Destroy<VulkanRenderPass>(memory::DefaultTraitAllocator, _render_pass);
-				//_device->GetCommandPool().FreeCommandBuffers(_command_buffers); //TODO: do we need this??
 				memory::Destroy<VulkanDevice>(memory::DefaultTraitAllocator, _device);
 				memory::Destroy<VulkanSurface>(memory::DefaultTraitAllocator, _surface);
 				_light_pipeline = nullptr;
@@ -224,7 +220,7 @@ namespace np::graphics::rhi
 				_render_pass = nullptr;
 				_device = nullptr;
 				_surface = nullptr;
-				_frames.clear();
+				_frame.Invalidate();
 			}
 		}
 
@@ -249,12 +245,9 @@ namespace np::graphics::rhi
 			return _is_out_of_date;
 		}
 
-		VkCommandBufferBeginInfo _command_buffer_begin_info = VulkanCommandBuffer::CreateBeginInfo();
-
-		Frame* BeginFrame() override
+		Frame& BeginFrame() override
 		{
-			::std::cout << "begin ";
-			VulkanFrame* frame = nullptr;
+			_frame.Invalidate();
 			i32 width = 0;
 			i32 height = 0;
 			glfwGetFramebufferSize((GLFWwindow*)GetSurface().GetWindow().GetNativeWindow(), &width, &height);
@@ -264,59 +257,48 @@ namespace np::graphics::rhi
 				if (result == VK_SUCCESS || result == VK_SUBOPTIMAL_KHR)
 				{
 					GetSwapchain().MarkAcquiredImageForUse();
-					frame = &_frames[GetSwapchain().GetCurrentImageIndex()];
-					*frame = VulkanFrame(GetDevice(), _command_buffers[GetSwapchain().GetCurrentImageIndex()]);
-					//VkCommandBufferBeginInfo command_buffer_begin_info = VulkanCommandBuffer::CreateBeginInfo();
-					//_frame.Begin(command_buffer_begin_info);
-					//frame = &_frame;
-					frame->Begin(_command_buffer_begin_info);
-					
-					NP_ENGINE_ASSERT(frame->IsValid(), "frame must be valid here");
+					_frame = _command_buffers[GetSwapchain().GetCurrentImageIndex()];
+					_frame.Begin(_command_buffer_begin_info);
+					NP_ENGINE_ASSERT(_frame.IsValid(), "frame must be valid here");
 				}
 				else if (result == VK_ERROR_OUT_OF_DATE_KHR)
 				{
-					::std::cout << "@acquire: ";
 					AdjustForOutOfDate();
 				}
 			}
 
-			return frame;
+			return _frame;
 		}
 
 		void EndFrame() override
 		{
-			::std::cout << "end ";
-			_frames[GetSwapchain().GetCurrentImageIndex()].End();
-			//_frame.End();
+			_frame.End();
 		}
 
 		void DrawFrame() override
 		{
-			::std::cout << "draw ";
-
 			ui32 image_index = GetSwapchain().GetAcquiredImageIndex();
 			ui32 current_index = GetSwapchain().GetCurrentImageIndex();
-			VkCommandBuffer buffer = _command_buffers[current_index];
-
-			container::vector<VkSemaphore> wait_semaphores{ GetSwapchain().GetImageAvailableSemaphores()[current_index] };
-			container::vector<VkPipelineStageFlags> wait_stages{ VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
-			container::vector<VkSemaphore> signal_semaphores{ GetSwapchain().GetRenderFinishedSemaphores()[current_index] };
-			container::vector<VkSwapchainKHR> swapchains{ GetSwapchain() };
+			container::vector<VkCommandBuffer> buffers = {_command_buffers[current_index]};
+			container::vector<VkSemaphore> wait_semaphores{GetSwapchain().GetImageSemaphores()[current_index]};
+			container::vector<VkPipelineStageFlags> wait_stages{VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
+			container::vector<VkSemaphore> signal_semaphores{GetSwapchain().GetRenderSemaphores()[current_index]};
+			container::vector<VkSwapchainKHR> swapchains{GetSwapchain()};
 
 			VkSubmitInfo submit_info{};
 			submit_info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 			submit_info.waitSemaphoreCount = wait_semaphores.size();
 			submit_info.pWaitSemaphores = wait_semaphores.data();
 			submit_info.pWaitDstStageMask = wait_stages.data();
-			submit_info.commandBufferCount = 1; // _command_buffers.size(); //TODO: what is going on here?? I think we're fine
-			submit_info.pCommandBuffers = &buffer;
+			submit_info.commandBufferCount = (ui32)buffers.size();
+			submit_info.pCommandBuffers = buffers.data();
 			submit_info.signalSemaphoreCount = (ui32)signal_semaphores.size();
 			submit_info.pSignalSemaphores = signal_semaphores.data();
 
 			vkResetFences(GetDevice(), 1, &GetSwapchain().GetFences()[current_index]);
 
 			if (vkQueueSubmit(GetDevice().GetGraphicsDeviceQueue(), 1, &submit_info,
-				GetSwapchain().GetFences()[current_index]) != VK_SUCCESS)
+							  GetSwapchain().GetFences()[current_index]) != VK_SUCCESS)
 			{
 				NP_ENGINE_ASSERT(false, "failed to submit draw command buffer!");
 			}
@@ -328,13 +310,11 @@ namespace np::graphics::rhi
 			present_info.swapchainCount = swapchains.size();
 			present_info.pSwapchains = swapchains.data();
 			present_info.pImageIndices = &image_index;
-			present_info.pResults = nullptr; // Optional
 
 			VkResult present_result = vkQueuePresentKHR(GetDevice().GetPresentDeviceQueue(), &present_info);
 
 			if (present_result == VK_ERROR_OUT_OF_DATE_KHR || present_result == VK_SUBOPTIMAL_KHR || IsOutOfDate())
 			{
-				::std::cout << "@present: ";
 				AdjustForOutOfDate();
 			}
 			else if (present_result != VK_SUCCESS)
@@ -344,12 +324,10 @@ namespace np::graphics::rhi
 
 			vkQueueWaitIdle(GetDevice().GetPresentDeviceQueue());
 			GetSwapchain().IncCurrentImage();
-			//_frame.Invalidate();
+			_frame.Invalidate();
 		}
 
 		void AdjustForWindowResize(window::Window& window) override {}
-
-		// TODO: make getters use references, asserting we actually have the objects
 
 		VulkanInstance& GetInstance()
 		{

@@ -24,8 +24,15 @@ namespace np::graphics
 
 		RenderableLight(Light& light): _light(light) {}
 
+		virtual void Destruct() {}
+
 	public:
 		static RenderableLight* Create(memory::Allocator& allocator, Light& light);
+
+		virtual ~RenderableLight()
+		{
+			Destruct();
+		}
 
 		Light& GetLight()
 		{

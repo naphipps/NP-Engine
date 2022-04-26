@@ -58,7 +58,7 @@ namespace np::app
 			_renderable_model(graphics::RenderableModel::Create(memory::DefaultTraitAllocator, _model)),
 			_model_entity(ecs_registry)
 		{
-			//TODO: register this renderable object to be associated with our scene
+			// TODO: register this renderable object to be associated with our scene
 			_model_entity.Add<graphics::RenderableObject*>(_renderable_model);
 		}
 

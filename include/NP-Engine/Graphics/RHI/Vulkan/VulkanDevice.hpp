@@ -26,7 +26,7 @@ namespace np::graphics::rhi
 	class VulkanDevice
 	{
 	public:
-		struct QueueFamilyIndices_T // TODO: do we need the suffix _T?
+		struct QueueFamilyIndices
 		{
 			::std::optional<ui32> graphics;
 			::std::optional<ui32> present;
@@ -44,27 +44,20 @@ namespace np::graphics::rhi
 
 			container::vector<ui32> to_vector() const
 			{
-				container::vector<ui32> v;
-
-				if (graphics.has_value() && present.has_value())
-				{
-					v = {graphics.value(), present.value()};
-				}
-
-				return v;
+				return is_complete() ? container::vector<ui32>{graphics.value(), present.value()} : container::vector<ui32>{};
 			}
 		};
 
 	private:
 		VulkanSurface& _surface;
-		QueueFamilyIndices_T _queue_family_indices;
+		QueueFamilyIndices _queue_family_indices;
 		VkSurfaceCapabilitiesKHR _surface_capabilities;
 		VkSurfaceFormatKHR _surface_format;
 		VkPresentModeKHR _present_mode;
 		VkPhysicalDevice _physical_device;
 		VkDevice _device;
-		VulkanCommandPool* _command_pool;
-		VkExtent2D _extent; //TODO: move this to RenderPass??
+		VulkanCommandPool _command_pool;
+		VkExtent2D _extent; // TODO: move this to RenderPass??
 
 		container::vector<VkExtensionProperties> GetSupportedDeviceExtensions(VkPhysicalDevice physical_device) const
 		{
@@ -433,11 +426,6 @@ namespace np::graphics::rhi
 			return info;
 		}
 
-		VulkanCommandPool* CreateCommandPool()
-		{
-			return memory::Create<VulkanCommandPool>(memory::DefaultTraitAllocator, _device, CreateCommandPoolInfo());
-		}
-
 		VkExtent2D ChooseExtent()
 		{
 			VkExtent2D extent{};
@@ -454,8 +442,8 @@ namespace np::graphics::rhi
 				VkExtent2D min_extent = GetCapabilities().minImageExtent;
 				VkExtent2D max_extent = GetCapabilities().maxImageExtent;
 
-				extent = { ::std::clamp((ui32)width, min_extent.width, max_extent.width),
-							::std::clamp((ui32)height, min_extent.height, max_extent.height) };
+				extent = {::std::clamp((ui32)width, min_extent.width, max_extent.width),
+						  ::std::clamp((ui32)height, min_extent.height, max_extent.height)};
 			}
 
 			return extent;
@@ -466,16 +454,15 @@ namespace np::graphics::rhi
 			_surface(surface),
 			_physical_device(ChoosePhysicalDevice()),
 			_device(CreateLogicalDevice()),
-			_command_pool(CreateCommandPool()), //TODO: I think I'd rather keep an actual object instead of a pointer
+			_command_pool(_device, CreateCommandPoolInfo()),
 			_extent(ChooseExtent())
 		{}
 
 		~VulkanDevice()
 		{
-			//TODO: I think I'd rather just call _command_pool.Dispose() or something
-			memory::Destroy<VulkanCommandPool>(memory::DefaultTraitAllocator, _command_pool); 
+			_command_pool.~VulkanCommandPool(); // TODO: I don't really like this
 
-			if (_device != nullptr)
+			if (_device)
 				vkDestroyDevice(_device, nullptr);
 		}
 
@@ -515,12 +502,12 @@ namespace np::graphics::rhi
 
 		VulkanCommandPool& GetCommandPool()
 		{
-			return *_command_pool;
+			return _command_pool;
 		}
 
 		const VulkanCommandPool& GetCommandPool() const
 		{
-			return *_command_pool;
+			return _command_pool;
 		}
 
 		const VkSurfaceCapabilitiesKHR& GetCapabilities()
@@ -541,7 +528,7 @@ namespace np::graphics::rhi
 			return _present_mode;
 		}
 
-		const QueueFamilyIndices_T& GetQueueFamilyIndices() const
+		const QueueFamilyIndices& GetQueueFamilyIndices() const
 		{
 			return _queue_family_indices;
 		}
@@ -630,10 +617,10 @@ namespace np::graphics::rhi
 
 		container::vector<VulkanCommandBuffer> BeginSingleUseCommandBuffers(siz count)
 		{
-			VkCommandBufferAllocateInfo command_buffer_allocate_info = _command_pool->CreateCommandBufferAllocateInfo();
+			VkCommandBufferAllocateInfo command_buffer_allocate_info = _command_pool.CreateCommandBufferAllocateInfo();
 			command_buffer_allocate_info.commandBufferCount = count;
 			container::vector<VulkanCommandBuffer> command_buffers =
-				_command_pool->AllocateCommandBuffers(command_buffer_allocate_info);
+				_command_pool.AllocateCommandBuffers(command_buffer_allocate_info);
 
 			VkCommandBufferBeginInfo command_buffer_begin_info = VulkanCommandBuffer::CreateBeginInfo();
 			command_buffer_begin_info.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
@@ -659,7 +646,7 @@ namespace np::graphics::rhi
 			vkQueueWaitIdle(GetGraphicsDeviceQueue()); // TODO: figure out how to use a fence so we can submit
 													   // multiple simultaneously - this makes it one by one
 
-			_command_pool->FreeCommandBuffers(command_buffers);
+			_command_pool.FreeCommandBuffers(command_buffers);
 		}
 	};
 } // namespace np::graphics::rhi

@@ -17,6 +17,9 @@ namespace np::graphics::rhi
 {
 	class VulkanRenderableLight : public RenderableLight
 	{
+	private:
+		void Destruct() override {}
+
 	public:
 		VulkanRenderableLight(Light& light): RenderableLight(light)
 		{
@@ -37,7 +40,7 @@ namespace np::graphics::rhi
 
 		void DisposeForPipeline(Pipeline& pipeline) override
 		{
-			//TODO: implement
+			// TODO: implement
 		}
 
 		bl IsOutOfDate() const override

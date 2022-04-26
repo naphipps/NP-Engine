@@ -33,8 +33,9 @@ namespace np::graphics::rhi
 	{
 	private:
 		bl _is_out_of_date;
-		ObjectMetaValues
-			_meta_values; // TODO: we could put this in RenderableModel so GameLayer can access it and update MetaValues there
+		// TODO: we could put RenderableMetaValues in RenderableModel so GameLayer can access it and update RenderableMetaValues
+		// there
+		ObjectMetaValues _meta_values;
 		VulkanBuffer* _vertex_buffer;
 		VulkanBuffer* _index_buffer;
 		VulkanTexture* _texture;
@@ -86,7 +87,7 @@ namespace np::graphics::rhi
 												 image_memory_property_flags, image_view_create_info);
 		}
 
-		void Dispose()
+		void Destruct() override
 		{
 			if (_texture)
 			{
@@ -131,6 +132,16 @@ namespace np::graphics::rhi
 			}
 		}
 
+		void UpdateMetaValues()
+		{
+			// TODO: still not completely happy with how this method is setup, the contents are fine, but the design
+			// TODO: feel like this should be in tester project
+			time::DurationMilliseconds duration = time::SteadyClock::now() - _start_timestamp;
+			flt seconds = duration.count() / 1000.0f;
+			_meta_values.object.Model =
+				glm::rotate(glm::mat4(1.0f), seconds * glm::radians(90.0f) / 4.0f, glm::vec3(0.0f, 0.0f, 1.0f));
+		}
+
 	public:
 		VulkanRenderableModel(Model& model):
 			RenderableModel(model),
@@ -152,22 +163,6 @@ namespace np::graphics::rhi
 
 		// TODO: move constructor??
 
-		~VulkanRenderableModel()
-		{
-			::std::cout << "loud VulkanRenderableModel destructor!\n";
-
-			Dispose();
-		}
-
-		void UpdateMetaValues()
-		{
-			// TODO: still not completely happy with how this method is setup, the contents are fine, but the design
-			time::DurationMilliseconds duration = time::SteadyClock::now() - _start_timestamp;
-			flt seconds = duration.count() / 1000.0f;
-			_meta_values.object.Model =
-				glm::rotate(glm::mat4(1.0f), seconds * glm::radians(90.0f) / 4.0f, glm::vec3(0.0f, 0.0f, 1.0f));
-		}
-
 		void RenderToFrame(Frame& frame, Pipeline& pipeline) override
 		{
 			VulkanFrame& vulkan_frame = (VulkanFrame&)frame;
@@ -187,7 +182,7 @@ namespace np::graphics::rhi
 			VulkanPipeline& vulkan_pipeline = (VulkanPipeline&)pipeline;
 			VulkanDevice& vulkan_device = vulkan_pipeline.GetDevice();
 
-			if (IsOutOfDate() || true) // TODO: remove "|| true"
+			if (IsOutOfDate())
 			{
 				DisposeForPipeline(pipeline);
 
@@ -207,17 +202,15 @@ namespace np::graphics::rhi
 								 VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 
 				// copy image data to staging
-				void* data;
-				vkMapMemory(vulkan_device, staging->GetDeviceMemory(), 0, _model.GetTextureImage().Size(), 0, &data);
-				memcpy(data, _model.GetTextureImage().Data(), _model.GetTextureImage().Size()); // TODO: include needed header
-				vkUnmapMemory(vulkan_device, staging->GetDeviceMemory());
+				staging->Assign(_model.GetTextureImage().Data());
 
 				// copy staging to texture
 				_texture->GetImage().TransitionLayout(VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_UNDEFINED,
 													  VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
 
-				VulkanImage::Copy(_texture->GetImage(), *staging, _model.GetTextureImage().GetWidth(),
-								  _model.GetTextureImage().GetHeight());
+				VkBufferImageCopy buffer_image_copy = VulkanCommandCopyBufferToImage::CreateBufferImageCopy();
+				buffer_image_copy.imageExtent = {_model.GetTextureImage().GetWidth(), _model.GetTextureImage().GetHeight(), 1};
+				_texture->GetImage().Assign(*staging, buffer_image_copy);
 
 				_texture->GetImage().TransitionLayout(VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
 													  VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
@@ -234,11 +227,8 @@ namespace np::graphics::rhi
 					CreateBuffer(vulkan_device, data_size, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
 								 VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 
-				vkMapMemory(vulkan_device, staging->GetDeviceMemory(), 0, data_size, 0, &data);
-				memcpy(data, _model.GetVertices().data(), data_size);
-				vkUnmapMemory(vulkan_device, staging->GetDeviceMemory());
-
-				VulkanBuffer::Copy(*_vertex_buffer, *staging, data_size);
+				staging->Assign(_model.GetVertices().data());
+				staging->CopyTo(*_vertex_buffer);
 				memory::Destroy<VulkanBuffer>(memory::DefaultTraitAllocator, staging);
 
 				// create index buffer
@@ -251,11 +241,8 @@ namespace np::graphics::rhi
 					CreateBuffer(vulkan_device, data_size, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
 								 VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 
-				vkMapMemory(vulkan_device, staging->GetDeviceMemory(), 0, data_size, 0, &data);
-				memcpy(data, _model.GetIndices().data(), data_size);
-				vkUnmapMemory(vulkan_device, staging->GetDeviceMemory());
-
-				VulkanBuffer::Copy(*_index_buffer, *staging, data_size);
+				staging->Assign(_model.GetIndices().data());
+				staging->CopyTo(*_index_buffer);
 				memory::Destroy<VulkanBuffer>(memory::DefaultTraitAllocator, staging);
 
 				// create commands
@@ -274,8 +261,10 @@ namespace np::graphics::rhi
 				_draw_indexed = memory::Create<VulkanCommandDrawIndexed>(memory::DefaultTraitAllocator,
 																		 (ui32)_model.GetIndices().size(), 1, 0, 0, 0);
 
-				// SetOutOfDate(false); //TODO:
+				SetOutOfDate(false);
 			}
+
+			_push_constants->PipelineLayout = vulkan_pipeline.GetPipelineLayout();
 
 			if (!_sampler)
 				SetSampler(vulkan_pipeline.GetDefaultSampler());
@@ -288,7 +277,7 @@ namespace np::graphics::rhi
 
 		void DisposeForPipeline(Pipeline& pipeline) override
 		{
-			Dispose();
+			Destruct();
 		}
 
 		bl IsOutOfDate() const override

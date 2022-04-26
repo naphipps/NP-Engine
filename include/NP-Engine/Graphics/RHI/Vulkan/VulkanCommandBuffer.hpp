@@ -39,8 +39,6 @@ namespace np::graphics::rhi
 			other._command_buffer = nullptr;
 		}
 
-		~VulkanCommandBuffer() = default; // TODO: do we need this??
-
 		VulkanCommandBuffer& operator=(const VulkanCommandBuffer& other)
 		{
 			_command_buffer = other._command_buffer;
@@ -81,7 +79,7 @@ namespace np::graphics::rhi
 			return vkEndCommandBuffer(_command_buffer);
 		}
 
-		void Add(VulkanCommand& command) const // TODO: should this return a VkResult?
+		void Add(VulkanCommand& command)
 		{
 			NP_ENGINE_ASSERT(IsValid(), "VulkanCommandBuffer must be valid before Add is called.");
 			command.ApplyTo(_command_buffer);

@@ -24,8 +24,15 @@ namespace np::graphics
 
 		RenderableImage(Image& image): _image(image) {}
 
+		virtual void Destruct() {}
+
 	public:
 		static RenderableImage* Create(memory::Allocator& allocator, Image& image);
+
+		virtual ~RenderableImage()
+		{
+			Destruct();
+		}
 
 		Image& GetImage()
 		{

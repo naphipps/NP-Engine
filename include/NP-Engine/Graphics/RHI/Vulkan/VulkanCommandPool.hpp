@@ -47,7 +47,11 @@ namespace np::graphics::rhi
 
 		~VulkanCommandPool()
 		{
-			vkDestroyCommandPool(_device, _command_pool, nullptr);
+			if (_command_pool)
+			{
+				vkDestroyCommandPool(_device, _command_pool, nullptr);
+				_command_pool = nullptr;
+			}
 		}
 
 		operator VkCommandPool() const

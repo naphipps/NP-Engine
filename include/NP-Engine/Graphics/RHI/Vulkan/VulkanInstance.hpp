@@ -7,7 +7,7 @@
 #ifndef NP_ENGINE_VULKAN_INSTANCE_HPP
 #define NP_ENGINE_VULKAN_INSTANCE_HPP
 
-#include <iostream> //TODO: remove
+#include <iostream> //TODO: remove?
 
 #include "NP-Engine/Primitive/Primitive.hpp"
 #include "NP-Engine/Container/Container.hpp"
@@ -27,18 +27,20 @@ namespace np::graphics::rhi
 		VkInstance _instance;
 		VkDebugUtilsMessengerEXT _debug_messenger;
 
-		static VKAPI_ATTR VkBool32 VKAPI_CALL _vk_DebugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT msg_severity,
-																VkDebugUtilsMessageTypeFlagsEXT msg_type,
-																const VkDebugUtilsMessengerCallbackDataEXT* callback_data,
-																void* user_data)
+		static VKAPI_ATTR VkBool32 VKAPI_CALL VulkanDebugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT msg_severity,
+																  VkDebugUtilsMessageTypeFlagsEXT msg_type,
+																  const VkDebugUtilsMessengerCallbackDataEXT* callback_data,
+																  void* user_data)
 		{
 			VkBool32 retval = VK_TRUE;
 			if ((msg_severity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT) == 0)
 			{
-				::std::cerr << ::std::endl << "Validation Layer: " << callback_data->pMessage << ::std::endl << ::std::endl;
 				retval = VK_FALSE;
-
-				NP_ENGINE_ASSERT(false, "vulkan error");
+				// TODO: feel like we should pipe this stuff through our logger
+				// TODO: should we have a macro to enable this? NP_ENGINE_ENABLE_VULKAN_DEBUG_CALLBACK?
+				str msg = "\nValidation Layer: " + to_str(callback_data->pMessage) + "\n";
+				::std::cerr << msg;
+				NP_ENGINE_ASSERT(false, msg); // here in case for issues that cause a gpu crash
 			}
 			return retval;
 		}
@@ -51,7 +53,8 @@ namespace np::graphics::rhi
 
 		ui32 GetVersion32() const
 		{
-			// return VK_HEADER_VERSION_COMPLETE; //1.2.189.0
+			// TODO: investigate what we should return, etc
+			//  return VK_HEADER_VERSION_COMPLETE; //1.2.189.0
 			ui32 version = 0;
 			vkEnumerateInstanceVersion(&version); // version: 4202658, 1.2.162.0
 			return version;
@@ -116,7 +119,8 @@ namespace np::graphics::rhi
 		{
 			container::vector<str> layers;
 
-#if DEBUG // TODO: we need a better way to clean up our debug messenger, etc - add some methods to organize this behavior
+#if DEBUG // TODO: we need a better way to clean up our debug messenger, etc - add some methods to organize this behavior ...
+		  // how??
 			layers.emplace_back("VK_LAYER_KHRONOS_validation");
 #endif
 
@@ -143,7 +147,7 @@ namespace np::graphics::rhi
 				VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
 			info.messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT |
 				VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
-			info.pfnUserCallback = _vk_DebugCallback;
+			info.pfnUserCallback = VulkanDebugCallback;
 			info.pUserData = this;
 			return info;
 		}

@@ -32,12 +32,9 @@ namespace np::graphics::rhi
 		{
 			VkAttachmentDescription desc{};
 			desc.format = GetDevice().GetSurfaceFormat().format;
-			desc.samples = VK_SAMPLE_COUNT_1_BIT; // TODO: multisampling
-			// TODO: The loadOp and storeOp determine what to do with the data in the
-			//	attachment before rendering and after rendering
+			desc.samples = VK_SAMPLE_COUNT_1_BIT;
 			desc.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
 			desc.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-			// TODO: we don't do anything with the stencil buffer
 			desc.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
 			desc.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
 			desc.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
@@ -166,7 +163,6 @@ namespace np::graphics::rhi
 			return memory::Create<VulkanTexture>(memory::DefaultTraitAllocator, GetDevice(), depth_image_create_info,
 												 depth_memory_property_flags, depth_image_view_create_info);
 
-			// TODO: do we need to do something with the following:
 			/*
 			the following transition is covered in the render pass, but here it is for reference
 
@@ -280,16 +276,6 @@ namespace np::graphics::rhi
 			_depth_texture = CreateDepthTexture();
 		}
 
-		/*
-		void Begin(VkRenderPassBeginInfo& render_pass_begin_info, VulkanCommandBuffer& command_buffer)
-		{
-			render_pass_begin_info.renderPass = _render_pass;
-			render_pass_begin_info.renderArea.extent = _render_extent;
-			VulkanCommandBeginRenderPass begin_render_pass(render_pass_begin_info, VK_SUBPASS_CONTENTS_INLINE);
-			command_buffer.Add(begin_render_pass);
-		}
-		*/
-
 		void Begin(VkRenderPassBeginInfo& render_pass_begin_info, VulkanFrame& frame)
 		{
 			render_pass_begin_info.renderPass = _render_pass;
@@ -298,19 +284,11 @@ namespace np::graphics::rhi
 			if (_begin_render_pass)
 				memory::Destroy<VulkanCommandBeginRenderPass>(memory::DefaultTraitAllocator, _begin_render_pass);
 
-			_begin_render_pass = memory::Create<VulkanCommandBeginRenderPass>(memory::DefaultTraitAllocator, 
-				render_pass_begin_info, VK_SUBPASS_CONTENTS_INLINE);
+			_begin_render_pass = memory::Create<VulkanCommandBeginRenderPass>(
+				memory::DefaultTraitAllocator, render_pass_begin_info, VK_SUBPASS_CONTENTS_INLINE);
 
 			frame.StageCommand(*_begin_render_pass);
 		}
-
-		/*
-		void End(VulkanCommandBuffer& command_buffer)
-		{
-			VulkanCommandEndRenderPass end_render_pass;
-			command_buffer.Add(end_render_pass);
-		}
-		*/
 
 		void End(VulkanFrame& frame)
 		{

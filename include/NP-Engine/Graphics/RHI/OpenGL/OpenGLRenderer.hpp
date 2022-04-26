@@ -20,8 +20,24 @@
 
 namespace np::graphics::rhi
 {
+	namespace __detail
+	{
+		struct OpenGLFrame : public Frame
+		{
+			virtual bl IsValid() const override
+			{
+				return false;
+			}
+
+			virtual void Invalidate() override {}
+		};
+	} // namespace __detail
+
 	class OpenGLRenderer : public Renderer
 	{
+	private:
+		__detail::OpenGLFrame _frame;
+
 	public:
 		OpenGLRenderer(::entt::registry& ecs_registry): Renderer(ecs_registry) {}
 
@@ -39,9 +55,9 @@ namespace np::graphics::rhi
 
 		void DetachFromWindow(window::Window& window) override {}
 
-		Frame* BeginFrame() override
+		Frame& BeginFrame() override
 		{
-			return nullptr;
+			return _frame;
 		}
 
 		void EndFrame() override {}

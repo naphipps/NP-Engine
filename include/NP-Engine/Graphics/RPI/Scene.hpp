@@ -27,12 +27,17 @@ namespace np::graphics
 		::entt::registry& _ecs_registry;
 		Renderer& _renderer;
 
+		virtual void Destruct() {}
+
 	public:
 		static Scene* Create(memory::Allocator& allocator, ::entt::registry& ecs_registry, Renderer& renderer);
 
 		Scene(::entt::registry& ecs_registry, Renderer& renderer): _ecs_registry(ecs_registry), _renderer(renderer) {}
 
-		virtual ~Scene() = default; // suppress warning
+		virtual ~Scene()
+		{
+			Destruct();
+		}
 
 		Renderer& GetRenderer()
 		{
@@ -43,6 +48,12 @@ namespace np::graphics
 		{
 			return _renderer;
 		}
+
+		// TODO: flesh out the following:
+		virtual void Add(RenderableObject& renderable_object) {}
+		virtual void Add(RenderableLightObject& renderable_light_object) {}
+		virtual void Remove(RenderableObject& renderable_object) {}
+		virtual void Remove(RenderableLightObject& renderable_light_object) {}
 
 		virtual void Draw() = 0;
 		virtual void Prepare() = 0;

@@ -18,6 +18,9 @@ namespace np::graphics::rhi
 {
 	class VulkanRenderableImage : public RenderableImage
 	{
+	private:
+		void Destruct() override {}
+
 	public:
 		VulkanRenderableImage(Image& image): RenderableImage(image) {}
 
@@ -40,7 +43,7 @@ namespace np::graphics::rhi
 
 		void DisposeForPipeline(Pipeline& pipeline) override
 		{
-			//TODO: implement
+			// TODO: implement
 		}
 
 		bl IsOutOfDate() const override

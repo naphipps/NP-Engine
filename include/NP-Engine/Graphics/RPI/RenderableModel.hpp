@@ -24,8 +24,15 @@ namespace np::graphics
 
 		RenderableModel(Model& model): _model(model) {}
 
+		virtual void Destruct() {}
+
 	public:
 		static RenderableModel* Create(memory::Allocator& allocator, Model& model);
+
+		virtual ~RenderableModel()
+		{
+			Destruct();
+		}
 
 		Model& GetModel()
 		{

@@ -24,6 +24,8 @@ namespace np::graphics::rhi
 	{
 	public:
 		constexpr static ui32 MAX_FRAMES = 2;
+		// TODO: ^don't really like this name - refactor to NP_ENGINE_MAX_FRAMES in our vulkan include
+		// TODO: we need to stop rebuilding things based on GetImages().size() and use MAX_FRAMES (or NP_ENGINE_MAX_FRAMES)
 
 	private:
 		VulkanRenderPass& _render_pass;
@@ -31,10 +33,10 @@ namespace np::graphics::rhi
 		container::vector<VkImage> _images; // we do not have device memory for these so we'll keep VkImage type
 		container::vector<VulkanImageView> _image_views;
 		container::vector<VkFramebuffer> _framebuffers;
-		container::vector<VkSemaphore> _image_available_semaphores; // TODO: refactor to _image_semaphores
-		container::vector<VkSemaphore> _render_finished_semaphores; // TODO: return to _semaphores
+		container::vector<VkSemaphore> _image_semaphores;
+		container::vector<VkSemaphore> _render_semaphores;
 		container::vector<VkFence> _fences;
-		container::vector<VkFence> _image_fences;
+		container::vector<VkFence> _acquired_image_fences;
 
 		ui32 _current_image_index;
 		ui32 _acquired_image_index;
@@ -134,7 +136,7 @@ namespace np::graphics::rhi
 			return images;
 		}
 
-		container::vector<VulkanImageView> CreateImageViews() // TODO: could we make use of ::std::move here??
+		container::vector<VulkanImageView> CreateImageViews()
 		{
 			container::vector<VulkanImageView> image_views;
 
@@ -156,7 +158,8 @@ namespace np::graphics::rhi
 
 			for (siz i = 0; i < GetImageViews().size(); i++)
 			{
-				container::vector<VkImageView> image_views{ GetImageViews()[i], GetRenderPass().GetDepthTexture().GetImageView()};
+				container::vector<VkImageView> image_views{GetImageViews()[i],
+														   GetRenderPass().GetDepthTexture().GetImageView()};
 
 				VkFramebufferCreateInfo framebuffer_info = CreateFramebufferInfo();
 				framebuffer_info.renderPass = GetRenderPass();
@@ -212,32 +215,29 @@ namespace np::graphics::rhi
 
 		void Dispose()
 		{
-			//_image_fences.clear(); // TODO: ???
-
 			for (VkFramebuffer framebuffer : _framebuffers)
 				vkDestroyFramebuffer(GetDevice(), framebuffer, nullptr);
 
 			_framebuffers.clear();
 			_image_views.clear();
 			_images.clear();
+			_acquired_image_fences.clear();
 
 			if (_swapchain) // TODO: we need this in every Vulkan class...
 				vkDestroySwapchainKHR(GetDevice(), _swapchain, nullptr);
 		}
 
 	public:
-		// TODO: I'd like to make all init methods const
-
 		VulkanSwapchain(VulkanRenderPass& render_pass):
 			_render_pass(render_pass),
 			_swapchain(CreateSwapchain()),
-			_images(RetrieveImages()), // TODO: _framebuffers, semaphores, fences
+			_images(RetrieveImages()),
 			_image_views(CreateImageViews()),
 			_framebuffers(CreateFramebuffers()),
-			_image_available_semaphores(CreateSemaphores(MAX_FRAMES)),
-			_render_finished_semaphores(CreateSemaphores(MAX_FRAMES)),
+			_image_semaphores(CreateSemaphores(MAX_FRAMES)),
+			_render_semaphores(CreateSemaphores(MAX_FRAMES)),
 			_fences(CreateFences(MAX_FRAMES)),
-			_image_fences(GetImages().size(), nullptr),
+			_acquired_image_fences(GetImages().size(), nullptr),
 			_current_image_index(0),
 			_acquired_image_index(0)
 		{}
@@ -246,10 +246,10 @@ namespace np::graphics::rhi
 		{
 			vkDeviceWaitIdle(GetDevice());
 
-			for (VkSemaphore& semaphore : _render_finished_semaphores)
+			for (VkSemaphore& semaphore : _render_semaphores)
 				vkDestroySemaphore(GetDevice(), semaphore, nullptr);
 
-			for (VkSemaphore& semaphore : _image_available_semaphores)
+			for (VkSemaphore& semaphore : _image_semaphores)
 				vkDestroySemaphore(GetDevice(), semaphore, nullptr);
 
 			for (VkFence& fence : _fences)
@@ -316,20 +316,17 @@ namespace np::graphics::rhi
 			_images = RetrieveImages();
 			_image_views = CreateImageViews();
 			_framebuffers = CreateFramebuffers();
-			//_image_fences.resize(_images.size(), nullptr); //TODO: we might need to keep this
+			_acquired_image_fences.resize(_images.size(), nullptr);
 		}
 
-		// TODO: I'd like to just return a struct with image index and result
 		VkResult AcquireImage()
 		{
 			vkWaitForFences(GetDevice(), 1, &_fences[_current_image_index], VK_TRUE, UI64_MAX);
 
-			VkResult result =
-				vkAcquireNextImageKHR(GetDevice(), _swapchain, UI64_MAX, _image_available_semaphores[_current_image_index],
-									  nullptr, &_acquired_image_index);
+			VkResult result = vkAcquireNextImageKHR(GetDevice(), _swapchain, UI64_MAX, _image_semaphores[_current_image_index],
+													nullptr, &_acquired_image_index);
 
-			if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR &&
-				result != VK_ERROR_OUT_OF_DATE_KHR)
+			if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR && result != VK_ERROR_OUT_OF_DATE_KHR)
 			{
 				NP_ENGINE_ASSERT(false, "vkAcquireNextImageKHR error");
 			}
@@ -340,13 +337,13 @@ namespace np::graphics::rhi
 		void MarkAcquiredImageForUse()
 		{
 			// Check if a previous frame is using this image (i.e. there is its fence to wait on)
-			if (_image_fences[_acquired_image_index] != nullptr)
+			if (_acquired_image_fences[_acquired_image_index] != nullptr)
 			{
-				vkWaitForFences(GetDevice(), 1, &_image_fences[_acquired_image_index], VK_TRUE, UI64_MAX);
+				vkWaitForFences(GetDevice(), 1, &_acquired_image_fences[_acquired_image_index], VK_TRUE, UI64_MAX);
 			}
 
 			// Mark the image as now being in use by this frame
-			_image_fences[_acquired_image_index] = _fences[_current_image_index];
+			_acquired_image_fences[_acquired_image_index] = _fences[_current_image_index];
 		}
 
 		void IncCurrentImage()
@@ -369,14 +366,14 @@ namespace np::graphics::rhi
 			return _framebuffers;
 		}
 
-		const container::vector<VkSemaphore> GetImageAvailableSemaphores() const
+		const container::vector<VkSemaphore> GetImageSemaphores() const
 		{
-			return _image_available_semaphores;
+			return _image_semaphores;
 		}
 
-		const container::vector<VkSemaphore> GetRenderFinishedSemaphores() const
+		const container::vector<VkSemaphore> GetRenderSemaphores() const
 		{
-			return _render_finished_semaphores;
+			return _render_semaphores;
 		}
 
 		const container::vector<VkFence> GetFences() const
@@ -386,7 +383,7 @@ namespace np::graphics::rhi
 
 		const container::vector<VkFence> GetImageFences() const
 		{
-			return _image_fences;
+			return _acquired_image_fences;
 		}
 
 		operator VkSwapchainKHR() const

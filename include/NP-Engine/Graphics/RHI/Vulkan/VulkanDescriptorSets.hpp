@@ -36,7 +36,7 @@ namespace np::graphics::rhi
 			create_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
 			create_info.poolSizeCount = (ui32)pool_sizes.size();
 			create_info.pPoolSizes = pool_sizes.data();
-			create_info.maxSets = (ui32)GetSwapchain().GetImages().size(); // TODO: I think there is a device specific max value
+			create_info.maxSets = (ui32)GetSwapchain().GetImages().size();
 			create_info.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
 
 			if (vkCreateDescriptorPool(GetDevice(), &create_info, nullptr, &pool) != VK_SUCCESS)
@@ -52,7 +52,7 @@ namespace np::graphics::rhi
 			VkDescriptorSetAllocateInfo allocate_info{};
 			allocate_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
 			allocate_info.descriptorPool = _descriptor_pool;
-			allocate_info.descriptorSetCount = (ui32)layouts.size(); // TODO: I think there is a device specific max value
+			allocate_info.descriptorSetCount = (ui32)layouts.size();
 			allocate_info.pSetLayouts = layouts.data();
 
 			sets.resize(layouts.size());
@@ -108,7 +108,8 @@ namespace np::graphics::rhi
 
 		void Rebuild()
 		{
-			vkFreeDescriptorSets(GetDevice(), _descriptor_pool, (ui32)_descriptor_sets.size(), _descriptor_sets.data());
+			vkDestroyDescriptorPool(GetDevice(), _descriptor_pool, nullptr);
+			_descriptor_pool = CreateDescriptorPool();
 			_descriptor_sets = CreateDescriptorSets();
 		}
 

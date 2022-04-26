@@ -14,6 +14,7 @@
 #include "NP-Engine/String/String.hpp"
 
 #include "NP-Engine/Vendor/LodePngInclude.hpp"
+// TODO: I feel like we could add back stb_image, and try lodepng when stb_image fails on pngs
 
 #include "Color.hpp"
 

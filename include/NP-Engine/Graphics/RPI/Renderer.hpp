@@ -47,7 +47,7 @@ namespace np::graphics
 		virtual void AttachToWindow(window::Window& window) = 0;
 		virtual void DetachFromWindow(window::Window& window) = 0;
 
-		virtual Frame* BeginFrame() = 0;
+		virtual Frame& BeginFrame() = 0;
 		virtual void EndFrame() = 0;
 		virtual void DrawFrame() = 0;
 

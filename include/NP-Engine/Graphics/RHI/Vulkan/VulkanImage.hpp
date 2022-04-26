@@ -56,13 +56,9 @@ namespace np::graphics::rhi
 				{
 					device_memory = nullptr;
 				}
-				else
+				else if (vkBindImageMemory(GetDevice(), _image, device_memory, 0) != VK_SUCCESS)
 				{
-					//TODO: I think we can get rid of this if check? Or at least clean it up
-					if (vkBindImageMemory(GetDevice(), _image, device_memory, 0) != VK_SUCCESS) 
-					{
-						device_memory = nullptr;
-					}
+					device_memory = nullptr;
 				}
 			}
 
@@ -70,37 +66,11 @@ namespace np::graphics::rhi
 		}
 
 	public:
-		static void Copy(VulkanImage& dst, VulkanBuffer& src, ui32 width, ui32 height)
-		{
-			// TODO: I feel like we could make this a method for the dst image?
-			// TODO: figure out a way to include fence/semaphore parameters/returns/etc
-			// TODO: we might want to accept a VkBufferImageCopy param instead
-			// TODO: we could add a VulkanCommandCopyBufferToImage::CreateBufferImageCopy
-
-			VkBufferImageCopy buffer_image_copy{};
-			buffer_image_copy.bufferOffset = 0;
-			buffer_image_copy.bufferRowLength = 0;
-			buffer_image_copy.bufferImageHeight = 0;
-			buffer_image_copy.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-			buffer_image_copy.imageSubresource.mipLevel = 0;
-			buffer_image_copy.imageSubresource.baseArrayLayer = 0;
-			buffer_image_copy.imageSubresource.layerCount = 1;
-			buffer_image_copy.imageOffset = {0, 0, 0};
-			buffer_image_copy.imageExtent = {width, height, 1};
-
-			VulkanCommandCopyBufferToImage copy_buffer_to_image(src, dst, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1,
-																&buffer_image_copy);
-
-			container::vector<VulkanCommandBuffer> command_buffers = dst.GetDevice().BeginSingleUseCommandBuffers(1);
-			command_buffers.front().Add(copy_buffer_to_image);
-			dst.GetDevice().EndSingleUseCommandBuffers(command_buffers);
-		}
-
 		static VkImageCreateInfo CreateInfo()
 		{
 			VkImageCreateInfo info{};
 			info.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
-			info.imageType = VK_IMAGE_TYPE_2D; // TODO: feel like this could be a constructor param??
+			info.imageType = VK_IMAGE_TYPE_2D;
 			info.extent = {0, 0, 1};
 			info.format = VK_FORMAT_R8G8B8A8_SRGB;
 			info.tiling = VK_IMAGE_TILING_OPTIMAL;
@@ -117,8 +87,6 @@ namespace np::graphics::rhi
 			_image(CreateImage(image_create_info)),
 			_device_memory(CreateDeviceMemory(memory_property_flags))
 		{}
-
-		// TODO: add move constructor?
 
 		VulkanImage(const VulkanImage&) = delete;
 
@@ -140,6 +108,18 @@ namespace np::graphics::rhi
 				vkDestroyImage(GetDevice(), _image, nullptr);
 		}
 
+		void Assign(VulkanBuffer& buffer, VkBufferImageCopy buffer_image_copy)
+		{
+			// TODO: figure out a way to include fence/semaphore parameters/returns/etc
+
+			VulkanCommandCopyBufferToImage copy_buffer_to_image(buffer, _image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1,
+																&buffer_image_copy);
+
+			container::vector<VulkanCommandBuffer> command_buffers = GetDevice().BeginSingleUseCommandBuffers(1);
+			command_buffers.front().Add(copy_buffer_to_image);
+			GetDevice().EndSingleUseCommandBuffers(command_buffers);
+		}
+
 		operator VkImage() const
 		{
 			return _image;
@@ -149,8 +129,6 @@ namespace np::graphics::rhi
 		{
 			return _device_memory;
 		}
-
-		// TODO: GetWidth and GetHeight??
 
 		VulkanDevice& GetDevice() const
 		{

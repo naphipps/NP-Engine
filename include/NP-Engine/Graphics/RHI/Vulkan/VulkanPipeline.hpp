@@ -35,6 +35,7 @@
 #include "VulkanFrame.hpp"
 
 // TODO: there might be some methods with zero references...
+// TODO: remove Optional comments
 
 namespace np::graphics::rhi
 {
@@ -49,7 +50,7 @@ namespace np::graphics::rhi
 		VulkanDescriptorSetLayout _descriptor_set_layout;
 		VulkanDescriptorSets _descriptor_sets;
 		// TODO: when we refactor _ubos, we could put it in Pipeline? //TODO: why do we have so many?
-		container::vector<UniformBufferObject> _ubos; 
+		container::vector<UniformBufferObject> _ubos;
 		container::vector<VulkanBuffer*> _ubo_buffers;
 		container::vector<VkDescriptorBufferInfo> _ubo_descriptor_infos;
 		container::vector<VkWriteDescriptorSet> _ubo_descriptor_writers;
@@ -82,7 +83,7 @@ namespace np::graphics::rhi
 			info.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
 			info.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
 			info.primitiveRestartEnable = VK_FALSE;
-			// TODO: it's possible to break up lines and triangles in the _STRIP topology modes by using a special index of
+			// it's possible to break up lines and triangles in the _STRIP topology modes by using a special index of
 			// 0xFFFF or 0xFFFFFFFF.
 			return info;
 		}
@@ -128,13 +129,12 @@ namespace np::graphics::rhi
 			info.depthClampEnable = VK_FALSE;
 
 			info.rasterizerDiscardEnable = VK_FALSE;
-			info.polygonMode = VK_POLYGON_MODE_FILL; // TODO: or VK_POLYGON_MODE_LINE or VK_POLYGON_MODE_POINT
+			info.polygonMode = VK_POLYGON_MODE_FILL; // or VK_POLYGON_MODE_LINE or VK_POLYGON_MODE_POINT
 			info.lineWidth = 1.0f; // TODO: any larger value required enabling wideLines GPU feature
 			info.cullMode = VK_CULL_MODE_BACK_BIT;
 			info.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
 
 			/*
-			//TODO:
 			The rasterizer can alter the depth values by adding a constant value or biasing them based on
 			a fragment's slope. This is sometimes used for shadow mapping, but we won't be using it.
 			Just set depthBiasEnable to VK_FALSE.
@@ -218,6 +218,8 @@ namespace np::graphics::rhi
 			return info;
 		}
 
+		// TODO: what's going on with these dynamic state methods??
+
 		container::vector<VkDynamicState> CreateDynamicStates()
 		{
 			return {VK_DYNAMIC_STATE_VIEWPORT, VK_DYNAMIC_STATE_LINE_WIDTH};
@@ -282,8 +284,8 @@ namespace np::graphics::rhi
 			VkDescriptorSetLayout descriptor_layout = _descriptor_set_layout;
 			VkPushConstantRange push_constant_range = CreatePushConstantRange();
 			VkPipelineLayoutCreateInfo create_info = CreatePipelineLayoutInfo();
-			create_info.setLayoutCount =
-				1; // TODO: setLayoutCount must be less than or equal to VkPhysicalDeviceLimits::maxBoundDescriptorSets
+			// TODO: setLayoutCount must be less than or equal to VkPhysicalDeviceLimits::maxBoundDescriptorSets
+			create_info.setLayoutCount = 1;
 			create_info.pSetLayouts = &descriptor_layout;
 			create_info.pushConstantRangeCount = 1;
 			create_info.pPushConstantRanges = &push_constant_range;
@@ -447,10 +449,10 @@ namespace np::graphics::rhi
 			_fragment_shader(fragment_shader),
 			_descriptor_set_layout(swapchain.GetDevice()),
 			_descriptor_sets(swapchain, _descriptor_set_layout),
-			_ubos(swapchain.GetImages().size()), // TODO: do we need a destroy method?
+			_ubos(swapchain.GetImages().size()),
 			_ubo_buffers(CreateUboBuffers()),
-			_ubo_descriptor_infos(CreateUboDescriptorInfos()), // TODO: do we need a destroy method?
-			_ubo_descriptor_writers(CreateUboDescriptorWriters()), // TODO: do we need a destroy method?
+			_ubo_descriptor_infos(CreateUboDescriptorInfos()),
+			_ubo_descriptor_writers(CreateUboDescriptorWriters()),
 			_sampler(swapchain.GetDevice(), VulkanSampler::CreateInfo()),
 			_pipeline_layout(CreatePipelineLayout()),
 			_pipeline(CreatePipeline()),
@@ -461,7 +463,6 @@ namespace np::graphics::rhi
 
 		~VulkanPipeline()
 		{
-			vkDeviceWaitIdle(GetDevice());
 			vkDestroyPipeline(GetDevice(), _pipeline, nullptr);
 			vkDestroyPipelineLayout(GetDevice(), _pipeline_layout, nullptr);
 			DestroyUboBuffers();
@@ -581,16 +582,17 @@ namespace np::graphics::rhi
 		{
 			_descriptor_sets.Rebuild();
 
+			// TODO: pretty sure we only need to rebuild ubo stuff??
+
 			vkDestroyPipeline(GetDevice(), _pipeline, nullptr);
 			vkDestroyPipelineLayout(GetDevice(), _pipeline_layout, nullptr);
 			DestroyUboBuffers();
-
 			_ubos.resize(GetSwapchain().GetImages().size());
 			_ubo_buffers = CreateUboBuffers();
 			_ubo_descriptor_infos = CreateUboDescriptorInfos();
 			_ubo_descriptor_writers = CreateUboDescriptorWriters();
 			_pipeline_layout = CreatePipelineLayout();
-			_pipeline = CreatePipeline();			
+			_pipeline = CreatePipeline();
 		}
 	};
 } // namespace np::graphics::rhi

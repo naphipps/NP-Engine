@@ -7,7 +7,6 @@
 #ifndef NP_ENGINE_VULKAN_BUFFER_HPP
 #define NP_ENGINE_VULKAN_BUFFER_HPP
 
-#include <iostream> //TODO: remove
 #include <utility>
 
 #include "NP-Engine/Vendor/VulkanInclude.hpp"
@@ -24,7 +23,7 @@ namespace np::graphics::rhi
 		VulkanDevice& _device;
 		VkBuffer _buffer;
 		VkDeviceMemory _device_memory;
-		VkDeviceSize _size; // TODO: do we need this??
+		VkDeviceSize _size;
 
 		VkBuffer CreateBuffer(VkBufferCreateInfo& info)
 		{
@@ -63,20 +62,6 @@ namespace np::graphics::rhi
 		}
 
 	public:
-		static void Copy(VulkanBuffer& dst, VulkanBuffer& src,
-						 siz size) // TODO: I think we should opt for a CopyTo or CopyFrom method instead
-		{
-			// TODO: figure out a way to include fence/semaphore parameters/returns/etc
-
-			VkBufferCopy buffer_copy{};
-			buffer_copy.size = size;
-			VulkanCommandCopyBuffers copy_buffers(src, dst, 1, &buffer_copy);
-
-			container::vector<VulkanCommandBuffer> command_buffers = dst.GetDevice().BeginSingleUseCommandBuffers(1);
-			command_buffers.front().Add(copy_buffers);
-			dst.GetDevice().EndSingleUseCommandBuffers(command_buffers);
-		}
-
 		static VkBufferCreateInfo CreateInfo()
 		{
 			VkBufferCreateInfo info{};
@@ -89,7 +74,8 @@ namespace np::graphics::rhi
 			Buffer(),
 			_device(device),
 			_buffer(CreateBuffer(buffer_create_info)),
-			_device_memory(CreateDeviceMemory(memory_property_flags))
+			_device_memory(CreateDeviceMemory(memory_property_flags)),
+			_size(buffer_create_info.size)
 		{}
 
 		VulkanBuffer(const VulkanBuffer&) = delete;
@@ -114,17 +100,57 @@ namespace np::graphics::rhi
 				vkFreeMemory(GetDevice(), _device_memory, nullptr);
 		}
 
-		VulkanInstance& GetInstance() const // TODO: the following methods should be added to every Vulkan class possible
+		void CopyTo(VulkanBuffer& other)
+		{
+			// TODO: figure out a way to include fence/semaphore parameters/returns/etc
+
+			VkBufferCopy buffer_copy{};
+			buffer_copy.size = _size;
+			VulkanCommandCopyBuffers copy_buffers(_buffer, other, 1, &buffer_copy);
+
+			container::vector<VulkanCommandBuffer> command_buffers = GetDevice().BeginSingleUseCommandBuffers(1);
+			command_buffers.front().Add(copy_buffers);
+			GetDevice().EndSingleUseCommandBuffers(command_buffers);
+		}
+
+		void Assign(const void* data)
+		{
+			void* mapping = nullptr;
+			if (vkMapMemory(GetDevice(), GetDeviceMemory(), 0, GetSize(), 0, &mapping) != VK_SUCCESS)
+				mapping = nullptr;
+			if (mapping)
+				memcpy(mapping, data, GetSize());
+			vkUnmapMemory(GetDevice(), GetDeviceMemory());
+		}
+
+		// TODO: the following methods should be added to every Vulkan class possible
+
+		VulkanInstance& GetInstance()
 		{
 			return _device.GetInstance();
 		}
 
-		VulkanSurface& GetSurface() const
+		const VulkanInstance& GetInstance() const
+		{
+			return _device.GetInstance();
+		}
+
+		VulkanSurface& GetSurface()
 		{
 			return _device.GetSurface();
 		}
 
-		VulkanDevice& GetDevice() const
+		const VulkanSurface& GetSurface() const
+		{
+			return _device.GetSurface();
+		}
+
+		VulkanDevice& GetDevice()
+		{
+			return _device;
+		}
+
+		const VulkanDevice& GetDevice() const
 		{
 			return _device;
 		}
@@ -132,6 +158,11 @@ namespace np::graphics::rhi
 		VkDeviceMemory GetDeviceMemory() const
 		{
 			return _device_memory;
+		}
+
+		VkDeviceSize GetSize() const
+		{
+			return _size;
 		}
 
 		operator VkBuffer() const

@@ -70,12 +70,6 @@ namespace np::graphics::rhi
 				vkDestroyImageView(GetDevice(), _image_view, nullptr);
 		}
 
-		/* TODO: don't know if the following is needed
-		VulkanImageView& operator=(const VulkanImageView&) = delete;
-
-		VulkanImageView& operator=(VulkanImageView&&) noexcept = delete;
-		*/
-
 		operator VkImageView() const
 		{
 			return _image_view;

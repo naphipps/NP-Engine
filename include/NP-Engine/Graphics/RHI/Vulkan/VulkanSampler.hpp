@@ -26,9 +26,8 @@ namespace np::graphics::rhi
 			vkGetPhysicalDeviceProperties(GetDevice().GetPhysicalDevice(), &device_properties);
 			vkGetPhysicalDeviceFeatures(GetDevice().GetPhysicalDevice(), &device_features);
 
-			info.anisotropyEnable = device_features.samplerAnisotropy; // TODO: revisit
-			info.maxAnisotropy = info.anisotropyEnable == VK_FALSE ? 1.0f : // TODO: revisit
-				device_properties.limits.maxSamplerAnisotropy;
+			info.anisotropyEnable = device_features.samplerAnisotropy;
+			info.maxAnisotropy = info.anisotropyEnable == VK_FALSE ? 1.0f : device_properties.limits.maxSamplerAnisotropy;
 
 			VkSampler sampler = nullptr;
 
@@ -53,12 +52,12 @@ namespace np::graphics::rhi
 			info.anisotropyEnable = VK_TRUE;
 			info.borderColor = VK_BORDER_COLOR_INT_OPAQUE_BLACK;
 			info.unnormalizedCoordinates = VK_FALSE;
-			info.compareEnable = VK_FALSE; // TODO: revisit
-			info.compareOp = VK_COMPARE_OP_ALWAYS; // TODO: revisit
-			info.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR; // TODO: revisit
-			info.mipLodBias = 0.0f; // TODO: revisit
-			info.minLod = 0.0f; // TODO: revisit
-			info.maxLod = 0.0f; // TODO: revisit
+			info.compareEnable = VK_FALSE;
+			info.compareOp = VK_COMPARE_OP_ALWAYS;
+			info.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
+			info.mipLodBias = 0.0f;
+			info.minLod = 0.0f;
+			info.maxLod = 0.0f;
 			return info;
 		}
 

@@ -23,12 +23,6 @@
 
 namespace np::graphics::rhi
 {
-	namespace __detail
-	{
-		static ui64 resize_count = 0;
-		static ui64 position_count = 0;
-	}
-
 	class VulkanScene : public Scene
 	{
 	private:
@@ -38,13 +32,9 @@ namespace np::graphics::rhi
 		// TODO: WindowResizeCallback and WindowPositionCallback can be called very fast in succession - add a threshold for
 		// when these actually draw so we don't get so bogged down with draw calls
 
-		
-
 		static void WindowResizeCallback(void* scene, ui32 width, ui32 height)
 		{
 			// TODO: find a way for these callbacks to trigger a thread that renders on a loop until Draw is called again
-			//((VulkanRenderer&)((Scene*)scene)->GetRenderer()).GetSwapchain().SetRebuild();
-			::std::cout << "@resize-" << __detail::resize_count++<<" ";
 			VulkanScene& vulkan_scene = (VulkanScene&)*((VulkanScene*)scene);
 			VulkanRenderer& vulkan_renderer = (VulkanRenderer&)vulkan_scene.GetRenderer();
 			vulkan_renderer.SetOutOfDate();
@@ -54,13 +44,13 @@ namespace np::graphics::rhi
 		static void WindowPositionCallback(void* scene, i32 x, i32 y)
 		{
 			// TODO: find a way for these callbacks to trigger a thread that renders on a loop until Draw is called again
-			//((VulkanRenderer&)((Scene*)scene)->GetRenderer()).GetSwapchain().SetRebuild();
-			::std::cout << "@position-" << __detail::position_count++<<" ";
 			VulkanScene& vulkan_scene = (VulkanScene&)*((VulkanScene*)scene);
 			VulkanRenderer& vulkan_renderer = (VulkanRenderer&)vulkan_scene.GetRenderer();
 			vulkan_renderer.SetOutOfDate();
 			vulkan_scene.Draw();
 		}
+
+		// TODO: investigate FramebufferResize callback for glfw
 
 	public:
 		VulkanScene(::entt::registry& ecs_registry, Renderer& renderer): Scene(ecs_registry, renderer)
@@ -88,59 +78,49 @@ namespace np::graphics::rhi
 
 			// TODO: loop through Entities to get camera, and objects to renderer, etc
 
-			::std::cout << "0 ";
-			Frame* frame = _renderer.BeginFrame();
-			if (frame != nullptr)
+			VulkanFrame& vulkan_frame = (VulkanFrame&)_renderer.BeginFrame();
+			if (vulkan_frame.IsValid())
 			{
-				::std::cout << "1 ";
-				VulkanFrame& vulkan_frame = (VulkanFrame&)*frame;
-				if (vulkan_frame.IsValid())
+				VulkanRenderer& vulkan_renderer = (VulkanRenderer&)_renderer;
+
+				UpdateCamera();
+				UniformBufferObject ubo = vulkan_renderer.GetObjectPipeline().GetUbo();
+				ubo.View = _camera.View;
+				ubo.Projection = _camera.Projection;
+				vulkan_renderer.GetObjectPipeline().SetUbo(ubo);
+
+				vulkan_renderer.BeginRenderPassOnFrame(vulkan_frame);
+				vulkan_renderer.GetObjectPipeline().BindPipelineToFrame(vulkan_frame);
+				vulkan_renderer.GetObjectPipeline().PrepareToBindDescriptorSets(vulkan_frame);
+				auto object_entities = _ecs_registry.view<RenderableObject*>();
+				for (auto e : object_entities)
 				{
-					::std::cout << "2 ";
-
-					VulkanRenderer& vulkan_renderer = (VulkanRenderer&)_renderer;
-
-					UpdateCamera();
-					UniformBufferObject ubo = vulkan_renderer.GetObjectPipeline().GetUbo();
-					ubo.View = _camera.View;
-					ubo.Projection = _camera.Projection;
-					vulkan_renderer.GetObjectPipeline().SetUbo(ubo);
-
-					vulkan_renderer.BeginRenderPassOnFrame(vulkan_frame);
-					vulkan_renderer.GetObjectPipeline().BindPipelineToFrame(vulkan_frame);
-					vulkan_renderer.GetObjectPipeline().PrepareToBindDescriptorSets(vulkan_frame);
-					auto object_entities = _ecs_registry.view<RenderableObject*>();
-					for (auto e : object_entities)
-					{
-						RenderableObject& object = *ecs::Entity(e, _ecs_registry).Get<RenderableObject*>();
-						object.RenderToFrame(vulkan_frame, vulkan_renderer.GetObjectPipeline());
-					}
-					vulkan_renderer.GetObjectPipeline().BindDescriptorSetsToFrame(vulkan_frame);
-
-					/*
-					vulkan_renderer.GetLightPipeline().BindPipelineToFrame(frame);
-					vulkan_renderer.GetLightPipeline().SetUbo(ubo);
-					vulkan_renderer.GetLightPipeline().PrepareToBindDescriptorSets(frame);
-					auto light_entities = _ecs_registry.view<RenderableLight*>();
-					for (auto e : light_entities)
-					{
-						RenderableLight& light = *ecs::Entity(e, _ecs_registry).Get<RenderableLight*>();
-						light.RenderToFrame(frame, vulkan_renderer.GetLightPipeline());
-
-						// TODO: we need to nest looping with the renderable objects to apply these lights to them
-					}
-					vulkan_renderer.GetLightPipeline().BindDescriptorSetsToFrame(frame);
-					*/
-
-					vulkan_renderer.EndRenderPassOnFrame(vulkan_frame);
-					vulkan_frame.SubmitStagedCommandsToBuffer();
-
-					_renderer.EndFrame();
-					_renderer.DrawFrame();
+					RenderableObject& object = *ecs::Entity(e, _ecs_registry).Get<RenderableObject*>();
+					object.RenderToFrame(vulkan_frame, vulkan_renderer.GetObjectPipeline());
 				}
-			}
+				vulkan_renderer.GetObjectPipeline().BindDescriptorSetsToFrame(vulkan_frame);
 
-			::std::cout << "3\n";
+				/*
+				vulkan_renderer.GetLightPipeline().BindPipelineToFrame(frame);
+				vulkan_renderer.GetLightPipeline().SetUbo(ubo);
+				vulkan_renderer.GetLightPipeline().PrepareToBindDescriptorSets(frame);
+				auto light_entities = _ecs_registry.view<RenderableLight*>();
+				for (auto e : light_entities)
+				{
+					RenderableLight& light = *ecs::Entity(e, _ecs_registry).Get<RenderableLight*>();
+					light.RenderToFrame(frame, vulkan_renderer.GetLightPipeline());
+
+					// TODO: we need to nest looping with the renderable objects to apply these lights to them
+				}
+				vulkan_renderer.GetLightPipeline().BindDescriptorSetsToFrame(frame);
+				*/
+
+				vulkan_renderer.EndRenderPassOnFrame(vulkan_frame);
+				vulkan_frame.SubmitStagedCommandsToBuffer();
+
+				_renderer.EndFrame();
+				_renderer.DrawFrame();
+			}
 		}
 
 		void Prepare() override
