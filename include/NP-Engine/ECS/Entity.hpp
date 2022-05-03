@@ -11,7 +11,6 @@
 
 #include "NP-Engine/Foundation/Foundation.hpp"
 #include "NP-Engine/Primitive/Primitive.hpp"
-#include "NP-Engine/Insight/Insight.hpp"
 #include "NP-Engine/Memory/Memory.hpp"
 
 #include "NP-Engine/Vendor/EnttInclude.hpp"
@@ -22,7 +21,7 @@ namespace np::ecs
 	{
 	private:
 		::entt::entity _entity;
-		::entt::registry* _registry; // TODO: should we add a getter for this?
+		::entt::registry* _registry;
 
 	public:
 		Entity(): _entity(::entt::null), _registry(nullptr) {}
@@ -60,6 +59,12 @@ namespace np::ecs
 			return _entity;
 		}
 
+		::entt::registry& GetRegistry() const
+		{
+			NP_ENGINE_ASSERT(IsValid(), "Entity must be valid to get registry");
+			return *_registry;
+		}
+
 		bl IsValid() const
 		{
 			return _entity != ::entt::null && _registry != nullptr && _registry->valid(_entity);
@@ -80,6 +85,16 @@ namespace np::ecs
 			{
 				_registry->destroy(_entity);
 				_entity = _registry->create(_entity);
+			}
+		}
+
+		void Destroy()
+		{
+			if (IsValid())
+			{
+				_registry->destroy(_entity);
+				_entity = ::entt::null;
+				_registry = nullptr;
 			}
 		}
 
