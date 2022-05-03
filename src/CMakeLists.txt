@@ -1,8 +1,12 @@
-# //##===----------------------------------------------------------------------===##//
-# //
-# //  Author: Nathan Phipps 11/1/21
-# //
-# //##===----------------------------------------------------------------------===##//
+##===----------------------------------------------------------------------===##
+#
+# Author: Nathan Phipps 11/1/21
+#
+##===----------------------------------------------------------------------===##
+
+##==--------------------------------------------------------==##
+#NP_ENGINE Header Files
+##==--------------------------------------------------------==##
 
 set(NP_ENGINE_APPLICATION_HPP
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Application/Application.hpp
@@ -72,7 +76,6 @@ set(NP_ENGINE_GRAPHICS_RPI_HPP
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/Camera.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/Command.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/Buffer.hpp
-	# ${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/Device.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/Pipeline.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/Scene.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/Shader.hpp
@@ -117,8 +120,6 @@ set(NP_ENGINE_GRAPHICS_VULKAN_HPP
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RHI/Vulkan/VulkanCommandBuffer.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RHI/Vulkan/VulkanDescriptorSets.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RHI/Vulkan/VulkanDescriptorSetLayout.hpp
-	# ${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RHI/Vulkan/VulkanDescriptor.hpp
-	# ${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RHI/Vulkan/VulkanDescriptorSlot.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RHI/Vulkan/VulkanTexture.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RHI/Vulkan/VulkanFrame.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RHI/Vulkan/VulkanCamera.hpp
@@ -530,6 +531,8 @@ configure_file(
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Foundation/cmake_include.hpp
 )
 
+##==--------------------------------------------------------==##
+#NP_ENGINE Source Groups
 ##==--------------------------------------------------------==##
 
 source_group("" FILES ${NP_ENGINE_HPP})
