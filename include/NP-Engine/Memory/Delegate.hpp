@@ -53,7 +53,7 @@ namespace np::memory
 			CopyFrom(other);
 		}
 
-		Delegate(Delegate&& other)
+		Delegate(Delegate&& other) noexcept
 		{
 			CopyFrom(other);
 		}
@@ -103,7 +103,7 @@ namespace np::memory
 			return *this;
 		}
 
-		Delegate& operator=(Delegate&& other)
+		Delegate& operator=(Delegate&& other) noexcept
 		{
 			CopyFrom(other);
 			return *this;
