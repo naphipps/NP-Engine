@@ -26,6 +26,7 @@
 #include "RenderableLight.hpp"
 #include "RenderableImage.hpp"
 #include "RenderableModel.hpp"
+#include "RenderableType.hpp"
 #include "Frame.hpp"
 #include "Pipeline.hpp"
 #include "ObjectMetaValues.hpp"
