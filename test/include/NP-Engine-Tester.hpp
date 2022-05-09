@@ -23,6 +23,7 @@ namespace np::app
 		graphics::Model _model;
 		graphics::RenderableModel* _renderable_model;
 		ecs::Entity _model_entity;
+		time::SteadyTimestamp _start_timestamp;
 
 		virtual void AdjustForWindowClose(event::Event& e)
 		{
@@ -47,6 +48,15 @@ namespace np::app
 			}
 		}
 
+		void UpdateMetaValuesOnFrame(memory::Delegate& d)
+		{
+			graphics::ObjectMetaValues& meta_values = _renderable_model->GetMetaValues();
+			
+			time::DurationMilliseconds duration = time::SteadyClock::now() - _start_timestamp;
+			flt seconds = duration.count() / 1000.0f;
+			meta_values.object.Model = glm::rotate(glm::mat4(1.0f), seconds * glm::radians(90.0f) / 4.0f, glm::vec3(0.0f, 0.0f, 1.0f));
+		}
+
 	public:
 		GameLayer(event::EventSubmitter& event_submitter, ::entt::registry& ecs_registry):
 			Layer(event_submitter, ecs_registry),
@@ -56,9 +66,10 @@ namespace np::app
 				fs::Append(fs::Append(fs::Append(NP_ENGINE_WORKING_DIR, "test"), "assets"), "viking_room.png")),
 			_model(_model_filename, graphics::Image(_model_texture_filename)),
 			_renderable_model(graphics::RenderableModel::Create(memory::DefaultTraitAllocator, _model)),
-			_model_entity(ecs_registry)
+			_model_entity(ecs_registry),
+			_start_timestamp(time::SteadyClock::now())
 		{
-			// TODO: register this renderable object to be associated with our scene
+			_renderable_model->GetUpdateMetaValuesOnFrameDelegate().Connect<GameLayer, &GameLayer::UpdateMetaValuesOnFrame>(this);
 			_model_entity.Add<graphics::RenderableObject*>(_renderable_model);
 		}
 
@@ -73,14 +84,13 @@ namespace np::app
 			_scene = memory::AddressOf(scene);
 			// TODO: init scene, and destroy content for last scene??
 			_scene->Prepare();
+			_scene->SetCamera(_camera);
 		}
 
 		void Update(time::DurationMilliseconds time_delta) override
 		{
 			if (_scene != nullptr)
 			{
-				// TODO: do stuff with the scene?
-
 				_scene->SetCamera(_camera); // TODO: our scene needs a camera
 			}
 		}

@@ -7,12 +7,8 @@
 #ifndef NP_ENGINE_VULKAN_RENDERABLE_MODEL_HPP
 #define NP_ENGINE_VULKAN_RENDERABLE_MODEL_HPP
 
-#include <iostream> //TODO: remove
-
 #include "NP-Engine/Primitive/Primitive.hpp"
 #include "NP-Engine/Memory/Memory.hpp"
-#include "NP-Engine/String/String.hpp"
-#include "NP-Engine/Time/Time.hpp"
 
 #include "NP-Engine/Vendor/GlmInclude.hpp"
 
@@ -33,9 +29,6 @@ namespace np::graphics::rhi
 	{
 	private:
 		bl _is_out_of_date;
-		// TODO: we could put RenderableMetaValues in RenderableModel so GameLayer can access it and update RenderableMetaValues
-		// there
-		ObjectMetaValues _meta_values;
 		VulkanBuffer* _vertex_buffer;
 		VulkanBuffer* _index_buffer;
 		VulkanTexture* _texture;
@@ -43,8 +36,6 @@ namespace np::graphics::rhi
 
 		VkDescriptorImageInfo _descriptor_info;
 		VkWriteDescriptorSet _descriptor_writer;
-
-		time::SteadyTimestamp _start_timestamp;
 
 		VkBuffer _vk_vertex_buffer;
 		container::vector<VkDeviceSize> _vertex_offsets;
@@ -132,16 +123,6 @@ namespace np::graphics::rhi
 			}
 		}
 
-		void UpdateMetaValues()
-		{
-			// TODO: still not completely happy with how this method is setup, the contents are fine, but the design
-			// TODO: feel like this should be in tester project
-			time::DurationMilliseconds duration = time::SteadyClock::now() - _start_timestamp;
-			flt seconds = duration.count() / 1000.0f;
-			_meta_values.object.Model =
-				glm::rotate(glm::mat4(1.0f), seconds * glm::radians(90.0f) / 4.0f, glm::vec3(0.0f, 0.0f, 1.0f));
-		}
-
 	public:
 		VulkanRenderableModel(Model& model):
 			RenderableModel(model),
@@ -152,7 +133,6 @@ namespace np::graphics::rhi
 			_sampler(nullptr),
 			_descriptor_info(CreateDescriptorImageInfo()),
 			_descriptor_writer(CreateDescriptorWriter()),
-			_start_timestamp(time::SteadyClock::now()),
 			_vk_vertex_buffer(nullptr),
 			_vertex_offsets({0}),
 			_push_constants(nullptr),
@@ -169,7 +149,7 @@ namespace np::graphics::rhi
 			VulkanPipeline& vulkan_pipeline = (VulkanPipeline&)pipeline;
 
 			PrepareForPipeline(pipeline);
-			UpdateMetaValues();
+			_update_meta_values_on_frame.InvokeConnectedFunction();
 
 			vulkan_frame.StageCommand(*_push_constants);
 			vulkan_frame.StageCommand(*_bind_vertex_buffers);

@@ -14,6 +14,7 @@
 #include "RhiType.hpp"
 #include "RenderableObject.hpp"
 #include "RenderableType.hpp"
+#include "ObjectMetaValues.hpp"
 #include "Model.hpp"
 
 namespace np::graphics
@@ -22,8 +23,10 @@ namespace np::graphics
 	{
 	protected:
 		Model& _model;
+		ObjectMetaValues _meta_values;
+		memory::Delegate _update_meta_values_on_frame;
 
-		RenderableModel(Model& model): _model(model) {}
+		RenderableModel(Model& model) : _model(model), _meta_values() {}
 
 		virtual void Destruct() {}
 
@@ -48,6 +51,31 @@ namespace np::graphics
 		const Model& GetModel() const
 		{
 			return _model;
+		}
+
+		ObjectMetaValues& GetMetaValues()
+		{
+			return _meta_values;
+		}
+
+		const ObjectMetaValues& GetMetaValues() const
+		{
+			return _meta_values;
+		}
+
+		void SetMetaValues(const ObjectMetaValues& meta_values)
+		{
+			_meta_values = meta_values;
+		}
+
+		memory::Delegate& GetUpdateMetaValuesOnFrameDelegate()
+		{
+			return _update_meta_values_on_frame;
+		}
+
+		const memory::Delegate& GetUpdateMetaValuesOnFrameDelegate() const
+		{
+			return _update_meta_values_on_frame;
 		}
 	};
 } // namespace np::graphics
