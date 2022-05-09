@@ -20,6 +20,10 @@ namespace np::graphics::rhi
 	private:
 		void Destruct() override {}
 
+		void RenderToFrame(VulkanFrame& frame, VulkanPipeline& pipeline, VulkanRenderableImage& image) {}
+
+		void RenderToFrame(VulkanFrame& frame, VulkanPipeline& pipeline, VulkanRenderableModel& model) {}
+
 	public:
 		VulkanRenderableLight(Light& light): RenderableLight(light)
 		{
@@ -31,9 +35,20 @@ namespace np::graphics::rhi
 			::std::cout << "loud VulkanRenderableLight destructor!\n";
 		}
 
-		void RenderToFrame(Frame& frame, Pipeline& pipeline) override
+		void RenderToFrame(Frame& frame, Pipeline& pipeline, RenderableObject& object) override
 		{
 			// TODO: implement this
+			switch (object.GetType())
+			{
+			case RenderableType::Image:
+				RenderToFrame((VulkanFrame&)frame, (VulkanPipeline&)pipeline, (VulkanRenderableImage&)object);
+				break;
+			case RenderableType::Model:
+				RenderToFrame((VulkanFrame&)frame, (VulkanPipeline&)pipeline, (VulkanRenderableModel&)object);
+				break;
+			default:
+				break;
+			}
 		}
 
 		void PrepareForPipeline(Pipeline& pipeline) override {}

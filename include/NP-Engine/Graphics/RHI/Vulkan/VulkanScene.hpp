@@ -82,39 +82,45 @@ namespace np::graphics::rhi
 			if (vulkan_frame.IsValid())
 			{
 				VulkanRenderer& vulkan_renderer = (VulkanRenderer&)_renderer;
+				VulkanPipeline& object_pipeline = vulkan_renderer.GetObjectPipeline();
+				VulkanPipeline& light_pipeline = vulkan_renderer.GetLightPipeline();
+
 
 				UpdateCamera();
-				UniformBufferObject ubo = vulkan_renderer.GetObjectPipeline().GetUbo();
+				UniformBufferObject ubo = object_pipeline.GetUbo();
 				ubo.View = _camera.View;
 				ubo.Projection = _camera.Projection;
-				vulkan_renderer.GetObjectPipeline().SetUbo(ubo);
+				object_pipeline.SetUbo(ubo);
+				light_pipeline.SetUbo(ubo);
 
 				vulkan_renderer.BeginRenderPassOnFrame(vulkan_frame);
-				vulkan_renderer.GetObjectPipeline().BindPipelineToFrame(vulkan_frame);
-				vulkan_renderer.GetObjectPipeline().PrepareToBindDescriptorSets(vulkan_frame);
+
+				object_pipeline.BindPipelineToFrame(vulkan_frame);
+				object_pipeline.PrepareToBindDescriptorSets(vulkan_frame);
 				auto object_entities = _ecs_registry.view<RenderableObject*>();
 				for (auto e : object_entities)
 				{
 					RenderableObject& object = *ecs::Entity(e, _ecs_registry).Get<RenderableObject*>();
-					object.RenderToFrame(vulkan_frame, vulkan_renderer.GetObjectPipeline());
+					object.RenderToFrame(vulkan_frame, object_pipeline);
 				}
-				vulkan_renderer.GetObjectPipeline().BindDescriptorSetsToFrame(vulkan_frame);
+				object_pipeline.BindDescriptorSetsToFrame(vulkan_frame);
 
-				/*
-				vulkan_renderer.GetLightPipeline().BindPipelineToFrame(frame);
-				vulkan_renderer.GetLightPipeline().SetUbo(ubo);
-				vulkan_renderer.GetLightPipeline().PrepareToBindDescriptorSets(frame);
+				light_pipeline.BindPipelineToFrame(vulkan_frame);
+				light_pipeline.PrepareToBindDescriptorSets(vulkan_frame);
 				auto light_entities = _ecs_registry.view<RenderableLight*>();
 				for (auto e : light_entities)
 				{
+					//TODO: we'll need to address the light assign for us to maximize performance here
+
 					RenderableLight& light = *ecs::Entity(e, _ecs_registry).Get<RenderableLight*>();
-					light.RenderToFrame(frame, vulkan_renderer.GetLightPipeline());
-
-					// TODO: we need to nest looping with the renderable objects to apply these lights to them
+					for (auto e : object_entities)
+					{
+						RenderableObject& object = *ecs::Entity(e, _ecs_registry).Get<RenderableObject*>();
+						light.RenderToFrame(vulkan_frame, light_pipeline, object);
+					}
 				}
-				vulkan_renderer.GetLightPipeline().BindDescriptorSetsToFrame(frame);
-				*/
-
+				light_pipeline.BindDescriptorSetsToFrame(vulkan_frame);
+				
 				vulkan_renderer.EndRenderPassOnFrame(vulkan_frame);
 				vulkan_frame.SubmitStagedCommandsToBuffer();
 

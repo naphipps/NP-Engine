@@ -12,6 +12,7 @@
 #include "Frame.hpp"
 #include "Pipeline.hpp"
 #include "RenderableType.hpp"
+#include "RenderableObject.hpp"
 
 namespace np::graphics
 {
@@ -19,8 +20,7 @@ namespace np::graphics
 	{
 		virtual RenderableType GetType() const = 0;
 
-		// TODO: feel like the following needs a RenderableObject& param, or should we overwrite with all renderable types?
-		virtual void RenderToFrame(Frame& frame, Pipeline& pipline) = 0;
+		virtual void RenderToFrame(Frame& frame, Pipeline& pipline, RenderableObject& object) = 0;
 
 		virtual void PrepareForPipeline(Pipeline& pipeline) = 0;
 
