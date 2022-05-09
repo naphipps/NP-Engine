@@ -93,6 +93,7 @@ set(NP_ENGINE_GRAPHICS_RPI_HPP
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/RenderableImage.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/RenderableModel.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/RenderableLight.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/RenderableType.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/ObjectMetaValues.hpp
 )
 

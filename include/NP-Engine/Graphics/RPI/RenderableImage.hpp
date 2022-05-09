@@ -13,6 +13,7 @@
 
 #include "RhiType.hpp"
 #include "RenderableObject.hpp"
+#include "RenderableType.hpp"
 #include "Image.hpp"
 
 namespace np::graphics
@@ -32,6 +33,11 @@ namespace np::graphics
 		virtual ~RenderableImage()
 		{
 			Destruct();
+		}
+
+		virtual RenderableType GetType() const override
+		{
+			return RenderableType::Image;
 		}
 
 		Image& GetImage()

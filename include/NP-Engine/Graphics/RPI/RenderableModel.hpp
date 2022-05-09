@@ -13,6 +13,7 @@
 
 #include "RhiType.hpp"
 #include "RenderableObject.hpp"
+#include "RenderableType.hpp"
 #include "Model.hpp"
 
 namespace np::graphics
@@ -32,6 +33,11 @@ namespace np::graphics
 		virtual ~RenderableModel()
 		{
 			Destruct();
+		}
+
+		virtual RenderableType GetType() const override
+		{
+			return RenderableType::Model;
 		}
 
 		Model& GetModel()

@@ -13,6 +13,7 @@
 
 #include "RhiType.hpp"
 #include "RenderableLightObject.hpp"
+#include "RenderableType.hpp"
 #include "Light.hpp"
 
 namespace np::graphics
@@ -32,6 +33,11 @@ namespace np::graphics
 		virtual ~RenderableLight()
 		{
 			Destruct();
+		}
+
+		virtual RenderableType GetType() const override
+		{
+			return RenderableType::Light;
 		}
 
 		Light& GetLight()
