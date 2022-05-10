@@ -7,7 +7,7 @@
 #ifndef NP_ENGINE_VULKAN_INSTANCE_HPP
 #define NP_ENGINE_VULKAN_INSTANCE_HPP
 
-#include <iostream> //TODO: remove?
+#include <iostream>
 
 #include "NP-Engine/Primitive/Primitive.hpp"
 #include "NP-Engine/Container/Container.hpp"
@@ -32,16 +32,36 @@ namespace np::graphics::rhi
 																  const VkDebugUtilsMessengerCallbackDataEXT* callback_data,
 																  void* user_data)
 		{
-			VkBool32 retval = VK_TRUE;
-			if ((msg_severity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT) == 0)
+			// TODO: feel like we should pipe this stuff through our logger
+			// TODO: should we have a macro to enable this? NP_ENGINE_ENABLE_VULKAN_DEBUG_CALLBACK?
+
+			container::vector<str> known_msgs
 			{
-				retval = VK_FALSE;
-				// TODO: feel like we should pipe this stuff through our logger
-				// TODO: should we have a macro to enable this? NP_ENGINE_ENABLE_VULKAN_DEBUG_CALLBACK?
-				str msg = "\nValidation Layer: " + to_str(callback_data->pMessage) + "\n";
-				::std::cerr << msg;
-				NP_ENGINE_ASSERT(false, msg); // here in case for issues that cause a gpu crash
+				R"(loader_scanned_icd_add: Driver C:\Windows\System32\DriverStore\FileRepository\u0377495.inf_amd64_58cc395c0bf03a26\B377432\.\amdvlk64.dll says it supports interface version 6 but still exports core entrypoints (Policy #LDP_DRIVER_6))" //vulkansdk 1.3.211
+			};
+
+			VkBool32 retval = VK_TRUE;
+			bl found = false;
+
+			for (auto it = known_msgs.begin(); !found && it != known_msgs.end(); it++)
+				found = *it == callback_data->pMessage;
+			
+			if (!found)
+			{
+				if ((msg_severity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT) != 0 ||
+					(msg_severity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT) != 0)
+				{
+					retval = VK_FALSE;
+					str msg = "\nNP Validation Layer: ";
+					msg += "[[" + to_str(callback_data->pMessageIdName) + ", " + to_str(callback_data->messageIdNumber) + "]] ";
+					msg += to_str(callback_data->pMessage);
+					msg += "\n";
+
+					::std::cerr << msg;
+					//NP_ENGINE_ASSERT(false, msg); // here in case for issues that cause a gpu crash
+				}
 			}
+
 			return retval;
 		}
 
