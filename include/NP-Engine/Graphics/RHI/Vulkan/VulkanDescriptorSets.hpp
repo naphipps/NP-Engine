@@ -81,6 +81,11 @@ namespace np::graphics::rhi
 			return _descriptor_sets;
 		}
 
+		VkDescriptorSet operator[](i32 index) const
+		{
+			return _descriptor_sets[index];
+		}
+
 		VulkanSwapchain& GetSwapchain()
 		{
 			return _swapchain;

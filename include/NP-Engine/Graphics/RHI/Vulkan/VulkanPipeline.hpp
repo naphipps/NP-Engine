@@ -555,8 +555,7 @@ namespace np::graphics::rhi
 			if (_bind_descriptor_sets)
 				memory::Destroy<VulkanCommandBindDescriptorSets>(memory::DefaultTraitAllocator, _bind_descriptor_sets);
 
-			_bound_descriptor_sets = {
-				((const container::vector<VkDescriptorSet>&)_descriptor_sets)[GetSwapchain().GetCurrentImageIndex()]};
+			_bound_descriptor_sets = { _descriptor_sets[GetSwapchain().GetCurrentImageIndex()] };
 
 			_bind_descriptor_sets = memory::Create<VulkanCommandBindDescriptorSets>(
 				memory::DefaultTraitAllocator, VK_PIPELINE_BIND_POINT_GRAPHICS, _pipeline_layout, 0,
