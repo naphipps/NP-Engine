@@ -28,7 +28,7 @@ namespace np::graphics::rhi
 		// TODO: we need to stop rebuilding things based on GetImages().size() and use MAX_FRAMES (or NP_ENGINE_MAX_FRAMES)
 
 	private:
-		VulkanDevice& _device; //TODO: remove framebuffers from here to remove this dependency
+		VulkanDevice& _device;
 		VkExtent2D _extent;
 		VkSwapchainKHR _swapchain;
 		container::vector<VkImage> _images; // we do not have device memory for these so we'll keep VkImage type

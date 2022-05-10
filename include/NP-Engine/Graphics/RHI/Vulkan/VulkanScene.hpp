@@ -7,8 +7,6 @@
 #ifndef NP_ENGINE_VULKAN_SCENE_HPP
 #define NP_ENGINE_VULKAN_SCENE_HPP
 
-#include <iostream> //TODO: remove
-
 #include "NP-Engine/Primitive/Primitive.hpp"
 #include "NP-Engine/Insight/Insight.hpp"
 #include "NP-Engine/Concurrency/Concurrency.hpp"
@@ -34,24 +32,17 @@ namespace np::graphics::rhi
 		atm_bl _engage_draw_loop_procedure;
 		atm_bl _drawing_is_complete;
 
-		// TODO: WindowResizeCallback and WindowPositionCallback can be called very fast in succession - add a threshold for
-		// when these actually draw so we don't get so bogged down with draw calls
-
 		static void WindowResizeCallback(void* scene, ui32 width, ui32 height)
 		{
-			// TODO: find a way for these callbacks to trigger a thread that renders on a loop until Draw is called again
 			VulkanScene& vulkan_scene = (VulkanScene&)*((VulkanScene*)scene);
 			vulkan_scene.EngageDrawLoopProcedure();
 		}
 
 		static void WindowPositionCallback(void* scene, i32 x, i32 y)
 		{
-			// TODO: find a way for these callbacks to trigger a thread that renders on a loop until Draw is called again
 			VulkanScene& vulkan_scene = (VulkanScene&)*((VulkanScene*)scene);
 			vulkan_scene.EngageDrawLoopProcedure();
 		}
-
-		// TODO: investigate FramebufferResize callback for glfw
 
 		void EngageDrawLoopProcedure()
 		{
@@ -96,10 +87,6 @@ namespace np::graphics::rhi
 			{
 				expected = true;
 			}
-
-			// TODO: telling the renderer to draw may require the usage of Command objects...
-
-			// TODO: loop through Entities to get camera, and objects to renderer, etc
 
 			VulkanFrame& vulkan_frame = (VulkanFrame&)_renderer.BeginFrame();
 			if (vulkan_frame.IsValid())
