@@ -11,6 +11,8 @@
 
 #include "NP-Engine/Primitive/Primitive.hpp"
 #include "NP-Engine/Insight/Insight.hpp"
+#include "NP-Engine/Concurrency/Concurrency.hpp"
+#include "NP-Engine/Time/Time.hpp"
 
 #include "NP-Engine/Vendor/VulkanInclude.hpp"
 
@@ -27,7 +29,10 @@ namespace np::graphics::rhi
 	{
 	private:
 		VulkanCamera _camera;
-		time::SteadyTimestamp _start_timestamp;
+		concurrency::Thread _draw_loop_thread;
+		atm_bl _draw_loop_procedure_is_complete;
+		atm_bl _engage_draw_loop_procedure;
+		atm_bl _drawing_is_complete;
 
 		// TODO: WindowResizeCallback and WindowPositionCallback can be called very fast in succession - add a threshold for
 		// when these actually draw so we don't get so bogged down with draw calls
@@ -36,44 +41,62 @@ namespace np::graphics::rhi
 		{
 			// TODO: find a way for these callbacks to trigger a thread that renders on a loop until Draw is called again
 			VulkanScene& vulkan_scene = (VulkanScene&)*((VulkanScene*)scene);
-			VulkanRenderer& vulkan_renderer = (VulkanRenderer&)vulkan_scene.GetRenderer();
-			vulkan_renderer.SetOutOfDate();
-			vulkan_scene.Draw();
+			vulkan_scene.EngageDrawLoopProcedure();
 		}
 
 		static void WindowPositionCallback(void* scene, i32 x, i32 y)
 		{
 			// TODO: find a way for these callbacks to trigger a thread that renders on a loop until Draw is called again
 			VulkanScene& vulkan_scene = (VulkanScene&)*((VulkanScene*)scene);
-			VulkanRenderer& vulkan_renderer = (VulkanRenderer&)vulkan_scene.GetRenderer();
-			vulkan_renderer.SetOutOfDate();
-			vulkan_scene.Draw();
+			vulkan_scene.EngageDrawLoopProcedure();
 		}
 
 		// TODO: investigate FramebufferResize callback for glfw
 
-	public:
-		VulkanScene(::entt::registry& ecs_registry, Renderer& renderer): Scene(ecs_registry, renderer)
+		void EngageDrawLoopProcedure()
 		{
-			((VulkanRenderer&)_renderer).GetSurface().GetWindow().SetResizeCallback(this, WindowResizeCallback);
-			((VulkanRenderer&)_renderer).GetSurface().GetWindow().SetPositionCallback(this, WindowPositionCallback);
+			bl expected = false;
+			if (_engage_draw_loop_procedure.compare_exchange_strong(expected, true, mo_release, mo_relaxed))
+			{
+				_draw_loop_procedure_is_complete.store(false, mo_release);
+				_draw_loop_thread.Dispose();
+				_draw_loop_thread.Run(&VulkanScene::DrawLoopProcedure, this);
+			}
 		}
 
-		~VulkanScene()
+		void DrawLoopProcedure()
 		{
-			Dispose();
+			time::SteadyTimestamp prev = time::SteadyClock::now();
+			time::SteadyTimestamp next;
+
+			siz max_duration = NP_ENGINE_APPLICATION_LOOP_DURATION;
+
+			while (_engage_draw_loop_procedure.load(mo_acquire))
+			{
+				((VulkanRenderer&)_renderer).SetOutOfDate();
+
+				Draw();
+
+				next = time::SteadyClock::now();
+				time::DurationMilliseconds duration = next - prev;
+				prev = next;
+				if (duration.count() < max_duration)
+				{
+					concurrency::ThisThread::sleep_for(time::DurationMilliseconds(max_duration - duration.count()));
+				}
+			}
+
+			_draw_loop_procedure_is_complete.store(true, mo_release);
 		}
 
-		void UpdateCamera()
+		void Draw() 
 		{
-			_camera.View = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-			_camera.Projection =
-				glm::perspective(glm::radians(45.0f), ((VulkanRenderer&)_renderer).GetDevice().GetAspectRatio(), 0.1f, 10.0f);
-			_camera.Projection[1][1] *= -1; // glm was made for OpenGL, so Y is inverted. We fix/invert Y here.
-		}
+			bl expected = true;
+			while (!_drawing_is_complete.compare_exchange_weak(expected, false, mo_release, mo_relaxed))
+			{
+				expected = true;
+			}
 
-		void Draw() override
-		{
 			// TODO: telling the renderer to draw may require the usage of Command objects...
 
 			// TODO: loop through Entities to get camera, and objects to renderer, etc
@@ -120,13 +143,48 @@ namespace np::graphics::rhi
 					}
 				}
 				light_pipeline.BindDescriptorSetsToFrame(vulkan_frame);
-				
+
 				vulkan_renderer.EndRenderPassOnFrame(vulkan_frame);
 				vulkan_frame.SubmitStagedCommandsToBuffer();
 
 				_renderer.EndFrame();
 				_renderer.DrawFrame();
 			}
+
+			_drawing_is_complete.store(true, mo_release);
+		}
+
+	public:
+		VulkanScene(::entt::registry& ecs_registry, Renderer& renderer): 
+			Scene(ecs_registry, renderer), 
+			_draw_loop_procedure_is_complete(true),
+			_engage_draw_loop_procedure(false),
+			_drawing_is_complete(true)
+		{
+			((VulkanRenderer&)_renderer).GetSurface().GetWindow().SetResizeCallback(this, WindowResizeCallback);
+			((VulkanRenderer&)_renderer).GetSurface().GetWindow().SetPositionCallback(this, WindowPositionCallback);
+		}
+
+		~VulkanScene()
+		{
+			Dispose();
+		}
+
+		//TODO: I don't like how we have our camera api setup since we overwrite everything in UpdateCamera()
+		void UpdateCamera()
+		{
+			_camera.View = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+			_camera.Projection =
+				glm::perspective(glm::radians(45.0f), ((VulkanRenderer&)_renderer).GetSwapchain().GetAspectRatio(), 0.1f, 10.0f);
+			_camera.Projection[1][1] *= -1; // glm was made for OpenGL, so Y is inverted. We fix/invert Y here.
+		}
+
+		void Render() override
+		{
+			while (!_draw_loop_procedure_is_complete.load(mo_acquire))
+				_engage_draw_loop_procedure.store(false, mo_release);
+
+			Draw();
 		}
 
 		void Prepare() override

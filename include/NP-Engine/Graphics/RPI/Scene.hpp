@@ -55,7 +55,7 @@ namespace np::graphics
 		virtual void Remove(RenderableObject& renderable_object) {}
 		virtual void Remove(RenderableLightObject& renderable_light_object) {}
 
-		virtual void Draw() = 0;
+		virtual void Render() = 0;
 		virtual void Prepare() = 0;
 		virtual void Dispose() = 0;
 		virtual void SetCamera(Camera& camera) = 0;

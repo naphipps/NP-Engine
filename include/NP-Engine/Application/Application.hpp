@@ -238,7 +238,7 @@ namespace np::app
 				for (Layer* overlay : _overlays)
 					overlay->Cleanup();
 
-				_graphics_layer.Draw();
+				_graphics_layer.Render();
 
 				loop_next_timestamp = time::SteadyClock::now();
 				loop_duration = loop_next_timestamp - loop_prev_timestamp;

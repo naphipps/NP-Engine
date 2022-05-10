@@ -259,10 +259,10 @@ namespace np::app
 			}
 		}
 
-		void Draw()
+		void Render()
 		{
 			for (auto it = _acquired_scenes.begin(); it != _acquired_scenes.end(); it++)
-				(*it)->Draw();
+				(*it)->Render();
 		}
 	};
 } // namespace np::app
