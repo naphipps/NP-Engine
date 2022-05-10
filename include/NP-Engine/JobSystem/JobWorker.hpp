@@ -213,6 +213,7 @@ namespace np::js
 			_lowest_job_deque(JOB_DEQUEUE_SIZE),
 			_keep_working(false),
 			_work_procedure_complete(true),
+			_job_pool(nullptr),
 			_thread_pool(nullptr),
 			_coworker_index(0),
 			_bad_steal_sleep_duration(NP_ENGINE_APPLICATION_LOOP_DURATION)
