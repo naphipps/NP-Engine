@@ -7,7 +7,7 @@
 #ifndef NP_ENGINE_RPI_RENDERABLE_TYPE_HPP
 #define NP_ENGINE_RPI_RENDERABLE_TYPE_HPP
 
-#include "NP-Engine\Primitive\Primitive.hpp"
+#include "NP-Engine/Primitive/Primitive.hpp"
 
 namespace np::graphics
 {
