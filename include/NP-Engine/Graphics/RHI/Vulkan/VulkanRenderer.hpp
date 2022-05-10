@@ -27,6 +27,7 @@
 #include "VulkanPipeline.hpp"
 #include "VulkanRenderPass.hpp"
 #include "VulkanFrame.hpp"
+#include "VulkanFramebuffers.hpp"
 
 namespace np::graphics::rhi
 {
@@ -36,8 +37,9 @@ namespace np::graphics::rhi
 		VulkanInstance* _instance;
 		VulkanSurface* _surface;
 		VulkanDevice* _device;
-		VulkanRenderPass* _render_pass;
 		VulkanSwapchain* _swapchain;
+		VulkanRenderPass* _render_pass;
+		VulkanFramebuffers* _framebuffers;
 		container::vector<VulkanCommandBuffer> _command_buffers;
 		str _object_vertex_shader_filename;
 		str _object_fragment_shader_filename;
@@ -61,10 +63,9 @@ namespace np::graphics::rhi
 			{
 				SetOutOfDate(false);
 				vkDeviceWaitIdle(GetDevice());
-				GetDevice().Rebuild();
-				_render_pass
-					->Rebuild(); // TODO: don't know why swapchain's rebuild hates it when this line is GetRenderPass() instead
 				GetSwapchain().Rebuild();
+				GetRenderPass().Rebuild();
+				GetFramebuffers().Rebuild();
 				GetDevice().GetCommandPool().FreeCommandBuffers(_command_buffers);
 				_command_buffers = CreateCommandBuffers();
 				GetObjectPipeline().Rebuild();
@@ -96,8 +97,9 @@ namespace np::graphics::rhi
 			_instance(memory::Create<VulkanInstance>(memory::DefaultTraitAllocator)),
 			_surface(nullptr),
 			_device(nullptr),
-			_render_pass(nullptr),
 			_swapchain(nullptr),
+			_render_pass(nullptr),
+			_framebuffers(nullptr),
 			_object_vertex_shader_filename(fs::Append(fs::Append("Vulkan", "shaders"), "object_vertex.glsl")),
 			_object_fragment_shader_filename(fs::Append(fs::Append("Vulkan", "shaders"), "object_fragment.glsl")),
 			_object_vertex_shader(nullptr),
@@ -137,11 +139,14 @@ namespace np::graphics::rhi
 			if (_object_vertex_shader)
 				memory::Destroy<VulkanShader>(memory::DefaultTraitAllocator, _object_vertex_shader);
 
-			if (_swapchain)
-				memory::Destroy<VulkanSwapchain>(memory::DefaultTraitAllocator, _swapchain);
+			if (_framebuffers)
+				memory::Destroy<VulkanFramebuffers>(memory::DefaultTraitAllocator, _framebuffers);
 
 			if (_render_pass)
 				memory::Destroy<VulkanRenderPass>(memory::DefaultTraitAllocator, _render_pass);
+
+			if (_swapchain)
+				memory::Destroy<VulkanSwapchain>(memory::DefaultTraitAllocator, _swapchain);
 
 			if (_device)
 			{
@@ -175,8 +180,9 @@ namespace np::graphics::rhi
 		{
 			_surface = memory::Create<VulkanSurface>(memory::DefaultTraitAllocator, *_instance, window);
 			_device = memory::Create<VulkanDevice>(memory::DefaultTraitAllocator, *_surface);
-			_render_pass = memory::Create<VulkanRenderPass>(memory::DefaultTraitAllocator, *_device);
-			_swapchain = memory::Create<VulkanSwapchain>(memory::DefaultTraitAllocator, *_render_pass);
+			_swapchain = memory::Create<VulkanSwapchain>(memory::DefaultTraitAllocator, *_device);
+			_render_pass = memory::Create<VulkanRenderPass>(memory::DefaultTraitAllocator, *_swapchain);
+			_framebuffers = memory::Create<VulkanFramebuffers>(memory::DefaultTraitAllocator, *_swapchain, *_render_pass);
 
 			_command_buffers = CreateCommandBuffers();
 
@@ -206,8 +212,9 @@ namespace np::graphics::rhi
 				memory::Destroy<VulkanPipeline>(memory::DefaultTraitAllocator, _object_pipeline);
 				memory::Destroy<VulkanShader>(memory::DefaultTraitAllocator, _object_vertex_shader);
 				memory::Destroy<VulkanShader>(memory::DefaultTraitAllocator, _object_fragment_shader);
-				memory::Destroy<VulkanSwapchain>(memory::DefaultTraitAllocator, _swapchain);
+				memory::Destroy<VulkanFramebuffers>(memory::DefaultTraitAllocator, _framebuffers);
 				memory::Destroy<VulkanRenderPass>(memory::DefaultTraitAllocator, _render_pass);
+				memory::Destroy<VulkanSwapchain>(memory::DefaultTraitAllocator, _swapchain);
 				memory::Destroy<VulkanDevice>(memory::DefaultTraitAllocator, _device);
 				memory::Destroy<VulkanSurface>(memory::DefaultTraitAllocator, _surface);
 				_light_pipeline = nullptr;
@@ -216,8 +223,9 @@ namespace np::graphics::rhi
 				_object_pipeline = nullptr;
 				_object_vertex_shader = nullptr;
 				_object_fragment_shader = nullptr;
-				_swapchain = nullptr;
+				_framebuffers = nullptr;
 				_render_pass = nullptr;
+				_swapchain = nullptr;
 				_device = nullptr;
 				_surface = nullptr;
 				_frame.Invalidate();
@@ -226,7 +234,7 @@ namespace np::graphics::rhi
 
 		void BeginRenderPassOnFrame(VulkanFrame& frame)
 		{
-			_render_pass_begin_info.framebuffer = GetSwapchain().GetFramebuffers()[GetSwapchain().GetAcquiredImageIndex()];
+			_render_pass_begin_info.framebuffer = GetFramebuffers()[GetSwapchain().GetAcquiredImageIndex()];
 			_render_pass->Begin(_render_pass_begin_info, frame);
 		}
 
@@ -359,16 +367,6 @@ namespace np::graphics::rhi
 			return *_device;
 		}
 
-		VulkanRenderPass GetRenderPass()
-		{
-			return *_render_pass;
-		}
-
-		const VulkanRenderPass GetRenderPass() const
-		{
-			return *_render_pass;
-		}
-
 		VulkanSwapchain& GetSwapchain()
 		{
 			return *_swapchain;
@@ -377,6 +375,26 @@ namespace np::graphics::rhi
 		const VulkanSwapchain& GetSwapchain() const
 		{
 			return *_swapchain;
+		}
+
+		VulkanRenderPass& GetRenderPass()
+		{
+			return *_render_pass;
+		}
+
+		const VulkanRenderPass& GetRenderPass() const
+		{
+			return *_render_pass;
+		}
+
+		VulkanFramebuffers& GetFramebuffers()
+		{
+			return *_framebuffers;
+		}
+
+		const VulkanFramebuffers& GetFramebuffers() const
+		{
+			return *_framebuffers;
 		}
 
 		VulkanPipeline& GetObjectPipeline()

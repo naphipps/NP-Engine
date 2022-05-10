@@ -51,14 +51,12 @@ namespace np::graphics::rhi
 	private:
 		VulkanSurface& _surface;
 		QueueFamilyIndices _queue_family_indices;
-		VkSurfaceCapabilitiesKHR _surface_capabilities;
 		VkSurfaceFormatKHR _surface_format;
 		VkPresentModeKHR _present_mode;
 		VkPhysicalDevice _physical_device;
 		VkDevice _device;
 		VulkanCommandPool _command_pool;
-		VkExtent2D _extent; // TODO: move this to RenderPass??
-
+		
 		container::vector<VkExtensionProperties> GetSupportedDeviceExtensions(VkPhysicalDevice physical_device) const
 		{
 			ui32 count = 0;
@@ -340,8 +338,6 @@ namespace np::graphics::rhi
 						}
 					}
 
-					vkGetPhysicalDeviceSurfaceCapabilitiesKHR(it->second, GetSurface(), &_surface_capabilities);
-
 					ui32 count;
 					vkGetPhysicalDeviceSurfaceFormatsKHR(it->second, GetSurface(), &count, nullptr);
 					surface_formats.resize(count);
@@ -426,36 +422,12 @@ namespace np::graphics::rhi
 			return info;
 		}
 
-		VkExtent2D ChooseExtent()
-		{
-			VkExtent2D extent{};
-
-			if (GetCapabilities().currentExtent.width != UI32_MAX)
-			{
-				extent = GetCapabilities().currentExtent;
-			}
-			else
-			{
-				i32 width, height;
-				glfwGetFramebufferSize((GLFWwindow*)GetSurface().GetWindow().GetNativeWindow(), &width, &height);
-
-				VkExtent2D min_extent = GetCapabilities().minImageExtent;
-				VkExtent2D max_extent = GetCapabilities().maxImageExtent;
-
-				extent = {::std::clamp((ui32)width, min_extent.width, max_extent.width),
-						  ::std::clamp((ui32)height, min_extent.height, max_extent.height)};
-			}
-
-			return extent;
-		}
-
 	public:
 		VulkanDevice(VulkanSurface& surface):
 			_surface(surface),
 			_physical_device(ChoosePhysicalDevice()),
 			_device(CreateLogicalDevice()),
-			_command_pool(_device, CreateCommandPoolInfo()),
-			_extent(ChooseExtent())
+			_command_pool(_device, CreateCommandPoolInfo())
 		{}
 
 		~VulkanDevice()
@@ -510,14 +482,6 @@ namespace np::graphics::rhi
 			return _command_pool;
 		}
 
-		const VkSurfaceCapabilitiesKHR& GetCapabilities()
-		{
-			if (GetPhysicalDevice() != nullptr)
-				vkGetPhysicalDeviceSurfaceCapabilitiesKHR(GetPhysicalDevice(), GetSurface(), &_surface_capabilities);
-
-			return _surface_capabilities;
-		}
-
 		const VkSurfaceFormatKHR& GetSurfaceFormat() const
 		{
 			return _surface_format;
@@ -551,21 +515,6 @@ namespace np::graphics::rhi
 				vkGetDeviceQueue(_device, _queue_family_indices.present.value(), 0, &queue);
 			}
 			return queue;
-		}
-
-		void Rebuild()
-		{
-			_extent = ChooseExtent();
-		}
-
-		VkExtent2D GetExtent()
-		{
-			return _extent;
-		}
-
-		flt GetAspectRatio()
-		{
-			return (flt)_extent.width / (flt)_extent.height;
 		}
 
 		ui32 GetMemoryTypeIndex(ui32 type_filter, VkMemoryPropertyFlags memory_property_flags)

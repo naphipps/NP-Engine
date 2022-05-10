@@ -93,8 +93,8 @@ namespace np::graphics::rhi
 			VkViewport viewport{};
 			viewport.x = 0.0f;
 			viewport.y = 0.0f;
-			viewport.width = (flt)GetDevice().GetExtent().width;
-			viewport.height = (flt)GetDevice().GetExtent().height;
+			viewport.width = (flt)GetSwapchain().GetExtent().width;
+			viewport.height = (flt)GetSwapchain().GetExtent().height;
 			viewport.minDepth = 0.0f;
 			viewport.maxDepth = 1.0f;
 			return viewport;
@@ -104,7 +104,7 @@ namespace np::graphics::rhi
 		{
 			VkRect2D scissor{};
 			scissor.offset = {0, 0};
-			scissor.extent = GetDevice().GetExtent();
+			scissor.extent = GetSwapchain().GetExtent();
 			return scissor;
 		}
 

@@ -15,8 +15,8 @@
 
 #include "VulkanInstance.hpp"
 #include "VulkanSurface.hpp"
-#include "VulkanRenderPass.hpp"
 #include "VulkanImageView.hpp"
+#include "VulkanDevice.hpp"
 
 namespace np::graphics::rhi
 {
@@ -28,16 +28,15 @@ namespace np::graphics::rhi
 		// TODO: we need to stop rebuilding things based on GetImages().size() and use MAX_FRAMES (or NP_ENGINE_MAX_FRAMES)
 
 	private:
-		VulkanRenderPass& _render_pass;
+		VulkanDevice& _device; //TODO: remove framebuffers from here to remove this dependency
+		VkExtent2D _extent;
 		VkSwapchainKHR _swapchain;
 		container::vector<VkImage> _images; // we do not have device memory for these so we'll keep VkImage type
 		container::vector<VulkanImageView> _image_views;
-		container::vector<VkFramebuffer> _framebuffers;
 		container::vector<VkSemaphore> _image_semaphores;
 		container::vector<VkSemaphore> _render_semaphores;
 		container::vector<VkFence> _fences;
 		container::vector<VkFence> _acquired_image_fences;
-
 		ui32 _current_image_index;
 		ui32 _acquired_image_index;
 
@@ -48,7 +47,6 @@ namespace np::graphics::rhi
 			info.surface = GetSurface();
 			info.imageFormat = GetDevice().GetSurfaceFormat().format;
 			info.imageColorSpace = GetDevice().GetSurfaceFormat().colorSpace;
-			info.imageExtent = GetDevice().GetExtent();
 			info.imageArrayLayers = 1;
 			info.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
 			return info;
@@ -72,28 +70,40 @@ namespace np::graphics::rhi
 			return info;
 		}
 
-		VkFramebufferCreateInfo CreateFramebufferInfo()
+		VkExtent2D ChooseExtent(const VkSurfaceCapabilitiesKHR& capabilities) const
 		{
-			VkFramebufferCreateInfo info{};
-			info.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-			info.width = GetDevice().GetExtent().width;
-			info.height = GetDevice().GetExtent().height;
-			info.layers = 1;
-			return info;
+			VkExtent2D extent{};
+
+			if (capabilities.currentExtent.width != UI32_MAX)
+			{
+				extent = capabilities.currentExtent;
+			}
+			else
+			{
+				i32 width, height;
+				glfwGetFramebufferSize((GLFWwindow*)GetSurface().GetWindow().GetNativeWindow(), &width, &height);
+
+				VkExtent2D min_extent = capabilities.minImageExtent;
+				VkExtent2D max_extent = capabilities.maxImageExtent;
+
+				extent = { ::std::clamp((ui32)width, min_extent.width, max_extent.width),
+						  ::std::clamp((ui32)height, min_extent.height, max_extent.height) };
+			}
+
+			return extent;
 		}
 
 		VkSwapchainKHR CreateSwapchain()
 		{
 			VkSwapchainKHR swapchain = nullptr;
 
-			ui32 min_image_count = GetDevice().GetCapabilities().minImageCount + 1;
-			if (GetDevice().GetCapabilities().maxImageCount != 0)
-				min_image_count = ::std::min(min_image_count, GetDevice().GetCapabilities().maxImageCount);
+			VkSwapchainCreateInfoKHR swapchain_info = CreateSwapchainInfo();
+			swapchain_info.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
+			swapchain_info.presentMode = GetDevice().GetPresentMode();
+			swapchain_info.clipped = VK_TRUE;
+			swapchain_info.oldSwapchain = nullptr;
 
 			container::vector<ui32> indices = GetDevice().GetQueueFamilyIndices().to_vector();
-
-			VkSwapchainCreateInfoKHR swapchain_info = CreateSwapchainInfo();
-			swapchain_info.minImageCount = min_image_count;
 
 			if (GetDevice().GetQueueFamilyIndices().graphics != GetDevice().GetQueueFamilyIndices().present)
 			{
@@ -106,12 +116,18 @@ namespace np::graphics::rhi
 				swapchain_info.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
 			}
 
-			// says that we don't want any local transform
-			swapchain_info.preTransform = GetDevice().GetCapabilities().currentTransform;
-			swapchain_info.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
-			swapchain_info.presentMode = GetDevice().GetPresentMode();
-			swapchain_info.clipped = VK_TRUE;
-			swapchain_info.oldSwapchain = nullptr;
+			VkSurfaceCapabilitiesKHR surface_capabilities{};
+
+			if (GetDevice().GetPhysicalDevice() != nullptr)
+				vkGetPhysicalDeviceSurfaceCapabilitiesKHR(GetDevice().GetPhysicalDevice(), GetSurface(), &surface_capabilities);
+
+			_extent = ChooseExtent(surface_capabilities);
+			
+			swapchain_info.imageExtent = _extent;
+			swapchain_info.preTransform = surface_capabilities.currentTransform; // says that we don't want any local transform
+			swapchain_info.minImageCount = surface_capabilities.minImageCount + 1;
+			if (surface_capabilities.maxImageCount != 0)
+				swapchain_info.minImageCount = ::std::min(swapchain_info.minImageCount, surface_capabilities.maxImageCount);
 
 			if (vkCreateSwapchainKHR(GetDevice(), &swapchain_info, nullptr, &swapchain) != VK_SUCCESS)
 			{
@@ -150,29 +166,6 @@ namespace np::graphics::rhi
 			}
 
 			return image_views;
-		}
-
-		container::vector<VkFramebuffer> CreateFramebuffers()
-		{
-			container::vector<VkFramebuffer> framebuffers(GetImageViews().size());
-
-			for (siz i = 0; i < GetImageViews().size(); i++)
-			{
-				container::vector<VkImageView> image_views{GetImageViews()[i],
-														   GetRenderPass().GetDepthTexture().GetImageView()};
-
-				VkFramebufferCreateInfo framebuffer_info = CreateFramebufferInfo();
-				framebuffer_info.renderPass = GetRenderPass();
-				framebuffer_info.attachmentCount = (ui32)image_views.size();
-				framebuffer_info.pAttachments = image_views.data();
-
-				if (vkCreateFramebuffer(GetDevice(), &framebuffer_info, nullptr, &framebuffers[i]) != VK_SUCCESS)
-				{
-					framebuffers[i] = nullptr;
-				}
-			}
-
-			return framebuffers;
 		}
 
 		container::vector<VkSemaphore> CreateSemaphores(siz count) const
@@ -215,10 +208,6 @@ namespace np::graphics::rhi
 
 		void Dispose()
 		{
-			for (VkFramebuffer framebuffer : _framebuffers)
-				vkDestroyFramebuffer(GetDevice(), framebuffer, nullptr);
-
-			_framebuffers.clear();
 			_image_views.clear();
 			_images.clear();
 			_acquired_image_fences.clear();
@@ -228,12 +217,11 @@ namespace np::graphics::rhi
 		}
 
 	public:
-		VulkanSwapchain(VulkanRenderPass& render_pass):
-			_render_pass(render_pass),
+		VulkanSwapchain(VulkanDevice& device):
+			_device(device),
 			_swapchain(CreateSwapchain()),
 			_images(RetrieveImages()),
 			_image_views(CreateImageViews()),
-			_framebuffers(CreateFramebuffers()),
 			_image_semaphores(CreateSemaphores(MAX_FRAMES)),
 			_render_semaphores(CreateSemaphores(MAX_FRAMES)),
 			_fences(CreateFences(MAX_FRAMES)),
@@ -260,42 +248,42 @@ namespace np::graphics::rhi
 
 		VulkanInstance& GetInstance()
 		{
-			return GetRenderPass().GetInstance();
+			return GetDevice().GetInstance();
 		}
 
 		const VulkanInstance& GetInstance() const
 		{
-			return GetRenderPass().GetInstance();
+			return GetDevice().GetInstance();
 		}
 
 		VulkanSurface& GetSurface()
 		{
-			return GetRenderPass().GetSurface();
+			return GetDevice().GetSurface();
 		}
 
 		const VulkanSurface& GetSurface() const
 		{
-			return GetRenderPass().GetSurface();
+			return GetDevice().GetSurface();
 		}
 
 		VulkanDevice& GetDevice()
 		{
-			return GetRenderPass().GetDevice();
+			return _device;
 		}
 
 		const VulkanDevice& GetDevice() const
 		{
-			return GetRenderPass().GetDevice();
+			return _device;
 		}
 
-		VulkanRenderPass& GetRenderPass()
+		VkExtent2D GetExtent() const
 		{
-			return _render_pass;
+			return _extent;
 		}
 
-		const VulkanRenderPass& GetRenderPass() const
+		flt GetAspectRatio()
 		{
-			return _render_pass;
+			return (flt)_extent.width / (flt)_extent.height;
 		}
 
 		ui32 GetCurrentImageIndex() const
@@ -315,7 +303,7 @@ namespace np::graphics::rhi
 			_swapchain = CreateSwapchain();
 			_images = RetrieveImages();
 			_image_views = CreateImageViews();
-			_framebuffers = CreateFramebuffers();
+			
 			_acquired_image_fences.resize(_images.size(), nullptr);
 		}
 
@@ -359,11 +347,6 @@ namespace np::graphics::rhi
 		const container::vector<VulkanImageView>& GetImageViews() const
 		{
 			return _image_views;
-		}
-
-		const container::vector<VkFramebuffer> GetFramebuffers() const
-		{
-			return _framebuffers;
 		}
 
 		const container::vector<VkSemaphore> GetImageSemaphores() const

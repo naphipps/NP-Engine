@@ -13,7 +13,7 @@
 
 #include "VulkanCommands.hpp"
 #include "VulkanCommandBuffer.hpp"
-#include "VulkanDevice.hpp"
+#include "VulkanSwapchain.hpp"
 #include "VulkanTexture.hpp"
 #include "VulkanFrame.hpp"
 
@@ -22,7 +22,7 @@ namespace np::graphics::rhi
 	class VulkanRenderPass
 	{
 	private:
-		VulkanDevice& _device;
+		VulkanSwapchain& _swapchain;
 		VkRenderPass _render_pass;
 		VulkanTexture* _depth_texture;
 		VulkanCommandBeginRenderPass* _begin_render_pass;
@@ -150,8 +150,8 @@ namespace np::graphics::rhi
 		VulkanTexture* CreateDepthTexture()
 		{
 			VkImageCreateInfo depth_image_create_info = VulkanImage::CreateInfo();
-			depth_image_create_info.extent.width = GetDevice().GetExtent().width;
-			depth_image_create_info.extent.height = GetDevice().GetExtent().height;
+			depth_image_create_info.extent.width = GetSwapchain().GetExtent().width;
+			depth_image_create_info.extent.height = GetSwapchain().GetExtent().height;
 			depth_image_create_info.format = GetDepthFormat();
 			depth_image_create_info.tiling = VK_IMAGE_TILING_OPTIMAL;
 			depth_image_create_info.usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
@@ -211,8 +211,8 @@ namespace np::graphics::rhi
 			return info;
 		}
 
-		VulkanRenderPass(VulkanDevice& device):
-			_device(device),
+		VulkanRenderPass(VulkanSwapchain& swapchain):
+			_swapchain(swapchain),
 			_render_pass(CreateRenderPass()),
 			_depth_texture(CreateDepthTexture()),
 			_begin_render_pass(nullptr)
@@ -221,38 +221,47 @@ namespace np::graphics::rhi
 		~VulkanRenderPass()
 		{
 			vkDeviceWaitIdle(GetDevice());
-
 			Dispose();
 		}
 
 		VulkanInstance& GetInstance()
 		{
-			return GetDevice().GetInstance();
+			return GetSwapchain().GetInstance();
 		}
 
 		const VulkanInstance& GetInstance() const
 		{
-			return GetDevice().GetInstance();
+			return GetSwapchain().GetInstance();
 		}
 
 		VulkanSurface& GetSurface()
 		{
-			return GetDevice().GetSurface();
+			return GetSwapchain().GetSurface();
 		}
 
 		const VulkanSurface& GetSurface() const
 		{
-			return GetDevice().GetSurface();
+			return GetSwapchain().GetSurface();
 		}
 
 		VulkanDevice& GetDevice()
 		{
-			return _device;
+			return GetSwapchain().GetDevice();
 		}
 
 		const VulkanDevice& GetDevice() const
 		{
-			return _device;
+			return GetSwapchain().GetDevice();
+		}
+
+		VulkanSwapchain& GetSwapchain()
+		{
+			return _swapchain;
+		}
+
+		const VulkanSwapchain& GetSwapchain() const
+		{
+			return _swapchain;
 		}
 
 		VulkanTexture& GetDepthTexture()
@@ -279,7 +288,7 @@ namespace np::graphics::rhi
 		void Begin(VkRenderPassBeginInfo& render_pass_begin_info, VulkanFrame& frame)
 		{
 			render_pass_begin_info.renderPass = _render_pass;
-			render_pass_begin_info.renderArea.extent = GetDevice().GetExtent();
+			render_pass_begin_info.renderArea.extent = GetSwapchain().GetExtent();
 
 			if (_begin_render_pass)
 				memory::Destroy<VulkanCommandBeginRenderPass>(memory::DefaultTraitAllocator, _begin_render_pass);
