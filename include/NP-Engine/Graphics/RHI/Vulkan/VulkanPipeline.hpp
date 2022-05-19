@@ -265,7 +265,7 @@ namespace np::graphics::rhi
 			VkPushConstantRange range{};
 			range.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
 			range.offset = 0;
-			range.size = sizeof(ObjectMetaValues);
+			range.size = sizeof(RenderableMetaValues);
 			return range;
 		}
 

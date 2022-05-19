@@ -29,7 +29,7 @@
 #include "RenderableType.hpp"
 #include "Frame.hpp"
 #include "Pipeline.hpp"
-#include "ObjectMetaValues.hpp"
+#include "RenderableMetaValues.hpp"
 
 // TODO: when we complete our renderer, we need to cleanup/remove files we are not using
 

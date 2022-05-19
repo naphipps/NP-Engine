@@ -17,7 +17,7 @@ layout (location = 2) in vec2 in_texture_coordinate;
 layout (location = 0) out vec3 out_color;
 layout (location = 1) out vec2 out_texture_coordinate;
 
-layout (push_constant) uniform ObjectMetaValues {
+layout (push_constant) uniform RenderableMetaValues {
 	vec4 color;
 	vec3 position;
 	float radius;

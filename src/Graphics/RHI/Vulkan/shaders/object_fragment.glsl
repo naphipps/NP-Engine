@@ -17,7 +17,7 @@ layout (location = 1) in vec2 in_texture_coordinate;
 
 layout (location = 0) out vec4 out_color;
 
-layout (push_constant) uniform ObjectMetaValues {
+layout (push_constant) uniform RenderableMetaValues {
 	mat4 model;
 	mat4 normal;
 } meta_values;

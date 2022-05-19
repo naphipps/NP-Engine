@@ -50,7 +50,7 @@ namespace np::app
 
 		void UpdateMetaValuesOnFrame(memory::Delegate& d)
 		{
-			graphics::ObjectMetaValues& meta_values = _renderable_model->GetMetaValues();
+			graphics::RenderableMetaValues& meta_values = _renderable_model->GetMetaValues();
 			
 			time::DurationMilliseconds duration = time::SteadyClock::now() - _start_timestamp;
 			flt seconds = duration.count() / 1000.0f;

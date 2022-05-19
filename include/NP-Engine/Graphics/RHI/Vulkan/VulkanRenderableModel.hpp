@@ -230,7 +230,7 @@ namespace np::graphics::rhi
 
 				_push_constants = memory::Create<VulkanCommandPushConstants>(
 					memory::DefaultTraitAllocator, vulkan_pipeline.GetPipelineLayout(),
-					VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(ObjectMetaValues), &_meta_values);
+					VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(RenderableMetaValues), &_meta_values);
 
 				_bind_vertex_buffers = memory::Create<VulkanCommandBindVertexBuffers>(
 					memory::DefaultTraitAllocator, 0, 1, &_vk_vertex_buffer, _vertex_offsets.data());

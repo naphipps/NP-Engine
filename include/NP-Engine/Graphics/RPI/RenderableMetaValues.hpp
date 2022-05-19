@@ -4,8 +4,8 @@
 //
 //##===----------------------------------------------------------------------===##//
 
-#ifndef NP_ENGINE_RPI_OBJECT_META_VALUES_HPP
-#define NP_ENGINE_RPI_OBJECT_META_VALUES_HPP
+#ifndef NP_ENGINE_RPI_RENDERABLE_META_VALUES_HPP
+#define NP_ENGINE_RPI_RENDERABLE_META_VALUES_HPP
 
 #include "NP-Engine/Primitive/Primitive.hpp"
 #include "NP-Engine/Foundation/Foundation.hpp"
@@ -14,7 +14,7 @@
 
 namespace np::graphics
 {
-	struct ObjectMetaValues // TODO: we only use this for Renderable objects, so maybe rename to RenderableMetaValues?
+	struct RenderableMetaValues
 	{
 		union {
 			struct
@@ -32,7 +32,7 @@ namespace np::graphics
 		};
 	};
 
-	NP_ENGINE_STATIC_ASSERT(sizeof(ObjectMetaValues) <= 128, "ObjectMetaValues should never exceed 128 bytes.");
+	NP_ENGINE_STATIC_ASSERT(sizeof(RenderableMetaValues) <= 128, "RenderableMetaValues should never exceed 128 bytes.");
 } // namespace np::graphics
 
-#endif /* NP_ENGINE_RPI_OBJECT_META_VALUES_HPP */
+#endif /* NP_ENGINE_RPI_RENDERABLE_META_VALUES_HPP */
