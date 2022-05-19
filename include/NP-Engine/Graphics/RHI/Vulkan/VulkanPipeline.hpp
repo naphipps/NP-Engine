@@ -49,11 +49,9 @@ namespace np::graphics::rhi
 
 		VulkanDescriptorSetLayout _descriptor_set_layout;
 		VulkanDescriptorSets _descriptor_sets;
-		// TODO: when we refactor _ubos, we could put it in Pipeline? //TODO: why do we have so many?
-		container::vector<UniformBufferObject> _ubos;
-		container::vector<VulkanBuffer*> _ubo_buffers;
-		container::vector<VkDescriptorBufferInfo> _ubo_descriptor_infos;
-		container::vector<VkWriteDescriptorSet> _ubo_descriptor_writers;
+		container::vector<VulkanBuffer*> _meta_value_buffers;
+		container::vector<VkDescriptorBufferInfo> _meta_value_descriptor_infos;
+		container::vector<VkWriteDescriptorSet> _meta_value_descriptor_writers;
 
 		VulkanSampler _sampler; // TODO: we might should put this in the Renderer
 		VkPipelineLayout _pipeline_layout;
@@ -383,61 +381,62 @@ namespace np::graphics::rhi
 			return memory::Create<VulkanBuffer>(memory::DefaultTraitAllocator, GetDevice(), info, memory_property_flags);
 		}
 
-		void UpdateUboBuffer()
+		void UpdateMetaValueBuffer()
 		{
 			ui32 index = GetSwapchain().GetCurrentImageIndex();
-			VkDeviceMemory device_memory = _ubo_buffers[index]->GetDeviceMemory();
+			VkDeviceMemory device_memory = _meta_value_buffers[index]->GetDeviceMemory();
 			void* data;
-			vkMapMemory(GetDevice(), device_memory, 0, sizeof(UniformBufferObject), 0, &data);
-			memcpy(data, &_ubos[index], sizeof(UniformBufferObject));
+			vkMapMemory(GetDevice(), device_memory, 0, sizeof(PipelineMetaValues), 0, &data);
+			memcpy(data, &_meta_values[index], sizeof(PipelineMetaValues));
 			vkUnmapMemory(GetDevice(), device_memory);
 		}
 
-		container::vector<VulkanBuffer*> CreateUboBuffers()
+		container::vector<VulkanBuffer*> CreateMetaValueBuffers()
 		{
-			container::vector<VulkanBuffer*> buffers(_ubos.size());
+			container::vector<VulkanBuffer*> buffers(GetSwapchain().GetImages().size());
 
 			for (siz i = 0; i < buffers.size(); i++)
 			{
-				buffers[i] = CreateBuffer(sizeof(UniformBufferObject), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+				buffers[i] = CreateBuffer(sizeof(PipelineMetaValues), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
 										  VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 			}
 
 			return buffers;
 		}
 
-		container::vector<VkDescriptorBufferInfo> CreateUboDescriptorInfos()
+		container::vector<VkDescriptorBufferInfo> CreateMetaValueDescriptorInfos()
 		{
-			container::vector<VkDescriptorBufferInfo> infos(_ubos.size());
+			container::vector<VkDescriptorBufferInfo> infos(GetSwapchain().GetImages().size());
 
 			for (siz i = 0; i < infos.size(); i++)
 			{
-				infos[i].buffer = *_ubo_buffers[i];
+				infos[i].buffer = *_meta_value_buffers[i];
 				infos[i].offset = 0;
-				infos[i].range = sizeof(UniformBufferObject);
+				infos[i].range = sizeof(PipelineMetaValues);
 			}
 
 			return infos;
 		}
 
-		container::vector<VkWriteDescriptorSet> CreateUboDescriptorWriters()
+		container::vector<VkWriteDescriptorSet> CreateMetaValueDescriptorWriters()
 		{
-			container::vector<VkWriteDescriptorSet> writers(_ubos.size(), {VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET});
+			container::vector<VkWriteDescriptorSet> writers(GetSwapchain().GetImages().size(),
+															{VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET});
 
 			for (siz i = 0; i < writers.size(); i++)
 			{
 				writers[i].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-				writers[i].pBufferInfo = memory::AddressOf(_ubo_descriptor_infos[i]);
+				writers[i].pBufferInfo = memory::AddressOf(_meta_value_descriptor_infos[i]);
 				writers[i].descriptorCount = 1;
 			}
 
 			return writers;
 		}
 
-		void DestroyUboBuffers()
+		void DestroyMetaValueBuffers()
 		{
-			for (VulkanBuffer*& ubo_buffer : _ubo_buffers)
-				memory::Destroy<VulkanBuffer>(memory::DefaultTraitAllocator, ubo_buffer);
+			for (VulkanBuffer*& meta_value_buffer : _meta_value_buffers)
+				memory::Destroy<VulkanBuffer>(memory::DefaultTraitAllocator, meta_value_buffer);
 		}
 
 	public:
@@ -449,23 +448,24 @@ namespace np::graphics::rhi
 			_fragment_shader(fragment_shader),
 			_descriptor_set_layout(swapchain.GetDevice()),
 			_descriptor_sets(swapchain, _descriptor_set_layout),
-			_ubos(swapchain.GetImages().size()),
-			_ubo_buffers(CreateUboBuffers()),
-			_ubo_descriptor_infos(CreateUboDescriptorInfos()),
-			_ubo_descriptor_writers(CreateUboDescriptorWriters()),
+			_meta_value_buffers(CreateMetaValueBuffers()),
+			_meta_value_descriptor_infos(CreateMetaValueDescriptorInfos()),
+			_meta_value_descriptor_writers(CreateMetaValueDescriptorWriters()),
 			_sampler(swapchain.GetDevice(), VulkanSampler::CreateInfo()),
 			_pipeline_layout(CreatePipelineLayout()),
 			_pipeline(CreatePipeline()),
 			_bind_pipeline(nullptr),
 			_bind_descriptor_sets_command_slot(0),
 			_bind_descriptor_sets(nullptr)
-		{}
+		{
+			_meta_values.resize(GetSwapchain().GetImages().size());
+		}
 
 		~VulkanPipeline()
 		{
 			vkDestroyPipeline(GetDevice(), _pipeline, nullptr);
 			vkDestroyPipelineLayout(GetDevice(), _pipeline_layout, nullptr);
-			DestroyUboBuffers();
+			DestroyMetaValueBuffers();
 		}
 
 		operator VkPipeline() const
@@ -550,12 +550,12 @@ namespace np::graphics::rhi
 
 		void BindDescriptorSetsToFrame(VulkanFrame& frame)
 		{
-			GetDescriptorSets().SubmitWriter(_ubo_descriptor_writers[GetSwapchain().GetCurrentImageIndex()]);
+			GetDescriptorSets().SubmitWriter(_meta_value_descriptor_writers[GetSwapchain().GetCurrentImageIndex()]);
 
 			if (_bind_descriptor_sets)
 				memory::Destroy<VulkanCommandBindDescriptorSets>(memory::DefaultTraitAllocator, _bind_descriptor_sets);
 
-			_bound_descriptor_sets = { _descriptor_sets[GetSwapchain().GetCurrentImageIndex()] };
+			_bound_descriptor_sets = {_descriptor_sets[GetSwapchain().GetCurrentImageIndex()]};
 
 			_bind_descriptor_sets = memory::Create<VulkanCommandBindDescriptorSets>(
 				memory::DefaultTraitAllocator, VK_PIPELINE_BIND_POINT_GRAPHICS, _pipeline_layout, 0,
@@ -566,30 +566,30 @@ namespace np::graphics::rhi
 			frame.StageCommand(_bind_descriptor_sets_command_slot, *_bind_descriptor_sets);
 		}
 
-		UniformBufferObject GetUbo() const
+		PipelineMetaValues GetMetaValues() const override
 		{
-			return _ubos[GetSwapchain().GetCurrentImageIndex()];
+			return _meta_values[GetSwapchain().GetCurrentImageIndex()];
 		}
 
-		void SetUbo(UniformBufferObject ubo)
+		void SetMetaValues(PipelineMetaValues meta_values) override
 		{
-			_ubos[GetSwapchain().GetCurrentImageIndex()] = ubo;
-			UpdateUboBuffer();
+			_meta_values[GetSwapchain().GetCurrentImageIndex()] = meta_values;
+			UpdateMetaValueBuffer();
 		}
 
 		void Rebuild()
 		{
 			_descriptor_sets.Rebuild();
 
-			// TODO: pretty sure we only need to rebuild ubo stuff??
+			// TODO: pretty sure we only need to rebuild ubo stuff?? Nah I think everything needs to be rebuilt....??
 
 			vkDestroyPipeline(GetDevice(), _pipeline, nullptr);
 			vkDestroyPipelineLayout(GetDevice(), _pipeline_layout, nullptr);
-			DestroyUboBuffers();
-			_ubos.resize(GetSwapchain().GetImages().size());
-			_ubo_buffers = CreateUboBuffers();
-			_ubo_descriptor_infos = CreateUboDescriptorInfos();
-			_ubo_descriptor_writers = CreateUboDescriptorWriters();
+			DestroyMetaValueBuffers();
+			_meta_values.resize(GetSwapchain().GetImages().size());
+			_meta_value_buffers = CreateMetaValueBuffers();
+			_meta_value_descriptor_infos = CreateMetaValueDescriptorInfos();
+			_meta_value_descriptor_writers = CreateMetaValueDescriptorWriters();
 			_pipeline_layout = CreatePipelineLayout();
 			_pipeline = CreatePipeline();
 		}

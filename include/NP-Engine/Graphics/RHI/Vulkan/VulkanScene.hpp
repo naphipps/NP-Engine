@@ -97,11 +97,11 @@ namespace np::graphics::rhi
 
 
 				UpdateCamera();
-				UniformBufferObject ubo = object_pipeline.GetUbo();
-				ubo.View = _camera.View;
-				ubo.Projection = _camera.Projection;
-				object_pipeline.SetUbo(ubo);
-				light_pipeline.SetUbo(ubo);
+				PipelineMetaValues pipeline_meta_values = object_pipeline.GetMetaValues();
+				pipeline_meta_values.View = _camera.View;
+				pipeline_meta_values.Projection = _camera.Projection;
+				object_pipeline.SetMetaValues(pipeline_meta_values);
+				light_pipeline.SetMetaValues(pipeline_meta_values);
 
 				vulkan_renderer.BeginRenderPassOnFrame(vulkan_frame);
 

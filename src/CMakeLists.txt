@@ -84,7 +84,6 @@ set(NP_ENGINE_GRAPHICS_RPI_HPP
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/Vertex.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/Color.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/Image.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/UniformBufferObject.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/Model.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/Frame.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/Light.hpp
@@ -95,6 +94,7 @@ set(NP_ENGINE_GRAPHICS_RPI_HPP
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/RenderableLight.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/RenderableType.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/RenderableMetaValues.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/PipelineMetaValues.hpp
 )
 
 set(NP_ENGINE_GRAPHICS_OPENGL_HPP
