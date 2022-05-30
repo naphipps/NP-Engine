@@ -7,7 +7,7 @@
 #include "NP-Engine/Graphics/RPI/RenderableImage.hpp"
 
 #if NP_ENGINE_PLATFORM_IS_LINUX || NP_ENGINE_PLATFORM_IS_WINDOWS
-	#include "NP-Engine/Graphics/RHI/OpenGL/OpenGLRenderer.hpp" //TODO: create OpenGLGraphics.hpp
+	#include "NP-Engine/Graphics/RHI/OpenGL/OpenGLGraphics.hpp"
 #endif
 
 #include "NP-Engine/Graphics/RHI/Vulkan/VulkanGraphics.hpp"

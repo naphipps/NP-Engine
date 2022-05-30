@@ -99,6 +99,7 @@ set(NP_ENGINE_GRAPHICS_RPI_HPP
 
 set(NP_ENGINE_GRAPHICS_OPENGL_HPP
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RHI/OpenGL/OpenGLRenderer.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RHI/OpenGL/OpenGLGraphics.hpp
 )
 
 set(NP_ENGINE_GRAPHICS_VULKAN_HPP
