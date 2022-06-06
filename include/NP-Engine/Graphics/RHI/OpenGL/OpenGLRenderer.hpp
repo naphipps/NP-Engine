@@ -16,8 +16,6 @@
 
 #include "NP-Engine/Graphics/RPI/RPI.hpp"
 
-// TODO: add summary comments
-
 namespace np::graphics::rhi
 {
 	namespace __detail

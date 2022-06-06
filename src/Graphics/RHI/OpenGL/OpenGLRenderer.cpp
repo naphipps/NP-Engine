@@ -6,8 +6,6 @@
 
 #include "NP-Engine/Graphics/RHI/OpenGL/OpenGLRenderer.hpp"
 
-// TODO: add summary comments
-
 namespace np::graphics::rhi
 {
 	Renderer::RhiType OpenGLRenderer::GetRhiType() const

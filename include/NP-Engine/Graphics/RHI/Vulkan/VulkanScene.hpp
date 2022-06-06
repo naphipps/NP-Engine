@@ -26,6 +26,9 @@ namespace np::graphics::rhi
 	class VulkanScene : public Scene
 	{
 	private:
+
+		//TODO: I think our scene needs it's own ecs registry
+
 		VulkanCamera _camera;
 		concurrency::Thread _draw_loop_thread;
 		atm_bl _draw_loop_procedure_is_complete;

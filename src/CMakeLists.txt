@@ -352,6 +352,7 @@ set(NP_ENGINE_CONCURRENCY_CPP
 	Concurrency/Thread.cpp
 )
 
+# TODO: we can remove these
 set(NP_ENGINE_GRAPHICS_CPP
 	#Graphics/Graphics.cpp
 )
@@ -371,10 +372,12 @@ set(NP_ENGINE_GRAPHICS_RPI_CPP
 	Graphics/RPI/Renderer.cpp
 )
 
+# TODO: we can remove these
 set(NP_ENGINE_GRAPHICS_OPENGL_CPP
 	#Graphics/RHI/OpenGL/OpenGLRenderer.cpp
 )
 
+# TODO: we can remove these
 set(NP_ENGINE_GRAPHICS_VULKAN_CPP
 	#Graphics/RHI/Vulkan/VulkanDevice.cpp
 	#Graphics/RHI/Vulkan/VulkanRenderer.cpp

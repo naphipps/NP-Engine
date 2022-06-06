@@ -28,7 +28,7 @@ namespace np::graphics
 		Renderer& _renderer;
 		memory::Delegate _on_draw_delegate;
 
-		virtual void Destruct() {}
+		virtual void Destruct() {} //TODO: every RPI object with a static Create should have a virtual Destruct
 
 	public:
 		static Scene* Create(memory::Allocator& allocator, ::entt::registry& ecs_registry, Renderer& renderer);

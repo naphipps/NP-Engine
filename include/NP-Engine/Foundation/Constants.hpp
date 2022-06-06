@@ -42,6 +42,8 @@
 #endif // NP_FUNCTION
 // concat NP_FUNCTION via str(NP_FUNCTION)
 
+//TODO: refactor these macros to preprend NP_ENGINE_ instead of NP_
+
 //--------------------------------------------------------------------------------
 
 #endif /* NP_ENGINE_CONSTANTS_HPP */

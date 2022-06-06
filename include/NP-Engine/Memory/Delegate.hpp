@@ -24,7 +24,7 @@ namespace np::memory
 			used to wrap a static function to our function pointer
 		*/
 		template <void (*Function)(Delegate&)>
-		inline static void wrap(InstancePtr, Delegate& delegate)
+		inline static void wrap(InstancePtr, Delegate& delegate) //TODO: refactor delegate since it is a keyword
 		{
 			return (Function)(delegate);
 		}

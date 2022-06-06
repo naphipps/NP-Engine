@@ -4,6 +4,8 @@
 //
 //##===----------------------------------------------------------------------===##//
 
+// TODO: bring back xcode support
+
 #include <exception>
 
 #include "NP-Engine/NP-Engine.hpp"
@@ -70,5 +72,5 @@ i32 main(i32 argc, chr** argv)
 		::np::app::Popup::Show("NP-Engine Code: " + to_str(retval), message, style, buttons);
 	}
 
-	return retval;
+	return retval; //TODO: use sysexits return values
 }
