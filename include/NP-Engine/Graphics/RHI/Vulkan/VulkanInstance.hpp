@@ -35,9 +35,8 @@ namespace np::graphics::rhi
 			// TODO: feel like we should pipe this stuff through our logger
 			// TODO: should we have a macro to enable this? NP_ENGINE_ENABLE_VULKAN_DEBUG_CALLBACK?
 
-			container::vector<str> known_msgs
-			{
-				R"(loader_scanned_icd_add: Driver C:\Windows\System32\DriverStore\FileRepository\u0377495.inf_amd64_58cc395c0bf03a26\B377432\.\amdvlk64.dll says it supports interface version 6 but still exports core entrypoints (Policy #LDP_DRIVER_6))" //vulkansdk 1.3.211
+			container::vector<str> known_msgs{
+				R"(loader_scanned_icd_add: Driver C:\Windows\System32\DriverStore\FileRepository\u0377495.inf_amd64_58cc395c0bf03a26\B377432\.\amdvlk64.dll says it supports interface version 6 but still exports core entrypoints (Policy #LDP_DRIVER_6))" // vulkansdk 1.3.211
 			};
 
 			VkBool32 retval = VK_TRUE;
@@ -45,7 +44,7 @@ namespace np::graphics::rhi
 
 			for (auto it = known_msgs.begin(); !found && it != known_msgs.end(); it++)
 				found = *it == callback_data->pMessage;
-			
+
 			if (!found)
 			{
 				if ((msg_severity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT) != 0 ||
@@ -58,7 +57,7 @@ namespace np::graphics::rhi
 					msg += "\n";
 
 					::std::cerr << msg;
-					//NP_ENGINE_ASSERT(false, msg); // here in case for issues that cause a gpu crash
+					// NP_ENGINE_ASSERT(false, msg); // here in case for issues that cause a gpu crash
 				}
 			}
 

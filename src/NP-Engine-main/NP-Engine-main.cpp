@@ -72,5 +72,5 @@ i32 main(i32 argc, chr** argv)
 		::np::app::Popup::Show("NP-Engine Code: " + to_str(retval), message, style, buttons);
 	}
 
-	return retval; //TODO: use sysexits return values
+	return retval; // TODO: use sysexits return values
 }

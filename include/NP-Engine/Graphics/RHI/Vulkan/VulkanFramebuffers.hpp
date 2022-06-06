@@ -39,8 +39,8 @@ namespace np::graphics::rhi
 
 			for (siz i = 0; i < framebuffers.size(); i++)
 			{
-				container::vector<VkImageView> image_views{ GetSwapchain().GetImageViews()[i],
-														   GetRenderPass().GetDepthTexture().GetImageView() };
+				container::vector<VkImageView> image_views{GetSwapchain().GetImageViews()[i],
+														   GetRenderPass().GetDepthTexture().GetImageView()};
 
 				VkFramebufferCreateInfo framebuffer_info = CreateFramebufferInfo();
 				framebuffer_info.renderPass = GetRenderPass();
@@ -65,7 +65,7 @@ namespace np::graphics::rhi
 		}
 
 	public:
-		VulkanFramebuffers(VulkanSwapchain& swapchain, VulkanRenderPass& render_pass) :
+		VulkanFramebuffers(VulkanSwapchain& swapchain, VulkanRenderPass& render_pass):
 			_swapchain(swapchain),
 			_render_pass(render_pass),
 			_framebuffers(CreateFramebuffers())
@@ -142,6 +142,6 @@ namespace np::graphics::rhi
 			_framebuffers = CreateFramebuffers();
 		}
 	};
-}
+} // namespace np::graphics::rhi
 
 #endif /* NP_ENGINE_VULKAN_FRAMEBUFFERS_HPP */

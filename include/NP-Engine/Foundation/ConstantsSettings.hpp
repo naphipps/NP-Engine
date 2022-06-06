@@ -27,7 +27,7 @@
 #endif
 
 // The following durations are milliseconds
-#define NP_ENGINE_APPLICATION_LOOP_DURATION 4 //TODO: add ifndef checks
+#define NP_ENGINE_APPLICATION_LOOP_DURATION 4 // TODO: add ifndef checks
 #define NP_ENGINE_WINDOW_LOOP_DURATION 8
 
 // github.com/skypjack/entt/wiki/Frequently-Asked-Questions#warning-c4003-the-min-the-max-and-the-macro

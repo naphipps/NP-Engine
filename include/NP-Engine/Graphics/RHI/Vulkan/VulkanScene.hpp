@@ -26,8 +26,7 @@ namespace np::graphics::rhi
 	class VulkanScene : public Scene
 	{
 	private:
-
-		//TODO: I think our scene needs it's own ecs registry
+		// TODO: I think our scene needs it's own ecs registry
 
 		VulkanCamera _camera;
 		concurrency::Thread _draw_loop_thread;
@@ -83,7 +82,7 @@ namespace np::graphics::rhi
 			_draw_loop_procedure_is_complete.store(true, mo_release);
 		}
 
-		void Draw() 
+		void Draw()
 		{
 			bl expected = true;
 			while (!_drawing_is_complete.compare_exchange_weak(expected, false, mo_release, mo_relaxed))
@@ -123,7 +122,7 @@ namespace np::graphics::rhi
 				auto light_entities = _ecs_registry.view<RenderableLight*>();
 				for (auto e : light_entities)
 				{
-					//TODO: we'll need to address the light assign for us to maximize performance here
+					// TODO: we'll need to address the light assign for us to maximize performance here
 
 					RenderableLight& light = *ecs::Entity(e, _ecs_registry).Get<RenderableLight*>();
 					for (auto e : object_entities)
@@ -145,8 +144,8 @@ namespace np::graphics::rhi
 		}
 
 	public:
-		VulkanScene(::entt::registry& ecs_registry, Renderer& renderer): 
-			Scene(ecs_registry, renderer), 
+		VulkanScene(::entt::registry& ecs_registry, Renderer& renderer):
+			Scene(ecs_registry, renderer),
 			_draw_loop_procedure_is_complete(true),
 			_engage_draw_loop_procedure(false),
 			_drawing_is_complete(true)

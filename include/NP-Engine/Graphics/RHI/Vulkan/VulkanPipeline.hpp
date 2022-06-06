@@ -587,7 +587,8 @@ namespace np::graphics::rhi
 			vkDestroyPipelineLayout(GetDevice(), _pipeline_layout, nullptr);
 			DestroyMetaValueBuffers();
 
-			for (PipelineMetaValues& meta_values : _meta_values) meta_values = {};
+			for (PipelineMetaValues& meta_values : _meta_values)
+				meta_values = {};
 
 			_meta_value_buffers = CreateMetaValueBuffers();
 			_meta_value_descriptor_infos = CreateMetaValueDescriptorInfos();

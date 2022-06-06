@@ -32,7 +32,7 @@ namespace np::app
 	protected:
 		memory::TraitAllocator _allocator;
 		container::vector<graphics::Renderer*> _renderers;
-		container::vector<graphics::Scene*> _scenes; //TODO: I feel like we need to redesign how we store all these
+		container::vector<graphics::Scene*> _scenes; // TODO: I feel like we need to redesign how we store all these
 		container::uset<graphics::Scene*> _unacquired_scenes;
 		container::uset<graphics::Scene*> _acquired_scenes;
 

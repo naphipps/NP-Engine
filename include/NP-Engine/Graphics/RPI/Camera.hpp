@@ -16,9 +16,9 @@ namespace np::graphics
 	class Camera
 	{
 	private:
-		::glm::mat4 _view{ 1.0f };
-		::glm::mat4 _projection{ 1.0f };
-		
+		::glm::mat4 _view{1.0f};
+		::glm::mat4 _projection{1.0f};
+
 	public:
 		flt Fovy;
 		flt AspectRatio;
@@ -27,7 +27,7 @@ namespace np::graphics
 
 		::glm::vec3 Eye;
 		::glm::vec3 Center;
-		::glm::vec3 Up{ 0.0f, 0.0f, 1.0f };
+		::glm::vec3 Up{0.0f, 0.0f, 1.0f};
 
 		void Update()
 		{

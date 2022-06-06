@@ -18,6 +18,6 @@ namespace np::graphics
 		Image = BIT(1),
 		Light = BIT(2)
 	};
-}
+} // namespace np::graphics
 
 #endif /* NP_ENGINE_RPI_RENDERABLE_TYPE_HPP */

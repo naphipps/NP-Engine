@@ -16,7 +16,6 @@ namespace np::graphics::rhi
 	class VulkanCamera : public Camera
 	{
 	public:
-
 		VulkanCamera& operator=(const Camera& other)
 		{
 			Fovy = other.Fovy;

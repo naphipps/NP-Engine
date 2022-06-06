@@ -42,7 +42,7 @@
 #endif // NP_FUNCTION
 // concat NP_FUNCTION via str(NP_FUNCTION)
 
-//TODO: refactor these macros to preprend NP_ENGINE_ instead of NP_
+// TODO: refactor these macros to preprend NP_ENGINE_ instead of NP_
 
 //--------------------------------------------------------------------------------
 

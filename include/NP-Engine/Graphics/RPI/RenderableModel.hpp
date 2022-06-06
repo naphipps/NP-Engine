@@ -26,7 +26,7 @@ namespace np::graphics
 		RenderableMetaValues _meta_values;
 		memory::Delegate _update_meta_values_on_frame;
 
-		RenderableModel(Model& model) : _model(model), _meta_values() {}
+		RenderableModel(Model& model): _model(model), _meta_values() {}
 
 		virtual void Destruct() {}
 

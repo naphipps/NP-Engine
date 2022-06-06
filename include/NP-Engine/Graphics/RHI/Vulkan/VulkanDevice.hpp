@@ -56,7 +56,7 @@ namespace np::graphics::rhi
 		VkPhysicalDevice _physical_device;
 		VkDevice _device;
 		VulkanCommandPool _command_pool;
-		
+
 		container::vector<VkExtensionProperties> GetSupportedDeviceExtensions(VkPhysicalDevice physical_device) const
 		{
 			ui32 count = 0;

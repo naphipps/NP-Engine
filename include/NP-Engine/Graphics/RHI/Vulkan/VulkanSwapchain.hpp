@@ -81,8 +81,8 @@ namespace np::graphics::rhi
 				VkExtent2D min_extent = capabilities.minImageExtent;
 				VkExtent2D max_extent = capabilities.maxImageExtent;
 
-				extent = { ::std::clamp((ui32)width, min_extent.width, max_extent.width),
-						  ::std::clamp((ui32)height, min_extent.height, max_extent.height) };
+				extent = {::std::clamp((ui32)width, min_extent.width, max_extent.width),
+						  ::std::clamp((ui32)height, min_extent.height, max_extent.height)};
 			}
 
 			return extent;
@@ -117,7 +117,7 @@ namespace np::graphics::rhi
 				vkGetPhysicalDeviceSurfaceCapabilitiesKHR(GetDevice().GetPhysicalDevice(), GetSurface(), &surface_capabilities);
 
 			_extent = ChooseExtent(surface_capabilities);
-			
+
 			swapchain_info.imageExtent = _extent;
 			swapchain_info.preTransform = surface_capabilities.currentTransform; // says that we don't want any local transform
 			swapchain_info.minImageCount = NP_ENGINE_VULKAN_MAX_FRAME_COUNT;
@@ -299,7 +299,7 @@ namespace np::graphics::rhi
 			_swapchain = CreateSwapchain();
 			_images = RetrieveImages();
 			_image_views = CreateImageViews();
-			
+
 			_acquired_image_fences.resize(_images.size(), nullptr);
 		}
 

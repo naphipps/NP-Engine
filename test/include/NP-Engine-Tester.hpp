@@ -56,7 +56,7 @@ namespace np::app
 			flt e = s + 3.f;
 			flt f = ::glm::radians(45.f + 20.f * (s + 1.f));
 
-			_camera.Eye = { e, e, e };
+			_camera.Eye = {e, e, e};
 			_camera.Fovy = f;
 
 			if (_scene != nullptr)
@@ -70,7 +70,8 @@ namespace np::app
 			graphics::RenderableMetaValues& meta_values = _renderable_model->GetMetaValues();
 			time::DurationMilliseconds duration = time::SteadyClock::now() - _start_timestamp;
 			flt seconds = duration.count() / 1000.0f;
-			meta_values.object.Model = ::glm::rotate(glm::mat4(1.0f), seconds * glm::radians(90.0f) / 4.0f, glm::vec3(0.0f, 0.0f, 1.0f));
+			meta_values.object.Model =
+				::glm::rotate(glm::mat4(1.0f), seconds * glm::radians(90.0f) / 4.0f, glm::vec3(0.0f, 0.0f, 1.0f));
 		}
 
 	public:
@@ -78,16 +79,18 @@ namespace np::app
 			Layer(event_submitter, ecs_registry),
 			_scene(nullptr),
 			_model_filename(fs::Append(fs::Append(fs::Append(NP_ENGINE_WORKING_DIR, "test"), "assets"), "viking_room.obj")),
-			_model_texture_filename(fs::Append(fs::Append(fs::Append(NP_ENGINE_WORKING_DIR, "test"), "assets"), "viking_room.png")),
+			_model_texture_filename(
+				fs::Append(fs::Append(fs::Append(NP_ENGINE_WORKING_DIR, "test"), "assets"), "viking_room.png")),
 			_model(_model_filename, graphics::Image(_model_texture_filename)),
 			_renderable_model(graphics::RenderableModel::Create(memory::DefaultTraitAllocator, _model)),
 			_model_entity(ecs_registry),
 			_start_timestamp(time::SteadyClock::now())
 		{
-			_renderable_model->GetUpdateMetaValuesOnFrameDelegate().Connect<GameLayer, &GameLayer::UpdateMetaValuesOnFrame>(this);
+			_renderable_model->GetUpdateMetaValuesOnFrameDelegate().Connect<GameLayer, &GameLayer::UpdateMetaValuesOnFrame>(
+				this);
 			_model_entity.Add<graphics::RenderableObject*>(_renderable_model);
 
-			_camera.Eye = { 2.0f, 2.0f, 2.0f };
+			_camera.Eye = {2.0f, 2.0f, 2.0f};
 			_camera.Fovy = ::glm::radians(45.0f);
 			_camera.NearPlane = 0.1f;
 			_camera.FarPlane = 10.0f;
