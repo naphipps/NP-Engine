@@ -36,7 +36,7 @@ namespace np::graphics::rhi
 			create_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
 			create_info.poolSizeCount = (ui32)pool_sizes.size();
 			create_info.pPoolSizes = pool_sizes.data();
-			create_info.maxSets = (ui32)GetSwapchain().GetImages().size();
+			create_info.maxSets = NP_ENGINE_VULKAN_MAX_FRAME_COUNT;
 			create_info.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
 
 			if (vkCreateDescriptorPool(GetDevice(), &create_info, nullptr, &pool) != VK_SUCCESS)
@@ -47,7 +47,7 @@ namespace np::graphics::rhi
 		container::vector<VkDescriptorSet> CreateDescriptorSets()
 		{
 			container::vector<VkDescriptorSet> sets;
-			container::vector<VkDescriptorSetLayout> layouts((ui32)GetSwapchain().GetImages().size(), _descriptor_set_layout);
+			container::vector<VkDescriptorSetLayout> layouts(NP_ENGINE_VULKAN_MAX_FRAME_COUNT, _descriptor_set_layout);
 
 			VkDescriptorSetAllocateInfo allocate_info{};
 			allocate_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;

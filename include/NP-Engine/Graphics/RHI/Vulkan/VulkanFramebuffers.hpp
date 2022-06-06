@@ -35,7 +35,7 @@ namespace np::graphics::rhi
 
 		container::vector<VkFramebuffer> CreateFramebuffers()
 		{
-			container::vector<VkFramebuffer> framebuffers(GetSwapchain().GetImageViews().size());
+			container::vector<VkFramebuffer> framebuffers(NP_ENGINE_VULKAN_MAX_FRAME_COUNT);
 
 			for (siz i = 0; i < framebuffers.size(); i++)
 			{

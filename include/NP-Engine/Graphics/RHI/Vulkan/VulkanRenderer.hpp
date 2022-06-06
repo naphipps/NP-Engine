@@ -79,7 +79,7 @@ namespace np::graphics::rhi
 			VkCommandBufferAllocateInfo command_buffer_allocate_info =
 				GetDevice().GetCommandPool().CreateCommandBufferAllocateInfo();
 			command_buffer_allocate_info.commandPool = GetDevice().GetCommandPool();
-			command_buffer_allocate_info.commandBufferCount = GetSwapchain().GetImages().size();
+			command_buffer_allocate_info.commandBufferCount = NP_ENGINE_VULKAN_MAX_FRAME_COUNT;
 			return GetDevice().GetCommandPool().AllocateCommandBuffers(command_buffer_allocate_info);
 		}
 

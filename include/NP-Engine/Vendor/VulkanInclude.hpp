@@ -12,6 +12,10 @@
 
 #include <vulkan/vulkan.hpp>
 
+#ifndef NP_ENGINE_VULKAN_MAX_FRAME_COUNT
+	#define NP_ENGINE_VULKAN_MAX_FRAME_COUNT 2
+#endif
+
 // TODO: add a bunch of helper functions like CreateSubmitInfo that sets "our default" SubmitInfo values
 namespace np::graphics::rhi
 {

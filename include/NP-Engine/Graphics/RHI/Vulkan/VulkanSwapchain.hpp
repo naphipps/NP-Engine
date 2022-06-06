@@ -22,11 +22,6 @@ namespace np::graphics::rhi
 {
 	class VulkanSwapchain
 	{
-	public:
-		constexpr static ui32 MAX_FRAMES = 2;
-		// TODO: ^don't really like this name - refactor to NP_ENGINE_MAX_FRAMES in our vulkan include
-		// TODO: we need to stop rebuilding things based on GetImages().size() and use MAX_FRAMES (or NP_ENGINE_MAX_FRAMES)
-
 	private:
 		VulkanDevice& _device;
 		VkExtent2D _extent;
@@ -125,7 +120,8 @@ namespace np::graphics::rhi
 			
 			swapchain_info.imageExtent = _extent;
 			swapchain_info.preTransform = surface_capabilities.currentTransform; // says that we don't want any local transform
-			swapchain_info.minImageCount = surface_capabilities.minImageCount + 1;
+			swapchain_info.minImageCount = NP_ENGINE_VULKAN_MAX_FRAME_COUNT;
+
 			if (surface_capabilities.maxImageCount != 0)
 				swapchain_info.minImageCount = ::std::min(swapchain_info.minImageCount, surface_capabilities.maxImageCount);
 
@@ -222,9 +218,9 @@ namespace np::graphics::rhi
 			_swapchain(CreateSwapchain()),
 			_images(RetrieveImages()),
 			_image_views(CreateImageViews()),
-			_image_semaphores(CreateSemaphores(MAX_FRAMES)),
-			_render_semaphores(CreateSemaphores(MAX_FRAMES)),
-			_fences(CreateFences(MAX_FRAMES)),
+			_image_semaphores(CreateSemaphores(NP_ENGINE_VULKAN_MAX_FRAME_COUNT)),
+			_render_semaphores(CreateSemaphores(NP_ENGINE_VULKAN_MAX_FRAME_COUNT)),
+			_fences(CreateFences(NP_ENGINE_VULKAN_MAX_FRAME_COUNT)),
 			_acquired_image_fences(GetImages().size(), nullptr),
 			_current_image_index(0),
 			_acquired_image_index(0)
@@ -336,7 +332,7 @@ namespace np::graphics::rhi
 
 		void IncCurrentImage()
 		{
-			_current_image_index = (_current_image_index + 1) % MAX_FRAMES;
+			_current_image_index = (_current_image_index + 1) % NP_ENGINE_VULKAN_MAX_FRAME_COUNT;
 		}
 
 		const container::vector<VkImage>& GetImages() const

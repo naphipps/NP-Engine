@@ -393,7 +393,7 @@ namespace np::graphics::rhi
 
 		container::vector<VulkanBuffer*> CreateMetaValueBuffers()
 		{
-			container::vector<VulkanBuffer*> buffers(GetSwapchain().GetImages().size());
+			container::vector<VulkanBuffer*> buffers(NP_ENGINE_VULKAN_MAX_FRAME_COUNT);
 
 			for (siz i = 0; i < buffers.size(); i++)
 			{
@@ -406,7 +406,7 @@ namespace np::graphics::rhi
 
 		container::vector<VkDescriptorBufferInfo> CreateMetaValueDescriptorInfos()
 		{
-			container::vector<VkDescriptorBufferInfo> infos(GetSwapchain().GetImages().size());
+			container::vector<VkDescriptorBufferInfo> infos(NP_ENGINE_VULKAN_MAX_FRAME_COUNT);
 
 			for (siz i = 0; i < infos.size(); i++)
 			{
@@ -420,7 +420,7 @@ namespace np::graphics::rhi
 
 		container::vector<VkWriteDescriptorSet> CreateMetaValueDescriptorWriters()
 		{
-			container::vector<VkWriteDescriptorSet> writers(GetSwapchain().GetImages().size(),
+			container::vector<VkWriteDescriptorSet> writers(NP_ENGINE_VULKAN_MAX_FRAME_COUNT,
 															{VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET});
 
 			for (siz i = 0; i < writers.size(); i++)
@@ -458,7 +458,7 @@ namespace np::graphics::rhi
 			_bind_descriptor_sets_command_slot(0),
 			_bind_descriptor_sets(nullptr)
 		{
-			_meta_values.resize(GetSwapchain().GetImages().size());
+			_meta_values.resize(NP_ENGINE_VULKAN_MAX_FRAME_COUNT);
 		}
 
 		~VulkanPipeline()
@@ -586,7 +586,9 @@ namespace np::graphics::rhi
 			vkDestroyPipeline(GetDevice(), _pipeline, nullptr);
 			vkDestroyPipelineLayout(GetDevice(), _pipeline_layout, nullptr);
 			DestroyMetaValueBuffers();
-			_meta_values.resize(GetSwapchain().GetImages().size());
+
+			for (PipelineMetaValues& meta_values : _meta_values) meta_values = {};
+
 			_meta_value_buffers = CreateMetaValueBuffers();
 			_meta_value_descriptor_infos = CreateMetaValueDescriptorInfos();
 			_meta_value_descriptor_writers = CreateMetaValueDescriptorWriters();
