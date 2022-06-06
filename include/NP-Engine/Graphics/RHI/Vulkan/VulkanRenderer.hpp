@@ -66,8 +66,6 @@ namespace np::graphics::rhi
 				GetSwapchain().Rebuild();
 				GetRenderPass().Rebuild();
 				GetFramebuffers().Rebuild();
-				GetDevice().GetCommandPool().FreeCommandBuffers(_command_buffers);
-				_command_buffers = CreateCommandBuffers();
 				GetObjectPipeline().Rebuild();
 				GetLightPipeline().Rebuild();
 				_frame.Invalidate();
