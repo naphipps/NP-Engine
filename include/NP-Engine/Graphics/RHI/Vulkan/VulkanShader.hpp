@@ -83,9 +83,9 @@ namespace np::graphics::rhi
 			}
 		}
 
-		void LoadModule()
+		void CreateModule()
 		{
-			DestroyModule();
+			Dispose();
 
 			if (Size() > 0)
 			{
@@ -99,9 +99,9 @@ namespace np::graphics::rhi
 			}
 		}
 
-		void DestroyModule()
+		void Dispose()
 		{
-			if (_shader_module != nullptr)
+			if (_shader_module)
 			{
 				vkDestroyShaderModule(_device, _shader_module, nullptr);
 				_shader_module = nullptr;
@@ -120,7 +120,7 @@ namespace np::graphics::rhi
 
 		~VulkanShader()
 		{
-			DestroyModule();
+			Dispose();
 		}
 
 		VulkanInstance& GetInstance() const
@@ -141,7 +141,7 @@ namespace np::graphics::rhi
 		void Load(str filename) override
 		{
 			Read(filename);
-			LoadModule();
+			CreateModule();
 		}
 
 		siz Size() const override

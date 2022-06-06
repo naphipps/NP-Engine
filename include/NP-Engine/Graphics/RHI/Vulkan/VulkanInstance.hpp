@@ -227,12 +227,12 @@ namespace np::graphics::rhi
 		{
 			VkDebugUtilsMessengerEXT messenger = nullptr;
 
-			if (_instance != nullptr)
+			if (_instance)
 			{
 				using F = PFN_vkCreateDebugUtilsMessengerEXT;
 				F func = (F)vkGetInstanceProcAddr(_instance, "vkCreateDebugUtilsMessengerEXT");
 
-				if (func != nullptr)
+				if (func)
 				{
 					VkDebugUtilsMessengerCreateInfoEXT debug_msgr_info = CreateDebugMessagerInfo();
 					func(_instance, &debug_msgr_info, nullptr, &messenger);
@@ -247,20 +247,22 @@ namespace np::graphics::rhi
 
 		~VulkanInstance()
 		{
-			if (_debug_messenger != nullptr)
+			if (_debug_messenger)
 			{
 				using F = PFN_vkDestroyDebugUtilsMessengerEXT;
 				F func = (F)vkGetInstanceProcAddr(_instance, "vkDestroyDebugUtilsMessengerEXT");
 
-				if (func != nullptr)
+				if (func)
 				{
 					func(_instance, _debug_messenger, nullptr);
+					_debug_messenger = nullptr;
 				}
 			}
 
-			if (_instance != nullptr)
+			if (_instance)
 			{
 				vkDestroyInstance(_instance, nullptr);
+				_instance = nullptr;
 			}
 		}
 

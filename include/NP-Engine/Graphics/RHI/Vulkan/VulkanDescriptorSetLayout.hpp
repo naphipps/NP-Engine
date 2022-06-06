@@ -59,7 +59,10 @@ namespace np::graphics::rhi
 		~VulkanDescriptorSetLayout()
 		{
 			if (_layout)
+			{
 				vkDestroyDescriptorSetLayout(GetDevice(), _layout, nullptr);
+				_layout = nullptr;
+			}
 		}
 
 		operator VkDescriptorSetLayout() const

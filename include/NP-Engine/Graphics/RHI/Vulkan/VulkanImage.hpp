@@ -102,10 +102,16 @@ namespace np::graphics::rhi
 		~VulkanImage()
 		{
 			if (_device_memory)
+			{
 				vkFreeMemory(GetDevice(), _device_memory, nullptr);
+				_device_memory = nullptr;
+			}
 
 			if (_image)
+			{
 				vkDestroyImage(GetDevice(), _image, nullptr);
+				_image = nullptr;
+			}
 		}
 
 		void Assign(VulkanBuffer& buffer, VkBufferImageCopy buffer_image_copy)

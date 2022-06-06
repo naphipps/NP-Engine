@@ -73,7 +73,10 @@ namespace np::graphics::rhi
 		~VulkanDescriptorSets()
 		{
 			if (_descriptor_pool)
+			{
 				vkDestroyDescriptorPool(GetDevice(), _descriptor_pool, nullptr);
+				_descriptor_pool = nullptr;
+			}
 		}
 
 		operator const container::vector<VkDescriptorSet>&() const

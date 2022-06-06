@@ -435,7 +435,10 @@ namespace np::graphics::rhi
 			_command_pool.Dispose();
 
 			if (_device)
+			{
 				vkDestroyDevice(_device, nullptr);
+				_device = nullptr;
+			}
 		}
 
 		operator VkDevice() const // TODO: I think all these operators should be after the destructor

@@ -69,7 +69,10 @@ namespace np::graphics::rhi
 		~VulkanSampler()
 		{
 			if (_sampler)
+			{
 				vkDestroySampler(GetDevice(), _sampler, nullptr);
+				_sampler = nullptr;
+			}
 		}
 
 		operator VkSampler() const

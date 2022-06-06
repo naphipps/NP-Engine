@@ -94,10 +94,16 @@ namespace np::graphics::rhi
 		~VulkanBuffer()
 		{
 			if (_buffer)
+			{
 				vkDestroyBuffer(GetDevice(), _buffer, nullptr);
+				_buffer = nullptr;
+			}
 
 			if (_device_memory)
+			{
 				vkFreeMemory(GetDevice(), _device_memory, nullptr);
+				_device_memory = nullptr;
+			}
 		}
 
 		void CopyTo(VulkanBuffer& other)

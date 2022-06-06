@@ -437,6 +437,8 @@ namespace np::graphics::rhi
 		{
 			for (VulkanBuffer*& meta_value_buffer : _meta_value_buffers)
 				memory::Destroy<VulkanBuffer>(memory::DefaultTraitAllocator, meta_value_buffer);
+
+			_meta_value_buffers.clear();
 		}
 
 	public:
@@ -463,8 +465,18 @@ namespace np::graphics::rhi
 
 		~VulkanPipeline()
 		{
-			vkDestroyPipeline(GetDevice(), _pipeline, nullptr);
-			vkDestroyPipelineLayout(GetDevice(), _pipeline_layout, nullptr);
+			if (_pipeline)
+			{
+				vkDestroyPipeline(GetDevice(), _pipeline, nullptr);
+				_pipeline = nullptr;
+			}
+
+			if (_pipeline_layout)
+			{
+				vkDestroyPipelineLayout(GetDevice(), _pipeline_layout, nullptr);
+				_pipeline_layout = nullptr;
+			}
+
 			DestroyMetaValueBuffers();
 		}
 

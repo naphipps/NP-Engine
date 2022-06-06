@@ -47,9 +47,10 @@ namespace np::graphics::rhi
 
 		~VulkanSurface()
 		{
-			if (_surface != nullptr)
+			if (_surface)
 			{
 				vkDestroySurfaceKHR(_instance, _surface, nullptr);
+				_surface = nullptr;
 			}
 		}
 

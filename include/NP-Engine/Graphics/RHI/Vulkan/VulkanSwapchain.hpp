@@ -208,8 +208,11 @@ namespace np::graphics::rhi
 			_images.clear();
 			_acquired_image_fences.clear();
 
-			if (_swapchain) // TODO: we need this in every Vulkan class...
+			if (_swapchain)
+			{
 				vkDestroySwapchainKHR(GetDevice(), _swapchain, nullptr);
+				_swapchain = nullptr;
+			}
 		}
 
 	public:

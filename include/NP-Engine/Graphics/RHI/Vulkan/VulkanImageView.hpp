@@ -67,7 +67,10 @@ namespace np::graphics::rhi
 		~VulkanImageView()
 		{
 			if (_image_view)
+			{
 				vkDestroyImageView(GetDevice(), _image_view, nullptr);
+				_image_view = nullptr;
+			}
 		}
 
 		operator VkImageView() const

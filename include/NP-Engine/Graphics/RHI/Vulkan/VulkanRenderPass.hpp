@@ -220,7 +220,6 @@ namespace np::graphics::rhi
 
 		~VulkanRenderPass()
 		{
-			vkDeviceWaitIdle(GetDevice());
 			Dispose();
 		}
 
