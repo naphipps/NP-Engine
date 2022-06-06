@@ -14,6 +14,7 @@
 #include "NP-Engine/Graphics/RPI/RPI.hpp"
 
 #include "VulkanDevice.hpp"
+#include "VulkanCommands.hpp"
 
 namespace np::graphics::rhi
 {

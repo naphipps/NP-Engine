@@ -13,6 +13,9 @@
 
 #include "NP-Engine/Graphics/RPI/RPI.hpp"
 
+#include "VulkanRenderableImage.hpp"
+#include "VulkanRenderableModel.hpp"
+
 namespace np::graphics::rhi
 {
 	// TODO: implement this
