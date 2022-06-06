@@ -28,7 +28,7 @@ namespace np::js
 
 		JobRecord(const JobRecord& record): JobRecord(record._priority, record._job) {}
 
-		JobRecord(JobRecord&& record): JobRecord(record._priority, record._job) {}
+		JobRecord(JobRecord&& record) noexcept: JobRecord(record._priority, record._job) {}
 
 		JobRecord& operator=(const JobRecord& other)
 		{
@@ -37,7 +37,7 @@ namespace np::js
 			return *this;
 		}
 
-		JobRecord& operator=(JobRecord&& other)
+		JobRecord& operator=(JobRecord&& other) noexcept
 		{
 			_priority = other._priority;
 			_job = other._job;
@@ -57,14 +57,12 @@ namespace np::js
 		const Job& GetJob() const
 		{
 			NP_ENGINE_ASSERT(IsValid(), "do not call this if we have an invalid job");
-
 			return *_job;
 		}
 
 		void Execute()
 		{
 			NP_ENGINE_ASSERT(IsValid(), "do not call this if we have an invalid job");
-
 			_job->Execute();
 		}
 
