@@ -26,6 +26,7 @@ namespace np::graphics
 	protected:
 		::entt::registry& _ecs_registry;
 		Renderer& _renderer;
+		memory::Delegate _on_draw_delegate;
 
 		virtual void Destruct() {}
 
@@ -47,6 +48,16 @@ namespace np::graphics
 		const Renderer& GetRenderer() const
 		{
 			return _renderer;
+		}
+
+		memory::Delegate& GetOnDrawDelegate()
+		{
+			return _on_draw_delegate;
+		}
+
+		const memory::Delegate& GetOnDrawDelegate() const
+		{
+			return _on_draw_delegate;
 		}
 
 		// TODO: flesh out the following:

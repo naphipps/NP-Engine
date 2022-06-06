@@ -11,38 +11,25 @@
 
 #include "NP-Engine/Graphics/RPI/RPI.hpp"
 
-#include "VulkanCommands.hpp"
-
 namespace np::graphics::rhi
 {
 	class VulkanCamera : public Camera
 	{
-	private:
-		VulkanCommandPushConstants* _push_constants = nullptr;
-
 	public:
-		VulkanCamera& operator=(const Camera& camera)
+
+		VulkanCamera& operator=(const Camera& other)
 		{
-			View = camera.View;
-			Projection = camera.Projection;
+			Fovy = other.Fovy;
+			AspectRatio = other.AspectRatio;
+			NearPlane = other.NearPlane;
+			FarPlane = other.FarPlane;
+			Eye = other.Eye;
+			Center = other.Center;
+			Up = other.Up;
+			Update();
+
 			return *this;
 		}
-		/*
-		* //TODO: clean this up
-		void RenderToFrame(Frame& frame, Pipeline& pipeline)
-		{
-			VulkanFrame& vulkan_frame = (VulkanFrame&)frame;
-			VulkanPipeline& vulkan_pipeline = (VulkanPipeline&)pipeline;
-
-			if (_push_constants)
-				memory::Destroy<VulkanCommandPushConstants>(memory::DefaultTraitAllocator, _push_constants);
-
-			_push_constants = memory::Create<VulkanCommandPushConstants>(memory::DefaultTraitAllocator,
-				vulkan_pipeline.GetPipelineLayout(), VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(VulkanCamera), this);
-
-			vulkan_frame.StageCommand(*_push_constants);
-		}
-		*/
 	};
 } // namespace np::graphics::rhi
 

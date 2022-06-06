@@ -88,6 +88,7 @@ namespace np::graphics::rhi
 				expected = true;
 			}
 
+			_on_draw_delegate.InvokeConnectedFunction();
 			VulkanFrame& vulkan_frame = (VulkanFrame&)_renderer.BeginFrame();
 			if (vulkan_frame.IsValid())
 			{
@@ -95,11 +96,10 @@ namespace np::graphics::rhi
 				VulkanPipeline& object_pipeline = vulkan_renderer.GetObjectPipeline();
 				VulkanPipeline& light_pipeline = vulkan_renderer.GetLightPipeline();
 
-
 				UpdateCamera();
 				PipelineMetaValues pipeline_meta_values = object_pipeline.GetMetaValues();
-				pipeline_meta_values.View = _camera.View;
-				pipeline_meta_values.Projection = _camera.Projection;
+				pipeline_meta_values.View = _camera.GetView();
+				pipeline_meta_values.Projection = _camera.GetProjection();
 				object_pipeline.SetMetaValues(pipeline_meta_values);
 				light_pipeline.SetMetaValues(pipeline_meta_values);
 
@@ -157,13 +157,10 @@ namespace np::graphics::rhi
 			Dispose();
 		}
 
-		//TODO: I don't like how we have our camera api setup since we overwrite everything in UpdateCamera()
 		void UpdateCamera()
 		{
-			_camera.View = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-			_camera.Projection =
-				glm::perspective(glm::radians(45.0f), ((VulkanRenderer&)_renderer).GetSwapchain().GetAspectRatio(), 0.1f, 10.0f);
-			_camera.Projection[1][1] *= -1; // glm was made for OpenGL, so Y is inverted. We fix/invert Y here.
+			_camera.AspectRatio = ((VulkanRenderer&)_renderer).GetSwapchain().GetAspectRatio();
+			_camera.Update();
 		}
 
 		void Render() override
@@ -206,6 +203,8 @@ namespace np::graphics::rhi
 				RenderableLight& light = *ecs::Entity(e, _ecs_registry).Get<RenderableLight*>();
 				light.DisposeForPipeline(((VulkanRenderer&)_renderer).GetLightPipeline());
 			}
+
+			_on_draw_delegate.DisconnectFunction();
 		}
 
 		virtual void SetCamera(Camera& camera) override
