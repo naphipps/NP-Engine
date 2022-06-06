@@ -91,6 +91,92 @@ namespace np::graphics::rhi
 			return info;
 		}
 
+		void Destruct() override
+		{
+			Dispose();
+		}
+
+		void Dispose()
+		{
+			if (_device)
+			{
+				vkDeviceWaitIdle(*_device);
+			}
+
+			if (_light_pipeline)
+			{
+				memory::Destroy<VulkanPipeline>(memory::DefaultTraitAllocator, _light_pipeline);
+				_light_pipeline = nullptr;
+			}
+
+			if (_light_fragment_shader)
+			{
+				memory::Destroy<VulkanShader>(memory::DefaultTraitAllocator, _light_fragment_shader);
+				_light_fragment_shader = nullptr;
+			}
+
+			if (_light_vertex_shader)
+			{
+				memory::Destroy<VulkanShader>(memory::DefaultTraitAllocator, _light_vertex_shader);
+				_light_vertex_shader = nullptr;
+			}
+
+			if (_object_pipeline)
+			{
+				memory::Destroy<VulkanPipeline>(memory::DefaultTraitAllocator, _object_pipeline);
+				_object_pipeline = nullptr;
+			}
+
+			if (_object_fragment_shader)
+			{
+				memory::Destroy<VulkanShader>(memory::DefaultTraitAllocator, _object_fragment_shader);
+				_object_fragment_shader = nullptr;
+			}
+
+			if (_object_vertex_shader)
+			{
+				memory::Destroy<VulkanShader>(memory::DefaultTraitAllocator, _object_vertex_shader);
+				_object_vertex_shader = nullptr;
+			}
+
+			if (_framebuffers)
+			{
+				memory::Destroy<VulkanFramebuffers>(memory::DefaultTraitAllocator, _framebuffers);
+				_framebuffers = nullptr;
+			}
+
+			if (_render_pass)
+			{
+				memory::Destroy<VulkanRenderPass>(memory::DefaultTraitAllocator, _render_pass);
+				_render_pass = nullptr;
+			}
+
+			if (_swapchain)
+			{
+				memory::Destroy<VulkanSwapchain>(memory::DefaultTraitAllocator, _swapchain);
+				_swapchain = nullptr;
+			}
+
+			if (_device)
+			{
+				_device->GetCommandPool().FreeCommandBuffers(_command_buffers);
+				memory::Destroy<VulkanDevice>(memory::DefaultTraitAllocator, _device);
+				_device = nullptr;
+			}
+
+			if (_surface)
+			{
+				memory::Destroy<VulkanSurface>(memory::DefaultTraitAllocator, _surface);
+				_surface = nullptr;
+			}
+
+			if (_instance)
+			{
+				memory::Destroy<VulkanInstance>(memory::DefaultTraitAllocator, _instance);
+				_instance = nullptr;
+			}
+		}
+
 	public:
 		VulkanRenderer(::entt::registry& ecs_registry):
 			Renderer(ecs_registry),
@@ -115,51 +201,6 @@ namespace np::graphics::rhi
 			_render_pass_begin_info(CreateRenderPassBeginInfo()),
 			_is_out_of_date(false)
 		{}
-
-		~VulkanRenderer()
-		{
-			if (_device)
-				vkDeviceWaitIdle(*_device);
-
-			if (_light_pipeline)
-				memory::Destroy<VulkanPipeline>(memory::DefaultTraitAllocator, _light_pipeline);
-
-			if (_light_fragment_shader)
-				memory::Destroy<VulkanShader>(memory::DefaultTraitAllocator, _light_fragment_shader);
-
-			if (_light_vertex_shader)
-				memory::Destroy<VulkanShader>(memory::DefaultTraitAllocator, _light_vertex_shader);
-
-			if (_object_pipeline)
-				memory::Destroy<VulkanPipeline>(memory::DefaultTraitAllocator, _object_pipeline);
-
-			if (_object_fragment_shader)
-				memory::Destroy<VulkanShader>(memory::DefaultTraitAllocator, _object_fragment_shader);
-
-			if (_object_vertex_shader)
-				memory::Destroy<VulkanShader>(memory::DefaultTraitAllocator, _object_vertex_shader);
-
-			if (_framebuffers)
-				memory::Destroy<VulkanFramebuffers>(memory::DefaultTraitAllocator, _framebuffers);
-
-			if (_render_pass)
-				memory::Destroy<VulkanRenderPass>(memory::DefaultTraitAllocator, _render_pass);
-
-			if (_swapchain)
-				memory::Destroy<VulkanSwapchain>(memory::DefaultTraitAllocator, _swapchain);
-
-			if (_device)
-			{
-				_device->GetCommandPool().FreeCommandBuffers(_command_buffers);
-				memory::Destroy<VulkanDevice>(memory::DefaultTraitAllocator, _device);
-			}
-
-			if (_surface)
-				memory::Destroy<VulkanSurface>(memory::DefaultTraitAllocator, _surface);
-
-			if (_instance)
-				memory::Destroy<VulkanInstance>(memory::DefaultTraitAllocator, _instance);
-		}
 
 		RhiType GetRhiType() const override
 		{
@@ -205,29 +246,7 @@ namespace np::graphics::rhi
 		{
 			if (IsAttachedToWindow(window))
 			{
-				vkDeviceWaitIdle(*_device);
-				memory::Destroy<VulkanPipeline>(memory::DefaultTraitAllocator, _light_pipeline);
-				memory::Destroy<VulkanShader>(memory::DefaultTraitAllocator, _light_vertex_shader);
-				memory::Destroy<VulkanShader>(memory::DefaultTraitAllocator, _light_fragment_shader);
-				memory::Destroy<VulkanPipeline>(memory::DefaultTraitAllocator, _object_pipeline);
-				memory::Destroy<VulkanShader>(memory::DefaultTraitAllocator, _object_vertex_shader);
-				memory::Destroy<VulkanShader>(memory::DefaultTraitAllocator, _object_fragment_shader);
-				memory::Destroy<VulkanFramebuffers>(memory::DefaultTraitAllocator, _framebuffers);
-				memory::Destroy<VulkanRenderPass>(memory::DefaultTraitAllocator, _render_pass);
-				memory::Destroy<VulkanSwapchain>(memory::DefaultTraitAllocator, _swapchain);
-				memory::Destroy<VulkanDevice>(memory::DefaultTraitAllocator, _device);
-				memory::Destroy<VulkanSurface>(memory::DefaultTraitAllocator, _surface);
-				_light_pipeline = nullptr;
-				_light_vertex_shader = nullptr;
-				_light_fragment_shader = nullptr;
-				_object_pipeline = nullptr;
-				_object_vertex_shader = nullptr;
-				_object_fragment_shader = nullptr;
-				_framebuffers = nullptr;
-				_render_pass = nullptr;
-				_swapchain = nullptr;
-				_device = nullptr;
-				_surface = nullptr;
+				Dispose();
 				_frame.Invalidate();
 			}
 		}

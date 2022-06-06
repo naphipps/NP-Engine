@@ -15,25 +15,24 @@
 
 namespace np::graphics::rhi
 {
+	// TODO: implement this
 	class VulkanRenderableLight : public RenderableLight
 	{
 	private:
-		void Destruct() override {}
+		void Destruct() override 
+		{
+			::std::cout << "loud VulkanRenderableLight destructor!\n";
+			Dispose();
+		}
 
 		void RenderToFrame(VulkanFrame& frame, VulkanPipeline& pipeline, VulkanRenderableImage& image) {}
 
 		void RenderToFrame(VulkanFrame& frame, VulkanPipeline& pipeline, VulkanRenderableModel& model) {}
 
-	public:
-		VulkanRenderableLight(Light& light): RenderableLight(light)
-		{
-			// TODO: implement this
-		}
+		void Dispose() {}
 
-		~VulkanRenderableLight()
-		{
-			::std::cout << "loud VulkanRenderableLight destructor!\n";
-		}
+	public:
+		VulkanRenderableLight(Light& light): RenderableLight(light) {}
 
 		void RenderToFrame(Frame& frame, Pipeline& pipeline, RenderableObject& object) override
 		{
@@ -56,6 +55,7 @@ namespace np::graphics::rhi
 		void DisposeForPipeline(Pipeline& pipeline) override
 		{
 			// TODO: implement
+			Dispose();
 		}
 
 		bl IsOutOfDate() const override

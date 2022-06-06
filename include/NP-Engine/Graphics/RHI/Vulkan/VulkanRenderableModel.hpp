@@ -80,6 +80,11 @@ namespace np::graphics::rhi
 
 		void Destruct() override
 		{
+			Dispose();
+		}
+
+		void Dispose()
+		{
 			if (_texture)
 			{
 				memory::Destroy<VulkanTexture>(memory::DefaultTraitAllocator, _texture);
@@ -257,7 +262,7 @@ namespace np::graphics::rhi
 
 		void DisposeForPipeline(Pipeline& pipeline) override
 		{
-			Destruct();
+			Dispose();
 		}
 
 		bl IsOutOfDate() const override

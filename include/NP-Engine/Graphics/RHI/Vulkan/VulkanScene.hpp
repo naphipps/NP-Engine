@@ -143,6 +143,12 @@ namespace np::graphics::rhi
 			_drawing_is_complete.store(true, mo_release);
 		}
 
+		void WaitForDrawProcedureToEnd()
+		{
+			while (!_draw_loop_procedure_is_complete.load(mo_acquire))
+				_engage_draw_loop_procedure.store(false, mo_release);
+		}
+
 	public:
 		VulkanScene(::entt::registry& ecs_registry, Renderer& renderer):
 			Scene(ecs_registry, renderer),
@@ -167,9 +173,7 @@ namespace np::graphics::rhi
 
 		void Render() override
 		{
-			while (!_draw_loop_procedure_is_complete.load(mo_acquire))
-				_engage_draw_loop_procedure.store(false, mo_release);
-
+			WaitForDrawProcedureToEnd();
 			Draw();
 		}
 
@@ -192,6 +196,8 @@ namespace np::graphics::rhi
 
 		void Dispose() override
 		{
+			WaitForDrawProcedureToEnd();
+
 			auto object_entities = _ecs_registry.view<RenderableObject*>();
 			for (auto e : object_entities)
 			{

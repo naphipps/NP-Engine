@@ -30,10 +30,15 @@ namespace np::graphics
 
 		Renderer(::entt::registry& ecs_registry): _ecs_registry(ecs_registry) {}
 
+		virtual void Destruct() {}
+
 	public:
 		static Renderer* Create(memory::Allocator& allocator, ::entt::registry& ecs_registry);
 
-		virtual ~Renderer() = default; // suppress warning
+		virtual ~Renderer()
+		{
+			Destruct();
+		}
 
 		virtual void RegisterRhiType() const
 		{

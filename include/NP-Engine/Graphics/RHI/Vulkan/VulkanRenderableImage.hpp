@@ -19,15 +19,16 @@ namespace np::graphics::rhi
 	class VulkanRenderableImage : public RenderableImage
 	{
 	private:
-		void Destruct() override {}
+		void Destruct() override 
+		{
+			::std::cout << "loud VulkanRenderableImage destructor\n";
+			Dispose();
+		}
+
+		void Dispose() {}
 
 	public:
 		VulkanRenderableImage(Image& image): RenderableImage(image) {}
-
-		~VulkanRenderableImage()
-		{
-			::std::cout << "loud VulkanRenderableImage destructor\n";
-		}
 
 		// TODO: add copy/move stuff??
 
@@ -44,6 +45,7 @@ namespace np::graphics::rhi
 		void DisposeForPipeline(Pipeline& pipeline) override
 		{
 			// TODO: implement
+			Dispose();
 		}
 
 		bl IsOutOfDate() const override
