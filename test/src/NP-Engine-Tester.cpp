@@ -11,9 +11,12 @@ namespace np::app
 	Application* CreateApplication(memory::Allocator& application_allocator)
 	{
 		::std::cout << "hello world from game create application\n";
+		return memory::Create<GameApp>(application_allocator, application_allocator);
+	}
 
-		memory::Block block = application_allocator.Allocate(sizeof(GameApp));
-		memory::Construct<GameApp>(block, application_allocator);
-		return static_cast<GameApp*>(block.ptr);
+	bl DestroyApplication(memory::Allocator& application_allocator, Application* application)
+	{
+		memory::Destroy<GameApp>(application_allocator, static_cast<GameApp*>(application));
+		return true;
 	}
 } // namespace np::app

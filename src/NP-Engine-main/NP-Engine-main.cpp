@@ -9,6 +9,7 @@
 #include "NP-Engine/NP-Engine.hpp"
 
 extern ::np::app::Application* ::np::app::CreateApplication(::np::memory::Allocator& application_allocator);
+extern bool ::np::app::DestroyApplication(::np::memory::Allocator& application_allocator, ::np::app::Application* application);
 
 i32 main(i32 argc, chr** argv)
 {
@@ -31,8 +32,7 @@ i32 main(i32 argc, chr** argv)
 			::np::memory::TraitAllocator::Register(application_allocator);
 			::np::app::Application* application = ::np::app::CreateApplication(application_allocator);
 			application->Run(argc, argv);
-			::np::memory::Destruct(application);
-			application_allocator.Deallocate(application);
+			::np::app::DestroyApplication(application_allocator, application);
 			::np::memory::TraitAllocator::Register(::np::memory::DefaultAllocator);
 		}
 		else

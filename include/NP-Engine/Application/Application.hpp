@@ -278,6 +278,8 @@ namespace np::app
 	};
 
 	Application* CreateApplication(memory::Allocator& application_allocator);
+
+	bl DestroyApplication(memory::Allocator& application_allocator, Application* application);
 } // namespace np::app
 
 #endif /* NP_ENGINE_APPLICATION_HPP */
