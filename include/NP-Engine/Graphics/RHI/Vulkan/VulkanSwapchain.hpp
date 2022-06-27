@@ -172,6 +172,7 @@ namespace np::graphics::rhi
 			{
 				VkSemaphoreCreateInfo semaphore_info{};
 				semaphore_info.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
+
 				if (vkCreateSemaphore(GetDevice(), &semaphore_info, nullptr, &semaphores[i]) != VK_SUCCESS)
 				{
 					semaphores.clear();
@@ -236,11 +237,17 @@ namespace np::graphics::rhi
 			for (VkSemaphore& semaphore : _render_semaphores)
 				vkDestroySemaphore(GetDevice(), semaphore, nullptr);
 
+			_render_semaphores.clear();
+
 			for (VkSemaphore& semaphore : _image_semaphores)
 				vkDestroySemaphore(GetDevice(), semaphore, nullptr);
 
+			_image_semaphores.clear();
+
 			for (VkFence& fence : _fences)
 				vkDestroyFence(GetDevice(), fence, nullptr);
+
+			_fences.clear();
 
 			Dispose();
 		}
