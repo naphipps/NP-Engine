@@ -112,6 +112,8 @@ namespace np::app
 			graphics::Renderer* vulkan = nullptr;
 			memory::Allocator& allocator = memory::DefaultTraitAllocator;
 
+			//TODO: we need to redo how we choose our rhi... look at Renderer.IsValid methods or something similar
+
 			// TODO: read graphics config file for renderer preference - then we could put our found renderers into multimap
 			// TODO: read from config file about which renderer was used last, if not available, ask user which renderer with
 			// popups
