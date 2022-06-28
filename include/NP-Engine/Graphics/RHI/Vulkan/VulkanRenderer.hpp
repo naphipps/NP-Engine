@@ -322,7 +322,7 @@ namespace np::graphics::rhi
 
 			vkResetFences(GetDevice(), 1, &GetSwapchain().GetFences()[current_index]);
 
-			if (vkQueueSubmit(GetDevice().GetGraphicsDeviceQueue(), 1, &submit_info,
+			if (GetDevice().GetGraphicsQueue().Submit({ submit_info },
 							  GetSwapchain().GetFences()[current_index]) != VK_SUCCESS)
 			{
 				NP_ENGINE_ASSERT(false, "failed to submit draw command buffer!");
@@ -336,7 +336,7 @@ namespace np::graphics::rhi
 			present_info.pSwapchains = swapchains.data();
 			present_info.pImageIndices = &image_index;
 
-			VkResult present_result = vkQueuePresentKHR(GetDevice().GetPresentDeviceQueue(), &present_info);
+			VkResult present_result = vkQueuePresentKHR(GetDevice().GetPresentQueue(), &present_info);
 
 			if (present_result == VK_ERROR_OUT_OF_DATE_KHR || present_result == VK_SUBOPTIMAL_KHR || IsOutOfDate())
 			{
@@ -347,7 +347,7 @@ namespace np::graphics::rhi
 				NP_ENGINE_ASSERT(false, "vkQueuePresentKHR error");
 			}
 
-			vkQueueWaitIdle(GetDevice().GetPresentDeviceQueue());
+			vkQueueWaitIdle(GetDevice().GetPresentQueue());
 			GetSwapchain().IncCurrentImage();
 			_frame.Invalidate();
 		}

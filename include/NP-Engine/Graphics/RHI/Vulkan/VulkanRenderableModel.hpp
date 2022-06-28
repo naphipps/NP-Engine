@@ -22,6 +22,8 @@
 #include "VulkanPipeline.hpp"
 #include "VulkanDescriptorSets.hpp"
 #include "VulkanSampler.hpp"
+#include "VulkanFence.hpp"
+#include "VulkanTimelineSemaphore.hpp"
 
 namespace np::graphics::rhi
 {
@@ -170,7 +172,26 @@ namespace np::graphics::rhi
 			if (IsOutOfDate())
 			{
 				DisposeForPipeline(pipeline);
+				container::vector<VulkanCommandBuffer> command_buffers;
 
+				//TODO: I think we can probably squeeze some more performance out of which stage our submits wait for
+				container::vector<VkPipelineStageFlags> wait_dst_flags{ VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT };
+				
+				ui64 timeline_initial_value = 0;
+				VulkanTimelineSemaphore timeline(vulkan_device, timeline_initial_value);
+				VkSemaphore timeline_semaphore = timeline;
+
+				VkTimelineSemaphoreSubmitInfo timeline_submit_info_template = VulkanTimelineSemaphore::CreateTimelineSemaphoreSubmitInfo();
+				timeline_submit_info_template.waitSemaphoreValueCount = 1;
+				timeline_submit_info_template.signalSemaphoreValueCount = 1;
+
+				VkSubmitInfo submit_info_template = VulkanQueue::CreateSubmitInfo();
+				submit_info_template.pWaitDstStageMask = wait_dst_flags.data();
+				submit_info_template.waitSemaphoreCount = 1;
+				submit_info_template.pWaitSemaphores = &timeline_semaphore;
+				submit_info_template.signalSemaphoreCount = 1;
+				submit_info_template.pSignalSemaphores = &timeline_semaphore;
+				
 				// create texture
 				VkImageCreateInfo texture_image_create_info = VulkanImage::CreateInfo();
 				texture_image_create_info.extent.width = _model.GetTextureImage().GetWidth();
@@ -181,54 +202,101 @@ namespace np::graphics::rhi
 				_texture = CreateTexture(vulkan_device, texture_image_create_info, texture_memory_property_flags,
 										 texture_image_view_create_info);
 
+				//create texture submit infos
+				ui64 texture_transition_to_dst_value = timeline_initial_value;
+				ui64 texture_assign_image_value = texture_transition_to_dst_value + 1;
+				ui64 texture_transition_to_shader_value = texture_assign_image_value + 1;
+				ui64 texture_complete_value = texture_transition_to_shader_value + 1;
+
+				VkTimelineSemaphoreSubmitInfo trasition_to_dst_timeline_submit = timeline_submit_info_template;
+				trasition_to_dst_timeline_submit.pWaitSemaphoreValues = &texture_transition_to_dst_value;
+				trasition_to_dst_timeline_submit.pSignalSemaphoreValues = &texture_assign_image_value;
+
+				VkTimelineSemaphoreSubmitInfo assign_image_timeline_submit = timeline_submit_info_template;
+				assign_image_timeline_submit.pWaitSemaphoreValues = &texture_assign_image_value;
+				assign_image_timeline_submit.pSignalSemaphoreValues = &texture_transition_to_shader_value;
+
+				VkTimelineSemaphoreSubmitInfo transition_to_timeline_submit = timeline_submit_info_template;
+				transition_to_timeline_submit.pWaitSemaphoreValues = &texture_transition_to_shader_value;
+				transition_to_timeline_submit.pSignalSemaphoreValues = &texture_complete_value;
+
+				VkSubmitInfo transition_to_dst_submit = submit_info_template;
+				transition_to_dst_submit.pNext = &trasition_to_dst_timeline_submit;
+
+				VkSubmitInfo assign_image_submit = submit_info_template;
+				assign_image_submit.pNext = &assign_image_timeline_submit;
+
+				VkSubmitInfo transition_to_shader_submit = submit_info_template;
+				transition_to_shader_submit.pNext = &transition_to_timeline_submit;
+
 				// create staging buffer
-				VulkanBuffer* staging =
+				VulkanBuffer* texture_staging =
 					CreateBuffer(vulkan_device, _model.GetTextureImage().Size(), VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
 								 VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 
 				// copy image data to staging
-				staging->Assign(_model.GetTextureImage().Data());
+				texture_staging->AssignData(_model.GetTextureImage().Data());
 
 				// copy staging to texture
-				_texture->GetImage().TransitionLayout(VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_UNDEFINED,
-													  VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+				_texture->GetImage().AsyncTransitionLayout(VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_UNDEFINED,
+													  VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, transition_to_dst_submit, command_buffers);
 
 				VkBufferImageCopy buffer_image_copy = VulkanCommandCopyBufferToImage::CreateBufferImageCopy();
 				buffer_image_copy.imageExtent = {_model.GetTextureImage().GetWidth(), _model.GetTextureImage().GetHeight(), 1};
-				_texture->GetImage().Assign(*staging, buffer_image_copy);
+				_texture->GetImage().AsyncAssign(*texture_staging, buffer_image_copy, assign_image_submit, command_buffers);
+				
+				_texture->GetImage().AsyncTransitionLayout(VK_FORMAT_R8G8B8A8_SRGB, 
+					VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+					VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, 
+					transition_to_shader_submit, command_buffers);
 
-				_texture->GetImage().TransitionLayout(VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-													  VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+				//create vertex submit infos
+				ui64 vertex_buffer_copy_value = texture_complete_value;
+				ui64 vertex_complete_value = vertex_buffer_copy_value + 1;
 
-				memory::Destroy<VulkanBuffer>(memory::DefaultTraitAllocator, staging);
+				VkTimelineSemaphoreSubmitInfo vertex_buffer_copy_timline_submit = timeline_submit_info_template;
+				vertex_buffer_copy_timline_submit.pWaitSemaphoreValues = &vertex_buffer_copy_value;
+				vertex_buffer_copy_timline_submit.pSignalSemaphoreValues = &vertex_complete_value;
+
+				VkSubmitInfo vertex_buffer_copy_submit = submit_info_template;
+				vertex_buffer_copy_submit.pNext = &vertex_buffer_copy_timline_submit;
 
 				// create vertex buffer
 				VkDeviceSize data_size = sizeof(VulkanVertex) * _model.GetVertices().size();
 
-				staging = CreateBuffer(vulkan_device, data_size, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+				VulkanBuffer* vertex_staging = CreateBuffer(vulkan_device, data_size, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
 									   VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 
-				_vertex_buffer =
-					CreateBuffer(vulkan_device, data_size, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
-								 VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+				_vertex_buffer = CreateBuffer(vulkan_device, data_size, 
+					VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
+					VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 
-				staging->Assign(_model.GetVertices().data());
-				staging->CopyTo(*_vertex_buffer);
-				memory::Destroy<VulkanBuffer>(memory::DefaultTraitAllocator, staging);
+				vertex_staging->AssignData(_model.GetVertices().data());
+				vertex_staging->AsyncCopyTo(*_vertex_buffer, vertex_buffer_copy_submit, command_buffers);
+
+				//create index submit infos
+				ui64 index_buffer_copy_value = vertex_complete_value;
+				ui64 index_complete_value = index_buffer_copy_value + 1;
+
+				VkTimelineSemaphoreSubmitInfo index_buffer_copy_timeline_submit = timeline_submit_info_template;
+				index_buffer_copy_timeline_submit.pWaitSemaphoreValues = &index_buffer_copy_value;
+				index_buffer_copy_timeline_submit.pSignalSemaphoreValues = &index_complete_value;
+
+				VkSubmitInfo index_buffer_copy_submit = submit_info_template;
+				index_buffer_copy_submit.pNext = &index_buffer_copy_timeline_submit;
 
 				// create index buffer
 				data_size = sizeof(ui32) * _model.GetIndices().size();
 
-				staging = CreateBuffer(vulkan_device, data_size, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+				VulkanBuffer* index_staging = CreateBuffer(vulkan_device, data_size, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
 									   VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 
-				_index_buffer =
-					CreateBuffer(vulkan_device, data_size, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
-								 VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+				_index_buffer = CreateBuffer(vulkan_device, data_size, 
+					VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
+					VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 
-				staging->Assign(_model.GetIndices().data());
-				staging->CopyTo(*_index_buffer);
-				memory::Destroy<VulkanBuffer>(memory::DefaultTraitAllocator, staging);
+				index_staging->AssignData(_model.GetIndices().data());
+				index_staging->AsyncCopyTo(*_index_buffer, index_buffer_copy_submit, command_buffers);
 
 				// create commands
 				_vk_vertex_buffer = *_vertex_buffer;
@@ -246,6 +314,14 @@ namespace np::graphics::rhi
 				_draw_indexed = memory::Create<VulkanCommandDrawIndexed>(memory::DefaultTraitAllocator,
 																		 (ui32)_model.GetIndices().size(), 1, 0, 0, 0);
 
+				timeline.Wait(texture_complete_value);
+				memory::Destroy<VulkanBuffer>(memory::DefaultTraitAllocator, texture_staging);
+				timeline.Wait(vertex_complete_value);
+				memory::Destroy<VulkanBuffer>(memory::DefaultTraitAllocator, vertex_staging);
+				timeline.Wait(index_complete_value);
+				memory::Destroy<VulkanBuffer>(memory::DefaultTraitAllocator, index_staging);
+
+				vulkan_device.FreeCommandBuffers(command_buffers);
 				SetOutOfDate(false);
 			}
 

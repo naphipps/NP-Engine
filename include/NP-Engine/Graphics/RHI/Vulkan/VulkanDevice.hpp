@@ -20,6 +20,7 @@
 #include "VulkanInstance.hpp"
 #include "VulkanSurface.hpp"
 #include "VulkanCommandPool.hpp"
+#include "VulkanQueue.hpp"
 
 namespace np::graphics::rhi
 {
@@ -56,6 +57,8 @@ namespace np::graphics::rhi
 		VkPhysicalDevice _physical_device;
 		VkDevice _device;
 		VulkanCommandPool _command_pool;
+		VulkanQueue _graphics_queue;
+		VulkanQueue _present_queue;
 
 		container::vector<VkExtensionProperties> GetSupportedDeviceExtensions(VkPhysicalDevice physical_device) const
 		{
@@ -70,7 +73,7 @@ namespace np::graphics::rhi
 		{
 			container::vector<VkExtensionProperties> extensions = GetSupportedDeviceExtensions(physical_device);
 			container::vector<str> names;
-			for (auto e : extensions)
+			for (VkExtensionProperties& e : extensions)
 				names.emplace_back(e.extensionName);
 			return names;
 		}
@@ -134,9 +137,22 @@ namespace np::graphics::rhi
 			if (physical_device != nullptr && (VkSurfaceKHR)GetSurface() != nullptr)
 			{
 				VkPhysicalDeviceProperties properties{};
-				VkPhysicalDeviceFeatures features{};
+				VkPhysicalDeviceVulkan12Properties properties12{};
+				VkPhysicalDeviceProperties2 properties2{};
+				properties12.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_PROPERTIES;
+				properties2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2;
+				properties2.pNext = &properties12;
 				vkGetPhysicalDeviceProperties(physical_device, &properties);
+				vkGetPhysicalDeviceProperties2(physical_device, &properties2);
+
+				VkPhysicalDeviceFeatures features{};
+				VkPhysicalDeviceVulkan12Features features12{};
+				VkPhysicalDeviceFeatures2 features2{};
+				features12.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES;
+				features2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
+				features2.pNext = &features12;
 				vkGetPhysicalDeviceFeatures(physical_device, &features);
+				vkGetPhysicalDeviceFeatures2(physical_device, &features2);
 
 				switch (properties.deviceType)
 				{
@@ -165,6 +181,7 @@ namespace np::graphics::rhi
 				bl has_queue_present_bit = false; // we require KHR present support
 				bl supports_required_extensions = false;
 				bl supports_required_layers = false;
+				bl supports_timeline_semaphores = false;
 
 				// check queue families
 				{
@@ -221,8 +238,13 @@ namespace np::graphics::rhi
 					}
 				}
 
+				// check timeline semaphores
+				{
+					supports_timeline_semaphores = features12.timelineSemaphore == VK_TRUE;
+				}
+
 				if (!has_queuegraphics_bit || !has_queue_present_bit || !supports_required_extensions ||
-					!supports_required_layers)
+					!supports_required_layers || !supports_timeline_semaphores)
 				{
 					score = 0;
 				}
@@ -235,7 +257,7 @@ namespace np::graphics::rhi
 		{
 			container::vector<VkDeviceQueueCreateInfo> infos;
 
-			if (_physical_device != nullptr)
+			if (_physical_device)
 			{
 				container::oset<ui32> families;
 				families.emplace(_queue_family_indices.graphics.value());
@@ -264,7 +286,7 @@ namespace np::graphics::rhi
 		{
 			_surface_format = {};
 
-			if (physical_device != nullptr)
+			if (physical_device)
 			{
 				_surface_format = surface_formats[0];
 
@@ -284,7 +306,7 @@ namespace np::graphics::rhi
 		{
 			_present_mode = {};
 
-			if (physical_device != nullptr)
+			if (physical_device)
 			{
 				_present_mode = VK_PRESENT_MODE_FIFO_KHR;
 
@@ -355,14 +377,14 @@ namespace np::graphics::rhi
 				}
 			}
 
-			if (physical_device == nullptr)
-			{
-				_queue_family_indices.clear();
-			}
-			else
+			if (physical_device)
 			{
 				ChooseSurfaceFormat(surface_formats, physical_device);
 				ChoosePresentMode(present_modes, physical_device);
+			}
+			else
+			{
+				_queue_family_indices.clear();
 			}
 
 			return physical_device;
@@ -372,10 +394,16 @@ namespace np::graphics::rhi
 		{
 			VkDevice logical_device = nullptr;
 
-			if (_physical_device != nullptr && (VkSurfaceKHR)GetSurface() != nullptr)
+			if (_physical_device && (VkSurfaceKHR)GetSurface() != nullptr)
 			{
 				VkPhysicalDeviceFeatures physical_features{};
+				VkPhysicalDeviceVulkan12Features physical_features12{};
+				VkPhysicalDeviceFeatures2 physical_features2{};
+				physical_features12.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES;
+				physical_features2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
+				physical_features2.pNext = &physical_features12;
 				vkGetPhysicalDeviceFeatures(_physical_device, &physical_features);
+				vkGetPhysicalDeviceFeatures2(_physical_device, &physical_features2);
 
 				container::vector<str> enabled_extensions = GetRequiredDeviceExtensionNames();
 				container::vector<const chr*> enabled_extension_names;
@@ -397,6 +425,7 @@ namespace np::graphics::rhi
 				}
 
 				VkDeviceCreateInfo device_info = CreateDeviceInfo();
+				device_info.pNext = &physical_features12;
 				device_info.pEnabledFeatures = &physical_features;
 				device_info.queueCreateInfoCount = (ui32)queue_infos.size();
 				device_info.pQueueCreateInfos = queue_infos.data();
@@ -427,7 +456,9 @@ namespace np::graphics::rhi
 			_surface(surface),
 			_physical_device(ChoosePhysicalDevice()),
 			_device(CreateLogicalDevice()),
-			_command_pool(_device, CreateCommandPoolInfo())
+			_command_pool(_device, CreateCommandPoolInfo()),
+			_graphics_queue(_device, _queue_family_indices.graphics.value(), 0),
+			_present_queue(_device, _queue_family_indices.present.value(), 0)
 		{}
 
 		~VulkanDevice()
@@ -450,7 +481,7 @@ namespace np::graphics::rhi
 		{
 			str name = "";
 
-			if (_physical_device != nullptr)
+			if (_physical_device)
 			{
 				VkPhysicalDeviceProperties properties;
 				vkGetPhysicalDeviceProperties(_physical_device, &properties);
@@ -500,29 +531,29 @@ namespace np::graphics::rhi
 			return _queue_family_indices;
 		}
 
-		VkQueue GetGraphicsDeviceQueue() const
+		VulkanQueue& GetGraphicsQueue()
 		{
-			VkQueue queue = nullptr;
-			if (_device != nullptr)
-			{
-				vkGetDeviceQueue(_device, _queue_family_indices.graphics.value(), 0, &queue);
-			}
-			return queue;
+			return _graphics_queue;
 		}
 
-		VkQueue GetPresentDeviceQueue() const
+		const VulkanQueue& GetGraphicsQueue() const
 		{
-			VkQueue queue = nullptr;
-			if (_device != nullptr)
-			{
-				vkGetDeviceQueue(_device, _queue_family_indices.present.value(), 0, &queue);
-			}
-			return queue;
+			return _graphics_queue;
 		}
 
-		ui32 GetMemoryTypeIndex(ui32 type_filter, VkMemoryPropertyFlags memory_property_flags)
+		VulkanQueue& GetPresentQueue()
 		{
-			VkPhysicalDeviceMemoryProperties memory_properties;
+			return _present_queue;
+		}
+
+		const VulkanQueue& GetPresentQueue() const
+		{
+			return _present_queue;
+		}
+
+		ui32 GetMemoryTypeIndex(ui32 type_filter, VkMemoryPropertyFlags memory_property_flags) 
+		{
+			VkPhysicalDeviceMemoryProperties memory_properties; //TODO: does this value change?? If not, then we should save it in a member
 			vkGetPhysicalDeviceMemoryProperties(GetPhysicalDevice(), &memory_properties);
 
 			bl found = false;
@@ -538,7 +569,7 @@ namespace np::graphics::rhi
 				}
 			}
 
-			return found ? memory_type_index : -1;
+			return found ? memory_type_index : -1; //TODO: returning -1 with type ui32??
 		}
 
 		VkFormat GetSupportedFormat(const container::vector<VkFormat>& format_candidates, VkImageTiling image_tiling,
@@ -567,38 +598,36 @@ namespace np::graphics::rhi
 			return format;
 		}
 
-		container::vector<VulkanCommandBuffer> BeginSingleUseCommandBuffers(siz count)
+		container::vector<VulkanCommandBuffer> AllocateCommandBuffers(siz count)
 		{
 			VkCommandBufferAllocateInfo command_buffer_allocate_info = _command_pool.CreateCommandBufferAllocateInfo();
 			command_buffer_allocate_info.commandBufferCount = count;
-			container::vector<VulkanCommandBuffer> command_buffers =
-				_command_pool.AllocateCommandBuffers(command_buffer_allocate_info);
-
-			VkCommandBufferBeginInfo command_buffer_begin_info = VulkanCommandBuffer::CreateBeginInfo();
-			command_buffer_begin_info.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
-
-			for (VulkanCommandBuffer& command_buffer : command_buffers)
-				command_buffer.Begin(command_buffer_begin_info);
-
-			return command_buffers;
+			return _command_pool.AllocateCommandBuffers(command_buffer_allocate_info);
 		}
 
-		void EndSingleUseCommandBuffers(container::vector<VulkanCommandBuffer>& command_buffers)
+		void FreeCommandBuffers(container::vector<VulkanCommandBuffer> command_buffers)
+		{
+			_command_pool.FreeCommandBuffers(command_buffers);
+		}
+
+		void BeginCommandBuffers(container::vector<VulkanCommandBuffer>& command_buffers, VkCommandBufferBeginInfo& begin_info)
+		{
+			for (VulkanCommandBuffer& command_buffer : command_buffers)
+				command_buffer.Begin(begin_info);
+		}
+
+		void BeginCommandBuffers(container::vector<VulkanCommandBuffer>& command_buffers, container::vector<VkCommandBufferBeginInfo>& begin_infos)
+		{
+			NP_ENGINE_ASSERT(command_buffers.size() == begin_infos.size(), "command_buffers size must equal begin_infos size");
+
+			for (siz i = 0; i < command_buffers.size(); i++)
+				command_buffers[i].Begin(begin_infos[i]);
+		}
+
+		void EndCommandBuffers(container::vector<VulkanCommandBuffer>& command_buffers)
 		{
 			for (VulkanCommandBuffer& command_buffer : command_buffers)
 				command_buffer.End();
-
-			container::vector<VkCommandBuffer> buffers(command_buffers.begin(), command_buffers.end());
-			VkSubmitInfo submit_info{};
-			submit_info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-			submit_info.commandBufferCount = (ui32)buffers.size();
-			submit_info.pCommandBuffers = buffers.data();
-
-			vkQueueSubmit(GetGraphicsDeviceQueue(), 1, &submit_info, nullptr);
-			vkQueueWaitIdle(GetGraphicsDeviceQueue()); // TODO: figure out how to use a fence so we can submit
-													   // multiple simultaneously - this makes it one by one
-
-			_command_pool.FreeCommandBuffers(command_buffers);
 		}
 	};
 } // namespace np::graphics::rhi

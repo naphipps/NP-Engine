@@ -114,21 +114,35 @@ namespace np::graphics::rhi
 			}
 		}
 
-		void Assign(VulkanBuffer& buffer, VkBufferImageCopy buffer_image_copy)
-		{
-			// TODO: figure out a way to include fence/semaphore parameters/returns/etc
-
-			VulkanCommandCopyBufferToImage copy_buffer_to_image(buffer, _image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1,
-																&buffer_image_copy);
-
-			container::vector<VulkanCommandBuffer> command_buffers = GetDevice().BeginSingleUseCommandBuffers(1);
-			command_buffers.front().Add(copy_buffer_to_image);
-			GetDevice().EndSingleUseCommandBuffers(command_buffers);
-		}
-
 		operator VkImage() const
 		{
 			return _image;
+		}
+
+		VkResult AsyncAssign(VulkanBuffer& buffer, VkBufferImageCopy buffer_image_copy, VkSubmitInfo& submit_info, container::vector<VulkanCommandBuffer>& command_buffers, VkFence fence = nullptr)
+		{
+			VulkanCommandCopyBufferToImage copy_buffer_to_image(buffer, _image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1,
+																&buffer_image_copy);
+
+			container::vector<VulkanCommandBuffer> buffers = GetDevice().AllocateCommandBuffers(1);
+			VkCommandBufferBeginInfo begin_info = VulkanCommandBuffer::CreateBeginInfo();
+			begin_info.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+			GetDevice().BeginCommandBuffers(buffers, begin_info);
+			buffers.front().Add(copy_buffer_to_image);
+			GetDevice().EndCommandBuffers(buffers);
+			for (auto it = buffers.begin(); it != buffers.end(); it++)
+				command_buffers.emplace_back(*it);
+			return GetDevice().GetGraphicsQueue().Submit(buffers, submit_info, fence);
+		}
+
+		VkResult SyncAssign(VulkanBuffer& buffer, VkBufferImageCopy buffer_image_copy, VkSubmitInfo& submit_info)
+		{
+			container::vector<VulkanCommandBuffer> command_buffers;
+			VulkanFence fence(GetDevice());
+			VkResult result = AsyncAssign(buffer, buffer_image_copy, submit_info, command_buffers, fence);
+			fence.Wait();
+			GetDevice().FreeCommandBuffers(command_buffers);
+			return result;
 		}
 
 		VkDeviceMemory GetDeviceMemory() const
@@ -141,7 +155,7 @@ namespace np::graphics::rhi
 			return _device;
 		}
 
-		void TransitionLayout(VkFormat format, VkImageLayout old_image_layout, VkImageLayout new_image_layout)
+		VkResult AsyncTransitionLayout(VkFormat format, VkImageLayout old_image_layout, VkImageLayout new_image_layout, VkSubmitInfo& submit_info, container::vector<VulkanCommandBuffer>& command_buffers, VkFence fence = nullptr)
 		{
 			// TODO: figure out a way to include fence/semaphore parameters/returns/etc
 
@@ -203,9 +217,26 @@ namespace np::graphics::rhi
 			VulkanCommandPipelineBarrier pipeline_barrier(src_pipeline_stage_flags, dst_pipeline_stage_flags, 0, 0, nullptr, 0,
 														  nullptr, 1, &image_memory_barrier);
 
-			container::vector<VulkanCommandBuffer> command_buffers = GetDevice().BeginSingleUseCommandBuffers(1);
-			command_buffers.front().Add(pipeline_barrier);
-			GetDevice().EndSingleUseCommandBuffers(command_buffers);
+			container::vector<VulkanCommandBuffer> buffers = GetDevice().AllocateCommandBuffers(1);
+			VkCommandBufferBeginInfo begin_info = VulkanCommandBuffer::CreateBeginInfo();
+			begin_info.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+			GetDevice().BeginCommandBuffers(buffers, begin_info);
+			buffers.front().Add(pipeline_barrier);
+			GetDevice().EndCommandBuffers(buffers);
+			using I = container::vector<VulkanCommandBuffer>::iterator;
+			for (I it = buffers.begin(); it != buffers.end(); it++)
+				command_buffers.emplace_back(*it);
+			return GetDevice().GetGraphicsQueue().Submit(buffers, submit_info, fence);
+		}
+
+		VkResult SyncTransitionLayout(VkFormat format, VkImageLayout old_image_layout, VkImageLayout new_image_layout, VkSubmitInfo& submit_info)
+		{
+			container::vector<VulkanCommandBuffer> command_buffers;
+			VulkanFence fence(GetDevice());
+			VkResult result = AsyncTransitionLayout(format, old_image_layout, new_image_layout, submit_info, command_buffers, fence);
+			fence.Wait();
+			GetDevice().FreeCommandBuffers(command_buffers);
+			return result;
 		}
 	};
 } // namespace np::graphics::rhi

@@ -15,6 +15,7 @@
 
 #include "VulkanDevice.hpp"
 #include "VulkanCommands.hpp"
+#include "VulkanFence.hpp"
 
 namespace np::graphics::rhi
 {
@@ -107,20 +108,35 @@ namespace np::graphics::rhi
 			}
 		}
 
-		void CopyTo(VulkanBuffer& other)
+		VkResult AsyncCopyTo(VulkanBuffer& other, VkSubmitInfo& submit_info, container::vector<VulkanCommandBuffer>& command_buffers, VkFence fence = nullptr)
 		{
-			// TODO: figure out a way to include fence/semaphore parameters/returns/etc
-
 			VkBufferCopy buffer_copy{};
 			buffer_copy.size = _size;
 			VulkanCommandCopyBuffers copy_buffers(_buffer, other, 1, &buffer_copy);
 
-			container::vector<VulkanCommandBuffer> command_buffers = GetDevice().BeginSingleUseCommandBuffers(1);
-			command_buffers.front().Add(copy_buffers);
-			GetDevice().EndSingleUseCommandBuffers(command_buffers);
+			//TODO: how are we freeing these command_buffers?
+			container::vector<VulkanCommandBuffer> buffers = GetDevice().AllocateCommandBuffers(1);
+			VkCommandBufferBeginInfo begin_info = VulkanCommandBuffer::CreateBeginInfo();
+			begin_info.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+			GetDevice().BeginCommandBuffers(buffers, begin_info);
+			buffers.front().Add(copy_buffers);
+			GetDevice().EndCommandBuffers(buffers);
+			for (auto it = buffers.begin(); it != buffers.end(); it++)
+				command_buffers.emplace_back(*it);
+			return GetDevice().GetGraphicsQueue().Submit(buffers, submit_info, fence);
 		}
 
-		void Assign(const void* data)
+		VkResult SyncCopyTo(VulkanBuffer& other, VkSubmitInfo& submit_info)
+		{
+			container::vector<VulkanCommandBuffer> command_buffers;
+			VulkanFence fence(GetDevice());
+			VkResult result = AsyncCopyTo(other, submit_info, command_buffers, fence);
+			fence.Wait();
+			GetDevice().FreeCommandBuffers(command_buffers);
+			return result;
+		}
+
+		void AssignData(const void* data)
 		{
 			void* mapping = nullptr;
 			if (vkMapMemory(GetDevice(), GetDeviceMemory(), 0, GetSize(), 0, &mapping) != VK_SUCCESS)
