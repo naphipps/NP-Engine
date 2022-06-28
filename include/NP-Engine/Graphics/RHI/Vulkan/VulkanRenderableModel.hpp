@@ -174,7 +174,7 @@ namespace np::graphics::rhi
 				DisposeForPipeline(pipeline);
 				container::vector<VulkanCommandBuffer> command_buffers;
 
-				//TODO: FIX BROKE BUILDS: macos and linux cannot use timeline semaphores
+				//TODO: FIX BROKE BUILDS: macos and linux cannot use timeline semaphores - maybe use khr extension of it??
 
 				//TODO: I think we can probably squeeze some more performance out of which stage our submits wait for
 				container::vector<VkPipelineStageFlags> wait_dst_flags{ VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT };
