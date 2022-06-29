@@ -108,13 +108,14 @@ namespace np::graphics::rhi
 			}
 		}
 
-		VkResult AsyncCopyTo(VulkanBuffer& other, VkSubmitInfo& submit_info, container::vector<VulkanCommandBuffer>& command_buffers, VkFence fence = nullptr)
+		VkResult AsyncCopyTo(VulkanBuffer& other, VkSubmitInfo& submit_info,
+							 container::vector<VulkanCommandBuffer>& command_buffers, VkFence fence = nullptr)
 		{
 			VkBufferCopy buffer_copy{};
 			buffer_copy.size = _size;
 			VulkanCommandCopyBuffers copy_buffers(_buffer, other, 1, &buffer_copy);
 
-			//TODO: how are we freeing these command_buffers?
+			// TODO: how are we freeing these command_buffers?
 			container::vector<VulkanCommandBuffer> buffers = GetDevice().AllocateCommandBuffers(1);
 			VkCommandBufferBeginInfo begin_info = VulkanCommandBuffer::CreateBeginInfo();
 			begin_info.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;

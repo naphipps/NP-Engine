@@ -28,18 +28,14 @@ namespace np::graphics::rhi
 			VkSemaphoreCreateInfo info{};
 			info.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
 			info.pNext = &type;
-			
+
 			if (vkCreateSemaphore(_device, &info, nullptr, &semaphore) != VK_SUCCESS)
 				semaphore = nullptr;
 			return semaphore;
 		}
 
 	public:
-
-		VulkanBinarySemaphore(VkDevice device) :
-			_device(device),
-			_semaphore(CreateSemaphore())
-		{}
+		VulkanBinarySemaphore(VkDevice device): _device(device), _semaphore(CreateSemaphore()) {}
 
 		~VulkanBinarySemaphore()
 		{
@@ -55,6 +51,6 @@ namespace np::graphics::rhi
 			return _semaphore;
 		}
 	};
-}
+} // namespace np::graphics::rhi
 
 #endif /* NP_ENGINE_VULKAN_BINARY_SEMAPHORE_HPP */

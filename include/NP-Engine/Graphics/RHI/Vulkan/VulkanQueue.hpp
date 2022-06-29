@@ -29,13 +29,12 @@ namespace np::graphics::rhi
 		}
 
 	public:
-
 		static VkSubmitInfo CreateSubmitInfo()
 		{
-			return { VK_STRUCTURE_TYPE_SUBMIT_INFO };
+			return {VK_STRUCTURE_TYPE_SUBMIT_INFO};
 		}
 
-		VulkanQueue(VkDevice device, ui32 queue_family_index, ui32 queue_index) :
+		VulkanQueue(VkDevice device, ui32 queue_family_index, ui32 queue_index):
 			_device(device),
 			_queue(RetrieveQueue(queue_family_index, queue_index))
 		{}
@@ -50,7 +49,8 @@ namespace np::graphics::rhi
 			return vkQueueSubmit(_queue, (ui32)submit_infos.size(), submit_infos.data(), fence);
 		}
 
-		VkResult Submit(container::vector<VulkanCommandBuffer>& command_buffers, VkSubmitInfo submit_info, VkFence fence = nullptr)
+		VkResult Submit(container::vector<VulkanCommandBuffer>& command_buffers, VkSubmitInfo submit_info,
+						VkFence fence = nullptr)
 		{
 			container::vector<VkCommandBuffer> buffers(command_buffers.begin(), command_buffers.end());
 			submit_info.commandBufferCount = (ui32)buffers.size();
@@ -58,6 +58,6 @@ namespace np::graphics::rhi
 			return vkQueueSubmit(_queue, 1, &submit_info, fence);
 		}
 	};
-}
+} // namespace np::graphics::rhi
 
 #endif /* NP_ENGINE_VULKAN_QUEUE_HPP */

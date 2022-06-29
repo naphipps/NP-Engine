@@ -36,13 +36,12 @@ namespace np::graphics::rhi
 		}
 
 	public:
-
 		static VkTimelineSemaphoreSubmitInfo CreateTimelineSemaphoreSubmitInfo()
 		{
 			return {VK_STRUCTURE_TYPE_TIMELINE_SEMAPHORE_SUBMIT_INFO};
 		}
 
-		VulkanTimelineSemaphore(VkDevice device, ui64 initial_value = 0) :
+		VulkanTimelineSemaphore(VkDevice device, ui64 initial_value = 0):
 			_device(device),
 			_semaphore(CreateSemaphore(initial_value))
 		{}
@@ -87,6 +86,6 @@ namespace np::graphics::rhi
 			return value;
 		}
 	};
-}
+} // namespace np::graphics::rhi
 
 #endif /* NP_ENGINE_VULKAN_TIMELINE_SEMAPHORE_HPP */

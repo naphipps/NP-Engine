@@ -174,16 +174,17 @@ namespace np::graphics::rhi
 				DisposeForPipeline(pipeline);
 				container::vector<VulkanCommandBuffer> command_buffers;
 
-				//TODO: FIX BROKE BUILDS: macos and linux cannot use timeline semaphores - maybe use khr extension of it??
+				// TODO: FIX BROKE BUILDS: macos and linux cannot use timeline semaphores - maybe use khr extension of it??
 
-				//TODO: I think we can probably squeeze some more performance out of which stage our submits wait for
-				container::vector<VkPipelineStageFlags> wait_dst_flags{ VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT };
-				
+				// TODO: I think we can probably squeeze some more performance out of which stage our submits wait for
+				container::vector<VkPipelineStageFlags> wait_dst_flags{VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT};
+
 				ui64 timeline_initial_value = 0;
 				VulkanTimelineSemaphore timeline(vulkan_device, timeline_initial_value);
 				VkSemaphore timeline_semaphore = timeline;
 
-				VkTimelineSemaphoreSubmitInfo timeline_submit_info_template = VulkanTimelineSemaphore::CreateTimelineSemaphoreSubmitInfo();
+				VkTimelineSemaphoreSubmitInfo timeline_submit_info_template =
+					VulkanTimelineSemaphore::CreateTimelineSemaphoreSubmitInfo();
 				timeline_submit_info_template.waitSemaphoreValueCount = 1;
 				timeline_submit_info_template.signalSemaphoreValueCount = 1;
 
@@ -193,7 +194,7 @@ namespace np::graphics::rhi
 				submit_info_template.pWaitSemaphores = &timeline_semaphore;
 				submit_info_template.signalSemaphoreCount = 1;
 				submit_info_template.pSignalSemaphores = &timeline_semaphore;
-				
+
 				// create texture
 				VkImageCreateInfo texture_image_create_info = VulkanImage::CreateInfo();
 				texture_image_create_info.extent.width = _model.GetTextureImage().GetWidth();
@@ -204,7 +205,7 @@ namespace np::graphics::rhi
 				_texture = CreateTexture(vulkan_device, texture_image_create_info, texture_memory_property_flags,
 										 texture_image_view_create_info);
 
-				//create texture submit infos
+				// create texture submit infos
 				ui64 texture_transition_to_dst_value = timeline_initial_value;
 				ui64 texture_assign_image_value = texture_transition_to_dst_value + 1;
 				ui64 texture_transition_to_shader_value = texture_assign_image_value + 1;
@@ -241,18 +242,18 @@ namespace np::graphics::rhi
 
 				// copy staging to texture
 				_texture->GetImage().AsyncTransitionLayout(VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_UNDEFINED,
-													  VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, transition_to_dst_submit, command_buffers);
+														   VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, transition_to_dst_submit,
+														   command_buffers);
 
 				VkBufferImageCopy buffer_image_copy = VulkanCommandCopyBufferToImage::CreateBufferImageCopy();
 				buffer_image_copy.imageExtent = {_model.GetTextureImage().GetWidth(), _model.GetTextureImage().GetHeight(), 1};
 				_texture->GetImage().AsyncAssign(*texture_staging, buffer_image_copy, assign_image_submit, command_buffers);
-				
-				_texture->GetImage().AsyncTransitionLayout(VK_FORMAT_R8G8B8A8_SRGB, 
-					VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-					VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, 
-					transition_to_shader_submit, command_buffers);
 
-				//create vertex submit infos
+				_texture->GetImage().AsyncTransitionLayout(VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+														   VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+														   transition_to_shader_submit, command_buffers);
+
+				// create vertex submit infos
 				ui64 vertex_buffer_copy_value = texture_complete_value;
 				ui64 vertex_complete_value = vertex_buffer_copy_value + 1;
 
@@ -266,17 +267,18 @@ namespace np::graphics::rhi
 				// create vertex buffer
 				VkDeviceSize data_size = sizeof(VulkanVertex) * _model.GetVertices().size();
 
-				VulkanBuffer* vertex_staging = CreateBuffer(vulkan_device, data_size, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-									   VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+				VulkanBuffer* vertex_staging =
+					CreateBuffer(vulkan_device, data_size, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+								 VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 
-				_vertex_buffer = CreateBuffer(vulkan_device, data_size, 
-					VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
-					VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+				_vertex_buffer =
+					CreateBuffer(vulkan_device, data_size, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
+								 VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 
 				vertex_staging->AssignData(_model.GetVertices().data());
 				vertex_staging->AsyncCopyTo(*_vertex_buffer, vertex_buffer_copy_submit, command_buffers);
 
-				//create index submit infos
+				// create index submit infos
 				ui64 index_buffer_copy_value = vertex_complete_value;
 				ui64 index_complete_value = index_buffer_copy_value + 1;
 
@@ -290,12 +292,13 @@ namespace np::graphics::rhi
 				// create index buffer
 				data_size = sizeof(ui32) * _model.GetIndices().size();
 
-				VulkanBuffer* index_staging = CreateBuffer(vulkan_device, data_size, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-									   VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+				VulkanBuffer* index_staging =
+					CreateBuffer(vulkan_device, data_size, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+								 VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 
-				_index_buffer = CreateBuffer(vulkan_device, data_size, 
-					VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
-					VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+				_index_buffer =
+					CreateBuffer(vulkan_device, data_size, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
+								 VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 
 				index_staging->AssignData(_model.GetIndices().data());
 				index_staging->AsyncCopyTo(*_index_buffer, index_buffer_copy_submit, command_buffers);

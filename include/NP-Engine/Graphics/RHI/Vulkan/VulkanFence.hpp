@@ -31,10 +31,7 @@ namespace np::graphics::rhi
 		}
 
 	public:
-
-		VulkanFence(VkDevice device) :
-			_device(device),
-			_fence(CreateFence())
+		VulkanFence(VkDevice device): _device(device), _fence(CreateFence())
 		{
 			Reset();
 		}
@@ -63,6 +60,6 @@ namespace np::graphics::rhi
 			vkResetFences(_device, 1, &_fence);
 		}
 	};
-}
+} // namespace np::graphics::rhi
 
 #endif /* NP_ENGINE_VULKAN_FENCE_HPP */

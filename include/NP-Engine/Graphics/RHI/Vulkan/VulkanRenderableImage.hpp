@@ -19,7 +19,7 @@ namespace np::graphics::rhi
 	class VulkanRenderableImage : public RenderableImage
 	{
 	private:
-		void Destruct() override 
+		void Destruct() override
 		{
 			::std::cout << "loud VulkanRenderableImage destructor\n";
 			Dispose();

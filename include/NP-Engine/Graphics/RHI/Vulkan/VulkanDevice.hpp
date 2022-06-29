@@ -551,9 +551,10 @@ namespace np::graphics::rhi
 			return _present_queue;
 		}
 
-		ui32 GetMemoryTypeIndex(ui32 type_filter, VkMemoryPropertyFlags memory_property_flags) 
+		ui32 GetMemoryTypeIndex(ui32 type_filter, VkMemoryPropertyFlags memory_property_flags)
 		{
-			VkPhysicalDeviceMemoryProperties memory_properties; //TODO: does this value change?? If not, then we should save it in a member
+			VkPhysicalDeviceMemoryProperties
+				memory_properties; // TODO: does this value change?? If not, then we should save it in a member
 			vkGetPhysicalDeviceMemoryProperties(GetPhysicalDevice(), &memory_properties);
 
 			bl found = false;
@@ -569,7 +570,7 @@ namespace np::graphics::rhi
 				}
 			}
 
-			return found ? memory_type_index : -1; //TODO: returning -1 with type ui32??
+			return found ? memory_type_index : -1; // TODO: returning -1 with type ui32??
 		}
 
 		VkFormat GetSupportedFormat(const container::vector<VkFormat>& format_candidates, VkImageTiling image_tiling,
@@ -616,7 +617,8 @@ namespace np::graphics::rhi
 				command_buffer.Begin(begin_info);
 		}
 
-		void BeginCommandBuffers(container::vector<VulkanCommandBuffer>& command_buffers, container::vector<VkCommandBufferBeginInfo>& begin_infos)
+		void BeginCommandBuffers(container::vector<VulkanCommandBuffer>& command_buffers,
+								 container::vector<VkCommandBufferBeginInfo>& begin_infos)
 		{
 			NP_ENGINE_ASSERT(command_buffers.size() == begin_infos.size(), "command_buffers size must equal begin_infos size");
 

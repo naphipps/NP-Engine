@@ -322,8 +322,7 @@ namespace np::graphics::rhi
 
 			vkResetFences(GetDevice(), 1, &GetSwapchain().GetFences()[current_index]);
 
-			if (GetDevice().GetGraphicsQueue().Submit({ submit_info },
-							  GetSwapchain().GetFences()[current_index]) != VK_SUCCESS)
+			if (GetDevice().GetGraphicsQueue().Submit({submit_info}, GetSwapchain().GetFences()[current_index]) != VK_SUCCESS)
 			{
 				NP_ENGINE_ASSERT(false, "failed to submit draw command buffer!");
 			}

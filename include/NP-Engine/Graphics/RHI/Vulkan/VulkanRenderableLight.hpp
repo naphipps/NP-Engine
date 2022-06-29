@@ -22,7 +22,7 @@ namespace np::graphics::rhi
 	class VulkanRenderableLight : public RenderableLight
 	{
 	private:
-		void Destruct() override 
+		void Destruct() override
 		{
 			::std::cout << "loud VulkanRenderableLight destructor!\n";
 			Dispose();

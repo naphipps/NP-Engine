@@ -119,7 +119,8 @@ namespace np::graphics::rhi
 			return _image;
 		}
 
-		VkResult AsyncAssign(VulkanBuffer& buffer, VkBufferImageCopy buffer_image_copy, VkSubmitInfo& submit_info, container::vector<VulkanCommandBuffer>& command_buffers, VkFence fence = nullptr)
+		VkResult AsyncAssign(VulkanBuffer& buffer, VkBufferImageCopy buffer_image_copy, VkSubmitInfo& submit_info,
+							 container::vector<VulkanCommandBuffer>& command_buffers, VkFence fence = nullptr)
 		{
 			VulkanCommandCopyBufferToImage copy_buffer_to_image(buffer, _image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1,
 																&buffer_image_copy);
@@ -155,7 +156,9 @@ namespace np::graphics::rhi
 			return _device;
 		}
 
-		VkResult AsyncTransitionLayout(VkFormat format, VkImageLayout old_image_layout, VkImageLayout new_image_layout, VkSubmitInfo& submit_info, container::vector<VulkanCommandBuffer>& command_buffers, VkFence fence = nullptr)
+		VkResult AsyncTransitionLayout(VkFormat format, VkImageLayout old_image_layout, VkImageLayout new_image_layout,
+									   VkSubmitInfo& submit_info, container::vector<VulkanCommandBuffer>& command_buffers,
+									   VkFence fence = nullptr)
 		{
 			// TODO: figure out a way to include fence/semaphore parameters/returns/etc
 
@@ -229,11 +232,13 @@ namespace np::graphics::rhi
 			return GetDevice().GetGraphicsQueue().Submit(buffers, submit_info, fence);
 		}
 
-		VkResult SyncTransitionLayout(VkFormat format, VkImageLayout old_image_layout, VkImageLayout new_image_layout, VkSubmitInfo& submit_info)
+		VkResult SyncTransitionLayout(VkFormat format, VkImageLayout old_image_layout, VkImageLayout new_image_layout,
+									  VkSubmitInfo& submit_info)
 		{
 			container::vector<VulkanCommandBuffer> command_buffers;
 			VulkanFence fence(GetDevice());
-			VkResult result = AsyncTransitionLayout(format, old_image_layout, new_image_layout, submit_info, command_buffers, fence);
+			VkResult result =
+				AsyncTransitionLayout(format, old_image_layout, new_image_layout, submit_info, command_buffers, fence);
 			fence.Wait();
 			GetDevice().FreeCommandBuffers(command_buffers);
 			return result;
