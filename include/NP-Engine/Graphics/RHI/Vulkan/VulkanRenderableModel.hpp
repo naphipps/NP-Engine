@@ -485,7 +485,7 @@ namespace np::graphics::rhi
 		{
 			if (IsOutOfDate())
 			{
-				//TODO: I'm not too convinced that we need to support timeline semaphores...
+				//TODO: I'm not too convinced that we need to support timeline semaphores... we should profile it
 
 #if NP_ENGINE_PLATFORM_SUPPORTS_VULKAN_TIMELINE_SEMAPHORES
 				BringUpToDateWithTimelineSemaphores(pipeline);
