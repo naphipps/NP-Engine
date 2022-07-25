@@ -44,7 +44,10 @@ namespace np::graphics::rhi
 		VulkanTimelineSemaphore(VkDevice device, ui64 initial_value = 0):
 			_device(device),
 			_semaphore(CreateSemaphore(initial_value))
-		{}
+		{
+			NP_ENGINE_ASSERT(NP_ENGINE_PLATFORM_SUPPORTS_VULKAN_TIMELINE_SEMAPHORES,
+				"Platform must support timeline semaphores to use timeline semaphores.");
+		}
 
 		~VulkanTimelineSemaphore()
 		{
