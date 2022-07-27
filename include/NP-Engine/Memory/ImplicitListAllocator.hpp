@@ -12,6 +12,7 @@
 
 #include "SizedAllocator.hpp"
 #include "Margin.hpp"
+#include "MemoryFunctions.hpp"
 
 namespace np::memory
 {
@@ -48,6 +49,19 @@ namespace np::memory
 			}
 
 			return initialized;
+		}
+
+		Block ExtractBlock(void* block_ptr)
+		{
+			Block block;
+
+			if (Contains(block_ptr))
+			{
+				MarginPtr block_header = (MarginPtr)((ui8*)block_ptr - __detail::MARGIN_ALIGNED_SIZE);
+				block = { block_ptr, block_header->GetSize() - (__detail::MARGIN_ALIGNED_SIZE << 1) };
+			}
+
+			return block;
 		}
 
 		ui8* FindAllocation(siz required_ALIGNED_SIZE, bl true_best_false_first)
@@ -156,6 +170,56 @@ namespace np::memory
 		Block AllocateBest(siz size)
 		{
 			return Allocate(size, true);
+		}
+
+		Block Reallocate(Block& old_block, siz new_size) override
+		{
+			return ReallocateBest(old_block, new_size);
+		}
+
+		Block Reallocate(void* old_ptr, siz new_size) override
+		{
+			return ReallocateBest(old_ptr, new_size);
+		}
+
+		Block ReallocateBest(Block& old_block, siz new_size)
+		{
+			Block new_block = AllocateBest(new_size);
+
+			if (Contains(old_block))
+			{
+				memory::CopyBytes(new_block.Begin(), old_block.Begin(), old_block.size);
+				Deallocate(old_block);
+				old_block.Invalidate();
+			}
+
+			return new_block;
+		}
+
+		Block ReallocateBest(void* old_ptr, siz new_size)
+		{
+			Block old_block = ExtractBlock(old_ptr);
+			return ReallocateBest(old_block, new_size);
+		}
+
+		Block ReallocateFirst(Block& old_block, siz new_size)
+		{
+			Block new_block = AllocateFirst(new_size);
+
+			if (Contains(old_block))
+			{
+				memory::CopyBytes(new_block.Begin(), old_block.Begin(), old_block.size);
+				Deallocate(old_block);
+				old_block.Invalidate();
+			}
+
+			return new_block;
+		}
+
+		Block ReallocateFirst(void* old_ptr, siz new_size)
+		{
+			Block old_block = ExtractBlock(old_ptr);
+			return ReallocateFirst(old_block, new_size);
 		}
 
 		bl Deallocate(Block& block) override

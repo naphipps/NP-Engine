@@ -11,6 +11,7 @@
 #include <thread>
 #include <sstream>
 #include <string>
+#include <utility>
 
 #include "NP-Engine/Foundation/Foundation.hpp"
 #include "NP-Engine/Primitive/Primitive.hpp"
@@ -27,24 +28,15 @@ namespace np::insight
 	class Instrumentor
 	{
 	private:
-		static const ::std::string OtherData;
-		static const ::std::string TraceEvents;
-		static Instrumentor _instance;
+		//TODO: should we use the same setup as Log for our InstrumentorPtr??
 
+		Mutex _mutex;
 		::rapidjson::Document _json;
+		bl _enable_trace_add;
+		bl _save_on_trace;
 		::std::string _filepath;
 		Timer _trace_timer;
-		Mutex _mutex;
-
-		Instrumentor(): Instrumentor(fs::Append(fs::GetCurrentPath(), "result.json")) {}
-
-		Instrumentor(::std::string filepath): _filepath(filepath)
-		{
-			_json[OtherData.c_str()].SetObject();
-			_json[TraceEvents.c_str()].SetArray();
-			_trace_timer.Stop();
-		}
-
+		
 		void InternalSave()
 		{
 			if (_filepath.size() > 0)
@@ -55,7 +47,6 @@ namespace np::insight
 				if (out_stream.is_open())
 				{
 					::rapidjson::StringBuffer buffer;
-					buffer.Clear(); // TODO: don't know if this is needed...
 					::rapidjson::Writer<::rapidjson::StringBuffer> writer(buffer);
 					_json.Accept(writer);
 
@@ -67,14 +58,22 @@ namespace np::insight
 		}
 
 	public:
-		static Instrumentor& Get()
-		{
-			return _instance;
-		}
 
-		~Instrumentor()
+		Instrumentor() : Instrumentor(fs::Append(fs::GetCurrentPath(), "result.json")) {}
+
+		Instrumentor(::std::string filepath) : _enable_trace_add(true), _save_on_trace(false), _filepath(filepath)
 		{
-			Save();
+			_json.SetObject();
+
+			::rapidjson::Value other_data_object;
+			other_data_object.SetObject();
+			_json.AddMember("otherData", other_data_object, _json.GetAllocator());
+
+			::rapidjson::Value trace_events_array;
+			trace_events_array.SetArray();
+			_json.AddMember("traceEvents", trace_events_array, _json.GetAllocator());
+
+			_trace_timer.Stop();
 		}
 
 		void Save(const ::std::string filepath = "")
@@ -82,63 +81,93 @@ namespace np::insight
 			Lock lock(_mutex);
 
 			if (filepath.size() > 0)
-			{
-				SetFilepath(filepath);
-			}
+				_filepath = filepath;
 
 			InternalSave();
 		}
 
 		void SetFilepath(const ::std::string filepath)
 		{
-			_filepath = filepath;
+			Lock lock(_mutex);
+			_filepath = filepath; //TODO: make internal method for this?
 		}
 
-		::std::string GetFilepath()
+		::std::string GetFilepath() const
 		{
 			return _filepath;
 		}
 
-		void AddTraceEvent(TraceEvent& event, bl save = false)
+		void EnableSaveOnTrace(bl enable = true)
+		{
+			Lock lock(_mutex);
+			_save_on_trace = enable;
+		}
+
+		void EnableTraceAdd(bl enable = true)
+		{
+			Lock lock(_mutex);
+			_enable_trace_add = enable;
+		}
+
+		void AddTraceEvent(TraceEvent& te)
 		{
 			Lock lock(_mutex);
 
-			::std::stringstream ss;
-			ss << event.ThreadId;
-			::std::string tid = ss.str();
-			ss.str(""); // clear ss
-			::rapidjson::Document trace;
-			trace.SetObject();
-
-			trace["cat"].SetString("function", 8);
-			trace["dur"].SetDouble(event.ElapsedMicroseconds.count());
-			trace["name"].SetString(event.Name.c_str(), event.Name.size());
-			trace["ph"].SetString("X", 1);
-			trace["pid"].SetString("0", 1);
-			trace["tid"].SetString(tid.c_str(), tid.size());
-			trace["ts"].SetDouble(time::DurationMicroseconds(event.StartTimestamp.time_since_epoch()).count());
-
-			_json[TraceEvents.c_str()].GetArray().PushBack(trace.GetObject(), _json.GetAllocator());
-
-#ifndef NP_PROFILE_FORCE_SAVE_ON_TRACE_ADD
-			if (save)
-#endif
+			if (_enable_trace_add)
 			{
-				InternalSave();
+				::std::stringstream ss;
+				ss << te.ThreadId;
+				::std::string tid_str = ss.str();
+				ss.str(""); // clear ss
+
+				::rapidjson::MemoryPoolAllocator<::rapidjson::CrtAllocator>& allocator = _json.GetAllocator();
+				::rapidjson::Value name(te.Name.c_str(), te.Name.size(), allocator);
+				::rapidjson::Value tid(tid_str.c_str(), tid_str.size(), allocator);
+				::rapidjson::Value trace;
+
+				trace.SetObject();
+				trace.AddMember("cat", "function", allocator);
+				trace.AddMember("dur", te.ElapsedMicroseconds.count(), allocator);
+				trace.AddMember("name", name, allocator);
+				trace.AddMember("ph", "X", allocator);
+				trace.AddMember("pid", "0", allocator);
+				trace.AddMember("tid", tid, allocator);
+				trace.AddMember("ts", time::DurationMicroseconds(te.StartTimestamp.time_since_epoch()).count(), allocator);
+
+				_json["traceEvents"].PushBack(::std::move(trace), allocator);
+
+				if (_save_on_trace)
+					InternalSave();
 			}
 		}
 	};
+
+	namespace __detail
+	{
+		extern Instrumentor* IntrumentorPtr;
+	}
+
+	static void StopInstrumentor()
+	{
+		if (__detail::IntrumentorPtr)
+		{
+			__detail::IntrumentorPtr->Save();
+			memory::Destroy<Instrumentor>(memory::DefaultTraitAllocator, __detail::IntrumentorPtr);
+			__detail::IntrumentorPtr = nullptr;
+		}
+	}
+
+	static void StartInstrumentor()
+	{
+		StopInstrumentor();
+		__detail::IntrumentorPtr = memory::Create<Instrumentor>(memory::DefaultTraitAllocator);
+	}
+
+	static Instrumentor& GetInstrumentor()
+	{
+		NP_ENGINE_ASSERT(__detail::IntrumentorPtr, "Call StartInstrumentor() before GetInstrumentor().");
+		return *__detail::IntrumentorPtr;
+	}
 } // namespace np::insight
-
-// check if NP_PROFILE_ENABLE is defined
-#ifndef NP_PROFILE_ENABLE
-	#define NP_PROFILE_ENABLE 0
-#endif
-
-#if NP_PROFILE_ENABLE
-	#define NP_PROFILE_SAVE() ::np::insight::Instrumentor::Get().Save();
-#else
-	#define NP_PROFILE_SAVE()
-#endif // NP_PROFILE_ENABLE
 
 #endif /* NP_ENGINE_INSTRUMENTOR_HPP */

@@ -118,7 +118,7 @@ namespace np::js
 
 		JobRecord GetStolenJob()
 		{
-			NP_PROFILE_FUNCTION();
+			NP_ENGINE_PROFILE_FUNCTION();
 
 			JobRecord stolen_job;
 
@@ -132,14 +132,14 @@ namespace np::js
 
 		void WorkerThreadProcedure()
 		{
-			NP_PROFILE_SCOPE("WorkerThreadProcedure: " + to_str((ui64)this));
+			NP_ENGINE_PROFILE_SCOPE("WorkerThreadProcedure: " + to_str((ui64)this));
 
 			while (_keep_working.load(mo_acquire))
 			{
 				JobRecord record = GetNextJob();
 				if (record.IsValid())
 				{
-					NP_PROFILE_SCOPE("executing my Job");
+					NP_ENGINE_PROFILE_SCOPE("executing my Job");
 					record.Execute();
 					_job_pool->DestroyObject(const_cast<Job*>(&record.GetJob()));
 				}
@@ -149,7 +149,7 @@ namespace np::js
 					JobRecord stolen = GetStolenJob();
 					if (stolen.IsValid())
 					{
-						NP_PROFILE_SCOPE("executing stolen Job");
+						NP_ENGINE_PROFILE_SCOPE("executing stolen Job");
 						stolen.Execute();
 						_job_pool->DestroyObject(const_cast<Job*>(&stolen.GetJob()));
 					}
@@ -280,7 +280,7 @@ namespace np::js
 
 		void StartWork(concurrency::ThreadPool& pool, i32 thread_affinity = -1)
 		{
-			NP_PROFILE_FUNCTION();
+			NP_ENGINE_PROFILE_FUNCTION();
 			_thread_pool = &pool;
 			_keep_working.store(true, mo_release);
 			_work_procedure_complete.store(false, mo_release);
@@ -290,7 +290,7 @@ namespace np::js
 
 		void StopWork()
 		{
-			NP_PROFILE_FUNCTION();
+			NP_ENGINE_PROFILE_FUNCTION();
 			_keep_working.store(false, mo_release);
 
 			do

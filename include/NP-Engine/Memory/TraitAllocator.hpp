@@ -39,6 +39,18 @@ namespace np::memory
 			return _allocator->Allocate(size);
 		}
 
+		Block Reallocate(Block& old_block, siz new_size) override
+		{
+			NP_ENGINE_ASSERT(_allocator != nullptr, "Registered TraitAllocator is nullptr");
+			return _allocator->Reallocate(old_block, new_size);
+		}
+
+		Block Reallocate(void* old_ptr, siz new_size) override
+		{
+			NP_ENGINE_ASSERT(_allocator != nullptr, "Registered TraitAllocator is nullptr");
+			return _allocator->Reallocate(old_ptr, new_size);
+		}
+
 		bl Deallocate(Block& block) override
 		{
 			return Deallocate(block.ptr);

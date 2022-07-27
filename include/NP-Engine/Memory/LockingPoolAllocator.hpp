@@ -11,6 +11,7 @@
 #include "NP-Engine/Primitive/Primitive.hpp"
 
 #include "SizedAllocator.hpp"
+#include "MemoryFunctions.hpp"
 
 namespace np::memory
 {
@@ -97,6 +98,25 @@ namespace np::memory
 			}
 
 			return block;
+		}
+
+		Block Reallocate(Block& old_block, siz new_size) override
+		{
+			Block new_block = Allocate(new_size);
+
+			if (Contains(old_block))
+			{
+				memory::CopyBytes(new_block.Begin(), old_block.Begin(), old_block.size);
+				Deallocate(old_block);
+				old_block.Invalidate();
+			}
+
+			return new_block;
+		}
+
+		Block Reallocate(void* old_ptr, siz new_size) override
+		{
+			return {};
 		}
 
 		bl Deallocate(Block& block, bl true_sort_false_constant)

@@ -54,7 +54,7 @@ namespace np::js
 
 		void Start()
 		{
-			NP_PROFILE_FUNCTION();
+			NP_ENGINE_PROFILE_FUNCTION();
 
 			_running = true;
 
@@ -66,7 +66,7 @@ namespace np::js
 
 		void Stop()
 		{
-			NP_PROFILE_FUNCTION();
+			NP_ENGINE_PROFILE_FUNCTION();
 
 			if (IsRunning())
 			{

@@ -18,9 +18,12 @@
 // TODO: refactor NP_ macros to NP_ENGINE_
 
 #if DEBUG
-	// TODO: only enable the following if not defined
-	#define NP_PROFILE_ENABLE 1
-	#define NP_LOG_ENABLE 1
+	#ifndef NP_ENGINE_PROFILE_ENABLE
+		#define NP_ENGINE_PROFILE_ENABLE true
+	#endif
+	#ifndef NP_ENGINE_LOG_ENABLE
+		#define NP_ENGINE_LOG_ENABLE true
+	#endif
 	#ifndef NP_ENGINE_ENABLE_ASSERT
 		#define NP_ENGINE_ENABLE_ASSERT true
 	#endif

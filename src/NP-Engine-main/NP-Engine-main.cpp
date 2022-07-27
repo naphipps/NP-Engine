@@ -32,9 +32,13 @@ i32 main(i32 argc, chr** argv)
 		{
 			::np::memory::RedBlackTreeAllocator application_allocator(main_block);
 			::np::memory::TraitAllocator::Register(application_allocator);
+			::np::insight::StartInstrumentor(); //TODO: if our Instrumentor handled instances like our Log, we probably won't need this
+
 			::np::app::Application* application = ::np::app::CreateApplication(application_allocator);
 			application->Run(argc, argv);
 			::np::app::DestroyApplication(application_allocator, application);
+
+			::np::insight::StopInstrumentor(); //TODO: figure out how to save our profiles if existing
 			::np::memory::TraitAllocator::Register(::np::memory::DefaultAllocator);
 		}
 		else
@@ -43,7 +47,7 @@ i32 main(i32 argc, chr** argv)
 			message = "WAS NOT ABLE TO ALLOCATE ENOUGH MEMORY\n";
 			message += "Log file can be found here: " + ::np::insight::Log::GetFileLoggerFilePath();
 			style = ::np::app::Popup::Style::Error;
-			NP_LOG_ERROR(message);
+			NP_ENGINE_LOG_ERROR(message);
 		}
 
 		main_allocator.Deallocate(main_block);
@@ -55,7 +59,7 @@ i32 main(i32 argc, chr** argv)
 		message = "STD EXCEPTION OCCURRED: \n" + to_str(e.what()) + "\n\n";
 		message += "Log file can be found here: " + ::np::insight::Log::GetFileLoggerFilePath();
 		style = ::np::app::Popup::Style::Error;
-		NP_LOG_ERROR(message);
+		NP_ENGINE_LOG_ERROR(message);
 	}
 	catch (...)
 	{
@@ -64,7 +68,7 @@ i32 main(i32 argc, chr** argv)
 		message = "UNKNOWN EXCEPTION OCCURRED\n\n";
 		message += "Log file can be found here: " + ::np::insight::Log::GetFileLoggerFilePath();
 		style = ::np::app::Popup::Style::Error;
-		NP_LOG_ERROR(message);
+		NP_ENGINE_LOG_ERROR(message);
 	}
 
 	if (retval != 0)

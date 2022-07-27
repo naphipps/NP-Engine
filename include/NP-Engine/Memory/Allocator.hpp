@@ -105,6 +105,10 @@ namespace np::memory
 
 		virtual Block Allocate(siz size) = 0;
 
+		virtual Block Reallocate(Block& old_block, siz new_size) = 0;
+
+		virtual Block Reallocate(void* old_ptr, siz new_size) = 0;
+
 		virtual bl Deallocate(Block& block) = 0;
 
 		virtual bl Deallocate(void* ptr) = 0;

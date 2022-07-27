@@ -6,9 +6,7 @@
 
 #include "NP-Engine/Insight/Instrumentor.hpp"
 
-namespace np::insight
+namespace np::insight::__detail
 {
-	const ::std::string Instrumentor::OtherData = "otherData";
-	const ::std::string Instrumentor::TraceEvents = "traceEvents";
-	Instrumentor Instrumentor::_instance;
+	Instrumentor* IntrumentorPtr = nullptr;
 } // namespace np::insight

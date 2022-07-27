@@ -60,6 +60,10 @@ namespace np::memory
 
 		virtual Block Allocate(siz size) override = 0;
 
+		virtual Block Reallocate(Block& old_block, siz new_size) override = 0;
+
+		virtual Block Reallocate(void* old_ptr, siz new_size) override = 0;
+
 		virtual bl Deallocate(Block& block) override = 0;
 
 		virtual bl Deallocate(void* ptr) override = 0;

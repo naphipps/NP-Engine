@@ -47,18 +47,13 @@ namespace np::concurrency
 		template <class Function, class... Args>
 		ThreadToken CreateThread(i32 thread_affinity, Function&& f, Args&&... args)
 		{
-			NP_PROFILE_FUNCTION();
+			NP_ENGINE_PROFILE_FUNCTION();
 
 			Thread* thread = base::CreateObject();
 			thread->Run(f, args...);
 
-			{
-				NP_PROFILE_SCOPE("attempt affinity");
-				if (thread_affinity > -1)
-				{
-					thread->SetAffinity(thread_affinity);
-				}
-			}
+			if (thread_affinity > -1)
+				thread->SetAffinity(thread_affinity);
 
 			ThreadToken token(thread);
 			return token;

@@ -11,6 +11,7 @@
 #include "NP-Engine/Primitive/Primitive.hpp"
 
 #include "Allocator.hpp"
+#include "MemoryFunctions.hpp"
 
 namespace np::memory
 {
@@ -79,6 +80,26 @@ namespace np::memory
 				block = _fallback->Allocate(size);
 			}
 			return block;
+		}
+
+		virtual Block Reallocate(Block& old_block, siz new_size) override
+		{
+			Block new_block = Allocate(new_size);
+
+			if (Contains(old_block))
+			{
+				memory::CopyBytes(new_block.Begin(), old_block.Begin(), old_block.size);
+				Deallocate(old_block);
+				old_block.Invalidate();
+			}
+
+			return new_block;
+		}
+
+		virtual Block Reallocate(void* old_ptr, siz new_size) override
+		{
+			NP_ENGINE_ASSERT(false, "SegregatedAllocator does not support Reallocate(void*, siz), use Reallocate(Block&, siz)");
+			return {};
 		}
 
 		virtual bl Deallocate(Block& block) override

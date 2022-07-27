@@ -46,10 +46,38 @@ namespace np::memory
 
 			if (ptr != nullptr)
 			{
-				block.ptr = ptr;
-				block.size = size;
+				block = { ptr, size };
 			}
 			return block;
+		}
+
+		virtual Block Reallocate(Block& old_block, siz new_size) override
+		{
+			Block new_block = Reallocate(old_block.ptr, new_size);
+			old_block.Invalidate();
+			return new_block;
+		}
+
+		virtual Block Reallocate(void* old_ptr, siz new_size) override
+		{
+			Block new_block;
+
+			if (old_ptr)
+			{
+				new_size = CalcAlignedSize(new_size);
+				void* ptr = ::std::realloc(old_ptr, new_size);
+
+				if (ptr != nullptr)
+				{
+					new_block = { ptr, new_size };
+				}
+			}
+			else
+			{
+				new_block = Allocate(new_size);
+			}
+
+			return new_block;
 		}
 
 		virtual bl Deallocate(Block& block) override
@@ -61,7 +89,7 @@ namespace np::memory
 
 		virtual bl Deallocate(void* ptr) override
 		{
-			::free(ptr);
+			::std::free(ptr);
 			return true;
 		}
 	};

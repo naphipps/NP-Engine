@@ -17,15 +17,35 @@
 #define RAPIDJSON_ASSERT(expression) \
 	NP_ENGINE_ASSERT(expression, ::std::string("RAPIDJSON encounted an asserted issue here: ") + ::std::string(NP_FUNCTION))
 
-#define RAPIDJSON_MALLOC(size) ::np::memory::DefaultTraitAllocator.Allocate(size).ptr
-#define RAPIDJSON_FREE(ptr) ::np::memory::DefaultTraitAllocator.Deallocate(ptr)
-
 namespace np::memory::__detail
 {
+	static void* RapidJsonMalloc(siz size)
+	{
+		Block block = DefaultTraitAllocator.Allocate(size);
+		RAPIDJSON_ASSERT(block.IsValid());
+		return block.ptr;
+	}
+
+	static void RapidJsonFree(void* ptr)
+	{
+		if (ptr)
+		{
+			bl freed = DefaultTraitAllocator.Deallocate(ptr);
+			RAPIDJSON_ASSERT(freed);
+		}
+	}
+
 	static void* RapidJsonRealloc(void* ptr, siz size)
 	{
-		RAPIDJSON_FREE(ptr);
-		return RAPIDJSON_MALLOC(size);
+		Block block;
+		
+		if (ptr)
+			block = DefaultTraitAllocator.Reallocate(ptr, size);
+		else
+			block = DefaultTraitAllocator.Allocate(size);
+
+		RAPIDJSON_ASSERT(block.IsValid());
+		return block.ptr;
 	}
 
 	template <typename T, typename... Args>
@@ -40,13 +60,18 @@ namespace np::memory::__detail
 	template <typename T>
 	static void RapidJsonDelete(T* ptr)
 	{
-		bl destructed = Destruct<T>(ptr);
-		RAPIDJSON_ASSERT(destructed);
-		bl deallocated = DefaultTraitAllocator.Deallocate(ptr);
-		RAPIDJSON_ASSERT(deallocated);
+		if (ptr)
+		{
+			bl destructed = Destruct<T>(ptr);
+			RAPIDJSON_ASSERT(destructed);
+			bl deallocated = DefaultTraitAllocator.Deallocate(ptr);
+			RAPIDJSON_ASSERT(deallocated);
+		}
 	}
 } // namespace np::memory::__detail
 
+#define RAPIDJSON_MALLOC(size) ::np::memory::__detail::RapidJsonMalloc(size)
+#define RAPIDJSON_FREE(ptr) ::np::memory::__detail::RapidJsonFree(ptr)
 #define RAPIDJSON_REALLOC(ptr, size) ::np::memory::__detail::RapidJsonRealloc(ptr, size)
 #define RAPIDJSON_NEW(TypeName) ::np::memory::__detail::RapidJsonNew<TypeName>
 #define RAPIDJSON_DELETE(ptr) ::np::memory::__detail::RapidJsonDelete(ptr)
