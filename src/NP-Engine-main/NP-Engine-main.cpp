@@ -32,13 +32,10 @@ i32 main(i32 argc, chr** argv)
 		{
 			::np::memory::RedBlackTreeAllocator application_allocator(main_block);
 			::np::memory::TraitAllocator::Register(application_allocator);
-			::np::insight::StartInstrumentor(); //TODO: if our Instrumentor handled instances like our Log, we probably won't need this
-
 			::np::app::Application* application = ::np::app::CreateApplication(application_allocator);
 			application->Run(argc, argv);
 			::np::app::DestroyApplication(application_allocator, application);
-
-			::np::insight::StopInstrumentor(); //TODO: figure out how to save our profiles if existing
+			NP_ENGINE_PROFILE_RESET();
 			::np::memory::TraitAllocator::Register(::np::memory::DefaultAllocator);
 		}
 		else

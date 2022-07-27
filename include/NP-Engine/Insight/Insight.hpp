@@ -25,11 +25,13 @@
 #if NP_ENGINE_PROFILE_ENABLE
 	#define NP_ENGINE_PROFILE_SCOPE(name) ::np::insight::InstrumentorTimer timer##__LINE__(name)
 	#define NP_ENGINE_PROFILE_FUNCTION() NP_ENGINE_PROFILE_SCOPE(NP_FUNCTION)
-	#define NP_ENGINE_GET_PROFILER() ::np::insight::GetInstrumentor()
+	#define NP_ENGINE_PROFILE_SAVE() ::np::insight::Instrumentor::Save()
+	#define NP_ENGINE_PROFILE_RESET() ::np::insight::Instrumentor::Reset()
 #else
 	#define NP_ENGINE_PROFILE_SCOPE(name)
 	#define NP_ENGINE_PROFILE_FUNCTION()
-	#define NP_ENGINE_GET_PROFILER()
+	#define NP_ENGINE_PROFILE_SAVE()
+	#define NP_ENGINE_PROFILE_RESET()
 #endif
 
 

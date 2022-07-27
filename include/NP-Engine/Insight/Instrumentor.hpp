@@ -7,6 +7,7 @@
 #ifndef NP_ENGINE_INSTRUMENTOR_HPP
 #define NP_ENGINE_INSTRUMENTOR_HPP
 
+#include <memory>
 #include <fstream>
 #include <thread>
 #include <sstream>
@@ -22,25 +23,26 @@
 
 #include "TraceEvent.hpp"
 #include "Timer.hpp"
+#include "Log.hpp"
 
 namespace np::insight
 {
 	class Instrumentor
 	{
 	private:
-		//TODO: should we use the same setup as Log for our InstrumentorPtr??
+		static Mutex _mutex;
+		static atm_bl _initialized;
+		static ::std::shared_ptr<::rapidjson::Document> _report;
+		static ::std::string _filepath;
+		static atm_bl _save_on_trace;
+		static atm_bl _enable_trace;
 
-		Mutex _mutex;
-		::rapidjson::Document _json;
-		bl _enable_trace_add;
-		bl _save_on_trace;
-		::std::string _filepath;
-		Timer _trace_timer;
-		
-		void InternalSave()
+		static void SaveReport()
 		{
 			if (_filepath.size() > 0)
 			{
+				::np::insight::Log::GetLogger()->info("Saving Instrumentor Report...");
+
 				::std::ofstream out_stream;
 				out_stream.open(_filepath);
 
@@ -48,79 +50,99 @@ namespace np::insight
 				{
 					::rapidjson::StringBuffer buffer;
 					::rapidjson::Writer<::rapidjson::StringBuffer> writer(buffer);
-					_json.Accept(writer);
+					_report->Accept(writer);
 
 					out_stream << buffer.GetString();
 					out_stream.flush();
 					out_stream.close();
 				}
+
+				::np::insight::Log::GetLogger()->info("Done Saving Instrumentor Report.");
+			}
+		}
+
+		static void Init()
+		{
+			bl expected = false;
+			if (_initialized.compare_exchange_strong(expected, true, mo_release, mo_relaxed))
+			{
+				_enable_trace = true;
+				_save_on_trace = false;
+				_filepath = fs::Append(fs::GetCurrentPath(), "profile_report.json");
+
+				_report = ::std::make_shared<::rapidjson::Document>();
+				_report->SetObject();
+
+				::rapidjson::Value other_data_object;
+				other_data_object.SetObject();
+				_report->AddMember("otherData", other_data_object, _report->GetAllocator());
+
+				::rapidjson::Value trace_events_array;
+				trace_events_array.SetArray();
+				_report->AddMember("traceEvents", trace_events_array, _report->GetAllocator());
 			}
 		}
 
 	public:
-
-		Instrumentor() : Instrumentor(fs::Append(fs::GetCurrentPath(), "result.json")) {}
-
-		Instrumentor(::std::string filepath) : _enable_trace_add(true), _save_on_trace(false), _filepath(filepath)
-		{
-			_json.SetObject();
-
-			::rapidjson::Value other_data_object;
-			other_data_object.SetObject();
-			_json.AddMember("otherData", other_data_object, _json.GetAllocator());
-
-			::rapidjson::Value trace_events_array;
-			trace_events_array.SetArray();
-			_json.AddMember("traceEvents", trace_events_array, _json.GetAllocator());
-
-			_trace_timer.Stop();
-		}
-
-		void Save(const ::std::string filepath = "")
+		static void Reset()
 		{
 			Lock lock(_mutex);
+			Init();
+			SaveReport();
+			_report.reset();
+			_initialized.store(false, mo_release);
+		}
+
+		static void Save(const ::std::string filepath = "")
+		{
+			Lock lock(_mutex);
+			Init();
 
 			if (filepath.size() > 0)
 				_filepath = filepath;
 
-			InternalSave();
+			SaveReport();
 		}
 
-		void SetFilepath(const ::std::string filepath)
+		static void SetFilepath(const ::std::string filepath)
 		{
 			Lock lock(_mutex);
-			_filepath = filepath; //TODO: make internal method for this?
+			Init();
+			_filepath = filepath;
 		}
 
-		::std::string GetFilepath() const
+		static ::std::string GetFilepath()
 		{
 			return _filepath;
 		}
 
-		void EnableSaveOnTrace(bl enable = true)
+		static void EnableSaveOnTrace(bl enable = true)
 		{
 			Lock lock(_mutex);
+			Init();
 			_save_on_trace = enable;
 		}
 
-		void EnableTraceAdd(bl enable = true)
+		static void EnableTraceAdd(bl enable = true)
 		{
 			Lock lock(_mutex);
-			_enable_trace_add = enable;
+			Init();
+			_enable_trace = enable;
 		}
 
-		void AddTraceEvent(TraceEvent& te)
+		static void AddTraceEvent(TraceEvent& te)
 		{
 			Lock lock(_mutex);
+			Init();
 
-			if (_enable_trace_add)
+			if (_enable_trace)
 			{
 				::std::stringstream ss;
 				ss << te.ThreadId;
 				::std::string tid_str = ss.str();
 				ss.str(""); // clear ss
 
-				::rapidjson::MemoryPoolAllocator<::rapidjson::CrtAllocator>& allocator = _json.GetAllocator();
+				::rapidjson::MemoryPoolAllocator<::rapidjson::CrtAllocator>& allocator = _report->GetAllocator();
 				::rapidjson::Value name(te.Name.c_str(), te.Name.size(), allocator);
 				::rapidjson::Value tid(tid_str.c_str(), tid_str.size(), allocator);
 				::rapidjson::Value trace;
@@ -134,40 +156,13 @@ namespace np::insight
 				trace.AddMember("tid", tid, allocator);
 				trace.AddMember("ts", time::DurationMicroseconds(te.StartTimestamp.time_since_epoch()).count(), allocator);
 
-				_json["traceEvents"].PushBack(::std::move(trace), allocator);
+				(*_report)["traceEvents"].PushBack(::std::move(trace), allocator);
 
 				if (_save_on_trace)
-					InternalSave();
+					SaveReport();
 			}
 		}
 	};
-
-	namespace __detail
-	{
-		extern Instrumentor* IntrumentorPtr;
-	}
-
-	static void StopInstrumentor()
-	{
-		if (__detail::IntrumentorPtr)
-		{
-			__detail::IntrumentorPtr->Save();
-			memory::Destroy<Instrumentor>(memory::DefaultTraitAllocator, __detail::IntrumentorPtr);
-			__detail::IntrumentorPtr = nullptr;
-		}
-	}
-
-	static void StartInstrumentor()
-	{
-		StopInstrumentor();
-		__detail::IntrumentorPtr = memory::Create<Instrumentor>(memory::DefaultTraitAllocator);
-	}
-
-	static Instrumentor& GetInstrumentor()
-	{
-		NP_ENGINE_ASSERT(__detail::IntrumentorPtr, "Call StartInstrumentor() before GetInstrumentor().");
-		return *__detail::IntrumentorPtr;
-	}
 } // namespace np::insight
 
 #endif /* NP_ENGINE_INSTRUMENTOR_HPP */

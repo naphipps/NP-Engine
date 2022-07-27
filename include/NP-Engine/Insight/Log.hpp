@@ -21,9 +21,6 @@ namespace np::insight
 	class Log
 	{
 	private:
-
-		//TODO: could we use extern here??
-
 		static atm_bl _initialized;
 		static ::std::shared_ptr<::spdlog::logger> _file_logger;
 		static ::std::shared_ptr<::spdlog::logger> _stdout_logger;
@@ -34,10 +31,9 @@ namespace np::insight
 	public:
 		static inline void Init()
 		{
-			if (!_initialized.load(mo_acquire)) //TODO: use compare and exchange
+			bl expected = false;
+			if (_initialized.compare_exchange_strong(expected, true, mo_release, mo_relaxed))
 			{
-				_initialized.store(true, mo_release);
-
 				::std::string pattern = "%^[pid:%P, tid:%t, %Y-%m-%d %H:%M:%S.%e] [%n, %l]%$ %v";
 
 				_stdout_sink = ::std::make_shared<spdlog::sinks::stdout_color_sink_mt>();

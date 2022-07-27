@@ -27,7 +27,7 @@ namespace np::insight
 			e.ElapsedMicroseconds = timer.GetElapsedMicroseconds();
 			e.StartTimestamp = timer.GetStartTimestamp();
 			e.ThreadId = ::std::this_thread::get_id();
-			::np::insight::GetInstrumentor().AddTraceEvent(e);
+			::np::insight::Instrumentor::AddTraceEvent(e);
 		}
 
 	public:
