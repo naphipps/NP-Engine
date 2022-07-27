@@ -4,7 +4,7 @@
 //
 //##===----------------------------------------------------------------------===##//
 
-// TODO: bring back xcode support
+// TODO: bring back xcode support - apparently our "fake" targets in cmake are bad for xcode
 
 #include <exception>
 
