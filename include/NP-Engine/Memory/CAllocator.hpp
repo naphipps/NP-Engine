@@ -46,7 +46,7 @@ namespace np::memory
 
 			if (ptr != nullptr)
 			{
-				block = { ptr, size };
+				block = {ptr, size};
 			}
 			return block;
 		}
@@ -69,7 +69,7 @@ namespace np::memory
 
 				if (ptr != nullptr)
 				{
-					new_block = { ptr, new_size };
+					new_block = {ptr, new_size};
 				}
 			}
 			else

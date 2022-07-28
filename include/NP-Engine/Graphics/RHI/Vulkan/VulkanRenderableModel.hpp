@@ -90,7 +90,7 @@ namespace np::graphics::rhi
 			container::vector<VulkanCommandBuffer> command_buffers;
 
 			// TODO: I think we can probably squeeze some more performance out of which stage our submits wait for
-			container::vector<VkPipelineStageFlags> wait_dst_flags{ VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT };
+			container::vector<VkPipelineStageFlags> wait_dst_flags{VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT};
 
 			ui64 timeline_initial_value = 0;
 			VulkanTimelineSemaphore timeline(vulkan_device, timeline_initial_value);
@@ -116,7 +116,7 @@ namespace np::graphics::rhi
 			VkMemoryPropertyFlags texture_memory_property_flags = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
 			VkImageViewCreateInfo texture_image_view_create_info = VulkanImageView::CreateInfo();
 			_texture = CreateTexture(vulkan_device, texture_image_create_info, texture_memory_property_flags,
-				texture_image_view_create_info);
+									 texture_image_view_create_info);
 
 			// create texture submit infos
 			ui64 texture_transition_to_dst_value = timeline_initial_value;
@@ -148,23 +148,23 @@ namespace np::graphics::rhi
 			// create staging buffer
 			VulkanBuffer* texture_staging =
 				CreateBuffer(vulkan_device, _model.GetTextureImage().Size(), VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-					VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+							 VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 
 			// copy image data to staging
 			texture_staging->AssignData(_model.GetTextureImage().Data());
 
 			// copy staging to texture
 			_texture->GetImage().AsyncTransitionLayout(VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_UNDEFINED,
-				VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, transition_to_dst_submit,
-				command_buffers);
+													   VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, transition_to_dst_submit,
+													   command_buffers);
 
 			VkBufferImageCopy buffer_image_copy = VulkanCommandCopyBufferToImage::CreateBufferImageCopy();
-			buffer_image_copy.imageExtent = { _model.GetTextureImage().GetWidth(), _model.GetTextureImage().GetHeight(), 1 };
+			buffer_image_copy.imageExtent = {_model.GetTextureImage().GetWidth(), _model.GetTextureImage().GetHeight(), 1};
 			_texture->GetImage().AsyncAssign(*texture_staging, buffer_image_copy, assign_image_submit, command_buffers);
 
 			_texture->GetImage().AsyncTransitionLayout(VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-				VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
-				transition_to_shader_submit, command_buffers);
+													   VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, transition_to_shader_submit,
+													   command_buffers);
 
 			// create vertex submit infos
 			ui64 vertex_buffer_copy_value = texture_complete_value;
@@ -182,11 +182,11 @@ namespace np::graphics::rhi
 
 			VulkanBuffer* vertex_staging =
 				CreateBuffer(vulkan_device, data_size, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-					VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+							 VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 
 			_vertex_buffer =
 				CreateBuffer(vulkan_device, data_size, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
-					VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+							 VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 
 			vertex_staging->AssignData(_model.GetVertices().data());
 			vertex_staging->AsyncCopyTo(*_vertex_buffer, vertex_buffer_copy_submit, command_buffers);
@@ -207,11 +207,11 @@ namespace np::graphics::rhi
 
 			VulkanBuffer* index_staging =
 				CreateBuffer(vulkan_device, data_size, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-					VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+							 VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 
 			_index_buffer =
 				CreateBuffer(vulkan_device, data_size, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
-					VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+							 VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 
 			index_staging->AssignData(_model.GetIndices().data());
 			index_staging->AsyncCopyTo(*_index_buffer, index_buffer_copy_submit, command_buffers);
@@ -223,14 +223,14 @@ namespace np::graphics::rhi
 				memory::DefaultTraitAllocator, vulkan_pipeline.GetPipelineLayout(),
 				VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(RenderableMetaValues), &_meta_values);
 
-			_bind_vertex_buffers = memory::Create<VulkanCommandBindVertexBuffers>(
-				memory::DefaultTraitAllocator, 0, 1, &_vk_vertex_buffer, _vertex_offsets.data());
+			_bind_vertex_buffers = memory::Create<VulkanCommandBindVertexBuffers>(memory::DefaultTraitAllocator, 0, 1,
+																				  &_vk_vertex_buffer, _vertex_offsets.data());
 
-			_bind_index_buffer = memory::Create<VulkanCommandBindIndexBuffer>(memory::DefaultTraitAllocator, *_index_buffer,
-				0, VK_INDEX_TYPE_UINT32);
+			_bind_index_buffer = memory::Create<VulkanCommandBindIndexBuffer>(memory::DefaultTraitAllocator, *_index_buffer, 0,
+																			  VK_INDEX_TYPE_UINT32);
 
 			_draw_indexed = memory::Create<VulkanCommandDrawIndexed>(memory::DefaultTraitAllocator,
-				(ui32)_model.GetIndices().size(), 1, 0, 0, 0);
+																	 (ui32)_model.GetIndices().size(), 1, 0, 0, 0);
 
 			timeline.Wait(texture_complete_value);
 			memory::Destroy<VulkanBuffer>(memory::DefaultTraitAllocator, texture_staging);
@@ -252,7 +252,7 @@ namespace np::graphics::rhi
 			container::vector<VulkanCommandBuffer> command_buffers;
 
 			// TODO: I think we can probably squeeze some more performance out of which stage our submits wait for
-			container::vector<VkPipelineStageFlags> wait_dst_flags{ VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT };
+			container::vector<VkPipelineStageFlags> wait_dst_flags{VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT};
 
 			// create texture
 			VkImageCreateInfo texture_image_create_info = VulkanImage::CreateInfo();
@@ -262,7 +262,7 @@ namespace np::graphics::rhi
 			VkMemoryPropertyFlags texture_memory_property_flags = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
 			VkImageViewCreateInfo texture_image_view_create_info = VulkanImageView::CreateInfo();
 			_texture = CreateTexture(vulkan_device, texture_image_create_info, texture_memory_property_flags,
-				texture_image_view_create_info);
+									 texture_image_view_create_info);
 
 			// create texture submit infos
 			VulkanBinarySemaphore transition_to_dst_semaphore(vulkan_device);
@@ -298,23 +298,23 @@ namespace np::graphics::rhi
 			// create staging buffer
 			VulkanBuffer* texture_staging =
 				CreateBuffer(vulkan_device, _model.GetTextureImage().Size(), VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-					VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+							 VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 
 			// copy image data to staging
 			texture_staging->AssignData(_model.GetTextureImage().Data());
 
 			// copy staging to texture
 			_texture->GetImage().AsyncTransitionLayout(VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_UNDEFINED,
-				VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, transition_to_dst_submit,
-				command_buffers);
+													   VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, transition_to_dst_submit,
+													   command_buffers);
 
 			VkBufferImageCopy buffer_image_copy = VulkanCommandCopyBufferToImage::CreateBufferImageCopy();
-			buffer_image_copy.imageExtent = { _model.GetTextureImage().GetWidth(), _model.GetTextureImage().GetHeight(), 1 };
+			buffer_image_copy.imageExtent = {_model.GetTextureImage().GetWidth(), _model.GetTextureImage().GetHeight(), 1};
 			_texture->GetImage().AsyncAssign(*texture_staging, buffer_image_copy, assign_image_submit, command_buffers);
 
 			_texture->GetImage().AsyncTransitionLayout(VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-				VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
-				transition_to_shader_submit, command_buffers, texture_complete_fence);
+													   VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, transition_to_shader_submit,
+													   command_buffers, texture_complete_fence);
 
 			// create vertex submit infos
 			VulkanBinarySemaphore vertex_buffer_copy_semaphore(vulkan_device);
@@ -334,11 +334,11 @@ namespace np::graphics::rhi
 
 			VulkanBuffer* vertex_staging =
 				CreateBuffer(vulkan_device, data_size, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-					VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+							 VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 
 			_vertex_buffer =
 				CreateBuffer(vulkan_device, data_size, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
-					VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+							 VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 
 			vertex_staging->AssignData(_model.GetVertices().data());
 			vertex_staging->AsyncCopyTo(*_vertex_buffer, vertex_buffer_copy_submit, command_buffers, vertex_complete_fence);
@@ -361,11 +361,11 @@ namespace np::graphics::rhi
 
 			VulkanBuffer* index_staging =
 				CreateBuffer(vulkan_device, data_size, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-					VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+							 VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 
 			_index_buffer =
 				CreateBuffer(vulkan_device, data_size, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
-					VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+							 VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 
 			index_staging->AssignData(_model.GetIndices().data());
 			index_staging->AsyncCopyTo(*_index_buffer, index_buffer_copy_submit, command_buffers, index_complete_fence);
@@ -377,14 +377,14 @@ namespace np::graphics::rhi
 				memory::DefaultTraitAllocator, vulkan_pipeline.GetPipelineLayout(),
 				VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(RenderableMetaValues), &_meta_values);
 
-			_bind_vertex_buffers = memory::Create<VulkanCommandBindVertexBuffers>(
-				memory::DefaultTraitAllocator, 0, 1, &_vk_vertex_buffer, _vertex_offsets.data());
+			_bind_vertex_buffers = memory::Create<VulkanCommandBindVertexBuffers>(memory::DefaultTraitAllocator, 0, 1,
+																				  &_vk_vertex_buffer, _vertex_offsets.data());
 
-			_bind_index_buffer = memory::Create<VulkanCommandBindIndexBuffer>(memory::DefaultTraitAllocator, *_index_buffer,
-				0, VK_INDEX_TYPE_UINT32);
+			_bind_index_buffer = memory::Create<VulkanCommandBindIndexBuffer>(memory::DefaultTraitAllocator, *_index_buffer, 0,
+																			  VK_INDEX_TYPE_UINT32);
 
 			_draw_indexed = memory::Create<VulkanCommandDrawIndexed>(memory::DefaultTraitAllocator,
-				(ui32)_model.GetIndices().size(), 1, 0, 0, 0);
+																	 (ui32)_model.GetIndices().size(), 1, 0, 0, 0);
 
 			texture_complete_fence.Wait();
 			memory::Destroy<VulkanBuffer>(memory::DefaultTraitAllocator, texture_staging);
@@ -485,7 +485,7 @@ namespace np::graphics::rhi
 		{
 			if (IsOutOfDate())
 			{
-				//TODO: I'm not too convinced that we need to support timeline semaphores... we should profile it
+				// TODO: I'm not too convinced that we need to support timeline semaphores... we should profile it
 
 #if NP_ENGINE_PLATFORM_SUPPORTS_VULKAN_TIMELINE_SEMAPHORES
 				BringUpToDateWithTimelineSemaphores(pipeline);

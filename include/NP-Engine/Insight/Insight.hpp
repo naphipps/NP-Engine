@@ -17,7 +17,6 @@
 #include "InstrumentorTimer.hpp"
 #include "TraceEvent.hpp"
 
-
 #ifndef NP_ENGINE_PROFILE_ENABLE
 	#define NP_ENGINE_PROFILE_ENABLE false
 #endif
@@ -34,10 +33,9 @@
 	#define NP_ENGINE_PROFILE_RESET()
 #endif
 
-
 #ifndef NP_ENGINE_LOG_ENABLE
 	#define NP_ENGINE_LOG_ENABLE false
-#endif 
+#endif
 
 #if NP_ENGINE_LOG_ENABLE
 	#define NP_ENGINE_LOG_TRACE(...) ::np::insight::Log::GetLogger()->trace(__VA_ARGS__)

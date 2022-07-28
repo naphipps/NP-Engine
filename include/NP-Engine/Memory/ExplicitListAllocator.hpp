@@ -136,7 +136,7 @@ namespace np::memory
 			if (Contains(block_ptr))
 			{
 				MarginPtr block_header = (MarginPtr)((ui8*)block_ptr - __detail::MARGIN_ALIGNED_SIZE);
-				block = { block_ptr, block_header->GetSize() - (__detail::MARGIN_ALIGNED_SIZE << 1) };
+				block = {block_ptr, block_header->GetSize() - (__detail::MARGIN_ALIGNED_SIZE << 1)};
 			}
 
 			return block;

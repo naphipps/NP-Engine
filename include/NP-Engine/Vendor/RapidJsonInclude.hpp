@@ -38,7 +38,7 @@ namespace np::memory::__detail
 	static void* RapidJsonRealloc(void* ptr, siz size)
 	{
 		Block block;
-		
+
 		if (ptr)
 			block = DefaultTraitAllocator.Reallocate(ptr, size);
 		else

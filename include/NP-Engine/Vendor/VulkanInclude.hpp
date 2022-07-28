@@ -13,7 +13,8 @@
 #include <vulkan/vulkan.hpp>
 
 #ifndef NP_ENGINE_VULKAN_MAX_FRAME_COUNT
-	#define NP_ENGINE_VULKAN_MAX_FRAME_COUNT 2 //TODO: get to the point where we can just change this arbitarily .. I think we can do that?
+	#define NP_ENGINE_VULKAN_MAX_FRAME_COUNT 2
+	// TODO: ^ get to the point where we can just change this arbitarily .. I think we can do that?
 #endif
 
 #if NP_ENGINE_PLATFORM_IS_APPLE || NP_ENGINE_PLATFORM_IS_LINUX
