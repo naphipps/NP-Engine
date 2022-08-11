@@ -106,11 +106,9 @@ namespace np::app
 
 		void ChooseRhi()
 		{
-			memory::Block block;
 			container::deque<graphics::Renderer*> renderers;
 			graphics::Renderer* opengl = nullptr;
 			graphics::Renderer* vulkan = nullptr;
-			memory::Allocator& allocator = memory::DefaultTraitAllocator;
 
 			// TODO: we need to redo how we choose our rhi... look at Renderer.IsValid methods or something similar
 
@@ -122,32 +120,10 @@ namespace np::app
 
 #if NP_ENGINE_PLATFORM_IS_WINDOWS
 			// TODO: we're keeping this here for testing purposes - when renderer is complete we can probably remove
-			block = allocator.Allocate(sizeof(graphics::rhi::OpenGLRenderer));
-			if (block.IsValid())
-			{
-				if (memory::Construct<graphics::rhi::OpenGLRenderer>(block, _ecs_registry))
-				{
-					opengl = static_cast<graphics::Renderer*>(block.ptr);
-				}
-				else
-				{
-					allocator.Deallocate(block);
-				}
-			}
-#endif
+			opengl = memory::Create<graphics::rhi::OpenGLRenderer>(memory::DefaultTraitAllocator, _ecs_registry);
 
-			block = allocator.Allocate(sizeof(graphics::rhi::VulkanRenderer));
-			if (block.IsValid())
-			{
-				if (memory::Construct<graphics::rhi::VulkanRenderer>(block, _ecs_registry))
-				{
-					vulkan = static_cast<graphics::Renderer*>(block.ptr);
-				}
-				else
-				{
-					allocator.Deallocate(block);
-				}
-			}
+#endif
+			vulkan = memory::Create<graphics::rhi::VulkanRenderer>(memory::DefaultTraitAllocator, _ecs_registry);
 
 			if (vulkan != nullptr)
 				renderers.emplace_back(vulkan);
@@ -191,8 +167,7 @@ namespace np::app
 
 			for (graphics::Renderer* renderer : renderers)
 			{
-				memory::Destruct(renderer);
-				allocator.Deallocate(renderer);
+				memory::Destroy<graphics::Renderer>(memory::DefaultTraitAllocator, renderer);
 			}
 		}
 
