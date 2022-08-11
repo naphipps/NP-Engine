@@ -17,6 +17,8 @@ namespace np::graphics
 {
 	struct RenderableObject
 	{
+		//TODO: does this need a virtual destructor?
+
 		virtual RenderableType GetType() const = 0;
 
 		virtual void RenderToFrame(Frame& frame, Pipeline& pipline) = 0;

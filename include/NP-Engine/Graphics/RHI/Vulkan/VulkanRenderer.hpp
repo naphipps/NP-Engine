@@ -89,11 +89,6 @@ namespace np::graphics::rhi
 			return info;
 		}
 
-		void Destruct() override
-		{
-			Dispose();
-		}
-
 		void Dispose()
 		{
 			if (_device)
@@ -199,6 +194,11 @@ namespace np::graphics::rhi
 			_render_pass_begin_info(CreateRenderPassBeginInfo()),
 			_is_out_of_date(false)
 		{}
+
+		~VulkanRenderer()
+		{
+			Dispose();
+		}
 
 		RhiType GetRhiType() const override
 		{

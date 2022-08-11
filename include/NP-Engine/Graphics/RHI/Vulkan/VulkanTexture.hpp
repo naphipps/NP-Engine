@@ -20,10 +20,10 @@
 
 namespace np::graphics::rhi
 {
-	class VulkanTexture : public Texture
+	class VulkanTexture
 	{
 	public:
-		struct CreateInfoType
+		struct CreateInfoType //TODO: can we remove this??
 		{
 			VkImageCreateInfo ImageCreateInfo{};
 			VkMemoryPropertyFlags ImageMemoryPropertyFlags = 0;
@@ -34,6 +34,9 @@ namespace np::graphics::rhi
 		VulkanDevice& _device;
 		VulkanImage _image;
 		VulkanImageView _image_view;
+		bl _hot_reloadable;
+		ui32 _width;
+		ui32 _height;
 
 		VkImageViewCreateInfo& ApplyImageToImageViewCreateInfo(VkImageViewCreateInfo& info)
 		{
@@ -43,21 +46,29 @@ namespace np::graphics::rhi
 
 	public:
 		VulkanTexture(VulkanDevice& device, VkImageCreateInfo& image_create_info, VkMemoryPropertyFlags memory_property_flags,
-					  VkImageViewCreateInfo& image_view_create_info):
+					  VkImageViewCreateInfo& image_view_create_info, bl hot_reloadable = false):
 			_device(device),
 			_image(device, image_create_info, memory_property_flags),
-			_image_view(device, ApplyImageToImageViewCreateInfo(image_view_create_info))
+			_image_view(device, ApplyImageToImageViewCreateInfo(image_view_create_info)),
+			_hot_reloadable(hot_reloadable),
+			_width(image_create_info.extent.width),
+			_height(image_create_info.extent.height)
 		{}
 
 		VulkanTexture(const VulkanTexture&) = delete;
 
-		VulkanTexture(VulkanTexture&& other) noexcept:
+		VulkanTexture(VulkanTexture&& other) noexcept :
 			_device(other._device),
 			_image(::std::move(other._image)),
-			_image_view(::std::move(other._image_view))
+			_image_view(::std::move(other._image_view)),
+			_hot_reloadable(::std::move(other._hot_reloadable)),
+			_width(::std::move(other._width)),
+			_height(::std::move(other._height))
 		{}
 
-		~VulkanTexture() = default;
+		VulkanTexture& operator=(const VulkanTexture& other) = delete;
+
+		//TODO: can we add move operator??
 
 		VulkanDevice& GetDevice() const
 		{
@@ -82,6 +93,26 @@ namespace np::graphics::rhi
 		const VulkanImageView& GetImageView() const
 		{
 			return _image_view;
+		}
+
+		void SetHotReloadable(bl hot_reloadable = true)
+		{
+			_hot_reloadable = hot_reloadable;
+		}
+
+		bl IsHotReloadable() const
+		{
+			return _hot_reloadable;
+		}
+
+		ui32 GetWidth() const
+		{
+			return _width;
+		}
+
+		ui32 GetHeight() const
+		{
+			return _height;
 		}
 	};
 } // namespace np::graphics::rhi

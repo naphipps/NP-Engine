@@ -28,17 +28,12 @@ namespace np::graphics
 		Renderer& _renderer;
 		memory::Delegate _on_draw_delegate;
 
-		virtual void Destruct() {}
-
 	public:
 		static Scene* Create(memory::Allocator& allocator, ::entt::registry& ecs_registry, Renderer& renderer);
 
 		Scene(::entt::registry& ecs_registry, Renderer& renderer): _ecs_registry(ecs_registry), _renderer(renderer) {}
 
-		virtual ~Scene()
-		{
-			Destruct();
-		}
+		virtual ~Scene() {}
 
 		Renderer& GetRenderer()
 		{

@@ -26,17 +26,14 @@ namespace np::graphics
 		RenderableMetaValues _meta_values;
 		memory::Delegate _update_meta_values_on_frame;
 
-		RenderableModel(Model& model): _model(model), _meta_values() {}
+		//TODO: add struct that represents all the needed information to render our _model
 
-		virtual void Destruct() {}
+		RenderableModel(Model& model): _model(model), _meta_values() {}
 
 	public:
 		static RenderableModel* Create(memory::Allocator& allocator, Model& model);
 
-		virtual ~RenderableModel()
-		{
-			Destruct();
-		}
+		virtual ~RenderableModel() {}
 
 		virtual RenderableType GetType() const override
 		{

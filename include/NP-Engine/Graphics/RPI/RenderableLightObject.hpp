@@ -18,6 +18,8 @@ namespace np::graphics
 {
 	struct RenderableLightObject
 	{
+		//TODO: does this need a virtual destructor?
+
 		virtual RenderableType GetType() const = 0;
 
 		virtual void RenderToFrame(Frame& frame, Pipeline& pipline, RenderableObject& object) = 0;

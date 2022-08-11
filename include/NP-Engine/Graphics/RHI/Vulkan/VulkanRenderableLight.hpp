@@ -22,12 +22,6 @@ namespace np::graphics::rhi
 	class VulkanRenderableLight : public RenderableLight
 	{
 	private:
-		void Destruct() override
-		{
-			::std::cout << "loud VulkanRenderableLight destructor!\n";
-			Dispose();
-		}
-
 		void RenderToFrame(VulkanFrame& frame, VulkanPipeline& pipeline, VulkanRenderableImage& image) {}
 
 		void RenderToFrame(VulkanFrame& frame, VulkanPipeline& pipeline, VulkanRenderableModel& model) {}
@@ -36,6 +30,11 @@ namespace np::graphics::rhi
 
 	public:
 		VulkanRenderableLight(Light& light): RenderableLight(light) {}
+
+		~VulkanRenderableLight()
+		{
+			Dispose();
+		}
 
 		void RenderToFrame(Frame& frame, Pipeline& pipeline, RenderableObject& object) override
 		{

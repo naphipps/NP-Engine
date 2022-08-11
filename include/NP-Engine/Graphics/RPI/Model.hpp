@@ -16,7 +16,7 @@
 #include "NP-Engine/Vendor/TinyObjLoaderInclude.hpp"
 #include "NP-Engine/Vendor/GlmInclude.hpp"
 
-#include "Image.hpp"
+#include "Texture.hpp"
 #include "Vertex.hpp"
 
 namespace np::graphics
@@ -28,7 +28,10 @@ namespace np::graphics
 		constexpr static ui32 TEXTURE_COORDINATE_STRIDE = 2;
 
 	protected:
-		Image _texture_image;
+		Texture _texture;
+		bl _hot_reloadable; 
+		//TODO: ^ I almost think we need some delegates for the actual model/image/light to call their renderable object for SetOutOfDate(false) calls to happen automatically
+		//TODO: ^ memory::Delegate _on_change_delegate;
 		str _filename;
 		::tinyobj::attrib_t _attributes;
 		container::vector<::tinyobj::shape_t> _shapes;
@@ -37,12 +40,58 @@ namespace np::graphics
 		container::vector<ui32> _indices;
 
 	public:
-		Model(str model_filename, Image&& texture_image): _texture_image(::std::move(texture_image))
+		Model(str model_filename, str model_texture_filename, bl hot_reloadable = false) : 
+			_texture(model_texture_filename, hot_reloadable),
+			_hot_reloadable(hot_reloadable)
 		{
 			Load(model_filename);
 		}
 
-		// TODO: add copy and move constructors, and assignments
+		Model(const Model& other) : 
+			_texture(other._texture), 
+			_hot_reloadable(other._hot_reloadable),
+			_filename(other._filename), 
+			_attributes(other._attributes),
+			_shapes(other._shapes),
+			_materials(other._materials),
+			_vertices(other._vertices),
+			_indices(other._indices)
+		{}
+
+		Model(Model&& other) noexcept :
+			_texture(::std::move(other._texture)),
+			_hot_reloadable(::std::move(other._hot_reloadable)),
+			_filename(::std::move(other._filename)),
+			_attributes(::std::move(other._attributes)),
+			_shapes(::std::move(other._shapes)),
+			_materials(::std::move(other._materials)),
+			_vertices(::std::move(other._vertices)),
+			_indices(::std::move(other._indices))
+		{}
+
+		Model& operator=(const Model& other)
+		{
+			_texture = other._texture;
+			_filename = other._filename;
+			_attributes = other._attributes;
+			_shapes = other._shapes;
+			_materials = other._materials;
+			_vertices = other._vertices;
+			_indices = other._indices;
+			return *this;
+		}
+
+		Model& operator=(Model&& other) noexcept
+		{
+			_texture = ::std::move(other._texture);
+			_filename = ::std::move(other._filename);
+			_attributes = ::std::move(other._attributes);
+			_shapes = ::std::move(other._shapes);
+			_materials = ::std::move(other._materials);
+			_vertices = ::std::move(other._vertices);
+			_indices = ::std::move(other._indices);
+			return *this;
+		}
 
 		bl Load(str filename)
 		{
@@ -97,23 +146,34 @@ namespace np::graphics
 
 		void Clear()
 		{
-			_texture_image.Clear();
+			_texture.Clear();
 			_attributes = {};
 			_shapes.clear();
 			_materials.clear();
 			_vertices.clear();
 			_indices.clear();
 			_filename.clear();
+			_hot_reloadable = false;
 		}
 
-		Image& GetTextureImage()
+		void SetHotReloadable(bl hot_reloadable = true)
 		{
-			return _texture_image;
+			_hot_reloadable = hot_reloadable;
 		}
 
-		const Image& GetTextureImage() const
+		bl IsHotReloadable() const
 		{
-			return _texture_image;
+			return _hot_reloadable;
+		}
+
+		Texture& GetTexture()
+		{
+			return _texture;
+		}
+
+		const Texture& GetTexture() const
+		{
+			return _texture;
 		}
 
 		::tinyobj::attrib_t& GetAttributes()

@@ -105,7 +105,7 @@ namespace np::graphics
 			_pixels.resize((siz)_width * (siz)_height * sizeof(Color), Color{});
 		}
 
-		void Clear()
+		virtual void Clear()
 		{
 			SetSize(0, 0);
 			_filename.clear();

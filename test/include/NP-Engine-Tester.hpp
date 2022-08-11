@@ -81,13 +81,15 @@ namespace np::app
 			_model_filename(fs::Append(fs::Append(fs::Append(NP_ENGINE_WORKING_DIR, "test"), "assets"), "viking_room.obj")),
 			_model_texture_filename(
 				fs::Append(fs::Append(fs::Append(NP_ENGINE_WORKING_DIR, "test"), "assets"), "viking_room.png")),
-			_model(_model_filename, graphics::Image(_model_texture_filename)),
+			_model(_model_filename, _model_texture_filename, true),
 			_renderable_model(graphics::RenderableModel::Create(memory::DefaultTraitAllocator, _model)),
 			_model_entity(ecs_registry),
 			_start_timestamp(time::SteadyClock::now())
 		{
+			_model.GetTexture().SetHotReloadable();
 			_renderable_model->GetUpdateMetaValuesOnFrameDelegate().Connect<GameLayer, &GameLayer::UpdateMetaValuesOnFrame>(
 				this);
+			
 			_model_entity.Add<graphics::RenderableObject*>(_renderable_model);
 
 			_camera.Eye = {2.0f, 2.0f, 2.0f};

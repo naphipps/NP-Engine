@@ -19,16 +19,15 @@ namespace np::graphics::rhi
 	class VulkanRenderableImage : public RenderableImage
 	{
 	private:
-		void Destruct() override
-		{
-			::std::cout << "loud VulkanRenderableImage destructor\n";
-			Dispose();
-		}
-
 		void Dispose() {}
 
 	public:
 		VulkanRenderableImage(Image& image): RenderableImage(image) {}
+
+		~VulkanRenderableImage()
+		{
+			Dispose();
+		}
 
 		// TODO: add copy/move stuff??
 
