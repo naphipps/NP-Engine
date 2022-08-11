@@ -33,11 +33,4 @@
 #define NP_ENGINE_APPLICATION_LOOP_DURATION 4 // TODO: add ifndef checks
 #define NP_ENGINE_WINDOW_LOOP_DURATION 8
 
-// github.com/skypjack/entt/wiki/Frequently-Asked-Questions#warning-c4003-the-min-the-max-and-the-macro
-#if NP_ENGINE_PLATFORM_IS_WINDOWS
-	#ifndef NOMINMAX
-		#define NOMINMAX
-	#endif
-#endif
-
 #endif /* NP_ENGINE_CONSTANTS_SETTINGS_HPP */
