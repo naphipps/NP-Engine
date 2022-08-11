@@ -23,7 +23,7 @@ namespace np::graphics::rhi
 	class VulkanTexture
 	{
 	public:
-		struct CreateInfoType //TODO: can we remove this??
+		struct CreateInfoType // TODO: can we remove this??
 		{
 			VkImageCreateInfo ImageCreateInfo{};
 			VkMemoryPropertyFlags ImageMemoryPropertyFlags = 0;
@@ -57,7 +57,7 @@ namespace np::graphics::rhi
 
 		VulkanTexture(const VulkanTexture&) = delete;
 
-		VulkanTexture(VulkanTexture&& other) noexcept :
+		VulkanTexture(VulkanTexture&& other) noexcept:
 			_device(other._device),
 			_image(::std::move(other._image)),
 			_image_view(::std::move(other._image_view)),
@@ -68,7 +68,7 @@ namespace np::graphics::rhi
 
 		VulkanTexture& operator=(const VulkanTexture& other) = delete;
 
-		//TODO: can we add move operator??
+		// TODO: can we add move operator??
 
 		VulkanDevice& GetDevice() const
 		{

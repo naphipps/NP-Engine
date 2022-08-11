@@ -25,8 +25,8 @@
 #include "Layer.hpp"
 #include "Popup.hpp"
 
-//TODO: looks like our big-picture is going to expand to support a Task Graph Architecture of some sort...
-//TODO: ^ Halcyon's RenderGraph idea is pretty nice, but it is inspired by Frostbite's FrameGraph [O'Donnell 2017]
+// TODO: looks like our big-picture is going to expand to support a Task Graph Architecture of some sort...
+// TODO: ^ Halcyon's RenderGraph idea is pretty nice, but it is inspired by Frostbite's FrameGraph [O'Donnell 2017]
 
 namespace np::app
 {

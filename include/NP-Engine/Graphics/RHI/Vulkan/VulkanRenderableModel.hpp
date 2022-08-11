@@ -95,8 +95,7 @@ namespace np::graphics::rhi
 			VkDeviceSize index_buffer_data_size = sizeof(ui32) * _model.GetIndices().size();
 
 			// create texture
-			if (!_texture || 
-				_texture->IsHotReloadable() != _model.GetTexture().IsHotReloadable() ||
+			if (!_texture || _texture->IsHotReloadable() != _model.GetTexture().IsHotReloadable() ||
 				_texture->GetWidth() != _model.GetTexture().GetWidth() ||
 				_texture->GetHeight() != _model.GetTexture().GetHeight())
 			{
@@ -111,7 +110,7 @@ namespace np::graphics::rhi
 				VkImageViewCreateInfo texture_image_view_create_info = VulkanImageView::CreateInfo();
 
 				_texture = CreateTexture(vulkan_device, texture_image_create_info, texture_memory_property_flags,
-					texture_image_view_create_info, _model.GetTexture().IsHotReloadable());
+										 texture_image_view_create_info, _model.GetTexture().IsHotReloadable());
 			}
 
 			// create vertex buffer
@@ -120,32 +119,30 @@ namespace np::graphics::rhi
 				if (_vertex_buffer)
 					memory::Destroy<VulkanBuffer>(memory::DefaultTraitAllocator, _vertex_buffer);
 
-				_vertex_buffer =
-					CreateBuffer(vulkan_device, vertex_buffer_data_size,
-						VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
-						VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+				_vertex_buffer = CreateBuffer(vulkan_device, vertex_buffer_data_size,
+											  VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
+											  VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 			}
 
-			//create index buffer
+			// create index buffer
 			if (!_index_buffer || _index_buffer->GetSize() != index_buffer_data_size)
 			{
 				if (_index_buffer)
 					memory::Destroy<VulkanBuffer>(memory::DefaultTraitAllocator, _index_buffer);
 
-				_index_buffer =
-					CreateBuffer(vulkan_device, index_buffer_data_size,
-						VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
-						VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+				_index_buffer = CreateBuffer(vulkan_device, index_buffer_data_size,
+											 VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
+											 VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 			}
 
-			//create staging
+			// create staging
 			if (!_texture_staging || _texture_staging->GetSize() != _model.GetTexture().Size())
 			{
 				if (_texture_staging)
 					memory::Destroy<VulkanBuffer>(memory::DefaultTraitAllocator, _texture_staging);
 
 				_texture_staging = CreateBuffer(vulkan_device, _model.GetTexture().Size(), VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-					VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+												VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 			}
 
 			if (!_vertex_staging || _vertex_staging->GetSize() != vertex_buffer_data_size)
@@ -154,7 +151,7 @@ namespace np::graphics::rhi
 					memory::Destroy<VulkanBuffer>(memory::DefaultTraitAllocator, _vertex_staging);
 
 				_vertex_staging = CreateBuffer(vulkan_device, vertex_buffer_data_size, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-					VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+											   VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 			}
 
 			if (!_index_staging || _index_staging->GetSize() != index_buffer_data_size)
@@ -163,7 +160,7 @@ namespace np::graphics::rhi
 					memory::Destroy<VulkanBuffer>(memory::DefaultTraitAllocator, _index_staging);
 
 				_index_staging = CreateBuffer(vulkan_device, index_buffer_data_size, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-					VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+											  VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 			}
 
 			container::vector<VulkanCommandBuffer> command_buffers;
@@ -219,16 +216,16 @@ namespace np::graphics::rhi
 
 			// copy staging to texture
 			_texture->GetImage().AsyncTransitionLayout(VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_UNDEFINED,
-				VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, transition_to_dst_submit,
-				command_buffers);
+													   VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, transition_to_dst_submit,
+													   command_buffers);
 
 			VkBufferImageCopy buffer_image_copy = VulkanCommandCopyBufferToImage::CreateBufferImageCopy();
-			buffer_image_copy.imageExtent = { _model.GetTexture().GetWidth(), _model.GetTexture().GetHeight(), 1 };
+			buffer_image_copy.imageExtent = {_model.GetTexture().GetWidth(), _model.GetTexture().GetHeight(), 1};
 			_texture->GetImage().AsyncAssign(*_texture_staging, buffer_image_copy, assign_image_submit, command_buffers);
 
 			_texture->GetImage().AsyncTransitionLayout(VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-				VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, transition_to_shader_submit,
-				command_buffers);
+													   VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, transition_to_shader_submit,
+													   command_buffers);
 
 			// create vertex submit infos
 			ui64 vertex_buffer_copy_value = texture_complete_value;
@@ -272,8 +269,8 @@ namespace np::graphics::rhi
 
 			if (!_bind_vertex_buffers)
 			{
-				_bind_vertex_buffers = memory::Create<VulkanCommandBindVertexBuffers>(memory::DefaultTraitAllocator, 0, 1,
-					&_vk_vertex_buffer, _vertex_offsets.data());
+				_bind_vertex_buffers = memory::Create<VulkanCommandBindVertexBuffers>(
+					memory::DefaultTraitAllocator, 0, 1, &_vk_vertex_buffer, _vertex_offsets.data());
 			}
 			else
 			{
@@ -282,8 +279,8 @@ namespace np::graphics::rhi
 
 			if (!_bind_index_buffer)
 			{
-				_bind_index_buffer = memory::Create<VulkanCommandBindIndexBuffer>(memory::DefaultTraitAllocator, *_index_buffer, 0,
-					VK_INDEX_TYPE_UINT32);
+				_bind_index_buffer = memory::Create<VulkanCommandBindIndexBuffer>(memory::DefaultTraitAllocator, *_index_buffer,
+																				  0, VK_INDEX_TYPE_UINT32);
 			}
 			else
 			{
@@ -293,7 +290,7 @@ namespace np::graphics::rhi
 			if (!_draw_indexed)
 			{
 				_draw_indexed = memory::Create<VulkanCommandDrawIndexed>(memory::DefaultTraitAllocator,
-					(ui32)_model.GetIndices().size(), 1, 0, 0, 0);
+																		 (ui32)_model.GetIndices().size(), 1, 0, 0, 0);
 			}
 			else
 			{
@@ -327,7 +324,7 @@ namespace np::graphics::rhi
 				VkMemoryPropertyFlags texture_memory_property_flags = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
 				VkImageViewCreateInfo texture_image_view_create_info = VulkanImageView::CreateInfo();
 				_texture = CreateTexture(vulkan_device, texture_image_create_info, texture_memory_property_flags,
-					texture_image_view_create_info, _model.GetTexture().IsHotReloadable());
+										 texture_image_view_create_info, _model.GetTexture().IsHotReloadable());
 			}
 
 			// create vertex buffer
@@ -336,29 +333,27 @@ namespace np::graphics::rhi
 				if (_vertex_buffer)
 					memory::Destroy<VulkanBuffer>(memory::DefaultTraitAllocator, _vertex_buffer);
 
-				_vertex_buffer =
-					CreateBuffer(vulkan_device, vertex_buffer_data_size, 
-						VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
-						VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+				_vertex_buffer = CreateBuffer(vulkan_device, vertex_buffer_data_size,
+											  VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
+											  VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 			}
 
-			//create index buffer
+			// create index buffer
 			if (!_index_buffer || _index_buffer->GetSize() != index_buffer_data_size)
 			{
-				_index_buffer =
-					CreateBuffer(vulkan_device, index_buffer_data_size, 
-						VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
-						VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+				_index_buffer = CreateBuffer(vulkan_device, index_buffer_data_size,
+											 VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
+											 VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 			}
 
-			//create staging
+			// create staging
 			if (!_texture_staging || _texture_staging->GetSize() != _model.GetTexture().Size())
 			{
 				if (_texture_staging)
 					memory::Destroy<VulkanBuffer>(memory::DefaultTraitAllocator, _texture_staging);
 
 				_texture_staging = CreateBuffer(vulkan_device, _model.GetTexture().Size(), VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-					VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+												VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 			}
 
 			if (!_vertex_staging || _vertex_staging->GetSize() != vertex_buffer_data_size)
@@ -367,7 +362,7 @@ namespace np::graphics::rhi
 					memory::Destroy<VulkanBuffer>(memory::DefaultTraitAllocator, _vertex_staging);
 
 				_vertex_staging = CreateBuffer(vulkan_device, vertex_buffer_data_size, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-						VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+											   VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 			}
 
 			if (!_index_staging || _index_staging->GetSize() != index_buffer_data_size)
@@ -376,7 +371,7 @@ namespace np::graphics::rhi
 					memory::Destroy<VulkanBuffer>(memory::DefaultTraitAllocator, _index_staging);
 
 				_index_staging = CreateBuffer(vulkan_device, index_buffer_data_size, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-						VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+											  VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 			}
 
 			container::vector<VulkanCommandBuffer> command_buffers;
@@ -420,16 +415,16 @@ namespace np::graphics::rhi
 
 			// copy staging to texture
 			_texture->GetImage().AsyncTransitionLayout(VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_UNDEFINED,
-				VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, transition_to_dst_submit,
-				command_buffers);
+													   VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, transition_to_dst_submit,
+													   command_buffers);
 
 			VkBufferImageCopy buffer_image_copy = VulkanCommandCopyBufferToImage::CreateBufferImageCopy();
-			buffer_image_copy.imageExtent = { _model.GetTexture().GetWidth(), _model.GetTexture().GetHeight(), 1 };
+			buffer_image_copy.imageExtent = {_model.GetTexture().GetWidth(), _model.GetTexture().GetHeight(), 1};
 			_texture->GetImage().AsyncAssign(*_texture_staging, buffer_image_copy, assign_image_submit, command_buffers);
 
 			_texture->GetImage().AsyncTransitionLayout(VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-				VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, transition_to_shader_submit,
-				command_buffers, texture_complete_fence);
+													   VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, transition_to_shader_submit,
+													   command_buffers, texture_complete_fence);
 
 			// create vertex submit infos
 			VulkanBinarySemaphore vertex_buffer_copy_semaphore(vulkan_device);
@@ -477,8 +472,8 @@ namespace np::graphics::rhi
 
 			if (!_bind_vertex_buffers)
 			{
-				_bind_vertex_buffers = memory::Create<VulkanCommandBindVertexBuffers>(memory::DefaultTraitAllocator, 0, 1,
-					&_vk_vertex_buffer, _vertex_offsets.data());
+				_bind_vertex_buffers = memory::Create<VulkanCommandBindVertexBuffers>(
+					memory::DefaultTraitAllocator, 0, 1, &_vk_vertex_buffer, _vertex_offsets.data());
 			}
 			else
 			{
@@ -487,8 +482,8 @@ namespace np::graphics::rhi
 
 			if (!_bind_index_buffer)
 			{
-				_bind_index_buffer = memory::Create<VulkanCommandBindIndexBuffer>(memory::DefaultTraitAllocator, *_index_buffer, 0,
-					VK_INDEX_TYPE_UINT32);
+				_bind_index_buffer = memory::Create<VulkanCommandBindIndexBuffer>(memory::DefaultTraitAllocator, *_index_buffer,
+																				  0, VK_INDEX_TYPE_UINT32);
 			}
 			else
 			{
@@ -498,7 +493,7 @@ namespace np::graphics::rhi
 			if (!_draw_indexed)
 			{
 				_draw_indexed = memory::Create<VulkanCommandDrawIndexed>(memory::DefaultTraitAllocator,
-					(ui32)_model.GetIndices().size(), 1, 0, 0, 0);
+																		 (ui32)_model.GetIndices().size(), 1, 0, 0, 0);
 			}
 			else
 			{
@@ -579,7 +574,7 @@ namespace np::graphics::rhi
 		}
 
 	public:
-		VulkanRenderableModel(Model& model) :
+		VulkanRenderableModel(Model& model):
 			RenderableModel(model),
 			_is_out_of_date(true),
 			_vertex_buffer(nullptr),

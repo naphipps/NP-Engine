@@ -13,8 +13,8 @@
 #include "NP-Engine/Concurrency/Concurrency.hpp"
 #include "NP-Engine/Memory/Memory.hpp"
 
-//TODO: replace copy constructor with move constructor
-//TODO: replace "Job* _dependent_job;" with "vector<Job*>* _dependent_jobs;"
+// TODO: replace copy constructor with move constructor
+// TODO: replace "Job* _dependent_job;" with "vector<Job*>* _dependent_jobs;"
 
 namespace np::js
 {

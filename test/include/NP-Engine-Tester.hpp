@@ -89,7 +89,7 @@ namespace np::app
 			_model.GetTexture().SetHotReloadable();
 			_renderable_model->GetUpdateMetaValuesOnFrameDelegate().Connect<GameLayer, &GameLayer::UpdateMetaValuesOnFrame>(
 				this);
-			
+
 			_model_entity.Add<graphics::RenderableObject*>(_renderable_model);
 
 			_camera.Eye = {2.0f, 2.0f, 2.0f};

@@ -26,7 +26,7 @@ namespace np::graphics
 		RenderableMetaValues _meta_values;
 		memory::Delegate _update_meta_values_on_frame;
 
-		//TODO: add struct that represents all the needed information to render our _model
+		// TODO: add struct that represents all the needed information to render our _model
 
 		RenderableModel(Model& model): _model(model), _meta_values() {}
 

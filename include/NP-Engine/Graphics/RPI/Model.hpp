@@ -29,9 +29,10 @@ namespace np::graphics
 
 	protected:
 		Texture _texture;
-		bl _hot_reloadable; 
-		//TODO: ^ I almost think we need some delegates for the actual model/image/light to call their renderable object for SetOutOfDate(false) calls to happen automatically
-		//TODO: ^ memory::Delegate _on_change_delegate;
+		bl _hot_reloadable;
+		// TODO: ^ I almost think we need some delegates for the actual model/image/light to call their renderable object for
+		// SetOutOfDate(false) calls to happen automatically
+		// TODO: ^ memory::Delegate _on_change_delegate;
 		str _filename;
 		::tinyobj::attrib_t _attributes;
 		container::vector<::tinyobj::shape_t> _shapes;
@@ -40,17 +41,17 @@ namespace np::graphics
 		container::vector<ui32> _indices;
 
 	public:
-		Model(str model_filename, str model_texture_filename, bl hot_reloadable = false) : 
+		Model(str model_filename, str model_texture_filename, bl hot_reloadable = false):
 			_texture(model_texture_filename, hot_reloadable),
 			_hot_reloadable(hot_reloadable)
 		{
 			Load(model_filename);
 		}
 
-		Model(const Model& other) : 
-			_texture(other._texture), 
+		Model(const Model& other):
+			_texture(other._texture),
 			_hot_reloadable(other._hot_reloadable),
-			_filename(other._filename), 
+			_filename(other._filename),
 			_attributes(other._attributes),
 			_shapes(other._shapes),
 			_materials(other._materials),
@@ -58,7 +59,7 @@ namespace np::graphics
 			_indices(other._indices)
 		{}
 
-		Model(Model&& other) noexcept :
+		Model(Model&& other) noexcept:
 			_texture(::std::move(other._texture)),
 			_hot_reloadable(::std::move(other._hot_reloadable)),
 			_filename(::std::move(other._filename)),

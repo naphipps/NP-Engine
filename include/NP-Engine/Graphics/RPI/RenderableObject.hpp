@@ -17,7 +17,7 @@ namespace np::graphics
 {
 	struct RenderableObject
 	{
-		//TODO: does this need a virtual destructor?
+		// TODO: does this need a virtual destructor?
 
 		virtual RenderableType GetType() const = 0;
 

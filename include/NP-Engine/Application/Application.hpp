@@ -170,7 +170,6 @@ namespace np::app
 		}
 
 	public:
-
 		virtual ~Application() {}
 
 		void Run()

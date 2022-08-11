@@ -22,23 +22,17 @@ namespace np::graphics
 		bl _hot_reloadable;
 
 	public:
-		Texture(bl hot_reloadable = false) : Image(), _hot_reloadable(hot_reloadable)
-		{}
+		Texture(bl hot_reloadable = false): Image(), _hot_reloadable(hot_reloadable) {}
 
-		Texture(str image_filepath, bl hot_reloadable = false) : Image(image_filepath), _hot_reloadable(hot_reloadable)
-		{}
+		Texture(str image_filepath, bl hot_reloadable = false): Image(image_filepath), _hot_reloadable(hot_reloadable) {}
 
-		Texture(const Image& image, bl hot_reloadable = false) : Image(image), _hot_reloadable(hot_reloadable)
-		{}
+		Texture(const Image& image, bl hot_reloadable = false): Image(image), _hot_reloadable(hot_reloadable) {}
 
-		Texture(Image&& image, bl hot_reloadable = false) : Image(::std::move(image)), _hot_reloadable(hot_reloadable)
-		{}
+		Texture(Image&& image, bl hot_reloadable = false): Image(::std::move(image)), _hot_reloadable(hot_reloadable) {}
 
-		Texture(const Texture& other) : Image(other), _hot_reloadable(other._hot_reloadable)
-		{}
+		Texture(const Texture& other): Image(other), _hot_reloadable(other._hot_reloadable) {}
 
-		Texture(Texture&& other) noexcept : Image(::std::move(other)), _hot_reloadable(::std::move(other._hot_reloadable))
-		{}
+		Texture(Texture&& other) noexcept: Image(::std::move(other)), _hot_reloadable(::std::move(other._hot_reloadable)) {}
 
 		Texture& operator=(const Texture& other)
 		{
