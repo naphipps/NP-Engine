@@ -34,6 +34,7 @@ i32 main(i32 argc, chr** argv)
 			::np::app::Application* application = ::np::app::CreateApplication(application_allocator);
 			application->Run(argc, argv);
 			::np::memory::Destroy<::np::app::Application>(application_allocator, application);
+			NP_ENGINE_PROFILE_SAVE();
 			NP_ENGINE_PROFILE_RESET();
 			::np::memory::TraitAllocator::Register(::np::memory::DefaultAllocator);
 		}

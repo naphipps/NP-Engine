@@ -41,7 +41,7 @@ namespace np::insight
 		{
 			if (_filepath.size() > 0)
 			{
-				::np::insight::Log::GetLogger()->info("Saving Instrumentor Report...");
+				::np::insight::Log::GetLogger()->info("Saving Instrumentor Profile Report...");
 
 				::std::ofstream out_stream;
 				out_stream.open(_filepath);
@@ -57,7 +57,7 @@ namespace np::insight
 					out_stream.close();
 				}
 
-				::np::insight::Log::GetLogger()->info("Done Saving Instrumentor Report.");
+				::np::insight::Log::GetLogger()->info("Done Saving Instrumentor Profile Report: <" + _filepath + ">");
 			}
 		}
 
@@ -88,7 +88,6 @@ namespace np::insight
 		{
 			Lock lock(_mutex);
 			Init();
-			SaveReport();
 			_report.reset();
 			_initialized.store(false, mo_release);
 		}
