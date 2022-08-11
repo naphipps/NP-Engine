@@ -313,6 +313,8 @@ namespace np::graphics::rhi
 				container::vector<VkPipelineShaderStageCreateInfo> shader_stages = CreateShaderStages();
 				VkPipelineInputAssemblyStateCreateInfo input_assembly_state_info = CreatePipelineInputAssemblyStateInfo();
 
+				// TODO: use dynamic viewport and scissor:
+				// https://github.com/Overv/VulkanTutorial/commit/87803541171579165caa354120157a0cc6c8192f
 				container::vector<VkViewport> viewports{CreateViewport()};
 				container::vector<VkRect2D> scissors{CreateScissor()};
 
