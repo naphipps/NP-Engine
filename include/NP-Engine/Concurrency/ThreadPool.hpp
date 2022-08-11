@@ -22,7 +22,7 @@ namespace np::concurrency
 		using base = memory::ObjectPool<Thread>;
 
 	public:
-		constexpr static ui64 MAX_THREAD_COUNT = 24;
+		constexpr static ui64 MAX_THREAD_COUNT = 128;
 
 	public:
 		ThreadPool(): base(Thread::HardwareConcurrency() < MAX_THREAD_COUNT ? Thread::HardwareConcurrency() : MAX_THREAD_COUNT)
