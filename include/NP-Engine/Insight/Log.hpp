@@ -34,7 +34,7 @@ namespace np::insight
 			bl expected = false;
 			if (_initialized.compare_exchange_strong(expected, true, mo_release, mo_relaxed))
 			{
-				::std::string pattern = "%^[pid:%P, tid:%t, %Y-%m-%d %H:%M:%S.%e] [%n, %l]%$\n\t%v\n";
+				::std::string pattern = "%^[%l, %n, %Y-%m-%d %H:%M:%S.%e, pid:%P, tid:%t]%$\n\t%v\n";
 
 				_stdout_sink = ::std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
 				_stdout_sink->set_pattern(pattern);
