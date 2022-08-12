@@ -57,7 +57,7 @@ namespace np::insight
 					out_stream.close();
 				}
 
-				::np::insight::Log::GetLogger()->info("Done Saving Instrumentor Profile Report: <" + _filepath + ">");
+				::np::insight::Log::GetLogger()->info("Done Saving Instrumentor Profile Report: '" + _filepath + "'");
 			}
 		}
 

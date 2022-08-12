@@ -10,7 +10,7 @@ namespace np::app
 {
 	Application* CreateApplication(memory::Allocator& application_allocator)
 	{
-		::std::cout << "hello world from game create application\n";
+		NP_ENGINE_LOG_INFO("Hello world from game create application.");
 		return memory::Create<GameApp>(application_allocator, application_allocator);
 	}
 } // namespace np::app

@@ -137,8 +137,7 @@ namespace np::app
 
 		void Run(i32 argc, chr** argv) override
 		{
-			::std::cout << "hello world from my game app!\n";
-			::std::cout << "my title is '" << GetTitle() << "'\n";
+			NP_ENGINE_LOG_INFO("Hello world from my game app! My title is '" + GetTitle() + "'");
 
 			window::Window::Properties window_properties;
 			window_properties.Title = "My Game Window >:D";

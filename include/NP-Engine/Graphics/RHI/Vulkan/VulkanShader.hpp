@@ -15,6 +15,7 @@
 #include "NP-Engine/Math/Math.hpp"
 #include "NP-Engine/Filesystem/Filesystem.hpp"
 #include "NP-Engine/System/System.hpp"
+#include "NP-Engine/Insight/Insight.hpp"
 
 #include "NP-Engine/Vendor/VulkanInclude.hpp"
 
@@ -51,13 +52,12 @@ namespace np::graphics::rhi
 
 			if (fs::Exists(_filename))
 			{
-				::std::cout << "Compiling: '" + cmd + "'\n";
+				NP_ENGINE_LOG_INFO("Compiling: '" + cmd + "'");
 				system::Run(cmd);
 			}
 			else
 			{
-				::std::cout << "cannot find: '" << _filename << "'\n";
-				::std::cout << system::GetDefaultWorkingDir() << "\n";
+				NP_ENGINE_LOG_ERROR("Cannot find: '" + _filename + "'\n" + system::GetDefaultWorkingDir());
 			}
 		}
 
