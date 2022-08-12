@@ -79,5 +79,6 @@ namespace np::memory::__detail
 #include <rapidjson/document.h>
 #include <rapidjson/writer.h>
 #include <rapidjson/stringbuffer.h>
+#include <rapidjson/prettywriter.h>
 
 #endif /* NP_ENGINE_VENDOR_RAPIDJSON_INCLUDE_HPP */

@@ -49,7 +49,7 @@ namespace np::insight
 				if (out_stream.is_open())
 				{
 					::rapidjson::StringBuffer buffer;
-					::rapidjson::Writer<::rapidjson::StringBuffer> writer(buffer);
+					::rapidjson::PrettyWriter<::rapidjson::StringBuffer> writer(buffer);
 					_report->Accept(writer);
 
 					out_stream << buffer.GetString();
