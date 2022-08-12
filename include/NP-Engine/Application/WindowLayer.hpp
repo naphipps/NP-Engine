@@ -71,9 +71,7 @@ namespace np::app
 
 		virtual window::Window* CreateWindow(window::Window::Properties& properties)
 		{
-			memory::Block block = _allocator.Allocate(sizeof(window::Window));
-			memory::Construct<window::Window>(block, properties, _event_submitter);
-			return _windows.emplace_back(static_cast<window::Window*>(block.ptr));
+			return _windows.emplace_back(memory::Create<window::Window>(_allocator, properties, _event_submitter));
 		}
 
 		virtual void Update(time::DurationMilliseconds time_delta) override
@@ -92,8 +90,7 @@ namespace np::app
 			{
 				if (!_windows[i]->IsRunning())
 				{
-					memory::Destruct(_windows[i]);
-					_allocator.Deallocate(_windows[i]);
+					memory::Destroy<window::Window>(_allocator, _windows[i]);
 					_windows.erase(_windows.begin() + i);
 				}
 			}
