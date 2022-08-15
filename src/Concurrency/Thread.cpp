@@ -19,8 +19,8 @@ namespace np::concurrency
 {
 	bl Thread::SetAffinity(i32 core_number)
 	{
-		// Apple does NOT support thread affinity - not even their pthread.h implementation supports it
 #if NP_ENGINE_PLATFORM_IS_APPLE
+		// Apple does NOT support thread affinity - not even their pthread.h implementation supports it
 		return false;
 #else
 		bl set = false;
@@ -52,8 +52,8 @@ namespace np::concurrency
 	{
 		bl SetAffinity(i32 core_number)
 		{
-			// Apple does NOT support thread affinity - not even their pthread.h implementation supports it
 #if NP_ENGINE_PLATFORM_IS_APPLE
+			// Apple does NOT support thread affinity - not even their pthread.h implementation supports it
 			return false;
 #else
 			bl set = false;
