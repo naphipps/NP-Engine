@@ -7,6 +7,8 @@
 #ifndef NP_ENGINE_DELEGATE_HPP
 #define NP_ENGINE_DELEGATE_HPP
 
+#include <utility>
+
 #include "PadObject.hpp"
 
 namespace np::memory
@@ -38,24 +40,37 @@ namespace np::memory
 			return (static_cast<C*>(instance)->*Function)(delegate);
 		}
 
-		inline void CopyFrom(const Delegate& other)
-		{
-			PadObject::CopyFrom(other);
-			_instance_ptr = other._instance_ptr;
-			_function_ptr = other._function_ptr;
-		}
-
 	public:
 		Delegate(): _instance_ptr(nullptr), _function_ptr(nullptr) {}
 
-		Delegate(const Delegate& other)
+		Delegate(const Delegate& other):
+			PadObject(static_cast<const PadObject&>(other)),
+			_instance_ptr(other._instance_ptr),
+			_function_ptr(other._function_ptr)
+		{}
+
+		Delegate(Delegate&& other) noexcept:
+			PadObject(static_cast<PadObject&&>(other)),
+			_instance_ptr(::std::move(other._instance_ptr)),
+			_function_ptr(::std::move(other._function_ptr))
+		{}
+
+		virtual ~Delegate() {}
+
+		Delegate& operator=(const Delegate& other)
 		{
-			CopyFrom(other);
+			PadObject::operator=(static_cast<const PadObject&>(other));
+			_instance_ptr = other._instance_ptr;
+			_function_ptr = other._function_ptr;
+			return *this;
 		}
 
-		Delegate(Delegate&& other) noexcept
+		Delegate& operator=(Delegate&& other) noexcept
 		{
-			CopyFrom(other);
+			PadObject::operator=(static_cast<PadObject&&>(other));
+			_instance_ptr = ::std::move(other._instance_ptr);
+			_function_ptr = ::std::move(other._function_ptr);
+			return *this;
 		}
 
 		/*
@@ -95,18 +110,6 @@ namespace np::memory
 		{
 			_instance_ptr = nullptr;
 			_function_ptr = nullptr;
-		}
-
-		inline Delegate& operator=(const Delegate& other)
-		{
-			CopyFrom(other);
-			return *this;
-		}
-
-		Delegate& operator=(Delegate&& other) noexcept
-		{
-			CopyFrom(other);
-			return *this;
 		}
 	};
 } // namespace np::memory
