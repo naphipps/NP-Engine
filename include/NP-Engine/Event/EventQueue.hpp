@@ -12,7 +12,7 @@
 #include "NP-Engine/Foundation/Foundation.hpp"
 #include "NP-Engine/Primitive/Primitive.hpp"
 #include "NP-Engine/Memory/Memory.hpp"
-#include "NP-Engine/Concurrency/Concurrency.hpp"
+#include "NP-Engine/Container/Container.hpp"
 
 #include "EventImpl.hpp"
 
@@ -23,13 +23,13 @@ namespace np::event
 	protected:
 		atm_bl _flag;
 		memory::TraitAllocator _allocator;
-		concurrency::MpmcQueue<Event*> _buffer1;
-		concurrency::MpmcQueue<Event*> _buffer2;
+		container::mpmc_queue<Event*> _buffer1;
+		container::mpmc_queue<Event*> _buffer2;
 
 		/*
 			gets the event queue based on the queue flag
 		*/
-		concurrency::MpmcQueue<Event*>& GetBuffer()
+		container::mpmc_queue<Event*>& GetBuffer()
 		{
 			return _flag.load(mo_acquire) ? _buffer1 : _buffer2;
 		}
@@ -37,7 +37,7 @@ namespace np::event
 		/*
 			gets the other event queue based on the queue flag
 		*/
-		concurrency::MpmcQueue<Event*>& GetOtherBuffer()
+		container::mpmc_queue<Event*>& GetOtherBuffer()
 		{
 			return _flag.load(mo_acquire) ? _buffer2 : _buffer1;
 		}
@@ -59,7 +59,7 @@ namespace np::event
 		{
 			NP_ENGINE_STATIC_ASSERT((::std::is_base_of_v<event::Event, T>), "T is requried to be a base of event:Event");
 			Event* e = nullptr;
-			concurrency::MpmcQueue<Event*>& buffer = GetBuffer();
+			container::mpmc_queue<Event*>& buffer = GetBuffer();
 
 			memory::Block block = _allocator.Allocate(sizeof(T));
 			if (block.IsValid())
@@ -93,7 +93,7 @@ namespace np::event
 		*/
 		event::Event* PopOther()
 		{
-			concurrency::MpmcQueue<Event*>& buffer = GetOtherBuffer();
+			container::mpmc_queue<Event*>& buffer = GetOtherBuffer();
 			event::Event* e = nullptr;
 			if (!buffer.try_dequeue(e))
 			{

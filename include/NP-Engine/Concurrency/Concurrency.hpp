@@ -12,6 +12,5 @@
 #include "ThreadPool.hpp"
 #include "ThreadToken.hpp"
 #include "Thread.hpp"
-#include "MpmcQueue.hpp"
 
 #endif /* NP_ENGINE_CONCURRENCY_HPP */

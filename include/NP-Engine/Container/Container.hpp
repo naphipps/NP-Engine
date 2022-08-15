@@ -7,10 +7,6 @@
 #ifndef NP_ENGINE_CONTAINER_HPP
 #define NP_ENGINE_CONTAINER_HPP
 
-#include "NP-Engine/Foundation/Foundation.hpp"
-
-#include "NP-Engine/Memory/Memory.hpp"
-
 #include <utility> //pair
 
 #include <array>
@@ -25,6 +21,11 @@
 #include <unordered_set>
 #include <unordered_map>
 #include <initializer_list>
+
+#include "NP-Engine/Foundation/Foundation.hpp"
+#include "NP-Engine/Memory/Memory.hpp"
+
+#include "NP-Engine/Vendor/ConcurrentqueueInclude.hpp"
 
 namespace np::container
 {

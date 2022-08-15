@@ -21,7 +21,6 @@ set(NP_ENGINE_APPLICATION_HPP
 
 set(NP_ENGINE_CONCURRENCY_HPP
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Concurrency/Concurrency.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Concurrency/MpmcQueue.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Concurrency/Thread.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Concurrency/ThreadPool.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Concurrency/ThreadToken.hpp
