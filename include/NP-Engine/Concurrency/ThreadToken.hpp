@@ -7,15 +7,14 @@
 #ifndef NP_ENGINE_THREAD_TOKEN_HPP
 #define NP_ENGINE_THREAD_TOKEN_HPP
 
+#include <utility>
+
 #include "NP-Engine/Primitive/Primitive.hpp"
 
 #include "Thread.hpp"
 
 namespace np::concurrency
 {
-	/*
-		contains a Thread pointer so outside objects cannot manipulate it
-	*/
 	class ThreadToken
 	{
 	private:
@@ -28,7 +27,19 @@ namespace np::concurrency
 
 		ThreadToken(const ThreadToken& token): _thread(token._thread) {}
 
-		ThreadToken(ThreadToken&& token) noexcept: _thread(token._thread) {}
+		ThreadToken(ThreadToken&& token) noexcept: _thread(::std::move(token._thread)) {}
+
+		ThreadToken& operator=(const ThreadToken& token)
+		{
+			_thread = token._thread;
+			return *this;
+		}
+
+		ThreadToken& operator=(ThreadToken&& token) noexcept
+		{
+			_thread = ::std::move(token._thread);
+			return *this;
+		}
 
 		inline bl IsValid() const
 		{
@@ -42,26 +53,12 @@ namespace np::concurrency
 
 		inline Thread& GetThread()
 		{
-			NP_ENGINE_ASSERT(IsValid(), "we require a valid token when getting the thread");
 			return *_thread;
 		}
 
 		inline const Thread& GetThread() const
 		{
-			NP_ENGINE_ASSERT(IsValid(), "we require a valid token when getting the thread");
 			return *_thread;
-		}
-
-		ThreadToken& operator=(const ThreadToken& token)
-		{
-			_thread = token._thread;
-			return *this;
-		}
-
-		ThreadToken& operator=(ThreadToken&& token) noexcept
-		{
-			_thread = token._thread;
-			return *this;
 		}
 
 		bl operator==(const ThreadToken& other) const
