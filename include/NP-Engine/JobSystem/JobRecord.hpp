@@ -7,6 +7,8 @@
 #ifndef NP_ENGINE_JOB_RECORD_HPP
 #define NP_ENGINE_JOB_RECORD_HPP
 
+#include <utility>
+
 #include "NP-Engine/Foundation/Foundation.hpp"
 #include "NP-Engine/Primitive/Primitive.hpp"
 
@@ -24,11 +26,11 @@ namespace np::js
 	public:
 		JobRecord(): JobRecord(JobPriority::Normal, nullptr) {}
 
-		JobRecord(JobPriority priority, const Job* job): _priority(priority), _job(const_cast<Job*>(job)) {}
+		JobRecord(JobPriority priority, Job* job): _priority(priority), _job(job) {}
 
-		JobRecord(const JobRecord& record): JobRecord(record._priority, record._job) {}
+		JobRecord(const JobRecord& other): _priority(other._priority), _job(other._job) {}
 
-		JobRecord(JobRecord&& record) noexcept: JobRecord(record._priority, record._job) {}
+		JobRecord(JobRecord&& other) noexcept: _priority(::std::move(other._priority)), _job(::std::move(other._job)) {}
 
 		JobRecord& operator=(const JobRecord& other)
 		{
@@ -39,8 +41,8 @@ namespace np::js
 
 		JobRecord& operator=(JobRecord&& other) noexcept
 		{
-			_priority = other._priority;
-			_job = other._job;
+			_priority = ::std::move(other._priority);
+			_job = ::std::move(other._job);
 			return *this;
 		}
 
@@ -54,26 +56,19 @@ namespace np::js
 			_job = nullptr;
 		}
 
-		const Job& GetJob() const
+		Job* GetJob() const
 		{
-			NP_ENGINE_ASSERT(IsValid(), "do not call this if we have an invalid job");
-			return *_job;
+			return _job;
 		}
 
 		void Execute()
 		{
-			NP_ENGINE_ASSERT(IsValid(), "do not call this if we have an invalid job");
 			_job->Execute();
 		}
 
 		JobPriority GetPriority() const
 		{
 			return _priority;
-		}
-
-		explicit operator bl() const
-		{
-			return IsValid();
 		}
 	};
 } // namespace np::js

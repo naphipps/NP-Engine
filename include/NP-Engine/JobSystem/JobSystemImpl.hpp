@@ -13,55 +13,90 @@
 #include "NP-Engine/Math/Math.hpp"
 
 #include "JobWorker.hpp"
-#include "JobWorkerToken.hpp"
 #include "JobPool.hpp"
+
+#ifndef NP_ENGINE_JOB_SYSTEM_POOL_DEFAULT_SIZE
+	#define NP_ENGINE_JOB_SYSTEM_POOL_DEFAULT_SIZE 2000
+#endif
 
 namespace np::js
 {
 	class JobSystem
 	{
 	private:
-		container::array<JobWorker, concurrency::ThreadPool::MAX_THREAD_COUNT> _job_workers;
-		siz _job_worker_count;
+		constexpr static siz JOB_ALIGNED_SIZE = memory::CalcAlignedSize(sizeof(Job));
+
+		atm_bl _running;
+
+		container::vector<JobWorker> _job_workers;
 		concurrency::ThreadPool _thread_pool;
-		JobPool _job_pool;
-		bl _running;
+		memory::Block _job_pool_block;
+		JobPool* _job_pool;
+
+		container::mpmc_queue<JobRecord> _highest_job_deque;
+		container::mpmc_queue<JobRecord> _higher_job_deque;
+		container::mpmc_queue<JobRecord> _normal_job_deque;
+		container::mpmc_queue<JobRecord> _lower_job_deque;
+		container::mpmc_queue<JobRecord> _lowest_job_deque;
 
 	public:
-		JobSystem(): _job_pool(2000), _running(false)
+		JobSystem(): _running(false)
 		{
+			_job_pool_block = memory::DefaultTraitAllocator.Allocate(JOB_ALIGNED_SIZE * NP_ENGINE_JOB_SYSTEM_POOL_DEFAULT_SIZE);
+			_job_pool = memory::Create<JobPool>(memory::DefaultTraitAllocator, _job_pool_block);
+
 			// we want to be sure we use one less the number of cores available so our main thread is not crowded
-			_job_worker_count = math::min(_thread_pool.ObjectCount() - 1, _job_workers.size());
+			_job_workers.resize(math::min(_thread_pool.ObjectCount() - 1, concurrency::ThreadPool::MAX_THREAD_COUNT));
 
-			for (ui32 i = 0; i < _job_worker_count; i++)
-			{
-				_job_workers[i]._job_pool = &_job_pool;
-
-				for (ui32 j = 0; j < _job_worker_count; j++)
-				{
-					_job_workers[i].AddCoworker(&_job_workers[j]);
-				}
-			}
+			for (auto it1 = _job_workers.begin(); it1 != _job_workers.end(); it1++)
+				for (auto it2 = _job_workers.begin(); it2 != _job_workers.end(); it2++)
+					it1->AddCoworker(memory::AddressOf(*it2));
 		}
 
 		~JobSystem()
 		{
-			if (IsRunning())
+			Dispose();
+		}
+
+		void Dispose()
+		{
+			Stop();
+
+			if (_job_pool)
 			{
-				Stop();
+				memory::Destroy<JobPool>(memory::DefaultTraitAllocator, _job_pool);
+				_job_pool = nullptr;
 			}
+
+			if (_job_pool_block.IsValid())
+			{
+				memory::DefaultTraitAllocator.Deallocate(_job_pool_block);
+				_job_pool_block.Invalidate();
+			}
+		}
+
+		void SetJobPoolSize(siz size)
+		{
+			Dispose();
+
+			_job_pool_block = memory::DefaultTraitAllocator.Allocate(JOB_ALIGNED_SIZE * size);
+			_job_pool = memory::Create<JobPool>(memory::DefaultTraitAllocator, _job_pool_block);
 		}
 
 		void Start()
 		{
 			NP_ENGINE_PROFILE_FUNCTION();
 
-			_running = true;
-
-			for (siz i = 0; i < _job_worker_count; i++)
+			if (!_job_pool)
 			{
-				_job_workers[i].StartWork(_thread_pool, (i + 1) % _thread_pool.ObjectCount());
+				_job_pool_block = memory::DefaultTraitAllocator.Allocate(JOB_ALIGNED_SIZE * NP_ENGINE_JOB_SYSTEM_POOL_DEFAULT_SIZE);
+				_job_pool = memory::Create<JobPool>(memory::DefaultTraitAllocator, _job_pool_block);
 			}
+
+			_running.store(true, mo_release);
+
+			for (siz i = 0; i < _job_workers.size(); i++)
+				_job_workers[i].StartWork(*this, _thread_pool, (i + 1) % _thread_pool.ObjectCount());
 		}
 
 		void Stop()
@@ -71,30 +106,90 @@ namespace np::js
 			if (IsRunning())
 			{
 				// stop workers
-				for (ui64 i = 0; i < _job_worker_count; i++)
-				{
-					_job_workers[i].StopWork();
-				}
+				for (auto it = _job_workers.begin(); it != _job_workers.end(); it++)
+					it->StopWork();
 
 				// stop threads
 				_thread_pool.Clear();
-				_running = false;
+				_running.store(false, mo_release);
 			}
 		}
 
-		bl IsRunning()
+		bl IsRunning() const
 		{
-			return _running;
+			return _running.load(mo_acquire);
 		}
 
-		ui64 GetJobWorkerCount()
+		container::mpmc_queue<JobRecord>& GetQueueForPriority(JobPriority priority)
 		{
-			return _job_worker_count;
+			container::mpmc_queue<JobRecord>* deque = nullptr;
+
+			switch (priority)
+			{
+			case JobPriority::Highest:
+				deque = &_highest_job_deque;
+				break;
+
+			case JobPriority::Higher:
+				deque = &_higher_job_deque;
+				break;
+
+			case JobPriority::Normal:
+				deque = &_normal_job_deque;
+				break;
+
+			case JobPriority::Lower:
+				deque = &_lower_job_deque;
+				break;
+
+			case JobPriority::Lowest:
+				deque = &_lowest_job_deque;
+				break;
+
+			default:
+				NP_ENGINE_ASSERT(false, "requested incorrect priority");
+				break;
+			}
+
+			return *deque;
 		}
 
-		JobWorkerToken GetJobWorker(ui64 index)
+		JobRecord SubmitJob(JobPriority priority, Job* job)
 		{
-			return JobWorkerToken(&_job_workers[index]);
+			return SubmitJob(JobRecord(priority, job));
+		}
+
+		JobRecord SubmitJob(JobRecord record)
+		{
+			NP_ENGINE_ASSERT(record.IsValid(), "attempted to add an invalid Job -- do not do that my guy");
+			NP_ENGINE_ASSERT(record.GetJob()->IsEnabled(), "the dude not enabled bro - why it do");
+
+			JobRecord return_record;
+
+			if (GetQueueForPriority(record.GetPriority()).enqueue(record))
+				return_record = record;
+
+			return return_record;
+		}
+
+		Job* CreateJob(memory::Delegate& d)
+		{
+			return _job_pool->CreateObject(d);
+		}
+
+		bl DestroyJob(Job* job)
+		{
+			return _job_pool->DestroyObject(job);
+		}
+
+		container::vector<JobWorker>& GetJobWorkers()
+		{
+			return _job_workers;
+		}
+
+		const container::vector<JobWorker>& GetJobWorkers() const
+		{
+			return _job_workers;
 		}
 	};
 } // namespace np::js

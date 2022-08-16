@@ -7,66 +7,47 @@
 #ifndef NP_ENGINE_JOB_HPP
 #define NP_ENGINE_JOB_HPP
 
+#include <utility>
+
 #include "NP-Engine/Foundation/Foundation.hpp"
 #include "NP-Engine/Primitive/Primitive.hpp"
 #include "NP-Engine/Insight/Insight.hpp"
-#include "NP-Engine/Concurrency/Concurrency.hpp"
 #include "NP-Engine/Memory/Memory.hpp"
+#include "NP-Engine/Container/Container.hpp"
 
-// TODO: replace copy constructor with move constructor
-// TODO: replace "Job* _dependent_job;" with "vector<Job*>* _dependent_jobs;"
+#include "JobPriority.hpp"
 
 namespace np::js
 {
 	class Job
 	{
-	public:
-		using Function = memory::Delegate;
-
 	private:
-		Job* _dependent_job; // job depending on this
-		atm_i32 _dependency_count;
-		Function _function;
-
-		void Dispose()
-		{
-			if (_dependent_job && !IsComplete())
-			{
-				_dependent_job->_dependency_count--;
-			}
-
-			_dependent_job = nullptr;
-			_function.DisconnectFunction();
-			_dependency_count = -1;
-		}
-
-		inline void CopyFrom(const Job& other)
-		{
-			_dependency_count.store(other._dependency_count);
-
-			if (other.IsEnabled())
-			{
-				_dependent_job = other._dependent_job;
-				_function = other._function;
-			}
-		}
+		container::vector<Job*> _dependents;
+		atm_i32 _antecedent_count;
+		memory::Delegate _delegate;
+		atm<atm_bl*> _confirm_completion_flag;
+		JobPriority _priority_attractor;
 
 	public:
-		Job(): _dependent_job(nullptr), _dependency_count(-1) {}
+		Job(): _antecedent_count(-1), _confirm_completion_flag(nullptr), _priority_attractor(JobPriority::Normal) {}
 
-		Job(Function& function, Job& dependent): Job(function)
-		{
-			dependent.DependOn(*this);
-		}
+		Job(memory::Delegate& d): _antecedent_count(1), _delegate(d), _confirm_completion_flag(nullptr), _priority_attractor(JobPriority::Normal) {}
 
-		Job(Function& function): _dependent_job(nullptr), _dependency_count(1), _function(function) {}
+		Job(const Job& other):
+			_dependents(other._dependents),
+			_antecedent_count(other._antecedent_count.load(mo_acquire)),
+			_delegate(other._delegate),
+			_confirm_completion_flag(other._confirm_completion_flag.load(mo_acquire)),
+			_priority_attractor(other._priority_attractor)
+		{}
 
-		Job(Job& other)
-		{
-			CopyFrom(other);
-		}
-
-		Job(Job&&) = delete;
+		Job(Job&& other) noexcept:
+			_dependents(::std::move(other._dependents)),
+			_antecedent_count(::std::move(other._antecedent_count.load(mo_acquire))),
+			_delegate(::std::move(other._delegate)),
+			_confirm_completion_flag(::std::move(other._confirm_completion_flag.load(mo_acquire))),
+			_priority_attractor(::std::move(other._priority_attractor))
+		{}
 
 		~Job()
 		{
@@ -75,67 +56,123 @@ namespace np::js
 
 		Job& operator=(const Job& other)
 		{
-			if (_dependent_job && !IsComplete())
-			{
-				_dependent_job->_dependency_count--;
-				_dependent_job = nullptr;
-			}
-
-			NP_ENGINE_ASSERT(CanExecute(),
-							 "You are overwriting a Job that has dependents. Only overwrite jobs that can execute.");
-
-			CopyFrom(other);
+			_dependents = other._dependents;
+			_antecedent_count.store(other._antecedent_count.load(mo_acquire), mo_release);
+			_delegate = other._delegate;
+			_confirm_completion_flag.store(other._confirm_completion_flag.load(mo_acquire), mo_release);
+			_priority_attractor = other._priority_attractor;
 			return *this;
 		}
 
-		Job& operator=(Job&&) = delete;
+		Job& operator=(Job&& other) noexcept
+		{
+			_dependents = ::std::move(other._dependents);
+			_antecedent_count.store(::std::move(other._antecedent_count.load(mo_acquire)), mo_release);
+			_delegate = ::std::move(other._delegate);
+			_confirm_completion_flag.store(::std::move(other._confirm_completion_flag.load(mo_acquire)), mo_release);
+			_priority_attractor = ::std::move(other._priority_attractor);
+			return *this;
+		}
+
+		void Dispose()
+		{
+			_dependents.clear();
+			_antecedent_count.store(-1, mo_release);
+			_delegate.DisconnectFunction();
+			_confirm_completion_flag.store(nullptr, mo_release);
+			_priority_attractor = JobPriority::Normal;
+		}
 
 		bl CanExecute() const
 		{
-			return _dependency_count.load(mo_acquire) == 1;
+			return _antecedent_count.load(mo_acquire) == 1;
 		}
 
 		void Execute()
 		{
 			if (CanExecute())
 			{
-				_function.InvokeConnectedFunction();
-				_dependency_count--;
+				_delegate.InvokeConnectedFunction();
+				atm_bl* flag = _confirm_completion_flag.load(mo_acquire);
 
-				if (_dependent_job)
+				if (!flag || flag->load(mo_acquire))
 				{
-					_dependent_job->_dependency_count--;
+					_antecedent_count--;
+					for (auto it = _dependents.begin(); it != _dependents.end(); it++)
+						(*it)->_antecedent_count--;
 				}
 			}
+		}
+
+		void WatchConfirmCompletionFlag(atm_bl* completion_flag)
+		{
+			_confirm_completion_flag.store(completion_flag, mo_release);
+		}
+
+		void UnwatchConfirmCompletionFlag()
+		{
+			_confirm_completion_flag.store(nullptr, mo_release);
 		}
 
 		bl IsComplete() const
 		{
-			return _dependency_count.load(mo_acquire) == 0;
+			return _antecedent_count.load(mo_acquire) == 0;
 		}
 
 		bl IsEnabled() const
 		{
-			return _dependency_count.load(mo_acquire) > -1;
+			return _antecedent_count.load(mo_acquire) > -1;
 		}
 
-		inline explicit operator bl() const
-		{
-			return IsEnabled();
-		}
-
-		void DependOn(Job& job)
+		void AddDependency(Job& other)
 		{
 			if (IsEnabled())
 			{
-				if (job._dependent_job)
-				{
-					job._dependent_job->_dependency_count--;
-				}
+				bl found = false;
+				for (auto it = other._dependents.begin(); it != other._dependents.end() && !found; it++)
+					found = *it == this;
 
-				job._dependent_job = this;
-				_dependency_count++;
+				if (!found)
+				{
+					other._dependents.emplace_back(this);
+					_antecedent_count++;
+				}
 			}
+		}
+
+		void RemoveDependency(Job& other)
+		{
+			if (IsEnabled())
+				for (auto it = other._dependents.begin(); it != other._dependents.end(); it++)
+					if (*it == this)
+					{
+						other._dependents.erase(it);
+						_antecedent_count--;
+						break;
+					}
+		}
+
+		void SetPriorityAttractor(JobPriority priority)
+		{
+			_priority_attractor = priority;
+		}
+
+		void ResetPriorityAttractor()
+		{
+			_priority_attractor = JobPriority::Normal;
+		}
+
+		JobPriority GetAttractedPriority(JobPriority priority)
+		{
+			ui32 attractor = (ui32)_priority_attractor;
+			ui32 priority_ui32 = (ui32)priority;
+
+			if (priority_ui32 < attractor)
+				priority_ui32++;
+			else if (priority_ui32 > attractor)
+				priority_ui32--;
+
+			return (JobPriority)priority_ui32;
 		}
 	};
 } // namespace np::js

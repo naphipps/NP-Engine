@@ -11,212 +11,85 @@
 
 #include "NP-Engine/Foundation/Foundation.hpp"
 #include "NP-Engine/Container/Container.hpp"
-#include "NP-Engine/Concurrency/Concurrency.hpp"
 #include "NP-Engine/Insight/Insight.hpp"
 #include "NP-Engine/Primitive/Primitive.hpp"
-#include "NP-Engine/String/String.hpp"
 #include "NP-Engine/Random/Random.hpp"
 #include "NP-Engine/Time/Time.hpp"
 
 #include "JobRecord.hpp"
 #include "JobPool.hpp"
-#include "JobToken.hpp"
 
 namespace np::js
 {
+	class JobSystem;
+
 	class JobWorker
 	{
 	private:
 		friend class JobSystem;
 
-	public:
-		using JobRecordQueue = concurrency::MpmcQueue<JobRecord>;
-
-	private:
 		atm_bl _keep_working;
 		atm_bl _work_procedure_complete;
 		concurrency::ThreadToken _thread_token;
 		concurrency::ThreadPool* _thread_pool;
-
-		JobPool* _job_pool;
-
-		constexpr static ui32 JOB_DEQUEUE_SIZE = 1024;
-		JobRecordQueue _highest_job_deque;
-		JobRecordQueue _higher_job_deque;
-		JobRecordQueue _normal_job_deque;
-		JobRecordQueue _lower_job_deque;
-		JobRecordQueue _lowest_job_deque;
-
+		JobSystem* _job_system;
+		container::mpmc_queue<Job*> _immediate_job_queue;
 		container::vector<JobWorker*> _coworkers;
 		ui32 _coworker_index;
 		time::DurationMilliseconds _bad_steal_sleep_duration;
 		random::Random32 _random_engine;
 
-		JobRecordQueue& GetQueueFromPriority(JobPriority priority)
+		/*
+			returns a valid && CanExecute() job, or invalid job
+		*/
+		Job* GetImmediateJob()
 		{
-			JobRecordQueue* deque = nullptr;
-
-			switch (priority)
+			NP_ENGINE_PROFILE_FUNCTION();
+			Job* job = nullptr;
+			if (_immediate_job_queue.try_dequeue(job) && !job->CanExecute())
 			{
-			case JobPriority::Highest:
-				deque = &_highest_job_deque;
-				break;
-
-			case JobPriority::Higher:
-				deque = &_higher_job_deque;
-				break;
-
-			case JobPriority::Normal:
-				deque = &_normal_job_deque;
-				break;
-
-			case JobPriority::Lower:
-				deque = &_lower_job_deque;
-				break;
-
-			case JobPriority::Lowest:
-				deque = &_lowest_job_deque;
-				break;
-
-			default:
-				NP_ENGINE_ASSERT(false, "requested incorrect priority");
-				break;
+				SubmitImmediateJob(job);
+				job = nullptr;
 			}
+			return job;
+		}
 
-			return *deque;
+		Job* GetStolenJob() 
+		{
+			NP_ENGINE_PROFILE_FUNCTION();
+			return _coworkers.empty() ? nullptr : _coworkers[_coworker_index]->GetImmediateJob();
 		}
 
 		/*
 			returns a valid && CanExecute() job, or invalid job
 		*/
-		JobRecord GetNextJob()
-		{
-			JobRecord next_job;
-			for (siz i = 0; i < JobPrioritiesHighToLow.size() && !next_job.IsValid(); i++)
-			{
-				JobRecordQueue& queue = GetQueueFromPriority(JobPrioritiesHighToLow[i]);
-				queue.try_dequeue(next_job);
+		JobRecord GetNextJob();
 
-				if (next_job.IsValid())
-				{
-					if (next_job.GetJob().IsEnabled())
-					{
-						if (!next_job.GetJob().CanExecute())
-						{
-							AddJob(NormalizePriority(next_job.GetPriority()), memory::AddressOf(next_job.GetJob()));
-							next_job.Invalidate();
-						}
-					}
-					else
-					{
-						NP_ENGINE_ASSERT(false, "next_job must be enabled when valid at all times - probable memory leak");
-					}
-				}
-			}
-			return next_job;
-		}
-
-		JobRecord GetStolenJob()
-		{
-			NP_ENGINE_PROFILE_FUNCTION();
-
-			JobRecord stolen_job;
-
-			if (!_coworkers.empty())
-			{
-				stolen_job = _coworkers[_coworker_index]->GetNextJob();
-			}
-
-			return stolen_job;
-		}
-
-		void WorkerThreadProcedure()
-		{
-			NP_ENGINE_PROFILE_SCOPE("WorkerThreadProcedure: " + to_str((ui64)this));
-
-			while (_keep_working.load(mo_acquire))
-			{
-				JobRecord record = GetNextJob();
-				if (record.IsValid())
-				{
-					NP_ENGINE_PROFILE_SCOPE("executing my Job");
-					record.Execute();
-					_job_pool->DestroyObject(const_cast<Job*>(&record.GetJob()));
-				}
-				else
-				{
-					// we did not find next job so we steal from coworker
-					JobRecord stolen = GetStolenJob();
-					if (stolen.IsValid())
-					{
-						NP_ENGINE_PROFILE_SCOPE("executing stolen Job");
-						stolen.Execute();
-						_job_pool->DestroyObject(const_cast<Job*>(&stolen.GetJob()));
-					}
-					else
-					{
-						// we did not steal a good job thus we want to steal from someone else
-						_coworker_index = (_coworker_index + 1) % _coworkers.size();
-
-						// we yield/sleep just in case all jobs are done
-						concurrency::ThisThread::yield();
-						concurrency::ThisThread::sleep_for(_bad_steal_sleep_duration);
-					}
-				}
-			}
-
-			_work_procedure_complete.store(true, mo_release);
-		}
-
-		Job* CreateJob(Job::Function& function, Job* dependent = nullptr)
-		{
-			Job* job = nullptr;
-
-			if (dependent)
-			{
-				job = _job_pool->CreateObject(function, *dependent);
-			}
-			else
-			{
-				job = _job_pool->CreateObject(function);
-			}
-
-			return job;
-		}
-
-		JobRecord AddJob(JobPriority priority, const Job* job)
-		{
-			return AddJob(JobRecord(priority, job));
-		}
-
-		JobRecord AddJob(JobRecord record)
-		{
-			NP_ENGINE_ASSERT(record.IsValid(), "attempted to add an invalid Job -- do not do that my guy");
-			NP_ENGINE_ASSERT(record.GetJob().IsEnabled(), "the dude not enabled bro - why it do");
-
-			JobRecord return_record;
-
-			if (GetQueueFromPriority(record.GetPriority()).enqueue(record))
-			{
-				return_record = record;
-			}
-
-			return return_record;
-		}
+		void WorkerThreadProcedure();
 
 	public:
 		JobWorker():
-			_highest_job_deque(JOB_DEQUEUE_SIZE),
-			_higher_job_deque(JOB_DEQUEUE_SIZE),
-			_normal_job_deque(JOB_DEQUEUE_SIZE),
-			_lower_job_deque(JOB_DEQUEUE_SIZE),
-			_lowest_job_deque(JOB_DEQUEUE_SIZE),
 			_keep_working(false),
 			_work_procedure_complete(true),
-			_job_pool(nullptr),
 			_thread_pool(nullptr),
+			_job_system(nullptr),
 			_coworker_index(0),
 			_bad_steal_sleep_duration(NP_ENGINE_APPLICATION_LOOP_DURATION)
+		{}
+
+		JobWorker(const JobWorker& other) = delete;
+
+		JobWorker(JobWorker&& other) noexcept:
+			_keep_working(::std::move(other._keep_working.load(mo_acquire))),
+			_work_procedure_complete(::std::move(other._work_procedure_complete.load(mo_acquire))),
+			_thread_token(::std::move(other._thread_token)),
+			_thread_pool(::std::move(other._thread_pool)),
+			_job_system(::std::move(other._job_system)),
+			_immediate_job_queue(::std::move(other._immediate_job_queue)),
+			_coworkers(::std::move(other._coworkers)),
+			_coworker_index(::std::move(other._coworker_index)),
+			_bad_steal_sleep_duration(::std::move(other._bad_steal_sleep_duration)),
+			_random_engine(::std::move(other._random_engine))
 		{}
 
 		~JobWorker()
@@ -224,24 +97,36 @@ namespace np::js
 			StopWork();
 		}
 
+		JobWorker& operator=(const JobWorker& other) = delete;
+
+		JobWorker& operator=(JobWorker&& other) noexcept
+		{
+			_keep_working.store(::std::move(other._keep_working.load(mo_acquire)), mo_release);
+			_work_procedure_complete.store(::std::move(other._work_procedure_complete.load(mo_acquire)), mo_release);
+			_thread_token = ::std::move(other._thread_token);
+			_thread_pool = ::std::move(other._thread_pool);
+			_job_system = ::std::move(other._job_system);
+			_immediate_job_queue = ::std::move(other._immediate_job_queue);
+			_coworkers = ::std::move(other._coworkers);
+			_coworker_index = ::std::move(other._coworker_index);
+			_bad_steal_sleep_duration = ::std::move(other._bad_steal_sleep_duration);
+			_random_engine = ::std::move(other._random_engine);
+			return *this;
+		}
+
 		void AddCoworker(JobWorker* coworker)
 		{
+			//intentionally not checking if we have this coworker already - allows us to support uneven distribution when stealing jobs
 			if (coworker != nullptr && coworker != this)
-			{
 				_coworkers.emplace_back(coworker);
-			}
 		}
 
 		void RemoveCoworker(JobWorker* coworker)
 		{
+			//because of potential uneven distrubutions for stealing jobs, we have to iterate through all _coworkers
 			for (auto it = _coworkers.begin(); it != _coworkers.end(); it++)
-			{
 				if (coworker == *it)
-				{
 					_coworkers.erase(it);
-					break;
-				}
-			}
 		}
 
 		void ClearCorkers()
@@ -249,38 +134,23 @@ namespace np::js
 			_coworkers.clear();
 		}
 
-		JobToken CreateJobToken(Job::Function& function, JobToken dependent = JobToken())
+		Job* SubmitImmediateJob(Job* job)
 		{
-			JobToken token(CreateJob(function));
+			NP_ENGINE_ASSERT(job != nullptr, "attempted to add an invalid Job -- do not do that my guy");
+			NP_ENGINE_ASSERT(job->IsEnabled(), "the dude not enabled bro - why it do");
 
-			if (token.IsValid() && dependent.IsValid())
-			{
-				dependent.GetJob().DependOn(token.GetJob());
-			}
+			Job* return_job = nullptr;
 
-			return token;
+			if (_immediate_job_queue.enqueue(job))
+				return_job = job;
+
+			return return_job;
 		}
 
-		JobRecord AddJob(JobPriority priority, JobToken token)
-		{
-			JobRecord record;
-
-			if (token.IsValid())
-			{
-				record = AddJob(priority, &token.GetJob());
-			}
-
-			return record;
-		}
-
-		JobRecord AddJob(JobPriority priority, Job::Function& function, JobToken dependent = JobToken())
-		{
-			return AddJob(priority, CreateJobToken(function, dependent));
-		}
-
-		void StartWork(concurrency::ThreadPool& pool, i32 thread_affinity = -1)
+		void StartWork(JobSystem& job_system, concurrency::ThreadPool& pool, i32 thread_affinity = -1)
 		{
 			NP_ENGINE_PROFILE_FUNCTION();
+			_job_system = memory::AddressOf(job_system);
 			_thread_pool = &pool;
 			_keep_working.store(true, mo_release);
 			_work_procedure_complete.store(false, mo_release);

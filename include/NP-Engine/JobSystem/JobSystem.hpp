@@ -13,7 +13,6 @@
 #include "JobPriority.hpp"
 #include "JobRecord.hpp"
 #include "JobSystemImpl.hpp"
-#include "JobWorkerToken.hpp"
 #include "JobWorker.hpp"
 #include "Job.hpp"
 
