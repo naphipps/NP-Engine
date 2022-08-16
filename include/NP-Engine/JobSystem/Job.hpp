@@ -31,7 +31,12 @@ namespace np::js
 	public:
 		Job(): _antecedent_count(-1), _confirm_completion_flag(nullptr), _priority_attractor(JobPriority::Normal) {}
 
-		Job(memory::Delegate& d): _antecedent_count(1), _delegate(d), _confirm_completion_flag(nullptr), _priority_attractor(JobPriority::Normal) {}
+		Job(memory::Delegate& d):
+			_antecedent_count(1),
+			_delegate(d),
+			_confirm_completion_flag(nullptr),
+			_priority_attractor(JobPriority::Normal)
+		{}
 
 		Job(const Job& other):
 			_dependents(other._dependents),

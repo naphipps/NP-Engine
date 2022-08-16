@@ -89,7 +89,8 @@ namespace np::js
 
 			if (!_job_pool)
 			{
-				_job_pool_block = memory::DefaultTraitAllocator.Allocate(JOB_ALIGNED_SIZE * NP_ENGINE_JOB_SYSTEM_POOL_DEFAULT_SIZE);
+				_job_pool_block =
+					memory::DefaultTraitAllocator.Allocate(JOB_ALIGNED_SIZE * NP_ENGINE_JOB_SYSTEM_POOL_DEFAULT_SIZE);
 				_job_pool = memory::Create<JobPool>(memory::DefaultTraitAllocator, _job_pool_block);
 			}
 

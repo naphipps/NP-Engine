@@ -54,7 +54,7 @@ namespace np::js
 			return job;
 		}
 
-		Job* GetStolenJob() 
+		Job* GetStolenJob()
 		{
 			NP_ENGINE_PROFILE_FUNCTION();
 			return _coworkers.empty() ? nullptr : _coworkers[_coworker_index]->GetImmediateJob();
@@ -116,14 +116,15 @@ namespace np::js
 
 		void AddCoworker(JobWorker* coworker)
 		{
-			//intentionally not checking if we have this coworker already - allows us to support uneven distribution when stealing jobs
+			// intentionally not checking if we have this coworker already
+			//	^ allows us to support uneven distribution when stealing jobs
 			if (coworker != nullptr && coworker != this)
 				_coworkers.emplace_back(coworker);
 		}
 
 		void RemoveCoworker(JobWorker* coworker)
 		{
-			//because of potential uneven distrubutions for stealing jobs, we have to iterate through all _coworkers
+			// because of potential uneven distrubutions for stealing jobs, we have to iterate through all _coworkers
 			for (auto it = _coworkers.begin(); it != _coworkers.end(); it++)
 				if (coworker == *it)
 					_coworkers.erase(it);

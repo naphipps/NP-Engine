@@ -32,6 +32,6 @@ namespace np::container
 
 	template <class T>
 	using mpmc_queue = ::moodycamel::ConcurrentQueue<T, __detail::mpmc_queue_traits>;
-}// namespace np::container
+} // namespace np::container
 
 #endif /* NP_ENGINE_VENDOR_CONCURRENTQUEUE_INCLUDE_HPP */

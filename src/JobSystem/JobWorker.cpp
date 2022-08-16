@@ -22,7 +22,7 @@ namespace np::js
 				{
 					if (!job->CanExecute())
 					{
-						//TODO: pretty sure using NormalizePriority function is faster, so profile this
+						// TODO: pretty sure using NormalizePriority function is faster, so profile this
 						_job_system->SubmitJob(job->GetAttractedPriority(next_job.GetPriority()), job);
 						next_job.Invalidate();
 					}
@@ -93,4 +93,4 @@ namespace np::js
 
 		_work_procedure_complete.store(true, mo_release);
 	}
-}
+} // namespace np::js
