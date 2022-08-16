@@ -9,6 +9,7 @@
 #include "NP-Engine/Foundation/Foundation.hpp"
 #include "NP-Engine/Primitive/Primitive.hpp"
 #include "NP-Engine/Insight/Insight.hpp"
+#include "NP-Engine/String/String.hpp"
 
 #include "Point.hpp"
 
