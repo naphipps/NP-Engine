@@ -7,6 +7,8 @@
 #ifndef NP_ENGINE_JOB_SYSTEM_IMPL_HPP
 #define NP_ENGINE_JOB_SYSTEM_IMPL_HPP
 
+#include <utility>
+
 #include "NP-Engine/Container/Container.hpp"
 #include "NP-Engine/Concurrency/Concurrency.hpp"
 #include "NP-Engine/Primitive/Primitive.hpp"
@@ -173,9 +175,14 @@ namespace np::js
 			return return_record;
 		}
 
-		Job* CreateJob(memory::Delegate& d)
+		Job* CreateJob(memory::Delegate&& d)
 		{
-			return _job_pool->CreateObject(d);
+			return _job_pool->CreateObject(::std::forward<memory::Delegate&&>(d));
+		}
+
+		Job* CreateJob()
+		{
+			return _job_pool->CreateObject();
 		}
 
 		bl DestroyJob(Job* job)

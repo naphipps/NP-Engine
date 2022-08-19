@@ -31,7 +31,7 @@ namespace np::js
 	public:
 		Job(): _antecedent_count(-1), _confirm_completion_flag(nullptr), _priority_attractor(JobPriority::Normal) {}
 
-		Job(memory::Delegate& d):
+		Job(memory::Delegate&& d):
 			_antecedent_count(1),
 			_delegate(d),
 			_confirm_completion_flag(nullptr),
@@ -77,6 +77,16 @@ namespace np::js
 			_confirm_completion_flag.store(::std::move(other._confirm_completion_flag.load(mo_acquire)), mo_release);
 			_priority_attractor = ::std::move(other._priority_attractor);
 			return *this;
+		}
+
+		memory::Delegate& GetDelegate()
+		{
+			return _delegate;
+		}
+
+		const memory::Delegate& GetDelegate() const
+		{
+			return _delegate;
 		}
 
 		void Dispose()
