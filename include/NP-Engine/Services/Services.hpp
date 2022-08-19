@@ -15,7 +15,8 @@
 
 namespace np::services
 {
-	//TODO: we need to create this before we create our application and then destroy it after our application, inside our application allocator
+	// TODO: we need to create this before we create our application and then destroy it after our application, inside our
+	// application allocator
 
 	class Services
 	{
@@ -25,15 +26,9 @@ namespace np::services
 		js::JobSystem _job_system;
 		event::EventQueue _event_queue;
 		event::EventSubmitter _event_submitter;
-		
+
 	public:
-		Services() :
-			_allocator(),
-			_ecs_registry(),
-			_job_system(),
-			_event_queue(),
-			_event_submitter(_event_queue)
-		{}
+		Services(): _allocator(), _ecs_registry(), _job_system(), _event_queue(), _event_submitter(_event_queue) {}
 
 		memory::Allocator& GetAllocator()
 		{
@@ -85,6 +80,6 @@ namespace np::services
 			return _event_submitter;
 		}
 	};
-}
+} // namespace np::services
 
 #endif /* NP_ENGINE_SERVICES_HPP */

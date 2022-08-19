@@ -52,8 +52,7 @@ namespace np::app
 		}
 
 	public:
-		WindowLayer(services::Services& services):
-			Layer(services)
+		WindowLayer(services::Services& services): Layer(services)
 		{
 			glfwInit();
 		}

@@ -49,7 +49,7 @@ namespace np::memory::__detail
 	static T* RapidJsonNew(Args&&... args)
 	{
 		siz size = sizeof(T);
-		Block block{ RapidJsonMalloc(size), size };
+		Block block{RapidJsonMalloc(size), size};
 		bl constructed = Construct<T>(block, ::std::forward<Args>(args)...);
 		RAPIDJSON_ASSERT(constructed);
 		return (T*)block.ptr;

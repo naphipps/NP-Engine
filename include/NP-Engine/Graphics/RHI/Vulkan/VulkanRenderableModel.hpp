@@ -280,8 +280,8 @@ namespace np::graphics::rhi
 
 			if (!_bind_index_buffer)
 			{
-				_bind_index_buffer = memory::Create<VulkanCommandBindIndexBuffer>(_services.GetAllocator(), *_index_buffer,
-																				  0, VK_INDEX_TYPE_UINT32);
+				_bind_index_buffer = memory::Create<VulkanCommandBindIndexBuffer>(_services.GetAllocator(), *_index_buffer, 0,
+																				  VK_INDEX_TYPE_UINT32);
 			}
 			else
 			{
@@ -483,8 +483,8 @@ namespace np::graphics::rhi
 
 			if (!_bind_index_buffer)
 			{
-				_bind_index_buffer = memory::Create<VulkanCommandBindIndexBuffer>(_services.GetAllocator(), *_index_buffer,
-																				  0, VK_INDEX_TYPE_UINT32);
+				_bind_index_buffer = memory::Create<VulkanCommandBindIndexBuffer>(_services.GetAllocator(), *_index_buffer, 0,
+																				  VK_INDEX_TYPE_UINT32);
 			}
 			else
 			{

@@ -31,7 +31,7 @@ namespace np::memory
 
 			void operator()(T* ptr) const noexcept
 			{
-				NP_ENGINE_STATIC_ASSERT(0 < sizeof(T), "can't delete an incomplete type"); //TODO: what is this?
+				NP_ENGINE_STATIC_ASSERT(0 < sizeof(T), "can't delete an incomplete type"); // TODO: what is this?
 				TraitAllocator allocator;
 				Destroy<T>(allocator, ptr);
 			}

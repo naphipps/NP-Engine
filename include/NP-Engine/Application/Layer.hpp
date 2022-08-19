@@ -25,9 +25,7 @@ namespace np::app
 		virtual void HandleEvent(event::Event& e) {}
 
 	public:
-		Layer(services::Services& services):
-			_services(services)
-		{}
+		Layer(services::Services& services): _services(services) {}
 
 		virtual void BeforeUdpate() {} // TODO: I think we'll decide if we like this idea if it works with imgui
 

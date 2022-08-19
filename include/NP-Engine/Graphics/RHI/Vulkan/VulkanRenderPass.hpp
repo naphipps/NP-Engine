@@ -162,8 +162,8 @@ namespace np::graphics::rhi
 			depth_image_view_create_info.format = depth_image_create_info.format;
 			depth_image_view_create_info.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
 
-			return memory::Create<VulkanTexture>(_allocator, GetDevice(), depth_image_create_info,
-												 depth_memory_property_flags, depth_image_view_create_info);
+			return memory::Create<VulkanTexture>(_allocator, GetDevice(), depth_image_create_info, depth_memory_property_flags,
+												 depth_image_view_create_info);
 
 			/*
 			the following transition is covered in the render pass, but here it is for reference
@@ -294,8 +294,8 @@ namespace np::graphics::rhi
 			if (_begin_render_pass)
 				memory::Destroy<VulkanCommandBeginRenderPass>(_allocator, _begin_render_pass);
 
-			_begin_render_pass = memory::Create<VulkanCommandBeginRenderPass>(
-				_allocator, render_pass_begin_info, VK_SUBPASS_CONTENTS_INLINE);
+			_begin_render_pass =
+				memory::Create<VulkanCommandBeginRenderPass>(_allocator, render_pass_begin_info, VK_SUBPASS_CONTENTS_INLINE);
 
 			frame.StageCommand(*_begin_render_pass);
 		}

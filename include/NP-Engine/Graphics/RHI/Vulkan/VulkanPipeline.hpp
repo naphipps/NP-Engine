@@ -370,8 +370,7 @@ namespace np::graphics::rhi
 
 		VulkanImage* CreateImage(VkImageCreateInfo& image_create_info, VkMemoryPropertyFlags memory_property_flags)
 		{
-			return memory::Create<VulkanImage>(_allocator, GetDevice(), image_create_info,
-											   memory_property_flags);
+			return memory::Create<VulkanImage>(_allocator, GetDevice(), image_create_info, memory_property_flags);
 		}
 
 		VulkanBuffer* CreateBuffer(VkDeviceSize size, VkBufferUsageFlags buffer_usage_flags,
@@ -553,8 +552,7 @@ namespace np::graphics::rhi
 			if (_bind_pipeline)
 				memory::Destroy<VulkanCommandBindPipeline>(_allocator, _bind_pipeline);
 
-			_bind_pipeline = memory::Create<VulkanCommandBindPipeline>(_allocator,
-																	   VK_PIPELINE_BIND_POINT_GRAPHICS, _pipeline);
+			_bind_pipeline = memory::Create<VulkanCommandBindPipeline>(_allocator, VK_PIPELINE_BIND_POINT_GRAPHICS, _pipeline);
 			frame.StageCommand(*_bind_pipeline);
 		}
 
@@ -573,8 +571,7 @@ namespace np::graphics::rhi
 			_bound_descriptor_sets = {_descriptor_sets[GetSwapchain().GetCurrentImageIndex()]};
 
 			_bind_descriptor_sets = memory::Create<VulkanCommandBindDescriptorSets>(
-				_allocator, VK_PIPELINE_BIND_POINT_GRAPHICS, _pipeline_layout, 0,
-				(ui32)_bound_descriptor_sets.size(),
+				_allocator, VK_PIPELINE_BIND_POINT_GRAPHICS, _pipeline_layout, 0, (ui32)_bound_descriptor_sets.size(),
 				_bound_descriptor_sets.empty() ? nullptr : const_cast<VkDescriptorSet*>(_bound_descriptor_sets.data()), 0,
 				nullptr);
 
