@@ -7,6 +7,7 @@
 #ifndef NP_ENGINE_PAD_OBJECT_HPP
 #define NP_ENGINE_PAD_OBJECT_HPP
 
+#include <utility>
 #include <string>
 #include <type_traits>
 
@@ -23,14 +24,6 @@ namespace np::memory
 	protected:
 		CacheLinePadding _padding;
 
-		void CopyFrom(const PadObject& other)
-		{
-			for (siz i = 0; i < CACHE_LINE_SIZE; i++)
-			{
-				_padding[i] = other._padding[i];
-			}
-		}
-
 	public:
 		PadObject()
 		{
@@ -39,12 +32,30 @@ namespace np::memory
 
 		PadObject(const PadObject& other)
 		{
-			CopyFrom(other);
+			for (siz i = 0; i < CACHE_LINE_SIZE; i++)
+				_padding[i] = other._padding[i];
 		}
 
-		PadObject(PadObject&& other)
+		PadObject(PadObject&& other) noexcept
 		{
-			CopyFrom(other);
+			for (siz i = 0; i < CACHE_LINE_SIZE; i++)
+				_padding[i] = ::std::move(other._padding[i]);
+		}
+
+		virtual ~PadObject() {}
+
+		PadObject& operator=(const PadObject& other)
+		{
+			for (siz i = 0; i < CACHE_LINE_SIZE; i++)
+				_padding[i] = other._padding[i];
+			return *this;
+		}
+
+		PadObject& operator=(PadObject&& other) noexcept
+		{
+			for (siz i = 0; i < CACHE_LINE_SIZE; i++)
+				_padding[i] = ::std::move(other._padding[i]);
+			return *this;
 		}
 
 		template <typename T>
@@ -83,18 +94,6 @@ namespace np::memory
 			{
 				_padding[i] = 0;
 			}
-		}
-
-		PadObject& operator=(const PadObject& other)
-		{
-			CopyFrom(other);
-			return *this;
-		}
-
-		PadObject& operator=(PadObject&& other)
-		{
-			CopyFrom(other);
-			return *this;
 		}
 	};
 } // namespace np::memory
