@@ -10,13 +10,13 @@
 #include <utility>
 
 #include "NP-Engine/Primitive/Primitive.hpp"
-#include "NP-Engine/Event/Event.hpp"
 #include "NP-Engine/Platform/Platform.hpp"
 #include "NP-Engine/Memory/Memory.hpp"
 #include "NP-Engine/Time/Time.hpp"
 #include "NP-Engine/String/String.hpp"
 #include "NP-Engine/Concurrency/Concurrency.hpp"
 #include "NP-Engine/Container/Container.hpp"
+#include "NP-Engine/Services/Services.hpp"
 
 #include "NP-Engine/Vendor/GlfwInclude.hpp"
 
@@ -40,6 +40,7 @@ namespace np::window
 
 	protected:
 		Properties _properties;
+		services::Services& _services;
 		GLFWwindow* _glfw_window;
 		concurrency::Thread _thread;
 		atm_bl _show_procedure_is_complete;
@@ -114,9 +115,9 @@ namespace np::window
 		}
 
 	public:
-		Window(const Window::Properties& properties, event::EventSubmitter& event_submitter):
-			event::EventHandler(event_submitter),
+		Window(const Window::Properties& properties, services::Services& services):
 			_properties(properties),
+			_services(services),
 			_glfw_window(CreateGlfwWindow()),
 			_show_procedure_is_complete(true)
 		{

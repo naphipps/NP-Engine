@@ -9,6 +9,7 @@
 
 #include "NP-Engine/Primitive/Primitive.hpp"
 #include "NP-Engine/Memory/Memory.hpp"
+#include "NP-Engine/Services/Services.hpp"
 
 #include "NP-Engine/Vendor/GlmInclude.hpp"
 
@@ -574,8 +575,8 @@ namespace np::graphics::rhi
 		}
 
 	public:
-		VulkanRenderableModel(Model& model):
-			RenderableModel(model),
+		VulkanRenderableModel(services::Services& services, Model& model):
+			RenderableModel(services, model),
 			_is_out_of_date(true),
 			_vertex_buffer(nullptr),
 			_index_buffer(nullptr),
@@ -617,8 +618,12 @@ namespace np::graphics::rhi
 
 		void PrepareForPipeline(Pipeline& pipeline) override
 		{
+			SetOutOfDate();
+
 			if (IsOutOfDate())
 			{
+				NP_ENGINE_PROFILE_SCOPE("preparing for pipeline");
+
 				// TODO: I'm not too convinced that we need to support timeline semaphores... we should profile it
 				// TODO: this method needs to be updated for hot-reloadable textures? I'm not so sure...
 

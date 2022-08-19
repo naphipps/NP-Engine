@@ -11,8 +11,7 @@
 #include "NP-Engine/Container/Container.hpp"
 #include "NP-Engine/Platform/Platform.hpp"
 #include "NP-Engine/Memory/Memory.hpp"
-
-#include "NP-Engine/Vendor/EnttInclude.hpp"
+#include "NP-Engine/Services/Services.hpp"
 
 #include "NP-Engine/Window/WindowEvents.hpp"
 
@@ -123,10 +122,10 @@ namespace np::app
 
 #if NP_ENGINE_PLATFORM_IS_WINDOWS
 			// TODO: we're keeping this here for testing purposes - when renderer is complete we can probably remove
-			opengl = memory::Create<graphics::rhi::OpenGLRenderer>(memory::DefaultTraitAllocator, _ecs_registry);
+			opengl = memory::Create<graphics::rhi::OpenGLRenderer>(memory::DefaultTraitAllocator, _services);
 
 #endif
-			vulkan = memory::Create<graphics::rhi::VulkanRenderer>(memory::DefaultTraitAllocator, _ecs_registry);
+			vulkan = memory::Create<graphics::rhi::VulkanRenderer>(memory::DefaultTraitAllocator, _services);
 
 			if (vulkan != nullptr)
 				renderers.emplace_back(vulkan);
@@ -176,14 +175,14 @@ namespace np::app
 
 		graphics::Scene* CreateScene(graphics::Renderer& renderer)
 		{
-			graphics::Scene* scene = graphics::Scene::Create(_allocator, _ecs_registry, renderer);
+			graphics::Scene* scene = graphics::Scene::Create(_services, renderer);
 			_unacquired_scenes.insert(scene);
 			return _scenes.emplace_back(scene);
 		}
 
 	public:
-		GraphicsLayer(event::EventSubmitter& event_submitter, ::entt::registry& ecs_registry):
-			Layer(event_submitter, ecs_registry)
+		GraphicsLayer(services::Services& services):
+			Layer(services)
 		{
 			ChooseRhi();
 		}
@@ -205,7 +204,7 @@ namespace np::app
 
 		graphics::Renderer* CreateRenderer(window::Window& window)
 		{
-			graphics::Renderer* renderer = graphics::Renderer::Create(_allocator, _ecs_registry);
+			graphics::Renderer* renderer = graphics::Renderer::Create(_services);
 			renderer->AttachToWindow(window);
 			CreateScene(*renderer);
 			return _renderers.emplace_back(renderer);

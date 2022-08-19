@@ -14,14 +14,14 @@
 
 namespace np::graphics
 {
-	RenderableImage* RenderableImage::Create(memory::Allocator& allocator, Image& image)
+	RenderableImage* RenderableImage::Create(services::Services& services, Image& image)
 	{
 		RenderableImage* renderable_image = nullptr;
 
 		switch (__detail::RegisteredRhiType.load(mo_acquire))
 		{
 		case RhiType::Vulkan:
-			renderable_image = memory::Create<rhi::VulkanRenderableImage>(allocator, image);
+			renderable_image = memory::Create<rhi::VulkanRenderableImage>(services.GetAllocator(), services, image);
 			break;
 		default:
 			break;

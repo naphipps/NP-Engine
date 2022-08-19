@@ -75,15 +75,15 @@ namespace np::app
 		}
 
 	public:
-		GameLayer(event::EventSubmitter& event_submitter, ::entt::registry& ecs_registry):
-			Layer(event_submitter, ecs_registry),
+		GameLayer(services::Services& services):
+			Layer(services),
 			_scene(nullptr),
 			_model_filename(fs::Append(fs::Append(fs::Append(NP_ENGINE_WORKING_DIR, "test"), "assets"), "viking_room.obj")),
 			_model_texture_filename(
 				fs::Append(fs::Append(fs::Append(NP_ENGINE_WORKING_DIR, "test"), "assets"), "viking_room.png")),
 			_model(_model_filename, _model_texture_filename, true),
-			_renderable_model(graphics::RenderableModel::Create(memory::DefaultTraitAllocator, _model)),
-			_model_entity(ecs_registry),
+			_renderable_model(graphics::RenderableModel::Create(_services, _model)),
+			_model_entity(_services.GetEcsRegistry()),
 			_start_timestamp(time::SteadyClock::now())
 		{
 			_model.GetTexture().SetHotReloadable();
@@ -123,14 +123,12 @@ namespace np::app
 	class GameApp : public Application
 	{
 	private:
-		memory::Allocator& _allocator;
 		GameLayer _game_layer;
 
 	public:
-		GameApp(memory::Allocator& application_allocator):
-			Application(Application::Properties{"My Game App"}),
-			_allocator(application_allocator),
-			_game_layer(_event_submitter, _ecs_registry)
+		GameApp(::np::services::Services& application_services):
+			Application(Application::Properties{"My Game App"}, application_services),
+			_game_layer(application_services)
 		{
 			PushLayer(memory::AddressOf(_game_layer));
 		}

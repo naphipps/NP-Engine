@@ -11,9 +11,9 @@
 #include "NP-Engine/Window/Window.hpp"
 #include "NP-Engine/Platform/Platform.hpp"
 #include "NP-Engine/Memory/Memory.hpp"
+#include "NP-Engine/Services/Services.hpp"
 
 #include "NP-Engine/Vendor/GlfwInclude.hpp"
-#include "NP-Engine/Vendor/EnttInclude.hpp"
 
 #include "Layer.hpp"
 #include "ApplicationCloseEvent.hpp"
@@ -52,8 +52,8 @@ namespace np::app
 		}
 
 	public:
-		WindowLayer(event::EventSubmitter& event_submitter, ::entt::registry& ecs_registry):
-			Layer(event_submitter, ecs_registry)
+		WindowLayer(services::Services& services):
+			Layer(services)
 		{
 			glfwInit();
 		}
@@ -71,7 +71,7 @@ namespace np::app
 
 		virtual window::Window* CreateWindow(window::Window::Properties& properties)
 		{
-			return _windows.emplace_back(memory::Create<window::Window>(_allocator, properties, _event_submitter));
+			return _windows.emplace_back(memory::Create<window::Window>(_allocator, properties, _services));
 		}
 
 		virtual void Update(time::DurationMilliseconds time_delta) override
@@ -97,7 +97,7 @@ namespace np::app
 
 			if (_windows.size() == 0)
 			{
-				_event_submitter.Emplace<ApplicationCloseEvent>();
+				_services.GetEventSubmitter().Emplace<ApplicationCloseEvent>();
 			}
 		}
 

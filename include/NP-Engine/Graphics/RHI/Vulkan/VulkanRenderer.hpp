@@ -13,9 +13,9 @@
 #include "NP-Engine/String/String.hpp"
 #include "NP-Engine/Memory/Memory.hpp"
 #include "NP-Engine/Window/Window.hpp"
+#include "NP-Engine/Services/Services.hpp"
 
 #include "NP-Engine/Vendor/VulkanInclude.hpp"
-#include "NP-Engine/Vendor/EnttInclude.hpp"
 
 #include "NP-Engine/Graphics/RPI/RPI.hpp"
 
@@ -171,8 +171,8 @@ namespace np::graphics::rhi
 		}
 
 	public:
-		VulkanRenderer(::entt::registry& ecs_registry):
-			Renderer(ecs_registry),
+		VulkanRenderer(services::Services& services):
+			Renderer(services),
 			_instance(memory::Create<VulkanInstance>(memory::DefaultTraitAllocator)),
 			_surface(nullptr),
 			_device(nullptr),

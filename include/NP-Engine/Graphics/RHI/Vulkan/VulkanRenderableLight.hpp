@@ -10,6 +10,7 @@
 #include <iostream> //TODO: remove
 
 #include "NP-Engine/Primitive/Primitive.hpp"
+#include "NP-Engine/Services/Services.hpp"
 
 #include "NP-Engine/Graphics/RPI/RPI.hpp"
 
@@ -29,7 +30,7 @@ namespace np::graphics::rhi
 		void Dispose() {}
 
 	public:
-		VulkanRenderableLight(Light& light): RenderableLight(light) {}
+		VulkanRenderableLight(services::Services& services, Light& light): RenderableLight(services, light) {}
 
 		~VulkanRenderableLight()
 		{

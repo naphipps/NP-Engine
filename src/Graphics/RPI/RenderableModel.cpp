@@ -14,14 +14,14 @@
 
 namespace np::graphics
 {
-	RenderableModel* RenderableModel::Create(memory::Allocator& allocator, Model& model)
+	RenderableModel* RenderableModel::Create(services::Services& services, Model& model)
 	{
 		RenderableModel* renderable_model = nullptr;
 
 		switch (__detail::RegisteredRhiType.load(mo_acquire))
 		{
 		case RhiType::Vulkan:
-			renderable_model = memory::Create<rhi::VulkanRenderableModel>(allocator, model);
+			renderable_model = memory::Create<rhi::VulkanRenderableModel>(services.GetAllocator(), services, model);
 			break;
 		default:
 			break;

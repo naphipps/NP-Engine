@@ -10,6 +10,7 @@
 #include "NP-Engine/Foundation/Foundation.hpp"
 #include "NP-Engine/Platform/Platform.hpp"
 #include "NP-Engine/Memory/Memory.hpp"
+#include "NP-Engine/Services/Services.hpp"
 
 #include "RhiType.hpp"
 #include "RenderableObject.hpp"
@@ -22,16 +23,17 @@ namespace np::graphics
 	class RenderableModel : public RenderableObject
 	{
 	protected:
+		services::Services& _services;
 		Model& _model;
 		RenderableMetaValues _meta_values;
 		memory::Delegate _update_meta_values_on_frame;
 
 		// TODO: add struct that represents all the needed information to render our _model
 
-		RenderableModel(Model& model): _model(model), _meta_values() {}
+		RenderableModel(services::Services& services, Model& model): _services(services), _model(model), _meta_values() {}
 
 	public:
-		static RenderableModel* Create(memory::Allocator& allocator, Model& model);
+		static RenderableModel* Create(services::Services& services, Model& model);
 
 		virtual ~RenderableModel() {}
 

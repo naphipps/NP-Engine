@@ -11,6 +11,7 @@
 
 #include "NP-Engine/Primitive/Primitive.hpp"
 #include "NP-Engine/String/String.hpp"
+#include "NP-Engine/Services/Services.hpp"
 
 #include "NP-Engine/Graphics/RPI/RPI.hpp"
 
@@ -22,7 +23,7 @@ namespace np::graphics::rhi
 		void Dispose() {}
 
 	public:
-		VulkanRenderableImage(Image& image): RenderableImage(image) {}
+		VulkanRenderableImage(services::Services& services, Image& image): RenderableImage(services, image) {}
 
 		~VulkanRenderableImage()
 		{

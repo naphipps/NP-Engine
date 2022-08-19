@@ -9,8 +9,8 @@
 
 #include "NP-Engine/Time/Time.hpp"
 #include "NP-Engine/Event/Event.hpp"
-
-#include "NP-Engine/Vendor/EnttInclude.hpp"
+#include "NP-Engine/JobSystem/JobSystem.hpp"
+#include "NP-Engine/Services/Services.hpp"
 
 namespace np::app
 {
@@ -20,14 +20,13 @@ namespace np::app
 	class Layer : public event::EventHandler
 	{
 	protected:
-		::entt::registry& _ecs_registry;
+		services::Services& _services;
 
 		virtual void HandleEvent(event::Event& e) {}
 
 	public:
-		Layer(event::EventSubmitter& event_submitter, ::entt::registry& ecs_registry):
-			event::EventHandler(event_submitter),
-			_ecs_registry(ecs_registry)
+		Layer(services::Services& services):
+			_services(services)
 		{}
 
 		virtual void BeforeUdpate() {} // TODO: I think we'll decide if we like this idea if it works with imgui

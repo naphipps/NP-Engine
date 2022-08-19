@@ -11,6 +11,7 @@
 #include "NP-Engine/Insight/Insight.hpp"
 #include "NP-Engine/Concurrency/Concurrency.hpp"
 #include "NP-Engine/Time/Time.hpp"
+#include "NP-Engine/Services/Services.hpp"
 
 #include "NP-Engine/Vendor/VulkanInclude.hpp"
 
@@ -26,7 +27,7 @@ namespace np::graphics::rhi
 	class VulkanScene : public Scene
 	{
 	private:
-		// TODO: I think our scene needs it's own ecs registry
+		// TODO: I think our scene needs it's own ecs registry!!
 
 		VulkanCamera _camera;
 		concurrency::Thread _draw_loop_thread;
@@ -94,6 +95,7 @@ namespace np::graphics::rhi
 			VulkanFrame& vulkan_frame = (VulkanFrame&)_renderer.BeginFrame();
 			if (vulkan_frame.IsValid())
 			{
+				::entt::registry& ecs_registry = _services.GetEcsRegistry();
 				VulkanRenderer& vulkan_renderer = (VulkanRenderer&)_renderer;
 				VulkanPipeline& object_pipeline = vulkan_renderer.GetObjectPipeline();
 				VulkanPipeline& light_pipeline = vulkan_renderer.GetLightPipeline();
@@ -109,25 +111,25 @@ namespace np::graphics::rhi
 
 				object_pipeline.BindPipelineToFrame(vulkan_frame);
 				object_pipeline.PrepareToBindDescriptorSets(vulkan_frame);
-				auto object_entities = _ecs_registry.view<RenderableObject*>();
+				auto object_entities = ecs_registry.view<RenderableObject*>();
 				for (auto e : object_entities)
 				{
-					RenderableObject& object = *ecs::Entity(e, _ecs_registry).Get<RenderableObject*>();
+					RenderableObject& object = *ecs::Entity(e, ecs_registry).Get<RenderableObject*>();
 					object.RenderToFrame(vulkan_frame, object_pipeline);
 				}
 				object_pipeline.BindDescriptorSetsToFrame(vulkan_frame);
 
 				light_pipeline.BindPipelineToFrame(vulkan_frame);
 				light_pipeline.PrepareToBindDescriptorSets(vulkan_frame);
-				auto light_entities = _ecs_registry.view<RenderableLight*>();
+				auto light_entities = ecs_registry.view<RenderableLight*>();
 				for (auto e : light_entities)
 				{
 					// TODO: we'll need to address the light assign for us to maximize performance here
 
-					RenderableLight& light = *ecs::Entity(e, _ecs_registry).Get<RenderableLight*>();
+					RenderableLight& light = *ecs::Entity(e, ecs_registry).Get<RenderableLight*>();
 					for (auto e : object_entities)
 					{
-						RenderableObject& object = *ecs::Entity(e, _ecs_registry).Get<RenderableObject*>();
+						RenderableObject& object = *ecs::Entity(e, ecs_registry).Get<RenderableObject*>();
 						light.RenderToFrame(vulkan_frame, light_pipeline, object);
 					}
 				}
@@ -150,8 +152,8 @@ namespace np::graphics::rhi
 		}
 
 	public:
-		VulkanScene(::entt::registry& ecs_registry, Renderer& renderer):
-			Scene(ecs_registry, renderer),
+		VulkanScene(services::Services& services, Renderer& renderer):
+			Scene(services, renderer),
 			_draw_loop_procedure_is_complete(true),
 			_engage_draw_loop_procedure(false),
 			_drawing_is_complete(true)
@@ -179,17 +181,19 @@ namespace np::graphics::rhi
 
 		void Prepare() override
 		{
-			auto object_entities = _ecs_registry.view<RenderableObject*>();
+			::entt::registry& ecs_registry = _services.GetEcsRegistry();
+
+			auto object_entities = ecs_registry.view<RenderableObject*>();
 			for (auto e : object_entities)
 			{
-				RenderableObject& object = *ecs::Entity(e, _ecs_registry).Get<RenderableObject*>();
+				RenderableObject& object = *ecs::Entity(e, ecs_registry).Get<RenderableObject*>();
 				object.PrepareForPipeline(((VulkanRenderer&)_renderer).GetObjectPipeline());
 			}
 
-			auto light_entities = _ecs_registry.view<RenderableLight*>();
+			auto light_entities = ecs_registry.view<RenderableLight*>();
 			for (auto e : light_entities)
 			{
-				RenderableLight& light = *ecs::Entity(e, _ecs_registry).Get<RenderableLight*>();
+				RenderableLight& light = *ecs::Entity(e, ecs_registry).Get<RenderableLight*>();
 				light.PrepareForPipeline(((VulkanRenderer&)_renderer).GetLightPipeline());
 			}
 		}
@@ -197,18 +201,19 @@ namespace np::graphics::rhi
 		void Dispose() override
 		{
 			WaitForDrawProcedureToEnd();
+			::entt::registry& ecs_registry = _services.GetEcsRegistry();
 
-			auto object_entities = _ecs_registry.view<RenderableObject*>();
+			auto object_entities = ecs_registry.view<RenderableObject*>();
 			for (auto e : object_entities)
 			{
-				RenderableObject& object = *ecs::Entity(e, _ecs_registry).Get<RenderableObject*>();
+				RenderableObject& object = *ecs::Entity(e, ecs_registry).Get<RenderableObject*>();
 				object.DisposeForPipeline(((VulkanRenderer&)_renderer).GetObjectPipeline());
 			}
 
-			auto light_entities = _ecs_registry.view<RenderableLight*>();
+			auto light_entities = ecs_registry.view<RenderableLight*>();
 			for (auto e : light_entities)
 			{
-				RenderableLight& light = *ecs::Entity(e, _ecs_registry).Get<RenderableLight*>();
+				RenderableLight& light = *ecs::Entity(e, ecs_registry).Get<RenderableLight*>();
 				light.DisposeForPipeline(((VulkanRenderer&)_renderer).GetLightPipeline());
 			}
 

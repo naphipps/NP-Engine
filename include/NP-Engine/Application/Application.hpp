@@ -19,8 +19,7 @@
 #include "NP-Engine/Concurrency/Concurrency.hpp"
 #include "NP-Engine/Time/Time.hpp"
 #include "NP-Engine/Window/Window.hpp"
-
-#include "NP-Engine/Vendor/EnttInclude.hpp"
+#include "NP-Engine/Services/Services.hpp"
 
 #include "ApplicationEvents.hpp"
 #include "Layer.hpp"
@@ -87,9 +86,6 @@ namespace np::app
 		};
 
 	protected:
-		::entt::registry _ecs_registry;
-		event::EventQueue _event_queue;
-		event::EventSubmitter _application_event_submitter;
 		Properties _properties;
 		WindowLayer _window_layer;
 		GraphicsLayer _graphics_layer;
@@ -97,12 +93,11 @@ namespace np::app
 		container::vector<Layer*> _overlays;
 		atm_bl _running;
 
-		Application(const Application::Properties& application_properties):
-			_application_event_submitter(_event_queue), // order matters
-			Layer(_application_event_submitter, _ecs_registry),
+		Application(const Application::Properties& application_properties, services::Services& application_services):
+			Layer(application_services),
 			_properties(application_properties),
-			_window_layer(_application_event_submitter, _ecs_registry),
-			_graphics_layer(_application_event_submitter, _ecs_registry),
+			_window_layer(application_services),
+			_graphics_layer(application_services),
 			_running(false)
 		{
 			system::SetTerminateHandler(__detail::HandleTerminate);
@@ -187,6 +182,8 @@ namespace np::app
 			// TODO: this into a fixed step loop - aka, set this to loop at 60fps or something with 0 being infinitely fast
 
 			_running.store(true, mo_release);
+			event::EventQueue& event_queue = _services.GetEventQueue();
+
 			const time::DurationMilliseconds max_loop_duration(NP_ENGINE_APPLICATION_LOOP_DURATION);
 
 			time::SteadyTimestamp loop_next_timestamp = time::SteadyClock::now();
@@ -218,7 +215,7 @@ namespace np::app
 				for (Layer* overlay : _overlays)
 					overlay->AfterUdpate();
 
-				for (event::Event* e = _event_queue.PopOther(); e != nullptr; e = _event_queue.PopOther())
+				for (event::Event* e = event_queue.PopOther(); e != nullptr; e = event_queue.PopOther())
 				{
 					e->SetCanBeHandled(false);
 
@@ -229,11 +226,11 @@ namespace np::app
 						(*it)->OnEvent(*e);
 
 					if (!e->CanBeHandled())
-						_event_queue.DestroyEvent(e);
+						event_queue.DestroyEvent(e);
 					else
-						_event_queue.Emplace(e);
+						event_queue.Emplace(e);
 				}
-				_event_queue.SwapBuffers();
+				event_queue.SwapBuffers();
 
 				for (Layer* layer : _layers)
 					layer->Cleanup();
@@ -279,9 +276,7 @@ namespace np::app
 		}
 	};
 
-	Application* CreateApplication(memory::Allocator& application_allocator);
-
-	bl DestroyApplication(memory::Allocator& application_allocator, Application* application);
+	Application* CreateApplication(services::Services& application_services);
 } // namespace np::app
 
 #endif /* NP_ENGINE_APPLICATION_HPP */

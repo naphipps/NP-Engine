@@ -12,8 +12,7 @@
 #include "NP-Engine/Memory/Memory.hpp"
 #include "NP-Engine/Platform/Platform.hpp"
 #include "NP-Engine/Window/Window.hpp"
-
-#include "NP-Engine/Vendor/EnttInclude.hpp"
+#include "NP-Engine/Services/Services.hpp"
 
 #include "RhiType.hpp"
 #include "Model.hpp"
@@ -26,12 +25,12 @@ namespace np::graphics
 	class Renderer
 	{
 	protected:
-		::entt::registry& _ecs_registry;
+		services::Services& _services;
 
-		Renderer(::entt::registry& ecs_registry): _ecs_registry(ecs_registry) {}
+		Renderer(services::Services& services): _services(services) {}
 
 	public:
-		static Renderer* Create(memory::Allocator& allocator, ::entt::registry& ecs_registry);
+		static Renderer* Create(services::Services& services);
 
 		virtual ~Renderer() {}
 

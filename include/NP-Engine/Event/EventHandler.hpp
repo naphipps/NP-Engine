@@ -15,13 +15,9 @@ namespace np::event
 	class EventHandler
 	{
 	protected:
-		EventSubmitter& _event_submitter;
-
 		virtual void HandleEvent(Event& e) = 0;
 
 	public:
-		EventHandler(EventSubmitter& event_submitter): _event_submitter(event_submitter) {}
-
 		virtual void OnEvent(Event& e)
 		{
 			if (EventCategoryContains(GetHandledCategories(), e.GetCategory()))

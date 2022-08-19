@@ -12,8 +12,7 @@
 #include "NP-Engine/Memory/Memory.hpp"
 #include "NP-Engine/Insight/Insight.hpp"
 #include "NP-Engine/Platform/Platform.hpp"
-
-#include "NP-Engine/Vendor/EnttInclude.hpp"
+#include "NP-Engine/Services/Services.hpp"
 
 #include "RhiType.hpp"
 #include "Renderer.hpp"
@@ -24,14 +23,14 @@ namespace np::graphics
 	class Scene
 	{
 	protected:
-		::entt::registry& _ecs_registry;
+		services::Services& _services;
 		Renderer& _renderer;
 		memory::Delegate _on_draw_delegate;
 
 	public:
-		static Scene* Create(memory::Allocator& allocator, ::entt::registry& ecs_registry, Renderer& renderer);
+		static Scene* Create(services::Services& services, Renderer& renderer);
 
-		Scene(::entt::registry& ecs_registry, Renderer& renderer): _ecs_registry(ecs_registry), _renderer(renderer) {}
+		Scene(services::Services& services, Renderer& renderer): _services(services), _renderer(renderer) {}
 
 		virtual ~Scene() {}
 

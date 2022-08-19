@@ -8,9 +8,9 @@
 
 namespace np::app
 {
-	Application* CreateApplication(memory::Allocator& application_allocator)
+	Application* CreateApplication(::np::services::Services& application_services)
 	{
 		NP_ENGINE_LOG_INFO("Hello world from game create application.");
-		return memory::Create<GameApp>(application_allocator, application_allocator);
+		return memory::Create<GameApp>(application_services.GetAllocator(), application_services);
 	}
 } // namespace np::app

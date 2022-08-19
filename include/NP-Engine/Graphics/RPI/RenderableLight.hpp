@@ -10,6 +10,7 @@
 #include "NP-Engine/Foundation/Foundation.hpp"
 #include "NP-Engine/Platform/Platform.hpp"
 #include "NP-Engine/Memory/Memory.hpp"
+#include "NP-Engine/Services/Services.hpp"
 
 #include "RhiType.hpp"
 #include "RenderableLightObject.hpp"
@@ -21,12 +22,13 @@ namespace np::graphics
 	class RenderableLight : public RenderableLightObject
 	{
 	protected:
+		services::Services& _services;
 		Light& _light;
 
-		RenderableLight(Light& light): _light(light) {}
+		RenderableLight(services::Services& services, Light& light): _services(services), _light(light) {}
 
 	public:
-		static RenderableLight* Create(memory::Allocator& allocator, Light& light);
+		static RenderableLight* Create(services::Services& services, Light& light);
 
 		virtual ~RenderableLight() {}
 

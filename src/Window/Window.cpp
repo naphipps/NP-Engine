@@ -53,7 +53,7 @@ namespace np::window
 	{
 		if (IsRunning())
 		{
-			_event_submitter.Emplace<WindowCloseEvent>(*this);
+			_services.GetEventSubmitter().Emplace<WindowCloseEvent>(*this);
 		}
 	}
 
@@ -66,7 +66,7 @@ namespace np::window
 
 			glfwSetWindowSize(_glfw_window, (i32)width, (i32)height);
 
-			_event_submitter.Emplace<WindowResizeEvent>(*this, width, height);
+			_services.GetEventSubmitter().Emplace<WindowResizeEvent>(*this, width, height);
 		}
 	}
 

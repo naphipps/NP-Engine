@@ -10,6 +10,7 @@
 #include "NP-Engine/Foundation/Foundation.hpp"
 #include "NP-Engine/Platform/Platform.hpp"
 #include "NP-Engine/Memory/Memory.hpp"
+#include "NP-Engine/Services/Services.hpp"
 
 #include "RhiType.hpp"
 #include "RenderableObject.hpp"
@@ -21,12 +22,13 @@ namespace np::graphics
 	class RenderableImage : public RenderableObject
 	{
 	protected:
+		services::Services& _services;
 		Image& _image;
 
-		RenderableImage(Image& image): _image(image) {}
+		RenderableImage(services::Services& services, Image& image): _services(services), _image(image) {}
 
 	public:
-		static RenderableImage* Create(memory::Allocator& allocator, Image& image);
+		static RenderableImage* Create(services::Services& services, Image& image);
 
 		virtual ~RenderableImage() {}
 

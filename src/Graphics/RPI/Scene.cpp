@@ -14,14 +14,14 @@
 
 namespace np::graphics
 {
-	Scene* Scene::Create(memory::Allocator& allocator, ::entt::registry& ecs_registry, Renderer& renderer)
+	Scene* Scene::Create(services::Services& services, Renderer& renderer)
 	{
 		Scene* scene = nullptr;
 
 		switch (__detail::RegisteredRhiType.load(mo_acquire))
 		{
 		case RhiType::Vulkan:
-			scene = memory::Create<rhi::VulkanScene>(allocator, ecs_registry, renderer);
+			scene = memory::Create<rhi::VulkanScene>(services.GetAllocator(), services, renderer);
 			break;
 		default:
 			break;

@@ -11,6 +11,7 @@
 #include "NP-Engine/String/String.hpp"
 #include "NP-Engine/Window/Window.hpp"
 #include "NP-Engine/Time/Time.hpp"
+#include "NP-Engine/Services/Services.hpp"
 
 #include "NP-Engine/Vendor/EnttInclude.hpp"
 
@@ -37,7 +38,7 @@ namespace np::graphics::rhi
 		__detail::OpenGLFrame _frame;
 
 	public:
-		OpenGLRenderer(::entt::registry& ecs_registry): Renderer(ecs_registry) {}
+		OpenGLRenderer(services::Services& services): Renderer(services) {}
 
 		RhiType GetRhiType() const override
 		{

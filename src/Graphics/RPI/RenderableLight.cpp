@@ -14,14 +14,14 @@
 
 namespace np::graphics
 {
-	RenderableLight* RenderableLight::Create(memory::Allocator& allocator, Light& light)
+	RenderableLight* RenderableLight::Create(services::Services& services, Light& light)
 	{
 		RenderableLight* renderable_light = nullptr;
 
 		switch (__detail::RegisteredRhiType.load(mo_acquire))
 		{
 		case RhiType::Vulkan:
-			renderable_light = memory::Create<rhi::VulkanRenderableLight>(allocator, light);
+			renderable_light = memory::Create<rhi::VulkanRenderableLight>(services.GetAllocator(), services, light);
 			break;
 		default:
 			break;
