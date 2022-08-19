@@ -75,14 +75,14 @@ namespace np::graphics::rhi
 			info.size = size;
 			info.usage = buffer_usage_flags;
 
-			return memory::Create<VulkanBuffer>(memory::DefaultTraitAllocator, device, info, memory_property_flags);
+			return memory::Create<VulkanBuffer>(_services.GetAllocator(), device, info, memory_property_flags);
 		}
 
 		VulkanTexture* CreateTexture(VulkanDevice& device, VkImageCreateInfo& image_create_info,
 									 VkMemoryPropertyFlags image_memory_property_flags,
 									 VkImageViewCreateInfo& image_view_create_info, bl hot_reloadable)
 		{
-			return memory::Create<VulkanTexture>(memory::DefaultTraitAllocator, device, image_create_info,
+			return memory::Create<VulkanTexture>(_services.GetAllocator(), device, image_create_info,
 												 image_memory_property_flags, image_view_create_info, hot_reloadable);
 		}
 
@@ -101,7 +101,7 @@ namespace np::graphics::rhi
 				_texture->GetHeight() != _model.GetTexture().GetHeight())
 			{
 				if (_texture)
-					memory::Destroy<VulkanTexture>(memory::DefaultTraitAllocator, _texture);
+					memory::Destroy<VulkanTexture>(_services.GetAllocator(), _texture);
 
 				VkImageCreateInfo texture_image_create_info = VulkanImage::CreateInfo();
 				texture_image_create_info.extent.width = _model.GetTexture().GetWidth();
@@ -118,7 +118,7 @@ namespace np::graphics::rhi
 			if (!_vertex_buffer || _vertex_buffer->GetSize() != vertex_buffer_data_size)
 			{
 				if (_vertex_buffer)
-					memory::Destroy<VulkanBuffer>(memory::DefaultTraitAllocator, _vertex_buffer);
+					memory::Destroy<VulkanBuffer>(_services.GetAllocator(), _vertex_buffer);
 
 				_vertex_buffer = CreateBuffer(vulkan_device, vertex_buffer_data_size,
 											  VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
@@ -129,7 +129,7 @@ namespace np::graphics::rhi
 			if (!_index_buffer || _index_buffer->GetSize() != index_buffer_data_size)
 			{
 				if (_index_buffer)
-					memory::Destroy<VulkanBuffer>(memory::DefaultTraitAllocator, _index_buffer);
+					memory::Destroy<VulkanBuffer>(_services.GetAllocator(), _index_buffer);
 
 				_index_buffer = CreateBuffer(vulkan_device, index_buffer_data_size,
 											 VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
@@ -140,7 +140,7 @@ namespace np::graphics::rhi
 			if (!_texture_staging || _texture_staging->GetSize() != _model.GetTexture().Size())
 			{
 				if (_texture_staging)
-					memory::Destroy<VulkanBuffer>(memory::DefaultTraitAllocator, _texture_staging);
+					memory::Destroy<VulkanBuffer>(_services.GetAllocator(), _texture_staging);
 
 				_texture_staging = CreateBuffer(vulkan_device, _model.GetTexture().Size(), VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
 												VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
@@ -149,7 +149,7 @@ namespace np::graphics::rhi
 			if (!_vertex_staging || _vertex_staging->GetSize() != vertex_buffer_data_size)
 			{
 				if (_vertex_staging)
-					memory::Destroy<VulkanBuffer>(memory::DefaultTraitAllocator, _vertex_staging);
+					memory::Destroy<VulkanBuffer>(_services.GetAllocator(), _vertex_staging);
 
 				_vertex_staging = CreateBuffer(vulkan_device, vertex_buffer_data_size, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
 											   VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
@@ -158,7 +158,7 @@ namespace np::graphics::rhi
 			if (!_index_staging || _index_staging->GetSize() != index_buffer_data_size)
 			{
 				if (_index_staging)
-					memory::Destroy<VulkanBuffer>(memory::DefaultTraitAllocator, _index_staging);
+					memory::Destroy<VulkanBuffer>(_services.GetAllocator(), _index_staging);
 
 				_index_staging = CreateBuffer(vulkan_device, index_buffer_data_size, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
 											  VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
@@ -264,14 +264,14 @@ namespace np::graphics::rhi
 			if (!_push_constants)
 			{
 				_push_constants = memory::Create<VulkanCommandPushConstants>(
-					memory::DefaultTraitAllocator, vulkan_pipeline.GetPipelineLayout(),
+					_services.GetAllocator(), vulkan_pipeline.GetPipelineLayout(),
 					VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(RenderableMetaValues), &_meta_values);
 			}
 
 			if (!_bind_vertex_buffers)
 			{
 				_bind_vertex_buffers = memory::Create<VulkanCommandBindVertexBuffers>(
-					memory::DefaultTraitAllocator, 0, 1, &_vk_vertex_buffer, _vertex_offsets.data());
+					_services.GetAllocator(), 0, 1, &_vk_vertex_buffer, _vertex_offsets.data());
 			}
 			else
 			{
@@ -280,7 +280,7 @@ namespace np::graphics::rhi
 
 			if (!_bind_index_buffer)
 			{
-				_bind_index_buffer = memory::Create<VulkanCommandBindIndexBuffer>(memory::DefaultTraitAllocator, *_index_buffer,
+				_bind_index_buffer = memory::Create<VulkanCommandBindIndexBuffer>(_services.GetAllocator(), *_index_buffer,
 																				  0, VK_INDEX_TYPE_UINT32);
 			}
 			else
@@ -290,7 +290,7 @@ namespace np::graphics::rhi
 
 			if (!_draw_indexed)
 			{
-				_draw_indexed = memory::Create<VulkanCommandDrawIndexed>(memory::DefaultTraitAllocator,
+				_draw_indexed = memory::Create<VulkanCommandDrawIndexed>(_services.GetAllocator(),
 																		 (ui32)_model.GetIndices().size(), 1, 0, 0, 0);
 			}
 			else
@@ -332,7 +332,7 @@ namespace np::graphics::rhi
 			if (!_vertex_buffer || _vertex_buffer->GetSize() != vertex_buffer_data_size)
 			{
 				if (_vertex_buffer)
-					memory::Destroy<VulkanBuffer>(memory::DefaultTraitAllocator, _vertex_buffer);
+					memory::Destroy<VulkanBuffer>(_services.GetAllocator(), _vertex_buffer);
 
 				_vertex_buffer = CreateBuffer(vulkan_device, vertex_buffer_data_size,
 											  VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
@@ -351,7 +351,7 @@ namespace np::graphics::rhi
 			if (!_texture_staging || _texture_staging->GetSize() != _model.GetTexture().Size())
 			{
 				if (_texture_staging)
-					memory::Destroy<VulkanBuffer>(memory::DefaultTraitAllocator, _texture_staging);
+					memory::Destroy<VulkanBuffer>(_services.GetAllocator(), _texture_staging);
 
 				_texture_staging = CreateBuffer(vulkan_device, _model.GetTexture().Size(), VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
 												VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
@@ -360,7 +360,7 @@ namespace np::graphics::rhi
 			if (!_vertex_staging || _vertex_staging->GetSize() != vertex_buffer_data_size)
 			{
 				if (_vertex_staging)
-					memory::Destroy<VulkanBuffer>(memory::DefaultTraitAllocator, _vertex_staging);
+					memory::Destroy<VulkanBuffer>(_services.GetAllocator(), _vertex_staging);
 
 				_vertex_staging = CreateBuffer(vulkan_device, vertex_buffer_data_size, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
 											   VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
@@ -369,7 +369,7 @@ namespace np::graphics::rhi
 			if (!_index_staging || _index_staging->GetSize() != index_buffer_data_size)
 			{
 				if (_index_staging)
-					memory::Destroy<VulkanBuffer>(memory::DefaultTraitAllocator, _index_staging);
+					memory::Destroy<VulkanBuffer>(_services.GetAllocator(), _index_staging);
 
 				_index_staging = CreateBuffer(vulkan_device, index_buffer_data_size, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
 											  VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
@@ -467,14 +467,14 @@ namespace np::graphics::rhi
 			if (!_push_constants)
 			{
 				_push_constants = memory::Create<VulkanCommandPushConstants>(
-					memory::DefaultTraitAllocator, vulkan_pipeline.GetPipelineLayout(),
+					_services.GetAllocator(), vulkan_pipeline.GetPipelineLayout(),
 					VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(RenderableMetaValues), &_meta_values);
 			}
 
 			if (!_bind_vertex_buffers)
 			{
 				_bind_vertex_buffers = memory::Create<VulkanCommandBindVertexBuffers>(
-					memory::DefaultTraitAllocator, 0, 1, &_vk_vertex_buffer, _vertex_offsets.data());
+					_services.GetAllocator(), 0, 1, &_vk_vertex_buffer, _vertex_offsets.data());
 			}
 			else
 			{
@@ -483,7 +483,7 @@ namespace np::graphics::rhi
 
 			if (!_bind_index_buffer)
 			{
-				_bind_index_buffer = memory::Create<VulkanCommandBindIndexBuffer>(memory::DefaultTraitAllocator, *_index_buffer,
+				_bind_index_buffer = memory::Create<VulkanCommandBindIndexBuffer>(_services.GetAllocator(), *_index_buffer,
 																				  0, VK_INDEX_TYPE_UINT32);
 			}
 			else
@@ -493,7 +493,7 @@ namespace np::graphics::rhi
 
 			if (!_draw_indexed)
 			{
-				_draw_indexed = memory::Create<VulkanCommandDrawIndexed>(memory::DefaultTraitAllocator,
+				_draw_indexed = memory::Create<VulkanCommandDrawIndexed>(_services.GetAllocator(),
 																		 (ui32)_model.GetIndices().size(), 1, 0, 0, 0);
 			}
 			else
@@ -513,61 +513,61 @@ namespace np::graphics::rhi
 		{
 			if (_texture_staging)
 			{
-				memory::Destroy<VulkanBuffer>(memory::DefaultTraitAllocator, _texture_staging);
+				memory::Destroy<VulkanBuffer>(_services.GetAllocator(), _texture_staging);
 				_texture_staging = nullptr;
 			}
 
 			if (_vertex_staging)
 			{
-				memory::Destroy<VulkanBuffer>(memory::DefaultTraitAllocator, _vertex_staging);
+				memory::Destroy<VulkanBuffer>(_services.GetAllocator(), _vertex_staging);
 				_vertex_staging = nullptr;
 			}
 
 			if (_index_staging)
 			{
-				memory::Destroy<VulkanBuffer>(memory::DefaultTraitAllocator, _index_staging);
+				memory::Destroy<VulkanBuffer>(_services.GetAllocator(), _index_staging);
 				_index_staging = nullptr;
 			}
 
 			if (_texture)
 			{
-				memory::Destroy<VulkanTexture>(memory::DefaultTraitAllocator, _texture);
+				memory::Destroy<VulkanTexture>(_services.GetAllocator(), _texture);
 				_texture = nullptr;
 			}
 
 			if (_vertex_buffer)
 			{
-				memory::Destroy<VulkanBuffer>(memory::DefaultTraitAllocator, _vertex_buffer);
+				memory::Destroy<VulkanBuffer>(_services.GetAllocator(), _vertex_buffer);
 				_vertex_buffer = nullptr;
 			}
 
 			if (_index_buffer)
 			{
-				memory::Destroy<VulkanBuffer>(memory::DefaultTraitAllocator, _index_buffer);
+				memory::Destroy<VulkanBuffer>(_services.GetAllocator(), _index_buffer);
 				_index_buffer = nullptr;
 			}
 
 			if (_push_constants)
 			{
-				memory::Destroy<VulkanCommandPushConstants>(memory::DefaultTraitAllocator, _push_constants);
+				memory::Destroy<VulkanCommandPushConstants>(_services.GetAllocator(), _push_constants);
 				_push_constants = nullptr;
 			}
 
 			if (_bind_vertex_buffers)
 			{
-				memory::Destroy<VulkanCommandBindVertexBuffers>(memory::DefaultTraitAllocator, _bind_vertex_buffers);
+				memory::Destroy<VulkanCommandBindVertexBuffers>(_services.GetAllocator(), _bind_vertex_buffers);
 				_bind_vertex_buffers = nullptr;
 			}
 
 			if (_bind_index_buffer)
 			{
-				memory::Destroy<VulkanCommandBindIndexBuffer>(memory::DefaultTraitAllocator, _bind_index_buffer);
+				memory::Destroy<VulkanCommandBindIndexBuffer>(_services.GetAllocator(), _bind_index_buffer);
 				_bind_index_buffer = nullptr;
 			}
 
 			if (_draw_indexed)
 			{
-				memory::Destroy<VulkanCommandDrawIndexed>(memory::DefaultTraitAllocator, _draw_indexed);
+				memory::Destroy<VulkanCommandDrawIndexed>(_services.GetAllocator(), _draw_indexed);
 				_draw_indexed = nullptr;
 			}
 

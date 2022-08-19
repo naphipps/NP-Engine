@@ -100,7 +100,7 @@ namespace np::app
 
 		~GameLayer()
 		{
-			memory::Destroy<graphics::RenderableModel>(memory::DefaultTraitAllocator, _renderable_model);
+			memory::Destroy<graphics::RenderableModel>(_services.GetAllocator(), _renderable_model);
 		}
 
 		void SetScene(graphics::Scene& scene)

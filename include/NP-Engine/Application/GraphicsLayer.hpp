@@ -32,7 +32,6 @@ namespace np::app
 	class GraphicsLayer : public Layer
 	{
 	protected:
-		memory::TraitAllocator _allocator;
 		container::vector<graphics::Renderer*> _renderers;
 		container::vector<graphics::Scene*> _scenes; // TODO: I feel like we need to redesign how we store all these
 		container::uset<graphics::Scene*> _unacquired_scenes;
@@ -43,29 +42,23 @@ namespace np::app
 			window::Window& window = *e.RetrieveData<window::WindowCloseEvent::DataType>().window;
 
 			for (auto it = _scenes.begin(); it != _scenes.end(); it++)
-			{
 				if ((*it)->GetRenderer().IsAttachedToWindow(window))
 				{
 					_unacquired_scenes.erase(*it);
 					_acquired_scenes.erase(*it);
-					memory::Destruct(*it);
-					_allocator.Deallocate(*it);
+					memory::Destroy<graphics::Scene>(_services.GetAllocator(), *it);
 					_scenes.erase(it);
 					break;
 				}
-			}
 
 			for (auto it = _renderers.begin(); it != _renderers.end(); it++)
-			{
 				if ((*it)->IsAttachedToWindow(window))
 				{
 					(*it)->DetachFromWindow(window);
-					memory::Destruct(*it);
-					_allocator.Deallocate(*it);
+					memory::Destroy<graphics::Renderer>(_services.GetAllocator(), *it);
 					_renderers.erase(it);
 					break;
 				}
-			}
 		}
 
 		virtual void AdjustForWindowResize(event::Event& e)
@@ -73,22 +66,18 @@ namespace np::app
 			window::Window& window = *e.RetrieveData<window::WindowCloseEvent::DataType>().window;
 
 			for (graphics::Scene*& scene : _scenes)
-			{
 				if (scene->GetRenderer().IsAttachedToWindow(window))
 				{
 					scene->AdjustForWindowResize(window);
 					break;
 				}
-			}
 
 			for (graphics::Renderer*& renderer : _renderers)
-			{
 				if (renderer->IsAttachedToWindow(window))
 				{
 					renderer->AdjustForWindowResize(window);
 					break;
 				}
-			}
 		}
 
 		virtual void HandleEvent(event::Event& e) override
@@ -108,6 +97,7 @@ namespace np::app
 
 		void ChooseRhi()
 		{
+			memory::TraitAllocator allocator;
 			container::deque<graphics::Renderer*> renderers;
 			graphics::Renderer* opengl = nullptr;
 			graphics::Renderer* vulkan = nullptr;
@@ -122,10 +112,10 @@ namespace np::app
 
 #if NP_ENGINE_PLATFORM_IS_WINDOWS
 			// TODO: we're keeping this here for testing purposes - when renderer is complete we can probably remove
-			opengl = memory::Create<graphics::rhi::OpenGLRenderer>(memory::DefaultTraitAllocator, _services);
+			opengl = memory::Create<graphics::rhi::OpenGLRenderer>(allocator, _services);
 
 #endif
-			vulkan = memory::Create<graphics::rhi::VulkanRenderer>(memory::DefaultTraitAllocator, _services);
+			vulkan = memory::Create<graphics::rhi::VulkanRenderer>(allocator, _services);
 
 			if (vulkan != nullptr)
 				renderers.emplace_back(vulkan);
@@ -135,9 +125,7 @@ namespace np::app
 			str available_renderers;
 
 			for (graphics::Renderer* renderer : renderers)
-			{
 				available_renderers += "\t- " + renderer->GetName() + "\n";
-			}
 
 			str title = "NP Engine";
 			str choose_message;
@@ -156,9 +144,7 @@ namespace np::app
 					select = Popup::Show(title, "Available renderers:\n" + available_renderers + choose_message, buttons);
 
 					if (select == Popup::Select::Yes)
-					{
 						break;
-					}
 
 					renderers.emplace_back(renderers.front());
 					renderers.pop_front();
@@ -168,9 +154,7 @@ namespace np::app
 			}
 
 			for (graphics::Renderer* renderer : renderers)
-			{
-				memory::Destroy<graphics::Renderer>(memory::DefaultTraitAllocator, renderer);
-			}
+				memory::Destroy<graphics::Renderer>(allocator, renderer);
 		}
 
 		graphics::Scene* CreateScene(graphics::Renderer& renderer)
@@ -190,16 +174,10 @@ namespace np::app
 		virtual ~GraphicsLayer()
 		{
 			for (auto it = _scenes.begin(); it != _scenes.end(); it++)
-			{
-				memory::Destruct(*it);
-				_allocator.Deallocate(*it);
-			}
+				memory::Destroy<graphics::Scene>(_services.GetAllocator(), *it);
 
 			for (auto it = _renderers.begin(); it != _renderers.end(); it++)
-			{
-				memory::Destruct(*it);
-				_allocator.Deallocate(*it);
-			}
+				memory::Destroy<graphics::Renderer>(_services.GetAllocator(), *it);
 		}
 
 		graphics::Renderer* CreateRenderer(window::Window& window)

@@ -31,9 +31,9 @@ namespace np::memory
 
 			void operator()(T* ptr) const noexcept
 			{
-				NP_ENGINE_STATIC_ASSERT(0 < sizeof(T), "can't delete an incomplete type");
-				memory::Destruct(ptr);
-				DefaultTraitAllocator.Deallocate(ptr);
+				NP_ENGINE_STATIC_ASSERT(0 < sizeof(T), "can't delete an incomplete type"); //TODO: what is this?
+				TraitAllocator allocator;
+				Destroy<T>(allocator, ptr);
 			}
 		};
 	} // namespace __detail
@@ -44,7 +44,8 @@ namespace np::memory
 	template <typename T, typename... Args>
 	constexpr uptr<T> CreateUptr(Args&&... args)
 	{
-		Block block = DefaultTraitAllocator.Allocate(sizeof(T));
+		TraitAllocator allocator;
+		Block block = allocator.Allocate(sizeof(T));
 		NP_ENGINE_ASSERT((::std::is_constructible_v<T, Args...>), "T must be constructible with the given args.");
 		bl constructed = memory::Construct<T>(block, ::std::forward<Args>(args)...);
 		NP_ENGINE_ASSERT(constructed, "We require a successful construction here.");
@@ -57,7 +58,8 @@ namespace np::memory
 	template <typename T, typename... Args>
 	constexpr sptr<T> CreateSptr(Args&&... args)
 	{
-		Block block = DefaultTraitAllocator.Allocate(sizeof(T));
+		TraitAllocator allocator;
+		Block block = allocator.Allocate(sizeof(T));
 		NP_ENGINE_ASSERT((::std::is_constructible_v<T, Args...>), "T must be constructible with the given args.");
 		bl constructed = memory::Construct<T>(block, ::std::forward<Args>(args)...);
 		NP_ENGINE_ASSERT(constructed, "We require a successful construction here.");

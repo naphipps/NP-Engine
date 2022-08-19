@@ -21,37 +21,35 @@ namespace np::memory::__detail
 {
 	static void* RapidJsonMalloc(siz size)
 	{
-		Block block = DefaultTraitAllocator.Allocate(size);
-		RAPIDJSON_ASSERT(block.IsValid());
-		return block.ptr;
+		void* result = TraitAllocator::malloc(size);
+		RAPIDJSON_ASSERT(result);
+		return result;
 	}
 
 	static void RapidJsonFree(void* ptr)
 	{
 		if (ptr)
-		{
-			bl freed = DefaultTraitAllocator.Deallocate(ptr);
-			RAPIDJSON_ASSERT(freed);
-		}
+			TraitAllocator::free(ptr);
 	}
 
-	static void* RapidJsonRealloc(void* ptr, siz size)
+	static void* RapidJsonRealloc(void* old_ptr, siz new_size)
 	{
-		Block block;
+		void* result = nullptr;
 
-		if (ptr)
-			block = DefaultTraitAllocator.Reallocate(ptr, size);
+		if (old_ptr)
+			result = TraitAllocator::realloc(old_ptr, new_size);
 		else
-			block = DefaultTraitAllocator.Allocate(size);
+			result = TraitAllocator::malloc(new_size);
 
-		RAPIDJSON_ASSERT(block.IsValid());
-		return block.ptr;
+		RAPIDJSON_ASSERT(result);
+		return result;
 	}
 
 	template <typename T, typename... Args>
 	static T* RapidJsonNew(Args&&... args)
 	{
-		Block block = DefaultTraitAllocator.Allocate(sizeof(T));
+		siz size = sizeof(T);
+		Block block{ RapidJsonMalloc(size), size };
 		bl constructed = Construct<T>(block, ::std::forward<Args>(args)...);
 		RAPIDJSON_ASSERT(constructed);
 		return (T*)block.ptr;
@@ -64,8 +62,7 @@ namespace np::memory::__detail
 		{
 			bl destructed = Destruct<T>(ptr);
 			RAPIDJSON_ASSERT(destructed);
-			bl deallocated = DefaultTraitAllocator.Deallocate(ptr);
-			RAPIDJSON_ASSERT(deallocated);
+			RapidJsonFree(ptr);
 		}
 	}
 } // namespace np::memory::__detail

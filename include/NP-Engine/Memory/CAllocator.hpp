@@ -93,8 +93,6 @@ namespace np::memory
 			return true;
 		}
 	};
-
-	extern CAllocator DefaultAllocator;
 } // namespace np::memory
 
 #endif /* NP_ENGINE_DEFAULT_ALLOCATOR_HPP */

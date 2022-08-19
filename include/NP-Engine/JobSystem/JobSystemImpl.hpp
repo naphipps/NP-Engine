@@ -13,6 +13,7 @@
 #include "NP-Engine/Concurrency/Concurrency.hpp"
 #include "NP-Engine/Primitive/Primitive.hpp"
 #include "NP-Engine/Math/Math.hpp"
+#include "NP-Engine/Memory/Memory.hpp"
 
 #include "JobWorker.hpp"
 #include "JobPool.hpp"
@@ -28,6 +29,7 @@ namespace np::js
 	private:
 		constexpr static siz JOB_ALIGNED_SIZE = memory::CalcAlignedSize(sizeof(Job));
 
+		memory::TraitAllocator _allocator;
 		atm_bl _running;
 
 		container::vector<JobWorker> _job_workers;
@@ -44,8 +46,8 @@ namespace np::js
 	public:
 		JobSystem(): _running(false)
 		{
-			_job_pool_block = memory::DefaultTraitAllocator.Allocate(JOB_ALIGNED_SIZE * NP_ENGINE_JOB_SYSTEM_POOL_DEFAULT_SIZE);
-			_job_pool = memory::Create<JobPool>(memory::DefaultTraitAllocator, _job_pool_block);
+			_job_pool_block = _allocator.Allocate(JOB_ALIGNED_SIZE * NP_ENGINE_JOB_SYSTEM_POOL_DEFAULT_SIZE);
+			_job_pool = memory::Create<JobPool>(_allocator, _job_pool_block);
 
 			// we want to be sure we use one less the number of cores available so our main thread is not crowded
 			_job_workers.resize(math::min(_thread_pool.ObjectCount() - 1, concurrency::ThreadPool::MAX_THREAD_COUNT));
@@ -66,13 +68,13 @@ namespace np::js
 
 			if (_job_pool)
 			{
-				memory::Destroy<JobPool>(memory::DefaultTraitAllocator, _job_pool);
+				memory::Destroy<JobPool>(_allocator, _job_pool);
 				_job_pool = nullptr;
 			}
 
 			if (_job_pool_block.IsValid())
 			{
-				memory::DefaultTraitAllocator.Deallocate(_job_pool_block);
+				_allocator.Deallocate(_job_pool_block);
 				_job_pool_block.Invalidate();
 			}
 		}
@@ -81,8 +83,8 @@ namespace np::js
 		{
 			Dispose();
 
-			_job_pool_block = memory::DefaultTraitAllocator.Allocate(JOB_ALIGNED_SIZE * size);
-			_job_pool = memory::Create<JobPool>(memory::DefaultTraitAllocator, _job_pool_block);
+			_job_pool_block = _allocator.Allocate(JOB_ALIGNED_SIZE * size);
+			_job_pool = memory::Create<JobPool>(_allocator, _job_pool_block);
 		}
 
 		void Start()
@@ -91,9 +93,8 @@ namespace np::js
 
 			if (!_job_pool)
 			{
-				_job_pool_block =
-					memory::DefaultTraitAllocator.Allocate(JOB_ALIGNED_SIZE * NP_ENGINE_JOB_SYSTEM_POOL_DEFAULT_SIZE);
-				_job_pool = memory::Create<JobPool>(memory::DefaultTraitAllocator, _job_pool_block);
+				_job_pool_block = _allocator.Allocate(JOB_ALIGNED_SIZE * NP_ENGINE_JOB_SYSTEM_POOL_DEFAULT_SIZE);
+				_job_pool = memory::Create<JobPool>(_allocator, _job_pool_block);
 			}
 
 			_running.store(true, mo_release);

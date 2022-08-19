@@ -24,7 +24,7 @@ i32 main(i32 argc, chr** argv)
 	try
 	{
 		::np::system::Init(); // TODO: get a way to save the original working dir where the executable lives
-		::np::memory::CAllocator& main_allocator = ::np::memory::DefaultAllocator;
+		::np::memory::CAllocator main_allocator;
 		::np::memory::Block main_block = main_allocator.Allocate(NP_ENGINE_MAIN_MEMORY_SIZE);
 
 		if (main_block.IsValid())
@@ -38,22 +38,22 @@ i32 main(i32 argc, chr** argv)
 			::np::memory::Destroy<::np::services::Services>(application_allocator, application_services);
 			NP_ENGINE_PROFILE_SAVE();
 			NP_ENGINE_PROFILE_RESET();
-			::np::memory::TraitAllocator::Register(::np::memory::DefaultAllocator);
+			::np::memory::TraitAllocator::ResetRegistration();
+			main_allocator.Deallocate(main_block);
 		}
 		else
 		{
+			::np::memory::TraitAllocator::ResetRegistration();
 			retval = 3;
 			message = "WAS NOT ABLE TO ALLOCATE ENOUGH MEMORY\n";
 			message += "Log file can be found here: " + ::np::insight::Log::GetFileLoggerFilePath();
 			style = ::np::app::Popup::Style::Error;
 			NP_ENGINE_LOG_ERROR(message);
 		}
-
-		main_allocator.Deallocate(main_block);
 	}
 	catch (const ::std::exception& e)
 	{
-		::np::memory::TraitAllocator::Register(::np::memory::DefaultAllocator);
+		::np::memory::TraitAllocator::ResetRegistration();
 		retval = 1;
 		message = "STD EXCEPTION OCCURRED: \n" + to_str(e.what()) + "\n\n";
 		message += "Log file can be found here: " + ::np::insight::Log::GetFileLoggerFilePath();
@@ -62,7 +62,7 @@ i32 main(i32 argc, chr** argv)
 	}
 	catch (...)
 	{
-		::np::memory::TraitAllocator::Register(::np::memory::DefaultAllocator);
+		::np::memory::TraitAllocator::ResetRegistration();
 		retval = 2;
 		message = "UNKNOWN EXCEPTION OCCURRED\n\n";
 		message += "Log file can be found here: " + ::np::insight::Log::GetFileLoggerFilePath();

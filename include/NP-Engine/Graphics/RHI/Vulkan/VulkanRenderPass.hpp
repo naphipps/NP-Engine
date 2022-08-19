@@ -7,6 +7,7 @@
 #ifndef NP_ENGINE_VULKAN_RENDER_PASS_HPP
 #define NP_ENGINE_VULKAN_RENDER_PASS_HPP
 
+#include "NP-Engine/Memory/Memory.hpp"
 #include "NP-Engine/Container/Container.hpp"
 
 #include "NP-Engine/Vendor/VulkanInclude.hpp"
@@ -22,6 +23,7 @@ namespace np::graphics::rhi
 	class VulkanRenderPass
 	{
 	private:
+		memory::TraitAllocator _allocator;
 		VulkanSwapchain& _swapchain;
 		VkRenderPass _render_pass;
 		VulkanTexture* _depth_texture;
@@ -160,7 +162,7 @@ namespace np::graphics::rhi
 			depth_image_view_create_info.format = depth_image_create_info.format;
 			depth_image_view_create_info.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
 
-			return memory::Create<VulkanTexture>(memory::DefaultTraitAllocator, GetDevice(), depth_image_create_info,
+			return memory::Create<VulkanTexture>(_allocator, GetDevice(), depth_image_create_info,
 												 depth_memory_property_flags, depth_image_view_create_info);
 
 			/*
@@ -175,7 +177,7 @@ namespace np::graphics::rhi
 		{
 			if (_depth_texture)
 			{
-				memory::Destroy<VulkanTexture>(memory::DefaultTraitAllocator, _depth_texture);
+				memory::Destroy<VulkanTexture>(_allocator, _depth_texture);
 				_depth_texture = nullptr;
 			}
 
@@ -280,7 +282,7 @@ namespace np::graphics::rhi
 
 		void Rebuild()
 		{
-			memory::Destroy<VulkanTexture>(memory::DefaultTraitAllocator, _depth_texture);
+			memory::Destroy<VulkanTexture>(_allocator, _depth_texture);
 			_depth_texture = CreateDepthTexture();
 		}
 
@@ -290,10 +292,10 @@ namespace np::graphics::rhi
 			render_pass_begin_info.renderArea.extent = GetSwapchain().GetExtent();
 
 			if (_begin_render_pass)
-				memory::Destroy<VulkanCommandBeginRenderPass>(memory::DefaultTraitAllocator, _begin_render_pass);
+				memory::Destroy<VulkanCommandBeginRenderPass>(_allocator, _begin_render_pass);
 
 			_begin_render_pass = memory::Create<VulkanCommandBeginRenderPass>(
-				memory::DefaultTraitAllocator, render_pass_begin_info, VK_SUBPASS_CONTENTS_INLINE);
+				_allocator, render_pass_begin_info, VK_SUBPASS_CONTENTS_INLINE);
 
 			frame.StageCommand(*_begin_render_pass);
 		}

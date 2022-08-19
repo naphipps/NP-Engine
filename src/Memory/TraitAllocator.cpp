@@ -8,6 +8,6 @@
 
 namespace np::memory
 {
-	Allocator* TraitAllocator::_allocator = AddressOf(DefaultAllocator);
-	TraitAllocator DefaultTraitAllocator;
+	CAllocator TraitAllocator::_default_allocator;
+	atm<Allocator*> TraitAllocator::_registered_allocator(AddressOf(TraitAllocator::_default_allocator));
 } // namespace np::memory
