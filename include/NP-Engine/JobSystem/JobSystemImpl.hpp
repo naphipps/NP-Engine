@@ -37,11 +37,11 @@ namespace np::js
 		memory::Block _job_pool_block;
 		JobPool* _job_pool;
 
-		container::mpmc_queue<JobRecord> _highest_job_deque;
-		container::mpmc_queue<JobRecord> _higher_job_deque;
-		container::mpmc_queue<JobRecord> _normal_job_deque;
-		container::mpmc_queue<JobRecord> _lower_job_deque;
-		container::mpmc_queue<JobRecord> _lowest_job_deque;
+		container::mpmc_queue<JobRecord> _highest_job_queue;
+		container::mpmc_queue<JobRecord> _higher_job_queue;
+		container::mpmc_queue<JobRecord> _normal_job_queue;
+		container::mpmc_queue<JobRecord> _lower_job_queue;
+		container::mpmc_queue<JobRecord> _lowest_job_queue;
 
 	public:
 		JobSystem(): _running(false)
@@ -131,23 +131,23 @@ namespace np::js
 			switch (priority)
 			{
 			case JobPriority::Highest:
-				deque = &_highest_job_deque;
+				deque = &_highest_job_queue;
 				break;
 
 			case JobPriority::Higher:
-				deque = &_higher_job_deque;
+				deque = &_higher_job_queue;
 				break;
 
 			case JobPriority::Normal:
-				deque = &_normal_job_deque;
+				deque = &_normal_job_queue;
 				break;
 
 			case JobPriority::Lower:
-				deque = &_lower_job_deque;
+				deque = &_lower_job_queue;
 				break;
 
 			case JobPriority::Lowest:
-				deque = &_lowest_job_deque;
+				deque = &_lowest_job_queue;
 				break;
 
 			default:
