@@ -10,7 +10,6 @@
 #include "NP-Engine/Foundation/Foundation.hpp"
 #include "PrimitiveTypes.hpp"
 #include "PrimitiveValues.hpp"
-#include "AtomicTypes.hpp"
 #include "SyncTypes.hpp"
 
 #endif /* NP_ENGINE_PRIMITIVE_HPP */

@@ -243,7 +243,6 @@ set(NP_ENGINE_PLATFORM_HPP
 )
 
 set(NP_ENGINE_PRIMITIVE_HPP
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Primitive/AtomicTypes.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Primitive/Primitive.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Primitive/PrimitiveTypes.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Primitive/PrimitiveValues.hpp
