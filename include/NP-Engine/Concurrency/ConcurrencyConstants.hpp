@@ -11,6 +11,8 @@
 
 #include "NP-Engine/Primitive/Primitive.hpp"
 
+//TODO: move this to PrimitiveValues
+
 namespace np
 {
 	namespace concurrency
