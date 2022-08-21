@@ -14,6 +14,9 @@
 #include "NP-Engine/Primitive/Primitive.hpp"
 #include "NP-Engine/Memory/Memory.hpp"
 
+// TODO: putting curly braces around the NP_ENGINE_ASSERT below will prevent rapidjson from complaining about empty body
+// TODO: ^ but I think we ought to try to figure out how to just ignore that warning
+
 #define RAPIDJSON_ASSERT(expression) \
 	NP_ENGINE_ASSERT(expression, ::std::string("RAPIDJSON encounted an asserted issue here: ") + ::std::string(NP_FUNCTION))
 
