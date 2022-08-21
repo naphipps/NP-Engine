@@ -12,7 +12,7 @@
 
 #include "NP-Engine/Foundation/Foundation.hpp"
 #include "NP-Engine/Primitive/Primitive.hpp"
-#include "NP-Engine/Filesystem/Filesystem.hpp"
+#include "NP-Engine/FileSystem/FileSystem.hpp"
 
 #include "NP-Engine/Vendor/SpdlogInclude.hpp"
 

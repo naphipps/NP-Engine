@@ -15,7 +15,7 @@
 #include "Core/Core.hpp"
 #include "ECS/ECS.hpp"
 #include "Event/Event.hpp"
-#include "Filesystem/Filesystem.hpp"
+#include "FileSystem/FileSystem.hpp"
 #include "Graphics/Graphics.hpp"
 #include "Input/Input.hpp"
 #include "Insight/Insight.hpp"

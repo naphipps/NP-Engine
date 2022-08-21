@@ -8,7 +8,7 @@
 #include "NP-Engine/Random/Random.hpp"
 #include "NP-Engine/Math/Math.hpp"
 #include "NP-Engine/String/String.hpp"
-#include "NP-Engine/Filesystem/Filesystem.hpp"
+#include "NP-Engine/FileSystem/FileSystem.hpp"
 
 namespace np
 {

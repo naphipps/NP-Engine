@@ -12,7 +12,7 @@
 #include "NP-Engine/Primitive/Primitive.hpp"
 #include "NP-Engine/Random/Random.hpp"
 #include "NP-Engine/String/String.hpp"
-#include "NP-Engine/Filesystem/Filesystem.hpp"
+#include "NP-Engine/FileSystem/FileSystem.hpp"
 
 #include "Perlin.hpp"
 #include "Simplex.hpp"

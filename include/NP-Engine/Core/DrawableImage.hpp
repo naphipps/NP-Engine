@@ -12,7 +12,7 @@
 #include "NP-Engine/Primitive/Primitive.hpp"
 #include "NP-Engine/Container/Container.hpp"
 #include "NP-Engine/Math/Math.hpp"
-#include "NP-Engine/Filesystem/Filesystem.hpp"
+#include "NP-Engine/FileSystem/FileSystem.hpp"
 
 #include "Image.hpp"
 

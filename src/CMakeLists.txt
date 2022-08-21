@@ -53,7 +53,7 @@ set(NP_ENGINE_EVENT_HPP
 )
 
 set(NP_ENGINE_FILESYSTEM_HPP
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Filesystem/Filesystem.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/FileSystem/FileSystem.hpp
 )
 
 set(NP_ENGINE_FOUNDATION_HPP
@@ -558,7 +558,7 @@ source_group(Container FILES ${NP_ENGINE_CONTAINER_HPP})
 source_group(Core FILES ${NP_ENGINE_CORE_HPP})
 source_group(ECS FILES ${NP_ENGINE_ECS_HPP})
 source_group(Event FILES ${NP_ENGINE_EVENT_HPP})
-source_group(Filesystem FILES ${NP_ENGINE_FILESYSTEM_HPP})
+source_group(FileSystem FILES ${NP_ENGINE_FILESYSTEM_HPP})
 source_group(Foundation FILES ${NP_ENGINE_FOUNDATION_HPP})
 source_group(Graphics FILES ${NP_ENGINE_GRAPHICS_HPP} ${NP_ENGINE_GRAPHICS_CPP})
 source_group(Graphics/RPI FILES ${NP_ENGINE_GRAPHICS_RPI_HPP} ${NP_ENGINE_GRAPHICS_RPI_CPP})
