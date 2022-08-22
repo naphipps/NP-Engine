@@ -1,10 +1,8 @@
+//##===----------------------------------------------------------------------===##//
 //
-//  Serializable.hpp
-//  Project Space
+//  Author: Nathan Phipps 5/24/20
 //
-//  Created by Nathan Phipps on 5/24/20.
-//  Copyright © 2020 Nathan Phipps. All rights reserved.
-//
+//##===----------------------------------------------------------------------===##//
 
 #ifndef NP_ENGINE_SERIALIZABLE_HPP
 #define NP_ENGINE_SERIALIZABLE_HPP
@@ -17,7 +15,9 @@
 
 #include "NP-Engine/Vendor/RapidJsonInclude.hpp"
 
-namespace np::serialization
+//TODO: our serialization needs have changes so this class is up for redesign
+
+namespace np::srlz
 {
 	/**
 	 this class acts as the basis for all serializable objects
@@ -166,6 +166,6 @@ namespace np::serialization
 		 */
 		virtual bl LoadFrom(str dirpath) = 0;
 	};
-} // namespace np::serialization
+} // namespace np::srlz
 
 #endif /* NP_ENGINE_SERIALIZABLE_HPP */
