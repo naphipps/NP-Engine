@@ -10,7 +10,7 @@
 #include <utility>
 
 #include "NP-Engine/Container/Container.hpp"
-#include "NP-Engine/Concurrency/Concurrency.hpp"
+#include "NP-Engine/Thread/Thread.hpp"
 #include "NP-Engine/Primitive/Primitive.hpp"
 #include "NP-Engine/Math/Math.hpp"
 #include "NP-Engine/Memory/Memory.hpp"
@@ -33,7 +33,7 @@ namespace np::js
 		atm_bl _running;
 
 		container::vector<JobWorker> _job_workers;
-		concurrency::ThreadPool _thread_pool;
+		thr::ThreadPool _thread_pool;
 		memory::Block _job_pool_block;
 		JobPool* _job_pool;
 
@@ -50,7 +50,7 @@ namespace np::js
 			_job_pool = memory::Create<JobPool>(_allocator, _job_pool_block);
 
 			// we want to be sure we use one less the number of cores available so our main thread is not crowded
-			_job_workers.resize(math::min(_thread_pool.ObjectCount() - 1, concurrency::ThreadPool::MAX_THREAD_COUNT));
+			_job_workers.resize(math::min(_thread_pool.ObjectCount() - 1, thr::ThreadPool::MAX_THREAD_COUNT));
 
 			for (auto it1 = _job_workers.begin(); it1 != _job_workers.end(); it1++)
 				for (auto it2 = _job_workers.begin(); it2 != _job_workers.end(); it2++)

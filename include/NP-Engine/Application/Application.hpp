@@ -16,7 +16,7 @@
 #include "NP-Engine/Memory/Memory.hpp"
 #include "NP-Engine/Event/Event.hpp"
 #include "NP-Engine/Container/Container.hpp"
-#include "NP-Engine/Concurrency/Concurrency.hpp"
+#include "NP-Engine/Thread/Thread.hpp"
 #include "NP-Engine/Time/Time.hpp"
 #include "NP-Engine/Window/Window.hpp"
 #include "NP-Engine/Services/Services.hpp"
@@ -244,8 +244,8 @@ namespace np::app
 				loop_prev_timestamp = loop_next_timestamp;
 				if (loop_duration < max_loop_duration)
 				{
-					concurrency::ThisThread::yield();
-					concurrency::ThisThread::sleep_for(max_loop_duration - loop_duration);
+					thr::ThisThread::yield();
+					thr::ThisThread::sleep_for(max_loop_duration - loop_duration);
 				}
 			}
 		}

@@ -10,7 +10,6 @@
 #include "Foundation/Foundation.hpp"
 
 #include "Application/Application.hpp"
-#include "Concurrency/Concurrency.hpp"
 #include "Container/Container.hpp"
 #include "Core/Core.hpp"
 #include "ECS/ECS.hpp"
@@ -30,6 +29,7 @@
 #include "Services/Services.hpp"
 #include "String/String.hpp"
 #include "System/System.hpp"
+#include "Thread/Thread.hpp"
 #include "Time/Time.hpp"
 
 #endif /* NP_ENGINE_HPP */

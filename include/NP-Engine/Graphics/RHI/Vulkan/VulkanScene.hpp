@@ -9,7 +9,7 @@
 
 #include "NP-Engine/Primitive/Primitive.hpp"
 #include "NP-Engine/Insight/Insight.hpp"
-#include "NP-Engine/Concurrency/Concurrency.hpp"
+#include "NP-Engine/Thread/Thread.hpp"
 #include "NP-Engine/Time/Time.hpp"
 #include "NP-Engine/Services/Services.hpp"
 
@@ -30,7 +30,7 @@ namespace np::graphics::rhi
 		// TODO: I think our scene needs it's own ecs registry!! //TODO: put this in RPI
 
 		VulkanCamera _camera;
-		concurrency::Thread _dlp_thread; // dlp = drawing loop procedure
+		thr::Thread _dlp_thread; // dlp = drawing loop procedure
 		atm_bl _dlp_is_complete;
 		atm_bl _dlp_keep_alive;
 		atm_bl _dlp_enable_draw;
@@ -70,7 +70,7 @@ namespace np::graphics::rhi
 				duration = next - prev;
 				prev = next;
 				if (duration.count() < max_duration)
-					concurrency::ThisThread::sleep_for(time::DurationMilliseconds(max_duration - duration.count()));
+					thr::ThisThread::sleep_for(time::DurationMilliseconds(max_duration - duration.count()));
 			}
 
 			_dlp_is_complete.store(true, mo_release);
@@ -197,7 +197,7 @@ namespace np::graphics::rhi
 		{
 			_dlp_enable_draw.store(false, mo_release);
 			while (_is_drawing.load(mo_acquire))
-				concurrency::ThisThread::yield();
+				thr::ThisThread::yield();
 
 			::entt::registry& ecs_registry = _services.GetEcsRegistry();
 

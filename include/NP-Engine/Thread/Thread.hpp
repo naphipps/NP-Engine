@@ -4,8 +4,8 @@
 //
 //##===----------------------------------------------------------------------===##//
 
-#ifndef NP_ENGINE_CONCURRENCY_HPP
-#define NP_ENGINE_CONCURRENCY_HPP
+#ifndef NP_ENGINE_THREAD_HPP
+#define NP_ENGINE_THREAD_HPP
 
 #include "NP-Engine/Foundation/Foundation.hpp"
 
@@ -15,4 +15,4 @@
 #include "ThreadToken.hpp"
 #include "Thread.hpp"
 
-#endif /* NP_ENGINE_CONCURRENCY_HPP */
+#endif /* NP_ENGINE_THREAD_HPP */

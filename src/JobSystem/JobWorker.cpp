@@ -84,8 +84,8 @@ namespace np::js
 						_coworker_index = (_coworker_index + 1) % _coworkers.size();
 
 						// we yield/sleep just in case all jobs are done
-						concurrency::ThisThread::yield();
-						concurrency::ThisThread::sleep_for(_bad_steal_sleep_duration);
+						thr::ThisThread::yield();
+						thr::ThisThread::sleep_for(_bad_steal_sleep_duration);
 					}
 				}
 			}

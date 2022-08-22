@@ -11,7 +11,7 @@
 
 #include "NP-Engine/Foundation/Foundation.hpp"
 #include "NP-Engine/Container/Container.hpp"
-#include "NP-Engine/Concurrency/Concurrency.hpp"
+#include "NP-Engine/Thread/Thread.hpp"
 #include "NP-Engine/Insight/Insight.hpp"
 #include "NP-Engine/Primitive/Primitive.hpp"
 #include "NP-Engine/Random/Random.hpp"
@@ -31,8 +31,8 @@ namespace np::js
 
 		atm_bl _keep_working;
 		atm_bl _work_procedure_complete;
-		concurrency::ThreadToken _thread_token;
-		concurrency::ThreadPool* _thread_pool;
+		thr::ThreadToken _thread_token;
+		thr::ThreadPool* _thread_pool;
 		JobSystem* _job_system;
 		container::mpmc_queue<Job*> _immediate_job_queue;
 		container::vector<JobWorker*> _coworkers;
@@ -149,7 +149,7 @@ namespace np::js
 			return return_job;
 		}
 
-		void StartWork(JobSystem& job_system, concurrency::ThreadPool& pool, i32 thread_affinity = -1)
+		void StartWork(JobSystem& job_system, thr::ThreadPool& pool, i32 thread_affinity = -1)
 		{
 			NP_ENGINE_PROFILE_FUNCTION();
 			_job_system = memory::AddressOf(job_system);
@@ -167,7 +167,7 @@ namespace np::js
 
 			do
 			{
-				concurrency::ThisThread::yield();
+				thr::ThisThread::yield();
 			}
 			while (!_work_procedure_complete.load(mo_acquire));
 

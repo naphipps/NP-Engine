@@ -4,15 +4,15 @@
 //
 //##===----------------------------------------------------------------------===##//
 
-#ifndef NP_ENGINE_THREAD_HPP
-#define NP_ENGINE_THREAD_HPP
+#ifndef NP_ENGINE_THREAD_IMPL_HPP
+#define NP_ENGINE_THREAD_IMPL_HPP
 
 #include <thread>
 
 #include "NP-Engine/Primitive/Primitive.hpp"
 #include "NP-Engine/Platform/Platform.hpp"
 
-namespace np::concurrency
+namespace np::thr
 {
 	class Thread
 	{
@@ -30,9 +30,7 @@ namespace np::concurrency
 		void ClearThreadAllocation()
 		{
 			for (siz i = 0; i < sizeof(::std::thread); i++)
-			{
 				_thread_allocation[i] = 0;
-			}
 		}
 
 		bl IsThreadAllocationClear() const
@@ -107,6 +105,6 @@ namespace np::concurrency
 
 		bl SetAffinity(i32 core_number);
 	} // namespace ThisThread
-} // namespace np::concurrency
+} // namespace np::thr
 
-#endif /* NP_ENGINE_THREAD_HPP */
+#endif /* NP_ENGINE_THREAD_IMPL_HPP */

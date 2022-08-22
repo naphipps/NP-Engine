@@ -14,7 +14,7 @@
 #include "NP-Engine/Memory/Memory.hpp"
 #include "NP-Engine/Time/Time.hpp"
 #include "NP-Engine/String/String.hpp"
-#include "NP-Engine/Concurrency/Concurrency.hpp"
+#include "NP-Engine/Thread/Thread.hpp"
 #include "NP-Engine/Container/Container.hpp"
 #include "NP-Engine/Services/Services.hpp"
 
@@ -42,7 +42,7 @@ namespace np::window
 		Properties _properties;
 		services::Services& _services;
 		GLFWwindow* _glfw_window;
-		concurrency::Thread _thread;
+		thr::Thread _thread;
 		atm_bl _show_procedure_is_complete;
 		container::omap<void*, ResizeCallback> _resize_callbacks;
 		container::omap<void*, PositionCallback> _position_callbacks;

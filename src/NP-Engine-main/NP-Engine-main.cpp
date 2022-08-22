@@ -14,7 +14,7 @@ extern ::np::app::Application* ::np::app::CreateApplication(::np::services::Serv
 
 i32 main(i32 argc, chr** argv)
 {
-	::np::concurrency::ThisThread::SetAffinity(0);
+	::np::thr::ThisThread::SetAffinity(0);
 
 	i32 retval = 0;
 	str message;

@@ -19,13 +19,6 @@ set(NP_ENGINE_APPLICATION_HPP
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Application/ApplicationEvents.hpp
 )
 
-set(NP_ENGINE_CONCURRENCY_HPP
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Concurrency/Concurrency.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Concurrency/Thread.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Concurrency/ThreadPool.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Concurrency/ThreadToken.hpp
-)
-
 set(NP_ENGINE_CONTAINER_HPP
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Container/Container.hpp
 )
@@ -275,6 +268,13 @@ set(NP_ENGINE_SYSTEM_HPP
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/System/System.hpp
 )
 
+set(NP_ENGINE_THREAD_HPP
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Thread/Thread.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Thread/ThreadImpl.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Thread/ThreadPool.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Thread/ThreadToken.hpp
+)
+
 set(NP_ENGINE_TIME_HPP
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Time/Time.hpp
 )
@@ -304,7 +304,6 @@ set(NP_ENGINE_WINDOW_HPP
 
 set(NP_ENGINE_HEADER_FILES
 	${NP_ENGINE_APPLICATION_HPP}
-	${NP_ENGINE_CONCURRENCY_HPP}
 	${NP_ENGINE_CONTAINER_HPP}
 	${NP_ENGINE_CORE_HPP}
 	${NP_ENGINE_ECS_HPP}
@@ -330,6 +329,7 @@ set(NP_ENGINE_HEADER_FILES
 	${NP_ENGINE_SERVICES_HPP}
 	${NP_ENGINE_STRING_HPP}
 	${NP_ENGINE_SYSTEM_HPP}
+	${NP_ENGINE_THREAD_HPP}
 	${NP_ENGINE_TIME_HPP}
 	${NP_ENGINE_VENDOR_HPP}
 	${NP_ENGINE_WINDOW_HPP}
@@ -352,10 +352,6 @@ else()
 		Application/Popup.cpp
 	)
 endif()
-
-set(NP_ENGINE_CONCURRENCY_CPP
-	Concurrency/Thread.cpp
-)
 
 # TODO: we can remove these
 set(NP_ENGINE_GRAPHICS_CPP
@@ -425,12 +421,16 @@ set(NP_ENGINE_PHYSICS_CPP
 	Physics/Physics.cpp
 )
 
+set(NP_ENGINE_THREAD_CPP
+	Thread/ThreadImpl.cpp
+)
+
 set(NP_ENGINE_WINDOW_CPP
 	Window/Window.cpp
 )
 
 set(NP_ENGINE_SOURCE_FILES
-	${NP_ENGINE_CONCURRENCY_CPP}
+	${NP_ENGINE_THREAD_CPP}
 	${NP_ENGINE_INSIGHT_CPP}
 	${NP_ENGINE_JOBSYSTEM_CPP}
 	${NP_ENGINE_MATH_CPP}
@@ -552,7 +552,6 @@ configure_file(
 
 source_group("" FILES ${NP_ENGINE_HPP})
 source_group(Application FILES ${NP_ENGINE_APPLICATION_HPP} ${NP_ENGINE_APPPLICATION_CPP})
-source_group(Concurrency FILES ${NP_ENGINE_CONCURRENCY_HPP} ${NP_ENGINE_CONCURRENCY_CPP})
 source_group(Container FILES ${NP_ENGINE_CONTAINER_HPP})
 source_group(Core FILES ${NP_ENGINE_CORE_HPP})
 source_group(ECS FILES ${NP_ENGINE_ECS_HPP})
@@ -579,6 +578,7 @@ source_group(Serialization FILES ${NP_ENGINE_SERIALIZATION_HPP})
 source_group(Services FILES ${NP_ENGINE_SERVICES_HPP})
 source_group(String FILES ${NP_ENGINE_STRING_HPP})
 source_group(System FILES ${NP_ENGINE_SYSTEM_HPP})
+source_group(Thread FILES ${NP_ENGINE_THREAD_HPP} ${NP_ENGINE_THREAD_CPP})
 source_group(Time FILES ${NP_ENGINE_TIME_HPP})
 source_group(Vendor FILES ${NP_ENGINE_VENDOR_HPP})
 source_group(Window FILES ${NP_ENGINE_WINDOW_HPP} ${NP_ENGINE_WINDOW_CPP})

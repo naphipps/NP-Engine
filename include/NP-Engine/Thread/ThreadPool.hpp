@@ -11,10 +11,10 @@
 #include "NP-Engine/Memory/Memory.hpp"
 #include "NP-Engine/Insight/Insight.hpp"
 
-#include "Thread.hpp"
+#include "ThreadImpl.hpp"
 #include "ThreadToken.hpp"
 
-namespace np::concurrency
+namespace np::thr
 {
 	class ThreadPool : protected memory::ObjectPool<Thread>
 	{
@@ -64,6 +64,6 @@ namespace np::concurrency
 			return DestroyObject(&token.GetThread());
 		}
 	};
-} // namespace np::concurrency
+} // namespace np::thr
 
 #endif /* NP_ENGINE_THREAD_POOL_HPP */

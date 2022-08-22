@@ -4,7 +4,7 @@
 //
 //##===----------------------------------------------------------------------===##//
 
-#include "NP-Engine/Concurrency/Thread.hpp"
+#include "NP-Engine/Thread/ThreadImpl.hpp"
 
 #if NP_ENGINE_PLATFORM_IS_LINUX
 	#include <pthread.h> //pthread_setaffinity_np
@@ -15,7 +15,7 @@
 
 #endif
 
-namespace np::concurrency
+namespace np::thr
 {
 	bl Thread::SetAffinity(i32 core_number)
 	{
@@ -80,4 +80,4 @@ namespace np::concurrency
 #endif
 		}
 	} // namespace ThisThread
-} // namespace np::concurrency
+} // namespace np::thr

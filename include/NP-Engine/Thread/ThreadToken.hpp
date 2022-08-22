@@ -11,9 +11,9 @@
 
 #include "NP-Engine/Primitive/Primitive.hpp"
 
-#include "Thread.hpp"
+#include "ThreadImpl.hpp"
 
-namespace np::concurrency
+namespace np::thr
 {
 	class ThreadToken
 	{
@@ -66,6 +66,6 @@ namespace np::concurrency
 			return _thread == other._thread;
 		}
 	};
-} // namespace np::concurrency
+} // namespace np::thr
 
 #endif /* NP_ENGINE_THREAD_TOKEN_HPP */
