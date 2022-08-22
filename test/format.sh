@@ -15,4 +15,5 @@ fi
 
 echo "Using clang-format: $(${format} --version)"
 
-find .. -type f -name "*.[ch]pp" \( -path "./test/*" -o -path "./include/*" -o -path "./src/*" \) -prune | xargs ${format} -i
+cd ..
+find . -type f -name "*.[ch]pp" \( -path "./test/*" -o -path "./include/*" -o -path "./src/*" \) -prune | xargs ${format} -i
