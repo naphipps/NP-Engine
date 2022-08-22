@@ -16,7 +16,7 @@
 
 #include "RandomEngine.hpp"
 
-namespace np::random
+namespace np::rng
 {
 	template <typename T>
 	class RandomBase
@@ -68,6 +68,6 @@ namespace np::random
 
 	typedef RandomBase<Random32> Random32Base;
 	typedef RandomBase<Random64> Random64Base;
-} // namespace np::random
+} // namespace np::rng
 
 #endif /* NP_ENGINE_RANDOM_BASE_HPP */

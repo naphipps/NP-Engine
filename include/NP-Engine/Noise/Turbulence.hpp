@@ -26,7 +26,7 @@ namespace np
 		 then those "turbulated" x, y, and z can be used to get a noise value for any other
 		 This class allows access to intern perlin and simplex noise usage
 		 */
-		class Turbulence : public random::Random32Base
+		class Turbulence : public rng::Random32Base
 		{
 		private:
 			constexpr static chr AsFilename[] = "turbulence.json";
@@ -44,7 +44,7 @@ namespace np
 			/**
 			 constructor
 			 */
-			Turbulence(const random::Random32& random_engine = random::Random32()): random::Random32Base(random_engine)
+			Turbulence(const rng::Random32& random_engine = rng::Random32()): rng::Random32Base(random_engine)
 			{
 				Init();
 			}
@@ -60,10 +60,10 @@ namespace np
 			 */
 			inline void Init() override
 			{
-				random::Random32Base::Init();
+				rng::Random32Base::Init();
 
 				_scalar = 0.1f;
-				random::Random32 rng;
+				rng::Random32 rng;
 
 				for (ui8 i = 0; i < PERLIN_DIMENSION_COUNT; i++)
 				{

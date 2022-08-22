@@ -14,7 +14,7 @@
 
 #include "PcgRandutils.hpp"
 
-namespace np::random
+namespace np::rng
 {
 	template <typename T>
 	class RandomSeed
@@ -88,6 +88,6 @@ namespace np::random
 			_state = state;
 		}
 	};
-} // namespace np::random
+} // namespace np::rng
 
 #endif /* NP_ENGINE_RANDOM_SEED_HPP */

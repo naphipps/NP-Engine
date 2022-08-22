@@ -18,7 +18,7 @@ namespace np
 		 provides improved perlin noise 3D
 		 provides fractal, fractional, rigid, billow, and warp methods
 		 */
-		class Perlin : public random::Random32Base
+		class Perlin : public rng::Random32Base
 		{
 		public:
 			constexpr static flt DEFAULT_FREQUENCY = 1.f;
@@ -97,7 +97,7 @@ namespace np
 			/**
 			 constructor
 			 */
-			Perlin(const random::Random32& engine = random::Random32()): random::Random32Base(engine)
+			Perlin(const rng::Random32& engine = rng::Random32()): rng::Random32Base(engine)
 			{
 				Init();
 			}
@@ -126,7 +126,7 @@ namespace np
 			 */
 			inline void Init() override
 			{
-				random::Random32Base::Init();
+				rng::Random32Base::Init();
 
 				_frequency = DEFAULT_FREQUENCY;
 				_amplitude = DEFAULT_AMPLITUDE;

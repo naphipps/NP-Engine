@@ -18,7 +18,7 @@ namespace np
 		 provides simplex noise 1D, 2D, 3D, 4D
 		 provides fractal, fractional, rigid, billow, and warp methods
 		 */
-		class Simplex : public random::Random32Base
+		class Simplex : public rng::Random32Base
 		{
 		public:
 			constexpr static flt DEFAULT_FREQUENCY = 1.f;
@@ -136,7 +136,7 @@ namespace np
 			/**
 			 constructor
 			 */
-			Simplex(const random::Random32& random_engine = random::Random32()): random::Random32Base(random_engine)
+			Simplex(const rng::Random32& random_engine = rng::Random32()): rng::Random32Base(random_engine)
 			{
 				Init();
 			}
@@ -165,7 +165,7 @@ namespace np
 			 */
 			inline void Init() override
 			{
-				random::Random32Base::Init();
+				rng::Random32Base::Init();
 
 				_frequency = DEFAULT_FREQUENCY;
 				_amplitude = DEFAULT_AMPLITUDE;

@@ -12,7 +12,7 @@
 #include "NP-Engine/Primitive/Primitive.hpp"
 #include "NP-Engine/Math/Math.hpp"
 
-namespace np::random
+namespace np::rng
 {
 	template <ui32 RESOLUTION>
 	class CdfSampleDistribution
@@ -164,6 +164,6 @@ namespace np::random
 
 	using StandardSampledDistribution100 = StandardSampledDistribution<100>;
 	using StandardSampledDistribution200 = StandardSampledDistribution<200>;
-} // namespace np::random
+} // namespace np::rng
 
 #endif /* NP_ENGINE_SAMPLE_DISTRIBUTION_HPP */

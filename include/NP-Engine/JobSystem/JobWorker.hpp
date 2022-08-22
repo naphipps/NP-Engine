@@ -38,7 +38,7 @@ namespace np::jsys
 		con::vector<JobWorker*> _coworkers;
 		ui32 _coworker_index;
 		tim::DurationMilliseconds _bad_steal_sleep_duration;
-		random::Random32 _random_engine;
+		rng::Random32 _random_engine;
 
 		/*
 			returns a valid && CanExecute() job, or invalid job
