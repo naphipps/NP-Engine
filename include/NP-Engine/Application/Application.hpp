@@ -184,19 +184,19 @@ namespace np::app
 			_running.store(true, mo_release);
 			event::EventQueue& event_queue = _services.GetEventQueue();
 
-			const time::DurationMilliseconds max_loop_duration(NP_ENGINE_APPLICATION_LOOP_DURATION);
+			const tim::DurationMilliseconds max_loop_duration(NP_ENGINE_APPLICATION_LOOP_DURATION);
 
-			time::SteadyTimestamp loop_next_timestamp = time::SteadyClock::now();
-			time::SteadyTimestamp loop_prev_timestamp = time::SteadyClock::now();
-			time::DurationMilliseconds loop_duration(0);
+			tim::SteadyTimestamp loop_next_timestamp = tim::SteadyClock::now();
+			tim::SteadyTimestamp loop_prev_timestamp = tim::SteadyClock::now();
+			tim::DurationMilliseconds loop_duration(0);
 
-			time::SteadyTimestamp update_next_timestamp = time::SteadyClock::now();
-			time::SteadyTimestamp update_prev_timestamp = time::SteadyClock::now();
-			time::DurationMilliseconds update_duration(0);
+			tim::SteadyTimestamp update_next_timestamp = tim::SteadyClock::now();
+			tim::SteadyTimestamp update_prev_timestamp = tim::SteadyClock::now();
+			tim::DurationMilliseconds update_duration(0);
 
 			while (_running.load(mo_acquire))
 			{
-				update_next_timestamp = time::SteadyClock::now();
+				update_next_timestamp = tim::SteadyClock::now();
 				update_duration = update_next_timestamp - update_prev_timestamp;
 				update_prev_timestamp = update_next_timestamp;
 
@@ -239,7 +239,7 @@ namespace np::app
 
 				_graphics_layer.Render();
 
-				loop_next_timestamp = time::SteadyClock::now();
+				loop_next_timestamp = tim::SteadyClock::now();
 				loop_duration = loop_next_timestamp - loop_prev_timestamp;
 				loop_prev_timestamp = loop_next_timestamp;
 				if (loop_duration < max_loop_duration)

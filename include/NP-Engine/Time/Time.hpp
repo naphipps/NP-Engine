@@ -11,7 +11,7 @@
 
 #include "NP-Engine/Primitive/Primitive.hpp"
 
-namespace np::time
+namespace np::tim
 {
 	using Milliseconds = ::std::chrono::milliseconds;
 	using Microseconds = ::std::chrono::microseconds;

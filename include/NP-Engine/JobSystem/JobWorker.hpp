@@ -37,7 +37,7 @@ namespace np::jsys
 		container::mpmc_queue<Job*> _immediate_job_queue;
 		container::vector<JobWorker*> _coworkers;
 		ui32 _coworker_index;
-		time::DurationMilliseconds _bad_steal_sleep_duration;
+		tim::DurationMilliseconds _bad_steal_sleep_duration;
 		random::Random32 _random_engine;
 
 		/*

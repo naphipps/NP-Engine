@@ -29,7 +29,7 @@ namespace np::app
 
 		virtual void BeforeUdpate() {} // TODO: I think we'll decide if we like this idea if it works with imgui
 
-		virtual void Update(time::DurationMilliseconds time_delta) {}
+		virtual void Update(tim::DurationMilliseconds time_delta) {}
 
 		virtual void AfterUdpate() {}
 

@@ -52,9 +52,9 @@ namespace np::graphics::rhi
 		{
 			NP_ENGINE_PROFILE_FUNCTION();
 
-			time::SteadyTimestamp prev = time::SteadyClock::now();
-			time::SteadyTimestamp next;
-			time::DurationMilliseconds duration;
+			tim::SteadyTimestamp prev = tim::SteadyClock::now();
+			tim::SteadyTimestamp next;
+			tim::DurationMilliseconds duration;
 			VulkanRenderer& vulkan_renderer = (VulkanRenderer&)_renderer;
 
 			siz max_duration = NP_ENGINE_APPLICATION_LOOP_DURATION;
@@ -66,11 +66,11 @@ namespace np::graphics::rhi
 				if (_dlp_enable_draw.load(mo_acquire))
 					Draw();
 
-				next = time::SteadyClock::now();
+				next = tim::SteadyClock::now();
 				duration = next - prev;
 				prev = next;
 				if (duration.count() < max_duration)
-					thr::ThisThread::sleep_for(time::DurationMilliseconds(max_duration - duration.count()));
+					thr::ThisThread::sleep_for(tim::DurationMilliseconds(max_duration - duration.count()));
 			}
 
 			_dlp_is_complete.store(true, mo_release);

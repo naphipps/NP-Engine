@@ -161,7 +161,7 @@ namespace np::window
 			return _properties;
 		}
 
-		virtual void Update(time::DurationMilliseconds duration_milliseconds) {}
+		virtual void Update(tim::DurationMilliseconds duration_milliseconds) {}
 
 		virtual void SetTitle(str title)
 		{

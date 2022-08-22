@@ -23,7 +23,7 @@ namespace np::app
 		graphics::Model _model;
 		graphics::RenderableModel* _renderable_model;
 		ecs::Entity _model_entity;
-		time::SteadyTimestamp _start_timestamp;
+		tim::SteadyTimestamp _start_timestamp;
 
 		virtual void AdjustForWindowClose(event::Event& e)
 		{
@@ -50,7 +50,7 @@ namespace np::app
 
 		void SceneOnDraw(memory::Delegate& d)
 		{
-			time::DurationMilliseconds duration = time::SteadyClock::now() - _start_timestamp;
+			tim::DurationMilliseconds duration = tim::SteadyClock::now() - _start_timestamp;
 			flt seconds = duration.count() / 1000.0f;
 			flt s = ::std::sinf(seconds * 1.2f);
 			flt e = s + 3.f;
@@ -68,7 +68,7 @@ namespace np::app
 		void UpdateMetaValuesOnFrame(memory::Delegate& d)
 		{
 			graphics::RenderableMetaValues& meta_values = _renderable_model->GetMetaValues();
-			time::DurationMilliseconds duration = time::SteadyClock::now() - _start_timestamp;
+			tim::DurationMilliseconds duration = tim::SteadyClock::now() - _start_timestamp;
 			flt seconds = duration.count() / 1000.0f;
 			meta_values.object.Model =
 				::glm::rotate(glm::mat4(1.0f), seconds * glm::radians(90.0f) / 4.0f, glm::vec3(0.0f, 0.0f, 1.0f));
@@ -84,7 +84,7 @@ namespace np::app
 			_model(_model_filename, _model_texture_filename, true),
 			_renderable_model(graphics::RenderableModel::Create(_services, _model)),
 			_model_entity(_services.GetEcsRegistry()),
-			_start_timestamp(time::SteadyClock::now())
+			_start_timestamp(tim::SteadyClock::now())
 		{
 			_model.GetTexture().SetHotReloadable();
 			_renderable_model->GetUpdateMetaValuesOnFrameDelegate().Connect<GameLayer, &GameLayer::UpdateMetaValuesOnFrame>(
@@ -112,7 +112,7 @@ namespace np::app
 			_scene->Prepare();
 		}
 
-		void Update(time::DurationMilliseconds time_delta) override {}
+		void Update(tim::DurationMilliseconds time_delta) override {}
 
 		virtual event::EventCategory GetHandledCategories() const override
 		{

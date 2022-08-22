@@ -18,32 +18,32 @@ namespace np::insight
 	{
 	protected:
 		::std::string _name;
-		time::SteadyTimestamp _start_timestamp;
-		time::SteadyTimestamp _end_timestamp;
+		tim::SteadyTimestamp _start_timestamp;
+		tim::SteadyTimestamp _end_timestamp;
 
 	public:
-		Timer(::std::string name = ""): _start_timestamp(time::SteadyClock::now()), _name(name)
+		Timer(::std::string name = ""): _start_timestamp(tim::SteadyClock::now()), _name(name)
 		{
 			_end_timestamp = _start_timestamp;
 		}
 
 		virtual void Restart()
 		{
-			_start_timestamp = time::SteadyClock::now();
+			_start_timestamp = tim::SteadyClock::now();
 			_end_timestamp = _start_timestamp;
 		}
 
 		virtual void Stop()
 		{
-			_end_timestamp = time::SteadyClock::now();
+			_end_timestamp = tim::SteadyClock::now();
 		}
 
-		time::SteadyTimestamp GetStartTimestamp()
+		tim::SteadyTimestamp GetStartTimestamp()
 		{
 			return _start_timestamp;
 		}
 
-		time::SteadyTimestamp GetEndTimestamp()
+		tim::SteadyTimestamp GetEndTimestamp()
 		{
 			return _end_timestamp;
 		}
@@ -58,17 +58,17 @@ namespace np::insight
 			return _name;
 		}
 
-		time::DurationMilliseconds GetElapsedMilliseconds()
+		tim::DurationMilliseconds GetElapsedMilliseconds()
 		{
-			time::DurationMilliseconds start(_start_timestamp.time_since_epoch());
-			time::DurationMilliseconds end(_end_timestamp.time_since_epoch());
+			tim::DurationMilliseconds start(_start_timestamp.time_since_epoch());
+			tim::DurationMilliseconds end(_end_timestamp.time_since_epoch());
 			return end - start;
 		}
 
-		time::DurationMicroseconds GetElapsedMicroseconds()
+		tim::DurationMicroseconds GetElapsedMicroseconds()
 		{
-			time::DurationMicroseconds start(_start_timestamp.time_since_epoch());
-			time::DurationMicroseconds end(_end_timestamp.time_since_epoch());
+			tim::DurationMicroseconds start(_start_timestamp.time_since_epoch());
+			tim::DurationMicroseconds end(_end_timestamp.time_since_epoch());
 			return end - start;
 		}
 	};

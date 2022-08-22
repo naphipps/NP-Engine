@@ -17,9 +17,9 @@ namespace np::insight
 	struct TraceEvent
 	{
 		::std::string Name;
-		time::SteadyTimestamp StartTimestamp;
-		time::DurationMicroseconds ElapsedMicroseconds;
-		time::DurationMilliseconds ElapsedMilliseconds;
+		tim::SteadyTimestamp StartTimestamp;
+		tim::DurationMicroseconds ElapsedMicroseconds;
+		tim::DurationMilliseconds ElapsedMilliseconds;
 		::std::thread::id ThreadId;
 	};
 } // namespace np::insight

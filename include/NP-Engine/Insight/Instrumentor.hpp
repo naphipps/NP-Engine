@@ -153,7 +153,7 @@ namespace np::insight
 				trace.AddMember("ph", "X", allocator);
 				trace.AddMember("pid", "0", allocator);
 				trace.AddMember("tid", tid, allocator);
-				trace.AddMember("ts", time::DurationMicroseconds(te.StartTimestamp.time_since_epoch()).count(), allocator);
+				trace.AddMember("ts", tim::DurationMicroseconds(te.StartTimestamp.time_since_epoch()).count(), allocator);
 
 				(*_report)["traceEvents"].PushBack(::std::move(trace), allocator);
 

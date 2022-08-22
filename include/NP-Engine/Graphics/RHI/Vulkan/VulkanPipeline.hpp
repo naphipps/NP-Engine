@@ -12,7 +12,6 @@
 
 #include "NP-Engine/Foundation/Foundation.hpp"
 #include "NP-Engine/Memory/Memory.hpp"
-#include "NP-Engine/Time/Time.hpp"
 #include "NP-Engine/FileSystem/FileSystem.hpp"
 
 #include "NP-Engine/Vendor/VulkanInclude.hpp"
