@@ -67,17 +67,13 @@ namespace np::window
 		void InvokeResizeCallbacks(ui32 width, ui32 height)
 		{
 			for (auto it = _resize_callbacks.begin(); it != _resize_callbacks.end(); it++)
-			{
 				it->second(it->first, width, height);
-			}
 		}
 
 		void InvokePositionCallbacks(i32 x, i32 y)
 		{
 			for (auto it = _position_callbacks.begin(); it != _position_callbacks.end(); it++)
-			{
 				it->second(it->first, x, y);
-			}
 		}
 
 		virtual void HandleClose(event::Event& e);
