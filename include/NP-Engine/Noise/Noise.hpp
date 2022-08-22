@@ -1,10 +1,8 @@
+//##===----------------------------------------------------------------------===##//
 //
-//  Noise.h
-//  Project Space
+//  Author: Nathan Phipps 12/20/18
 //
-//  Created by Nathan Phipps on 12/20/18.
-//  Copyright © 2018 Nathan Phipps. All rights reserved.
-//
+//##===----------------------------------------------------------------------===##//
 
 #ifndef NP_ENGINE_NOISE_HPP
 #define NP_ENGINE_NOISE_HPP
