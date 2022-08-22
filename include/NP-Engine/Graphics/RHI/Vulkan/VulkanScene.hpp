@@ -27,69 +27,60 @@ namespace np::graphics::rhi
 	class VulkanScene : public Scene
 	{
 	private:
-		// TODO: I think our scene needs it's own ecs registry!!
+		// TODO: I think our scene needs it's own ecs registry!! //TODO: put this in RPI
 
 		VulkanCamera _camera;
-		concurrency::Thread _draw_loop_thread;
-		atm_bl _draw_loop_procedure_is_complete;
-		atm_bl _engage_draw_loop_procedure;
-		atm_bl _drawing_is_complete;
+		concurrency::Thread _dlp_thread; //dlp = drawing loop procedure
+		atm_bl _dlp_is_complete;
+		atm_bl _dlp_keep_alive;
+		atm_bl _dlp_enable_draw;
+		atm_bl _is_drawing;
 
 		static void WindowResizeCallback(void* scene, ui32 width, ui32 height)
 		{
 			VulkanScene& vulkan_scene = (VulkanScene&)*((VulkanScene*)scene);
-			vulkan_scene.EngageDrawLoopProcedure();
+			vulkan_scene._dlp_enable_draw.store(true, mo_release);
 		}
 
 		static void WindowPositionCallback(void* scene, i32 x, i32 y)
 		{
 			VulkanScene& vulkan_scene = (VulkanScene&)*((VulkanScene*)scene);
-			vulkan_scene.EngageDrawLoopProcedure();
-		}
-
-		void EngageDrawLoopProcedure()
-		{
-			bl expected = false;
-			if (_engage_draw_loop_procedure.compare_exchange_strong(expected, true, mo_release, mo_relaxed))
-			{
-				_draw_loop_procedure_is_complete.store(false, mo_release);
-				_draw_loop_thread.Dispose();
-				_draw_loop_thread.Run(&VulkanScene::DrawLoopProcedure, this);
-			}
+			vulkan_scene._dlp_enable_draw.store(true, mo_release);
 		}
 
 		void DrawLoopProcedure()
 		{
+			NP_ENGINE_PROFILE_FUNCTION();
+
 			time::SteadyTimestamp prev = time::SteadyClock::now();
 			time::SteadyTimestamp next;
+			time::DurationMilliseconds duration;
+			VulkanRenderer& vulkan_renderer = (VulkanRenderer&)_renderer;
 
 			siz max_duration = NP_ENGINE_APPLICATION_LOOP_DURATION;
 
-			while (_engage_draw_loop_procedure.load(mo_acquire))
+			while (_dlp_keep_alive.load(mo_acquire))
 			{
-				((VulkanRenderer&)_renderer).SetOutOfDate();
+				vulkan_renderer.SetOutOfDate();
 
-				Draw();
+				if (_dlp_enable_draw.load(mo_acquire))
+					Draw();
 
 				next = time::SteadyClock::now();
-				time::DurationMilliseconds duration = next - prev;
+				duration = next - prev;
 				prev = next;
 				if (duration.count() < max_duration)
-				{
 					concurrency::ThisThread::sleep_for(time::DurationMilliseconds(max_duration - duration.count()));
-				}
 			}
 
-			_draw_loop_procedure_is_complete.store(true, mo_release);
+			_dlp_is_complete.store(true, mo_release);
 		}
 
 		void Draw()
 		{
-			bl expected = true;
-			while (!_drawing_is_complete.compare_exchange_weak(expected, false, mo_release, mo_relaxed))
-			{
-				expected = true;
-			}
+			bl expected = false;
+			while (!_is_drawing.compare_exchange_weak(expected, true, mo_release, mo_relaxed))
+				expected = false;
 
 			_on_draw_delegate.InvokeConnectedFunction();
 			VulkanFrame& vulkan_frame = (VulkanFrame&)_renderer.BeginFrame();
@@ -142,28 +133,32 @@ namespace np::graphics::rhi
 				_renderer.DrawFrame();
 			}
 
-			_drawing_is_complete.store(true, mo_release);
-		}
-
-		void WaitForDrawProcedureToEnd()
-		{
-			while (!_draw_loop_procedure_is_complete.load(mo_acquire))
-				_engage_draw_loop_procedure.store(false, mo_release);
+			_is_drawing.store(false, mo_release);
 		}
 
 	public:
-		VulkanScene(services::Services& services, Renderer& renderer):
+		VulkanScene(services::Services& services, Renderer& renderer) :
 			Scene(services, renderer),
-			_draw_loop_procedure_is_complete(true),
-			_engage_draw_loop_procedure(false),
-			_drawing_is_complete(true)
+			_dlp_is_complete(true),
+			_dlp_keep_alive(false),
+			_dlp_enable_draw(false),
+			_is_drawing(false)
 		{
 			((VulkanRenderer&)_renderer).GetSurface().GetWindow().SetResizeCallback(this, WindowResizeCallback);
 			((VulkanRenderer&)_renderer).GetSurface().GetWindow().SetPositionCallback(this, WindowPositionCallback);
+
+			_dlp_keep_alive.store(true, mo_release);
+			_dlp_is_complete.store(false, mo_release);
+			_dlp_thread.Run(&VulkanScene::DrawLoopProcedure, this);
 		}
 
 		~VulkanScene()
 		{
+			while (!_dlp_is_complete.load(mo_acquire))
+				_dlp_keep_alive.store(false, mo_release);
+
+			_dlp_thread.Dispose();
+
 			Dispose();
 		}
 
@@ -175,7 +170,7 @@ namespace np::graphics::rhi
 
 		void Render() override
 		{
-			WaitForDrawProcedureToEnd();
+			_dlp_enable_draw.store(false, mo_release);
 			Draw();
 		}
 
@@ -200,7 +195,10 @@ namespace np::graphics::rhi
 
 		void Dispose() override
 		{
-			WaitForDrawProcedureToEnd();
+			_dlp_enable_draw.store(false, mo_release);
+			while (_is_drawing.load(mo_acquire))
+				concurrency::ThisThread::yield();
+
 			::entt::registry& ecs_registry = _services.GetEcsRegistry();
 
 			auto object_entities = ecs_registry.view<RenderableObject*>();
