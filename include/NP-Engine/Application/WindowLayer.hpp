@@ -24,13 +24,13 @@ namespace np::app
 	{
 	private:
 		mem::TraitAllocator _allocator;
-		container::vector<window::Window*> _windows;
+		container::vector<win::Window*> _windows;
 		container::vector<void*> _native_windows;
 
 	protected:
 		virtual void HandleWindowCreate(evnt::Event& e)
 		{
-			CreateWindow(e.RetrieveData<window::Window::Properties>());
+			CreateWindow(e.RetrieveData<win::Window::Properties>());
 			e.SetHandled();
 		}
 
@@ -68,16 +68,16 @@ namespace np::app
 			glfwTerminate();
 		}
 
-		virtual window::Window* CreateWindow(window::Window::Properties& properties)
+		virtual win::Window* CreateWindow(win::Window::Properties& properties)
 		{
-			return _windows.emplace_back(mem::Create<window::Window>(_allocator, properties, _services));
+			return _windows.emplace_back(mem::Create<win::Window>(_allocator, properties, _services));
 		}
 
 		virtual void Update(tim::DurationMilliseconds time_delta) override
 		{
 			glfwPollEvents();
 
-			for (window::Window* window : _windows)
+			for (win::Window* window : _windows)
 			{
 				window->Update(time_delta);
 			}
@@ -89,7 +89,7 @@ namespace np::app
 			{
 				if (!_windows[i]->IsRunning())
 				{
-					mem::Destroy<window::Window>(_allocator, _windows[i]);
+					mem::Destroy<win::Window>(_allocator, _windows[i]);
 					_windows.erase(_windows.begin() + i);
 				}
 			}

@@ -20,7 +20,7 @@ namespace np::gfx::rhi
 	{
 	private:
 		VulkanInstance& _instance;
-		window::Window& _window;
+		win::Window& _window;
 		VkSurfaceKHR _surface;
 
 		VkSurfaceKHR CreateSurface()
@@ -39,7 +39,7 @@ namespace np::gfx::rhi
 		}
 
 	public:
-		VulkanSurface(VulkanInstance& instance, window::Window& window):
+		VulkanSurface(VulkanInstance& instance, win::Window& window):
 			_instance(instance),
 			_window(window),
 			_surface(CreateSurface())
@@ -59,7 +59,7 @@ namespace np::gfx::rhi
 			return _instance;
 		}
 
-		window::Window& GetWindow() const
+		win::Window& GetWindow() const
 		{
 			return _window;
 		}

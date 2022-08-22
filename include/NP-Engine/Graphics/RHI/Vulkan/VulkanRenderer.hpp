@@ -210,12 +210,12 @@ namespace np::gfx::rhi
 			return "Vulkan";
 		}
 
-		virtual bl IsAttachedToWindow(window::Window& window) const override
+		virtual bl IsAttachedToWindow(win::Window& window) const override
 		{
 			return _surface && mem::AddressOf(_surface->GetWindow()) == mem::AddressOf(window);
 		}
 
-		void AttachToWindow(window::Window& window) override
+		void AttachToWindow(win::Window& window) override
 		{
 			_surface = mem::Create<VulkanSurface>(_services.GetAllocator(), *_instance, window);
 			_device = mem::Create<VulkanDevice>(_services.GetAllocator(), *_surface);
@@ -240,7 +240,7 @@ namespace np::gfx::rhi
 															 *_light_vertex_shader, *_light_fragment_shader);
 		}
 
-		void DetachFromWindow(window::Window& window) override
+		void DetachFromWindow(win::Window& window) override
 		{
 			if (IsAttachedToWindow(window))
 			{
@@ -351,7 +351,7 @@ namespace np::gfx::rhi
 			_frame.Invalidate();
 		}
 
-		void AdjustForWindowResize(window::Window& window) override {}
+		void AdjustForWindowResize(win::Window& window) override {}
 
 		VulkanInstance& GetInstance()
 		{

@@ -7,7 +7,7 @@
 #include "NP-Engine/Window/Window.hpp"
 #include "NP-Engine/Window/WindowEvents.hpp"
 
-namespace np::window
+namespace np::win
 {
 	void Window::HandleClose(evnt::Event& e)
 	{
@@ -76,4 +76,4 @@ namespace np::window
 		glfwSetWindowSizeCallback(glfw_window, WindowSizeCallback);
 		glfwSetWindowPosCallback(glfw_window, WindowPositionCallback);
 	}
-} // namespace np::window
+} // namespace np::win

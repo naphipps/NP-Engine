@@ -13,7 +13,7 @@
 
 #include "Window.hpp"
 
-namespace np::window
+namespace np::win
 {
 	class WindowResizeEvent : public evnt::Event
 	{
@@ -50,6 +50,6 @@ namespace np::window
 			return evnt::EventCategory::Window;
 		}
 	};
-} // namespace np::window
+} // namespace np::win
 
 #endif /* NP_ENGINE_WINDOW_RESIZE_EVENT_HPP */

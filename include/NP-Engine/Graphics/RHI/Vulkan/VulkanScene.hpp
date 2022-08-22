@@ -223,7 +223,7 @@ namespace np::gfx::rhi
 			_camera = camera;
 		}
 
-		virtual void AdjustForWindowResize(window::Window& window) override {}
+		virtual void AdjustForWindowResize(win::Window& window) override {}
 	};
 } // namespace np::gfx::rhi
 

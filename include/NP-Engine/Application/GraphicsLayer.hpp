@@ -39,7 +39,7 @@ namespace np::app
 
 		virtual void AdjustForWindowClose(evnt::Event& e)
 		{
-			window::Window& window = *e.RetrieveData<window::WindowCloseEvent::DataType>().window;
+			win::Window& window = *e.RetrieveData<win::WindowCloseEvent::DataType>().window;
 
 			for (auto it = _scenes.begin(); it != _scenes.end(); it++)
 				if ((*it)->GetRenderer().IsAttachedToWindow(window))
@@ -63,7 +63,7 @@ namespace np::app
 
 		virtual void AdjustForWindowResize(evnt::Event& e)
 		{
-			window::Window& window = *e.RetrieveData<window::WindowCloseEvent::DataType>().window;
+			win::Window& window = *e.RetrieveData<win::WindowCloseEvent::DataType>().window;
 
 			for (gfx::Scene*& scene : _scenes)
 				if (scene->GetRenderer().IsAttachedToWindow(window))
@@ -179,7 +179,7 @@ namespace np::app
 				mem::Destroy<gfx::Renderer>(_services.GetAllocator(), *it);
 		}
 
-		gfx::Renderer* CreateRenderer(window::Window& window)
+		gfx::Renderer* CreateRenderer(win::Window& window)
 		{
 			gfx::Renderer* renderer = gfx::Renderer::Create(_services);
 			renderer->AttachToWindow(window);

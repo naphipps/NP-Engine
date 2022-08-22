@@ -12,7 +12,7 @@
 
 #include "Window.hpp"
 
-namespace np::window
+namespace np::win
 {
 	class WindowCloseEvent : public evnt::Event
 	{
@@ -37,6 +37,6 @@ namespace np::window
 			return evnt::EventCategory::Window;
 		}
 	};
-} // namespace np::window
+} // namespace np::win
 
 #endif /* NP_ENGINE_WINDOW_CLOSE_EVENT_HPP */

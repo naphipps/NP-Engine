@@ -49,9 +49,9 @@ namespace np::gfx::rhi
 			return "OpenGL";
 		}
 
-		void AttachToWindow(window::Window& window) override {}
+		void AttachToWindow(win::Window& window) override {}
 
-		void DetachFromWindow(window::Window& window) override {}
+		void DetachFromWindow(win::Window& window) override {}
 
 		Frame& BeginFrame() override
 		{
@@ -62,9 +62,9 @@ namespace np::gfx::rhi
 
 		void DrawFrame() override {}
 
-		void AdjustForWindowResize(window::Window& window) override {}
+		void AdjustForWindowResize(win::Window& window) override {}
 
-		virtual bl IsAttachedToWindow(window::Window& window) const override
+		virtual bl IsAttachedToWindow(win::Window& window) const override
 		{
 			return false;
 		}

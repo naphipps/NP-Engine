@@ -64,7 +64,7 @@ namespace np::gfx
 		virtual void Prepare() = 0;
 		virtual void Dispose() = 0;
 		virtual void SetCamera(Camera& camera) = 0;
-		virtual void AdjustForWindowResize(window::Window& window) = 0;
+		virtual void AdjustForWindowResize(win::Window& window) = 0;
 	};
 } // namespace np::gfx
 

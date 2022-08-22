@@ -43,15 +43,15 @@ namespace np::gfx
 
 		virtual str GetName() const = 0;
 
-		virtual void AttachToWindow(window::Window& window) = 0;
-		virtual void DetachFromWindow(window::Window& window) = 0;
+		virtual void AttachToWindow(win::Window& window) = 0;
+		virtual void DetachFromWindow(win::Window& window) = 0;
 
 		virtual Frame& BeginFrame() = 0;
 		virtual void EndFrame() = 0;
 		virtual void DrawFrame() = 0;
 
-		virtual void AdjustForWindowResize(window::Window& window) = 0;
-		virtual bl IsAttachedToWindow(window::Window& window) const = 0;
+		virtual void AdjustForWindowResize(win::Window& window) = 0;
+		virtual bl IsAttachedToWindow(win::Window& window) const = 0;
 	};
 } // namespace np::gfx
 

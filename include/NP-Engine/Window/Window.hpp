@@ -20,7 +20,7 @@
 
 #include "NP-Engine/Vendor/GlfwInclude.hpp"
 
-namespace np::window
+namespace np::win
 {
 	class Window : public evnt::EventHandler
 	{
@@ -210,6 +210,6 @@ namespace np::window
 			return evnt::EventCategory::Window;
 		}
 	};
-} // namespace np::window
+} // namespace np::win
 
 #endif /* NP_ENGINE_WINDOW_HPP */

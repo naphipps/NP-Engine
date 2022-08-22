@@ -152,9 +152,9 @@ namespace np::app
 			_overlays.emplace_back(overlay);
 		}
 
-		gfx::Scene* CreateWindowScene(window::Window::Properties& window_properties)
+		gfx::Scene* CreateWindowScene(win::Window::Properties& window_properties)
 		{
-			window::Window* w = _window_layer.CreateWindow(window_properties);
+			win::Window* w = _window_layer.CreateWindow(window_properties);
 			_graphics_layer.CreateRenderer(*w);
 			return _graphics_layer.AcquireScene();
 		}

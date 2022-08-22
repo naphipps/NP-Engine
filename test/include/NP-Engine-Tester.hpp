@@ -28,7 +28,7 @@ namespace np::app
 		virtual void AdjustForWindowClose(evnt::Event& e)
 		{
 			if (_scene != nullptr &&
-				_scene->GetRenderer().IsAttachedToWindow(*e.RetrieveData<window::WindowCloseEvent::DataType>().window))
+				_scene->GetRenderer().IsAttachedToWindow(*e.RetrieveData<win::WindowCloseEvent::DataType>().window))
 			{
 				_scene->Dispose();
 				_scene = nullptr; // TODO: destroy content for scene
@@ -137,7 +137,7 @@ namespace np::app
 		{
 			NP_ENGINE_LOG_INFO("Hello world from my game app! My title is '" + GetTitle() + "'");
 
-			window::Window::Properties window_properties;
+			win::Window::Properties window_properties;
 			window_properties.Title = "My Game Window >:D";
 			gfx::Scene* scene = CreateWindowScene(window_properties);
 			_game_layer.SetScene(*scene);
