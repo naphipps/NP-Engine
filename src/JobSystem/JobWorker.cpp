@@ -7,7 +7,7 @@
 #include "NP-Engine/JobSystem/JobWorker.hpp"
 #include "NP-Engine/JobSystem/JobSystemImpl.hpp" //get the defined JobSystem since we forward-declared it in JobWorker
 
-namespace np::js
+namespace np::jsys
 {
 	JobRecord JobWorker::GetNextJob()
 	{

@@ -12,7 +12,7 @@
 #include "NP-Engine/Container/Container.hpp"
 #include "NP-Engine/Insight/Insight.hpp"
 
-namespace np::js
+namespace np::jsys
 {
 	enum class JobPriority : ui32
 	{

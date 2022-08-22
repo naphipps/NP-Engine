@@ -23,7 +23,7 @@ namespace np::services
 	private:
 		memory::TraitAllocator _allocator;
 		::entt::registry _ecs_registry;
-		js::JobSystem _job_system;
+		jsys::JobSystem _job_system;
 		event::EventQueue _event_queue;
 		event::EventSubmitter _event_submitter;
 
@@ -50,12 +50,12 @@ namespace np::services
 			return _ecs_registry;
 		}
 
-		js::JobSystem& GetJobSystem()
+		jsys::JobSystem& GetJobSystem()
 		{
 			return _job_system;
 		}
 
-		const js::JobSystem& GetJobSystem() const
+		const jsys::JobSystem& GetJobSystem() const
 		{
 			return _job_system;
 		}

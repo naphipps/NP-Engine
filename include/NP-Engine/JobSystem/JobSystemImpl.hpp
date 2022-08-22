@@ -22,7 +22,7 @@
 	#define NP_ENGINE_JOB_SYSTEM_POOL_DEFAULT_SIZE 2000
 #endif
 
-namespace np::js
+namespace np::jsys
 {
 	class JobSystem
 	{

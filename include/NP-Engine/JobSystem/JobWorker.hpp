@@ -20,7 +20,7 @@
 #include "JobRecord.hpp"
 #include "JobPool.hpp"
 
-namespace np::js
+namespace np::jsys
 {
 	class JobSystem;
 

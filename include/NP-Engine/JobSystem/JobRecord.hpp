@@ -15,7 +15,7 @@
 #include "Job.hpp"
 #include "JobPriority.hpp"
 
-namespace np::js
+namespace np::jsys
 {
 	class JobRecord
 	{

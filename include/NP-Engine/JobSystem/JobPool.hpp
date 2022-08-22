@@ -11,7 +11,7 @@
 
 #include "Job.hpp"
 
-namespace np::js
+namespace np::jsys
 {
 	using JobPool = memory::ObjectPool<Job>;
 } // namespace np::js
