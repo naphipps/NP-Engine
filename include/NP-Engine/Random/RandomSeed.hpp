@@ -7,6 +7,7 @@
 #ifndef NP_ENGINE_RANDOM_SEED_HPP
 #define NP_ENGINE_RANDOM_SEED_HPP
 
+#include <utility>
 #include <type_traits>
 
 #include "NP-Engine/Foundation/Foundation.hpp"
@@ -31,12 +32,6 @@ namespace np::rng
 			_inc |= 1;
 		}
 
-		void CopyFrom(const RandomSeed<T>& other)
-		{
-			_inc = other._inc;
-			_state = other._state;
-		}
-
 	public:
 		RandomSeed(): RandomSeed(0, 0) {} // TODO: figure out better default values here
 
@@ -45,25 +40,27 @@ namespace np::rng
 			ForceOddInc();
 		}
 
-		RandomSeed(const RandomSeed<T>& seed)
-		{
-			CopyFrom(seed);
-		}
+		RandomSeed(const RandomSeed<T>& other):
+			_inc(other._inc),
+			_state(other._state)
+		{}
 
-		RandomSeed(RandomSeed<T>&& seed)
-		{
-			CopyFrom(seed);
-		}
+		RandomSeed(RandomSeed<T>&& other) noexcept:
+			_inc(::std::move(other._inc)),
+			_state(::std::move(other._state))
+		{}
 
 		RandomSeed<T>& operator=(const RandomSeed<T>& other)
 		{
-			CopyFrom(other);
+			_inc = other._inc;
+			_state = other._state;
 			return *this;
 		}
 
-		RandomSeed<T>& operator=(RandomSeed<T>&& other)
+		RandomSeed<T>& operator=(RandomSeed<T>&& other) noexcept
 		{
-			CopyFrom(other);
+			_inc = ::std::move(other._inc);
+			_state = ::std::move(other._state);
 			return *this;
 		}
 

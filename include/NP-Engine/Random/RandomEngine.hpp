@@ -7,6 +7,7 @@
 #ifndef NP_ENGINE_RANDOM_ENGINE_HPP
 #define NP_ENGINE_RANDOM_ENGINE_HPP
 
+#include <utility>
 #include <type_traits>
 
 #include "NP-Engine/Foundation/Foundation.hpp"
@@ -30,31 +31,18 @@ namespace np::rng
 		using StateType = typename T::state_type;
 		using SeedType = RandomSeed<typename T::state_type>;
 
-	private:
-		void CopyFrom(const T& other)
-		{
-			RandomEngine<T> engine(other);
-			CopyFrom(engine);
-		}
-
-		void CopyFrom(const RandomEngine<T>& other)
-		{
-			SetIncAndState(other.GetInc(), other.GetState());
-		}
-
-	public:
 		RandomEngine(): T()
 		{
 			Init();
 		}
 
-		RandomEngine(const RandomEngine<T>& engine): T(engine) {}
+		RandomEngine(const RandomEngine<T>& other): T(other) {}
 
-		RandomEngine(RandomEngine<T>&& engine): T(engine) {}
+		RandomEngine(RandomEngine<T>&& other): T(other) {}
 
-		RandomEngine(const T& engine): T(engine) {}
+		RandomEngine(const T& other): T(other) {}
 
-		RandomEngine(T&& engine): T(engine) {}
+		RandomEngine(T&& other) noexcept: T(other) {}
 
 		RandomEngine(const SeedType& seed): T()
 		{
@@ -63,38 +51,34 @@ namespace np::rng
 
 		RandomEngine& operator=(const RandomEngine<T>& other)
 		{
-			CopyFrom(other);
+			T::operator=(other);
 			return *this;
 		}
 
-		RandomEngine& operator=(RandomEngine<T>&& other)
+		RandomEngine& operator=(RandomEngine<T>&& other) noexcept
 		{
-			CopyFrom(other);
+			T::operator=(::std::move(other));
 			return *this;
 		}
 
 		RandomEngine& operator=(const T& other)
 		{
-			CopyFrom(other);
+			T::operator=(other);
 			return *this;
 		}
 
-		RandomEngine& operator=(T&& other)
+		RandomEngine& operator=(T&& other) noexcept
 		{
-			CopyFrom(other);
+			T::operator=(::std::move(other));
 			return *this;
 		}
 
 		void Init()
 		{
 			if constexpr (::std::is_same_v<T, ::pcg32>)
-			{
 				*this = ::pcg32_fe().engine();
-			}
 			else // if constexpr (::std::is_same_v<T, ::pcg64>)
-			{
 				*this = ::pcg64_fe().engine();
-			}
 		}
 
 		ResultType GetLemireWithinRange(ResultType range)
@@ -110,9 +94,7 @@ namespace np::rng
 				{
 					t -= range;
 					if (t >= range)
-					{
 						t %= range;
-					}
 				}
 				while (l < t)
 				{
@@ -125,13 +107,9 @@ namespace np::rng
 			StateType shift_amount = 0;
 
 			if constexpr (::std::is_same_v<T, ::pcg32>)
-			{
 				shift_amount = 32;
-			}
 			else // if constexpr (::std::is_same_v<T, ::pcg64>)
-			{
 				shift_amount = 64;
-			}
 
 			return (ResultType)(m >> shift_amount);
 		}
@@ -142,9 +120,7 @@ namespace np::rng
 			// add all the weights to determine range
 			ResultType range = 0;
 			for (ui64 i = 0; i < distribution.size(); i++)
-			{
 				range += distribution[i];
-			}
 
 			// random result from range
 			ResultType result = GetLemireWithinRange(range);
@@ -189,24 +165,14 @@ namespace np::rng
 			T::state_ = state;
 		}
 
-		void SetIncAndState(StateType inc, StateType state)
-		{
-			SetInc(inc);
-			SetState(state);
-		}
-
 		SeedType CreateSeed()
 		{
 			StateType shift_amount = 0;
 
 			if constexpr (::std::is_same_v<T, ::pcg32>)
-			{
 				shift_amount = 32;
-			}
 			else // if constexpr (::std::is_same_v<T, ::pcg64>)
-			{
 				shift_amount = 64;
-			}
 
 			// generate new inc
 			T::inc_ = (*this)();
@@ -232,7 +198,8 @@ namespace np::rng
 
 		void SetSeed(const SeedType& seed)
 		{
-			SetIncAndState(seed.GetInc(), seed.GetState());
+			SetInc(seed.GetInc());
+			SetState(seed.GetState());
 		}
 	};
 
