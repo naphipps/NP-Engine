@@ -23,7 +23,7 @@ i32 main(i32 argc, chr** argv)
 
 	try
 	{
-		::np::system::Init(); // TODO: get a way to save the original working dir where the executable lives
+		::np::sys::Init(); // TODO: get a way to save the original working dir where the executable lives
 		::np::mem::CAllocator main_allocator;
 		::np::mem::Block main_block = main_allocator.Allocate(NP_ENGINE_MAIN_MEMORY_SIZE);
 

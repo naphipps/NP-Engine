@@ -53,11 +53,11 @@ namespace np::gfx::rhi
 			if (fs::Exists(_filename))
 			{
 				NP_ENGINE_LOG_INFO("Compiling: '" + cmd + "'");
-				system::Run(cmd);
+				sys::Run(cmd);
 			}
 			else
 			{
-				NP_ENGINE_LOG_ERROR("Cannot find: '" + _filename + "'\n" + system::GetDefaultWorkingDir());
+				NP_ENGINE_LOG_ERROR("Cannot find: '" + _filename + "'\n" + sys::GetDefaultWorkingDir());
 			}
 		}
 

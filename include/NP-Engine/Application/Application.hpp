@@ -100,8 +100,8 @@ namespace np::app
 			_graphics_layer(application_services),
 			_running(false)
 		{
-			system::SetTerminateHandler(__detail::HandleTerminate);
-			system::SetSignalHandler(__detail::HandleSignal);
+			sys::SetTerminateHandler(__detail::HandleTerminate);
+			sys::SetSignalHandler(__detail::HandleSignal);
 
 			_layers.emplace_back(this);
 			_layers.emplace_back(mem::AddressOf(_window_layer));

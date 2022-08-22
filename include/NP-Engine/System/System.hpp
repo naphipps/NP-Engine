@@ -18,7 +18,7 @@
 #include "NP-Engine/Primitive/Primitive.hpp"
 #include "NP-Engine/Insight/Insight.hpp"
 
-namespace np::system
+namespace np::sys
 {
 	using TerminateHandler = ::std::terminate_handler;
 	typedef void (*SignalHandler)(i32 signal);
@@ -67,6 +67,6 @@ namespace np::system
 	{
 		return ::std::system(command.c_str());
 	}
-} // namespace np::system
+} // namespace np::sys
 
 #endif /* NP_ENGINE_SYSTEM_HPP */
