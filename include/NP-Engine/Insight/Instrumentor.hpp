@@ -68,7 +68,7 @@ namespace np::nsit
 			{
 				_enable_trace = true;
 				_save_on_trace = false;
-				_filepath = fs::Append(fs::GetCurrentPath(), "profile_report.json");
+				_filepath = fsys::Append(fsys::GetCurrentPath(), "profile_report.json");
 
 				_report = ::std::make_shared<::rapidjson::Document>();
 				_report->SetObject();

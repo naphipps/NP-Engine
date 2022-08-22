@@ -12,7 +12,7 @@
 
 #include "NP-Engine/Primitive/Primitive.hpp"
 
-namespace np::fs
+namespace np::fsys
 {
 	/*
 		checks if the given file or dir exists
@@ -80,6 +80,6 @@ namespace np::fs
 	{
 		::std::filesystem::current_path(::std::filesystem::path(s));
 	}
-} // namespace np::fs
+} // namespace np::fsys
 
 #endif /* NP_ENGINE_FILESYSTEM_HPP */

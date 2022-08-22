@@ -64,7 +64,7 @@ namespace np::nsit
 
 		static inline ::std::string GetFileLoggerFilePath()
 		{
-			return fs::Append(fs::GetCurrentPath(), "NP-Engine-Log.log");
+			return fsys::Append(fsys::GetCurrentPath(), "NP-Engine-Log.log");
 		}
 
 		static inline ::std::shared_ptr<spdlog::logger>& GetFileLogger()

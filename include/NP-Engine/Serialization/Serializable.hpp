@@ -35,14 +35,14 @@ namespace np::serialization
 		{
 			bl saved = false;
 
-			str parent_path = fs::GetParentPath(filepath);
+			str parent_path = fsys::GetParentPath(filepath);
 
 			if (parent_path.size() > 0)
 			{
-				fs::CreateDirectories(parent_path);
+				fsys::CreateDirectories(parent_path);
 			}
 
-			if ((parent_path.size() == 0 && filepath.size() > 0) || fs::Exists(parent_path))
+			if ((parent_path.size() == 0 && filepath.size() > 0) || fsys::Exists(parent_path))
 			{
 				::std::ofstream os;
 				os.open(filepath);
@@ -63,7 +63,7 @@ namespace np::serialization
 		{
 			bl loaded = false;
 
-			if (fs::Exists(filepath))
+			if (fsys::Exists(filepath))
 			{
 				::std::ifstream is;
 				is.open(filepath);
@@ -101,14 +101,14 @@ namespace np::serialization
 		{
 			bl saved = false;
 
-			str parent_path = fs::GetParentPath(filepath);
+			str parent_path = fsys::GetParentPath(filepath);
 
 			if (parent_path.size() > 0)
 			{
-				fs::CreateDirectories(parent_path);
+				fsys::CreateDirectories(parent_path);
 			}
 
-			if ((parent_path.size() == 0 && filepath.size() > 0) || fs::Exists(parent_path))
+			if ((parent_path.size() == 0 && filepath.size() > 0) || fsys::Exists(parent_path))
 			{
 				::std::ofstream os;
 				os.open(filepath);
@@ -129,7 +129,7 @@ namespace np::serialization
 		{
 			bl loaded = false;
 
-			if (fs::Exists(filepath))
+			if (fsys::Exists(filepath))
 			{
 				::std::ifstream is;
 				is.open(filepath);

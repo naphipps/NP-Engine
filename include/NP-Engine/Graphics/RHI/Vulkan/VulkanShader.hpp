@@ -47,10 +47,10 @@ namespace np::gfx::rhi
 
 			str cmd(NP_ENGINE_VULKAN_GLSLC);
 			cmd += " -fshader-stage=" + GetShaderStage();
-			cmd += " " + fs::Append(".", _filename);
-			cmd += " -o " + fs::Append(".", _filename_spv);
+			cmd += " " + fsys::Append(".", _filename);
+			cmd += " -o " + fsys::Append(".", _filename_spv);
 
-			if (fs::Exists(_filename))
+			if (fsys::Exists(_filename))
 			{
 				NP_ENGINE_LOG_INFO("Compiling: '" + cmd + "'");
 				sys::Run(cmd);
