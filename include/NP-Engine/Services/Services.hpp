@@ -13,7 +13,7 @@
 
 #include "NP-Engine/Vendor/EnttInclude.hpp"
 
-namespace np::services
+namespace np::srvc
 {
 	// TODO: we need to create this before we create our application and then destroy it after our application, inside our
 	// application allocator
@@ -80,6 +80,6 @@ namespace np::services
 			return _event_submitter;
 		}
 	};
-} // namespace np::services
+} // namespace np::srvc
 
 #endif /* NP_ENGINE_SERVICES_HPP */

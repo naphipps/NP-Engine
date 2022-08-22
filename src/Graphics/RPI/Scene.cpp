@@ -14,7 +14,7 @@
 
 namespace np::graphics
 {
-	Scene* Scene::Create(services::Services& services, Renderer& renderer)
+	Scene* Scene::Create(srvc::Services& services, Renderer& renderer)
 	{
 		Scene* scene = nullptr;
 

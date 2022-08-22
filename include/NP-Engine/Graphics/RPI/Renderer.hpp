@@ -25,12 +25,12 @@ namespace np::graphics
 	class Renderer
 	{
 	protected:
-		services::Services& _services;
+		srvc::Services& _services;
 
-		Renderer(services::Services& services): _services(services) {}
+		Renderer(srvc::Services& services): _services(services) {}
 
 	public:
-		static Renderer* Create(services::Services& services);
+		static Renderer* Create(srvc::Services& services);
 
 		virtual ~Renderer() {}
 

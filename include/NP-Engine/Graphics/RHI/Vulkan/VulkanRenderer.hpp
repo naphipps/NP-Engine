@@ -171,7 +171,7 @@ namespace np::graphics::rhi
 		}
 
 	public:
-		VulkanRenderer(services::Services& services):
+		VulkanRenderer(srvc::Services& services):
 			Renderer(services),
 			_instance(mem::Create<VulkanInstance>(_services.GetAllocator())),
 			_surface(nullptr),

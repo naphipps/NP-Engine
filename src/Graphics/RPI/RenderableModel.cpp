@@ -14,7 +14,7 @@
 
 namespace np::graphics
 {
-	RenderableModel* RenderableModel::Create(services::Services& services, Model& model)
+	RenderableModel* RenderableModel::Create(srvc::Services& services, Model& model)
 	{
 		RenderableModel* renderable_model = nullptr;
 

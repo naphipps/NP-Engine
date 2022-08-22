@@ -575,7 +575,7 @@ namespace np::graphics::rhi
 		}
 
 	public:
-		VulkanRenderableModel(services::Services& services, Model& model):
+		VulkanRenderableModel(srvc::Services& services, Model& model):
 			RenderableModel(services, model),
 			_is_out_of_date(true),
 			_vertex_buffer(nullptr),

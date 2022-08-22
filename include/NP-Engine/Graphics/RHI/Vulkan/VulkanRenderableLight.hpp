@@ -30,7 +30,7 @@ namespace np::graphics::rhi
 		void Dispose() {}
 
 	public:
-		VulkanRenderableLight(services::Services& services, Light& light): RenderableLight(services, light) {}
+		VulkanRenderableLight(srvc::Services& services, Light& light): RenderableLight(services, light) {}
 
 		~VulkanRenderableLight()
 		{

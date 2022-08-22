@@ -23,17 +23,17 @@ namespace np::graphics
 	class RenderableModel : public RenderableObject
 	{
 	protected:
-		services::Services& _services;
+		srvc::Services& _services;
 		Model& _model;
 		RenderableMetaValues _meta_values;
 		mem::Delegate _update_meta_values_on_frame;
 
 		// TODO: add struct that represents all the needed information to render our _model
 
-		RenderableModel(services::Services& services, Model& model): _services(services), _model(model), _meta_values() {}
+		RenderableModel(srvc::Services& services, Model& model): _services(services), _model(model), _meta_values() {}
 
 	public:
-		static RenderableModel* Create(services::Services& services, Model& model);
+		static RenderableModel* Create(srvc::Services& services, Model& model);
 
 		virtual ~RenderableModel() {}
 

@@ -37,7 +37,7 @@ namespace np::graphics::rhi
 		__detail::OpenGLFrame _frame;
 
 	public:
-		OpenGLRenderer(services::Services& services): Renderer(services) {}
+		OpenGLRenderer(srvc::Services& services): Renderer(services) {}
 
 		RhiType GetRhiType() const override
 		{

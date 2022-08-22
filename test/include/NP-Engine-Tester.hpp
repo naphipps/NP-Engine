@@ -75,7 +75,7 @@ namespace np::app
 		}
 
 	public:
-		GameLayer(services::Services& services):
+		GameLayer(srvc::Services& services):
 			Layer(services),
 			_scene(nullptr),
 			_model_filename(fs::Append(fs::Append(fs::Append(NP_ENGINE_WORKING_DIR, "test"), "assets"), "viking_room.obj")),
@@ -126,7 +126,7 @@ namespace np::app
 		GameLayer _game_layer;
 
 	public:
-		GameApp(::np::services::Services& application_services):
+		GameApp(::np::srvc::Services& application_services):
 			Application(Application::Properties{"My Game App"}, application_services),
 			_game_layer(application_services)
 		{

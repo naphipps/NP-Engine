@@ -20,12 +20,12 @@ namespace np::app
 	class Layer : public event::EventHandler
 	{
 	protected:
-		services::Services& _services;
+		srvc::Services& _services;
 
 		virtual void HandleEvent(event::Event& e) {}
 
 	public:
-		Layer(services::Services& services): _services(services) {}
+		Layer(srvc::Services& services): _services(services) {}
 
 		virtual void BeforeUdpate() {} // TODO: I think we'll decide if we like this idea if it works with imgui
 

@@ -23,14 +23,14 @@ namespace np::graphics
 	class Scene
 	{
 	protected:
-		services::Services& _services;
+		srvc::Services& _services;
 		Renderer& _renderer;
 		mem::Delegate _on_draw_delegate;
 
 	public:
-		static Scene* Create(services::Services& services, Renderer& renderer);
+		static Scene* Create(srvc::Services& services, Renderer& renderer);
 
-		Scene(services::Services& services, Renderer& renderer): _services(services), _renderer(renderer) {}
+		Scene(srvc::Services& services, Renderer& renderer): _services(services), _renderer(renderer) {}
 
 		virtual ~Scene() {}
 

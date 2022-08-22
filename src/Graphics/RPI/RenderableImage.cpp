@@ -14,7 +14,7 @@
 
 namespace np::graphics
 {
-	RenderableImage* RenderableImage::Create(services::Services& services, Image& image)
+	RenderableImage* RenderableImage::Create(srvc::Services& services, Image& image)
 	{
 		RenderableImage* renderable_image = nullptr;
 

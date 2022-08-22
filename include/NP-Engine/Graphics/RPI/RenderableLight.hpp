@@ -22,13 +22,13 @@ namespace np::graphics
 	class RenderableLight : public RenderableLightObject
 	{
 	protected:
-		services::Services& _services;
+		srvc::Services& _services;
 		Light& _light;
 
-		RenderableLight(services::Services& services, Light& light): _services(services), _light(light) {}
+		RenderableLight(srvc::Services& services, Light& light): _services(services), _light(light) {}
 
 	public:
-		static RenderableLight* Create(services::Services& services, Light& light);
+		static RenderableLight* Create(srvc::Services& services, Light& light);
 
 		virtual ~RenderableLight() {}
 

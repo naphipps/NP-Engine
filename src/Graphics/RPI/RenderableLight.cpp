@@ -14,7 +14,7 @@
 
 namespace np::graphics
 {
-	RenderableLight* RenderableLight::Create(services::Services& services, Light& light)
+	RenderableLight* RenderableLight::Create(srvc::Services& services, Light& light)
 	{
 		RenderableLight* renderable_light = nullptr;
 

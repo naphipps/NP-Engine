@@ -23,7 +23,7 @@ namespace np::graphics::rhi
 		void Dispose() {}
 
 	public:
-		VulkanRenderableImage(services::Services& services, Image& image): RenderableImage(services, image) {}
+		VulkanRenderableImage(srvc::Services& services, Image& image): RenderableImage(services, image) {}
 
 		~VulkanRenderableImage()
 		{

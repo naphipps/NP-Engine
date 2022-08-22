@@ -14,7 +14,7 @@
 
 namespace np::graphics
 {
-	Renderer* Renderer::Create(services::Services& services)
+	Renderer* Renderer::Create(srvc::Services& services)
 	{
 		Renderer* renderer = nullptr;
 

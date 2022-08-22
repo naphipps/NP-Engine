@@ -10,7 +10,7 @@
 
 #include "NP-Engine/NP-Engine.hpp"
 
-extern ::np::app::Application* ::np::app::CreateApplication(::np::services::Services& application_services);
+extern ::np::app::Application* ::np::app::CreateApplication(::np::srvc::Services& application_services);
 
 i32 main(i32 argc, chr** argv)
 {
@@ -31,12 +31,12 @@ i32 main(i32 argc, chr** argv)
 		{
 			::np::mem::RedBlackTreeAllocator application_allocator(main_block);
 			::np::mem::TraitAllocator::Register(application_allocator);
-			::np::services::Services* application_services =
-				::np::mem::Create<::np::services::Services>(application_allocator);
+			::np::srvc::Services* application_services =
+				::np::mem::Create<::np::srvc::Services>(application_allocator);
 			::np::app::Application* application = ::np::app::CreateApplication(*application_services);
 			application->Run(argc, argv);
 			::np::mem::Destroy<::np::app::Application>(application_allocator, application);
-			::np::mem::Destroy<::np::services::Services>(application_allocator, application_services);
+			::np::mem::Destroy<::np::srvc::Services>(application_allocator, application_services);
 			NP_ENGINE_PROFILE_SAVE();
 			NP_ENGINE_PROFILE_RESET();
 			::np::mem::TraitAllocator::ResetRegistration();

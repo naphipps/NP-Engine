@@ -22,13 +22,13 @@ namespace np::graphics
 	class RenderableImage : public RenderableObject
 	{
 	protected:
-		services::Services& _services;
+		srvc::Services& _services;
 		Image& _image;
 
-		RenderableImage(services::Services& services, Image& image): _services(services), _image(image) {}
+		RenderableImage(srvc::Services& services, Image& image): _services(services), _image(image) {}
 
 	public:
-		static RenderableImage* Create(services::Services& services, Image& image);
+		static RenderableImage* Create(srvc::Services& services, Image& image);
 
 		virtual ~RenderableImage() {}
 

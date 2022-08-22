@@ -93,7 +93,7 @@ namespace np::app
 		container::vector<Layer*> _overlays;
 		atm_bl _running;
 
-		Application(const Application::Properties& application_properties, services::Services& application_services):
+		Application(const Application::Properties& application_properties, srvc::Services& application_services):
 			Layer(application_services),
 			_properties(application_properties),
 			_window_layer(application_services),
@@ -276,7 +276,7 @@ namespace np::app
 		}
 	};
 
-	Application* CreateApplication(services::Services& application_services);
+	Application* CreateApplication(srvc::Services& application_services);
 } // namespace np::app
 
 #endif /* NP_ENGINE_APPLICATION_HPP */

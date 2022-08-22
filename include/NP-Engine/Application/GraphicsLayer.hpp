@@ -165,7 +165,7 @@ namespace np::app
 		}
 
 	public:
-		GraphicsLayer(services::Services& services): Layer(services)
+		GraphicsLayer(srvc::Services& services): Layer(services)
 		{
 			ChooseRhi();
 		}

@@ -137,7 +137,7 @@ namespace np::graphics::rhi
 		}
 
 	public:
-		VulkanScene(services::Services& services, Renderer& renderer):
+		VulkanScene(srvc::Services& services, Renderer& renderer):
 			Scene(services, renderer),
 			_dlp_is_complete(true),
 			_dlp_keep_alive(false),

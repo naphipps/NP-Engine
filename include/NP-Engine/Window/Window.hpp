@@ -40,7 +40,7 @@ namespace np::window
 
 	protected:
 		Properties _properties;
-		services::Services& _services;
+		srvc::Services& _services;
 		GLFWwindow* _glfw_window;
 		thr::Thread _thread;
 		atm_bl _show_procedure_is_complete;
@@ -111,7 +111,7 @@ namespace np::window
 		}
 
 	public:
-		Window(const Window::Properties& properties, services::Services& services):
+		Window(const Window::Properties& properties, srvc::Services& services):
 			_properties(properties),
 			_services(services),
 			_glfw_window(CreateGlfwWindow()),
