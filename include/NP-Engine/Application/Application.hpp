@@ -89,8 +89,8 @@ namespace np::app
 		Properties _properties;
 		WindowLayer _window_layer;
 		GraphicsLayer _graphics_layer;
-		container::vector<Layer*> _layers;
-		container::vector<Layer*> _overlays;
+		con::vector<Layer*> _layers;
+		con::vector<Layer*> _overlays;
 		atm_bl _running;
 
 		Application(const Application::Properties& application_properties, srvc::Services& application_services):

@@ -25,7 +25,7 @@ namespace np::gfx
 	private:
 		ui32 _width;
 		ui32 _height;
-		container::vector<ui8> _pixels;
+		con::vector<ui8> _pixels;
 		str _filename;
 
 	public:

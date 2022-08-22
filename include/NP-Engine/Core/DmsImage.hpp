@@ -1256,7 +1256,7 @@ namespace np
 			 return object is a vector of shapes with holes
 			 */
 			math::fltPointVector3D* GetPolygonVector3D(const flt isohreshold)
-			// container::vector<DmsLineSegmentUset>* GetPolygonVector3D(const flt isohreshold)
+			// con::vector<DmsLineSegmentUset>* GetPolygonVector3D(const flt isohreshold)
 			{
 				NP_ENGINE_ASSERT(isohreshold >= 0.0 && isohreshold <= 1.0, "isothreshold must be on range [0, 1]");
 
@@ -1264,7 +1264,7 @@ namespace np
 				math::fltPointVector3D* shapes_with_holes;
 				shapes_with_holes = new math::fltPointVector3D;
 
-				container::vector<DmsLineSegmentUset>* temp_return = new container::vector<DmsLineSegmentUset>;
+				con::vector<DmsLineSegmentUset>* temp_return = new con::vector<DmsLineSegmentUset>;
 
 				for (ui16 y = 0; y < base::GetHeight(); y++)
 				{

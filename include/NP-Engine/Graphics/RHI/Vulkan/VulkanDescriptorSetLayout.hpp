@@ -20,7 +20,7 @@ namespace np::gfx::rhi
 	{
 	private:
 		VulkanDevice& _device;
-		const container::vector<VkDescriptorSetLayoutBinding> _layout_bindings;
+		const con::vector<VkDescriptorSetLayoutBinding> _layout_bindings;
 		VkDescriptorSetLayout _layout;
 
 		VkDescriptorSetLayout CreateLayout() const
@@ -95,7 +95,7 @@ namespace np::gfx::rhi
 			return found;
 		}
 
-		const container::vector<VkDescriptorSetLayoutBinding>& GetBindings() const
+		const con::vector<VkDescriptorSetLayoutBinding>& GetBindings() const
 		{
 			return _layout_bindings;
 		}

@@ -115,9 +115,9 @@ namespace np
 			}
 		};
 
-		using DmsLineSegmentUset = container::uset<DmsLineSegment, DmsLineSegmentHash>;
-		using DmsLineSegmentVector = container::vector<DmsLineSegment>;
-		using DmsLineSegmentVector2D = container::vector<DmsLineSegmentVector>;
+		using DmsLineSegmentUset = con::uset<DmsLineSegment, DmsLineSegmentHash>;
+		using DmsLineSegmentVector = con::vector<DmsLineSegment>;
+		using DmsLineSegmentVector2D = con::vector<DmsLineSegmentVector>;
 	} // namespace core
 } // namespace np
 

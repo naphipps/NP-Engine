@@ -46,7 +46,7 @@ namespace np::gfx::rhi
 		VkWriteDescriptorSet _descriptor_writer;
 
 		VkBuffer _vk_vertex_buffer;
-		container::vector<VkDeviceSize> _vertex_offsets;
+		con::vector<VkDeviceSize> _vertex_offsets;
 		VulkanCommandPushConstants* _push_constants;
 		VulkanCommandBindVertexBuffers* _bind_vertex_buffers;
 		VulkanCommandBindIndexBuffer* _bind_index_buffer;
@@ -164,10 +164,10 @@ namespace np::gfx::rhi
 											  VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 			}
 
-			container::vector<VulkanCommandBuffer> command_buffers;
+			con::vector<VulkanCommandBuffer> command_buffers;
 
 			// TODO: I think we can probably squeeze some more performance out of which stage our submits wait for
-			container::vector<VkPipelineStageFlags> wait_dst_flags{VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT};
+			con::vector<VkPipelineStageFlags> wait_dst_flags{VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT};
 
 			ui64 timeline_initial_value = 0;
 			VulkanTimelineSemaphore timeline(vulkan_device, timeline_initial_value);
@@ -375,10 +375,10 @@ namespace np::gfx::rhi
 											  VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 			}
 
-			container::vector<VulkanCommandBuffer> command_buffers;
+			con::vector<VulkanCommandBuffer> command_buffers;
 
 			// TODO: I think we can probably squeeze some more performance out of which stage our submits wait for
-			container::vector<VkPipelineStageFlags> wait_dst_flags{VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT};
+			con::vector<VkPipelineStageFlags> wait_dst_flags{VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT};
 
 			// create texture submit infos
 			VulkanBinarySemaphore transition_to_dst_semaphore(vulkan_device);

@@ -23,13 +23,13 @@ namespace np::evnt
 	protected:
 		atm_bl _flag;
 		mem::TraitAllocator _allocator;
-		container::mpmc_queue<Event*> _buffer1;
-		container::mpmc_queue<Event*> _buffer2;
+		con::mpmc_queue<Event*> _buffer1;
+		con::mpmc_queue<Event*> _buffer2;
 
 		/*
 			gets the event queue based on the queue flag
 		*/
-		container::mpmc_queue<Event*>& GetBuffer()
+		con::mpmc_queue<Event*>& GetBuffer()
 		{
 			return _flag.load(mo_acquire) ? _buffer1 : _buffer2;
 		}
@@ -37,7 +37,7 @@ namespace np::evnt
 		/*
 			gets the other event queue based on the queue flag
 		*/
-		container::mpmc_queue<Event*>& GetOtherBuffer()
+		con::mpmc_queue<Event*>& GetOtherBuffer()
 		{
 			return _flag.load(mo_acquire) ? _buffer2 : _buffer1;
 		}
@@ -59,7 +59,7 @@ namespace np::evnt
 		{
 			NP_ENGINE_STATIC_ASSERT((::std::is_base_of_v<evnt::Event, T>), "T is requried to be a base of event:Event");
 			Event* e = nullptr;
-			container::mpmc_queue<Event*>& buffer = GetBuffer();
+			con::mpmc_queue<Event*>& buffer = GetBuffer();
 
 			mem::Block block = _allocator.Allocate(sizeof(T));
 			if (block.IsValid())
@@ -93,7 +93,7 @@ namespace np::evnt
 		*/
 		evnt::Event* PopOther()
 		{
-			container::mpmc_queue<Event*>& buffer = GetOtherBuffer();
+			con::mpmc_queue<Event*>& buffer = GetOtherBuffer();
 			evnt::Event* e = nullptr;
 			if (!buffer.try_dequeue(e))
 			{

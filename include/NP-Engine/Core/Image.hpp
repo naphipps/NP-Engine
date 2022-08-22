@@ -79,7 +79,7 @@ namespace np
 
 			constexpr static ui16 _width = SIZE;
 			constexpr static ui16 _height = SIZE;
-			container::array<T, (ui32)SIZE*(ui32)SIZE> _value;
+			con::array<T, (ui32)SIZE*(ui32)SIZE> _value;
 
 		public:
 			/**

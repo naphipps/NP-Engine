@@ -49,16 +49,16 @@ namespace np::gfx::rhi
 
 		VulkanDescriptorSetLayout _descriptor_set_layout;
 		VulkanDescriptorSets _descriptor_sets;
-		container::vector<VulkanBuffer*> _meta_value_buffers;
-		container::vector<VkDescriptorBufferInfo> _meta_value_descriptor_infos;
-		container::vector<VkWriteDescriptorSet> _meta_value_descriptor_writers;
+		con::vector<VulkanBuffer*> _meta_value_buffers;
+		con::vector<VkDescriptorBufferInfo> _meta_value_descriptor_infos;
+		con::vector<VkWriteDescriptorSet> _meta_value_descriptor_writers;
 
 		VulkanSampler _sampler; // TODO: we might should put this in the Renderer
 		VkPipelineLayout _pipeline_layout;
 		VkPipeline _pipeline;
 		VulkanCommandBindPipeline* _bind_pipeline;
 		siz _bind_descriptor_sets_command_slot;
-		container::vector<VkDescriptorSet> _bound_descriptor_sets;
+		con::vector<VkDescriptorSet> _bound_descriptor_sets;
 		VulkanCommandBindDescriptorSets* _bind_descriptor_sets;
 
 		VkPipelineShaderStageCreateInfo CreatePipelineShaderStageInfo()
@@ -218,7 +218,7 @@ namespace np::gfx::rhi
 
 		// TODO: what's going on with these dynamic state methods??
 
-		container::vector<VkDynamicState> CreateDynamicStates()
+		con::vector<VkDynamicState> CreateDynamicStates()
 		{
 			return {VK_DYNAMIC_STATE_VIEWPORT, VK_DYNAMIC_STATE_LINE_WIDTH};
 		}
@@ -239,9 +239,9 @@ namespace np::gfx::rhi
 			return info;
 		}
 
-		container::vector<VkPipelineShaderStageCreateInfo> CreateShaderStages()
+		con::vector<VkPipelineShaderStageCreateInfo> CreateShaderStages()
 		{
-			container::vector<VkPipelineShaderStageCreateInfo> stages;
+			con::vector<VkPipelineShaderStageCreateInfo> stages;
 
 			VkPipelineShaderStageCreateInfo vertex_stage = CreatePipelineShaderStageInfo();
 			vertex_stage.stage = VK_SHADER_STAGE_VERTEX_BIT;
@@ -300,8 +300,8 @@ namespace np::gfx::rhi
 
 			if (_pipeline_layout != nullptr && _render_pass != nullptr)
 			{
-				container::vector<VkVertexInputBindingDescription> vertex_binding_descs = VulkanVertex::BindingDescriptions();
-				container::array<VkVertexInputAttributeDescription, 3> vertex_attribute_descs =
+				con::vector<VkVertexInputBindingDescription> vertex_binding_descs = VulkanVertex::BindingDescriptions();
+				con::array<VkVertexInputAttributeDescription, 3> vertex_attribute_descs =
 					VulkanVertex::AttributeDescriptions();
 
 				VkPipelineVertexInputStateCreateInfo vertex_input_state_info = CreatePipelineVertexInputStateInfo();
@@ -310,13 +310,13 @@ namespace np::gfx::rhi
 				vertex_input_state_info.vertexAttributeDescriptionCount = (ui32)vertex_attribute_descs.size();
 				vertex_input_state_info.pVertexAttributeDescriptions = vertex_attribute_descs.data();
 
-				container::vector<VkPipelineShaderStageCreateInfo> shader_stages = CreateShaderStages();
+				con::vector<VkPipelineShaderStageCreateInfo> shader_stages = CreateShaderStages();
 				VkPipelineInputAssemblyStateCreateInfo input_assembly_state_info = CreatePipelineInputAssemblyStateInfo();
 
 				// TODO: use dynamic viewport and scissor:
 				// https://github.com/Overv/VulkanTutorial/commit/87803541171579165caa354120157a0cc6c8192f
-				container::vector<VkViewport> viewports{CreateViewport()};
-				container::vector<VkRect2D> scissors{CreateScissor()};
+				con::vector<VkViewport> viewports{CreateViewport()};
+				con::vector<VkRect2D> scissors{CreateScissor()};
 
 				VkPipelineViewportStateCreateInfo viewport_state_info = CreatePipelineViewportStateInfo();
 				viewport_state_info.viewportCount = viewports.size();
@@ -327,7 +327,7 @@ namespace np::gfx::rhi
 				VkPipelineRasterizationStateCreateInfo rasterization_state_info = CreatePipelineRasterizationStateInfo();
 				VkPipelineMultisampleStateCreateInfo multisample_state_info = CreatePipelineMultisampleStateInfo();
 
-				container::vector<VkPipelineColorBlendAttachmentState> color_blend_attachment_states = {
+				con::vector<VkPipelineColorBlendAttachmentState> color_blend_attachment_states = {
 					CreatePipelineColorBlendAttachmentState()};
 				VkPipelineColorBlendStateCreateInfo color_blend_state_info = CreatePipelineColorBlendStateInfo();
 				color_blend_state_info.attachmentCount = color_blend_attachment_states.size();
@@ -392,9 +392,9 @@ namespace np::gfx::rhi
 			vkUnmapMemory(GetDevice(), device_memory);
 		}
 
-		container::vector<VulkanBuffer*> CreateMetaValueBuffers()
+		con::vector<VulkanBuffer*> CreateMetaValueBuffers()
 		{
-			container::vector<VulkanBuffer*> buffers(NP_ENGINE_VULKAN_MAX_FRAME_COUNT);
+			con::vector<VulkanBuffer*> buffers(NP_ENGINE_VULKAN_MAX_FRAME_COUNT);
 
 			for (siz i = 0; i < buffers.size(); i++)
 			{
@@ -405,9 +405,9 @@ namespace np::gfx::rhi
 			return buffers;
 		}
 
-		container::vector<VkDescriptorBufferInfo> CreateMetaValueDescriptorInfos()
+		con::vector<VkDescriptorBufferInfo> CreateMetaValueDescriptorInfos()
 		{
-			container::vector<VkDescriptorBufferInfo> infos(NP_ENGINE_VULKAN_MAX_FRAME_COUNT);
+			con::vector<VkDescriptorBufferInfo> infos(NP_ENGINE_VULKAN_MAX_FRAME_COUNT);
 
 			for (siz i = 0; i < infos.size(); i++)
 			{
@@ -419,9 +419,9 @@ namespace np::gfx::rhi
 			return infos;
 		}
 
-		container::vector<VkWriteDescriptorSet> CreateMetaValueDescriptorWriters()
+		con::vector<VkWriteDescriptorSet> CreateMetaValueDescriptorWriters()
 		{
-			container::vector<VkWriteDescriptorSet> writers(NP_ENGINE_VULKAN_MAX_FRAME_COUNT,
+			con::vector<VkWriteDescriptorSet> writers(NP_ENGINE_VULKAN_MAX_FRAME_COUNT,
 															{VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET});
 
 			for (siz i = 0; i < writers.size(); i++)

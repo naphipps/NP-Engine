@@ -34,8 +34,8 @@ namespace np::jsys
 		thr::ThreadToken _thread_token;
 		thr::ThreadPool* _thread_pool;
 		JobSystem* _job_system;
-		container::mpmc_queue<Job*> _immediate_job_queue;
-		container::vector<JobWorker*> _coworkers;
+		con::mpmc_queue<Job*> _immediate_job_queue;
+		con::vector<JobWorker*> _coworkers;
 		ui32 _coworker_index;
 		tim::DurationMilliseconds _bad_steal_sleep_duration;
 		random::Random32 _random_engine;

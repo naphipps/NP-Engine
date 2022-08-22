@@ -35,10 +35,10 @@ namespace np::gfx
 		// TODO: ^ mem::Delegate _on_change_delegate;
 		str _filename;
 		::tinyobj::attrib_t _attributes;
-		container::vector<::tinyobj::shape_t> _shapes;
-		container::vector<::tinyobj::material_t> _materials;
-		container::vector<Vertex> _vertices;
-		container::vector<ui32> _indices;
+		con::vector<::tinyobj::shape_t> _shapes;
+		con::vector<::tinyobj::material_t> _materials;
+		con::vector<Vertex> _vertices;
+		con::vector<ui32> _indices;
 
 	public:
 		Model(str model_filename, str model_texture_filename, bl hot_reloadable = false):
@@ -113,7 +113,7 @@ namespace np::gfx
 			{
 				_shapes.assign(::std::make_move_iterator(shapes.begin()), ::std::make_move_iterator(shapes.end()));
 				_materials.assign(::std::make_move_iterator(materials.begin()), ::std::make_move_iterator(materials.end()));
-				container::umap<Vertex, ui32> vertexIndexMap;
+				con::umap<Vertex, ui32> vertexIndexMap;
 
 				for (const ::tinyobj::shape_t& shape : _shapes)
 				{
@@ -187,42 +187,42 @@ namespace np::gfx
 			return _attributes;
 		}
 
-		container::vector<::tinyobj::shape_t>& GetShapes()
+		con::vector<::tinyobj::shape_t>& GetShapes()
 		{
 			return _shapes;
 		}
 
-		const container::vector<::tinyobj::shape_t>& GetShapes() const
+		const con::vector<::tinyobj::shape_t>& GetShapes() const
 		{
 			return _shapes;
 		}
 
-		container::vector<::tinyobj::material_t>& GetMaterials()
+		con::vector<::tinyobj::material_t>& GetMaterials()
 		{
 			return _materials;
 		}
 
-		const container::vector<::tinyobj::material_t>& GetMaterials() const
+		const con::vector<::tinyobj::material_t>& GetMaterials() const
 		{
 			return _materials;
 		}
 
-		container::vector<Vertex>& GetVertices()
+		con::vector<Vertex>& GetVertices()
 		{
 			return _vertices;
 		}
 
-		const container::vector<Vertex>& GetVertices() const
+		const con::vector<Vertex>& GetVertices() const
 		{
 			return _vertices;
 		}
 
-		container::vector<ui32>& GetIndices()
+		con::vector<ui32>& GetIndices()
 		{
 			return _indices;
 		}
 
-		const container::vector<ui32>& GetIndices() const
+		const con::vector<ui32>& GetIndices() const
 		{
 			return _indices;
 		}

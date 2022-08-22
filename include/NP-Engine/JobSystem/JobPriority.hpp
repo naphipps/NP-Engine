@@ -57,9 +57,9 @@ namespace np::jsys
 		return return_priority;
 	}
 
-	constexpr static container::array<JobPriority, 5> JobPrioritiesHighToLow{
+	constexpr static con::array<JobPriority, 5> JobPrioritiesHighToLow{
 		JobPriority::Highest, JobPriority::Higher, JobPriority::Normal, JobPriority::Lower, JobPriority::Lowest};
-	constexpr static container::array<JobPriority, 5> JobPrioritiesLowToHigh{
+	constexpr static con::array<JobPriority, 5> JobPrioritiesLowToHigh{
 		JobPriority::Lowest, JobPriority::Lower, JobPriority::Normal, JobPriority::Higher, JobPriority::Highest};
 } // namespace np::js
 

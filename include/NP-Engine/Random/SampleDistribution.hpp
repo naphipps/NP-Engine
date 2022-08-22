@@ -32,7 +32,7 @@ namespace np::random
 
 	private:
 		ui32 _resolution = RESOLUTION;
-		container::array<SampleType, RESOLUTION + 1> _sample; //"RESOLUTION + 1" ensures sample [0, 1]
+		con::array<SampleType, RESOLUTION + 1> _sample; //"RESOLUTION + 1" ensures sample [0, 1]
 		CdfFunctionType _cdf_function;
 		flt _min_result;
 		flt _max_result;
@@ -116,7 +116,7 @@ namespace np::random
 			flt chosen_probability = norm_uniform_result_f;
 
 			// extract sample value from chosen probability above
-			using SampleIterator = typename container::array<SampleType, RESOLUTION>::iterator; // sample_type*;
+			using SampleIterator = typename con::array<SampleType, RESOLUTION>::iterator; // sample_type*;
 			SampleIterator bound = ::std::upper_bound(_sample.begin(), _sample.end(), chosen_probability);
 			flt value = _min_result - 1; // sets an invalid value
 

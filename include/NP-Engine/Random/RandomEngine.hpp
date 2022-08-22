@@ -137,7 +137,7 @@ namespace np::random
 		}
 
 		template <siz SIZE>
-		ResultType GetRouletteWheelSelection(const container::array<ResultType, SIZE>& distribution)
+		ResultType GetRouletteWheelSelection(const con::array<ResultType, SIZE>& distribution)
 		{
 			// add all the weights to determine range
 			ResultType range = 0;

@@ -35,7 +35,7 @@ namespace np::gfx::rhi
 			// TODO: feel like we should pipe this stuff through our logger
 			// TODO: should we have a macro to enable this? NP_ENGINE_ENABLE_VULKAN_DEBUG_CALLBACK?
 
-			container::vector<str> known_msgs{
+			con::vector<str> known_msgs{
 				R"(loader_scanned_icd_add: Driver C:\Windows\System32\DriverStore\FileRepository\u0377495.inf_amd64_58cc395c0bf03a26\B377432\.\amdvlk64.dll says it supports interface version 6 but still exports core entrypoints (Policy #LDP_DRIVER_6))" // vulkansdk 1.3.211
 			};
 
@@ -79,45 +79,45 @@ namespace np::gfx::rhi
 			return version;
 		}
 
-		container::vector<VkExtensionProperties> GetSupportedInstanceExtensions() const
+		con::vector<VkExtensionProperties> GetSupportedInstanceExtensions() const
 		{
 			ui32 count = 0;
 			vkEnumerateInstanceExtensionProperties(nullptr, &count, nullptr);
-			container::vector<VkExtensionProperties> extensions(count);
+			con::vector<VkExtensionProperties> extensions(count);
 			vkEnumerateInstanceExtensionProperties(nullptr, &count, extensions.data());
 			return extensions;
 		}
 
-		container::vector<str> GetSupportedInstanceExtensionNames() const
+		con::vector<str> GetSupportedInstanceExtensionNames() const
 		{
-			container::vector<VkExtensionProperties> extensions = GetSupportedInstanceExtensions();
-			container::vector<str> names;
+			con::vector<VkExtensionProperties> extensions = GetSupportedInstanceExtensions();
+			con::vector<str> names;
 			for (auto e : extensions)
 				names.emplace_back(e.extensionName);
 			return names;
 		}
 
-		container::vector<VkLayerProperties> GetSupportedInstanceLayers() const
+		con::vector<VkLayerProperties> GetSupportedInstanceLayers() const
 		{
 			ui32 count;
 			vkEnumerateInstanceLayerProperties(&count, nullptr);
-			container::vector<VkLayerProperties> layers(count);
+			con::vector<VkLayerProperties> layers(count);
 			vkEnumerateInstanceLayerProperties(&count, layers.data());
 			return layers;
 		}
 
-		container::vector<str> GetSupportedInstanceLayerNames() const
+		con::vector<str> GetSupportedInstanceLayerNames() const
 		{
-			container::vector<VkLayerProperties> layers = GetSupportedInstanceLayers();
-			container::vector<str> names;
+			con::vector<VkLayerProperties> layers = GetSupportedInstanceLayers();
+			con::vector<str> names;
 			for (auto e : layers)
 				names.emplace_back(e.layerName);
 			return names;
 		}
 
-		container::vector<str> GetRequiredInstanceExtensionNames() const
+		con::vector<str> GetRequiredInstanceExtensionNames() const
 		{
-			container::uset<str> extension_set;
+			con::uset<str> extension_set;
 
 			ui32 count;
 			const chr** glfw_required = glfwGetRequiredInstanceExtensions(&count);
@@ -127,16 +127,16 @@ namespace np::gfx::rhi
 
 			extension_set.emplace(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
 
-			container::vector<str> extensions;
+			con::vector<str> extensions;
 			for (const str& extension : extension_set)
 				extensions.emplace_back(extension);
 
 			return extensions;
 		}
 
-		container::vector<str> GetRequiredInstanceLayerNames() const
+		con::vector<str> GetRequiredInstanceLayerNames() const
 		{
-			container::vector<str> layers;
+			con::vector<str> layers;
 
 #if DEBUG // TODO: we need a better way to clean up our debug messenger, etc - add some methods to organize this behavior ...
 		  // how??
@@ -185,13 +185,13 @@ namespace np::gfx::rhi
 			VkApplicationInfo app_info = CreateApplicationInfo();
 			VkDebugUtilsMessengerCreateInfoEXT debug_msgr_info = CreateDebugMessagerInfo();
 
-			container::vector<str> required_extensions = GetRequiredInstanceExtensionNames();
-			container::vector<const chr*> required_extension_names;
+			con::vector<str> required_extensions = GetRequiredInstanceExtensionNames();
+			con::vector<const chr*> required_extension_names;
 			for (const str& extension : required_extensions)
 				required_extension_names.emplace_back(extension.c_str());
 
-			container::vector<str> required_layers = GetRequiredInstanceLayerNames();
-			container::vector<const chr*> required_layer_names;
+			con::vector<str> required_layers = GetRequiredInstanceLayerNames();
+			con::vector<const chr*> required_layer_names;
 			for (const str& layer : required_layers)
 				required_layer_names.emplace_back(layer.c_str());
 
@@ -203,13 +203,13 @@ namespace np::gfx::rhi
 			instance_info.ppEnabledLayerNames = required_layer_names.data();
 			instance_info.pNext = &debug_msgr_info;
 
-			container::uset<str> required_extension_set(required_extensions.begin(), required_extensions.end());
-			container::vector<str> supported_extensions = GetSupportedInstanceExtensionNames();
+			con::uset<str> required_extension_set(required_extensions.begin(), required_extensions.end());
+			con::vector<str> supported_extensions = GetSupportedInstanceExtensionNames();
 			for (const str& e : supported_extensions)
 				required_extension_set.erase(e);
 
-			container::uset<str> required_layer_set(required_layers.begin(), required_layers.end());
-			container::vector<str> supported_layers = GetSupportedInstanceLayerNames();
+			con::uset<str> required_layer_set(required_layers.begin(), required_layers.end());
+			con::vector<str> supported_layers = GetSupportedInstanceLayerNames();
 			for (const str& l : supported_layers)
 				required_layer_set.erase(l);
 

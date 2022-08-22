@@ -216,17 +216,17 @@ namespace np
 		};
 
 		template <typename T>
-		using PointQueue = container::queue<Point<T>>;
+		using PointQueue = con::queue<Point<T>>;
 		template <typename T>
-		using PointUset = container::uset<Point<T>>;
+		using PointUset = con::uset<Point<T>>;
 		template <typename T>
-		using PointVector = container::vector<Point<T>>;
+		using PointVector = con::vector<Point<T>>;
 		template <typename T, siz SIZE>
-		using PointArray = container::array<Point<T>, SIZE>;
+		using PointArray = con::array<Point<T>, SIZE>;
 		template <typename T>
-		using PointVector2D = container::vector<PointVector<T>>;
+		using PointVector2D = con::vector<PointVector<T>>;
 		template <typename T>
-		using PointVector3D = container::vector<PointVector2D<T>>;
+		using PointVector3D = con::vector<PointVector2D<T>>;
 
 		using ui8Point = Point<ui8>;
 		using ui16Point = Point<ui16>;

@@ -16,7 +16,7 @@ namespace np::gfx
 	class Pipeline
 	{
 	protected:
-		container::vector<PipelineMetaValues> _meta_values;
+		con::vector<PipelineMetaValues> _meta_values;
 
 	public:
 		virtual PipelineMetaValues GetMetaValues() const = 0;

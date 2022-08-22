@@ -27,7 +27,7 @@
 
 #include "NP-Engine/Vendor/ConcurrentqueueInclude.hpp"
 
-namespace np::container
+namespace np::con
 {
 	template <class T>
 	using init_list = ::std::initializer_list<T>;
@@ -41,13 +41,13 @@ namespace np::container
 	template <class T>
 	using deque = ::std::deque<T, mem::StdAllocator<T>>;
 
-	template <class T, class Container = container::deque<T>>
+	template <class T, class Container = con::deque<T>>
 	using stack = ::std::stack<T, Container>;
 
-	template <class T, class Container = container::deque<T>>
+	template <class T, class Container = con::deque<T>>
 	using queue = ::std::queue<T, Container>;
 
-	template <class T, class Container = container::vector<T>, class Compare = ::std::less<typename Container::value_type>>
+	template <class T, class Container = con::vector<T>, class Compare = ::std::less<typename Container::value_type>>
 	using pqueue = ::std::priority_queue<T, Container, Compare>;
 
 	template <class T>
@@ -79,6 +79,6 @@ namespace np::container
 
 	template <class Key, class T, class Hash = ::std::hash<Key>, class KeyEqualTo = ::std::equal_to<Key>>
 	using ummap = ::std::unordered_multimap<Key, T, Hash, KeyEqualTo, mem::StdAllocator<::std::pair<const Key, T>>>;
-} // namespace np::container
+} // namespace np::con
 
 #endif /* NP_ENGINE_CONTAINER_HPP */

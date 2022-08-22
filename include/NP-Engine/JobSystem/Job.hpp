@@ -22,7 +22,7 @@ namespace np::jsys
 	class Job
 	{
 	private:
-		container::vector<Job*> _dependents;
+		con::vector<Job*> _dependents;
 		atm_i32 _antecedent_count;
 		mem::Delegate _delegate;
 		atm<atm_bl*> _confirm_completion_flag;

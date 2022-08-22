@@ -44,8 +44,8 @@ namespace np::win
 		GLFWwindow* _glfw_window;
 		thr::Thread _thread;
 		atm_bl _show_procedure_is_complete;
-		container::omap<void*, ResizeCallback> _resize_callbacks;
-		container::omap<void*, PositionCallback> _position_callbacks;
+		con::omap<void*, ResizeCallback> _resize_callbacks;
+		con::omap<void*, PositionCallback> _position_callbacks;
 
 		static void WindowCloseCallback(GLFWwindow* glfw_window)
 		{

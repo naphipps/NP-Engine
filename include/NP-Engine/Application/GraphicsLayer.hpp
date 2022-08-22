@@ -32,10 +32,10 @@ namespace np::app
 	class GraphicsLayer : public Layer
 	{
 	protected:
-		container::vector<gfx::Renderer*> _renderers;
-		container::vector<gfx::Scene*> _scenes; // TODO: I feel like we need to redesign how we store all these
-		container::uset<gfx::Scene*> _unacquired_scenes;
-		container::uset<gfx::Scene*> _acquired_scenes;
+		con::vector<gfx::Renderer*> _renderers;
+		con::vector<gfx::Scene*> _scenes; // TODO: I feel like we need to redesign how we store all these
+		con::uset<gfx::Scene*> _unacquired_scenes;
+		con::uset<gfx::Scene*> _acquired_scenes;
 
 		virtual void AdjustForWindowClose(evnt::Event& e)
 		{
@@ -98,7 +98,7 @@ namespace np::app
 		void ChooseRhi()
 		{
 			mem::TraitAllocator allocator;
-			container::deque<gfx::Renderer*> renderers;
+			con::deque<gfx::Renderer*> renderers;
 			gfx::Renderer* opengl = nullptr;
 			gfx::Renderer* vulkan = nullptr;
 

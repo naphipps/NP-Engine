@@ -24,8 +24,8 @@ namespace np::app
 	{
 	private:
 		mem::TraitAllocator _allocator;
-		container::vector<win::Window*> _windows;
-		container::vector<void*> _native_windows;
+		con::vector<win::Window*> _windows;
+		con::vector<void*> _native_windows;
 
 	protected:
 		virtual void HandleWindowCreate(evnt::Event& e)

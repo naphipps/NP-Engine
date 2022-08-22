@@ -43,9 +43,9 @@ namespace np::gfx::rhi
 				return graphics.has_value() && present.has_value();
 			}
 
-			container::vector<ui32> to_vector() const
+			con::vector<ui32> to_vector() const
 			{
-				return is_complete() ? container::vector<ui32>{graphics.value(), present.value()} : container::vector<ui32>{};
+				return is_complete() ? con::vector<ui32>{graphics.value(), present.value()} : con::vector<ui32>{};
 			}
 		};
 
@@ -60,63 +60,63 @@ namespace np::gfx::rhi
 		VulkanQueue _graphics_queue;
 		VulkanQueue _present_queue;
 
-		container::vector<VkExtensionProperties> GetSupportedDeviceExtensions(VkPhysicalDevice physical_device) const
+		con::vector<VkExtensionProperties> GetSupportedDeviceExtensions(VkPhysicalDevice physical_device) const
 		{
 			ui32 count = 0;
 			vkEnumerateDeviceExtensionProperties(physical_device, nullptr, &count, nullptr);
-			container::vector<VkExtensionProperties> extensions(count);
+			con::vector<VkExtensionProperties> extensions(count);
 			vkEnumerateDeviceExtensionProperties(physical_device, nullptr, &count, extensions.data());
 			return extensions;
 		}
 
-		container::vector<str> GetSupportedDeviceExtensionNames(VkPhysicalDevice physical_device) const
+		con::vector<str> GetSupportedDeviceExtensionNames(VkPhysicalDevice physical_device) const
 		{
-			container::vector<VkExtensionProperties> extensions = GetSupportedDeviceExtensions(physical_device);
-			container::vector<str> names;
+			con::vector<VkExtensionProperties> extensions = GetSupportedDeviceExtensions(physical_device);
+			con::vector<str> names;
 			for (VkExtensionProperties& e : extensions)
 				names.emplace_back(e.extensionName);
 			return names;
 		}
 
-		container::vector<VkLayerProperties> GetSupportedDeviceLayers(VkPhysicalDevice physical_device) const
+		con::vector<VkLayerProperties> GetSupportedDeviceLayers(VkPhysicalDevice physical_device) const
 		{
 			ui32 count;
 			vkEnumerateDeviceLayerProperties(physical_device, &count, nullptr);
-			container::vector<VkLayerProperties> layers(count);
+			con::vector<VkLayerProperties> layers(count);
 			vkEnumerateDeviceLayerProperties(physical_device, &count, layers.data());
 			return layers;
 		}
 
-		container::vector<str> GetSupportedDeviceLayerNames(VkPhysicalDevice physical_device) const
+		con::vector<str> GetSupportedDeviceLayerNames(VkPhysicalDevice physical_device) const
 		{
-			container::vector<VkLayerProperties> layers = GetSupportedDeviceLayers(physical_device);
-			container::vector<str> names;
+			con::vector<VkLayerProperties> layers = GetSupportedDeviceLayers(physical_device);
+			con::vector<str> names;
 			for (VkLayerProperties& layer : layers)
 				names.emplace_back(layer.layerName);
 			return names;
 		}
 
-		container::vector<VkPhysicalDevice> GetPhysicalDevices() const
+		con::vector<VkPhysicalDevice> GetPhysicalDevices() const
 		{
 			ui32 count = 0;
 			vkEnumeratePhysicalDevices(GetSurface().GetInstance(), &count, nullptr);
-			container::vector<VkPhysicalDevice> devices(count);
+			con::vector<VkPhysicalDevice> devices(count);
 			vkEnumeratePhysicalDevices(GetSurface().GetInstance(), &count, devices.data());
 			return devices;
 		}
 
-		container::vector<VkQueueFamilyProperties> GetQueueFamilyProperties(VkPhysicalDevice device) const
+		con::vector<VkQueueFamilyProperties> GetQueueFamilyProperties(VkPhysicalDevice device) const
 		{
 			ui32 count = 0;
 			vkGetPhysicalDeviceQueueFamilyProperties(device, &count, nullptr);
-			container::vector<VkQueueFamilyProperties> properties(count);
+			con::vector<VkQueueFamilyProperties> properties(count);
 			vkGetPhysicalDeviceQueueFamilyProperties(device, &count, properties.data());
 			return properties;
 		}
 
-		container::vector<str> GetRequiredDeviceExtensionNames() const
+		con::vector<str> GetRequiredDeviceExtensionNames() const
 		{
-			container::vector<str> extensions{VK_KHR_SWAPCHAIN_EXTENSION_NAME};
+			con::vector<str> extensions{VK_KHR_SWAPCHAIN_EXTENSION_NAME};
 
 #if NP_ENGINE_PLATFORM_IS_APPLE
 			// Apple uses MoltenVK, hence insert VK_KHR_portability_subset
@@ -125,7 +125,7 @@ namespace np::gfx::rhi
 			return extensions;
 		}
 
-		container::vector<str> GetRequiredDeviceLayerNames() const
+		con::vector<str> GetRequiredDeviceLayerNames() const
 		{
 			return {};
 		}
@@ -185,7 +185,7 @@ namespace np::gfx::rhi
 
 				// check queue families
 				{
-					container::vector<VkQueueFamilyProperties> queue_family_properties =
+					con::vector<VkQueueFamilyProperties> queue_family_properties =
 						GetQueueFamilyProperties(physical_device);
 
 					for (siz i = 0; i < queue_family_properties.size(); i++)
@@ -206,11 +206,11 @@ namespace np::gfx::rhi
 
 				// check extensions
 				{
-					container::vector<str> required_extensions = GetRequiredDeviceExtensionNames();
+					con::vector<str> required_extensions = GetRequiredDeviceExtensionNames();
 					if (required_extensions.size() > 0)
 					{
-						container::uset<str> required_extensions_set(required_extensions.begin(), required_extensions.end());
-						container::vector<str> supported_extensions = GetSupportedDeviceExtensionNames(physical_device);
+						con::uset<str> required_extensions_set(required_extensions.begin(), required_extensions.end());
+						con::vector<str> supported_extensions = GetSupportedDeviceExtensionNames(physical_device);
 						for (const str& e : supported_extensions)
 							required_extensions_set.erase(e);
 						supports_required_extensions = required_extensions_set.empty();
@@ -223,11 +223,11 @@ namespace np::gfx::rhi
 
 				// check layers
 				{
-					container::vector<str> required_layers = GetRequiredDeviceLayerNames();
+					con::vector<str> required_layers = GetRequiredDeviceLayerNames();
 					if (required_layers.size() > 0)
 					{
-						container::uset<str> required_layers_set(required_layers.begin(), required_layers.end());
-						container::vector<str> supported_layers = GetSupportedDeviceLayerNames(physical_device);
+						con::uset<str> required_layers_set(required_layers.begin(), required_layers.end());
+						con::vector<str> supported_layers = GetSupportedDeviceLayerNames(physical_device);
 						for (const str& l : supported_layers)
 							required_layers_set.erase(l);
 						supports_required_layers = required_layers_set.empty();
@@ -253,13 +253,13 @@ namespace np::gfx::rhi
 			return score;
 		}
 
-		container::vector<VkDeviceQueueCreateInfo> CreateQueueCreateInfos()
+		con::vector<VkDeviceQueueCreateInfo> CreateQueueCreateInfos()
 		{
-			container::vector<VkDeviceQueueCreateInfo> infos;
+			con::vector<VkDeviceQueueCreateInfo> infos;
 
 			if (_physical_device)
 			{
-				container::oset<ui32> families;
+				con::oset<ui32> families;
 				families.emplace(_queue_family_indices.graphics.value());
 				families.emplace(_queue_family_indices.present.value());
 
@@ -282,7 +282,7 @@ namespace np::gfx::rhi
 			return info;
 		}
 
-		void ChooseSurfaceFormat(container::vector<VkSurfaceFormatKHR>& surface_formats, VkPhysicalDevice physical_device)
+		void ChooseSurfaceFormat(con::vector<VkSurfaceFormatKHR>& surface_formats, VkPhysicalDevice physical_device)
 		{
 			_surface_format = {};
 
@@ -302,7 +302,7 @@ namespace np::gfx::rhi
 			}
 		}
 
-		void ChoosePresentMode(container::vector<VkPresentModeKHR>& present_modes, VkPhysicalDevice physical_device)
+		void ChoosePresentMode(con::vector<VkPresentModeKHR>& present_modes, VkPhysicalDevice physical_device)
 		{
 			_present_mode = {};
 
@@ -325,16 +325,16 @@ namespace np::gfx::rhi
 		VkPhysicalDevice ChoosePhysicalDevice()
 		{
 			VkPhysicalDevice physical_device = nullptr;
-			container::vector<VkSurfaceFormatKHR> surface_formats;
-			container::vector<VkPresentModeKHR> present_modes;
-			container::ommap<i32, VkPhysicalDevice> candidates;
+			con::vector<VkSurfaceFormatKHR> surface_formats;
+			con::vector<VkPresentModeKHR> present_modes;
+			con::ommap<i32, VkPhysicalDevice> candidates;
 			for (VkPhysicalDevice device : GetPhysicalDevices())
 				candidates.emplace(GetPhysicalDeviceScore(device), device);
 
 			if ((VkSurfaceKHR)GetSurface() != nullptr && candidates.size() > 0)
 			{
 				ui32 count = 0;
-				container::vector<VkQueueFamilyProperties> queue_families;
+				con::vector<VkQueueFamilyProperties> queue_families;
 				for (auto it = candidates.rbegin(); it->first > 0 && it != candidates.rend(); it++)
 				{
 					// first = score, second = physical device
@@ -405,19 +405,19 @@ namespace np::gfx::rhi
 				vkGetPhysicalDeviceFeatures(_physical_device, &physical_features);
 				vkGetPhysicalDeviceFeatures2(_physical_device, &physical_features2);
 
-				container::vector<str> enabled_extensions = GetRequiredDeviceExtensionNames();
-				container::vector<const chr*> enabled_extension_names;
+				con::vector<str> enabled_extensions = GetRequiredDeviceExtensionNames();
+				con::vector<const chr*> enabled_extension_names;
 				for (const str& extension : enabled_extensions)
 					enabled_extension_names.emplace_back(extension.c_str());
 
-				container::vector<str> enabled_layers = GetRequiredDeviceLayerNames();
-				container::vector<const chr*> enabled_layer_names;
+				con::vector<str> enabled_layers = GetRequiredDeviceLayerNames();
+				con::vector<const chr*> enabled_layer_names;
 				for (const str& layer : enabled_layers)
 					enabled_layer_names.emplace_back(layer.c_str());
 
-				container::vector<VkDeviceQueueCreateInfo> queue_infos = CreateQueueCreateInfos();
+				con::vector<VkDeviceQueueCreateInfo> queue_infos = CreateQueueCreateInfos();
 
-				container::vector<flt> queue_priorities{1.f};
+				con::vector<flt> queue_priorities{1.f};
 				for (VkDeviceQueueCreateInfo& info : queue_infos)
 				{
 					info.queueCount = (ui32)queue_priorities.size();
@@ -573,7 +573,7 @@ namespace np::gfx::rhi
 			return found ? memory_type_index : -1; // TODO: returning -1 with type ui32??
 		}
 
-		VkFormat GetSupportedFormat(const container::vector<VkFormat>& format_candidates, VkImageTiling image_tiling,
+		VkFormat GetSupportedFormat(const con::vector<VkFormat>& format_candidates, VkImageTiling image_tiling,
 									VkFormatFeatureFlags format_features) const
 		{
 			VkFormat format = VK_FORMAT_UNDEFINED;
@@ -599,26 +599,26 @@ namespace np::gfx::rhi
 			return format;
 		}
 
-		container::vector<VulkanCommandBuffer> AllocateCommandBuffers(siz count)
+		con::vector<VulkanCommandBuffer> AllocateCommandBuffers(siz count)
 		{
 			VkCommandBufferAllocateInfo command_buffer_allocate_info = _command_pool.CreateCommandBufferAllocateInfo();
 			command_buffer_allocate_info.commandBufferCount = count;
 			return _command_pool.AllocateCommandBuffers(command_buffer_allocate_info);
 		}
 
-		void FreeCommandBuffers(container::vector<VulkanCommandBuffer> command_buffers)
+		void FreeCommandBuffers(con::vector<VulkanCommandBuffer> command_buffers)
 		{
 			_command_pool.FreeCommandBuffers(command_buffers);
 		}
 
-		void BeginCommandBuffers(container::vector<VulkanCommandBuffer>& command_buffers, VkCommandBufferBeginInfo& begin_info)
+		void BeginCommandBuffers(con::vector<VulkanCommandBuffer>& command_buffers, VkCommandBufferBeginInfo& begin_info)
 		{
 			for (VulkanCommandBuffer& command_buffer : command_buffers)
 				command_buffer.Begin(begin_info);
 		}
 
-		void BeginCommandBuffers(container::vector<VulkanCommandBuffer>& command_buffers,
-								 container::vector<VkCommandBufferBeginInfo>& begin_infos)
+		void BeginCommandBuffers(con::vector<VulkanCommandBuffer>& command_buffers,
+								 con::vector<VkCommandBufferBeginInfo>& begin_infos)
 		{
 			NP_ENGINE_ASSERT(command_buffers.size() == begin_infos.size(), "command_buffers size must equal begin_infos size");
 
@@ -626,7 +626,7 @@ namespace np::gfx::rhi
 				command_buffers[i].Begin(begin_infos[i]);
 		}
 
-		void EndCommandBuffers(container::vector<VulkanCommandBuffer>& command_buffers)
+		void EndCommandBuffers(con::vector<VulkanCommandBuffer>& command_buffers)
 		{
 			for (VulkanCommandBuffer& command_buffer : command_buffers)
 				command_buffer.End();
