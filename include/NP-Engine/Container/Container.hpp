@@ -36,10 +36,10 @@ namespace np::container
 	using array = ::std::array<T, SIZE>;
 
 	template <class T>
-	using vector = ::std::vector<T, memory::StdAllocator<T>>;
+	using vector = ::std::vector<T, mem::StdAllocator<T>>;
 
 	template <class T>
-	using deque = ::std::deque<T, memory::StdAllocator<T>>;
+	using deque = ::std::deque<T, mem::StdAllocator<T>>;
 
 	template <class T, class Container = container::deque<T>>
 	using stack = ::std::stack<T, Container>;
@@ -51,34 +51,34 @@ namespace np::container
 	using pqueue = ::std::priority_queue<T, Container, Compare>;
 
 	template <class T>
-	using flist = ::std::forward_list<T, memory::StdAllocator<T>>;
+	using flist = ::std::forward_list<T, mem::StdAllocator<T>>;
 
 	template <class T>
-	using list = ::std::list<T, memory::StdAllocator<T>>;
+	using list = ::std::list<T, mem::StdAllocator<T>>;
 
 	template <class Key, class Compare = ::std::less<Key>>
-	using oset = ::std::set<Key, Compare, memory::StdAllocator<Key>>;
+	using oset = ::std::set<Key, Compare, mem::StdAllocator<Key>>;
 
 	template <class Key, class Hash = ::std::hash<Key>, class KeyEqualTo = ::std::equal_to<Key>>
-	using uset = ::std::unordered_set<Key, Hash, KeyEqualTo, memory::StdAllocator<Key>>;
+	using uset = ::std::unordered_set<Key, Hash, KeyEqualTo, mem::StdAllocator<Key>>;
 
 	template <class Key, class T, class Compare = ::std::less<Key>>
-	using omap = ::std::map<Key, T, Compare, memory::StdAllocator<::std::pair<const Key, T>>>;
+	using omap = ::std::map<Key, T, Compare, mem::StdAllocator<::std::pair<const Key, T>>>;
 
 	template <class Key, class T, class Hash = ::std::hash<Key>, class KeyEqualTo = ::std::equal_to<Key>>
-	using umap = ::std::unordered_map<Key, T, Hash, KeyEqualTo, memory::StdAllocator<::std::pair<const Key, T>>>;
+	using umap = ::std::unordered_map<Key, T, Hash, KeyEqualTo, mem::StdAllocator<::std::pair<const Key, T>>>;
 
 	template <class Key, class Compare = ::std::less<Key>>
-	using omset = ::std::multiset<Key, Compare, memory::StdAllocator<Key>>;
+	using omset = ::std::multiset<Key, Compare, mem::StdAllocator<Key>>;
 
 	template <class Key, class Hash = ::std::hash<Key>, class KeyEqualTo = ::std::equal_to<Key>>
-	using umset = ::std::unordered_multiset<Key, Hash, KeyEqualTo, memory::StdAllocator<Key>>;
+	using umset = ::std::unordered_multiset<Key, Hash, KeyEqualTo, mem::StdAllocator<Key>>;
 
 	template <class Key, class T, class Compare = ::std::less<Key>>
-	using ommap = ::std::multimap<Key, T, Compare, memory::StdAllocator<::std::pair<const Key, T>>>;
+	using ommap = ::std::multimap<Key, T, Compare, mem::StdAllocator<::std::pair<const Key, T>>>;
 
 	template <class Key, class T, class Hash = ::std::hash<Key>, class KeyEqualTo = ::std::equal_to<Key>>
-	using ummap = ::std::unordered_multimap<Key, T, Hash, KeyEqualTo, memory::StdAllocator<::std::pair<const Key, T>>>;
+	using ummap = ::std::unordered_multimap<Key, T, Hash, KeyEqualTo, mem::StdAllocator<::std::pair<const Key, T>>>;
 } // namespace np::container
 
 #endif /* NP_ENGINE_CONTAINER_HPP */

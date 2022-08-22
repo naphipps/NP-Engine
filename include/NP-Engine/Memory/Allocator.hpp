@@ -13,7 +13,7 @@
 
 #include "Block.hpp"
 
-namespace np::memory
+namespace np::mem
 {
 	/*
 		constructs the given type using the given args inside given block
@@ -130,6 +130,6 @@ namespace np::memory
 		bl deallocated = allocator.Deallocate((void*)ptr);
 		NP_ENGINE_ASSERT(destructed && deallocated, "We required object of T to be destructed and deallocated.");
 	}
-} // namespace np::memory
+} // namespace np::mem
 
 #endif /* NP_ENGINE_ALLOCATOR_HPP */

@@ -98,74 +98,74 @@ namespace np::graphics::rhi
 
 			if (_light_pipeline)
 			{
-				memory::Destroy<VulkanPipeline>(_services.GetAllocator(), _light_pipeline);
+				mem::Destroy<VulkanPipeline>(_services.GetAllocator(), _light_pipeline);
 				_light_pipeline = nullptr;
 			}
 
 			if (_light_fragment_shader)
 			{
-				memory::Destroy<VulkanShader>(_services.GetAllocator(), _light_fragment_shader);
+				mem::Destroy<VulkanShader>(_services.GetAllocator(), _light_fragment_shader);
 				_light_fragment_shader = nullptr;
 			}
 
 			if (_light_vertex_shader)
 			{
-				memory::Destroy<VulkanShader>(_services.GetAllocator(), _light_vertex_shader);
+				mem::Destroy<VulkanShader>(_services.GetAllocator(), _light_vertex_shader);
 				_light_vertex_shader = nullptr;
 			}
 
 			if (_object_pipeline)
 			{
-				memory::Destroy<VulkanPipeline>(_services.GetAllocator(), _object_pipeline);
+				mem::Destroy<VulkanPipeline>(_services.GetAllocator(), _object_pipeline);
 				_object_pipeline = nullptr;
 			}
 
 			if (_object_fragment_shader)
 			{
-				memory::Destroy<VulkanShader>(_services.GetAllocator(), _object_fragment_shader);
+				mem::Destroy<VulkanShader>(_services.GetAllocator(), _object_fragment_shader);
 				_object_fragment_shader = nullptr;
 			}
 
 			if (_object_vertex_shader)
 			{
-				memory::Destroy<VulkanShader>(_services.GetAllocator(), _object_vertex_shader);
+				mem::Destroy<VulkanShader>(_services.GetAllocator(), _object_vertex_shader);
 				_object_vertex_shader = nullptr;
 			}
 
 			if (_framebuffers)
 			{
-				memory::Destroy<VulkanFramebuffers>(_services.GetAllocator(), _framebuffers);
+				mem::Destroy<VulkanFramebuffers>(_services.GetAllocator(), _framebuffers);
 				_framebuffers = nullptr;
 			}
 
 			if (_render_pass)
 			{
-				memory::Destroy<VulkanRenderPass>(_services.GetAllocator(), _render_pass);
+				mem::Destroy<VulkanRenderPass>(_services.GetAllocator(), _render_pass);
 				_render_pass = nullptr;
 			}
 
 			if (_swapchain)
 			{
-				memory::Destroy<VulkanSwapchain>(_services.GetAllocator(), _swapchain);
+				mem::Destroy<VulkanSwapchain>(_services.GetAllocator(), _swapchain);
 				_swapchain = nullptr;
 			}
 
 			if (_device)
 			{
 				_device->GetCommandPool().FreeCommandBuffers(_command_buffers);
-				memory::Destroy<VulkanDevice>(_services.GetAllocator(), _device);
+				mem::Destroy<VulkanDevice>(_services.GetAllocator(), _device);
 				_device = nullptr;
 			}
 
 			if (_surface)
 			{
-				memory::Destroy<VulkanSurface>(_services.GetAllocator(), _surface);
+				mem::Destroy<VulkanSurface>(_services.GetAllocator(), _surface);
 				_surface = nullptr;
 			}
 
 			if (_instance)
 			{
-				memory::Destroy<VulkanInstance>(_services.GetAllocator(), _instance);
+				mem::Destroy<VulkanInstance>(_services.GetAllocator(), _instance);
 				_instance = nullptr;
 			}
 		}
@@ -173,7 +173,7 @@ namespace np::graphics::rhi
 	public:
 		VulkanRenderer(services::Services& services):
 			Renderer(services),
-			_instance(memory::Create<VulkanInstance>(_services.GetAllocator())),
+			_instance(mem::Create<VulkanInstance>(_services.GetAllocator())),
 			_surface(nullptr),
 			_device(nullptr),
 			_swapchain(nullptr),
@@ -212,31 +212,31 @@ namespace np::graphics::rhi
 
 		virtual bl IsAttachedToWindow(window::Window& window) const override
 		{
-			return _surface && memory::AddressOf(_surface->GetWindow()) == memory::AddressOf(window);
+			return _surface && mem::AddressOf(_surface->GetWindow()) == mem::AddressOf(window);
 		}
 
 		void AttachToWindow(window::Window& window) override
 		{
-			_surface = memory::Create<VulkanSurface>(_services.GetAllocator(), *_instance, window);
-			_device = memory::Create<VulkanDevice>(_services.GetAllocator(), *_surface);
-			_swapchain = memory::Create<VulkanSwapchain>(_services.GetAllocator(), *_device);
-			_render_pass = memory::Create<VulkanRenderPass>(_services.GetAllocator(), *_swapchain);
-			_framebuffers = memory::Create<VulkanFramebuffers>(_services.GetAllocator(), *_swapchain, *_render_pass);
+			_surface = mem::Create<VulkanSurface>(_services.GetAllocator(), *_instance, window);
+			_device = mem::Create<VulkanDevice>(_services.GetAllocator(), *_surface);
+			_swapchain = mem::Create<VulkanSwapchain>(_services.GetAllocator(), *_device);
+			_render_pass = mem::Create<VulkanRenderPass>(_services.GetAllocator(), *_swapchain);
+			_framebuffers = mem::Create<VulkanFramebuffers>(_services.GetAllocator(), *_swapchain, *_render_pass);
 
 			_command_buffers = CreateCommandBuffers();
 
-			_object_vertex_shader = memory::Create<VulkanShader>(_services.GetAllocator(), *_device,
+			_object_vertex_shader = mem::Create<VulkanShader>(_services.GetAllocator(), *_device,
 																 _object_vertex_shader_filename, VulkanShader::Type::VERTEX);
-			_object_fragment_shader = memory::Create<VulkanShader>(
+			_object_fragment_shader = mem::Create<VulkanShader>(
 				_services.GetAllocator(), *_device, _object_fragment_shader_filename, VulkanShader::Type::FRAGMENT);
-			_object_pipeline = memory::Create<VulkanPipeline>(_services.GetAllocator(), *_swapchain, *_render_pass,
+			_object_pipeline = mem::Create<VulkanPipeline>(_services.GetAllocator(), *_swapchain, *_render_pass,
 															  *_object_vertex_shader, *_object_fragment_shader);
 
-			_light_vertex_shader = memory::Create<VulkanShader>(_services.GetAllocator(), *_device,
+			_light_vertex_shader = mem::Create<VulkanShader>(_services.GetAllocator(), *_device,
 																_light_vertex_shader_filename, VulkanShader::Type::VERTEX);
-			_light_fragment_shader = memory::Create<VulkanShader>(
+			_light_fragment_shader = mem::Create<VulkanShader>(
 				_services.GetAllocator(), *_device, _light_fragment_shader_filename, VulkanShader::Type::FRAGMENT);
-			_light_pipeline = memory::Create<VulkanPipeline>(_services.GetAllocator(), *_swapchain, *_render_pass,
+			_light_pipeline = mem::Create<VulkanPipeline>(_services.GetAllocator(), *_swapchain, *_render_pass,
 															 *_light_vertex_shader, *_light_fragment_shader);
 		}
 

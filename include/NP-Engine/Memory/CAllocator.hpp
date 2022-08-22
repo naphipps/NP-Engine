@@ -15,7 +15,7 @@
 #include "Allocator.hpp"
 #include "Block.hpp"
 
-namespace np::memory
+namespace np::mem
 {
 	class CAllocator : public Allocator
 	{
@@ -93,6 +93,6 @@ namespace np::memory
 			return true;
 		}
 	};
-} // namespace np::memory
+} // namespace np::mem
 
 #endif /* NP_ENGINE_DEFAULT_ALLOCATOR_HPP */

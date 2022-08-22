@@ -27,14 +27,14 @@ namespace np::jsys
 	class JobSystem
 	{
 	private:
-		constexpr static siz JOB_ALIGNED_SIZE = memory::CalcAlignedSize(sizeof(Job));
+		constexpr static siz JOB_ALIGNED_SIZE = mem::CalcAlignedSize(sizeof(Job));
 
-		memory::TraitAllocator _allocator;
+		mem::TraitAllocator _allocator;
 		atm_bl _running;
 
 		container::vector<JobWorker> _job_workers;
 		thr::ThreadPool _thread_pool;
-		memory::Block _job_pool_block;
+		mem::Block _job_pool_block;
 		JobPool* _job_pool;
 
 		container::mpmc_queue<JobRecord> _highest_job_queue;
@@ -47,14 +47,14 @@ namespace np::jsys
 		JobSystem(): _running(false)
 		{
 			_job_pool_block = _allocator.Allocate(JOB_ALIGNED_SIZE * NP_ENGINE_JOB_SYSTEM_POOL_DEFAULT_SIZE);
-			_job_pool = memory::Create<JobPool>(_allocator, _job_pool_block);
+			_job_pool = mem::Create<JobPool>(_allocator, _job_pool_block);
 
 			// we want to be sure we use one less the number of cores available so our main thread is not crowded
 			_job_workers.resize(math::min(_thread_pool.ObjectCount() - 1, thr::ThreadPool::MAX_THREAD_COUNT));
 
 			for (auto it1 = _job_workers.begin(); it1 != _job_workers.end(); it1++)
 				for (auto it2 = _job_workers.begin(); it2 != _job_workers.end(); it2++)
-					it1->AddCoworker(memory::AddressOf(*it2));
+					it1->AddCoworker(mem::AddressOf(*it2));
 		}
 
 		~JobSystem()
@@ -68,7 +68,7 @@ namespace np::jsys
 
 			if (_job_pool)
 			{
-				memory::Destroy<JobPool>(_allocator, _job_pool);
+				mem::Destroy<JobPool>(_allocator, _job_pool);
 				_job_pool = nullptr;
 			}
 
@@ -84,7 +84,7 @@ namespace np::jsys
 			Dispose();
 
 			_job_pool_block = _allocator.Allocate(JOB_ALIGNED_SIZE * size);
-			_job_pool = memory::Create<JobPool>(_allocator, _job_pool_block);
+			_job_pool = mem::Create<JobPool>(_allocator, _job_pool_block);
 		}
 
 		void Start()
@@ -94,7 +94,7 @@ namespace np::jsys
 			if (!_job_pool)
 			{
 				_job_pool_block = _allocator.Allocate(JOB_ALIGNED_SIZE * NP_ENGINE_JOB_SYSTEM_POOL_DEFAULT_SIZE);
-				_job_pool = memory::Create<JobPool>(_allocator, _job_pool_block);
+				_job_pool = mem::Create<JobPool>(_allocator, _job_pool_block);
 			}
 
 			_running.store(true, mo_release);
@@ -176,9 +176,9 @@ namespace np::jsys
 			return return_record;
 		}
 
-		Job* CreateJob(memory::Delegate&& d)
+		Job* CreateJob(mem::Delegate&& d)
 		{
-			return _job_pool->CreateObject(::std::forward<memory::Delegate&&>(d));
+			return _job_pool->CreateObject(::std::forward<mem::Delegate&&>(d));
 		}
 
 		Job* CreateJob()

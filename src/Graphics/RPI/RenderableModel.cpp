@@ -21,7 +21,7 @@ namespace np::graphics
 		switch (__detail::RegisteredRhiType.load(mo_acquire))
 		{
 		case RhiType::Vulkan:
-			renderable_model = memory::Create<rhi::VulkanRenderableModel>(services.GetAllocator(), services, model);
+			renderable_model = mem::Create<rhi::VulkanRenderableModel>(services.GetAllocator(), services, model);
 			break;
 		default:
 			break;

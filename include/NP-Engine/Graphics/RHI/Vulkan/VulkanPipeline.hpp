@@ -41,7 +41,7 @@ namespace np::graphics::rhi
 	class VulkanPipeline : public Pipeline
 	{
 	private:
-		memory::TraitAllocator _allocator;
+		mem::TraitAllocator _allocator;
 		VulkanSwapchain& _swapchain;
 		VulkanRenderPass& _render_pass;
 		VulkanShader& _vertex_shader;
@@ -364,12 +364,12 @@ namespace np::graphics::rhi
 
 		VulkanSampler* CreateSampler(VkSamplerCreateInfo& info)
 		{
-			return memory::Create<VulkanSampler>(_allocator, GetDevice(), info);
+			return mem::Create<VulkanSampler>(_allocator, GetDevice(), info);
 		}
 
 		VulkanImage* CreateImage(VkImageCreateInfo& image_create_info, VkMemoryPropertyFlags memory_property_flags)
 		{
-			return memory::Create<VulkanImage>(_allocator, GetDevice(), image_create_info, memory_property_flags);
+			return mem::Create<VulkanImage>(_allocator, GetDevice(), image_create_info, memory_property_flags);
 		}
 
 		VulkanBuffer* CreateBuffer(VkDeviceSize size, VkBufferUsageFlags buffer_usage_flags,
@@ -379,7 +379,7 @@ namespace np::graphics::rhi
 			info.size = size;
 			info.usage = buffer_usage_flags;
 
-			return memory::Create<VulkanBuffer>(_allocator, GetDevice(), info, memory_property_flags);
+			return mem::Create<VulkanBuffer>(_allocator, GetDevice(), info, memory_property_flags);
 		}
 
 		void UpdateMetaValueBuffer()
@@ -427,7 +427,7 @@ namespace np::graphics::rhi
 			for (siz i = 0; i < writers.size(); i++)
 			{
 				writers[i].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-				writers[i].pBufferInfo = memory::AddressOf(_meta_value_descriptor_infos[i]);
+				writers[i].pBufferInfo = mem::AddressOf(_meta_value_descriptor_infos[i]);
 				writers[i].descriptorCount = 1;
 			}
 
@@ -437,7 +437,7 @@ namespace np::graphics::rhi
 		void DestroyMetaValueBuffers()
 		{
 			for (VulkanBuffer*& meta_value_buffer : _meta_value_buffers)
-				memory::Destroy<VulkanBuffer>(_allocator, meta_value_buffer);
+				mem::Destroy<VulkanBuffer>(_allocator, meta_value_buffer);
 
 			_meta_value_buffers.clear();
 		}
@@ -549,9 +549,9 @@ namespace np::graphics::rhi
 		void BindPipelineToFrame(VulkanFrame& frame)
 		{
 			if (_bind_pipeline)
-				memory::Destroy<VulkanCommandBindPipeline>(_allocator, _bind_pipeline);
+				mem::Destroy<VulkanCommandBindPipeline>(_allocator, _bind_pipeline);
 
-			_bind_pipeline = memory::Create<VulkanCommandBindPipeline>(_allocator, VK_PIPELINE_BIND_POINT_GRAPHICS, _pipeline);
+			_bind_pipeline = mem::Create<VulkanCommandBindPipeline>(_allocator, VK_PIPELINE_BIND_POINT_GRAPHICS, _pipeline);
 			frame.StageCommand(*_bind_pipeline);
 		}
 
@@ -565,11 +565,11 @@ namespace np::graphics::rhi
 			GetDescriptorSets().SubmitWriter(_meta_value_descriptor_writers[GetSwapchain().GetCurrentImageIndex()]);
 
 			if (_bind_descriptor_sets)
-				memory::Destroy<VulkanCommandBindDescriptorSets>(_allocator, _bind_descriptor_sets);
+				mem::Destroy<VulkanCommandBindDescriptorSets>(_allocator, _bind_descriptor_sets);
 
 			_bound_descriptor_sets = {_descriptor_sets[GetSwapchain().GetCurrentImageIndex()]};
 
-			_bind_descriptor_sets = memory::Create<VulkanCommandBindDescriptorSets>(
+			_bind_descriptor_sets = mem::Create<VulkanCommandBindDescriptorSets>(
 				_allocator, VK_PIPELINE_BIND_POINT_GRAPHICS, _pipeline_layout, 0, (ui32)_bound_descriptor_sets.size(),
 				_bound_descriptor_sets.empty() ? nullptr : const_cast<VkDescriptorSet*>(_bound_descriptor_sets.data()), 0,
 				nullptr);

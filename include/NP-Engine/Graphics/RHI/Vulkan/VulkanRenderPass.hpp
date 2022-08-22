@@ -23,7 +23,7 @@ namespace np::graphics::rhi
 	class VulkanRenderPass
 	{
 	private:
-		memory::TraitAllocator _allocator;
+		mem::TraitAllocator _allocator;
 		VulkanSwapchain& _swapchain;
 		VkRenderPass _render_pass;
 		VulkanTexture* _depth_texture;
@@ -162,7 +162,7 @@ namespace np::graphics::rhi
 			depth_image_view_create_info.format = depth_image_create_info.format;
 			depth_image_view_create_info.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
 
-			return memory::Create<VulkanTexture>(_allocator, GetDevice(), depth_image_create_info, depth_memory_property_flags,
+			return mem::Create<VulkanTexture>(_allocator, GetDevice(), depth_image_create_info, depth_memory_property_flags,
 												 depth_image_view_create_info);
 
 			/*
@@ -177,7 +177,7 @@ namespace np::graphics::rhi
 		{
 			if (_depth_texture)
 			{
-				memory::Destroy<VulkanTexture>(_allocator, _depth_texture);
+				mem::Destroy<VulkanTexture>(_allocator, _depth_texture);
 				_depth_texture = nullptr;
 			}
 
@@ -282,7 +282,7 @@ namespace np::graphics::rhi
 
 		void Rebuild()
 		{
-			memory::Destroy<VulkanTexture>(_allocator, _depth_texture);
+			mem::Destroy<VulkanTexture>(_allocator, _depth_texture);
 			_depth_texture = CreateDepthTexture();
 		}
 
@@ -292,10 +292,10 @@ namespace np::graphics::rhi
 			render_pass_begin_info.renderArea.extent = GetSwapchain().GetExtent();
 
 			if (_begin_render_pass)
-				memory::Destroy<VulkanCommandBeginRenderPass>(_allocator, _begin_render_pass);
+				mem::Destroy<VulkanCommandBeginRenderPass>(_allocator, _begin_render_pass);
 
 			_begin_render_pass =
-				memory::Create<VulkanCommandBeginRenderPass>(_allocator, render_pass_begin_info, VK_SUBPASS_CONTENTS_INLINE);
+				mem::Create<VulkanCommandBeginRenderPass>(_allocator, render_pass_begin_info, VK_SUBPASS_CONTENTS_INLINE);
 
 			frame.StageCommand(*_begin_render_pass);
 		}

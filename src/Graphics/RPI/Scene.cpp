@@ -21,7 +21,7 @@ namespace np::graphics
 		switch (__detail::RegisteredRhiType.load(mo_acquire))
 		{
 		case RhiType::Vulkan:
-			scene = memory::Create<rhi::VulkanScene>(services.GetAllocator(), services, renderer);
+			scene = mem::Create<rhi::VulkanScene>(services.GetAllocator(), services, renderer);
 			break;
 		default:
 			break;

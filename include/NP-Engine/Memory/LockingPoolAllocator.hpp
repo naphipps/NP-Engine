@@ -13,7 +13,7 @@
 #include "SizedAllocator.hpp"
 #include "MemoryFunctions.hpp"
 
-namespace np::memory
+namespace np::mem
 {
 	template <typename T>
 	class LockingPoolAllocator : public SizedAllocator
@@ -106,7 +106,7 @@ namespace np::memory
 
 			if (Contains(old_block))
 			{
-				memory::CopyBytes(new_block.Begin(), old_block.Begin(), old_block.size);
+				CopyBytes(new_block.Begin(), old_block.Begin(), old_block.size);
 				Deallocate(old_block);
 				old_block.Invalidate();
 			}
@@ -180,6 +180,6 @@ namespace np::memory
 			return true;
 		}
 	};
-} // namespace np::memory
+} // namespace np::mem
 
 #endif /* NP_ENGINE_LOCKING_POOL_ALLOCATOR_HPP */

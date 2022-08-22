@@ -142,7 +142,7 @@ namespace np::graphics
 
 			if (x < _width && y < _height)
 			{
-				const ui8* pixel_data = memory::AddressOf(_pixels[(siz)x + (siz)y * (siz)_width * sizeof(Color)]);
+				const ui8* pixel_data = mem::AddressOf(_pixels[(siz)x + (siz)y * (siz)_width * sizeof(Color)]);
 				pixel = *((ui32*)pixel_data);
 			}
 
@@ -153,7 +153,7 @@ namespace np::graphics
 		{
 			if (x < _width && y < _height)
 			{
-				ui8* pixel_data = memory::AddressOf(_pixels[(siz)x + (siz)y * (siz)_width * sizeof(Color)]);
+				ui8* pixel_data = mem::AddressOf(_pixels[(siz)x + (siz)y * (siz)_width * sizeof(Color)]);
 				*((ui32*)pixel_data) = color;
 			}
 		}

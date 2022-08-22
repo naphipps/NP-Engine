@@ -23,7 +23,7 @@ namespace np::app
 	class WindowLayer : public Layer
 	{
 	private:
-		memory::TraitAllocator _allocator;
+		mem::TraitAllocator _allocator;
 		container::vector<window::Window*> _windows;
 		container::vector<void*> _native_windows;
 
@@ -61,7 +61,7 @@ namespace np::app
 		{
 			for (auto it = _windows.begin(); it != _windows.end(); it++)
 			{
-				memory::Destruct(*it);
+				mem::Destruct(*it);
 				_allocator.Deallocate(*it);
 			}
 
@@ -70,7 +70,7 @@ namespace np::app
 
 		virtual window::Window* CreateWindow(window::Window::Properties& properties)
 		{
-			return _windows.emplace_back(memory::Create<window::Window>(_allocator, properties, _services));
+			return _windows.emplace_back(mem::Create<window::Window>(_allocator, properties, _services));
 		}
 
 		virtual void Update(tim::DurationMilliseconds time_delta) override
@@ -89,7 +89,7 @@ namespace np::app
 			{
 				if (!_windows[i]->IsRunning())
 				{
-					memory::Destroy<window::Window>(_allocator, _windows[i]);
+					mem::Destroy<window::Window>(_allocator, _windows[i]);
 					_windows.erase(_windows.begin() + i);
 				}
 			}

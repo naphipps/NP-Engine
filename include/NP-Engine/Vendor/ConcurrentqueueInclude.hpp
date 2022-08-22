@@ -20,12 +20,12 @@ namespace np::container
 		{
 			static inline void* malloc(siz size)
 			{
-				return ::np::memory::TraitAllocator::malloc(size);
+				return ::np::mem::TraitAllocator::malloc(size);
 			}
 
 			static inline void free(void* ptr)
 			{
-				::np::memory::TraitAllocator::free(ptr);
+				::np::mem::TraitAllocator::free(ptr);
 			}
 		};
 	} // namespace __detail

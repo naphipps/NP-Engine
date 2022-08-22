@@ -104,8 +104,8 @@ namespace np::app
 			system::SetSignalHandler(__detail::HandleSignal);
 
 			_layers.emplace_back(this);
-			_layers.emplace_back(memory::AddressOf(_window_layer));
-			_layers.emplace_back(memory::AddressOf(_graphics_layer));
+			_layers.emplace_back(mem::AddressOf(_window_layer));
+			_layers.emplace_back(mem::AddressOf(_graphics_layer));
 		}
 
 		virtual WindowLayer& GetWindowLayer()

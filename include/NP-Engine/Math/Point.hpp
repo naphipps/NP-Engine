@@ -381,8 +381,8 @@ namespace std
 		ui64 operator()(const ::np::math::fltPoint& p) const noexcept
 		{
 			ui32 x, y;
-			::np::memory::CopyBytes(&x, &p.x, sizeof(flt));
-			::np::memory::CopyBytes(&y, &p.y, sizeof(flt));
+			::np::mem::CopyBytes(&x, &p.x, sizeof(flt));
+			::np::mem::CopyBytes(&y, &p.y, sizeof(flt));
 
 			return ((ui64)x) << 32 | (ui64)y;
 		}

@@ -14,7 +14,7 @@
 #include "Margin.hpp"
 #include "MemoryFunctions.hpp"
 
-namespace np::memory
+namespace np::mem
 {
 	namespace __detail
 	{
@@ -272,7 +272,7 @@ namespace np::memory
 
 			if (Contains(old_block))
 			{
-				memory::CopyBytes(new_block.Begin(), old_block.Begin(), old_block.size);
+				CopyBytes(new_block.Begin(), old_block.Begin(), old_block.size);
 				Deallocate(old_block);
 				old_block.Invalidate();
 			}
@@ -292,7 +292,7 @@ namespace np::memory
 
 			if (Contains(old_block))
 			{
-				memory::CopyBytes(new_block.Begin(), old_block.Begin(), old_block.size);
+				CopyBytes(new_block.Begin(), old_block.Begin(), old_block.size);
 				Deallocate(old_block);
 				old_block.Invalidate();
 			}
@@ -390,6 +390,6 @@ namespace np::memory
 			return true;
 		}
 	};
-} // namespace np::memory
+} // namespace np::mem
 
 #endif /* NP_ENGINE_EXPLICIT_LIST_ALLOCATOR_HPP */

@@ -22,7 +22,7 @@ namespace np::event
 	{
 	protected:
 		atm_bl _flag;
-		memory::TraitAllocator _allocator;
+		mem::TraitAllocator _allocator;
 		container::mpmc_queue<Event*> _buffer1;
 		container::mpmc_queue<Event*> _buffer2;
 
@@ -61,15 +61,15 @@ namespace np::event
 			Event* e = nullptr;
 			container::mpmc_queue<Event*>& buffer = GetBuffer();
 
-			memory::Block block = _allocator.Allocate(sizeof(T));
+			mem::Block block = _allocator.Allocate(sizeof(T));
 			if (block.IsValid())
 			{
-				if (memory::Construct<T>(block, ::std::forward<Args>(args)...))
+				if (mem::Construct<T>(block, ::std::forward<Args>(args)...))
 				{
 					e = static_cast<Event*>(block.ptr);
 					if (!buffer.enqueue(e))
 					{
-						memory::Destruct(static_cast<T*>(e));
+						mem::Destruct(static_cast<T*>(e));
 						_allocator.Deallocate(e);
 						e = nullptr;
 					}
@@ -105,7 +105,7 @@ namespace np::event
 
 		bl DestroyEvent(Event* e)
 		{
-			bl destructed = memory::Destruct(e);
+			bl destructed = mem::Destruct(e);
 			bl deallocated = _allocator.Deallocate(e);
 			return destructed && deallocated;
 		}

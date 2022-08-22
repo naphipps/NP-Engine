@@ -12,7 +12,7 @@
 #include "CAllocator.hpp"
 #include "Block.hpp"
 
-namespace np::memory
+namespace np::mem
 {
 	class SizedAllocator : public CAllocator
 	{
@@ -74,6 +74,6 @@ namespace np::memory
 	constexpr static ui32 KILOBYTE_SIZE = 1000;
 	constexpr static ui32 MEGABYTE_SIZE = 1000000;
 	constexpr static ui32 GIGABYTE_SIZE = 1000000000;
-} // namespace np::memory
+} // namespace np::mem
 
 #endif /* NP_ENGINE_SIZED_ALLOCATOR_HPP */

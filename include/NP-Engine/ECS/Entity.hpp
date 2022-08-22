@@ -26,9 +26,9 @@ namespace np::ecs
 	public:
 		Entity(): _entity(::entt::null), _registry(nullptr) {}
 
-		Entity(::entt::registry& registry): _entity(registry.create()), _registry(memory::AddressOf(registry)) {}
+		Entity(::entt::registry& registry): _entity(registry.create()), _registry(mem::AddressOf(registry)) {}
 
-		Entity(::entt::entity entity, ::entt::registry& registry): _entity(entity), _registry(memory::AddressOf(registry)) {}
+		Entity(::entt::entity entity, ::entt::registry& registry): _entity(entity), _registry(mem::AddressOf(registry)) {}
 
 		Entity(const Entity& other): Entity(other._entity, *other._registry) {}
 

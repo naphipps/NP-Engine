@@ -6,8 +6,8 @@
 
 #include "NP-Engine/Memory/TraitAllocator.hpp"
 
-namespace np::memory
+namespace np::mem
 {
 	CAllocator TraitAllocator::_default_allocator;
 	atm<Allocator*> TraitAllocator::_registered_allocator(AddressOf(TraitAllocator::_default_allocator));
-} // namespace np::memory
+} // namespace np::mem

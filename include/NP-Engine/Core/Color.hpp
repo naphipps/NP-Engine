@@ -32,7 +32,7 @@ namespace np
 			ui32 ToUi32() const
 			{
 				ui32 i;
-				memory::CopyBytes(&i, &r, sizeof(ui32)); // TODO: fix this...
+				mem::CopyBytes(&i, &r, sizeof(ui32)); // TODO: fix this...
 				return i;
 			}
 

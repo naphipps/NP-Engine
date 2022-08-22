@@ -41,7 +41,7 @@ namespace np::graphics
 		operator ui32() const
 		{
 			ui32 i = 0;
-			memory::CopyBytes(&i, &r, sizeof(ui32));
+			mem::CopyBytes(&i, &r, sizeof(ui32));
 			return i;
 		}
 

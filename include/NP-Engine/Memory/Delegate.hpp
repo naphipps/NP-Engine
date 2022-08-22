@@ -11,7 +11,7 @@
 
 #include "PadObject.hpp"
 
-namespace np::memory
+namespace np::mem
 {
 	class Delegate : public PadObject
 	{
@@ -112,6 +112,6 @@ namespace np::memory
 			_function_ptr = nullptr;
 		}
 	};
-} // namespace np::memory
+} // namespace np::mem
 
 #endif /* NP_ENGINE_DELEGATE_HPP */

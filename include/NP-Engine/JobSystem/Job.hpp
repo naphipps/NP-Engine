@@ -24,14 +24,14 @@ namespace np::jsys
 	private:
 		container::vector<Job*> _dependents;
 		atm_i32 _antecedent_count;
-		memory::Delegate _delegate;
+		mem::Delegate _delegate;
 		atm<atm_bl*> _confirm_completion_flag;
 		JobPriority _priority_attractor;
 
 	public:
 		Job(): _antecedent_count(-1), _confirm_completion_flag(nullptr), _priority_attractor(JobPriority::Normal) {}
 
-		Job(memory::Delegate&& d):
+		Job(mem::Delegate&& d):
 			_antecedent_count(1),
 			_delegate(d),
 			_confirm_completion_flag(nullptr),
@@ -79,12 +79,12 @@ namespace np::jsys
 			return *this;
 		}
 
-		memory::Delegate& GetDelegate()
+		mem::Delegate& GetDelegate()
 		{
 			return _delegate;
 		}
 
-		const memory::Delegate& GetDelegate() const
+		const mem::Delegate& GetDelegate() const
 		{
 			return _delegate;
 		}

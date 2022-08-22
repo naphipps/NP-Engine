@@ -20,7 +20,7 @@
 #define RAPIDJSON_ASSERT(expression) \
 	NP_ENGINE_ASSERT(expression, ::std::string("RAPIDJSON encounted an asserted issue here: ") + ::std::string(NP_FUNCTION))
 
-namespace np::memory::__detail
+namespace np::mem::__detail
 {
 	static void* RapidJsonMalloc(siz size)
 	{
@@ -68,13 +68,13 @@ namespace np::memory::__detail
 			RapidJsonFree(ptr);
 		}
 	}
-} // namespace np::memory::__detail
+} // namespace np::mem::__detail
 
-#define RAPIDJSON_MALLOC(size) ::np::memory::__detail::RapidJsonMalloc(size)
-#define RAPIDJSON_FREE(ptr) ::np::memory::__detail::RapidJsonFree(ptr)
-#define RAPIDJSON_REALLOC(ptr, size) ::np::memory::__detail::RapidJsonRealloc(ptr, size)
-#define RAPIDJSON_NEW(TypeName) ::np::memory::__detail::RapidJsonNew<TypeName>
-#define RAPIDJSON_DELETE(ptr) ::np::memory::__detail::RapidJsonDelete(ptr)
+#define RAPIDJSON_MALLOC(size) ::np::mem::__detail::RapidJsonMalloc(size)
+#define RAPIDJSON_FREE(ptr) ::np::mem::__detail::RapidJsonFree(ptr)
+#define RAPIDJSON_REALLOC(ptr, size) ::np::mem::__detail::RapidJsonRealloc(ptr, size)
+#define RAPIDJSON_NEW(TypeName) ::np::mem::__detail::RapidJsonNew<TypeName>
+#define RAPIDJSON_DELETE(ptr) ::np::mem::__detail::RapidJsonDelete(ptr)
 
 #include <rapidjson/document.h>
 #include <rapidjson/writer.h>

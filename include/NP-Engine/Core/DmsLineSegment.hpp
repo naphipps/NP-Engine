@@ -108,8 +108,8 @@ namespace np
 				flt yf = line.Midpoint().y;
 
 				ui32 xi, yi;
-				memory::CopyBytes(&xi, &xf, sizeof(flt));
-				memory::CopyBytes(&yi, &yf, sizeof(flt));
+				mem::CopyBytes(&xi, &xf, sizeof(flt));
+				mem::CopyBytes(&yi, &yf, sizeof(flt));
 
 				return ((ui64)xi << 32) | (ui64)yi;
 			}

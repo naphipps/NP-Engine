@@ -27,7 +27,7 @@ namespace np::window
 
 		WindowResizeEvent(Window& window, ui32 width, ui32 height): event::Event()
 		{
-			AssignData<DataType>({memory::AddressOf(window), width, height});
+			AssignData<DataType>({mem::AddressOf(window), width, height});
 		}
 
 		i32 GetWidth() const

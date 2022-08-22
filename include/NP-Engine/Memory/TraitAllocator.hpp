@@ -14,7 +14,7 @@
 #include "CAllocator.hpp"
 #include "MemoryFunctions.hpp"
 
-namespace np::memory
+namespace np::mem
 {
 	class TraitAllocator : public Allocator
 	{
@@ -98,6 +98,6 @@ namespace np::memory
 			Register(_default_allocator);
 		}
 	};
-} // namespace np::memory
+} // namespace np::mem
 
 #endif /* NP_ENGINE_TRAIT_ALLOCATOR_HPP */

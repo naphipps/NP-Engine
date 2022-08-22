@@ -46,7 +46,7 @@ namespace np::app
 				{
 					_unacquired_scenes.erase(*it);
 					_acquired_scenes.erase(*it);
-					memory::Destroy<graphics::Scene>(_services.GetAllocator(), *it);
+					mem::Destroy<graphics::Scene>(_services.GetAllocator(), *it);
 					_scenes.erase(it);
 					break;
 				}
@@ -55,7 +55,7 @@ namespace np::app
 				if ((*it)->IsAttachedToWindow(window))
 				{
 					(*it)->DetachFromWindow(window);
-					memory::Destroy<graphics::Renderer>(_services.GetAllocator(), *it);
+					mem::Destroy<graphics::Renderer>(_services.GetAllocator(), *it);
 					_renderers.erase(it);
 					break;
 				}
@@ -97,7 +97,7 @@ namespace np::app
 
 		void ChooseRhi()
 		{
-			memory::TraitAllocator allocator;
+			mem::TraitAllocator allocator;
 			container::deque<graphics::Renderer*> renderers;
 			graphics::Renderer* opengl = nullptr;
 			graphics::Renderer* vulkan = nullptr;
@@ -112,10 +112,10 @@ namespace np::app
 
 #if NP_ENGINE_PLATFORM_IS_WINDOWS
 			// TODO: we're keeping this here for testing purposes - when renderer is complete we can probably remove
-			opengl = memory::Create<graphics::rhi::OpenGLRenderer>(allocator, _services);
+			opengl = mem::Create<graphics::rhi::OpenGLRenderer>(allocator, _services);
 
 #endif
-			vulkan = memory::Create<graphics::rhi::VulkanRenderer>(allocator, _services);
+			vulkan = mem::Create<graphics::rhi::VulkanRenderer>(allocator, _services);
 
 			if (vulkan != nullptr)
 				renderers.emplace_back(vulkan);
@@ -154,7 +154,7 @@ namespace np::app
 			}
 
 			for (graphics::Renderer* renderer : renderers)
-				memory::Destroy<graphics::Renderer>(allocator, renderer);
+				mem::Destroy<graphics::Renderer>(allocator, renderer);
 		}
 
 		graphics::Scene* CreateScene(graphics::Renderer& renderer)
@@ -173,10 +173,10 @@ namespace np::app
 		virtual ~GraphicsLayer()
 		{
 			for (auto it = _scenes.begin(); it != _scenes.end(); it++)
-				memory::Destroy<graphics::Scene>(_services.GetAllocator(), *it);
+				mem::Destroy<graphics::Scene>(_services.GetAllocator(), *it);
 
 			for (auto it = _renderers.begin(); it != _renderers.end(); it++)
-				memory::Destroy<graphics::Renderer>(_services.GetAllocator(), *it);
+				mem::Destroy<graphics::Renderer>(_services.GetAllocator(), *it);
 		}
 
 		graphics::Renderer* CreateRenderer(window::Window& window)

@@ -32,7 +32,7 @@ namespace np::graphics
 		bl _hot_reloadable;
 		// TODO: ^ I almost think we need some delegates for the actual model/image/light to call their renderable object for
 		// SetOutOfDate(false) calls to happen automatically
-		// TODO: ^ memory::Delegate _on_change_delegate;
+		// TODO: ^ mem::Delegate _on_change_delegate;
 		str _filename;
 		::tinyobj::attrib_t _attributes;
 		container::vector<::tinyobj::shape_t> _shapes;

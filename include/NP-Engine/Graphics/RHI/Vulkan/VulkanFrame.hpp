@@ -98,12 +98,12 @@ namespace np::graphics::rhi
 
 		void StageCommand(VulkanCommand& command)
 		{
-			_commands.emplace_back(memory::AddressOf(command));
+			_commands.emplace_back(mem::AddressOf(command));
 		}
 
 		void StageCommand(siz slot, VulkanCommand& command)
 		{
-			_commands[slot] = memory::AddressOf(command);
+			_commands[slot] = mem::AddressOf(command);
 		}
 
 		void SubmitStagedCommandsToBuffer()

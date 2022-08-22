@@ -14,7 +14,7 @@
 #include "NP-Engine/Foundation/Foundation.hpp"
 #include "NP-Engine/Primitive/Primitive.hpp"
 
-namespace np::memory
+namespace np::mem
 {
 	constexpr static siz CACHE_LINE_SIZE = 64;
 	using CacheLinePadding = ui8[CACHE_LINE_SIZE];
@@ -96,6 +96,6 @@ namespace np::memory
 			}
 		}
 	};
-} // namespace np::memory
+} // namespace np::mem
 
 #endif /* NP_ENGINE_PAD_OBJECT_HPP */

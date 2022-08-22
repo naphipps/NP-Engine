@@ -11,7 +11,7 @@
 
 #include "NP-Engine/Primitive/Primitive.hpp"
 
-namespace np::memory
+namespace np::mem
 {
 	template <class T>
 	constexpr T* AddressOf(T& t) noexcept
@@ -39,6 +39,6 @@ namespace np::memory
 			*dst_it = *src_it;
 		}
 	}
-} // namespace np::memory
+} // namespace np::mem
 
 #endif /* NP_ENGINE_MEMORY_FUNCTIONS_HPP */

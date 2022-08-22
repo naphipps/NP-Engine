@@ -26,7 +26,7 @@ namespace np::graphics
 		services::Services& _services;
 		Model& _model;
 		RenderableMetaValues _meta_values;
-		memory::Delegate _update_meta_values_on_frame;
+		mem::Delegate _update_meta_values_on_frame;
 
 		// TODO: add struct that represents all the needed information to render our _model
 
@@ -67,12 +67,12 @@ namespace np::graphics
 			_meta_values = meta_values;
 		}
 
-		memory::Delegate& GetUpdateMetaValuesOnFrameDelegate()
+		mem::Delegate& GetUpdateMetaValuesOnFrameDelegate()
 		{
 			return _update_meta_values_on_frame;
 		}
 
-		const memory::Delegate& GetUpdateMetaValuesOnFrameDelegate() const
+		const mem::Delegate& GetUpdateMetaValuesOnFrameDelegate() const
 		{
 			return _update_meta_values_on_frame;
 		}

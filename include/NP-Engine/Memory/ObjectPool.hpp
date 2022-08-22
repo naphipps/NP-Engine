@@ -15,7 +15,7 @@
 #include "PoolAllocator.hpp"
 #include "LockingPoolAllocator.hpp"
 
-namespace np::memory
+namespace np::mem
 {
 	template <typename T, typename A = PoolAllocator<T>>
 	class ObjectPool
@@ -87,6 +87,6 @@ namespace np::memory
 
 	template <typename T>
 	using LockingObjectPool = ObjectPool<T, LockingPoolAllocator<T>>;
-} // namespace np::memory
+} // namespace np::mem
 
 #endif /* NP_ENGINE_OBJECT_POOL_HPP */

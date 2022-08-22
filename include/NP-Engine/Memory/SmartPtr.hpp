@@ -16,7 +16,7 @@
 
 #include "TraitAllocator.hpp"
 
-namespace np::memory
+namespace np::mem
 {
 	namespace __detail
 	{
@@ -47,7 +47,7 @@ namespace np::memory
 		TraitAllocator allocator;
 		Block block = allocator.Allocate(sizeof(T));
 		NP_ENGINE_ASSERT((::std::is_constructible_v<T, Args...>), "T must be constructible with the given args.");
-		bl constructed = memory::Construct<T>(block, ::std::forward<Args>(args)...);
+		bl constructed = Construct<T>(block, ::std::forward<Args>(args)...);
 		NP_ENGINE_ASSERT(constructed, "We require a successful construction here.");
 		return uptr<T>(static_cast<T*>(block.ptr));
 	}
@@ -61,10 +61,10 @@ namespace np::memory
 		TraitAllocator allocator;
 		Block block = allocator.Allocate(sizeof(T));
 		NP_ENGINE_ASSERT((::std::is_constructible_v<T, Args...>), "T must be constructible with the given args.");
-		bl constructed = memory::Construct<T>(block, ::std::forward<Args>(args)...);
+		bl constructed = Construct<T>(block, ::std::forward<Args>(args)...);
 		NP_ENGINE_ASSERT(constructed, "We require a successful construction here.");
 		return sptr<T>(static_cast<T*>(block.ptr), __detail::SmartPtrDeleter<T>{});
 	}
-} // namespace np::memory
+} // namespace np::mem
 
 #endif /* NP_ENGINE_SMART_PTR_HPP */

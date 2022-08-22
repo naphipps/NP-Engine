@@ -25,7 +25,7 @@ namespace np::graphics
 	protected:
 		services::Services& _services;
 		Renderer& _renderer;
-		memory::Delegate _on_draw_delegate;
+		mem::Delegate _on_draw_delegate;
 
 	public:
 		static Scene* Create(services::Services& services, Renderer& renderer);
@@ -44,12 +44,12 @@ namespace np::graphics
 			return _renderer;
 		}
 
-		memory::Delegate& GetOnDrawDelegate()
+		mem::Delegate& GetOnDrawDelegate()
 		{
 			return _on_draw_delegate;
 		}
 
-		const memory::Delegate& GetOnDrawDelegate() const
+		const mem::Delegate& GetOnDrawDelegate() const
 		{
 			return _on_draw_delegate;
 		}

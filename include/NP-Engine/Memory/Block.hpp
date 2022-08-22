@@ -9,7 +9,7 @@
 
 #include "NP-Engine/Primitive/Primitive.hpp"
 
-namespace np::memory
+namespace np::mem
 {
 	/*
 		our Block design was inspired by Andrei Alexandrescu's cppcon 2017 talk "std::allocator is to allocation what
@@ -60,6 +60,6 @@ namespace np::memory
 			}
 		}
 	};
-} // namespace np::memory
+} // namespace np::mem
 
 #endif /* NP_ENGINE_BLOCK_HPP */

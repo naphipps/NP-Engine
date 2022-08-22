@@ -125,7 +125,7 @@ namespace np::graphics::rhi
 		{
 			_descriptor_set_layout.GetBindingForDescriptorType(writer.descriptorType, writer.dstBinding);
 			writer.dstSet = _descriptor_sets[GetSwapchain().GetCurrentImageIndex()];
-			vkUpdateDescriptorSets(GetDevice(), 1, memory::AddressOf(writer), 0, nullptr);
+			vkUpdateDescriptorSets(GetDevice(), 1, mem::AddressOf(writer), 0, nullptr);
 		}
 
 		void SubmitWriters(container::vector<VkWriteDescriptorSet>& writers)

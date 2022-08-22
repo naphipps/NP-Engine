@@ -48,7 +48,7 @@ namespace np::app
 			}
 		}
 
-		void SceneOnDraw(memory::Delegate& d)
+		void SceneOnDraw(mem::Delegate& d)
 		{
 			tim::DurationMilliseconds duration = tim::SteadyClock::now() - _start_timestamp;
 			flt seconds = duration.count() / 1000.0f;
@@ -65,7 +65,7 @@ namespace np::app
 			}
 		}
 
-		void UpdateMetaValuesOnFrame(memory::Delegate& d)
+		void UpdateMetaValuesOnFrame(mem::Delegate& d)
 		{
 			graphics::RenderableMetaValues& meta_values = _renderable_model->GetMetaValues();
 			tim::DurationMilliseconds duration = tim::SteadyClock::now() - _start_timestamp;
@@ -100,12 +100,12 @@ namespace np::app
 
 		~GameLayer()
 		{
-			memory::Destroy<graphics::RenderableModel>(_services.GetAllocator(), _renderable_model);
+			mem::Destroy<graphics::RenderableModel>(_services.GetAllocator(), _renderable_model);
 		}
 
 		void SetScene(graphics::Scene& scene)
 		{
-			_scene = memory::AddressOf(scene);
+			_scene = mem::AddressOf(scene);
 			// TODO: init scene, and destroy content for last scene??
 
 			_scene->GetOnDrawDelegate().Connect<GameLayer, &GameLayer::SceneOnDraw>(this);
@@ -130,7 +130,7 @@ namespace np::app
 			Application(Application::Properties{"My Game App"}, application_services),
 			_game_layer(application_services)
 		{
-			PushLayer(memory::AddressOf(_game_layer));
+			PushLayer(mem::AddressOf(_game_layer));
 		}
 
 		void Run(i32 argc, chr** argv) override

@@ -152,7 +152,7 @@ namespace np::jsys
 		void StartWork(JobSystem& job_system, thr::ThreadPool& pool, i32 thread_affinity = -1)
 		{
 			NP_ENGINE_PROFILE_FUNCTION();
-			_job_system = memory::AddressOf(job_system);
+			_job_system = mem::AddressOf(job_system);
 			_thread_pool = &pool;
 			_keep_working.store(true, mo_release);
 			_work_procedure_complete.store(false, mo_release);

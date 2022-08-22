@@ -66,14 +66,14 @@ namespace np::event
 		return ((ui64)a & (ui64)b) != (ui64)EventCategory::None;
 	}
 
-	class Event : public memory::Delegate
+	class Event : public mem::Delegate
 	{
 	protected:
 		bl _handled;
 		bl _can_be_handled; // TODO: refactor to _keep_alive?
 
 	public:
-		Event(): memory::Delegate(), _handled(false), _can_be_handled(false) {}
+		Event(): mem::Delegate(), _handled(false), _can_be_handled(false) {}
 
 		virtual ~Event() {}
 

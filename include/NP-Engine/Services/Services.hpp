@@ -21,7 +21,7 @@ namespace np::services
 	class Services
 	{
 	private:
-		memory::TraitAllocator _allocator;
+		mem::TraitAllocator _allocator;
 		::entt::registry _ecs_registry;
 		jsys::JobSystem _job_system;
 		event::EventQueue _event_queue;
@@ -30,12 +30,12 @@ namespace np::services
 	public:
 		Services(): _allocator(), _ecs_registry(), _job_system(), _event_queue(), _event_submitter(_event_queue) {}
 
-		memory::Allocator& GetAllocator()
+		mem::Allocator& GetAllocator()
 		{
 			return _allocator;
 		}
 
-		const memory::Allocator& GetAllocator() const
+		const mem::Allocator& GetAllocator() const
 		{
 			return _allocator;
 		}

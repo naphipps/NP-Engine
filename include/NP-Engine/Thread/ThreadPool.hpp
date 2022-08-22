@@ -16,10 +16,10 @@
 
 namespace np::thr
 {
-	class ThreadPool : protected memory::ObjectPool<Thread>
+	class ThreadPool : protected mem::ObjectPool<Thread>
 	{
 	private:
-		using base = memory::ObjectPool<Thread>;
+		using base = mem::ObjectPool<Thread>;
 
 	public:
 		constexpr static siz MAX_THREAD_COUNT = 128;

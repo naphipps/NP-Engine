@@ -11,7 +11,7 @@
 
 #include "TraitAllocator.hpp"
 
-namespace np::memory
+namespace np::mem
 {
 	template <class T>
 	class StdAllocator : public ::std::allocator<T>
@@ -60,6 +60,6 @@ namespace np::memory
 			_allocator.Deallocate(ptr);
 		}
 	};
-} // namespace np::memory
+} // namespace np::mem
 
 #endif /* NP_ENGINE_STD_ALLOCATOR_HPP */

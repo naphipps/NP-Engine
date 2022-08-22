@@ -15,10 +15,10 @@
 #include "NP-Engine/Memory/Memory.hpp"
 
 template <class T, class STD_T = ::std::string>
-class tstr : public ::std::basic_string<T, ::std::char_traits<T>, ::np::memory::StdAllocator<T>>
+class tstr : public ::std::basic_string<T, ::std::char_traits<T>, ::np::mem::StdAllocator<T>>
 {
 public:
-	using base = ::std::basic_string<T, ::std::char_traits<T>, ::np::memory::StdAllocator<T>>;
+	using base = ::std::basic_string<T, ::std::char_traits<T>, ::np::mem::StdAllocator<T>>;
 	using traits_type = typename base::traits_type;
 	using allocator_type = typename base::allocator_type;
 	using value_type = typename base::value_type;

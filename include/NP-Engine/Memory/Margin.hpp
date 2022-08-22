@@ -9,7 +9,7 @@
 
 #include "NP-Engine/Primitive/Primitive.hpp"
 
-namespace np::memory::__detail
+namespace np::mem::__detail
 {
 	struct Margin
 	{
@@ -44,6 +44,6 @@ namespace np::memory::__detail
 	using MarginPtr = Margin*;
 
 	const static siz MARGIN_ALIGNED_SIZE = CalcAlignedSize(sizeof(Margin));
-} // namespace np::memory::__detail
+} // namespace np::mem::__detail
 
 #endif /* NP_ENGINE_MARGIN_HPP */

@@ -11,15 +11,15 @@
 /*
 namespace np::graphics
 {
-	Device* Device::Create(memory::Allocator& allocator)
+	Device* Device::Create(mem::Allocator& allocator)
 	{
 		Device* device = nullptr;
 
 		switch (__detail::RegisteredRhiType.load(mo_acquire))
 		{
 		case RhiType::Vulkan:
-			memory::Block block = allocator.Allocate(sizeof(rhi::VulkanDevice));
-			memory::Construct<rhi::VulkanDevice>(block, allocator);
+			mem::Block block = allocator.Allocate(sizeof(rhi::VulkanDevice));
+			mem::Construct<rhi::VulkanDevice>(block, allocator);
 			device = (Device*)block.Begin(); //TODO: figure out if we're going to use ptr or Begin...
 			break;
 		}
