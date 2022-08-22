@@ -1,11 +1,15 @@
+//##===----------------------------------------------------------------------===##//
 //
-//  Input.hpp
-//  NP-Engine
+//  Author: Nathan Phipps 2/13/21
 //
-//  Created by Nathan Phipps on 2/13/21.
-//
+//##===----------------------------------------------------------------------===##//
 
-#ifndef Input_h
-#define Input_h
+#ifndef NP_ENGINE_INPUT_HPP
+#define NP_ENGINE_INPUT_HPP
 
-#endif /* Input_h */
+#include "KeyCodes.hpp"
+#include "KeyEvent.hpp"
+#include "MouseCodes.hpp"
+#include "MouseEvent.hpp"
+
+#endif /* NP_ENGINE_INPUT_HPP */
