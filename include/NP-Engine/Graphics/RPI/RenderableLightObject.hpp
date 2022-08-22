@@ -14,7 +14,7 @@
 #include "RenderableType.hpp"
 #include "RenderableObject.hpp"
 
-namespace np::graphics
+namespace np::gfx
 {
 	struct RenderableLightObject
 	{
@@ -32,6 +32,6 @@ namespace np::graphics
 
 		virtual void SetOutOfDate(bl is_out_of_date = true) = 0;
 	};
-} // namespace np::graphics
+} // namespace np::gfx
 
 #endif /* NP_ENGINE_RPI_RENDERABLE_LIGHT_OBJECT_HPP */

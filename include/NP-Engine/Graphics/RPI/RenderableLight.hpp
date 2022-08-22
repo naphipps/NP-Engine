@@ -17,7 +17,7 @@
 #include "RenderableType.hpp"
 #include "Light.hpp"
 
-namespace np::graphics
+namespace np::gfx
 {
 	class RenderableLight : public RenderableLightObject
 	{
@@ -47,6 +47,6 @@ namespace np::graphics
 			return _light;
 		}
 	};
-} // namespace np::graphics
+} // namespace np::gfx
 
 #endif /* NP_ENGINE_RPI_RENDERABLE_LIGHT_HPP */

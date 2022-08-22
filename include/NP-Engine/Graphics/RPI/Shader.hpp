@@ -12,7 +12,7 @@
 #include "NP-Engine/Primitive/Primitive.hpp"
 #include "NP-Engine/String/String.hpp"
 
-namespace np::graphics
+namespace np::gfx
 {
 	class Shader
 	{
@@ -105,6 +105,6 @@ namespace np::graphics
 			return _type;
 		}
 	};
-} // namespace np::graphics
+} // namespace np::gfx
 
 #endif /* NP_ENGINE_RPI_SHADER_HPP */

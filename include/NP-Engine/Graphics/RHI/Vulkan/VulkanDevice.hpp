@@ -22,7 +22,7 @@
 #include "VulkanCommandPool.hpp"
 #include "VulkanQueue.hpp"
 
-namespace np::graphics::rhi
+namespace np::gfx::rhi
 {
 	class VulkanDevice
 	{
@@ -632,6 +632,6 @@ namespace np::graphics::rhi
 				command_buffer.End();
 		}
 	};
-} // namespace np::graphics::rhi
+} // namespace np::gfx::rhi
 
 #endif /* NP_ENGINE_VULKAN_DEVICE_HPP */

@@ -12,7 +12,7 @@
 
 #include "NP-Engine/Graphics/RHI/Vulkan/VulkanGraphics.hpp"
 
-namespace np::graphics
+namespace np::gfx
 {
 	RenderableLight* RenderableLight::Create(srvc::Services& services, Light& light)
 	{
@@ -29,4 +29,4 @@ namespace np::graphics
 
 		return renderable_light;
 	}
-} // namespace np::graphics
+} // namespace np::gfx

@@ -11,7 +11,7 @@
 
 #include "PipelineMetaValues.hpp"
 
-namespace np::graphics
+namespace np::gfx
 {
 	class Pipeline
 	{
@@ -22,6 +22,6 @@ namespace np::graphics
 		virtual PipelineMetaValues GetMetaValues() const = 0;
 		virtual void SetMetaValues(PipelineMetaValues meta_values) = 0;
 	};
-} // namespace np::graphics
+} // namespace np::gfx
 
 #endif /* NP_ENGINE_RPI_PIPELINE_HPP */

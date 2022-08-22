@@ -6,7 +6,7 @@
 
 #include "NP-Engine/Graphics/RHI/OpenGL/OpenGLRenderer.hpp"
 
-namespace np::graphics::rhi
+namespace np::gfx::rhi
 {
 	Renderer::RhiType OpenGLRenderer::GetRhiType() const
 	{
@@ -17,4 +17,4 @@ namespace np::graphics::rhi
 	{
 		return false;
 	}
-} // namespace np::graphics::rhi
+} // namespace np::gfx::rhi

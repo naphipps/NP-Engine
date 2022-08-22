@@ -11,7 +11,7 @@
 
 #include "VulkanCommand.hpp"
 
-namespace np::graphics::rhi
+namespace np::gfx::rhi
 {
 	class VulkanCommandBindPipeline : public VulkanCommand
 	{
@@ -29,6 +29,6 @@ namespace np::graphics::rhi
 			vkCmdBindPipeline(command_buffer, PipelineBindPoint, Pipeline);
 		}
 	};
-} // namespace np::graphics::rhi
+} // namespace np::gfx::rhi
 
 #endif /* NP_ENGINE_VULKAN_COMMAND_BIND_PIPELINE_HPP */

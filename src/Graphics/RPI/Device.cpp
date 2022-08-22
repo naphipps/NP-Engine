@@ -9,7 +9,7 @@
 #include "NP-Engine/Graphics/RHI/Vulkan/VulkanDevice.hpp" //because we're in cpp
 
 /*
-namespace np::graphics
+namespace np::gfx
 {
 	Device* Device::Create(mem::Allocator& allocator)
 	{

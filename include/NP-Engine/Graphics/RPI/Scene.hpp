@@ -18,7 +18,7 @@
 #include "Renderer.hpp"
 #include "Camera.hpp"
 
-namespace np::graphics
+namespace np::gfx
 {
 	class Scene
 	{
@@ -66,6 +66,6 @@ namespace np::graphics
 		virtual void SetCamera(Camera& camera) = 0;
 		virtual void AdjustForWindowResize(window::Window& window) = 0;
 	};
-} // namespace np::graphics
+} // namespace np::gfx
 
 #endif /* NP_ENGINE_RPI_SCENE_HPP */

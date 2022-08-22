@@ -11,7 +11,7 @@
 
 #include "VulkanCommand.hpp"
 
-namespace np::graphics::rhi
+namespace np::gfx::rhi
 {
 	class VulkanCommandCopyBuffers : public VulkanCommand
 	{
@@ -33,6 +33,6 @@ namespace np::graphics::rhi
 			vkCmdCopyBuffer(command_buffer, SrcBuffer, DstBuffer, RegionCount, Regions);
 		}
 	};
-} // namespace np::graphics::rhi
+} // namespace np::gfx::rhi
 
 #endif /* NP_ENGINE_VULKAN_COMMAND_COPY_BUFFERS_HPP */

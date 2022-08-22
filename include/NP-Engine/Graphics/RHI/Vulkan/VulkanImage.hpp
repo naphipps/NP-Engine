@@ -16,7 +16,7 @@
 #include "VulkanDevice.hpp"
 #include "VulkanBuffer.hpp"
 
-namespace np::graphics::rhi
+namespace np::gfx::rhi
 {
 	class VulkanImage
 	{
@@ -244,6 +244,6 @@ namespace np::graphics::rhi
 			return result;
 		}
 	};
-} // namespace np::graphics::rhi
+} // namespace np::gfx::rhi
 
 #endif /* NP_ENGINE_VULKAN_IMAGE_HPP */

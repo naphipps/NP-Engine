@@ -11,7 +11,7 @@
 
 #include "NP-Engine/Graphics/RPI/RPI.hpp"
 
-namespace np::graphics::rhi
+namespace np::gfx::rhi
 {
 	class VulkanCamera : public Camera
 	{
@@ -30,6 +30,6 @@ namespace np::graphics::rhi
 			return *this;
 		}
 	};
-} // namespace np::graphics::rhi
+} // namespace np::gfx::rhi
 
 #endif /* NP_ENGINE_VULKAN_CAMERA_HPP */

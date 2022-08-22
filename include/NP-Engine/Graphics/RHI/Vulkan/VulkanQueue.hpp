@@ -13,7 +13,7 @@
 
 #include "VulkanCommandBuffer.hpp"
 
-namespace np::graphics::rhi
+namespace np::gfx::rhi
 {
 	class VulkanQueue
 	{
@@ -58,6 +58,6 @@ namespace np::graphics::rhi
 			return vkQueueSubmit(_queue, 1, &submit_info, fence);
 		}
 	};
-} // namespace np::graphics::rhi
+} // namespace np::gfx::rhi
 
 #endif /* NP_ENGINE_VULKAN_QUEUE_HPP */

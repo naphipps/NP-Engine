@@ -16,12 +16,12 @@ namespace np::app
 	class GameLayer : public Layer
 	{
 	private:
-		graphics::Scene* _scene;
-		graphics::Camera _camera;
+		gfx::Scene* _scene;
+		gfx::Camera _camera;
 		str _model_filename;
 		str _model_texture_filename;
-		graphics::Model _model;
-		graphics::RenderableModel* _renderable_model;
+		gfx::Model _model;
+		gfx::RenderableModel* _renderable_model;
 		ecs::Entity _model_entity;
 		tim::SteadyTimestamp _start_timestamp;
 
@@ -67,7 +67,7 @@ namespace np::app
 
 		void UpdateMetaValuesOnFrame(mem::Delegate& d)
 		{
-			graphics::RenderableMetaValues& meta_values = _renderable_model->GetMetaValues();
+			gfx::RenderableMetaValues& meta_values = _renderable_model->GetMetaValues();
 			tim::DurationMilliseconds duration = tim::SteadyClock::now() - _start_timestamp;
 			flt seconds = duration.count() / 1000.0f;
 			meta_values.object.Model =
@@ -82,7 +82,7 @@ namespace np::app
 			_model_texture_filename(
 				fs::Append(fs::Append(fs::Append(NP_ENGINE_WORKING_DIR, "test"), "assets"), "viking_room.png")),
 			_model(_model_filename, _model_texture_filename, true),
-			_renderable_model(graphics::RenderableModel::Create(_services, _model)),
+			_renderable_model(gfx::RenderableModel::Create(_services, _model)),
 			_model_entity(_services.GetEcsRegistry()),
 			_start_timestamp(tim::SteadyClock::now())
 		{
@@ -90,7 +90,7 @@ namespace np::app
 			_renderable_model->GetUpdateMetaValuesOnFrameDelegate().Connect<GameLayer, &GameLayer::UpdateMetaValuesOnFrame>(
 				this);
 
-			_model_entity.Add<graphics::RenderableObject*>(_renderable_model);
+			_model_entity.Add<gfx::RenderableObject*>(_renderable_model);
 
 			_camera.Eye = {2.0f, 2.0f, 2.0f};
 			_camera.Fovy = ::glm::radians(45.0f);
@@ -100,10 +100,10 @@ namespace np::app
 
 		~GameLayer()
 		{
-			mem::Destroy<graphics::RenderableModel>(_services.GetAllocator(), _renderable_model);
+			mem::Destroy<gfx::RenderableModel>(_services.GetAllocator(), _renderable_model);
 		}
 
-		void SetScene(graphics::Scene& scene)
+		void SetScene(gfx::Scene& scene)
 		{
 			_scene = mem::AddressOf(scene);
 			// TODO: init scene, and destroy content for last scene??
@@ -139,7 +139,7 @@ namespace np::app
 
 			window::Window::Properties window_properties;
 			window_properties.Title = "My Game Window >:D";
-			graphics::Scene* scene = CreateWindowScene(window_properties);
+			gfx::Scene* scene = CreateWindowScene(window_properties);
 			_game_layer.SetScene(*scene);
 
 			Application::Run(argc, argv);

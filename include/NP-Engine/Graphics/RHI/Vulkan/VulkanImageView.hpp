@@ -13,7 +13,7 @@
 
 #include "VulkanDevice.hpp"
 
-namespace np::graphics::rhi
+namespace np::gfx::rhi
 {
 	class VulkanImageView
 	{
@@ -83,6 +83,6 @@ namespace np::graphics::rhi
 			return _device;
 		}
 	};
-} // namespace np::graphics::rhi
+} // namespace np::gfx::rhi
 
 #endif /* NP_ENGINE_VULKAN_IMAGE_VIEW_HPP */

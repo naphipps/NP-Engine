@@ -9,7 +9,7 @@
 
 #include "NP-Engine/Primitive/Primitive.hpp"
 
-namespace np::graphics
+namespace np::gfx
 {
 	enum class RhiType : ui32
 	{
@@ -24,6 +24,6 @@ namespace np::graphics
 	{
 		extern atm<RhiType> RegisteredRhiType;
 	} // namespace __detail
-} // namespace np::graphics
+} // namespace np::gfx
 
 #endif /* NP_ENGINE_RHI_TYPE_HPP */

@@ -11,7 +11,7 @@
 
 #include "VulkanCommand.hpp"
 
-namespace np::graphics::rhi
+namespace np::gfx::rhi
 {
 	class VulkanCommandCopyBufferToImage : public VulkanCommand
 	{
@@ -51,6 +51,6 @@ namespace np::graphics::rhi
 			vkCmdCopyBufferToImage(command_buffer, SrcBuffer, DstImage, DstImageLayout, RegionCount, Regions);
 		}
 	};
-} // namespace np::graphics::rhi
+} // namespace np::gfx::rhi
 
 #endif /* NP_ENGINE_VULKAN_COMMAND_COPY_BUFFER_TO_IMAGE_HPP */

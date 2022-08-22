@@ -18,7 +18,7 @@
 #include "VulkanImageView.hpp"
 #include "VulkanSampler.hpp"
 
-namespace np::graphics::rhi
+namespace np::gfx::rhi
 {
 	class VulkanTexture
 	{
@@ -115,6 +115,6 @@ namespace np::graphics::rhi
 			return _height;
 		}
 	};
-} // namespace np::graphics::rhi
+} // namespace np::gfx::rhi
 
 #endif /* NP_ENGINE_VULKAN_TEXTURE_HPP */

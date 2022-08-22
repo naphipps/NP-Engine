@@ -16,7 +16,7 @@
 
 #include "NP-Engine/Graphics/RPI/RPI.hpp"
 
-namespace np::graphics::rhi
+namespace np::gfx::rhi
 {
 	namespace __detail
 	{
@@ -69,6 +69,6 @@ namespace np::graphics::rhi
 			return false;
 		}
 	};
-} // namespace np::graphics::rhi
+} // namespace np::gfx::rhi
 
 #endif /* NP_ENGINE_GRAPHICS_OPENGL_RENDERER_HPP */

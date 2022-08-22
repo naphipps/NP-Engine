@@ -27,7 +27,7 @@
 #include "VulkanTimelineSemaphore.hpp"
 #include "VulkanBinarySemaphore.hpp"
 
-namespace np::graphics::rhi
+namespace np::gfx::rhi
 {
 	class VulkanRenderableModel : public RenderableModel
 	{
@@ -669,6 +669,6 @@ namespace np::graphics::rhi
 			_descriptor_info.sampler = *_sampler;
 		}
 	};
-} // namespace np::graphics::rhi
+} // namespace np::gfx::rhi
 
 #endif /* NP_ENGINE_VULKAN_RENDERABLE_MODEL_HPP */

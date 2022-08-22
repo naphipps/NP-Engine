@@ -11,7 +11,7 @@
 
 #include "NP-Engine/Vendor/GlmInclude.hpp"
 
-namespace np::graphics
+namespace np::gfx
 {
 	class Camera
 	{
@@ -46,6 +46,6 @@ namespace np::graphics
 			return _projection;
 		}
 	};
-} // namespace np::graphics
+} // namespace np::gfx
 
 #endif /* NP_ENGINE_RPI_CAMERA_HPP */

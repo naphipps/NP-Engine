@@ -24,12 +24,12 @@
 #endif
 
 // TODO: add a bunch of helper functions like CreateSubmitInfo that sets "our default" SubmitInfo values
-namespace np::graphics::rhi
+namespace np::gfx::rhi
 {
 	static bl VulkanHasStencilComponent(VkFormat format)
 	{
 		return format == VK_FORMAT_D32_SFLOAT_S8_UINT || format == VK_FORMAT_D24_UNORM_S8_UINT;
 	}
-} // namespace np::graphics::rhi
+} // namespace np::gfx::rhi
 
 #endif /* NP_ENGINE_VENDOR_VULKAN_INCLUDE_HPP */

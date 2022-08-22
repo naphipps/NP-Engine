@@ -13,7 +13,7 @@
 #include "Pipeline.hpp"
 #include "RenderableType.hpp"
 
-namespace np::graphics
+namespace np::gfx
 {
 	struct RenderableObject
 	{
@@ -31,6 +31,6 @@ namespace np::graphics
 
 		virtual void SetOutOfDate(bl is_out_of_date = true) = 0;
 	};
-} // namespace np::graphics
+} // namespace np::gfx
 
 #endif /* NP_ENGINE_RPI_RENDERABLE_OBJECT_HPP */

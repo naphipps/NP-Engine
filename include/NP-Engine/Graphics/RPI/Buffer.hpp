@@ -7,10 +7,10 @@
 #ifndef NP_ENGINE_RPI_BUFFER_HPP
 #define NP_ENGINE_RPI_BUFFER_HPP
 
-namespace np::graphics
+namespace np::gfx
 {
 	struct Buffer
 	{};
-} // namespace np::graphics
+} // namespace np::gfx
 
 #endif /* NP_ENGINE_RPI_BUFFER_HPP */

@@ -9,7 +9,7 @@
 
 #include "NP-Engine/Vendor/VulkanInclude.hpp"
 
-namespace np::graphics::rhi
+namespace np::gfx::rhi
 {
 	class VulkanBinarySemaphore
 	{
@@ -51,6 +51,6 @@ namespace np::graphics::rhi
 			return _semaphore;
 		}
 	};
-} // namespace np::graphics::rhi
+} // namespace np::gfx::rhi
 
 #endif /* NP_ENGINE_VULKAN_BINARY_SEMAPHORE_HPP */

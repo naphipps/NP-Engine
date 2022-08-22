@@ -14,7 +14,7 @@
 
 #include "VulkanCommandBuffer.hpp"
 
-namespace np::graphics::rhi
+namespace np::gfx::rhi
 {
 	class VulkanCommandPool
 	{
@@ -92,6 +92,6 @@ namespace np::graphics::rhi
 			vkFreeCommandBuffers(_device, _command_pool, (ui32)buffers.size(), buffers.data());
 		}
 	};
-} // namespace np::graphics::rhi
+} // namespace np::gfx::rhi
 
 #endif /* NP_ENGINE_VULKAN_COMMAND_POOL_HPP */

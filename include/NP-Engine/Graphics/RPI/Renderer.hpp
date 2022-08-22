@@ -20,7 +20,7 @@
 #include "RenderableLight.hpp"
 #include "RenderableObject.hpp"
 
-namespace np::graphics
+namespace np::gfx
 {
 	class Renderer
 	{
@@ -53,6 +53,6 @@ namespace np::graphics
 		virtual void AdjustForWindowResize(window::Window& window) = 0;
 		virtual bl IsAttachedToWindow(window::Window& window) const = 0;
 	};
-} // namespace np::graphics
+} // namespace np::gfx
 
 #endif /* NP_ENGINE_RPI_RENDERER_HPP */

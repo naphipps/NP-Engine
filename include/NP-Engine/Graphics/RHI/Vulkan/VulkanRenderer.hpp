@@ -29,7 +29,7 @@
 #include "VulkanFrame.hpp"
 #include "VulkanFramebuffers.hpp"
 
-namespace np::graphics::rhi
+namespace np::gfx::rhi
 {
 	class VulkanRenderer : public Renderer
 	{
@@ -433,6 +433,6 @@ namespace np::graphics::rhi
 			return *_light_pipeline;
 		}
 	};
-} // namespace np::graphics::rhi
+} // namespace np::gfx::rhi
 
 #endif /* NP_ENGINE_VULKAN_RENDERER_HPP */

@@ -13,7 +13,7 @@
 
 #include "VulkanCommand.hpp"
 
-namespace np::graphics::rhi
+namespace np::gfx::rhi
 {
 	class VulkanCommandPushConstants : public VulkanCommand
 	{
@@ -38,6 +38,6 @@ namespace np::graphics::rhi
 			vkCmdPushConstants(command_buffer, PipelineLayout, ShaderStageFlags, Offset, Size, Values);
 		}
 	};
-} // namespace np::graphics::rhi
+} // namespace np::gfx::rhi
 
 #endif /* NP_ENGINE_VULKAN_COMMAND_PUSH_CONSTANTS_HPP */

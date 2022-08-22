@@ -11,7 +11,7 @@
 
 #include "NP-Engine/Vendor/GlmInclude.hpp"
 
-namespace np::graphics
+namespace np::gfx
 {
 	struct Vertex
 	{
@@ -24,14 +24,14 @@ namespace np::graphics
 			return Position == other.Position && Color == other.Color && TextureCoordinate == other.TextureCoordinate;
 		}
 	};
-} // namespace np::graphics
+} // namespace np::gfx
 
 namespace std
 {
 	template <>
-	struct hash<::np::graphics::Vertex>
+	struct hash<::np::gfx::Vertex>
 	{
-		siz operator()(const ::np::graphics::Vertex& vertex) const
+		siz operator()(const ::np::gfx::Vertex& vertex) const
 		{
 			return (hash<::glm::vec3>()(vertex.Position) ^ (hash<::glm::vec3>()(vertex.Color) << 1) >> 1) ^
 				(hash<::glm::vec2>()(vertex.TextureCoordinate) << 1);

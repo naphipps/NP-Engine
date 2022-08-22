@@ -11,7 +11,7 @@
 
 #include "VulkanCommand.hpp"
 
-namespace np::graphics::rhi
+namespace np::gfx::rhi
 {
 	class VulkanCommandEndRenderPass : public VulkanCommand
 	{
@@ -21,6 +21,6 @@ namespace np::graphics::rhi
 			vkCmdEndRenderPass(command_buffer);
 		}
 	};
-} // namespace np::graphics::rhi
+} // namespace np::gfx::rhi
 
 #endif /* NP_ENGINE_VULKAN_COMMAND_END_RENDER_PASS_HPP */

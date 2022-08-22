@@ -7,7 +7,7 @@
 /*
 #include "NP-Engine/Graphics/RHI/Vulkan/VulkanPipeline.hpp"
 
-namespace np::graphics::rhi
+namespace np::gfx::rhi
 {
 	VulkanPipeline::VulkanPipeline(VulkanDevice& device) :
 		_device(device),

@@ -18,7 +18,7 @@
 #include "VulkanImageView.hpp"
 #include "VulkanDevice.hpp"
 
-namespace np::graphics::rhi
+namespace np::gfx::rhi
 {
 	class VulkanSwapchain
 	{
@@ -380,6 +380,6 @@ namespace np::graphics::rhi
 			return _swapchain;
 		}
 	};
-} // namespace np::graphics::rhi
+} // namespace np::gfx::rhi
 
 #endif /* NP_ENGINE_VULKAN_SWAPCHAIN_HPP */

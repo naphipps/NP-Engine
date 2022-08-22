@@ -18,7 +18,7 @@
 #include "RenderableMetaValues.hpp"
 #include "Model.hpp"
 
-namespace np::graphics
+namespace np::gfx
 {
 	class RenderableModel : public RenderableObject
 	{
@@ -77,6 +77,6 @@ namespace np::graphics
 			return _update_meta_values_on_frame;
 		}
 	};
-} // namespace np::graphics
+} // namespace np::gfx
 
 #endif /* NP_ENGINE_RPI_RENDERABLE_MODEL_HPP */

@@ -19,7 +19,7 @@
 #include "Texture.hpp"
 #include "Vertex.hpp"
 
-namespace np::graphics
+namespace np::gfx
 {
 	class Model
 	{
@@ -227,6 +227,6 @@ namespace np::graphics
 			return _indices;
 		}
 	};
-} // namespace np::graphics
+} // namespace np::gfx
 
 #endif /* NP_ENGINE_RPI_MODEL_HPP */

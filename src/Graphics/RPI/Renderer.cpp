@@ -12,7 +12,7 @@
 
 #include "NP-Engine/Graphics/RHI/Vulkan/VulkanGraphics.hpp"
 
-namespace np::graphics
+namespace np::gfx
 {
 	Renderer* Renderer::Create(srvc::Services& services)
 	{
@@ -30,4 +30,4 @@ namespace np::graphics
 		return renderer;
 	}
 
-} // namespace np::graphics
+} // namespace np::gfx

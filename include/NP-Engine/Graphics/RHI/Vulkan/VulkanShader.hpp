@@ -23,7 +23,7 @@
 
 #include "VulkanDevice.hpp"
 
-namespace np::graphics::rhi
+namespace np::gfx::rhi
 {
 	class VulkanShader : public Shader
 	{
@@ -159,6 +159,6 @@ namespace np::graphics::rhi
 			return _shader_module;
 		}
 	};
-} // namespace np::graphics::rhi
+} // namespace np::gfx::rhi
 
 #endif /* NP_ENGINE_VULKAN_SHADER_HPP */

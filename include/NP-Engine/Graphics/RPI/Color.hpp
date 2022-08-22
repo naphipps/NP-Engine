@@ -12,7 +12,7 @@
 #include "NP-Engine/Memory/Memory.hpp"
 #include "NP-Engine/Insight/Insight.hpp"
 
-namespace np::graphics
+namespace np::gfx
 {
 	// TODO: add implicit cast to vec4? and assign operator to vec4?
 
@@ -56,6 +56,6 @@ namespace np::graphics
 	};
 
 	NP_ENGINE_STATIC_ASSERT(sizeof(Color) == 4, "Color must have size of 4.");
-} // namespace np::graphics
+} // namespace np::gfx
 
 #endif /* NP_ENGINE_RPI_COLOR_HPP */

@@ -15,7 +15,7 @@
 
 #include "../../RPI/RPI.hpp"
 
-namespace np::graphics::rhi
+namespace np::gfx::rhi
 {
 	struct VulkanVertex : public Vertex
 	{
@@ -69,6 +69,6 @@ namespace np::graphics::rhi
 			return descs;
 		}
 	};
-} // namespace np::graphics::rhi
+} // namespace np::gfx::rhi
 
 #endif /* NP_ENGINE_VULKAN_VERTEX_HPP */

@@ -36,7 +36,7 @@
 // TODO: there might be some methods with zero references...
 // TODO: remove Optional comments
 
-namespace np::graphics::rhi
+namespace np::gfx::rhi
 {
 	class VulkanPipeline : public Pipeline
 	{
@@ -608,6 +608,6 @@ namespace np::graphics::rhi
 			_pipeline = CreatePipeline();
 		}
 	};
-} // namespace np::graphics::rhi
+} // namespace np::gfx::rhi
 
 #endif /* NP_ENGINE_VULKAN_PIPELINE_HPP */

@@ -152,14 +152,14 @@ namespace np::app
 			_overlays.emplace_back(overlay);
 		}
 
-		graphics::Scene* CreateWindowScene(window::Window::Properties& window_properties)
+		gfx::Scene* CreateWindowScene(window::Window::Properties& window_properties)
 		{
 			window::Window* w = _window_layer.CreateWindow(window_properties);
 			_graphics_layer.CreateRenderer(*w);
 			return _graphics_layer.AcquireScene();
 		}
 
-		void DestroyWindowScene(graphics::Scene& scene)
+		void DestroyWindowScene(gfx::Scene& scene)
 		{
 			// TODO: do we need this??
 		}

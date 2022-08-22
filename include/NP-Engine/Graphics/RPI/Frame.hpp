@@ -9,7 +9,7 @@
 
 #include "NP-Engine/Primitive/Primitive.hpp"
 
-namespace np::graphics
+namespace np::gfx
 {
 	struct Frame
 	{
@@ -18,6 +18,6 @@ namespace np::graphics
 		virtual bl IsValid() const = 0;
 		virtual void Invalidate() = 0;
 	};
-} // namespace np::graphics
+} // namespace np::gfx
 
 #endif /* NP_ENGINE_RPI_FRAME_HPP */

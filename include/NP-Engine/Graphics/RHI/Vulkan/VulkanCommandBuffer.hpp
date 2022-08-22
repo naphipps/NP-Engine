@@ -13,7 +13,7 @@
 
 #include "VulkanCommand.hpp"
 
-namespace np::graphics::rhi
+namespace np::gfx::rhi
 {
 	class VulkanCommandBuffer
 	{
@@ -85,6 +85,6 @@ namespace np::graphics::rhi
 			command.ApplyTo(_command_buffer);
 		}
 	};
-} // namespace np::graphics::rhi
+} // namespace np::gfx::rhi
 
 #endif /* NP_ENGINE_VULKAN_COMMAND_BUFFER_HPP */

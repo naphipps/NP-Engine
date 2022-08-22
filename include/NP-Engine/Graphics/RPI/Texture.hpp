@@ -14,7 +14,7 @@
 
 #include "Image.hpp"
 
-namespace np::graphics
+namespace np::gfx
 {
 	class Texture : public Image
 	{
@@ -64,6 +64,6 @@ namespace np::graphics
 			return _hot_reloadable;
 		}
 	};
-} // namespace np::graphics
+} // namespace np::gfx
 
 #endif /* NP_ENGINE_RPI_TEXTURE_HPP */

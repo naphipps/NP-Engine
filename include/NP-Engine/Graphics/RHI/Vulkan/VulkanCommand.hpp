@@ -11,12 +11,12 @@
 
 #include "NP-Engine/Graphics/RPI/RPI.hpp"
 
-namespace np::graphics::rhi
+namespace np::gfx::rhi
 {
 	struct VulkanCommand : public Command
 	{
 		virtual void ApplyTo(VkCommandBuffer command_buffer) = 0;
 	};
-} // namespace np::graphics::rhi
+} // namespace np::gfx::rhi
 
 #endif /* NP_ENGINE_VULKAN_COMMAND_HPP */

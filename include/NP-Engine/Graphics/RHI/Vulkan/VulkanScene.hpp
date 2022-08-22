@@ -22,7 +22,7 @@
 #include "VulkanRenderableModel.hpp"
 #include "VulkanCamera.hpp"
 
-namespace np::graphics::rhi
+namespace np::gfx::rhi
 {
 	class VulkanScene : public Scene
 	{
@@ -225,6 +225,6 @@ namespace np::graphics::rhi
 
 		virtual void AdjustForWindowResize(window::Window& window) override {}
 	};
-} // namespace np::graphics::rhi
+} // namespace np::gfx::rhi
 
 #endif /* NP_ENGINE_VULKAN_SCENE_HPP */

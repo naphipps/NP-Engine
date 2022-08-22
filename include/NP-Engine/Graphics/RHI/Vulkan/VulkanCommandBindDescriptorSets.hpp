@@ -11,7 +11,7 @@
 
 #include "VulkanCommand.hpp"
 
-namespace np::graphics::rhi
+namespace np::gfx::rhi
 {
 	class VulkanCommandBindDescriptorSets : public VulkanCommand
 	{
@@ -42,6 +42,6 @@ namespace np::graphics::rhi
 									DescriptorSets, DynamicOffsetCount, DynamicOffsets);
 		}
 	};
-} // namespace np::graphics::rhi
+} // namespace np::gfx::rhi
 
 #endif /* NP_ENGINE_VULKAN_COMMAND_BIND_DESCRIPTOR_SETS_HPP */

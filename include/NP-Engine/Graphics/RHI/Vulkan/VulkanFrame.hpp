@@ -19,7 +19,7 @@
 
 #include "VulkanCommandBuffer.hpp"
 
-namespace np::graphics::rhi
+namespace np::gfx::rhi
 {
 	class VulkanFrame : public Frame
 	{
@@ -114,6 +114,6 @@ namespace np::graphics::rhi
 					_command_buffer.Add(*command);
 		}
 	};
-} // namespace np::graphics::rhi
+} // namespace np::gfx::rhi
 
 #endif /* NP_ENGINE_VULKAN_FRAME_HPP */

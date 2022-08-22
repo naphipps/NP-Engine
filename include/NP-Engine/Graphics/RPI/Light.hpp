@@ -13,7 +13,7 @@
 
 #include "Color.hpp"
 
-namespace np::graphics
+namespace np::gfx
 {
 	class Light
 	{
@@ -40,6 +40,6 @@ namespace np::graphics
 			return _type;
 		}
 	};
-} // namespace np::graphics
+} // namespace np::gfx
 
 #endif /* NP_ENGINE_RPI_LIGHT_HPP */

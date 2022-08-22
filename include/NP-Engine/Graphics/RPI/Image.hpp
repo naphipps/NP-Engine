@@ -18,7 +18,7 @@
 
 #include "Color.hpp"
 
-namespace np::graphics
+namespace np::gfx
 {
 	class Image
 	{
@@ -158,6 +158,6 @@ namespace np::graphics
 			}
 		}
 	};
-} // namespace np::graphics
+} // namespace np::gfx
 
 #endif /* NP_ENGINE_RPI_IMAGE_HPP */

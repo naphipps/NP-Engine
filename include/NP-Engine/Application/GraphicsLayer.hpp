@@ -32,10 +32,10 @@ namespace np::app
 	class GraphicsLayer : public Layer
 	{
 	protected:
-		container::vector<graphics::Renderer*> _renderers;
-		container::vector<graphics::Scene*> _scenes; // TODO: I feel like we need to redesign how we store all these
-		container::uset<graphics::Scene*> _unacquired_scenes;
-		container::uset<graphics::Scene*> _acquired_scenes;
+		container::vector<gfx::Renderer*> _renderers;
+		container::vector<gfx::Scene*> _scenes; // TODO: I feel like we need to redesign how we store all these
+		container::uset<gfx::Scene*> _unacquired_scenes;
+		container::uset<gfx::Scene*> _acquired_scenes;
 
 		virtual void AdjustForWindowClose(evnt::Event& e)
 		{
@@ -46,7 +46,7 @@ namespace np::app
 				{
 					_unacquired_scenes.erase(*it);
 					_acquired_scenes.erase(*it);
-					mem::Destroy<graphics::Scene>(_services.GetAllocator(), *it);
+					mem::Destroy<gfx::Scene>(_services.GetAllocator(), *it);
 					_scenes.erase(it);
 					break;
 				}
@@ -55,7 +55,7 @@ namespace np::app
 				if ((*it)->IsAttachedToWindow(window))
 				{
 					(*it)->DetachFromWindow(window);
-					mem::Destroy<graphics::Renderer>(_services.GetAllocator(), *it);
+					mem::Destroy<gfx::Renderer>(_services.GetAllocator(), *it);
 					_renderers.erase(it);
 					break;
 				}
@@ -65,14 +65,14 @@ namespace np::app
 		{
 			window::Window& window = *e.RetrieveData<window::WindowCloseEvent::DataType>().window;
 
-			for (graphics::Scene*& scene : _scenes)
+			for (gfx::Scene*& scene : _scenes)
 				if (scene->GetRenderer().IsAttachedToWindow(window))
 				{
 					scene->AdjustForWindowResize(window);
 					break;
 				}
 
-			for (graphics::Renderer*& renderer : _renderers)
+			for (gfx::Renderer*& renderer : _renderers)
 				if (renderer->IsAttachedToWindow(window))
 				{
 					renderer->AdjustForWindowResize(window);
@@ -98,9 +98,9 @@ namespace np::app
 		void ChooseRhi()
 		{
 			mem::TraitAllocator allocator;
-			container::deque<graphics::Renderer*> renderers;
-			graphics::Renderer* opengl = nullptr;
-			graphics::Renderer* vulkan = nullptr;
+			container::deque<gfx::Renderer*> renderers;
+			gfx::Renderer* opengl = nullptr;
+			gfx::Renderer* vulkan = nullptr;
 
 			// TODO: we need to redo how we choose our rhi... look at Renderer.IsValid methods or something similar
 
@@ -112,10 +112,10 @@ namespace np::app
 
 #if NP_ENGINE_PLATFORM_IS_WINDOWS
 			// TODO: we're keeping this here for testing purposes - when renderer is complete we can probably remove
-			opengl = mem::Create<graphics::rhi::OpenGLRenderer>(allocator, _services);
+			opengl = mem::Create<gfx::rhi::OpenGLRenderer>(allocator, _services);
 
 #endif
-			vulkan = mem::Create<graphics::rhi::VulkanRenderer>(allocator, _services);
+			vulkan = mem::Create<gfx::rhi::VulkanRenderer>(allocator, _services);
 
 			if (vulkan != nullptr)
 				renderers.emplace_back(vulkan);
@@ -124,7 +124,7 @@ namespace np::app
 
 			str available_renderers;
 
-			for (graphics::Renderer* renderer : renderers)
+			for (gfx::Renderer* renderer : renderers)
 				available_renderers += "\t- " + renderer->GetName() + "\n";
 
 			str title = "NP Engine";
@@ -153,13 +153,13 @@ namespace np::app
 				renderers.front()->RegisterRhiType();
 			}
 
-			for (graphics::Renderer* renderer : renderers)
-				mem::Destroy<graphics::Renderer>(allocator, renderer);
+			for (gfx::Renderer* renderer : renderers)
+				mem::Destroy<gfx::Renderer>(allocator, renderer);
 		}
 
-		graphics::Scene* CreateScene(graphics::Renderer& renderer)
+		gfx::Scene* CreateScene(gfx::Renderer& renderer)
 		{
-			graphics::Scene* scene = graphics::Scene::Create(_services, renderer);
+			gfx::Scene* scene = gfx::Scene::Create(_services, renderer);
 			_unacquired_scenes.insert(scene);
 			return _scenes.emplace_back(scene);
 		}
@@ -173,15 +173,15 @@ namespace np::app
 		virtual ~GraphicsLayer()
 		{
 			for (auto it = _scenes.begin(); it != _scenes.end(); it++)
-				mem::Destroy<graphics::Scene>(_services.GetAllocator(), *it);
+				mem::Destroy<gfx::Scene>(_services.GetAllocator(), *it);
 
 			for (auto it = _renderers.begin(); it != _renderers.end(); it++)
-				mem::Destroy<graphics::Renderer>(_services.GetAllocator(), *it);
+				mem::Destroy<gfx::Renderer>(_services.GetAllocator(), *it);
 		}
 
-		graphics::Renderer* CreateRenderer(window::Window& window)
+		gfx::Renderer* CreateRenderer(window::Window& window)
 		{
-			graphics::Renderer* renderer = graphics::Renderer::Create(_services);
+			gfx::Renderer* renderer = gfx::Renderer::Create(_services);
 			renderer->AttachToWindow(window);
 			CreateScene(*renderer);
 			return _renderers.emplace_back(renderer);
@@ -192,9 +192,9 @@ namespace np::app
 			return (evnt::EventCategory)((ui64)evnt::EventCategory::Graphics | (ui64)evnt::EventCategory::Window);
 		}
 
-		graphics::Scene* AcquireScene()
+		gfx::Scene* AcquireScene()
 		{
-			graphics::Scene* scene = nullptr;
+			gfx::Scene* scene = nullptr;
 
 			if (!_unacquired_scenes.empty())
 			{
@@ -206,7 +206,7 @@ namespace np::app
 			return scene;
 		}
 
-		void ReleaseScene(graphics::Scene* scene)
+		void ReleaseScene(gfx::Scene* scene)
 		{
 			if (_acquired_scenes.find(scene) != _acquired_scenes.end())
 			{

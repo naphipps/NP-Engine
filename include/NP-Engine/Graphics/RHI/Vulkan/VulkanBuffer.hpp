@@ -17,7 +17,7 @@
 #include "VulkanCommands.hpp"
 #include "VulkanFence.hpp"
 
-namespace np::graphics::rhi
+namespace np::gfx::rhi
 {
 	class VulkanBuffer : public Buffer
 	{
@@ -194,6 +194,6 @@ namespace np::graphics::rhi
 			return _buffer;
 		}
 	};
-} // namespace np::graphics::rhi
+} // namespace np::gfx::rhi
 
 #endif /* NP_ENGINE_VULKAN_BUFFER_HPP */

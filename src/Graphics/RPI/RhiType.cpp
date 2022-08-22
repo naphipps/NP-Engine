@@ -6,7 +6,7 @@
 
 #include "NP-Engine/Graphics/RPI/RhiType.hpp"
 
-namespace np::graphics::__detail
+namespace np::gfx::__detail
 {
 	atm<RhiType> RegisteredRhiType(RhiType::None);
-} // namespace np::graphics::__detail
+} // namespace np::gfx::__detail

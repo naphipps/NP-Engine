@@ -17,7 +17,7 @@
 #include "RenderableType.hpp"
 #include "Image.hpp"
 
-namespace np::graphics
+namespace np::gfx
 {
 	class RenderableImage : public RenderableObject
 	{
@@ -47,6 +47,6 @@ namespace np::graphics
 			return _image;
 		}
 	};
-} // namespace np::graphics
+} // namespace np::gfx
 
 #endif /* NP_ENGINE_RPI_RENDERABLE_IMAGE_HPP */

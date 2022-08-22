@@ -9,7 +9,7 @@
 
 #include "NP-Engine/Primitive/Primitive.hpp"
 
-namespace np::graphics
+namespace np::gfx
 {
 	enum class RenderableType : ui32
 	{
@@ -18,6 +18,6 @@ namespace np::graphics
 		Image = BIT(1),
 		Light = BIT(2)
 	};
-} // namespace np::graphics
+} // namespace np::gfx
 
 #endif /* NP_ENGINE_RPI_RENDERABLE_TYPE_HPP */

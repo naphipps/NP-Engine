@@ -9,7 +9,7 @@
 
 #include "NP-Engine/Vendor/VulkanInclude.hpp"
 
-namespace np::graphics::rhi
+namespace np::gfx::rhi
 {
 	class VulkanTimelineSemaphore
 	{
@@ -89,6 +89,6 @@ namespace np::graphics::rhi
 			return value;
 		}
 	};
-} // namespace np::graphics::rhi
+} // namespace np::gfx::rhi
 
 #endif /* NP_ENGINE_VULKAN_TIMELINE_SEMAPHORE_HPP */
