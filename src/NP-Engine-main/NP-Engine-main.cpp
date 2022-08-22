@@ -31,8 +31,7 @@ i32 main(i32 argc, chr** argv)
 		{
 			::np::mem::RedBlackTreeAllocator app_allocator(main_block);
 			::np::mem::TraitAllocator::Register(app_allocator);
-			::np::srvc::Services* app_services =
-				::np::mem::Create<::np::srvc::Services>(app_allocator);
+			::np::srvc::Services* app_services = ::np::mem::Create<::np::srvc::Services>(app_allocator);
 			::np::app::Application* application = ::np::app::CreateApplication(*app_services);
 			application->Run(argc, argv);
 			::np::mem::Destroy<::np::app::Application>(app_allocator, application);

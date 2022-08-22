@@ -22,7 +22,7 @@ namespace np::noiz
 
 		MEMBERS:
 
-			ui8 _warp_octave_count; 
+			ui8 _warp_octave_count;
 				- recommend [1, 2]
 				- 0 gives you fbm
 				- > 3 is not very usable due to performance but produces cool results
@@ -49,11 +49,11 @@ namespace np::noiz
 				- frequency ("width") of the first octave of noise
 				- default to 1.0
 
-			flt _amplitude; 
+			flt _amplitude;
 				- amplitude ("height") of the first octave of noise
 				- default to 1.0
 
-			flt _lacunarity; 
+			flt _lacunarity;
 				- lacunarity specifies the frequency multiplier between successive octaves
 				- default to 2.0
 
@@ -66,12 +66,12 @@ namespace np::noiz
 				- default to 0.19
 
 			ui8 _octave_count;
-				- recommends [3, 6] for good control of detail 
-				- [6, +oo) can be way much detail and perform slow 
-				- [0, 3] may be too little detail 
+				- recommends [3, 6] for good control of detail
+				- [6, +oo) can be way much detail and perform slow
+				- [0, 3] may be too little detail
 				- default to 3 for performance reasons
 
-			ui8 _rigidity; 
+			ui8 _rigidity;
 				- higher rigidity means a more stark noise
 				- default to 1
 				- [0, 8] will use high performance pow
@@ -87,25 +87,25 @@ namespace np::noiz
 
 			Fractal
 				- the same layer of noise will be added on top of itself an octave count number of times with
-					detail respect to lacunarity 
-				- may contain artifacts due to it layers the same layer of noise on top of itself 
+					detail respect to lacunarity
+				- may contain artifacts due to it layers the same layer of noise on top of itself
 				- return [-1, 1]
 
 			Fractional
 				- adds an octave count number of layers of noise together with detail respect to lacunarity
-				- the added layers are fractional incremenet's value away from each other 
+				- the added layers are fractional incremenet's value away from each other
 					- calculates values in one dimention less than fractal for this reason
 				- if fractional increment is zero, then fractional noise may contain artifacts due to it layers
 					the same layer of noise on top of itself
 				- return [-1, 1]
 
 			RigidFractal
-				- same noise as fractal but adds the abs value of each layer then subtracts it 
+				- same noise as fractal but adds the abs value of each layer then subtracts it
 					from 1 then raises it to the rigidity value's power
 				- return [0, 1]
 
-			RigidFractional 
-				- same noise as fractional but adds the abs value of each layer then subtracts 
+			RigidFractional
+				- same noise as fractional but adds the abs value of each layer then subtracts
 					it from 1 then raises it to the rigidity value's power
 				- return [0, 1]
 
@@ -118,7 +118,7 @@ namespace np::noiz
 			WarpFractal
 				- same noise as fractal but warps it through itself based on warp related fields
 
-			WarpFractional 
+			WarpFractional
 				- same noise as fractional but warps it through itself based on warp related fields
 	*/
 
@@ -367,11 +367,10 @@ namespace np::noiz
 			// Add blended results from 8 corners of cube
 			flt res = math::lerp(
 				math::lerp(math::lerp(Grad(_permutation[AA], x, y, z), Grad(_permutation[BA], x - 1, y, z), u),
-							math::lerp(Grad(_permutation[AB], x, y - 1, z), Grad(_permutation[BB], x - 1, y - 1, z), u), v),
+						   math::lerp(Grad(_permutation[AB], x, y - 1, z), Grad(_permutation[BB], x - 1, y - 1, z), u), v),
 				math::lerp(
 					math::lerp(Grad(_permutation[AA + 1], x, y, z - 1), Grad(_permutation[BA + 1], x - 1, y, z - 1), u),
-					math::lerp(Grad(_permutation[AB + 1], x, y - 1, z - 1), Grad(_permutation[BB + 1], x - 1, y - 1, z - 1),
-								u),
+					math::lerp(Grad(_permutation[AB + 1], x, y - 1, z - 1), Grad(_permutation[BB + 1], x - 1, y - 1, z - 1), u),
 					v),
 				w);
 
@@ -479,8 +478,8 @@ namespace np::noiz
 
 			for (ui8 i = 0; i < _octave_count; i++)
 			{
-				output += amplitude *
-					math::abs(CalculateNoise(x * frequency, y * frequency, i * _fractional_increment * frequency));
+				output +=
+					amplitude * math::abs(CalculateNoise(x * frequency, y * frequency, i * _fractional_increment * frequency));
 				denom += amplitude;
 				frequency *= _lacunarity;
 				amplitude *= _persistence;
@@ -561,10 +560,10 @@ namespace np::noiz
 				for (ui8 i = 0; i < woc; i++)
 				{
 					wx = Fractal(x + wom * wx + i * woi, y + wom * wy + i * woi, z + wom * wz + i * woi);
-					wy = Fractal(x + wom * wx + (i + wod) * woi, y + wom * wy + (i + wod) * woi,
-									z + wom * wz + (i + wod) * woi);
+					wy =
+						Fractal(x + wom * wx + (i + wod) * woi, y + wom * wy + (i + wod) * woi, z + wom * wz + (i + wod) * woi);
 					wz = Fractal(x + wom * wx + (i + 2 * wod) * woi, y + wom * wy + (i + 2 * wod) * woi,
-									z + wom * wz + (i + 2 * wod) * woi);
+								 z + wom * wz + (i + 2 * wod) * woi);
 				}
 
 				output = Fractal(x + wom * wx + woc * woi, y + wom * wy + woc * woi, z + wom * wz + woc * woi);
@@ -606,6 +605,6 @@ namespace np::noiz
 			return output;
 		}
 	};
-} // namespace np
+} // namespace np::noiz
 
 #endif /* NP_ENGINE_PERLIN_HPP */

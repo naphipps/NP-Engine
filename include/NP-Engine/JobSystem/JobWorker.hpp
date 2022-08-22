@@ -179,6 +179,6 @@ namespace np::jsys
 			}
 		}
 	};
-} // namespace np::js
+} // namespace np::jsys
 
 #endif /* NP_ENGINE_JOB_WORKER_HPP */

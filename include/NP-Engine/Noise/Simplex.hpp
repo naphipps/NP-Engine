@@ -137,14 +137,13 @@ namespace np::noiz
 		constexpr static flt DEFAULT_WARP_OCTAVE_INCREMENT = 0.19f;
 		constexpr static flt DEFAULT_WARP_OCTAVE_DISPLACEMENT = 0.f;
 		constexpr static flt GRADIENT4D[128] = {
-			0.f,  1.f,	1.f, 1.f, 0.f,	1.f,  1.f,	-1.f, 0.f,	1.f,  -1.f, 1.f, 0.f,  1.f,	 -1.f, -1.f,
-			0.f,  -1.f, 1.f, 1.f, 0.f,	-1.f, 1.f,	-1.f, 0.f,	-1.f, -1.f, 1.f, 0.f,  -1.f, -1.f, -1.f,
-			1.f,  0.f,	1.f, 1.f, 1.f,	0.f,  1.f,	-1.f, 1.f,	0.f,  -1.f, 1.f, 1.f,  0.f,	 -1.f, -1.f,
-			-1.f, 0.f,	1.f, 1.f, -1.f, 0.f,  1.f,	-1.f, -1.f, 0.f,  -1.f, 1.f, -1.f, 0.f,	 -1.f, -1.f,
-			1.f,  1.f,	0.f, 1.f, 1.f,	1.f,  0.f,	-1.f, 1.f,	-1.f, 0.f,	1.f, 1.f,  -1.f, 0.f,  -1.f,
-			-1.f, 1.f,	0.f, 1.f, -1.f, 1.f,  0.f,	-1.f, -1.f, -1.f, 0.f,	1.f, -1.f, -1.f, 0.f,  -1.f,
-			1.f,  1.f,	1.f, 0.f, 1.f,	1.f,  -1.f, 0.f,  1.f,	-1.f, 1.f,	0.f, 1.f,  -1.f, -1.f, 0.f,
-			-1.f, 1.f,	1.f, 0.f, -1.f, 1.f,  -1.f, 0.f,  -1.f, -1.f, 1.f,	0.f, -1.f, -1.f, -1.f, 0.f };
+			0.f,  1.f,	1.f,  1.f,	0.f,  1.f,	1.f,  -1.f, 0.f,  1.f,	-1.f, 1.f,	0.f,  1.f,	-1.f, -1.f, 0.f,  -1.f, 1.f,
+			1.f,  0.f,	-1.f, 1.f,	-1.f, 0.f,	-1.f, -1.f, 1.f,  0.f,	-1.f, -1.f, -1.f, 1.f,	0.f,  1.f,	1.f,  1.f,	0.f,
+			1.f,  -1.f, 1.f,  0.f,	-1.f, 1.f,	1.f,  0.f,	-1.f, -1.f, -1.f, 0.f,	1.f,  1.f,	-1.f, 0.f,	1.f,  -1.f, -1.f,
+			0.f,  -1.f, 1.f,  -1.f, 0.f,  -1.f, -1.f, 1.f,	1.f,  0.f,	1.f,  1.f,	1.f,  0.f,	-1.f, 1.f,	-1.f, 0.f,	1.f,
+			1.f,  -1.f, 0.f,  -1.f, -1.f, 1.f,	0.f,  1.f,	-1.f, 1.f,	0.f,  -1.f, -1.f, -1.f, 0.f,  1.f,	-1.f, -1.f, 0.f,
+			-1.f, 1.f,	1.f,  1.f,	0.f,  1.f,	1.f,  -1.f, 0.f,  1.f,	-1.f, 1.f,	0.f,  1.f,	-1.f, -1.f, 0.f,  -1.f, 1.f,
+			1.f,  0.f,	-1.f, 1.f,	-1.f, 0.f,	-1.f, -1.f, 1.f,  0.f,	-1.f, -1.f, -1.f, 0.f};
 
 	private:
 		static const ui32 PERMUTATION_SIZE = 256;
@@ -1223,8 +1222,8 @@ namespace np::noiz
 
 			for (ui8 i = 0; i < _octave_count; i++)
 			{
-				output += amplitude *
-					math::abs(CalculateNoise(x * frequency, y * frequency, i * _fractional_increment * frequency));
+				output +=
+					amplitude * math::abs(CalculateNoise(x * frequency, y * frequency, i * _fractional_increment * frequency));
 				denom += amplitude;
 				frequency *= _lacunarity;
 				amplitude *= _persistence;
@@ -1281,7 +1280,7 @@ namespace np::noiz
 			{
 				output += amplitude *
 					math::abs(CalculateNoise(x * frequency, y * frequency, z * frequency,
-												i * _fractional_increment * frequency));
+											 i * _fractional_increment * frequency));
 				denom += amplitude;
 				frequency *= _lacunarity;
 				amplitude *= _persistence;
@@ -1445,10 +1444,10 @@ namespace np::noiz
 				for (ui8 i = 0; i < woc; i++)
 				{
 					wx = Fractal(x + wom * wx + i * woi, y + wom * wy + i * woi, z + wom * wz + i * woi);
-					wy = Fractal(x + wom * wx + (i + wod) * woi, y + wom * wy + (i + wod) * woi,
-									z + wom * wz + (i + wod) * woi);
+					wy =
+						Fractal(x + wom * wx + (i + wod) * woi, y + wom * wy + (i + wod) * woi, z + wom * wz + (i + wod) * woi);
 					wz = Fractal(x + wom * wx + (i + 2 * wod) * woi, y + wom * wy + (i + 2 * wod) * woi,
-									z + wom * wz + (i + 2 * wod) * woi);
+								 z + wom * wz + (i + 2 * wod) * woi);
 				}
 
 				output = Fractal(x + wom * wx + woc * woi, y + wom * wy + woc * woi, z + wom * wz + woc * woi);
@@ -1475,29 +1474,29 @@ namespace np::noiz
 				// with wod = 0, ox and oy would end up being the same value, so we just use ox below
 				for (ui8 i = 0; i < woc; i++)
 				{
-					wx = Fractal(x + wom * wx + i * woi, y + wom * wx + i * woi, z + wom * wz + i * woi,
-									w + wom * ww + i * woi);
+					wx =
+						Fractal(x + wom * wx + i * woi, y + wom * wx + i * woi, z + wom * wz + i * woi, w + wom * ww + i * woi);
 				}
 
 				output = Fractal(x + wom * wx + woc * woi, y + wom * wx + woc * woi, z + wom * wz + woc * woi,
-									w + wom * ww + woc * woi);
+								 w + wom * ww + woc * woi);
 			}
 			else
 			{
 				for (ui8 i = 0; i < woc; i++)
 				{
-					wx = Fractal(x + wom * wx + i * woi, y + wom * wy + i * woi, z + wom * wz + i * woi,
-									w + wom * ww + i * woi);
-					wy = Fractal(x + wom * wx + (i + wod) * woi, y + wom * wy + (i + wod) * woi,
-									z + wom * wz + (i + wod) * woi, w + wom * ww + (i + wod) * woi);
+					wx =
+						Fractal(x + wom * wx + i * woi, y + wom * wy + i * woi, z + wom * wz + i * woi, w + wom * ww + i * woi);
+					wy = Fractal(x + wom * wx + (i + wod) * woi, y + wom * wy + (i + wod) * woi, z + wom * wz + (i + wod) * woi,
+								 w + wom * ww + (i + wod) * woi);
 					wz = Fractal(x + wom * wx + (i + 2 * wod) * woi, y + wom * wy + (i + 2 * wod) * woi,
-									z + wom * wz + (i + 2 * wod) * woi, w + wom * ww + (i + 2 * wod) * woi);
+								 z + wom * wz + (i + 2 * wod) * woi, w + wom * ww + (i + 2 * wod) * woi);
 					ww = Fractal(x + wom * wx + (i + 4 * wod) * woi, y + wom * wy + (i + 4 * wod) * woi,
-									z + wom * wz + (i + 4 * wod) * woi, w + wom * ww + (i + 4 * wod) * woi);
+								 z + wom * wz + (i + 4 * wod) * woi, w + wom * ww + (i + 4 * wod) * woi);
 				}
 
 				output = Fractal(x + wom * wx + woc * woi, y + wom * wy + woc * woi, z + wom * wz + woc * woi,
-									w + wom * ww + woc * woi);
+								 w + wom * ww + woc * woi);
 			}
 
 			return output;
@@ -1598,6 +1597,6 @@ namespace np::noiz
 			return output;
 		}
 	};
-} // namespace np
+} // namespace np::noiz
 
 #endif /* NP_ENGINE_SIMPLEX_HPP */

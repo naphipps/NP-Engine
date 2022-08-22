@@ -15,7 +15,7 @@
 #include "Perlin.hpp"
 #include "Simplex.hpp"
 
-//TODO: can we use containers here for our perline and simplex array??
+// TODO: can we use containers here for our perline and simplex array??
 
 namespace np::noiz
 {
@@ -41,7 +41,7 @@ namespace np::noiz
 			flt _scalar;
 				- can be anything
 				- default to 0.1f
-				
+
 
 		*/
 
@@ -241,6 +241,6 @@ namespace np::noiz
 			z += _simplex[2].Fractional(x, y, z) * _scalar;
 		}
 	};
-} // namespace np
+} // namespace np::noiz
 
 #endif /* NP_ENGINE_TURBULENCE_HPP */

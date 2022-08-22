@@ -185,8 +185,7 @@ namespace np::gfx::rhi
 
 				// check queue families
 				{
-					con::vector<VkQueueFamilyProperties> queue_family_properties =
-						GetQueueFamilyProperties(physical_device);
+					con::vector<VkQueueFamilyProperties> queue_family_properties = GetQueueFamilyProperties(physical_device);
 
 					for (siz i = 0; i < queue_family_properties.size(); i++)
 					{

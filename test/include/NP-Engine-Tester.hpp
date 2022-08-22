@@ -78,7 +78,8 @@ namespace np::app
 		GameLayer(srvc::Services& services):
 			Layer(services),
 			_scene(nullptr),
-			_model_filename(fsys::Append(fsys::Append(fsys::Append(NP_ENGINE_WORKING_DIR, "test"), "assets"), "viking_room.obj")),
+			_model_filename(
+				fsys::Append(fsys::Append(fsys::Append(NP_ENGINE_WORKING_DIR, "test"), "assets"), "viking_room.obj")),
 			_model_texture_filename(
 				fsys::Append(fsys::Append(fsys::Append(NP_ENGINE_WORKING_DIR, "test"), "assets"), "viking_room.png")),
 			_model(_model_filename, _model_texture_filename, true),

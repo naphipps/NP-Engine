@@ -108,8 +108,8 @@ namespace np::gfx::rhi
 			}
 		}
 
-		VkResult AsyncCopyTo(VulkanBuffer& other, VkSubmitInfo& submit_info,
-							 con::vector<VulkanCommandBuffer>& command_buffers, VkFence fence = nullptr)
+		VkResult AsyncCopyTo(VulkanBuffer& other, VkSubmitInfo& submit_info, con::vector<VulkanCommandBuffer>& command_buffers,
+							 VkFence fence = nullptr)
 		{
 			VkBufferCopy buffer_copy{};
 			buffer_copy.size = _size;

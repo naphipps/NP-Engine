@@ -201,6 +201,6 @@ namespace np::jsys
 			return _job_workers;
 		}
 	};
-} // namespace np::js
+} // namespace np::jsys
 
 #endif /* NP_ENGINE_JOB_SYSTEM_IMPL_HPP */

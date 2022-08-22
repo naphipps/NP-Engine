@@ -15,7 +15,7 @@
 
 #include "NP-Engine/Vendor/RapidJsonInclude.hpp"
 
-//TODO: our serialization needs have changes so this class is up for redesign
+// TODO: our serialization needs have changes so this class is up for redesign
 
 namespace np::srlz
 {

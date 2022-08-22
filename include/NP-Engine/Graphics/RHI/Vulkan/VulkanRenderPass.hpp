@@ -122,7 +122,7 @@ namespace np::gfx::rhi
 			con::vector<VkSubpassDescription> subpass_descriptions = {subpass_description};
 
 			con::vector<VkAttachmentDescription> attachment_descriptions = {CreateColorAttachmentDescription(),
-																				  CreateDepthAttachmentDescription()};
+																			CreateDepthAttachmentDescription()};
 
 			con::vector<VkSubpassDependency> subpass_dependencies = CreateSubpassDependencies();
 
@@ -163,7 +163,7 @@ namespace np::gfx::rhi
 			depth_image_view_create_info.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
 
 			return mem::Create<VulkanTexture>(_allocator, GetDevice(), depth_image_create_info, depth_memory_property_flags,
-												 depth_image_view_create_info);
+											  depth_image_view_create_info);
 
 			/*
 			the following transition is covered in the render pass, but here it is for reference

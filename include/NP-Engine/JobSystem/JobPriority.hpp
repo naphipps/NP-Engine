@@ -61,6 +61,6 @@ namespace np::jsys
 		JobPriority::Highest, JobPriority::Higher, JobPriority::Normal, JobPriority::Lower, JobPriority::Lowest};
 	constexpr static con::array<JobPriority, 5> JobPrioritiesLowToHigh{
 		JobPriority::Lowest, JobPriority::Lower, JobPriority::Normal, JobPriority::Higher, JobPriority::Highest};
-} // namespace np::js
+} // namespace np::jsys
 
 #endif /* NP_ENGINE_JOB_PRIORITY_HPP */

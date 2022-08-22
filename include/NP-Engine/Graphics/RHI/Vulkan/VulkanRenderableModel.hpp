@@ -82,8 +82,8 @@ namespace np::gfx::rhi
 									 VkMemoryPropertyFlags image_memory_property_flags,
 									 VkImageViewCreateInfo& image_view_create_info, bl hot_reloadable)
 		{
-			return mem::Create<VulkanTexture>(_services.GetAllocator(), device, image_create_info,
-												 image_memory_property_flags, image_view_create_info, hot_reloadable);
+			return mem::Create<VulkanTexture>(_services.GetAllocator(), device, image_create_info, image_memory_property_flags,
+											  image_view_create_info, hot_reloadable);
 		}
 
 		void BringUpToDateWithTimelineSemaphores(Pipeline& pipeline)
@@ -270,8 +270,8 @@ namespace np::gfx::rhi
 
 			if (!_bind_vertex_buffers)
 			{
-				_bind_vertex_buffers = mem::Create<VulkanCommandBindVertexBuffers>(
-					_services.GetAllocator(), 0, 1, &_vk_vertex_buffer, _vertex_offsets.data());
+				_bind_vertex_buffers = mem::Create<VulkanCommandBindVertexBuffers>(_services.GetAllocator(), 0, 1,
+																				   &_vk_vertex_buffer, _vertex_offsets.data());
 			}
 			else
 			{
@@ -281,7 +281,7 @@ namespace np::gfx::rhi
 			if (!_bind_index_buffer)
 			{
 				_bind_index_buffer = mem::Create<VulkanCommandBindIndexBuffer>(_services.GetAllocator(), *_index_buffer, 0,
-																				  VK_INDEX_TYPE_UINT32);
+																			   VK_INDEX_TYPE_UINT32);
 			}
 			else
 			{
@@ -291,7 +291,7 @@ namespace np::gfx::rhi
 			if (!_draw_indexed)
 			{
 				_draw_indexed = mem::Create<VulkanCommandDrawIndexed>(_services.GetAllocator(),
-																		 (ui32)_model.GetIndices().size(), 1, 0, 0, 0);
+																	  (ui32)_model.GetIndices().size(), 1, 0, 0, 0);
 			}
 			else
 			{
@@ -473,8 +473,8 @@ namespace np::gfx::rhi
 
 			if (!_bind_vertex_buffers)
 			{
-				_bind_vertex_buffers = mem::Create<VulkanCommandBindVertexBuffers>(
-					_services.GetAllocator(), 0, 1, &_vk_vertex_buffer, _vertex_offsets.data());
+				_bind_vertex_buffers = mem::Create<VulkanCommandBindVertexBuffers>(_services.GetAllocator(), 0, 1,
+																				   &_vk_vertex_buffer, _vertex_offsets.data());
 			}
 			else
 			{
@@ -484,7 +484,7 @@ namespace np::gfx::rhi
 			if (!_bind_index_buffer)
 			{
 				_bind_index_buffer = mem::Create<VulkanCommandBindIndexBuffer>(_services.GetAllocator(), *_index_buffer, 0,
-																				  VK_INDEX_TYPE_UINT32);
+																			   VK_INDEX_TYPE_UINT32);
 			}
 			else
 			{
@@ -494,7 +494,7 @@ namespace np::gfx::rhi
 			if (!_draw_indexed)
 			{
 				_draw_indexed = mem::Create<VulkanCommandDrawIndexed>(_services.GetAllocator(),
-																		 (ui32)_model.GetIndices().size(), 1, 0, 0, 0);
+																	  (ui32)_model.GetIndices().size(), 1, 0, 0, 0);
 			}
 			else
 			{

@@ -40,15 +40,9 @@ namespace np::rng
 			ForceOddInc();
 		}
 
-		RandomSeed(const RandomSeed<T>& other):
-			_inc(other._inc),
-			_state(other._state)
-		{}
+		RandomSeed(const RandomSeed<T>& other): _inc(other._inc), _state(other._state) {}
 
-		RandomSeed(RandomSeed<T>&& other) noexcept:
-			_inc(::std::move(other._inc)),
-			_state(::std::move(other._state))
-		{}
+		RandomSeed(RandomSeed<T>&& other) noexcept: _inc(::std::move(other._inc)), _state(::std::move(other._state)) {}
 
 		RandomSeed<T>& operator=(const RandomSeed<T>& other)
 		{

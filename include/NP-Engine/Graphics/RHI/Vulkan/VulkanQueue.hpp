@@ -49,8 +49,7 @@ namespace np::gfx::rhi
 			return vkQueueSubmit(_queue, (ui32)submit_infos.size(), submit_infos.data(), fence);
 		}
 
-		VkResult Submit(con::vector<VulkanCommandBuffer>& command_buffers, VkSubmitInfo submit_info,
-						VkFence fence = nullptr)
+		VkResult Submit(con::vector<VulkanCommandBuffer>& command_buffers, VkSubmitInfo submit_info, VkFence fence = nullptr)
 		{
 			con::vector<VkCommandBuffer> buffers(command_buffers.begin(), command_buffers.end());
 			submit_info.commandBufferCount = (ui32)buffers.size();

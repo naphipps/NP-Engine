@@ -93,4 +93,4 @@ namespace np::jsys
 
 		_work_procedure_complete.store(true, mo_release);
 	}
-} // namespace np::js
+} // namespace np::jsys

@@ -73,8 +73,7 @@ namespace np::gfx::rhi
 			return info;
 		}
 
-		con::vector<VulkanCommandBuffer> AllocateCommandBuffers(
-			const VkCommandBufferAllocateInfo& command_buffer_allocate_info)
+		con::vector<VulkanCommandBuffer> AllocateCommandBuffers(const VkCommandBufferAllocateInfo& command_buffer_allocate_info)
 		{
 			con::vector<VkCommandBuffer> buffers(command_buffer_allocate_info.commandBufferCount);
 

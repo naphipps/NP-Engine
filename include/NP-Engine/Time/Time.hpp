@@ -21,6 +21,6 @@ namespace np::tim
 
 	using DurationMilliseconds = ::std::chrono::duration<dbl, ::std::milli>;
 	using DurationMicroseconds = ::std::chrono::duration<dbl, ::std::micro>;
-} // namespace np::time
+} // namespace np::tim
 
 #endif /* NP_ENGINE_TIME_HPP */

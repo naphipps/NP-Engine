@@ -190,6 +190,6 @@ namespace np::jsys
 			return (JobPriority)priority_ui32;
 		}
 	};
-} // namespace np::js
+} // namespace np::jsys
 
 #endif /* NP_ENGINE_JOB_HPP */

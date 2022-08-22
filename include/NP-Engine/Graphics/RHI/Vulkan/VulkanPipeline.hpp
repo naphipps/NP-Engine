@@ -301,8 +301,7 @@ namespace np::gfx::rhi
 			if (_pipeline_layout != nullptr && _render_pass != nullptr)
 			{
 				con::vector<VkVertexInputBindingDescription> vertex_binding_descs = VulkanVertex::BindingDescriptions();
-				con::array<VkVertexInputAttributeDescription, 3> vertex_attribute_descs =
-					VulkanVertex::AttributeDescriptions();
+				con::array<VkVertexInputAttributeDescription, 3> vertex_attribute_descs = VulkanVertex::AttributeDescriptions();
 
 				VkPipelineVertexInputStateCreateInfo vertex_input_state_info = CreatePipelineVertexInputStateInfo();
 				vertex_input_state_info.vertexBindingDescriptionCount = (ui32)vertex_binding_descs.size();
@@ -422,7 +421,7 @@ namespace np::gfx::rhi
 		con::vector<VkWriteDescriptorSet> CreateMetaValueDescriptorWriters()
 		{
 			con::vector<VkWriteDescriptorSet> writers(NP_ENGINE_VULKAN_MAX_FRAME_COUNT,
-															{VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET});
+													  {VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET});
 
 			for (siz i = 0; i < writers.size(); i++)
 			{

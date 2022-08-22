@@ -8,8 +8,6 @@
 #define NP_ENGINE_KEY_EVENT_HPP
 
 namespace np::nput
-{
-
-} // namespace np
+{} // namespace np::nput
 
 #endif /* NP_ENGINE_KEY_EVENT_HPP */

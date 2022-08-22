@@ -226,18 +226,18 @@ namespace np::gfx::rhi
 			_command_buffers = CreateCommandBuffers();
 
 			_object_vertex_shader = mem::Create<VulkanShader>(_services.GetAllocator(), *_device,
-																 _object_vertex_shader_filename, VulkanShader::Type::VERTEX);
-			_object_fragment_shader = mem::Create<VulkanShader>(
-				_services.GetAllocator(), *_device, _object_fragment_shader_filename, VulkanShader::Type::FRAGMENT);
+															  _object_vertex_shader_filename, VulkanShader::Type::VERTEX);
+			_object_fragment_shader = mem::Create<VulkanShader>(_services.GetAllocator(), *_device,
+																_object_fragment_shader_filename, VulkanShader::Type::FRAGMENT);
 			_object_pipeline = mem::Create<VulkanPipeline>(_services.GetAllocator(), *_swapchain, *_render_pass,
-															  *_object_vertex_shader, *_object_fragment_shader);
+														   *_object_vertex_shader, *_object_fragment_shader);
 
-			_light_vertex_shader = mem::Create<VulkanShader>(_services.GetAllocator(), *_device,
-																_light_vertex_shader_filename, VulkanShader::Type::VERTEX);
-			_light_fragment_shader = mem::Create<VulkanShader>(
-				_services.GetAllocator(), *_device, _light_fragment_shader_filename, VulkanShader::Type::FRAGMENT);
+			_light_vertex_shader = mem::Create<VulkanShader>(_services.GetAllocator(), *_device, _light_vertex_shader_filename,
+															 VulkanShader::Type::VERTEX);
+			_light_fragment_shader = mem::Create<VulkanShader>(_services.GetAllocator(), *_device,
+															   _light_fragment_shader_filename, VulkanShader::Type::FRAGMENT);
 			_light_pipeline = mem::Create<VulkanPipeline>(_services.GetAllocator(), *_swapchain, *_render_pass,
-															 *_light_vertex_shader, *_light_fragment_shader);
+														  *_light_vertex_shader, *_light_fragment_shader);
 		}
 
 		void DetachFromWindow(win::Window& window) override
