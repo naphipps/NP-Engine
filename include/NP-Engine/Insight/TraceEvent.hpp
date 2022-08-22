@@ -12,7 +12,7 @@
 
 #include "NP-Engine/Time/Time.hpp"
 
-namespace np::insight
+namespace np::nsit
 {
 	struct TraceEvent
 	{
@@ -22,6 +22,6 @@ namespace np::insight
 		tim::DurationMilliseconds ElapsedMilliseconds;
 		::std::thread::id ThreadId;
 	};
-} // namespace np::insight
+} // namespace np::nsit
 
 #endif /* NP_ENGINE_TRACE_EVENT_HPP */

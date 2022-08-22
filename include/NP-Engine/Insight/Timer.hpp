@@ -12,7 +12,7 @@
 #include "NP-Engine/Primitive/Primitive.hpp"
 #include "NP-Engine/Time/Time.hpp"
 
-namespace np::insight
+namespace np::nsit
 {
 	class Timer
 	{
@@ -72,6 +72,6 @@ namespace np::insight
 			return end - start;
 		}
 	};
-} // namespace np::insight
+} // namespace np::nsit
 
 #endif /* NP_ENGINE_TIMER_HPP */

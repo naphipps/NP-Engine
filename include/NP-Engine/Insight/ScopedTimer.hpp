@@ -13,7 +13,7 @@
 
 #include "Timer.hpp"
 
-namespace np::insight
+namespace np::nsit
 {
 	class ScopedTimer : public Timer
 	{
@@ -62,6 +62,6 @@ namespace np::insight
 			_stopped = false;
 		}
 	};
-} // namespace np::insight
+} // namespace np::nsit
 
 #endif /* NP_ENGINE_SCOPED_TIMER_HPP */

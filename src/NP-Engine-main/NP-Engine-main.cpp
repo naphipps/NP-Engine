@@ -47,7 +47,7 @@ i32 main(i32 argc, chr** argv)
 			::np::mem::TraitAllocator::ResetRegistration();
 			retval = 3;
 			message = "WAS NOT ABLE TO ALLOCATE ENOUGH MEMORY\n";
-			message += "Log file can be found here: " + ::np::insight::Log::GetFileLoggerFilePath();
+			message += "Log file can be found here: " + ::np::nsit::Log::GetFileLoggerFilePath();
 			style = ::np::app::Popup::Style::Error;
 			NP_ENGINE_LOG_ERROR(message);
 		}
@@ -57,7 +57,7 @@ i32 main(i32 argc, chr** argv)
 		::np::mem::TraitAllocator::ResetRegistration();
 		retval = 1;
 		message = "STD EXCEPTION OCCURRED: \n" + to_str(e.what()) + "\n\n";
-		message += "Log file can be found here: " + ::np::insight::Log::GetFileLoggerFilePath();
+		message += "Log file can be found here: " + ::np::nsit::Log::GetFileLoggerFilePath();
 		style = ::np::app::Popup::Style::Error;
 		NP_ENGINE_LOG_ERROR(message);
 	}
@@ -66,7 +66,7 @@ i32 main(i32 argc, chr** argv)
 		::np::mem::TraitAllocator::ResetRegistration();
 		retval = 2;
 		message = "UNKNOWN EXCEPTION OCCURRED\n\n";
-		message += "Log file can be found here: " + ::np::insight::Log::GetFileLoggerFilePath();
+		message += "Log file can be found here: " + ::np::nsit::Log::GetFileLoggerFilePath();
 		style = ::np::app::Popup::Style::Error;
 		NP_ENGINE_LOG_ERROR(message);
 	}

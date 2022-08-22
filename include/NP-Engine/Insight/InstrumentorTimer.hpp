@@ -14,7 +14,7 @@
 #include "ScopedTimer.hpp"
 #include "Instrumentor.hpp"
 
-namespace np::insight
+namespace np::nsit
 {
 	class InstrumentorTimer : public ScopedTimer
 	{
@@ -27,12 +27,12 @@ namespace np::insight
 			e.ElapsedMicroseconds = timer.GetElapsedMicroseconds();
 			e.StartTimestamp = timer.GetStartTimestamp();
 			e.ThreadId = ::std::this_thread::get_id();
-			::np::insight::Instrumentor::AddTraceEvent(e);
+			Instrumentor::AddTraceEvent(e);
 		}
 
 	public:
 		InstrumentorTimer(::std::string name): ScopedTimer(name, AddTraceEventAction) {}
 	};
-} // namespace np::insight
+} // namespace np::nsit
 
 #endif /* NP_ENGINE_INSTRUMENTOR_TIMER_HPP */

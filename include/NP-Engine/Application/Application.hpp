@@ -34,11 +34,11 @@ namespace np::app
 		static inline void HandleTerminate() noexcept
 		{
 			::std::cerr << "The terminate function was called.\nLog file can be found here : " +
-					insight::Log::GetFileLoggerFilePath()
+					nsit::Log::GetFileLoggerFilePath()
 						<< "\n";
 			Popup::Show("NP-Engine Terminate Function Called",
 						"Probably an unhandled exception was thrown.\nLog file can be found here : " +
-							insight::Log::GetFileLoggerFilePath(),
+							nsit::Log::GetFileLoggerFilePath(),
 						Popup::Style::Error, Popup::Buttons::OK);
 		}
 
@@ -70,7 +70,7 @@ namespace np::app
 				break;
 			}
 
-			str message = signal_string + " was raised.\nLog file can be found here : " + insight::Log::GetFileLoggerFilePath();
+			str message = signal_string + " was raised.\nLog file can be found here : " + nsit::Log::GetFileLoggerFilePath();
 
 			::std::cerr << message << "\n";
 			Popup::Show("NP-Engine Signal Raised", message, Popup::Style::Error, Popup::Buttons::OK);

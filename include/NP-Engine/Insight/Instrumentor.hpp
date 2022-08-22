@@ -25,7 +25,7 @@
 #include "Timer.hpp"
 #include "Log.hpp"
 
-namespace np::insight
+namespace np::nsit
 {
 	class Instrumentor
 	{
@@ -41,7 +41,7 @@ namespace np::insight
 		{
 			if (_filepath.size() > 0)
 			{
-				::np::insight::Log::GetLogger()->info("Saving Instrumentor Profile Report...");
+				Log::GetLogger()->info("Saving Instrumentor Profile Report...");
 
 				::std::ofstream out_stream;
 				out_stream.open(_filepath);
@@ -57,7 +57,7 @@ namespace np::insight
 					out_stream.close();
 				}
 
-				::np::insight::Log::GetLogger()->info("Done Saving Instrumentor Profile Report: '" + _filepath + "'");
+				Log::GetLogger()->info("Done Saving Instrumentor Profile Report: '" + _filepath + "'");
 			}
 		}
 
@@ -162,6 +162,6 @@ namespace np::insight
 			}
 		}
 	};
-} // namespace np::insight
+} // namespace np::nsit
 
 #endif /* NP_ENGINE_INSTRUMENTOR_HPP */

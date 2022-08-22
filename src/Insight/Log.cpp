@@ -6,7 +6,7 @@
 
 #include "NP-Engine/Insight/Log.hpp"
 
-namespace np::insight
+namespace np::nsit
 {
 	atm_bl Log::_initialized(false);
 	::std::shared_ptr<spdlog::logger> Log::_file_logger;
@@ -14,4 +14,4 @@ namespace np::insight
 	::std::shared_ptr<spdlog::logger> Log::_logger;
 	::std::shared_ptr<::spdlog::sinks::sink> Log::_stdout_sink;
 	::std::shared_ptr<::spdlog::sinks::sink> Log::_file_sink;
-} // namespace np::insight
+} // namespace np::nsit

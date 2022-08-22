@@ -16,7 +16,7 @@
 
 #include "NP-Engine/Vendor/SpdlogInclude.hpp"
 
-namespace np::insight
+namespace np::nsit
 {
 	class Log
 	{
@@ -85,6 +85,6 @@ namespace np::insight
 			return _logger;
 		}
 	};
-} // namespace np::insight
+} // namespace np::nsit
 
 #endif /* NP_ENGINE_LOG_HPP */
