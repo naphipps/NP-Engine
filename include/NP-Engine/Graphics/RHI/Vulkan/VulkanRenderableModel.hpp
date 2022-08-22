@@ -594,7 +594,7 @@ namespace np::graphics::rhi
 			_bind_index_buffer(nullptr),
 			_draw_indexed(nullptr)
 		{
-			//TODO: feel like we can go ahead and get some resources here
+			// TODO: feel like we can go ahead and get some resources here
 		}
 
 		// TODO: move constructor??

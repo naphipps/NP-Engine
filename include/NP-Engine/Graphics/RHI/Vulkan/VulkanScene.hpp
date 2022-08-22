@@ -30,7 +30,7 @@ namespace np::graphics::rhi
 		// TODO: I think our scene needs it's own ecs registry!! //TODO: put this in RPI
 
 		VulkanCamera _camera;
-		concurrency::Thread _dlp_thread; //dlp = drawing loop procedure
+		concurrency::Thread _dlp_thread; // dlp = drawing loop procedure
 		atm_bl _dlp_is_complete;
 		atm_bl _dlp_keep_alive;
 		atm_bl _dlp_enable_draw;
@@ -137,7 +137,7 @@ namespace np::graphics::rhi
 		}
 
 	public:
-		VulkanScene(services::Services& services, Renderer& renderer) :
+		VulkanScene(services::Services& services, Renderer& renderer):
 			Scene(services, renderer),
 			_dlp_is_complete(true),
 			_dlp_keep_alive(false),
