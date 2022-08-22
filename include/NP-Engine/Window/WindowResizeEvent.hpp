@@ -15,7 +15,7 @@
 
 namespace np::window
 {
-	class WindowResizeEvent : public event::Event
+	class WindowResizeEvent : public evnt::Event
 	{
 	public:
 		struct DataType
@@ -25,7 +25,7 @@ namespace np::window
 			ui32 height;
 		};
 
-		WindowResizeEvent(Window& window, ui32 width, ui32 height): event::Event()
+		WindowResizeEvent(Window& window, ui32 width, ui32 height): evnt::Event()
 		{
 			AssignData<DataType>({mem::AddressOf(window), width, height});
 		}
@@ -40,14 +40,14 @@ namespace np::window
 			return RetrieveData<DataType>().height;
 		}
 
-		event::EventType GetType() const override
+		evnt::EventType GetType() const override
 		{
-			return event::EventType::WindowResize;
+			return evnt::EventType::WindowResize;
 		}
 
-		event::EventCategory GetCategory() const override
+		evnt::EventCategory GetCategory() const override
 		{
-			return event::EventCategory::Window;
+			return evnt::EventCategory::Window;
 		}
 	};
 } // namespace np::window

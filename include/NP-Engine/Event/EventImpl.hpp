@@ -10,7 +10,7 @@
 #include "NP-Engine/Primitive/Primitive.hpp"
 #include "NP-Engine/Memory/Memory.hpp"
 
-namespace np::event
+namespace np::evnt
 {
 	enum class EventType : ui64
 	{
@@ -110,6 +110,6 @@ namespace np::event
 		*/
 		virtual EventCategory GetCategory() const = 0;
 	};
-} // namespace np::event
+} // namespace np::evnt
 
 #endif /* NP_ENGINE_EVENT_IMPL_HPP */

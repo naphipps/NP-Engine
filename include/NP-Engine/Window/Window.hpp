@@ -22,7 +22,7 @@
 
 namespace np::window
 {
-	class Window : public event::EventHandler
+	class Window : public evnt::EventHandler
 	{
 	public:
 		constexpr static ui32 DEFAULT_WIDTH = 800;
@@ -76,18 +76,18 @@ namespace np::window
 				it->second(it->first, x, y);
 		}
 
-		virtual void HandleClose(event::Event& e);
+		virtual void HandleClose(evnt::Event& e);
 
-		virtual void HandleResize(event::Event& e);
+		virtual void HandleResize(evnt::Event& e);
 
-		virtual void HandleEvent(event::Event& e) override
+		virtual void HandleEvent(evnt::Event& e) override
 		{
 			switch (e.GetType())
 			{
-			case event::EventType::WindowClose:
+			case evnt::EventType::WindowClose:
 				HandleClose(e);
 				break;
-			case event::EventType::WindowResize:
+			case evnt::EventType::WindowResize:
 				HandleResize(e);
 				break;
 			default:
@@ -205,9 +205,9 @@ namespace np::window
 			UnsetPositionCallback(caller);
 		}
 
-		virtual event::EventCategory GetHandledCategories() const override
+		virtual evnt::EventCategory GetHandledCategories() const override
 		{
-			return event::EventCategory::Window;
+			return evnt::EventCategory::Window;
 		}
 	};
 } // namespace np::window

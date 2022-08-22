@@ -17,12 +17,12 @@ namespace np::app
 	/*
 		Layer will represent a layer in our application
 	*/
-	class Layer : public event::EventHandler
+	class Layer : public evnt::EventHandler
 	{
 	protected:
 		srvc::Services& _services;
 
-		virtual void HandleEvent(event::Event& e) {}
+		virtual void HandleEvent(evnt::Event& e) {}
 
 	public:
 		Layer(srvc::Services& services): _services(services) {}
@@ -35,9 +35,9 @@ namespace np::app
 
 		virtual void Cleanup() {}
 
-		virtual event::EventCategory GetHandledCategories() const
+		virtual evnt::EventCategory GetHandledCategories() const
 		{
-			return event::EventCategory::None;
+			return evnt::EventCategory::None;
 		}
 	};
 } // namespace np::app

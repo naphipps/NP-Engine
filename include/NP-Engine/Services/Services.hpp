@@ -24,8 +24,8 @@ namespace np::srvc
 		mem::TraitAllocator _allocator;
 		::entt::registry _ecs_registry;
 		jsys::JobSystem _job_system;
-		event::EventQueue _event_queue;
-		event::EventSubmitter _event_submitter;
+		evnt::EventQueue _event_queue;
+		evnt::EventSubmitter _event_submitter;
 
 	public:
 		Services(): _allocator(), _ecs_registry(), _job_system(), _event_queue(), _event_submitter(_event_queue) {}
@@ -60,22 +60,22 @@ namespace np::srvc
 			return _job_system;
 		}
 
-		event::EventQueue& GetEventQueue()
+		evnt::EventQueue& GetEventQueue()
 		{
 			return _event_queue;
 		}
 
-		const event::EventQueue& GetEventQueue() const
+		const evnt::EventQueue& GetEventQueue() const
 		{
 			return _event_queue;
 		}
 
-		event::EventSubmitter& GetEventSubmitter()
+		evnt::EventSubmitter& GetEventSubmitter()
 		{
 			return _event_submitter;
 		}
 
-		const event::EventSubmitter& GetEventSubmitter() const
+		const evnt::EventSubmitter& GetEventSubmitter() const
 		{
 			return _event_submitter;
 		}

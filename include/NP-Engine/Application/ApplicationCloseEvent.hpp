@@ -11,19 +11,19 @@
 
 namespace np::app
 {
-	class ApplicationCloseEvent : public event::Event
+	class ApplicationCloseEvent : public evnt::Event
 	{
 	public:
-		ApplicationCloseEvent(): event::Event() {}
+		ApplicationCloseEvent(): evnt::Event() {}
 
-		virtual event::EventType GetType() const override
+		virtual evnt::EventType GetType() const override
 		{
-			return event::EventType::ApplicationClose;
+			return evnt::EventType::ApplicationClose;
 		}
 
-		virtual event::EventCategory GetCategory() const override
+		virtual evnt::EventCategory GetCategory() const override
 		{
-			return event::EventCategory::Application;
+			return evnt::EventCategory::Application;
 		}
 	};
 } // namespace np::app

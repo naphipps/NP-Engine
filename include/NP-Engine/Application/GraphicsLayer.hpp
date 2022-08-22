@@ -37,7 +37,7 @@ namespace np::app
 		container::uset<graphics::Scene*> _unacquired_scenes;
 		container::uset<graphics::Scene*> _acquired_scenes;
 
-		virtual void AdjustForWindowClose(event::Event& e)
+		virtual void AdjustForWindowClose(evnt::Event& e)
 		{
 			window::Window& window = *e.RetrieveData<window::WindowCloseEvent::DataType>().window;
 
@@ -61,7 +61,7 @@ namespace np::app
 				}
 		}
 
-		virtual void AdjustForWindowResize(event::Event& e)
+		virtual void AdjustForWindowResize(evnt::Event& e)
 		{
 			window::Window& window = *e.RetrieveData<window::WindowCloseEvent::DataType>().window;
 
@@ -80,14 +80,14 @@ namespace np::app
 				}
 		}
 
-		virtual void HandleEvent(event::Event& e) override
+		virtual void HandleEvent(evnt::Event& e) override
 		{
 			switch (e.GetType())
 			{
-			case event::EventType::WindowClose:
+			case evnt::EventType::WindowClose:
 				AdjustForWindowClose(e);
 				break;
-			case event::EventType::WindowResize:
+			case evnt::EventType::WindowResize:
 				AdjustForWindowResize(e);
 				break;
 			default:
@@ -187,9 +187,9 @@ namespace np::app
 			return _renderers.emplace_back(renderer);
 		}
 
-		virtual event::EventCategory GetHandledCategories() const override
+		virtual evnt::EventCategory GetHandledCategories() const override
 		{
-			return (event::EventCategory)((ui64)event::EventCategory::Graphics | (ui64)event::EventCategory::Window);
+			return (evnt::EventCategory)((ui64)evnt::EventCategory::Graphics | (ui64)evnt::EventCategory::Window);
 		}
 
 		graphics::Scene* AcquireScene()

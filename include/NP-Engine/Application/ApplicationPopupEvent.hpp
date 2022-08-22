@@ -14,7 +14,7 @@
 
 namespace np::app
 {
-	class ApplicationPopupEvent : public event::Event
+	class ApplicationPopupEvent : public evnt::Event
 	{
 	public:
 		struct DataType
@@ -30,14 +30,14 @@ namespace np::app
 			AssignData<DataType>({message, style, buttons, Popup::Select::None});
 		}
 
-		event::EventType GetType() const override
+		evnt::EventType GetType() const override
 		{
-			return event::EventType::ApplicationPopup;
+			return evnt::EventType::ApplicationPopup;
 		}
 
-		event::EventCategory GetCategory() const override
+		evnt::EventCategory GetCategory() const override
 		{
-			return event::EventCategory::Application;
+			return evnt::EventCategory::Application;
 		}
 	};
 } // namespace np::app

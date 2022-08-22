@@ -13,7 +13,7 @@
 
 namespace np::window
 {
-	class WindowCreateEvent : public event::Event
+	class WindowCreateEvent : public evnt::Event
 	{
 	public:
 		struct DataType
@@ -21,19 +21,19 @@ namespace np::window
 			Window::Properties window_properties;
 		};
 
-		WindowCreateEvent(Window::Properties window_properties): event::Event()
+		WindowCreateEvent(Window::Properties window_properties): evnt::Event()
 		{
 			AssignData<DataType>({window_properties});
 		}
 
-		event::EventType GetType() const override
+		evnt::EventType GetType() const override
 		{
-			return event::EventType::WindowCreate;
+			return evnt::EventType::WindowCreate;
 		}
 
-		event::EventCategory GetCategory() const override
+		evnt::EventCategory GetCategory() const override
 		{
-			return event::EventCategory::Window;
+			return evnt::EventCategory::Window;
 		}
 	};
 } // namespace np::window

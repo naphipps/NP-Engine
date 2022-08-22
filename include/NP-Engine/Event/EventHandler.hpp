@@ -10,7 +10,7 @@
 #include "EventImpl.hpp"
 #include "EventSubmitter.hpp"
 
-namespace np::event
+namespace np::evnt
 {
 	class EventHandler
 	{
@@ -28,6 +28,6 @@ namespace np::event
 
 		virtual EventCategory GetHandledCategories() const = 0;
 	};
-} // namespace np::event
+} // namespace np::evnt
 
 #endif /* NP_ENGINE_EVENT_HANDLER_HPP */

@@ -28,17 +28,17 @@ namespace np::app
 		container::vector<void*> _native_windows;
 
 	protected:
-		virtual void HandleWindowCreate(event::Event& e)
+		virtual void HandleWindowCreate(evnt::Event& e)
 		{
 			CreateWindow(e.RetrieveData<window::Window::Properties>());
 			e.SetHandled();
 		}
 
-		virtual void HandleEvent(event::Event& e) override
+		virtual void HandleEvent(evnt::Event& e) override
 		{
 			switch (e.GetType())
 			{
-			case event::EventType::WindowCreate:
+			case evnt::EventType::WindowCreate:
 				HandleWindowCreate(e);
 				break;
 			default:
@@ -100,9 +100,9 @@ namespace np::app
 			}
 		}
 
-		virtual event::EventCategory GetHandledCategories() const override
+		virtual evnt::EventCategory GetHandledCategories() const override
 		{
-			return event::EventCategory::Window;
+			return evnt::EventCategory::Window;
 		}
 	};
 } // namespace np::app

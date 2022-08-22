@@ -14,7 +14,7 @@
 
 namespace np::window
 {
-	class WindowCloseEvent : public event::Event
+	class WindowCloseEvent : public evnt::Event
 	{
 	public:
 		struct DataType
@@ -22,19 +22,19 @@ namespace np::window
 			Window* window;
 		};
 
-		WindowCloseEvent(Window& window): event::Event()
+		WindowCloseEvent(Window& window): evnt::Event()
 		{
 			AssignData<DataType>({mem::AddressOf(window)});
 		}
 
-		event::EventType GetType() const override
+		evnt::EventType GetType() const override
 		{
-			return event::EventType::WindowClose;
+			return evnt::EventType::WindowClose;
 		}
 
-		event::EventCategory GetCategory() const override
+		evnt::EventCategory GetCategory() const override
 		{
-			return event::EventCategory::Window;
+			return evnt::EventCategory::Window;
 		}
 	};
 } // namespace np::window

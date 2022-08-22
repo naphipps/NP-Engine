@@ -9,7 +9,7 @@
 
 namespace np::window
 {
-	void Window::HandleClose(event::Event& e)
+	void Window::HandleClose(evnt::Event& e)
 	{
 		if (e.RetrieveData<WindowCloseEvent::DataType>().window == this)
 		{
@@ -30,7 +30,7 @@ namespace np::window
 		}
 	}
 
-	void Window::HandleResize(event::Event& e)
+	void Window::HandleResize(evnt::Event& e)
 	{
 		if (e.RetrieveData<WindowResizeEvent::DataType>().window == this)
 		{

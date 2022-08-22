@@ -16,7 +16,7 @@
 
 #include "EventImpl.hpp"
 
-namespace np::event
+namespace np::evnt
 {
 	class EventQueue
 	{
@@ -57,7 +57,7 @@ namespace np::event
 		template <typename T, typename... Args>
 		bl Emplace(Args&&... args)
 		{
-			NP_ENGINE_STATIC_ASSERT((::std::is_base_of_v<event::Event, T>), "T is requried to be a base of event:Event");
+			NP_ENGINE_STATIC_ASSERT((::std::is_base_of_v<evnt::Event, T>), "T is requried to be a base of event:Event");
 			Event* e = nullptr;
 			container::mpmc_queue<Event*>& buffer = GetBuffer();
 
@@ -91,10 +91,10 @@ namespace np::event
 		/*
 			pop from the other buffer
 		*/
-		event::Event* PopOther()
+		evnt::Event* PopOther()
 		{
 			container::mpmc_queue<Event*>& buffer = GetOtherBuffer();
-			event::Event* e = nullptr;
+			evnt::Event* e = nullptr;
 			if (!buffer.try_dequeue(e))
 			{
 				e = nullptr;
@@ -110,6 +110,6 @@ namespace np::event
 			return destructed && deallocated;
 		}
 	};
-} // namespace np::event
+} // namespace np::evnt
 
 #endif /* NP_ENGINE_EVENT_QUEUE_HPP */

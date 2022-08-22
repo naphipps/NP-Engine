@@ -14,7 +14,7 @@
 #include "EventQueue.hpp"
 #include "EventImpl.hpp"
 
-namespace np::event
+namespace np::evnt
 {
 	class EventSubmitter
 	{
@@ -35,6 +35,6 @@ namespace np::event
 			return _queue.Emplace(e);
 		}
 	};
-} // namespace np::event
+} // namespace np::evnt
 
 #endif /* NP_EGNINE_EVENT_SUBMITTER_HPP */

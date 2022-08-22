@@ -118,7 +118,7 @@ namespace np::app
 			return _graphics_layer;
 		}
 
-		void HandlePopup(event::Event& e)
+		void HandlePopup(evnt::Event& e)
 		{
 			ApplicationPopupEvent::DataType& data = e.RetrieveData<ApplicationPopupEvent::DataType>();
 			data.select = Popup::Show(GetTitle(), data.message, data.style, data.buttons);
@@ -126,15 +126,15 @@ namespace np::app
 			e.SetHandled();
 		}
 
-		void HandleEvent(event::Event& e) override
+		void HandleEvent(evnt::Event& e) override
 		{
 			switch (e.GetType())
 			{
-			case event::EventType::ApplicationClose:
+			case evnt::EventType::ApplicationClose:
 				StopRunning();
 				e.SetHandled();
 				break;
-			case event::EventType::ApplicationPopup:
+			case evnt::EventType::ApplicationPopup:
 				HandlePopup(e);
 				break;
 			default:
@@ -182,7 +182,7 @@ namespace np::app
 			// TODO: this into a fixed step loop - aka, set this to loop at 60fps or something with 0 being infinitely fast
 
 			_running.store(true, mo_release);
-			event::EventQueue& event_queue = _services.GetEventQueue();
+			evnt::EventQueue& event_queue = _services.GetEventQueue();
 
 			const tim::DurationMilliseconds max_loop_duration(NP_ENGINE_APPLICATION_LOOP_DURATION);
 
@@ -215,7 +215,7 @@ namespace np::app
 				for (Layer* overlay : _overlays)
 					overlay->AfterUdpate();
 
-				for (event::Event* e = event_queue.PopOther(); e != nullptr; e = event_queue.PopOther())
+				for (evnt::Event* e = event_queue.PopOther(); e != nullptr; e = event_queue.PopOther())
 				{
 					e->SetCanBeHandled(false);
 
@@ -265,9 +265,9 @@ namespace np::app
 			_running.store(false, mo_release);
 		}
 
-		event::EventCategory GetHandledCategories() const override
+		evnt::EventCategory GetHandledCategories() const override
 		{
-			return event::EventCategory::Application;
+			return evnt::EventCategory::Application;
 		}
 
 		bl IsRunning() const
