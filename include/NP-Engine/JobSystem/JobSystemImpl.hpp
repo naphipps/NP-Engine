@@ -50,7 +50,7 @@ namespace np::jsys
 			_job_pool = mem::Create<JobPool>(_allocator, _job_pool_block);
 
 			// we want to be sure we use one less the number of cores available so our main thread is not crowded
-			_job_workers.resize(math::min(_thread_pool.ObjectCount() - 1, thr::ThreadPool::MAX_THREAD_COUNT));
+			_job_workers.resize(::std::min(_thread_pool.ObjectCount() - 1, thr::ThreadPool::MAX_THREAD_COUNT));
 
 			for (auto it1 = _job_workers.begin(); it1 != _job_workers.end(); it1++)
 				for (auto it2 = _job_workers.begin(); it2 != _job_workers.end(); it2++)

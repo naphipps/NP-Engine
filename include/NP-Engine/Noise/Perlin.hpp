@@ -338,9 +338,9 @@ namespace np::noiz
 		inline flt CalculateNoise(flt x, flt y, flt z) const
 		{
 			// Find the unit cube that contains the point
-			i32 X = math::fastfloor(x);
-			i32 Y = math::fastfloor(y);
-			i32 Z = math::fastfloor(z);
+			i32 X = mat::FastFloor(x);
+			i32 Y = mat::FastFloor(y);
+			i32 Z = mat::FastFloor(z);
 
 			// Find relative x, y, z of point in cube
 			x -= X;
@@ -365,12 +365,13 @@ namespace np::noiz
 			i32 BB = _permutation[B + 1] + Z;
 
 			// Add blended results from 8 corners of cube
-			flt res = math::lerp(
-				math::lerp(math::lerp(Grad(_permutation[AA], x, y, z), Grad(_permutation[BA], x - 1, y, z), u),
-						   math::lerp(Grad(_permutation[AB], x, y - 1, z), Grad(_permutation[BB], x - 1, y - 1, z), u), v),
-				math::lerp(
-					math::lerp(Grad(_permutation[AA + 1], x, y, z - 1), Grad(_permutation[BA + 1], x - 1, y, z - 1), u),
-					math::lerp(Grad(_permutation[AB + 1], x, y - 1, z - 1), Grad(_permutation[BB + 1], x - 1, y - 1, z - 1), u),
+			flt res = ::glm::lerp(
+				::glm::lerp(::glm::lerp(Grad(_permutation[AA], x, y, z), Grad(_permutation[BA], x - 1, y, z), u),
+							::glm::lerp(Grad(_permutation[AB], x, y - 1, z), Grad(_permutation[BB], x - 1, y - 1, z), u), v),
+				::glm::lerp(
+					::glm::lerp(Grad(_permutation[AA + 1], x, y, z - 1), Grad(_permutation[BA + 1], x - 1, y, z - 1), u),
+					::glm::lerp(Grad(_permutation[AB + 1], x, y - 1, z - 1), Grad(_permutation[BB + 1], x - 1, y - 1, z - 1),
+								u),
 					v),
 				w);
 
@@ -423,46 +424,46 @@ namespace np::noiz
 
 			for (ui8 i = 0; i < _octave_count; i++)
 			{
-				output += amplitude * math::abs(CalculateNoise(x * frequency, y * frequency, z * frequency));
+				output += amplitude * ::std::abs(CalculateNoise(x * frequency, y * frequency, z * frequency));
 				denom += amplitude;
 				frequency *= _lacunarity;
 				amplitude *= _persistence;
 			}
 
 			output /= denom;
-			output = math::flip(output);
+			output = mat::Flip(output);
 
 			switch (_rigidity)
 			{
 			case 0:
-				output = math::pow0(output);
+				output = mat::Pow0(output);
 				break;
 			case 1:
-				output = math::pow1(output);
+				output = mat::Pow1(output);
 				break;
 			case 2:
-				output = math::pow2(output);
+				output = mat::Pow2(output);
 				break;
 			case 3:
-				output = math::pow3(output);
+				output = mat::Pow3(output);
 				break;
 			case 4:
-				output = math::pow4(output);
+				output = mat::Pow4(output);
 				break;
 			case 5:
-				output = math::pow5(output);
+				output = mat::Pow5(output);
 				break;
 			case 6:
-				output = math::pow6(output);
+				output = mat::Pow6(output);
 				break;
 			case 7:
-				output = math::pow7(output);
+				output = mat::Pow7(output);
 				break;
 			case 8:
-				output = math::pow8(output);
+				output = mat::Pow8(output);
 				break;
 			default:
-				output = math::pow(output, _rigidity);
+				output = ::std::pow(output, _rigidity);
 				break;
 			}
 
@@ -479,46 +480,46 @@ namespace np::noiz
 			for (ui8 i = 0; i < _octave_count; i++)
 			{
 				output +=
-					amplitude * math::abs(CalculateNoise(x * frequency, y * frequency, i * _fractional_increment * frequency));
+					amplitude * ::std::abs(CalculateNoise(x * frequency, y * frequency, i * _fractional_increment * frequency));
 				denom += amplitude;
 				frequency *= _lacunarity;
 				amplitude *= _persistence;
 			}
 
 			output /= denom;
-			output = math::flip(output);
+			output = mat::Flip(output);
 
 			switch (_rigidity)
 			{
 			case 0:
-				output = math::pow0(output);
+				output = mat::Pow0(output);
 				break;
 			case 1:
-				output = math::pow1(output);
+				output = mat::Pow1(output);
 				break;
 			case 2:
-				output = math::pow2(output);
+				output = mat::Pow2(output);
 				break;
 			case 3:
-				output = math::pow3(output);
+				output = mat::Pow3(output);
 				break;
 			case 4:
-				output = math::pow4(output);
+				output = mat::Pow4(output);
 				break;
 			case 5:
-				output = math::pow5(output);
+				output = mat::Pow5(output);
 				break;
 			case 6:
-				output = math::pow6(output);
+				output = mat::Pow6(output);
 				break;
 			case 7:
-				output = math::pow7(output);
+				output = mat::Pow7(output);
 				break;
 			case 8:
-				output = math::pow8(output);
+				output = mat::Pow8(output);
 				break;
 			default:
-				output = math::pow(output, _rigidity);
+				output = ::std::pow(output, _rigidity);
 				break;
 			}
 
@@ -527,12 +528,12 @@ namespace np::noiz
 
 		inline flt BillowFractal(flt x, flt y, flt z) const
 		{
-			return math::flip(RigidFractal(x, y, z));
+			return mat::Flip(RigidFractal(x, y, z));
 		}
 
 		inline flt BillowFractional(flt x, flt y) const
 		{
-			return math::flip(RigidFractional(x, y));
+			return mat::Flip(RigidFractional(x, y));
 		}
 
 		inline flt WarpFractal(flt x, flt y, flt z) const

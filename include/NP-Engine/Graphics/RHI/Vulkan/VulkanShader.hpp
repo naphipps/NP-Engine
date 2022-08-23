@@ -12,7 +12,6 @@
 #include "NP-Engine/Primitive/Primitive.hpp"
 #include "NP-Engine/String/String.hpp"
 #include "NP-Engine/Container/Container.hpp"
-#include "NP-Engine/Math/Math.hpp"
 #include "NP-Engine/FileSystem/FileSystem.hpp"
 #include "NP-Engine/System/System.hpp"
 #include "NP-Engine/Insight/Insight.hpp"

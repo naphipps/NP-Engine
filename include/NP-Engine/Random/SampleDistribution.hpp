@@ -41,12 +41,12 @@ namespace np::rng
 		inline void Init()
 		{
 			NP_ENGINE_ASSERT(_min_result < _max_result, "min must always be < max");
-			i32 powOfTwo = math::fastfloor(math::sqrt((flt)_sample.size()));
+			i32 powOfTwo = mat::FastFloor(::std::sqrt((flt)_sample.size()));
 
 			for (ui64 i = 0; i < _sample.size(); i++)
 			{
 				_sample[i].value = (flt)i / (flt)_resolution * (_max_result - _min_result) + _min_result;
-				_sample[i].probability = math::roundToInvPowOfTwo(math::abs(_cdf_function(_sample[i].value)), powOfTwo);
+				_sample[i].probability = mat::RoundToInvPowOfTwo(::std::abs(_cdf_function(_sample[i].value)), powOfTwo);
 
 				if (i > 0)
 				{
@@ -136,7 +136,7 @@ namespace np::rng
 				if (_enable_lerp)
 				{
 					flt t = (chosen_probability - prev->probability) / (next->probability - prev->probability);
-					value = math::lerp(prev->value, next->value, t);
+					value = ::glm::lerp(prev->value, next->value, t);
 				}
 				else
 				{
@@ -155,7 +155,7 @@ namespace np::rng
 	struct StandardSampledDistribution : public CdfSampleDistribution<RESOLUTION>
 	{
 		StandardSampledDistribution():
-			CdfSampleDistribution<RESOLUTION>(math::standard_cdf, math::MIN_STANDARD_CDF, math::MAX_STANDARD_CDF)
+			CdfSampleDistribution<RESOLUTION>(mat::StandardCdf, mat::MIN_STANDARD_CDF, mat::MAX_STANDARD_CDF)
 		{}
 	};
 

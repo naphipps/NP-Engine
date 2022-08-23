@@ -16,5 +16,6 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/hash.hpp>
 #include <glm/gtx/quaternion.hpp>
+#include <glm/gtx/compatibility.hpp>
 
 #endif /* NP_ENGINE_VENDOR_GLM_INCLUDE_HPP */

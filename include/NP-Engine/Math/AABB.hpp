@@ -1,53 +1,40 @@
+//##===----------------------------------------------------------------------===##//
 //
-//  AABB.hpp
-//  Project Space
+//  Author: Nathan Phipps 1/12/21
 //
-//  Created by Nathan Phipps on 1/12/21.
-//  Copyright © 2021 Nathan Phipps. All rights reserved.
-//
+//##===----------------------------------------------------------------------===##//
 
 #ifndef NP_ENGINE_AABB_HPP
 #define NP_ENGINE_AABB_HPP
 
 #include "NP-Engine/Primitive/Primitive.hpp"
 
-#include "Point.hpp"
+#include "NP-Engine/Vendor/GlmInclude.hpp"
 
-namespace np
+#include "MathImpl.hpp"
+
+namespace np::mat
 {
-	namespace math
+	template <typename T, ::glm::qualifier Q = ::glm::qualifier::defaultp>
+	struct AABB
 	{
-		template <typename T>
-		struct AABB
+		::glm::vec<2, T, Q> LowerLeft;
+		::glm::vec<2, T, Q> UpperRight;
+
+		bl Contains(::glm::vec<2, T, Q> point) const
 		{
-			Point<T> LowerLeft;
-			Point<T> UpperRight;
+			return point.x >= LowerLeft.x && point.x <= UpperRight.x - 1 && point.y >= LowerLeft.y &&
+				point.y <= UpperRight.y - 1;
+		}
 
-			bl Contains(const Point<T>& Point) const
-			{
-				bl contains = false;
+		::glm::vec<2, T, Q> GetCenter() const
+		{
+			return Midpoint(LowerLeft, UpperRight);
+		}
+	};
 
-				if (Point.x >= LowerLeft.x && Point.x <= UpperRight.x - 1 && Point.y >= LowerLeft.y &&
-					Point.y <= UpperRight.y - 1)
-				{
-					contains = true;
-				}
-
-				return contains;
-			}
-		};
-
-		using ui8AABB = AABB<ui8>;
-		using ui16AABB = AABB<ui16>;
-		using ui32AABB = AABB<ui32>;
-		using ui64AABB = AABB<ui64>;
-		using i8AABB = AABB<i8>;
-		using i16AABB = AABB<i16>;
-		using i32AABB = AABB<i32>;
-		using i64AABB = AABB<i64>;
-		using fltAABB = AABB<flt>;
-		using dblAABB = AABB<dbl>;
-	} // namespace math
-} // namespace np
+	using fltAABB = AABB<flt>;
+	using dblAABB = AABB<dbl>;
+} // namespace np::mat
 
 #endif /* NP_ENGINE_AABB_HPP */

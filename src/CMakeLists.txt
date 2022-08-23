@@ -8,6 +8,14 @@
 #NP_ENGINE Header Files
 ##==--------------------------------------------------------==##
 
+set(NP_ENGINE_ALGORITHMS_HPP
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Algorithms/Algorithms.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Algorithms/BresenhamLine.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Algorithms/ClipLine.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Algorithms/MidpointCircle.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Algorithms/pnpoly.hpp
+)
+
 set(NP_ENGINE_APPLICATION_HPP
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Application/Application.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Application/ApplicationCloseEvent.hpp
@@ -24,12 +32,12 @@ set(NP_ENGINE_CONTAINER_HPP
 )
 
 set(NP_ENGINE_CORE_HPP
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Core/Color.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Core/Core.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Core/DmsImage.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Core/DmsLineSegment.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Core/DrawableImage.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Core/Image.hpp
+	# ${PROJECT_SOURCE_DIR}/include/NP-Engine/Core/Color.hpp
+	# ${PROJECT_SOURCE_DIR}/include/NP-Engine/Core/Core.hpp
+	# ${PROJECT_SOURCE_DIR}/include/NP-Engine/Core/DmsImage.hpp
+	# ${PROJECT_SOURCE_DIR}/include/NP-Engine/Core/DmsLineSegment.hpp
+	# ${PROJECT_SOURCE_DIR}/include/NP-Engine/Core/DrawableImage.hpp
+	# ${PROJECT_SOURCE_DIR}/include/NP-Engine/Core/Image.hpp
 )
 
 set(NP_ENGINE_ECS_HPP
@@ -170,22 +178,14 @@ set(NP_ENGINE_JOBSYSTEM_HPP
 
 set(NP_ENGINE_MATH_HPP
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Math/AABB.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Math/BresenhamLine.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Math/ClipLine.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Math/cmath_include.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Math/ease_functions.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Math/exp_functions.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Math/CMathInclude.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Math/EaseImpl.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Math/Math.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Math/math_functions.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Math/MidpointCircle.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Math/MathImpl.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Math/owen.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Math/pnpoly.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Math/Point.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Math/PointMath.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Math/Polygon.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Math/PolygonUtility.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Math/statistic_functions.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Math/trig_functions.hpp
+	# ${PROJECT_SOURCE_DIR}/include/NP-Engine/Math/Polygon.hpp
+	# ${PROJECT_SOURCE_DIR}/include/NP-Engine/Math/PolygonUtility.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Math/StatisticImpl.hpp
 )
 
 set(NP_ENGINE_MEMORY_HPP
@@ -303,6 +303,7 @@ set(NP_ENGINE_WINDOW_HPP
 )
 
 set(NP_ENGINE_HEADER_FILES
+	${NP_ENGINE_ALGORITHMS_HPP}
 	${NP_ENGINE_APPLICATION_HPP}
 	${NP_ENGINE_CONTAINER_HPP}
 	${NP_ENGINE_CORE_HPP}
@@ -551,6 +552,7 @@ configure_file(
 ##==--------------------------------------------------------==##
 
 source_group("" FILES ${NP_ENGINE_HPP})
+source_group(Algorithms FILES ${NP_ENGINE_ALGORITHMS_HPP})
 source_group(Application FILES ${NP_ENGINE_APPLICATION_HPP} ${NP_ENGINE_APPPLICATION_CPP})
 source_group(Container FILES ${NP_ENGINE_CONTAINER_HPP})
 source_group(Core FILES ${NP_ENGINE_CORE_HPP})

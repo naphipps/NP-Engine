@@ -9,9 +9,10 @@
 
 #include "Foundation/Foundation.hpp"
 
+#include "Algorithms/Algorithms.hpp"
 #include "Application/Application.hpp"
 #include "Container/Container.hpp"
-#include "Core/Core.hpp"
+//#include "Core/Core.hpp" //TODO: cleanup Core > move to respective alg or something
 #include "ECS/ECS.hpp"
 #include "Event/Event.hpp"
 #include "FileSystem/FileSystem.hpp"

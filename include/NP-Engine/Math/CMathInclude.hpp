@@ -1,5 +1,11 @@
-#ifndef NP_ENGINE_CMATH_INCLUDE
-#define NP_ENGINE_CMATH_INCLUDE
+//##===----------------------------------------------------------------------===##//
+//
+//  Author: Nathan Phipps 11/2/21
+//
+//##===----------------------------------------------------------------------===##//
+
+#ifndef NP_ENGINE_CMATH_INCLUDE_HPP
+#define NP_ENGINE_CMATH_INCLUDE_HPP
 
 #include <cmath>
 
@@ -727,4 +733,4 @@ namespace std
 } // namespace std
 
 #endif
-#endif
+#endif /* NP_ENGINE_CMATH_INCLUDE_HPP */
