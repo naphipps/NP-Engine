@@ -113,8 +113,6 @@ namespace np::alg
 	template <typename T, ::glm::qualifier Q = ::glm::qualifier::defaultp>
 	static inline ClipLineReturn ClipLine(::glm::vec<2, T, Q>& p, ::glm::vec<2, T, Q>& q, T top, T right, T bottom, T left)
 	{
-		// TODO: optimize the if blocks in our switch
-
 		ClipLineReturn retval;
 
 		/*
@@ -165,18 +163,14 @@ namespace np::alg
 		case 0x05:
 			retval.clipped = __detail::ClipQLeft(p, q, left);
 			if (q.y < bottom)
-			{
 				retval.clipped |= __detail::ClipQBottom(p, q, bottom);
-			}
 			retval.visible = true;
 			break;
 
 		case 0x06:
 			retval.clipped = __detail::ClipQRight(p, q, right);
 			if (q.y < bottom)
-			{
 				retval.clipped |= __detail::ClipQBottom(p, q, bottom);
-			}
 			retval.visible = true;
 			break;
 
@@ -188,18 +182,14 @@ namespace np::alg
 		case 0x09:
 			retval.clipped = __detail::ClipQLeft(p, q, left);
 			if (q.y > top)
-			{
 				retval.clipped |= __detail::ClipQTop(p, q, top);
-			}
 			retval.visible = true;
 			break;
 
 		case 0x0A:
 			retval.clipped = __detail::ClipQRight(p, q, right);
 			if (q.y > top)
-			{
 				retval.clipped |= __detail::ClipQTop(p, q, top);
-			}
 			retval.visible = true;
 			break;
 
@@ -221,8 +211,7 @@ namespace np::alg
 
 		case 0x14:
 			retval.clipped = __detail::ClipPLeft(p, q, left);
-			if (p.y < bottom) {}
-			else
+			if (p.y >= bottom)
 			{
 				retval.clipped |= __detail::ClipQBottom(p, q, bottom);
 				retval.visible = true;
@@ -234,22 +223,18 @@ namespace np::alg
 
 		case 0x16:
 			retval.clipped = __detail::ClipPLeft(p, q, left);
-			if (p.y < bottom) {}
-			else
+			if (p.y >= bottom)
 			{
 				retval.clipped |= __detail::ClipQBottom(p, q, bottom);
 				if (q.x > right)
-				{
 					retval.clipped |= __detail::ClipQRight(p, q, right);
-				}
 				retval.visible = true;
 			}
 			break;
 
 		case 0x18:
 			retval.clipped = __detail::ClipPLeft(p, q, left);
-			if (p.y > top) {}
-			else
+			if (p.y <= top)
 			{
 				retval.clipped |= __detail::ClipQTop(p, q, top);
 				retval.visible = true;
@@ -261,14 +246,11 @@ namespace np::alg
 
 		case 0x1A:
 			retval.clipped = __detail::ClipPLeft(p, q, left);
-			if (p.y > top) {}
-			else
+			if (p.y <= top)
 			{
 				retval.clipped |= __detail::ClipQTop(p, q, top);
 				if (q.x > right)
-				{
 					retval.clipped |= __detail::ClipQRight(p, q, right);
-				}
 				retval.visible = true;
 			}
 			break;
@@ -291,8 +273,7 @@ namespace np::alg
 
 		case 0x24:
 			retval.clipped = __detail::ClipPRight(p, q, right);
-			if (p.y < bottom) {}
-			else
+			if (p.y >= bottom)
 			{
 				retval.clipped |= __detail::ClipQBottom(p, q, bottom);
 				retval.visible = true;
@@ -301,14 +282,11 @@ namespace np::alg
 
 		case 0x25:
 			retval.clipped = __detail::ClipPRight(p, q, right);
-			if (p.y < bottom) {}
-			else
+			if (p.y >= bottom)
 			{
 				retval.clipped |= __detail::ClipQBottom(p, q, bottom);
 				if (q.x < left)
-				{
 					retval.clipped |= __detail::ClipQLeft(p, q, left);
-				}
 				retval.visible = true;
 			}
 			break;
@@ -318,8 +296,7 @@ namespace np::alg
 
 		case 0x28:
 			retval.clipped = __detail::ClipPRight(p, q, right);
-			if (p.y > top) {}
-			else
+			if (p.y <= top)
 			{
 				retval.clipped |= __detail::ClipQTop(p, q, top);
 				retval.visible = true;
@@ -328,14 +305,11 @@ namespace np::alg
 
 		case 0x29:
 			retval.clipped = __detail::ClipPRight(p, q, right);
-			if (p.y > top) {}
-			else
+			if (p.y <= top)
 			{
 				retval.clipped |= __detail::ClipQTop(p, q, top);
 				if (q.x < left)
-				{
 					retval.clipped |= __detail::ClipQLeft(p, q, left);
-				}
 				retval.visible = true;
 			}
 			break;
@@ -352,22 +326,18 @@ namespace np::alg
 
 		case 0x41:
 			retval.clipped = __detail::ClipPBottom(p, q, bottom);
-			if (p.x < left) {}
-			else
+			if (p.x >= left)
 			{
 				retval.clipped |= __detail::ClipQLeft(p, q, left);
 				if (q.y < bottom)
-				{
 					retval.clipped |= __detail::ClipQBottom(p, q, bottom);
-				}
 				retval.visible = true;
 			}
 			break;
 
 		case 0x42:
 			retval.clipped = __detail::ClipPBottom(p, q, bottom);
-			if (p.x > right) {}
-			else
+			if (p.x <= right)
 			{
 				retval.clipped |= __detail::ClipQRight(p, q, right);
 				retval.visible = true;
@@ -391,28 +361,22 @@ namespace np::alg
 
 		case 0x49:
 			retval.clipped = __detail::ClipPBottom(p, q, bottom);
-			if (p.x < left) {}
-			else
+			if (p.x >= left)
 			{
 				retval.clipped |= __detail::ClipQLeft(p, q, left);
 				if (q.y > top)
-				{
 					retval.clipped |= __detail::ClipQTop(p, q, top);
-				}
 				retval.visible = true;
 			}
 			break;
 
 		case 0x4A:
 			retval.clipped = __detail::ClipPBottom(p, q, bottom);
-			if (p.x > right) {}
-			else
+			if (p.x <= right)
 			{
 				retval.clipped |= __detail::ClipQRight(p, q, right);
 				if (q.y > top)
-				{
 					retval.clipped |= __detail::ClipQTop(p, q, top);
-				}
 				retval.visible = true;
 			}
 			break;
@@ -422,9 +386,7 @@ namespace np::alg
 		case 0x50:
 			retval.clipped = __detail::ClipPLeft(p, q, left);
 			if (p.y < bottom)
-			{
 				retval.clipped |= __detail::ClipPBottom(p, q, bottom);
-			}
 			retval.visible = true;
 			break;
 
@@ -433,14 +395,11 @@ namespace np::alg
 
 		case 0x52:
 			retval.clipped = __detail::ClipQRight(p, q, right);
-			if (q.y < bottom) {}
-			else
+			if (q.y >= bottom)
 			{
 				retval.clipped |= __detail::ClipPBottom(p, q, bottom);
 				if (p.x < left)
-				{
 					retval.clipped |= __detail::ClipPLeft(p, q, left);
-				}
 				retval.visible = true;
 			}
 			break;
@@ -456,14 +415,11 @@ namespace np::alg
 
 		case 0x58:
 			retval.clipped = __detail::ClipQTop(p, q, top);
-			if (q.x < left) {}
-			else
+			if (q.x >= left)
 			{
 				retval.clipped |= __detail::ClipPBottom(p, q, bottom);
 				if (p.x < left)
-				{
 					retval.clipped |= __detail::ClipPLeft(p, q, left);
-				}
 				retval.visible = true;
 			}
 
@@ -472,21 +428,15 @@ namespace np::alg
 
 		case 0x5A:
 			retval.clipped = __detail::ClipPLeft(p, q, left);
-			if (p.y < left) {}
-			else
+			if (p.y >= left)
 			{
 				retval.clipped |= __detail::ClipQRight(p, q, right);
-				if (q.y < bottom) {}
-				else
+				if (q.y >= bottom)
 				{
 					if (p.y < bottom)
-					{
 						retval.clipped |= __detail::ClipPBottom(p, q, bottom);
-					}
 					if (q.y > top)
-					{
 						retval.clipped |= __detail::ClipQTop(p, q, top);
-					}
 					retval.visible = true;
 				}
 			}
@@ -497,22 +447,17 @@ namespace np::alg
 		case 0x60:
 			retval.clipped = __detail::ClipPRight(p, q, right);
 			if (p.y < bottom)
-			{
 				retval.clipped |= __detail::ClipPBottom(p, q, bottom);
-			}
 			retval.visible = true;
 			break;
 
 		case 0x61:
 			retval.clipped = __detail::ClipQLeft(p, q, left);
-			if (q.y < bottom) {}
-			else
+			if (q.y >= bottom)
 			{
 				retval.clipped |= __detail::ClipPBottom(p, q, bottom);
 				if (p.x > right)
-				{
 					retval.clipped |= __detail::ClipPRight(p, q, right);
-				}
 				retval.visible = true;
 			}
 			break;
@@ -531,35 +476,26 @@ namespace np::alg
 
 		case 0x68:
 			retval.clipped = __detail::ClipQTop(p, q, top);
-			if (q.x > right) {}
-			else
+			if (q.x <= right)
 			{
 				retval.clipped |= __detail::ClipPRight(p, q, right);
 				if (p.y < bottom)
-				{
 					retval.clipped |= __detail::ClipPBottom(p, q, bottom);
-				}
 				retval.visible = true;
 			}
 			break;
 
 		case 0x69:
 			retval.clipped = __detail::ClipQLeft(p, q, left);
-			if (q.y < bottom) {}
-			else
+			if (q.y >= bottom)
 			{
 				retval.clipped |= __detail::ClipPRight(p, q, right);
-				if (p.y > top) {}
-				else
+				if (p.y <= top)
 				{
 					if (q.y > top)
-					{
 						retval.clipped |= __detail::ClipQTop(p, q, top);
-					}
 					if (p.y < bottom)
-					{
 						retval.clipped |= __detail::ClipPBottom(p, q, bottom);
-					}
 					retval.visible = true;
 				}
 			}
@@ -577,8 +513,7 @@ namespace np::alg
 
 		case 0x81:
 			retval.clipped = __detail::ClipPTop(p, q, top);
-			if (p.x < left) {}
-			else
+			if (p.x >= left)
 			{
 				retval.clipped |= __detail::ClipQLeft(p, q, left);
 				retval.visible = true;
@@ -587,8 +522,7 @@ namespace np::alg
 
 		case 0x82:
 			retval.clipped = __detail::ClipPTop(p, q, top);
-			if (p.x > right) {}
-			else
+			if (p.x <= right)
 			{
 				retval.clipped |= __detail::ClipQRight(p, q, right);
 				retval.visible = true;
@@ -603,28 +537,22 @@ namespace np::alg
 
 		case 0x85:
 			retval.clipped = __detail::ClipPTop(p, q, top);
-			if (p.x < left) {}
-			else
+			if (p.x >= left)
 			{
 				retval.clipped |= __detail::ClipQLeft(p, q, left);
 				if (q.y < bottom)
-				{
 					retval.clipped |= __detail::ClipQBottom(p, q, bottom);
-				}
 				retval.visible = true;
 			}
 			break;
 
 		case 0x86:
 			retval.clipped = __detail::ClipPTop(p, q, top);
-			if (p.x > right) {}
-			else
+			if (p.x <= right)
 			{
 				retval.clipped |= __detail::ClipQRight(p, q, right);
 				if (q.y < bottom)
-				{
 					retval.clipped |= __detail::ClipQBottom(p, q, bottom);
-				}
 				retval.visible = true;
 			}
 			break;
@@ -643,9 +571,7 @@ namespace np::alg
 		case 0x90:
 			retval.clipped = __detail::ClipPLeft(p, q, left);
 			if (p.y > top)
-			{
 				retval.clipped |= __detail::ClipPTop(p, q, top);
-			}
 			retval.visible = true;
 			break;
 
@@ -654,28 +580,22 @@ namespace np::alg
 
 		case 0x92:
 			retval.clipped = __detail::ClipQRight(p, q, right);
-			if (q.y > top) {}
-			else
+			if (q.y <= top)
 			{
 				retval.clipped |= __detail::ClipPTop(p, q, top);
 				if (p.x < left)
-				{
 					retval.clipped |= __detail::ClipPLeft(p, q, left);
-				}
 				retval.visible = true;
 			}
 			break;
 
 		case 0x94:
 			retval.clipped = __detail::ClipQBottom(p, q, bottom);
-			if (q.x < left) {}
-			else
+			if (q.x >= left)
 			{
 				retval.clipped |= __detail::ClipPLeft(p, q, left);
 				if (p.y > top)
-				{
 					retval.clipped |= __detail::ClipPTop(p, q, top);
-				}
 				retval.visible = true;
 			}
 			break;
@@ -685,21 +605,15 @@ namespace np::alg
 
 		case 0x96:
 			retval.clipped = __detail::ClipPLeft(p, q, left);
-			if (p.y < bottom) {}
-			else
+			if (p.y >= bottom)
 			{
 				retval.clipped |= __detail::ClipQRight(p, q, right);
-				if (q.y > top) {}
-				else
+				if (q.y <= top)
 				{
 					if (p.y > top)
-					{
 						retval.clipped |= __detail::ClipPTop(p, q, top);
-					}
 					if (q.y < bottom)
-					{
 						retval.clipped |= __detail::ClipQBottom(p, q, bottom);
-					}
 					retval.visible = true;
 				}
 			}
@@ -719,22 +633,17 @@ namespace np::alg
 		case 0xA0:
 			retval.clipped = __detail::ClipPRight(p, q, right);
 			if (p.y > top)
-			{
 				retval.clipped |= __detail::ClipPTop(p, q, top);
-			}
 			retval.visible = true;
 			break;
 
 		case 0xA1:
 			retval.clipped = __detail::ClipQLeft(p, q, left);
-			if (q.y > top) {}
-			else
+			if (q.y <= top)
 			{
 				retval.clipped |= __detail::ClipPTop(p, q, top);
 				if (p.x > right)
-				{
 					retval.clipped |= __detail::ClipPRight(p, q, right);
-				}
 				retval.visible = true;
 			}
 			break;
@@ -744,35 +653,26 @@ namespace np::alg
 
 		case 0xA4:
 			retval.clipped = __detail::ClipQBottom(p, q, bottom);
-			if (q.x > right) {}
-			else
+			if (q.x <= right)
 			{
 				retval.clipped |= __detail::ClipPRight(p, q, right);
 				if (p.y > top)
-				{
 					retval.clipped |= __detail::ClipPTop(p, q, top);
-				}
 				retval.visible = true;
 			}
 			break;
 
 		case 0xA5:
 			retval.clipped = __detail::ClipQLeft(p, q, left);
-			if (q.y > top) {}
-			else
+			if (q.y <= top)
 			{
 				retval.clipped |= __detail::ClipPRight(p, q, right);
-				if (p.y < bottom) {}
-				else
+				if (p.y >= bottom)
 				{
 					if (q.y < bottom)
-					{
 						retval.clipped |= __detail::ClipQBottom(p, q, bottom);
-					}
 					if (p.y > top)
-					{
 						retval.clipped |= __detail::ClipPTop(p, q, top);
-					}
 					retval.visible = true;
 				}
 			}
