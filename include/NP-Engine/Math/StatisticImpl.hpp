@@ -58,7 +58,8 @@ namespace np::mat
 	{
 		flt skew;
 		if (IsSkewReal(scale, location, mean))
-			skew = (mean < 0.f ? -1.f : 1.f) * ::std::sqrt(1.f / (((2.f * Pow2(scale)) / (M_PI * Pow2(mean - location))) - 1.f));
+			skew =
+				(mean < 0.f ? -1.f : 1.f) * ::std::sqrt(1.f / (((2.f * Pow2(scale)) / (M_PI * Pow2(mean - location))) - 1.f));
 		else
 			skew = ::std::nanf("skew is not real");
 		return skew;
@@ -103,7 +104,8 @@ namespace np::mat
 	{
 		dbl skew;
 		if (IsSkewReal(scale, location, mean))
-			skew = (mean < 0.0 ? -1.0 : 1.0) * ::std::sqrt(1.0 / (((2.0 * Pow2(scale)) / (M_PI * Pow2(mean - location))) - 1.0));
+			skew =
+				(mean < 0.0 ? -1.0 : 1.0) * ::std::sqrt(1.0 / (((2.0 * Pow2(scale)) / (M_PI * Pow2(mean - location))) - 1.0));
 		else
 			skew = ::std::nan("skew is not real");
 		return skew;
