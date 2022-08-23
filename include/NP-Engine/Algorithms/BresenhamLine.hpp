@@ -15,8 +15,6 @@ namespace np::alg
 {
 	namespace __detail
 	{
-		// TODO: I think we can optimize some of the *2 operations with shifts?
-
 		/*
 			gets the series of points on low sloped line given begin point and given end point
 		*/
