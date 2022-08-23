@@ -7,6 +7,7 @@
 #ifndef NP_ENGINE_MIDPOINTCIRCLE_HPP
 #define NP_ENGINE_MIDPOINTCIRCLE_HPP
 
+#include "NP-Engine/Primitive/Primitive.hpp"
 #include "NP-Engine/Container/Container.hpp"
 #include "NP-Engine/Math/Math.hpp"
 
