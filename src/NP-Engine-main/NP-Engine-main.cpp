@@ -14,35 +14,6 @@ extern ::np::app::Application* ::np::app::CreateApplication(::np::srvc::Services
 
 i32 main(i32 argc, chr** argv)
 {
-	{
-		using namespace np;
-
-		con::array<::glm::vec2, 10> poly;
-		::glm::vec2 point;
-
-		bl is = alg::pnpoly(poly, point);
-
-		con::vector<::glm::vec2> cir = alg::GetMidpointCirclePoints<::glm::vec2::value_type>(30);
-
-		con::array<::glm::vec2, 2000> points;
-		siz points_size;
-		::glm::vec2 offset;
-
-		bl b = alg::GetMidpointCirclePoints(30, points, points_size, offset);
-
-		::glm::vec2 lb, le;
-		con::vector<::glm::vec2> line = alg::GetBresenhamLinePoints(lb, le);
-
-		con::array<::glm::vec2, 3000> line2;
-		siz line_size;
-		bl line_yes = alg::GetBresenhamLinePoints(line2, line_size, lb, le);
-
-		::glm::vec2 p, q;
-		alg::ClipLineReturn clr = alg::ClipLine<::glm::vec2::value_type>(p, q, 4, 5);
-
-		return 0;
-	}
-
 	::np::thr::ThisThread::SetAffinity(0);
 
 	i32 retval = 0;
