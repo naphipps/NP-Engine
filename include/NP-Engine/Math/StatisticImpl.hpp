@@ -56,8 +56,12 @@ namespace np::mat
 
 	static inline flt CalcSkew(const flt scale, const flt location, const flt mean = 0.f)
 	{
-		NP_ENGINE_ASSERT(IsSkewReal(scale, location, mean), "skew must be real");
-		return (mean < 0.f ? -1.f : 1.f) * ::std::sqrt(1.f / (((2.f * Pow2(scale)) / (M_PI * Pow2(mean - location))) - 1.f));
+		flt skew;
+		if (IsSkewReal(scale, location, mean))
+			skew = (mean < 0.f ? -1.f : 1.f) * ::std::sqrt(1.f / (((2.f * Pow2(scale)) / (M_PI * Pow2(mean - location))) - 1.f));
+		else
+			skew = ::std::nanf("skew is not real");
+		return skew;
 	}
 
 	static inline dbl StandardPdf(const dbl x)
@@ -97,9 +101,12 @@ namespace np::mat
 
 	static inline dbl CalcSkew(const dbl scale, const dbl location, const dbl mean = 0.0)
 	{
-		// TODO: do we still want to return something reasonable, say 0, when skew is imaginary?
-		NP_ENGINE_ASSERT(IsSkewReal(scale, location, mean), "skew must be real");
-		return (mean < 0.0 ? -1.0 : 1.0) * ::std::sqrt(1.0 / (((2.0 * Pow2(scale)) / (M_PI * Pow2(mean - location))) - 1.0));
+		dbl skew;
+		if (IsSkewReal(scale, location, mean))
+			skew = (mean < 0.0 ? -1.0 : 1.0) * ::std::sqrt(1.0 / (((2.0 * Pow2(scale)) / (M_PI * Pow2(mean - location))) - 1.0));
+		else
+			skew = ::std::nan("skew is not real");
+		return skew;
 	}
 } // namespace np::mat
 
