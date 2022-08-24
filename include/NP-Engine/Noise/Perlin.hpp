@@ -80,7 +80,7 @@ namespace np::noiz
 			Noise
 				- return [-amplitude, amplitude]
 
-			CalculateNoise
+			PureNoise
 				- return [-1, 1]
 
 			Fractal
@@ -136,8 +136,8 @@ namespace np::noiz
 		constexpr static flt DEFAULT_WARP_OCTAVE_DISPLACEMENT = 0.f;
 
 	private:
-		constexpr static ui32 PERMUTATION_SIZE = 512;
-		constexpr static ui32 HALF_PERMUTATION_SIZE = 256;
+		constexpr static siz PERMUTATION_SIZE = 512;
+		constexpr static siz HALF_PERMUTATION_SIZE = 256;
 		ui8 _permutation[PERMUTATION_SIZE];
 		ui8 _warp_octave_count;
 		flt _warp_octave_multiplier;
@@ -166,7 +166,7 @@ namespace np::noiz
 
 		inline void InitPermutation()
 		{
-			for (ui32 i = 0; i < HALF_PERMUTATION_SIZE; i++)
+			for (siz i = 0; i < HALF_PERMUTATION_SIZE; i++)
 			{
 				_permutation[i] = i;
 				_permutation[HALF_PERMUTATION_SIZE + i] = i;
@@ -201,19 +201,22 @@ namespace np::noiz
 
 		inline void ShufflePermutation()
 		{
-			for (i32 i = 0; i < HALF_PERMUTATION_SIZE; i++)
+			siz last_index = HALF_PERMUTATION_SIZE - 1;
+			for (siz i = 0; i < HALF_PERMUTATION_SIZE; i++)
 			{
-				i32 index = GetRandomEngine().GetLemireWithinRange(HALF_PERMUTATION_SIZE - i);
-
-				// do not swap with itself
-				if (index != PERMUTATION_SIZE - 1 - i)
+				siz index = last_index - i;
+				siz swap = GetRandomEngine().GetLemireWithinRange(HALF_PERMUTATION_SIZE);
+				
+				// optimization - no need to swap with self
+				if (index != swap)
 				{
-					// temp = last number in perm yet to be shuffled
-					ui8 temp = _permutation[HALF_PERMUTATION_SIZE - 1 - i];
-					_permutation[HALF_PERMUTATION_SIZE - 1 - i] = _permutation[index];
+					ui8 temp = _permutation[index];
+					_permutation[index] = _permutation[swap];
+					_permutation[swap] = temp;
+
 					// copy to latter half of permutation
-					_permutation[PERMUTATION_SIZE - 1 - i] = _permutation[index];
-					_permutation[index] = temp;
+					_permutation[HALF_PERMUTATION_SIZE + index] = _permutation[index];
+					_permutation[HALF_PERMUTATION_SIZE + swap] = _permutation[swap];
 				}
 			}
 		}
@@ -330,10 +333,13 @@ namespace np::noiz
 
 		inline flt Noise(flt x, flt y, flt z) const
 		{
-			return GetAmplitude() * CalculateNoise(GetFrequency() * x, GetFrequency() * y, GetFrequency() * z);
+			return GetAmplitude() * PureNoise(GetFrequency() * x, GetFrequency() * y, GetFrequency() * z);
 		}
 
-		inline flt CalculateNoise(flt x, flt y, flt z) const
+		/*
+			calculates noise value based directly on params and not affected by internal properties
+		*/
+		inline flt PureNoise(flt x, flt y, flt z) const
 		{
 			// Find the unit cube that contains the point
 			i32 X = mat::FastFloor(x);
@@ -385,7 +391,7 @@ namespace np::noiz
 
 			for (ui8 i = 0; i < _octave_count; i++)
 			{
-				output += amplitude * CalculateNoise(x * frequency, y * frequency, z * frequency);
+				output += amplitude * PureNoise(x * frequency, y * frequency, z * frequency);
 				denom += amplitude;
 				frequency *= _lacunarity;
 				amplitude *= _persistence;
@@ -404,7 +410,7 @@ namespace np::noiz
 
 			for (ui8 i = 0; i < _octave_count; i++)
 			{
-				output += amplitude * CalculateNoise(x * frequency, y * frequency, i * fractionalIncrement * frequency);
+				output += amplitude * PureNoise(x * frequency, y * frequency, i * fractionalIncrement * frequency);
 				denom += amplitude;
 				frequency *= _lacunarity;
 				amplitude *= _persistence;
@@ -422,7 +428,7 @@ namespace np::noiz
 
 			for (ui8 i = 0; i < _octave_count; i++)
 			{
-				output += amplitude * ::std::abs(CalculateNoise(x * frequency, y * frequency, z * frequency));
+				output += amplitude * ::std::abs(PureNoise(x * frequency, y * frequency, z * frequency));
 				denom += amplitude;
 				frequency *= _lacunarity;
 				amplitude *= _persistence;
@@ -478,7 +484,7 @@ namespace np::noiz
 			for (ui8 i = 0; i < _octave_count; i++)
 			{
 				output +=
-					amplitude * ::std::abs(CalculateNoise(x * frequency, y * frequency, i * _fractional_increment * frequency));
+					amplitude * ::std::abs(PureNoise(x * frequency, y * frequency, i * _fractional_increment * frequency));
 				denom += amplitude;
 				frequency *= _lacunarity;
 				amplitude *= _persistence;

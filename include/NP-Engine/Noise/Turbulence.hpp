@@ -8,12 +8,11 @@
 #define NP_ENGINE_TURBULENCE_HPP
 
 #include "NP-Engine/Primitive/Primitive.hpp"
+#include "NP-Engine/Container/Container.hpp"
 #include "NP-Engine/Random/Random.hpp"
 
 #include "Perlin.hpp"
 #include "Simplex.hpp"
-
-// TODO: can we use containers here for our perline and simplex array??
 
 namespace np::noiz
 {
@@ -24,38 +23,34 @@ namespace np::noiz
 
 		CONSTANTS:
 
-			siz PERLIN_DIMENSION_COUNT = 3
-				- perlin can only support up to 3D
-
-			siz SIMPLEX_DIMENSION_COUNT = 4;
-				- simplex can only support up to 4D
+			flt DEFAULT_SCALAR = 0.1f
+				- arbitary value
 
 		MEMBERS:
 
-			Perlin _perlin[PERLIN_DIMENSION_COUNT];
+			con::array<Perlin, 3> _perlins;
+				- perlin can only support up to 3D
 
-			Simplex _simplex[SIMPLEX_DIMENSION_COUNT];
+			con::array<Simplex, 4> _simplexes;
+				- simplex can only support up to 4D
 
 			flt _scalar;
 				- can be anything
 				- default to 0.1f
-
-
 		*/
 
 	class Turbulence : public rng::Random32Base
 	{
 	public:
-		constexpr static siz PERLIN_DIMENSION_COUNT = 3;
-		constexpr static siz SIMPLEX_DIMENSION_COUNT = 4;
+		constexpr static flt DEFAULT_SCALAR = 0.1f;
 
 	private:
-		Perlin _perlin[PERLIN_DIMENSION_COUNT];
-		Simplex _simplex[SIMPLEX_DIMENSION_COUNT];
+		con::array<Perlin, 3> _perlins;
+		con::array<Simplex, 4> _simplexes;
 		flt _scalar;
 
 	public:
-		Turbulence(const rng::Random32& random_engine = rng::Random32()): rng::Random32Base(random_engine)
+		Turbulence(const rng::Random32& random_engine = rng::Random32()): rng::Random32Base(random_engine), _scalar(DEFAULT_SCALAR)
 		{
 			Init();
 		}
@@ -64,52 +59,42 @@ namespace np::noiz
 		{
 			rng::Random32Base::Init();
 
-			_scalar = 0.1f;
+			_scalar = DEFAULT_SCALAR;
 			rng::Random32 rng;
 
-			for (siz i = 0; i < PERLIN_DIMENSION_COUNT; i++)
+			for (siz i = 0; i < _perlins.size(); i++)
 			{
 				rng.SetSeed(GetRandomEngine().CreateSeed());
-				_perlin[i].SetRandomEngine(rng);
-				_perlin[i].Init();
+				_perlins[i].SetRandomEngine(rng);
+				_perlins[i].Init();
 			}
 
-			for (siz i = 0; i < SIMPLEX_DIMENSION_COUNT; i++)
+			for (siz i = 0; i < _simplexes.size(); i++)
 			{
 				rng.SetSeed(GetRandomEngine().CreateSeed());
-				_simplex[i].SetRandomEngine(rng);
-				_simplex[i].Init();
+				_simplexes[i].SetRandomEngine(rng);
+				_simplexes[i].Init();
 			}
 		}
 
-		inline siz GetPerlinCount() const
+		con::array<Perlin, 3>& GetPerlins()
 		{
-			return PERLIN_DIMENSION_COUNT;
+			return _perlins;
 		}
 
-		inline siz GetSimplexCount() const
+		const con::array<Perlin, 3>& GetPerlins() const
 		{
-			return SIMPLEX_DIMENSION_COUNT;
+			return _perlins;
 		}
 
-		inline Perlin& GetPerlin(siz index)
+		con::array<Simplex, 4>& GetSimplexes()
 		{
-			return _perlin[index];
+			return _simplexes;
 		}
 
-		inline const Perlin& GetPerlin(siz index) const
+		const con::array<Simplex, 4>& GetSimplexes() const
 		{
-			return _perlin[index];
-		}
-
-		inline Simplex& GetSimplex(siz index)
-		{
-			return _simplex[index];
-		}
-
-		inline const Simplex& GetSimplex(siz index) const
-		{
-			return _simplex[index];
+			return _simplexes;
 		}
 
 		inline void SetScalar(flt scalar)
@@ -124,119 +109,119 @@ namespace np::noiz
 
 		inline void TurbulateWithPerlin(flt& x) const
 		{
-			x += _perlin[0].Noise(x, 0, 0) * _scalar;
+			x += _perlins[0].Noise(x, 0, 0) * _scalar;
 		}
 
 		inline void TurbulateWithPerlin(flt& x, flt& y) const
 		{
-			x += _perlin[0].Noise(x, y, 0) * _scalar;
-			y += _perlin[1].Noise(x, y, 0) * _scalar;
+			x += _perlins[0].Noise(x, y, 0) * _scalar;
+			y += _perlins[1].Noise(x, y, 0) * _scalar;
 		}
 
 		inline void TurbulateWithPerlin(flt& x, flt& y, flt& z) const
 		{
-			x += _perlin[0].Noise(x, y, z) * _scalar;
-			y += _perlin[1].Noise(x, y, z) * _scalar;
-			z += _perlin[2].Noise(x, y, z) * _scalar;
+			x += _perlins[0].Noise(x, y, z) * _scalar;
+			y += _perlins[1].Noise(x, y, z) * _scalar;
+			z += _perlins[2].Noise(x, y, z) * _scalar;
 		}
 
 		inline void TurbulateWithPerlinFractal(flt& x) const
 		{
-			x += _perlin[0].Fractal(x, 0, 0) * _scalar;
+			x += _perlins[0].Fractal(x, 0, 0) * _scalar;
 		}
 
 		inline void TurbulateWithPerlinFractal(flt& x, flt& y) const
 		{
-			x += _perlin[0].Fractal(x, y, 0) * _scalar;
-			y += _perlin[1].Fractal(x, y, 0) * _scalar;
+			x += _perlins[0].Fractal(x, y, 0) * _scalar;
+			y += _perlins[1].Fractal(x, y, 0) * _scalar;
 		}
 
 		inline void TurbulateWithPerlinFractal(flt& x, flt& y, flt& z) const
 		{
-			x += _perlin[0].Fractal(x, y, z) * _scalar;
-			y += _perlin[1].Fractal(x, y, z) * _scalar;
-			z += _perlin[2].Fractal(x, y, z) * _scalar;
+			x += _perlins[0].Fractal(x, y, z) * _scalar;
+			y += _perlins[1].Fractal(x, y, z) * _scalar;
+			z += _perlins[2].Fractal(x, y, z) * _scalar;
 		}
 
 		inline void TurbulateWithPerlinFractional(flt& x) const
 		{
-			x += _perlin[0].Fractional(x, 0) * _scalar;
+			x += _perlins[0].Fractional(x, 0) * _scalar;
 		}
 
 		inline void TurbulateWithPerlinFractional(flt& x, flt& y) const
 		{
-			x += _perlin[0].Fractional(x, y) * _scalar;
-			y += _perlin[1].Fractional(x, y) * _scalar;
+			x += _perlins[0].Fractional(x, y) * _scalar;
+			y += _perlins[1].Fractional(x, y) * _scalar;
 		}
 
 		inline void TurbulateWithSimplex(flt& x) const
 		{
-			x += _simplex[0].Noise(x) * _scalar;
+			x += _simplexes[0].Noise(x) * _scalar;
 		}
 
 		inline void TurbulateWithSimplex(flt& x, flt& y) const
 		{
-			x += _simplex[0].Noise(x, y) * _scalar;
-			y += _simplex[1].Noise(x, y) * _scalar;
+			x += _simplexes[0].Noise(x, y) * _scalar;
+			y += _simplexes[1].Noise(x, y) * _scalar;
 		}
 
 		inline void TurbulateWithSimplex(flt& x, flt& y, flt& z) const
 		{
-			x += _simplex[0].Noise(x, y, z) * _scalar;
-			y += _simplex[1].Noise(x, y, z) * _scalar;
-			z += _simplex[2].Noise(x, y, z) * _scalar;
+			x += _simplexes[0].Noise(x, y, z) * _scalar;
+			y += _simplexes[1].Noise(x, y, z) * _scalar;
+			z += _simplexes[2].Noise(x, y, z) * _scalar;
 		}
 
 		inline void TurbulateWithSimplex(flt& x, flt& y, flt& z, flt& w) const
 		{
-			x += _simplex[0].Noise(x, y, z, w) * _scalar;
-			y += _simplex[1].Noise(x, y, z, w) * _scalar;
-			z += _simplex[2].Noise(x, y, z, w) * _scalar;
-			w += _simplex[3].Noise(x, y, z, w) * _scalar;
+			x += _simplexes[0].Noise(x, y, z, w) * _scalar;
+			y += _simplexes[1].Noise(x, y, z, w) * _scalar;
+			z += _simplexes[2].Noise(x, y, z, w) * _scalar;
+			w += _simplexes[3].Noise(x, y, z, w) * _scalar;
 		}
 
 		inline void TurbulateWithSimplexFractal(flt& x) const
 		{
-			x += _simplex[0].Fractal(x) * _scalar;
+			x += _simplexes[0].Fractal(x) * _scalar;
 		}
 
 		inline void TurbulateWithSimplexFractal(flt& x, flt& y) const
 		{
-			x += _simplex[0].Fractal(x, y) * _scalar;
-			y += _simplex[1].Fractal(x, y) * _scalar;
+			x += _simplexes[0].Fractal(x, y) * _scalar;
+			y += _simplexes[1].Fractal(x, y) * _scalar;
 		}
 
 		inline void TurbulateWithSimplexFractal(flt& x, flt& y, flt& z) const
 		{
-			x += _simplex[0].Fractal(x, y, z) * _scalar;
-			y += _simplex[1].Fractal(x, y, z) * _scalar;
-			z += _simplex[2].Fractal(x, y, z) * _scalar;
+			x += _simplexes[0].Fractal(x, y, z) * _scalar;
+			y += _simplexes[1].Fractal(x, y, z) * _scalar;
+			z += _simplexes[2].Fractal(x, y, z) * _scalar;
 		}
 
 		inline void TurbulateWithSimplexFractal(flt& x, flt& y, flt& z, flt& w) const
 		{
-			x += _simplex[0].Fractal(x, y, z, w) * _scalar;
-			y += _simplex[1].Fractal(x, y, z, w) * _scalar;
-			z += _simplex[2].Fractal(x, y, z, w) * _scalar;
-			w += _simplex[3].Fractal(x, y, z, w) * _scalar;
+			x += _simplexes[0].Fractal(x, y, z, w) * _scalar;
+			y += _simplexes[1].Fractal(x, y, z, w) * _scalar;
+			z += _simplexes[2].Fractal(x, y, z, w) * _scalar;
+			w += _simplexes[3].Fractal(x, y, z, w) * _scalar;
 		}
 
 		inline void TurbulateWithSimplexFractional(flt& x) const
 		{
-			x += _simplex[0].Fractional(x) * _scalar;
+			x += _simplexes[0].Fractional(x) * _scalar;
 		}
 
 		inline void TurbulateWithSimplexFractional(flt& x, flt& y) const
 		{
-			x += _simplex[0].Fractional(x, y) * _scalar;
-			y += _simplex[1].Fractional(x, y) * _scalar;
+			x += _simplexes[0].Fractional(x, y) * _scalar;
+			y += _simplexes[1].Fractional(x, y) * _scalar;
 		}
 
 		inline void TurbulateWithSimplexFractional(flt& x, flt& y, flt& z) const
 		{
-			x += _simplex[0].Fractional(x, y, z) * _scalar;
-			y += _simplex[1].Fractional(x, y, z) * _scalar;
-			z += _simplex[2].Fractional(x, y, z) * _scalar;
+			x += _simplexes[0].Fractional(x, y, z) * _scalar;
+			y += _simplexes[1].Fractional(x, y, z) * _scalar;
+			z += _simplexes[2].Fractional(x, y, z) * _scalar;
 		}
 	};
 } // namespace np::noiz
