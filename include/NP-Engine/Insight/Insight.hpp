@@ -7,8 +7,6 @@
 #ifndef NP_ENGINE_INSIGHT_HPP
 #define NP_ENGINE_INSIGHT_HPP
 
-// TODO: I'm pretty sure Insight can now make use of Memory?
-
 #include "NP-Engine/Foundation/Foundation.hpp"
 #include "Log.hpp"
 #include "Instrumentor.hpp"
