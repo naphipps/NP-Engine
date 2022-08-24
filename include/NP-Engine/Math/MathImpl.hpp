@@ -88,7 +88,7 @@ namespace np::mat
 	}
 
 	template <typename T>
-	static inline T& Clamp(const T& n, const T& min, const T& max) // TODO: can this return a reference??
+	static inline T Clamp(const T& n, const T& min, const T& max)
 	{
 		return n > max ? max : (n < min ? min : n);
 	}

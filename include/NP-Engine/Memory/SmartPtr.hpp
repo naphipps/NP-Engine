@@ -31,7 +31,7 @@ namespace np::mem
 
 			void operator()(T* ptr) const noexcept
 			{
-				NP_ENGINE_STATIC_ASSERT(0 < sizeof(T), "can't delete an incomplete type"); // TODO: what is this?
+				NP_ENGINE_STATIC_ASSERT(0 < sizeof(T), "can't delete an incomplete type");
 				TraitAllocator allocator;
 				Destroy<T>(allocator, ptr);
 			}
@@ -44,12 +44,11 @@ namespace np::mem
 	template <typename T, typename... Args>
 	constexpr uptr<T> CreateUptr(Args&&... args)
 	{
-		TraitAllocator allocator;
-		Block block = allocator.Allocate(sizeof(T));
 		NP_ENGINE_ASSERT((::std::is_constructible_v<T, Args...>), "T must be constructible with the given args.");
-		bl constructed = Construct<T>(block, ::std::forward<Args>(args)...);
-		NP_ENGINE_ASSERT(constructed, "We require a successful construction here.");
-		return uptr<T>(static_cast<T*>(block.ptr));
+		TraitAllocator allocator;
+		T* ptr = Create<T>(allocator, ::std::forward<Args>(args)...);
+		NP_ENGINE_ASSERT(ptr, "We require a successful construction here.");
+		return uptr<T>(ptr);
 	}
 
 	template <typename T>
@@ -58,12 +57,12 @@ namespace np::mem
 	template <typename T, typename... Args>
 	constexpr sptr<T> CreateSptr(Args&&... args)
 	{
+		NP_ENGINE_ASSERT((::std::is_constructible_v<T, Args...>), "T must be constructible with the given args.");
 		TraitAllocator allocator;
 		Block block = allocator.Allocate(sizeof(T));
-		NP_ENGINE_ASSERT((::std::is_constructible_v<T, Args...>), "T must be constructible with the given args.");
-		bl constructed = Construct<T>(block, ::std::forward<Args>(args)...);
-		NP_ENGINE_ASSERT(constructed, "We require a successful construction here.");
-		return sptr<T>(static_cast<T*>(block.ptr), __detail::SmartPtrDeleter<T>{});
+		T* ptr = Create<T>(allocator, ::std::forward<Args>(args)...);
+		NP_ENGINE_ASSERT(ptr, "We require a successful construction here.");
+		return sptr<T>(ptr, __detail::SmartPtrDeleter<T>{});
 	}
 } // namespace np::mem
 

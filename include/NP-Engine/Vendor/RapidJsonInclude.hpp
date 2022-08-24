@@ -18,7 +18,7 @@
 // TODO: ^ but I think we ought to try to figure out how to just ignore that warning
 
 #define RAPIDJSON_ASSERT(expression) \
-	NP_ENGINE_ASSERT(expression, ::std::string("RAPIDJSON encounted an asserted issue here: ") + ::std::string(NP_FUNCTION))
+	NP_ENGINE_ASSERT(expression, ::std::string("RAPIDJSON encounted an asserted issue here: ") + ::std::string(NP_ENGINE_FUNCTION))
 
 namespace np::mem::__detail
 {

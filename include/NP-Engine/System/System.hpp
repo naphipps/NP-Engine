@@ -20,6 +20,11 @@
 
 namespace np::sys
 {
+	namespace __detail
+	{
+		extern ::std::string InitialWorkingDir;
+	}
+
 	using TerminateHandler = ::std::terminate_handler;
 	typedef void (*SignalHandler)(i32 signal);
 
@@ -41,8 +46,16 @@ namespace np::sys
 #endif
 	}
 
+	static inline ::std::string GetInitalWorkingDir()
+	{
+		return __detail::InitialWorkingDir;
+	}
+
 	static inline void Init()
 	{
+		if (__detail::InitialWorkingDir.empty())
+			__detail::InitialWorkingDir = fsys::GetCurrentPath();
+
 		::std::string working_dir = GetDefaultWorkingDir();
 		fsys::CreateDirectories(working_dir);
 		fsys::SetCurrentPath(working_dir);

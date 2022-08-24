@@ -15,9 +15,6 @@
 
 namespace np::srvc
 {
-	// TODO: we need to create this before we create our application and then destroy it after our application, inside our
-	// application allocator
-
 	class Services
 	{
 	private:

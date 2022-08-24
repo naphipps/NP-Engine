@@ -16,14 +16,14 @@ i32 main(i32 argc, chr** argv)
 {
 	::np::thr::ThisThread::SetAffinity(0);
 
-	i32 retval = 0;
+	siz exit_val = NP_ENGINE_EXIT_SUCCESS;
 	str message;
 	::np::app::Popup::Style style = ::np::app::Popup::DefaultStyle;
 	::np::app::Popup::Buttons buttons = ::np::app::Popup::DefaultButtons;
 
 	try
 	{
-		::np::sys::Init(); // TODO: get a way to save the original working dir where the executable lives
+		::np::sys::Init();
 		::np::mem::CAllocator main_allocator;
 		::np::mem::Block main_block = main_allocator.Allocate(NP_ENGINE_MAIN_MEMORY_SIZE);
 
@@ -44,7 +44,7 @@ i32 main(i32 argc, chr** argv)
 		else
 		{
 			::np::mem::TraitAllocator::ResetRegistration();
-			retval = 3;
+			exit_val = NP_ENGINE_EXIT_MEMORY_ERROR;
 			message = "WAS NOT ABLE TO ALLOCATE ENOUGH MEMORY\n";
 			message += "Log file can be found here: " + ::np::nsit::Log::GetFileLoggerFilePath();
 			style = ::np::app::Popup::Style::Error;
@@ -54,7 +54,7 @@ i32 main(i32 argc, chr** argv)
 	catch (const ::std::exception& e)
 	{
 		::np::mem::TraitAllocator::ResetRegistration();
-		retval = 1;
+		exit_val = NP_ENGINE_EXIT_STD_ERROR;
 		message = "STD EXCEPTION OCCURRED: \n" + to_str(e.what()) + "\n\n";
 		message += "Log file can be found here: " + ::np::nsit::Log::GetFileLoggerFilePath();
 		style = ::np::app::Popup::Style::Error;
@@ -63,17 +63,15 @@ i32 main(i32 argc, chr** argv)
 	catch (...)
 	{
 		::np::mem::TraitAllocator::ResetRegistration();
-		retval = 2;
+		exit_val = NP_ENGINE_EXIT_UNKNOWN_ERROR;
 		message = "UNKNOWN EXCEPTION OCCURRED\n\n";
 		message += "Log file can be found here: " + ::np::nsit::Log::GetFileLoggerFilePath();
 		style = ::np::app::Popup::Style::Error;
 		NP_ENGINE_LOG_ERROR(message);
 	}
 
-	if (retval != 0)
-	{
-		::np::app::Popup::Show("NP-Engine Code: " + to_str(retval), message, style, buttons);
-	}
+	if (exit_val != 0)
+		::np::app::Popup::Show("NP-Engine Exit Code: " + to_str(exit_val), message, style, buttons);
 
-	return retval; // TODO: use sysexits return values
+	return exit_val;
 }

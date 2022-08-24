@@ -32,7 +32,7 @@ namespace np::mat
 		*/
 		static inline dbl znorm1(dbl z)
 		{
-			return 0.5 * ::std::erf(z / ::std::sqrt(2.0)); // TODO: we need to use our erf, not c++'s
+			return 0.5 * ::std::erf(z / ::std::sqrt(2.0));
 		}
 
 		/*

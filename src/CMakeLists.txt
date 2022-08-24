@@ -422,6 +422,10 @@ set(NP_ENGINE_PHYSICS_CPP
 	Physics/Physics.cpp
 )
 
+set(NP_ENGINE_SYSTEM_CPP
+	System/System.cpp
+)
+
 set(NP_ENGINE_THREAD_CPP
 	Thread/ThreadImpl.cpp
 )
@@ -445,6 +449,7 @@ set(NP_ENGINE_SOURCE_FILES
 	${NP_ENGINE_GRAPHICS_VULKAN_SHADERS_GLSL}
 	${NP_ENGINE_GRAPHICS_CPP}
 	${NP_ENGINE_APPPLICATION_CPP}
+	${NP_ENGINE_SYSTEM_CPP}
 )
 
 ##==--------------------------------------------------------==##
@@ -579,7 +584,7 @@ source_group(Random FILES ${NP_ENGINE_RANDOM_HPP})
 source_group(Serialization FILES ${NP_ENGINE_SERIALIZATION_HPP})
 source_group(Services FILES ${NP_ENGINE_SERVICES_HPP})
 source_group(String FILES ${NP_ENGINE_STRING_HPP})
-source_group(System FILES ${NP_ENGINE_SYSTEM_HPP})
+source_group(System FILES ${NP_ENGINE_SYSTEM_HPP} ${NP_ENGINE_SYSTEM_CPP})
 source_group(Thread FILES ${NP_ENGINE_THREAD_HPP} ${NP_ENGINE_THREAD_CPP})
 source_group(Time FILES ${NP_ENGINE_TIME_HPP})
 source_group(Vendor FILES ${NP_ENGINE_VENDOR_HPP})

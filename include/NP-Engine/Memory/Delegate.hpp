@@ -26,18 +26,18 @@ namespace np::mem
 			used to wrap a static function to our function pointer
 		*/
 		template <void (*Function)(Delegate&)>
-		inline static void wrap(InstancePtr, Delegate& delegate) // TODO: refactor delegate since it is a keyword
+		inline static void wrap(InstancePtr, Delegate& del)
 		{
-			return (Function)(delegate);
+			return (Function)(del);
 		}
 
 		/*
 			used to wrap a class method to our function pointer
 		*/
 		template <class C, void (C::*Function)(Delegate&)>
-		inline static void wrap(InstancePtr instance, Delegate& delegate)
+		inline static void wrap(InstancePtr ptr, Delegate& del)
 		{
-			return (static_cast<C*>(instance)->*Function)(delegate);
+			return (static_cast<C*>(ptr)->*Function)(del);
 		}
 
 	public:
@@ -87,9 +87,9 @@ namespace np::mem
 			connects a class method to our function pointer
 		*/
 		template <class C, void (C::*Method)(Delegate&)>
-		inline void Connect(InstancePtr instance)
+		inline void Connect(InstancePtr ptr)
 		{
-			_instance_ptr = instance;
+			_instance_ptr = ptr;
 			_function_ptr = &wrap<C, Method>;
 		}
 

@@ -33,7 +33,7 @@ namespace np::rng
 		}
 
 	public:
-		RandomSeed(): RandomSeed(0, 0) {} // TODO: figure out better default values here
+		RandomSeed(): RandomSeed(0, 0) {}
 
 		RandomSeed(T inc, T state): _inc(inc), _state(state)
 		{

@@ -9,8 +9,6 @@
 
 #include "NP-Engine/Foundation/Foundation.hpp"
 
-// TODO: refactor Concurrency to Thread with namespace thr
-
 #include "ThreadPool.hpp"
 #include "ThreadToken.hpp"
 #include "Thread.hpp"
