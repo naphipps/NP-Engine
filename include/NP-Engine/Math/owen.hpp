@@ -16,10 +16,7 @@ namespace np::mat
 	namespace __detail
 	{
 		/*
-			John Burkardt owen T
-
-			Implementation of Owen's T function follows Burkardt's implementation
-			found here: <https://people.sc.fsu.edu/~jburkardt/cpp_src/owen/owen.html>
+			John Burkardt owen T <https://people.sc.fsu.edu/~jburkardt/cpp_src/owen/owen.html>
 
 			Changes include formatting and refactoring.
 		*/
