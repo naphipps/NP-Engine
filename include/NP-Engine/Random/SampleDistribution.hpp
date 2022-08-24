@@ -7,6 +7,8 @@
 #ifndef NP_ENGINE_SAMPLE_DISTRIBUTION_HPP
 #define NP_ENGINE_SAMPLE_DISTRIBUTION_HPP
 
+#include <string>
+
 #include "NP-Engine/Foundation/Foundation.hpp"
 #include "NP-Engine/Container/Container.hpp"
 #include "NP-Engine/Primitive/Primitive.hpp"
@@ -145,7 +147,7 @@ namespace np::rng
 			}
 
 			NP_ENGINE_ASSERT(value >= _min_result && value <= _max_result,
-							 "our result must be within [" + to_str(_min_result) + ", " + to_str(_max_result) + "]");
+							 "our result must be within [" + ::std::to_string(_min_result) + ", " + ::std::to_string(_max_result) + "]");
 
 			return value;
 		}
