@@ -81,6 +81,10 @@ namespace np::rng
 				*this = ::pcg64_fe().engine();
 		}
 
+		/*
+			<https://www.pcg-random.org/posts/bounded-rands.html>
+			returns [0, range)
+		*/
 		ResultType GetLemireWithinRange(ResultType range)
 		{
 			ResultType x = (*this)();
