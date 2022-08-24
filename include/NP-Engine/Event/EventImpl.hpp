@@ -70,7 +70,7 @@ namespace np::evnt
 	{
 	protected:
 		bl _handled;
-		bl _can_be_handled; // TODO: refactor to _keep_alive?
+		bl _can_be_handled;
 
 	public:
 		Event(): mem::Delegate(), _handled(false), _can_be_handled(false) {}
