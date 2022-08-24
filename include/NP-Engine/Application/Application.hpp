@@ -227,8 +227,8 @@ namespace np::app
 
 					if (!e->CanBeHandled())
 						event_queue.DestroyEvent(e);
-					else
-						event_queue.Emplace(e);
+					else if (!event_queue.Emplace(e))
+							NP_ENGINE_ASSERT(false, "all events must emplace successfully here");
 				}
 				event_queue.SwapBuffers();
 

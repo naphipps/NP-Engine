@@ -30,7 +30,7 @@ namespace np::evnt
 			return _queue.Emplace<T>(::std::forward<Args>(args)...);
 		}
 
-		bl Emplace(const Event* e)
+		bl Emplace(Event* e)
 		{
 			return _queue.Emplace(e);
 		}

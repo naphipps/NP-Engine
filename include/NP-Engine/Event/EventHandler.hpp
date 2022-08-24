@@ -21,9 +21,7 @@ namespace np::evnt
 		virtual void OnEvent(Event& e)
 		{
 			if (EventCategoryContains(GetHandledCategories(), e.GetCategory()))
-			{
 				HandleEvent(e);
-			}
 		}
 
 		virtual EventCategory GetHandledCategories() const = 0;

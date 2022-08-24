@@ -58,34 +58,21 @@ namespace np::evnt
 		bl Emplace(Args&&... args)
 		{
 			NP_ENGINE_STATIC_ASSERT((::std::is_base_of_v<evnt::Event, T>), "T is requried to be a base of event:Event");
-			Event* e = nullptr;
-			con::mpmc_queue<Event*>& buffer = GetBuffer();
+			T* e = mem::Create<T>(_allocator, ::std::forward<Args>(args)...);
 
-			mem::Block block = _allocator.Allocate(sizeof(T));
-			if (block.IsValid())
-			{
-				if (mem::Construct<T>(block, ::std::forward<Args>(args)...))
+			if (e)
+				if (!Emplace(e))
 				{
-					e = static_cast<Event*>(block.ptr);
-					if (!buffer.enqueue(e))
-					{
-						mem::Destruct(static_cast<T*>(e));
-						_allocator.Deallocate(e);
-						e = nullptr;
-					}
+					mem::Destroy<T>(_allocator, e);
+					e = nullptr;
 				}
-				else
-				{
-					_allocator.Deallocate(block);
-				}
-			}
 
-			return e != nullptr;
+			return e;
 		}
 
-		bl Emplace(const Event* e)
+		bl Emplace(Event* e)
 		{
-			return GetBuffer().enqueue(const_cast<Event*>(e));
+			return GetBuffer().enqueue(e);
 		}
 
 		/*
@@ -93,21 +80,13 @@ namespace np::evnt
 		*/
 		evnt::Event* PopOther()
 		{
-			con::mpmc_queue<Event*>& buffer = GetOtherBuffer();
 			evnt::Event* e = nullptr;
-			if (!buffer.try_dequeue(e))
-			{
-				e = nullptr;
-			}
-
-			return e;
+			return GetOtherBuffer().try_dequeue(e) ? e : nullptr;
 		}
 
-		bl DestroyEvent(Event* e)
+		void DestroyEvent(Event* e)
 		{
-			bl destructed = mem::Destruct(e);
-			bl deallocated = _allocator.Deallocate(e);
-			return destructed && deallocated;
+			mem::Destroy<Event>(_allocator, e);
 		}
 	};
 } // namespace np::evnt
