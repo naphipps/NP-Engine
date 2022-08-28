@@ -7,10 +7,16 @@ This game engine started out as my first video game, but because the project kep
 - Goals/Features/Baseline of this engine:
 	- [x] Detailed memory management. (I aim to use vendors that I can pipe memory management through my own stuff.)
 	- [ ] Vulkan rendering (maybe OpenGL later).
-	- [x] Cross platform (Apple, Linux (latest Ubuntu at least), Windows 10).
+	- [x] Support for Windows and Linux (latest Ubunutu). Official support for Apple is deferred.
 	- [x] ECS via [Entt](https://github.com/skypjack/entt)
-	- [ ] 2D Physics via [Box2D](https://github.com/erincatto/box2d) with [liquidfun's](https://github.com/google/liquidfun) particle physics. I will also improve the pressure solvers to _probably_ IISPH or something that is better, and more accurate.
-	- [x] A priority-based JobSystem that automatically scales up/down for the platform.
+	- [ ] 2D Physics via [Box2D](https://github.com/erincatto/box2d) with [liquidfun's](https://github.com/google/liquidfun) particle physics.
+	  - I will also improve the pressure solvers to _probably_ IISPH or something that is better, and more accurate.
+	- [ ] 3D Physics via [Bullet](https://github.com/bulletphysics/bullet3)
+	- [x] A feature-rich JobSystem (task graph architecture):
+	  - priority-based jobs
+	  - controller over individual job workers
+	  - automatic scaling up/down for the platform it runs on
+	  - considerate of the main thread so thread scheduling does not throttle the main thread
 	- [x] A profiler that outputs a JSON file for Chrome's Tracing tool. (Type "chrome://tracing/" in Chrome's url.)
 
 ***
