@@ -27,17 +27,17 @@ namespace np::win
 
 		WindowResizeEvent(Window& window, ui32 width, ui32 height): evnt::Event()
 		{
-			AssignData<DataType>({mem::AddressOf(window), width, height});
+			SetData<DataType>({mem::AddressOf(window), width, height});
 		}
 
 		i32 GetWidth() const
 		{
-			return RetrieveData<DataType>().width;
+			return GetData<DataType>().width;
 		}
 
 		i32 GetHeight() const
 		{
-			return RetrieveData<DataType>().height;
+			return GetData<DataType>().height;
 		}
 
 		evnt::EventType GetType() const override

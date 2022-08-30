@@ -27,7 +27,7 @@ namespace np::app
 
 		ApplicationPopupEvent(str message, Popup::Style style, Popup::Buttons buttons)
 		{
-			AssignData<DataType>({message, style, buttons, Popup::Select::None});
+			SetData<DataType>({message, style, buttons, Popup::Select::None});
 		}
 
 		evnt::EventType GetType() const override

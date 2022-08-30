@@ -11,16 +11,14 @@ namespace np::win
 {
 	void Window::HandleClose(evnt::Event& e)
 	{
-		if (e.RetrieveData<WindowCloseEvent::DataType>().window == this)
+		if (e.GetData<WindowCloseEvent::DataType>().window == this)
 		{
 			e.SetCanBeHandled();
 
 			if (!_show_procedure_is_complete.load(mo_acquire))
 			{
 				if (_glfw_window != nullptr && glfwWindowShouldClose(_glfw_window) == GLFW_FALSE)
-				{
 					glfwSetWindowShouldClose(_glfw_window, GLFW_TRUE);
-				}
 			}
 			else
 			{
@@ -32,10 +30,8 @@ namespace np::win
 
 	void Window::HandleResize(evnt::Event& e)
 	{
-		if (e.RetrieveData<WindowResizeEvent::DataType>().window == this)
-		{
+		if (e.GetData<WindowResizeEvent::DataType>().window == this)
 			e.SetHandled();
-		}
 	}
 
 	void Window::ShowProcedure()
@@ -52,9 +48,7 @@ namespace np::win
 	void Window::Close()
 	{
 		if (IsRunning())
-		{
 			_services.GetEventSubmitter().Emplace<WindowCloseEvent>(*this);
-		}
 	}
 
 	void Window::Resize(ui32 width, ui32 height)

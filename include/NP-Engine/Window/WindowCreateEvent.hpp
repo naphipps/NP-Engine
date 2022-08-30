@@ -23,7 +23,7 @@ namespace np::win
 
 		WindowCreateEvent(Window::Properties window_properties): evnt::Event()
 		{
-			AssignData<DataType>({window_properties});
+			SetData<DataType>({window_properties});
 		}
 
 		evnt::EventType GetType() const override

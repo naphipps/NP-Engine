@@ -30,7 +30,7 @@ namespace np::app
 	protected:
 		virtual void HandleWindowCreate(evnt::Event& e)
 		{
-			CreateWindow(e.RetrieveData<win::Window::Properties>());
+			CreateWindow(e.GetData<win::Window::Properties>());
 			e.SetHandled();
 		}
 

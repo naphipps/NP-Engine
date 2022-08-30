@@ -58,10 +58,8 @@ namespace np::mem
 			return *this;
 		}
 
-		//TODO: refactor AssignData and RetrieveData to SetData and GetData
-
 		template <typename T>
-		void AssignData(const T& object)
+		void SetData(const T& object)
 		{
 			NP_ENGINE_ASSERT(sizeof(T) <= CACHE_LINE_SIZE - 1,
 							 "cannot assign padding struct of size (" + ::std::to_string(sizeof(T)) + ")\nplease keep it <= (" +
@@ -74,13 +72,13 @@ namespace np::mem
 		}
 
 		template <typename T>
-		const T& RetrieveData() const
+		const T& GetData() const
 		{
 			return *((T*)_padding);
 		}
 
 		template <typename T>
-		T& RetrieveData()
+		T& GetData()
 		{
 			return *((T*)_padding);
 		}

@@ -120,7 +120,7 @@ namespace np::app
 
 		void HandlePopup(evnt::Event& e)
 		{
-			ApplicationPopupEvent::DataType& data = e.RetrieveData<ApplicationPopupEvent::DataType>();
+			ApplicationPopupEvent::DataType& data = e.GetData<ApplicationPopupEvent::DataType>();
 			data.select = Popup::Show(GetTitle(), data.message, data.style, data.buttons);
 			e.InvokeConnectedFunction();
 			e.SetHandled();

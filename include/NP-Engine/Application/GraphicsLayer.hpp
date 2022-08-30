@@ -39,7 +39,7 @@ namespace np::app
 
 		virtual void AdjustForWindowClose(evnt::Event& e)
 		{
-			win::Window& window = *e.RetrieveData<win::WindowCloseEvent::DataType>().window;
+			win::Window& window = *e.GetData<win::WindowCloseEvent::DataType>().window;
 
 			for (auto it = _scenes.begin(); it != _scenes.end(); it++)
 				if ((*it)->GetRenderer().IsAttachedToWindow(window))
@@ -63,7 +63,7 @@ namespace np::app
 
 		virtual void AdjustForWindowResize(evnt::Event& e)
 		{
-			win::Window& window = *e.RetrieveData<win::WindowCloseEvent::DataType>().window;
+			win::Window& window = *e.GetData<win::WindowCloseEvent::DataType>().window;
 
 			for (gfx::Scene*& scene : _scenes)
 				if (scene->GetRenderer().IsAttachedToWindow(window))

@@ -28,7 +28,7 @@ namespace np::app
 		virtual void AdjustForWindowClose(evnt::Event& e)
 		{
 			if (_scene != nullptr &&
-				_scene->GetRenderer().IsAttachedToWindow(*e.RetrieveData<win::WindowCloseEvent::DataType>().window))
+				_scene->GetRenderer().IsAttachedToWindow(*e.GetData<win::WindowCloseEvent::DataType>().window))
 			{
 				_scene->Dispose();
 				_scene = nullptr; // TODO: destroy content for scene

@@ -24,7 +24,7 @@ namespace np::win
 
 		WindowCloseEvent(Window& window): evnt::Event()
 		{
-			AssignData<DataType>({mem::AddressOf(window)});
+			SetData<DataType>({mem::AddressOf(window)});
 		}
 
 		evnt::EventType GetType() const override
