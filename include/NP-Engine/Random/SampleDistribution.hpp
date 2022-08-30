@@ -147,7 +147,8 @@ namespace np::rng
 			}
 
 			NP_ENGINE_ASSERT(value >= _min_result && value <= _max_result,
-							 "our result must be within [" + ::std::to_string(_min_result) + ", " + ::std::to_string(_max_result) + "]");
+							 "our result must be within [" + ::std::to_string(_min_result) + ", " +
+								 ::std::to_string(_max_result) + "]");
 
 			return value;
 		}

@@ -33,7 +33,6 @@ namespace np::gfxalg
 		ImageSubview _image_subview;
 
 	private:
-
 		static bl IsNotVisitedAndUnderIsothreshold(mem::BlDelegate& d)
 		{
 			using Relation = FloodFillImage::PointRelation;
@@ -88,7 +87,8 @@ namespace np::gfxalg
 			3 p 4
 			5 6 7
 		*/
-		void GetLineSegments(con::uset<DmsLineSegment>& segments, dbl isothreshold, gfx::ColorChannel channel, const DmsPoint& p)
+		void GetLineSegments(con::uset<DmsLineSegment>& segments, dbl isothreshold, gfx::ColorChannel channel,
+							 const DmsPoint& p)
 		{
 			bl has_upper = p.y < _image_subview.GetHeight() - 1;
 			bl has_lower = p.y > 0;
@@ -143,7 +143,7 @@ namespace np::gfxalg
 			d c
 		*/
 		void GetLineSegments(con::uset<DmsLineSegment>& segments, dbl isothreshold, gfx::ColorChannel channel,
-			const DmsPoint& a, const DmsPoint& b, const DmsPoint& c, const DmsPoint& d)
+							 const DmsPoint& a, const DmsPoint& b, const DmsPoint& c, const DmsPoint& d)
 		{
 			dbl a_iso = GetIsovalue(a, channel);
 			dbl b_iso = GetIsovalue(b, channel);
@@ -199,8 +199,8 @@ namespace np::gfxalg
 				dbl bc_t = (isothreshold - b_iso) / (c_iso - b_iso);
 				dbl dc_t = (isothreshold - d_iso) / (c_iso - d_iso);
 				dbl ad_t = (isothreshold - a_iso) / (d_iso - a_iso);
-				AddLineSegment(segments,::glm::lerp(a, d, ad_t), ::glm::lerp(a, b, ab_t));
-				AddLineSegment(segments,::glm::lerp(d, c, dc_t), ::glm::lerp(b, c, bc_t));
+				AddLineSegment(segments, ::glm::lerp(a, d, ad_t), ::glm::lerp(a, b, ab_t));
+				AddLineSegment(segments, ::glm::lerp(d, c, dc_t), ::glm::lerp(b, c, bc_t));
 				break;
 			}
 			case 6:
@@ -236,20 +236,13 @@ namespace np::gfxalg
 		}
 
 	public:
-		DmsImage(ImageSubview& image_subview) :_image_subview(image_subview)
-		{}
+		DmsImage(ImageSubview& image_subview): _image_subview(image_subview) {}
 
-		DmsImage(ImageSubview&& image_subview) :
-			_image_subview(::std::move(image_subview))
-		{}
+		DmsImage(ImageSubview&& image_subview): _image_subview(::std::move(image_subview)) {}
 
-		DmsImage(gfx::Image& image) :
-			_image_subview(image)
-		{}
+		DmsImage(gfx::Image& image): _image_subview(image) {}
 
-		DmsImage(gfx::Image& image, Subview subview) :
-			_image_subview(image, subview)
-		{}
+		DmsImage(gfx::Image& image, Subview subview): _image_subview(image, subview) {}
 
 		/*
 			- gets the dms iso value [0.0 - 1.0] at given point
@@ -299,7 +292,7 @@ namespace np::gfxalg
 			{
 				for (ui32 x = 0; x < width; x++)
 				{
-					point = { x, y };
+					point = {x, y};
 					if (visited.count(point) || GetIsovalue(point, channel) >= isothreshold)
 						continue;
 
@@ -313,7 +306,7 @@ namespace np::gfxalg
 					for (const DmsPoint& edge_point : edge_points)
 						GetLineSegments(segments, isothreshold, channel, edge_point);
 
-					//TODO: get segments along the edges of image
+					// TODO: get segments along the edges of image
 
 					// prime first loop
 					// put our first segment into our last loop
@@ -326,10 +319,8 @@ namespace np::gfxalg
 						bl found_next = false;
 						for (const DmsLineSegment& s : segments)
 						{
-							if (s.Begin() == loops.back().back().Begin() ||
-								s.Begin() == loops.back().back().End() ||
-								s.End() == loops.back().back().Begin() || 
-								s.End() == loops.back().back().End())
+							if (s.Begin() == loops.back().back().Begin() || s.Begin() == loops.back().back().End() ||
+								s.End() == loops.back().back().Begin() || s.End() == loops.back().back().End())
 							{
 								// seg matches up on back's begin or end
 								loops.back().emplace_back(s);
@@ -361,17 +352,16 @@ namespace np::gfxalg
 
 					// sort our loops
 					::std::sort(loops.begin(), loops.end(),
-						[](const con::vector<DmsLineSegment>& a, const con::vector<DmsLineSegment>& b) -> bl
-						{
-							return a.size() > b.size();
-						});
-
+								[](const con::vector<DmsLineSegment>& a, const con::vector<DmsLineSegment>& b) -> bl
+								{
+									return a.size() > b.size();
+								});
 
 					// get the midpoints of all line segments
 					// organize them into a vector of shapes with holes
 					// a shape with holes is a vector of polygons (first one being the largest polygon)
 					// a polygon is loop of midpoints
-					
+
 					extraction.emplace_back();
 					for (DmsLineSegmentLoop& loop : loops)
 					{
@@ -381,10 +371,10 @@ namespace np::gfxalg
 					}
 
 					::std::sort(extraction.back().begin(), extraction.back().end(),
-						[](const con::vector<DmsPoint>& a, const con::vector<DmsPoint>& b)
-						{
-							return a.size() > b.size();
-						});
+								[](const con::vector<DmsPoint>& a, const con::vector<DmsPoint>& b)
+								{
+									return a.size() > b.size();
+								});
 
 					if (extraction.back().back().empty())
 						extraction.back().erase(extraction.back().end() - 1);
@@ -410,18 +400,18 @@ namespace np::gfxalg
 
 			for (ui32 y = 0; y < height; y += 2)
 				for (ui32 x = 0; x < width; x += 2)
-					GetLineSegments(segments, isothreshold, channel, { x, y });
+					GetLineSegments(segments, isothreshold, channel, {x, y});
 
 			if (width_is_even)
 				for (ui32 y = 0; y < height; y += 2)
-					GetLineSegments(segments, isothreshold, channel, { width - 1, y });
+					GetLineSegments(segments, isothreshold, channel, {width - 1, y});
 
 			if (height_is_even)
 				for (ui32 x = 0; x < width; x += 2)
-					GetLineSegments(segments, isothreshold, channel, { x, height - 1 });
+					GetLineSegments(segments, isothreshold, channel, {x, height - 1});
 
 			if (width_is_even && height_is_even)
-				GetLineSegments(segments, isothreshold, channel, { width - 1, height - 1 });
+				GetLineSegments(segments, isothreshold, channel, {width - 1, height - 1});
 
 			return segments;
 		}
@@ -458,7 +448,7 @@ namespace np::gfxalg
 			{
 				for (ui32 x = 0; x < width; x++)
 				{
-					point = { x, y };
+					point = {x, y};
 					if (visited.count(point) || GetIsovalue(point, channel) >= isothreshold)
 						continue;
 
@@ -479,9 +469,9 @@ namespace np::gfxalg
 
 		Extraction GetExtraction(con::uset<DmsLineSegment>& segments)
 		{
-			return {}; //TODO: I figure we can make this an addition step?
+			return {}; // TODO: I figure we can make this an addition step?
 		}
 	};
-} // namespace np
+} // namespace np::gfxalg
 
 #endif /* NP_ENGINE_DMS_IMAGE_HPP */

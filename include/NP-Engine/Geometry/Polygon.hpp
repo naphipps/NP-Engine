@@ -32,6 +32,6 @@ namespace np::geom
 
 	template <typename T>
 	using Polygon4D = Polygon<4, T>;
-}
+} // namespace np::geom
 
 #endif /* NP_ENGINE_POLYGON_HPP */

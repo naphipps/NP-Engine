@@ -146,8 +146,7 @@ namespace np::alg
 	}
 
 	template <siz POLY_SIZE, typename T>
-	void pnpoly_precalc(const con::array<::glm::vec<2, T>, POLY_SIZE>& poly,
-						con::array<::glm::vec<2, T>, POLY_SIZE>& precalc)
+	void pnpoly_precalc(const con::array<::glm::vec<2, T>, POLY_SIZE>& poly, con::array<::glm::vec<2, T>, POLY_SIZE>& precalc)
 	{
 		pnpoly_precalc<T>(poly.data(), poly.size(), precalc.data());
 	}

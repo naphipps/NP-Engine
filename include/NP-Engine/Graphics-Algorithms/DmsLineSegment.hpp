@@ -29,8 +29,7 @@ namespace np::gfxalg
 		DmsPoint _midpoint;
 
 	public:
-		DmsLineSegment(const DmsPoint& a, const DmsPoint& b): _a(a), _b(b), _midpoint(mat::Midpoint(_a, _b))
-		{}
+		DmsLineSegment(const DmsPoint& a, const DmsPoint& b): _a(a), _b(b), _midpoint(mat::Midpoint(_a, _b)) {}
 
 		const DmsPoint& Begin() const
 		{
@@ -52,7 +51,7 @@ namespace np::gfxalg
 			return Begin() == other.Begin() && End() == other.End() && Midpoint() == other.Midpoint();
 		}
 	};
-} // namespace np
+} // namespace np::gfxalg
 
 namespace std
 {
@@ -61,8 +60,7 @@ namespace std
 	{
 		siz operator()(const ::np::gfxalg::DmsLineSegment& line) const noexcept
 		{
-			union
-			{
+			union {
 				siz h;
 
 				struct
@@ -77,6 +75,6 @@ namespace std
 			return h;
 		}
 	};
-}
+} // namespace std
 
 #endif /* NP_ENGINE_DMS_LINE_SEGMENT_HPP */

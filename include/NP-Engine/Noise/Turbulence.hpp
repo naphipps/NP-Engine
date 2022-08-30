@@ -50,7 +50,9 @@ namespace np::noiz
 		flt _scalar;
 
 	public:
-		Turbulence(const rng::Random32& random_engine = rng::Random32()): rng::Random32Base(random_engine), _scalar(DEFAULT_SCALAR)
+		Turbulence(const rng::Random32& random_engine = rng::Random32()):
+			rng::Random32Base(random_engine),
+			_scalar(DEFAULT_SCALAR)
 		{
 			Init();
 		}

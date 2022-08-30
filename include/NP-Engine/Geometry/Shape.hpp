@@ -18,6 +18,6 @@ namespace np::geom
 	{
 		using Point = ::glm::vec<DIMENSION_COUNT, T>;
 	};
-}
+} // namespace np::geom
 
 #endif /* NP_ENGINE_SHAPE_HPP */

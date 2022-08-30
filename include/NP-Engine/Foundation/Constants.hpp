@@ -34,7 +34,7 @@
 		#define NP_ENGINE_FUNCTION __func__
 	#else
 		#define NP_ENGINE_FUNCTION NP_ENGINE_FILE_AND_LINE
-	#endif 
+	#endif
 #endif // NP_ENGINE_FUNCTION
 
 #define NP_ENGINE_EXIT_SUCCESS 0

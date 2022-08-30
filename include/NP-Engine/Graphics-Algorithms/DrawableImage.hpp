@@ -19,7 +19,7 @@
 #include "ImageSubview.hpp"
 #include "FloodFillImage.hpp"
 
-//TODO: support drawing shapes that have specific colors at their points
+// TODO: support drawing shapes that have specific colors at their points
 
 namespace np::gfxalg
 {
@@ -97,22 +97,13 @@ namespace np::gfxalg
 		}
 
 	public:
-		
-		DrawableImage(const ImageSubview& image_subview) :
-			_image_subview(image_subview)
-		{}
+		DrawableImage(const ImageSubview& image_subview): _image_subview(image_subview) {}
 
-		DrawableImage(ImageSubview&& image_subview) :
-			_image_subview(::std::move(image_subview))
-		{}
+		DrawableImage(ImageSubview&& image_subview): _image_subview(::std::move(image_subview)) {}
 
-		DrawableImage(gfx::Image& image) :
-			_image_subview(image)
-		{}
+		DrawableImage(gfx::Image& image): _image_subview(image) {}
 
-		DrawableImage(gfx::Image& image, Subview subview) :
-			_image_subview(image, subview)
-		{}
+		DrawableImage(gfx::Image& image, Subview subview): _image_subview(image, subview) {}
 
 		ImageSubview& GetImageSubview()
 		{
@@ -134,7 +125,7 @@ namespace np::gfxalg
 		void Draw(const Polygon& polygon, gfx::Color color)
 		{
 			con::vector<Point> line;
-			
+
 			for (siz i = 0; i < polygon.Points.size() - 1; i++)
 			{
 				const Point& begin = polygon.Points[i];
@@ -169,7 +160,7 @@ namespace np::gfxalg
 			payload.user_data = &user_data;
 			payload.point = point;
 			payload.enable_diagonal = enable_diagonal;
-			
+
 			FloodFillImage flood(_image_subview);
 			flood.GetIsApprovedDelegate().Connect<&DrawableImage::IsOldColor>();
 			flood.GetApprovedActionDelegate().Connect<&DrawableImage::SetToNewColor>();
@@ -177,7 +168,8 @@ namespace np::gfxalg
 			flood.Fill(payload);
 		}
 
-		con::uset<OutsidePoint> FloodFillGetOutsideEdgePoints(const Point& point, gfx::Color old_color, gfx::Color new_color, bl enable_diagonal = false)
+		con::uset<OutsidePoint> FloodFillGetOutsideEdgePoints(const Point& point, gfx::Color old_color, gfx::Color new_color,
+															  bl enable_diagonal = false)
 		{
 			con::uset<OutsidePoint> outside_edge_points;
 
@@ -201,7 +193,8 @@ namespace np::gfxalg
 			return outside_edge_points;
 		}
 
-		con::uset<Point> FloodFillGetEdgePoints(const Point& point, gfx::Color old_color, gfx::Color new_color, bl enable_diagonal = false)
+		con::uset<Point> FloodFillGetEdgePoints(const Point& point, gfx::Color old_color, gfx::Color new_color,
+												bl enable_diagonal = false)
 		{
 			con::uset<Point> edge_points;
 
@@ -225,6 +218,6 @@ namespace np::gfxalg
 			return edge_points;
 		}
 	};
-} // namespace np
+} // namespace np::gfxalg
 
 #endif /* NP_ENGINE_DRAWABLE_IMAGE_HPP */

@@ -44,6 +44,6 @@ namespace np::geom
 	using fltAABB = AABB<flt>;
 	using dblAABB = AABB<dbl>;
 	using ldblAABB = AABB<ldbl>;
-} // namespace np::mat
+} // namespace np::geom
 
 #endif /* NP_ENGINE_AABB_HPP */

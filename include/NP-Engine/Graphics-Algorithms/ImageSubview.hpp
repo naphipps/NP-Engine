@@ -32,14 +32,13 @@ namespace np::gfxalg
 		Subview _subview;
 
 	public:
-		ImageSubview(Image& image) : _image(image)
+		ImageSubview(Image& image): _image(image)
 		{
-			_subview.Origin = { 0, 0 };
-			_subview.Boundary = { _image.GetWidth(), _image.GetHeight() };
+			_subview.Origin = {0, 0};
+			_subview.Boundary = {_image.GetWidth(), _image.GetHeight()};
 		}
 
-		ImageSubview(Image& image, Subview subview) :_image(image), _subview(subview)
-		{}
+		ImageSubview(Image& image, Subview subview): _image(image), _subview(subview) {}
 
 		void SetSubview(Subview subview)
 		{
@@ -79,6 +78,6 @@ namespace np::gfxalg
 			return _image.Get(local);
 		}
 	};
-}
+} // namespace np::gfxalg
 
 #endif /* NP_ENGINE_IMAGE_SUBVIEW_HPP */

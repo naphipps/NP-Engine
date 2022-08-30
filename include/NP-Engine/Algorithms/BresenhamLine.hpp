@@ -19,8 +19,7 @@ namespace np::alg
 			gets the series of points on low sloped line given begin point and given end point
 		*/
 		template <typename T>
-		static inline con::vector<::glm::vec<2, T>> GetLowSlopedLine(const ::glm::vec<2, T>& begin,
-																		const ::glm::vec<2, T>& end)
+		static inline con::vector<::glm::vec<2, T>> GetLowSlopedLine(const ::glm::vec<2, T>& begin, const ::glm::vec<2, T>& end)
 		{
 			con::vector<::glm::vec<2, T>> points;
 
@@ -58,7 +57,7 @@ namespace np::alg
 		*/
 		template <typename T>
 		static inline con::vector<::glm::vec<2, T>> GetHighSlopedLine(const ::glm::vec<2, T>& begin,
-																		 const ::glm::vec<2, T>& end)
+																	  const ::glm::vec<2, T>& end)
 		{
 			con::vector<::glm::vec<2, T>> points;
 
@@ -205,7 +204,7 @@ namespace np::alg
 	*/
 	template <typename T>
 	static inline con::vector<::glm::vec<2, T>> GetBresenhamLinePoints(const ::glm::vec<2, T>& begin,
-																		  const ::glm::vec<2, T>& end)
+																	   const ::glm::vec<2, T>& end)
 	{
 		con::vector<::glm::vec<2, T>> points;
 

@@ -44,6 +44,6 @@ namespace glm
 	{
 		return !(a < b);
 	}
-}
+} // namespace glm
 
 #endif /* NP_ENGINE_VENDOR_GLM_INCLUDE_HPP */

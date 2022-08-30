@@ -9,4 +9,4 @@
 namespace np::sys::__detail
 {
 	::std::string InitialWorkingDir;
-}
+} // namespace np::sys::__detail

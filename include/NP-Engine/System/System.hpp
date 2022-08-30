@@ -23,7 +23,7 @@ namespace np::sys
 	namespace __detail
 	{
 		extern ::std::string InitialWorkingDir;
-	}
+	} // namespace __detail
 
 	using TerminateHandler = ::std::terminate_handler;
 	typedef void (*SignalHandler)(i32 signal);

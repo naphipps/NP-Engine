@@ -372,8 +372,7 @@ namespace np::noiz
 
 		inline flt Noise(flt x, flt y, flt z, flt w) const
 		{
-			return GetAmplitude() *
-				PureNoise(GetFrequency() * x, GetFrequency() * y, GetFrequency() * z, GetFrequency() * w);
+			return GetAmplitude() * PureNoise(GetFrequency() * x, GetFrequency() * y, GetFrequency() * z, GetFrequency() * w);
 		}
 
 		/*
@@ -937,8 +936,8 @@ namespace np::noiz
 
 			for (ui8 i = 0; i < _octave_count; i++)
 			{
-				output += amplitude *
-					PureNoise(x * frequency, y * frequency, z * frequency, i * _fractional_increment * frequency);
+				output +=
+					amplitude * PureNoise(x * frequency, y * frequency, z * frequency, i * _fractional_increment * frequency);
 				denom += amplitude;
 				frequency *= _lacunarity;
 				amplitude *= _persistence;
@@ -1288,8 +1287,7 @@ namespace np::noiz
 			for (ui8 i = 0; i < _octave_count; i++)
 			{
 				output += amplitude *
-					::std::abs(PureNoise(x * frequency, y * frequency, z * frequency,
-											  i * _fractional_increment * frequency));
+					::std::abs(PureNoise(x * frequency, y * frequency, z * frequency, i * _fractional_increment * frequency));
 				denom += amplitude;
 				frequency *= _lacunarity;
 				amplitude *= _persistence;

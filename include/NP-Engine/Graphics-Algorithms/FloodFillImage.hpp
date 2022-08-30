@@ -18,7 +18,7 @@ namespace np::gfxalg
 	{
 	public:
 		using Point = ImageSubview::Point;
-		
+
 		enum class PointRelation : ui32
 		{
 			None = 0,
@@ -67,27 +67,22 @@ namespace np::gfxalg
 		}
 
 	public:
-
-		FloodFillImage(const ImageSubview& image_subview) :
-			_image_subview(image_subview)
+		FloodFillImage(const ImageSubview& image_subview): _image_subview(image_subview)
 		{
 			Init();
 		}
 
-		FloodFillImage(ImageSubview&& image_subview) :
-			_image_subview(::std::move(image_subview))
+		FloodFillImage(ImageSubview&& image_subview): _image_subview(::std::move(image_subview))
 		{
 			Init();
 		}
 
-		FloodFillImage(gfx::Image& image) :
-			_image_subview(image)
+		FloodFillImage(gfx::Image& image): _image_subview(image)
 		{
 			Init();
 		}
 
-		FloodFillImage(gfx::Image& image, Subview subview) :
-			_image_subview(image, subview)
+		FloodFillImage(gfx::Image& image, Subview subview): _image_subview(image, subview)
 		{
 			Init();
 		}
@@ -166,7 +161,7 @@ namespace np::gfxalg
 				{
 					if (_is_approved.InvokeConnectedFunction())
 						flood.emplace(payload.point.x, payload.point.y - 1);
-					else 
+					else
 						_rejected_action.InvokeConnectedFunction();
 				}
 				else
@@ -259,6 +254,6 @@ namespace np::gfxalg
 			}
 		}
 	};
-}
+} // namespace np::gfxalg
 
 #endif /* NP_ENGINE_FLOOD_FILL_IMAGE_HPP */

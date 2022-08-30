@@ -13,7 +13,7 @@
 
 #include "Shape.hpp"
 
-//TODO: do we add besier curves/lines here?? I think they go in their own file
+// TODO: do we add besier curves/lines here?? I think they go in their own file
 
 namespace np::geom
 {
@@ -34,6 +34,6 @@ namespace np::geom
 
 	template <typename T>
 	using Line4D = Line<4, T>;
-}
+} // namespace np::geom
 
 #endif /* NP_ENGINE_LINE_HPP */

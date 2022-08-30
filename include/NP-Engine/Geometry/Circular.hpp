@@ -32,6 +32,6 @@ namespace np::geom
 
 	template <typename T>
 	using HyperSphere = Circular<4, T>;
-}
+} // namespace np::geom
 
 #endif /* NP_ENGINE_CIRCLE_HPP */

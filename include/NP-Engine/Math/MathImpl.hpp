@@ -98,8 +98,8 @@ namespace np::mat
 	*/
 	static inline flt InvSqrt(const flt n, i32 newton_iteration_count = 2)
 	{
-		union // keeping union for performance
-		{
+		// keeping union for performance
+		union {
 			flt result;
 			i32 i_result;
 		};
@@ -239,8 +239,7 @@ namespace np::mat
 		return ::std::atan2(-(point.y), -(point.x));
 	}
 
-	static inline dbl GetAngleB(const ::glm::vec<2, flt>& a_pt, const ::glm::vec<2, flt>& b_pt,
-								const ::glm::vec<2, flt>& c_pt)
+	static inline dbl GetAngleB(const ::glm::vec<2, flt>& a_pt, const ::glm::vec<2, flt>& b_pt, const ::glm::vec<2, flt>& c_pt)
 	{
 		dbl a_sq = DistanceSquared(b_pt, c_pt);
 		dbl b_sq = DistanceSquared(a_pt, c_pt);
@@ -251,8 +250,7 @@ namespace np::mat
 		return B;
 	}
 
-	static inline dbl GetAngleB(const ::glm::vec<2, dbl>& a_pt, const ::glm::vec<2, dbl>& b_pt,
-								const ::glm::vec<2, dbl>& c_pt)
+	static inline dbl GetAngleB(const ::glm::vec<2, dbl>& a_pt, const ::glm::vec<2, dbl>& b_pt, const ::glm::vec<2, dbl>& c_pt)
 	{
 		dbl a_sq = DistanceSquared(b_pt, c_pt);
 		dbl b_sq = DistanceSquared(a_pt, c_pt);
@@ -264,8 +262,7 @@ namespace np::mat
 	}
 
 	template <typename T>
-	static inline ui64 GetAngleB(const ::glm::vec<2, T>& a_pt, const ::glm::vec<2, T>& b_pt,
-								 const ::glm::vec<2, T>& c_pt)
+	static inline ui64 GetAngleB(const ::glm::vec<2, T>& a_pt, const ::glm::vec<2, T>& b_pt, const ::glm::vec<2, T>& c_pt)
 	{
 		ui64 a_sq = DistanceSquared(b_pt, c_pt);
 		ui64 b_sq = DistanceSquared(a_pt, c_pt);

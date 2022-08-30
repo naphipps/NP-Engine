@@ -206,7 +206,7 @@ namespace np::noiz
 			{
 				siz index = last_index - i;
 				siz swap = GetRandomEngine().GetLemireWithinRange(HALF_PERMUTATION_SIZE);
-				
+
 				// optimization - no need to swap with self
 				if (index != swap)
 				{

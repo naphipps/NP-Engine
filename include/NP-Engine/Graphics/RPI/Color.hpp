@@ -12,7 +12,7 @@
 #include "NP-Engine/Memory/Memory.hpp"
 #include "NP-Engine/Insight/Insight.hpp"
 
-//TODO: I think we could use some static colors
+// TODO: I think we could use some static colors
 
 namespace np::gfx
 {
