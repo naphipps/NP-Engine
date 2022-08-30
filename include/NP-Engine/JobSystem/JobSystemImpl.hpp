@@ -178,7 +178,7 @@ namespace np::jsys
 
 		Job* CreateJob(mem::Delegate&& d)
 		{
-			return _job_pool->CreateObject(::std::forward<mem::Delegate&&>(d));
+			return _job_pool->CreateObject(::std::move(d));
 		}
 
 		Job* CreateJob()

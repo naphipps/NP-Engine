@@ -31,7 +31,7 @@ namespace std
 	template <>
 	struct hash<::np::gfx::Vertex>
 	{
-		siz operator()(const ::np::gfx::Vertex& vertex) const
+		siz operator()(const ::np::gfx::Vertex& vertex) const noexcept
 		{
 			return (hash<::glm::vec3>()(vertex.Position) ^ (hash<::glm::vec3>()(vertex.Color) << 1) >> 1) ^
 				(hash<::glm::vec2>()(vertex.TextureCoordinate) << 1);

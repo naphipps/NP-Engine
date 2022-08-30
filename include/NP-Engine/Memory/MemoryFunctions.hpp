@@ -29,15 +29,11 @@ namespace np::mem
 
 		siz loops = byte_count / 8; // we'll copy 8 bytes at a time to start
 		for (siz i = 0; i < loops; i++, dst_it += 8, src_it += 8)
-		{
 			*(ui64*)dst_it = *(ui64*)src_it;
-		}
 
 		loops = byte_count % 8; // now we'll copy the remaining bytes to finish
 		for (siz i = 0; i < loops; i++, dst_it++, src_it++)
-		{
 			*dst_it = *src_it;
-		}
 	}
 } // namespace np::mem
 

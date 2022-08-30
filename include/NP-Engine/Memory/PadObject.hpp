@@ -58,6 +58,8 @@ namespace np::mem
 			return *this;
 		}
 
+		//TODO: refactor AssignData and RetrieveData to SetData and GetData
+
 		template <typename T>
 		void AssignData(const T& object)
 		{
@@ -91,9 +93,7 @@ namespace np::mem
 		void Clear()
 		{
 			for (siz i = 0; i < CACHE_LINE_SIZE; i++)
-			{
 				_padding[i] = 0;
-			}
 		}
 	};
 } // namespace np::mem
