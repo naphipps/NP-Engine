@@ -11,6 +11,8 @@ namespace np::jsys
 {
 	JobRecord JobWorker::GetNextJob()
 	{
+		NP_ENGINE_PROFILE_FUNCTION();
+
 		JobRecord next_job;
 		for (siz i = 0; i < JobPrioritiesHighToLow.size() && !next_job.IsValid(); i++)
 		{
