@@ -28,7 +28,7 @@ namespace np::geom
 
 		::glm::vec<2, T> GetCenter() const
 		{
-			return Midpoint(LowerLeft, UpperRight);
+			return mat::Midpoint(LowerLeft, UpperRight);
 		}
 	};
 
