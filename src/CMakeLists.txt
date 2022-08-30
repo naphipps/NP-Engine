@@ -31,15 +31,6 @@ set(NP_ENGINE_CONTAINER_HPP
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Container/Container.hpp
 )
 
-set(NP_ENGINE_CORE_HPP
-	# ${PROJECT_SOURCE_DIR}/include/NP-Engine/Core/Color.hpp
-	# ${PROJECT_SOURCE_DIR}/include/NP-Engine/Core/Core.hpp
-	# ${PROJECT_SOURCE_DIR}/include/NP-Engine/Core/DmsImage.hpp
-	# ${PROJECT_SOURCE_DIR}/include/NP-Engine/Core/DmsLineSegment.hpp
-	# ${PROJECT_SOURCE_DIR}/include/NP-Engine/Core/DrawableImage.hpp
-	# ${PROJECT_SOURCE_DIR}/include/NP-Engine/Core/Image.hpp
-)
-
 set(NP_ENGINE_ECS_HPP
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/ECS/ECS.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/ECS/Entity.hpp
@@ -64,6 +55,15 @@ set(NP_ENGINE_FOUNDATION_HPP
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Foundation/cmake_include.hpp.in
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Foundation/cmake_include.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Foundation/Assert.hpp
+)
+
+set(NP_ENGINE_GEOMETRY_HPP
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Geometry/Geometry.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Geometry/Shape.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Geometry/Line.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Geometry/Polygon.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Geometry/Circular.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Geometry/AABB.hpp
 )
 
 set(NP_ENGINE_GRAPHICS_HPP
@@ -148,6 +148,16 @@ set(NP_ENGINE_GRAPHICS_VULKAN_HPP
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RHI/Vulkan/VulkanTimelineSemaphore.hpp
 )
 
+set(NP_ENGINE_GRAPHICS_ALGORITHMS_HPP
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics-Algorithms/Graphics-Algorithms.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics-Algorithms/DmsImage.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics-Algorithms/DmsLineSegment.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics-Algorithms/DrawableImage.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics-Algorithms/ImageSubview.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics-Algorithms/Subview.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics-Algorithms/FloodFillImage.hpp
+)
+
 set(NP_ENGINE_INPUT_HPP
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Input/Input.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Input/KeyCodes.hpp
@@ -177,7 +187,6 @@ set(NP_ENGINE_JOBSYSTEM_HPP
 )
 
 set(NP_ENGINE_MATH_HPP
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Math/AABB.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Math/CMathInclude.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Math/EaseImpl.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Math/Math.hpp
@@ -306,15 +315,16 @@ set(NP_ENGINE_HEADER_FILES
 	${NP_ENGINE_ALGORITHMS_HPP}
 	${NP_ENGINE_APPLICATION_HPP}
 	${NP_ENGINE_CONTAINER_HPP}
-	${NP_ENGINE_CORE_HPP}
 	${NP_ENGINE_ECS_HPP}
 	${NP_ENGINE_EVENT_HPP}
 	${NP_ENGINE_FILESYSTEM_HPP}
 	${NP_ENGINE_FOUNDATION_HPP}
+	${NP_ENGINE_GEOMETRY_HPP}
 	${NP_ENGINE_GRAPHICS_HPP}
 	${NP_ENGINE_GRAPHICS_RPI_HPP}
 	${NP_ENGINE_GRAPHICS_OPENGL_HPP}
 	${NP_ENGINE_GRAPHICS_VULKAN_HPP}
+	${NP_ENGINE_GRAPHICS_ALGORITHMS_HPP}
 	${NP_ENGINE_INPUT_HPP}
 	${NP_ENGINE_INSIGHT_HPP}
 	${NP_ENGINE_JOBSYSTEM_HPP}
@@ -560,16 +570,17 @@ source_group("" FILES ${NP_ENGINE_HPP})
 source_group(Algorithms FILES ${NP_ENGINE_ALGORITHMS_HPP})
 source_group(Application FILES ${NP_ENGINE_APPLICATION_HPP} ${NP_ENGINE_APPPLICATION_CPP})
 source_group(Container FILES ${NP_ENGINE_CONTAINER_HPP})
-source_group(Core FILES ${NP_ENGINE_CORE_HPP})
 source_group(ECS FILES ${NP_ENGINE_ECS_HPP})
 source_group(Event FILES ${NP_ENGINE_EVENT_HPP})
 source_group(FileSystem FILES ${NP_ENGINE_FILESYSTEM_HPP})
 source_group(Foundation FILES ${NP_ENGINE_FOUNDATION_HPP})
+source_group(Geometry FILES ${NP_ENGINE_GEOMETRY_HPP})
 source_group(Graphics FILES ${NP_ENGINE_GRAPHICS_HPP} ${NP_ENGINE_GRAPHICS_CPP})
 source_group(Graphics/RPI FILES ${NP_ENGINE_GRAPHICS_RPI_HPP} ${NP_ENGINE_GRAPHICS_RPI_CPP})
 source_group(Graphics/RHI/OpenGL FILES ${NP_ENGINE_GRAPHICS_OPENGL_HPP} ${NP_ENGINE_GRAPHICS_OPENGL_CPP})
 source_group(Graphics/RHI/Vulkan FILES ${NP_ENGINE_GRAPHICS_VULKAN_HPP} ${NP_ENGINE_GRAPHICS_VULKAN_CPP})
 source_group(Graphics/RHI/Vulkan/shaders FILES ${NP_ENGINE_GRAPHICS_VULKAN_SHADERS_GLSL})
+source_group(Graphics-Algorithms FILES ${NP_ENGINE_GRAPHICS_ALGORITHMS_HPP})
 source_group(Input FILES ${NP_ENGINE_INPUT_HPP})
 source_group(Insight FILES ${NP_ENGINE_INSIGHT_HPP} ${NP_ENGINE_INSIGHT_CPP})
 source_group(JobSystem FILES ${NP_ENGINE_JOBSYSTEM_HPP} ${NP_ENGINE_JOBSYSTEM_CPP})

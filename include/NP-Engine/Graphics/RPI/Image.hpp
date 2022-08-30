@@ -12,6 +12,7 @@
 #include "NP-Engine/Primitive/Primitive.hpp"
 #include "NP-Engine/Container/Container.hpp"
 #include "NP-Engine/String/String.hpp"
+#include "NP-Engine/Math/Math.hpp"
 
 #include "NP-Engine/Vendor/LodePngInclude.hpp"
 // TODO: I feel like we could add back stb_image, and try lodepng when stb_image fails on pngs
@@ -22,7 +23,10 @@ namespace np::gfx
 {
 	class Image
 	{
-	private:
+	public:
+		using Point = ::glm::vec<2, ui32>;
+
+	protected:
 		ui32 _width;
 		ui32 _height;
 		con::vector<ui8> _pixels;
@@ -136,6 +140,11 @@ namespace np::gfx
 			return _pixels.data();
 		}
 
+		Color Get(const Point& point) const
+		{
+			return Get(point.x, point.y);
+		}
+
 		Color Get(ui32 x, ui32 y) const
 		{
 			Color pixel{};
@@ -147,6 +156,11 @@ namespace np::gfx
 			}
 
 			return pixel;
+		}
+
+		void Set(const Point& point, Color color)
+		{
+			Set(point.x, point.y, color);
 		}
 
 		void Set(ui32 x, ui32 y, Color color)
