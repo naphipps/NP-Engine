@@ -22,8 +22,8 @@ namespace np::mat
 		else if result < 0 then CW
 		else if result == 0 then colinear
 	*/
-	template <typename T, ::glm::qualifier Q = ::glm::qualifier::defaultp>
-	static inline T GetOrientation(const ::glm::vec<2, T, Q>& a, const ::glm::vec<2, T, Q>& b, const ::glm::vec<2, T, Q>& c)
+	template <typename T>
+	static inline T GetOrientation(const ::glm::vec<2, T>& a, const ::glm::vec<2, T>& b, const ::glm::vec<2, T>& c)
 	{
 		/*
 			|1  1  1 |
@@ -37,8 +37,8 @@ namespace np::mat
 		return b.x * c.y - b.y * c.x - a.x * c.y + a.y * c.x + a.x * b.y - a.y * b.x;
 	}
 
-	template <typename T, ::glm::qualifier Q = ::glm::qualifier::defaultp>
-	static inline ::glm::vec<2, T, Q> Midpoint(const ::glm::vec<2, T, Q>& a, const ::glm::vec<2, T, Q>& b)
+	template <typename T>
+	static inline ::glm::vec<2, T> Midpoint(const ::glm::vec<2, T>& a, const ::glm::vec<2, T>& b)
 	{
 		return {(a.x + b.x) / (T)2, (a.y + b.y) / (T)2};
 	}
@@ -171,14 +171,14 @@ namespace np::mat
 		return n * n * n * n * n * n * n * n;
 	}
 
-	template <typename T, ::glm::qualifier Q = ::glm::qualifier::defaultp>
-	static inline ::glm::vec<2, T, Q> RoundTo32nd(const ::glm::vec<2, T, Q>& point)
+	template <typename T>
+	static inline ::glm::vec<2, T> RoundTo32nd(const ::glm::vec<2, T>& point)
 	{
 		return {RoundTo32nd(point.x), RoundTo32nd(point.y)};
 	}
 
-	template <typename T, ::glm::qualifier Q = ::glm::qualifier::defaultp>
-	static inline ::glm::vec<2, T, Q> RoundTo16th(const ::glm::vec<2, T, Q>& point)
+	template <typename T>
+	static inline ::glm::vec<2, T> RoundTo16th(const ::glm::vec<2, T>& point)
 	{
 		return {RoundTo16th(point.x), RoundTo16th(point.y)};
 	}
@@ -205,20 +205,18 @@ namespace np::mat
 		return x_diff * x_diff + y_diff * y_diff;
 	}
 
-	template <::glm::qualifier Q>
-	static inline dbl DistanceSquared(const ::glm::vec<2, flt, Q>& a, const ::glm::vec<2, flt, Q>& b)
+	static inline dbl DistanceSquared(const ::glm::vec<2, flt>& a, const ::glm::vec<2, flt>& b)
 	{
 		return DistanceSquared(a.x, a.y, b.x, b.y);
 	}
 
-	template <::glm::qualifier Q>
-	static inline dbl DistanceSquared(const ::glm::vec<2, dbl, Q>& a, const ::glm::vec<2, dbl, Q>& b)
+	static inline dbl DistanceSquared(const ::glm::vec<2, dbl>& a, const ::glm::vec<2, dbl>& b)
 	{
 		return DistanceSquared(a.x, a.y, b.x, b.y);
 	}
 
-	template <typename T, ::glm::qualifier Q>
-	static inline ui64 DistanceSquared(const ::glm::vec<2, T, Q>& a, const ::glm::vec<2, T, Q>& b)
+	template <typename T>
+	static inline ui64 DistanceSquared(const ::glm::vec<2, T>& a, const ::glm::vec<2, T>& b)
 	{
 		return DistanceSquared(a.x, a.y, b.x, b.y);
 	}
@@ -235,15 +233,14 @@ namespace np::mat
 		return ::std::round(n * scalar) / scalar;
 	}
 
-	template <typename T, ::glm::qualifier Q>
-	static inline T GetAngle(const ::glm::vec<2, T, Q>& point)
+	template <typename T>
+	static inline T GetAngle(const ::glm::vec<2, T>& point)
 	{
 		return ::std::atan2(-(point.y), -(point.x));
 	}
 
-	template <::glm::qualifier Q = ::glm::qualifier::defaultp>
-	static inline dbl GetAngleB(const ::glm::vec<2, flt, Q>& a_pt, const ::glm::vec<2, flt, Q>& b_pt,
-								const ::glm::vec<2, flt, Q>& c_pt)
+	static inline dbl GetAngleB(const ::glm::vec<2, flt>& a_pt, const ::glm::vec<2, flt>& b_pt,
+								const ::glm::vec<2, flt>& c_pt)
 	{
 		dbl a_sq = DistanceSquared(b_pt, c_pt);
 		dbl b_sq = DistanceSquared(a_pt, c_pt);
@@ -254,9 +251,8 @@ namespace np::mat
 		return B;
 	}
 
-	template <::glm::qualifier Q = ::glm::qualifier::defaultp>
-	static inline dbl GetAngleB(const ::glm::vec<2, dbl, Q>& a_pt, const ::glm::vec<2, dbl, Q>& b_pt,
-								const ::glm::vec<2, dbl, Q>& c_pt)
+	static inline dbl GetAngleB(const ::glm::vec<2, dbl>& a_pt, const ::glm::vec<2, dbl>& b_pt,
+								const ::glm::vec<2, dbl>& c_pt)
 	{
 		dbl a_sq = DistanceSquared(b_pt, c_pt);
 		dbl b_sq = DistanceSquared(a_pt, c_pt);
@@ -267,9 +263,9 @@ namespace np::mat
 		return B;
 	}
 
-	template <typename T, ::glm::qualifier Q = ::glm::qualifier::defaultp>
-	static inline ui64 GetAngleB(const ::glm::vec<2, T, Q>& a_pt, const ::glm::vec<2, T, Q>& b_pt,
-								 const ::glm::vec<2, T, Q>& c_pt)
+	template <typename T>
+	static inline ui64 GetAngleB(const ::glm::vec<2, T>& a_pt, const ::glm::vec<2, T>& b_pt,
+								 const ::glm::vec<2, T>& c_pt)
 	{
 		ui64 a_sq = DistanceSquared(b_pt, c_pt);
 		ui64 b_sq = DistanceSquared(a_pt, c_pt);
@@ -280,14 +276,14 @@ namespace np::mat
 		return B;
 	}
 
-	template <typename T, ::glm::qualifier Q = ::glm::qualifier::defaultp>
-	static inline bl AngleComparerCCW(const ::glm::vec<2, T, Q>& a, const ::glm::vec<2, T, Q>& b)
+	template <typename T>
+	static inline bl AngleComparerCCW(const ::glm::vec<2, T>& a, const ::glm::vec<2, T>& b)
 	{
 		return GetAngle(a) < GetAngle(b);
 	}
 
-	template <typename T, ::glm::qualifier Q = ::glm::qualifier::defaultp>
-	static inline bl AngleComparerCW(const ::glm::vec<2, T, Q>& a, const ::glm::vec<2, T, Q>& b)
+	template <typename T>
+	static inline bl AngleComparerCW(const ::glm::vec<2, T>& a, const ::glm::vec<2, T>& b)
 	{
 		return GetAngle(a) > GetAngle(b);
 	}

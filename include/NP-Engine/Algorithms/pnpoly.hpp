@@ -29,8 +29,8 @@ namespace np::alg
 		precalc pnpoly optimization provided by Evgueni Tcherniaev
 	*/
 
-	template <typename T, ::glm::qualifier Q = ::glm::qualifier::defaultp>
-	static bl pnpoly(const ::glm::vec<2, T, Q> poly[], const siz poly_size, const ::glm::vec<2, T, Q>& point)
+	template <typename T>
+	static bl pnpoly(const ::glm::vec<2, T> poly[], const siz poly_size, const ::glm::vec<2, T>& point)
 	{
 		dbl x = (dbl)point.x;
 		dbl y = (dbl)point.y;
@@ -51,14 +51,14 @@ namespace np::alg
 		return oddNodes;
 	}
 
-	template <siz POLY_SIZE, typename T, ::glm::qualifier Q = ::glm::qualifier::defaultp>
-	static bl pnpoly(const con::array<::glm::vec<2, T, Q>, POLY_SIZE>& poly, const ::glm::vec<2, T, Q>& point)
+	template <siz POLY_SIZE, typename T>
+	static bl pnpoly(const con::array<::glm::vec<2, T>, POLY_SIZE>& poly, const ::glm::vec<2, T>& point)
 	{
 		return pnpoly(poly.data(), poly.size(), point);
 	}
 
-	template <typename T, ::glm::qualifier Q = ::glm::qualifier::defaultp>
-	void pnpoly_precalc(const ::glm::vec<2, T, Q> poly[], const siz poly_size, T constants[], T multiples[])
+	template <typename T>
+	void pnpoly_precalc(const ::glm::vec<2, T> poly[], const siz poly_size, T constants[], T multiples[])
 	{
 		siz i;
 		siz j = poly_size - 1;
@@ -79,15 +79,15 @@ namespace np::alg
 		}
 	}
 
-	template <siz POLY_SIZE, typename T, ::glm::qualifier Q = ::glm::qualifier::defaultp>
-	void pnpoly_precalc(const con::array<::glm::vec<2, T, Q>, POLY_SIZE>& poly, T constants[], T multiples[])
+	template <siz POLY_SIZE, typename T>
+	void pnpoly_precalc(const con::array<::glm::vec<2, T>, POLY_SIZE>& poly, T constants[], T multiples[])
 	{
-		pnpoly_precalc<T, Q>(poly.data(), poly.size(), constants, multiples);
+		pnpoly_precalc<T>(poly.data(), poly.size(), constants, multiples);
 	}
 
-	template <typename T, ::glm::qualifier Q = ::glm::qualifier::defaultp>
-	bl pnpoly(const ::glm::vec<2, T, Q> poly[], const siz poly_size, const T constants[], const T multiples[],
-			  const ::glm::vec<2, T, Q>& point)
+	template <typename T>
+	bl pnpoly(const ::glm::vec<2, T> poly[], const siz poly_size, const T constants[], const T multiples[],
+			  const ::glm::vec<2, T>& point)
 	{
 		bl oddNodes = false;
 		bl current = poly[poly_size - 1].y > point.y;
@@ -102,29 +102,29 @@ namespace np::alg
 		return oddNodes;
 	}
 
-	template <siz POLY_SIZE, typename T, ::glm::qualifier Q = ::glm::qualifier::defaultp>
-	bl pnpoly(const con::array<::glm::vec<2, T, Q>, POLY_SIZE>& poly, const T constants[], const T multiples[],
-			  const ::glm::vec<2, T, Q>& point)
+	template <siz POLY_SIZE, typename T>
+	bl pnpoly(const con::array<::glm::vec<2, T>, POLY_SIZE>& poly, const T constants[], const T multiples[],
+			  const ::glm::vec<2, T>& point)
 	{
-		return pnpoly<T, Q>(poly.data(), poly.size(), constants, multiples, point);
+		return pnpoly<T>(poly.data(), poly.size(), constants, multiples, point);
 	}
 
-	template <siz POLY_SIZE, typename T, ::glm::qualifier Q = ::glm::qualifier::defaultp>
-	void pnpoly_precalc(const con::array<::glm::vec<2, T, Q>, POLY_SIZE>& poly, con::array<T, POLY_SIZE>& constants,
+	template <siz POLY_SIZE, typename T>
+	void pnpoly_precalc(const con::array<::glm::vec<2, T>, POLY_SIZE>& poly, con::array<T, POLY_SIZE>& constants,
 						con::array<T, POLY_SIZE>& multiples)
 	{
-		pnpoly_precalc<T, Q>(poly.data(), poly.size(), constants.data(), multiples.data());
+		pnpoly_precalc<T>(poly.data(), poly.size(), constants.data(), multiples.data());
 	}
 
-	template <siz POLY_SIZE, typename T, ::glm::qualifier Q = ::glm::qualifier::defaultp>
-	bl pnpoly(const con::array<::glm::vec<2, T, Q>, POLY_SIZE>& poly, const con::array<T, POLY_SIZE>& constants,
-			  const con::array<T, POLY_SIZE>& multiples, const ::glm::vec<2, T, Q>& point)
+	template <siz POLY_SIZE, typename T>
+	bl pnpoly(const con::array<::glm::vec<2, T>, POLY_SIZE>& poly, const con::array<T, POLY_SIZE>& constants,
+			  const con::array<T, POLY_SIZE>& multiples, const ::glm::vec<2, T>& point)
 	{
-		return pnpoly<T, Q>(poly.data(), poly.size(), constants.data(), multiples.data(), point);
+		return pnpoly<T>(poly.data(), poly.size(), constants.data(), multiples.data(), point);
 	}
 
-	template <typename T, ::glm::qualifier Q = ::glm::qualifier::defaultp>
-	void pnpoly_precalc(const ::glm::vec<2, T, Q> poly[], const siz poly_size, ::glm::vec<2, T, Q> precalc[])
+	template <typename T>
+	void pnpoly_precalc(const ::glm::vec<2, T> poly[], const siz poly_size, ::glm::vec<2, T> precalc[])
 	{
 		siz i;
 		siz j = poly_size - 1;
@@ -145,16 +145,16 @@ namespace np::alg
 		}
 	}
 
-	template <siz POLY_SIZE, typename T, ::glm::qualifier Q = ::glm::qualifier::defaultp>
-	void pnpoly_precalc(const con::array<::glm::vec<2, T, Q>, POLY_SIZE>& poly,
-						con::array<::glm::vec<2, T, Q>, POLY_SIZE>& precalc)
+	template <siz POLY_SIZE, typename T>
+	void pnpoly_precalc(const con::array<::glm::vec<2, T>, POLY_SIZE>& poly,
+						con::array<::glm::vec<2, T>, POLY_SIZE>& precalc)
 	{
-		pnpoly_precalc<T, Q>(poly.data(), poly.size(), precalc.data());
+		pnpoly_precalc<T>(poly.data(), poly.size(), precalc.data());
 	}
 
-	template <typename T, ::glm::qualifier Q = ::glm::qualifier::defaultp>
-	bl pnpoly(const ::glm::vec<2, T, Q> poly[], const siz poly_size, const ::glm::vec<2, T, Q> precalc[],
-			  const ::glm::vec<2, T, Q>& point)
+	template <typename T>
+	bl pnpoly(const ::glm::vec<2, T> poly[], const siz poly_size, const ::glm::vec<2, T> precalc[],
+			  const ::glm::vec<2, T>& point)
 	{
 		bl oddNodes = false;
 		bl current = poly[poly_size - 1].y > point.y;
@@ -169,11 +169,11 @@ namespace np::alg
 		return oddNodes;
 	}
 
-	template <siz POLY_SIZE, typename T, ::glm::qualifier Q = ::glm::qualifier::defaultp>
-	bl pnpoly(const con::array<::glm::vec<2, T, Q>, POLY_SIZE>& poly, const con::array<::glm::vec<2, T, Q>, POLY_SIZE>& precalc,
-			  const ::glm::vec<2, T, Q>& point)
+	template <siz POLY_SIZE, typename T>
+	bl pnpoly(const con::array<::glm::vec<2, T>, POLY_SIZE>& poly, const con::array<::glm::vec<2, T>, POLY_SIZE>& precalc,
+			  const ::glm::vec<2, T>& point)
 	{
-		return pnpoly<T, Q>(poly.data(), poly.size(), precalc.data(), point);
+		return pnpoly<T>(poly.data(), poly.size(), precalc.data(), point);
 	}
 } // namespace np::alg
 

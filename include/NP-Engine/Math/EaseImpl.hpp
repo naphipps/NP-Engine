@@ -26,8 +26,8 @@ namespace np::mat
 	/*
 		gets the t value from given point, from a to b
 	*/
-	template <typename T, ::glm::qualifier Q = ::glm::qualifier::defaultp>
-	static inline T GetT(const ::glm::vec<2, T, Q>& a, const ::glm::vec<2, T, Q>& b, const ::glm::vec<2, T, Q>& point)
+	template <typename T>
+	static inline T GetT(const ::glm::vec<2, T>& a, const ::glm::vec<2, T>& b, const ::glm::vec<2, T>& point)
 	{
 		T x_diff = b.x > a.x ? b.x - a.x : a.x - b.x;
 		T y_diff = b.y > a.y ? b.y - a.y : a.y - b.y;

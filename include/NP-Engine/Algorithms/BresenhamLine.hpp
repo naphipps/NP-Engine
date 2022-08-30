@@ -18,11 +18,11 @@ namespace np::alg
 		/*
 			gets the series of points on low sloped line given begin point and given end point
 		*/
-		template <typename T, ::glm::qualifier Q = ::glm::qualifier::defaultp>
-		static inline con::vector<::glm::vec<2, T, Q>> GetLowSlopedLine(const ::glm::vec<2, T, Q>& begin,
-																		const ::glm::vec<2, T, Q>& end)
+		template <typename T>
+		static inline con::vector<::glm::vec<2, T>> GetLowSlopedLine(const ::glm::vec<2, T>& begin,
+																		const ::glm::vec<2, T>& end)
 		{
-			con::vector<::glm::vec<2, T, Q>> points;
+			con::vector<::glm::vec<2, T>> points;
 
 			T dx = end.x - begin.x;
 			T dy = end.y - begin.y;
@@ -56,11 +56,11 @@ namespace np::alg
 		/*
 			gets the high sloped line given the begin point and the end point
 		*/
-		template <typename T, ::glm::qualifier Q = ::glm::qualifier::defaultp>
-		static inline con::vector<::glm::vec<2, T, Q>> GetHighSlopedLine(const ::glm::vec<2, T, Q>& begin,
-																		 const ::glm::vec<2, T, Q>& end)
+		template <typename T>
+		static inline con::vector<::glm::vec<2, T>> GetHighSlopedLine(const ::glm::vec<2, T>& begin,
+																		 const ::glm::vec<2, T>& end)
 		{
-			con::vector<::glm::vec<2, T, Q>> points;
+			con::vector<::glm::vec<2, T>> points;
 
 			T dx = end.x - begin.x;
 			T dy = end.y - begin.y;
@@ -95,9 +95,9 @@ namespace np::alg
 			gets the series of points on low sloped line given begin point and given end point
 			inputs include the line array and line size ref for us to set as long as it stays under the given max line size
 		*/
-		template <typename T, ::glm::qualifier Q = ::glm::qualifier::defaultp>
-		static inline bl GetLowSlopedLine(::glm::vec<2, T, Q> line[], siz& line_size, const siz line_max_size,
-										  const ::glm::vec<2, T, Q>& begin, const ::glm::vec<2, T, Q>& end)
+		template <typename T>
+		static inline bl GetLowSlopedLine(::glm::vec<2, T> line[], siz& line_size, const siz line_max_size,
+										  const ::glm::vec<2, T>& begin, const ::glm::vec<2, T>& end)
 		{
 			siz i = 0;
 			bl result = i < line_max_size;
@@ -142,9 +142,9 @@ namespace np::alg
 			gets the high sloped line given the begin point and the end point
 			inputs include the line array and line size ref for us to set as long as it stays under the given max line size
 		*/
-		template <typename T, ::glm::qualifier Q = ::glm::qualifier::defaultp>
-		static inline bl GetHighSlopedLine(::glm::vec<2, T, Q> line[], siz& line_size, const siz line_max_size,
-										   const ::glm::vec<2, T, Q>& begin, const ::glm::vec<2, T, Q>& end)
+		template <typename T>
+		static inline bl GetHighSlopedLine(::glm::vec<2, T> line[], siz& line_size, const siz line_max_size,
+										   const ::glm::vec<2, T>& begin, const ::glm::vec<2, T>& end)
 		{
 			siz i = 0;
 			bl result = i < line_max_size;
@@ -185,16 +185,16 @@ namespace np::alg
 			return result;
 		}
 
-		template <siz ARRAY_SIZE, typename T, ::glm::qualifier Q = ::glm::qualifier::defaultp>
-		static inline bl GetLowSlopedLine(con::array<::glm::vec<2, T, Q>, ARRAY_SIZE>& line, siz& line_size,
-										  const ::glm::vec<2, T, Q>& begin, const ::glm::vec<2, T, Q>& end)
+		template <siz ARRAY_SIZE, typename T>
+		static inline bl GetLowSlopedLine(con::array<::glm::vec<2, T>, ARRAY_SIZE>& line, siz& line_size,
+										  const ::glm::vec<2, T>& begin, const ::glm::vec<2, T>& end)
 		{
 			return GetLowSlopedLine(line.data(), line_size, line.size(), begin, end);
 		}
 
-		template <siz ARRAY_SIZE, typename T, ::glm::qualifier Q = ::glm::qualifier::defaultp>
-		static inline bl GetHighSlopedLine(con::array<::glm::vec<2, T, Q>, ARRAY_SIZE>& line, siz& line_size,
-										   const ::glm::vec<2, T, Q>& begin, const ::glm::vec<2, T, Q>& end)
+		template <siz ARRAY_SIZE, typename T>
+		static inline bl GetHighSlopedLine(con::array<::glm::vec<2, T>, ARRAY_SIZE>& line, siz& line_size,
+										   const ::glm::vec<2, T>& begin, const ::glm::vec<2, T>& end)
 		{
 			return GetHighSlopedLine(line.data(), line_size, line.size(), begin, end);
 		}
@@ -203,25 +203,25 @@ namespace np::alg
 	/*
 		gets the series of points on line from given begin point to given end point
 	*/
-	template <typename T, ::glm::qualifier Q = ::glm::qualifier::defaultp>
-	static inline con::vector<::glm::vec<2, T, Q>> GetBresenhamLinePoints(const ::glm::vec<2, T, Q>& begin,
-																		  const ::glm::vec<2, T, Q>& end)
+	template <typename T>
+	static inline con::vector<::glm::vec<2, T>> GetBresenhamLinePoints(const ::glm::vec<2, T>& begin,
+																		  const ::glm::vec<2, T>& end)
 	{
-		con::vector<::glm::vec<2, T, Q>> points;
+		con::vector<::glm::vec<2, T>> points;
 
-		if (::std::abs(end.y - begin.y) < ::std::abs(end.x - begin.x))
+		if (::std::abs((dbl)end.y - (dbl)begin.y) < ::std::abs((dbl)end.x - (dbl)begin.x))
 		{
 			if (begin.x > end.x)
-				points = __detail::GetLowSlopedLine(end, begin);
+				points = __detail::GetLowSlopedLine<T>(end, begin);
 			else
-				points = __detail::GetLowSlopedLine(begin, end);
+				points = __detail::GetLowSlopedLine<T>(begin, end);
 		}
 		else
 		{
 			if (begin.y > end.y)
-				points = __detail::GetHighSlopedLine(end, begin);
+				points = __detail::GetHighSlopedLine<T>(end, begin);
 			else
-				points = __detail::GetHighSlopedLine(begin, end);
+				points = __detail::GetHighSlopedLine<T>(begin, end);
 		}
 
 		return points;
@@ -231,35 +231,35 @@ namespace np::alg
 		gets the series of points on line from given begin point to given end point
 		inputs include the line array and line size ref for us to set as long as it stays under the given max line size
 	*/
-	template <typename T, ::glm::qualifier Q = ::glm::qualifier::defaultp>
-	static inline bl GetBresenhamLinePoints(::glm::vec<2, T, Q> line[], siz& line_size, const siz line_max_size,
-											const ::glm::vec<2, T, Q>& begin, const ::glm::vec<2, T, Q>& end)
+	template <typename T>
+	static inline bl GetBresenhamLinePoints(::glm::vec<2, T> line[], siz& line_size, const siz line_max_size,
+											const ::glm::vec<2, T>& begin, const ::glm::vec<2, T>& end)
 	{
 		bl result = true;
 
-		if (::std::abs(end.y - begin.y) < ::std::abs(end.x - begin.x))
+		if (::std::abs((dbl)end.y - (dbl)begin.y) < ::std::abs((dbl)end.x - (dbl)begin.x))
 		{
 			if (begin.x > end.x)
-				result = __detail::GetLowSlopedLine(line, line_size, line_max_size, end, begin);
+				result = __detail::GetLowSlopedLine<T>(line, line_size, line_max_size, end, begin);
 			else
-				result = __detail::GetLowSlopedLine(line, line_size, line_max_size, begin, end);
+				result = __detail::GetLowSlopedLine<T>(line, line_size, line_max_size, begin, end);
 		}
 		else
 		{
 			if (begin.y > end.y)
-				result = __detail::GetHighSlopedLine(line, line_size, line_max_size, end, begin);
+				result = __detail::GetHighSlopedLine<T>(line, line_size, line_max_size, end, begin);
 			else
-				result = __detail::GetHighSlopedLine(line, line_size, line_max_size, begin, end);
+				result = __detail::GetHighSlopedLine<T>(line, line_size, line_max_size, begin, end);
 		}
 
 		return result;
 	}
 
-	template <siz ARRAY_SIZE, typename T, ::glm::qualifier Q = ::glm::qualifier::defaultp>
-	static inline bl GetBresenhamLinePoints(con::array<::glm::vec<2, T, Q>, ARRAY_SIZE>& line, siz& line_size,
-											const ::glm::vec<2, T, Q>& begin, const ::glm::vec<2, T, Q>& end)
+	template <siz ARRAY_SIZE, typename T>
+	static inline bl GetBresenhamLinePoints(con::array<::glm::vec<2, T>, ARRAY_SIZE>& line, siz& line_size,
+											const ::glm::vec<2, T>& begin, const ::glm::vec<2, T>& end)
 	{
-		return GetBresenhamLinePoints<T, Q>(line.data(), line_size, line.size(), begin, end);
+		return GetBresenhamLinePoints<T>(line.data(), line_size, line.size(), begin, end);
 	}
 } // namespace np::alg
 

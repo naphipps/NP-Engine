@@ -16,10 +16,10 @@ namespace np::alg
 	/*
 		gets the points about the origin representing a circle via the midpoint circle algorithm
 	*/
-	template <typename T, ::glm::qualifier Q = ::glm::qualifier::defaultp>
-	static inline con::vector<::glm::vec<2, T, Q>> GetMidpointCirclePoints(const dbl radius)
+	template <typename T>
+	static inline con::vector<::glm::vec<2, T>> GetMidpointCirclePoints(const dbl radius)
 	{
-		con::vector<::glm::vec<2, T, Q>> points;
+		con::vector<::glm::vec<2, T>> points;
 
 		dbl x = radius;
 		dbl y = 0;
@@ -74,7 +74,7 @@ namespace np::alg
 			}
 		}
 
-		::std::sort(points.begin(), points.end(), mat::AngleComparerCCW<T, Q>);
+		::std::sort(points.begin(), points.end(), mat::AngleComparerCCW<T>);
 
 		return points;
 	}
@@ -83,9 +83,9 @@ namespace np::alg
 		gets the points about the origin representing a circle via the midpoint circle algorithm
 		inputs include the line array and line size ref for us to set as long as it stays under the given max line size
 	*/
-	template <typename T, ::glm::qualifier Q = ::glm::qualifier::defaultp>
-	static inline bl GetMidpointCirclePoints(const dbl radius, ::glm::vec<2, T, Q> points[], siz& points_size,
-											 const siz points_max_size, const ::glm::vec<2, T, Q>& offset)
+	template <typename T>
+	static inline bl GetMidpointCirclePoints(const dbl radius, ::glm::vec<2, T> points[], siz& points_size,
+											 const siz points_max_size, const ::glm::vec<2, T>& offset)
 	{
 		siz i = 0;
 		bl result = i <= points_max_size;
@@ -219,23 +219,23 @@ namespace np::alg
 		if (result)
 		{
 			::std::sort(points, points + points_size,
-						[&offset](const ::glm::vec<2, T, Q>& a, const ::glm::vec<2, T, Q>& b)
+						[&offset](const ::glm::vec<2, T>& a, const ::glm::vec<2, T>& b)
 						{
-							::glm::vec<2, T, Q> ao{offset.x - a.x, offset.y - a.y};
-							::glm::vec<2, T, Q> bo{offset.x - b.x, offset.y - b.y};
+							::glm::vec<2, T> ao{offset.x - a.x, offset.y - a.y};
+							::glm::vec<2, T> bo{offset.x - b.x, offset.y - b.y};
 
-							return mat::AngleComparerCCW<T, Q>(ao, bo);
+							return mat::AngleComparerCCW<T>(ao, bo);
 						});
 		}
 
 		return result;
 	}
 
-	template <siz ARRAY_SIZE, typename T, ::glm::qualifier Q = ::glm::qualifier::defaultp>
-	static inline bl GetMidpointCirclePoints(const dbl radius, con::array<::glm::vec<2, T, Q>, ARRAY_SIZE>& points,
-											 siz& points_size, const ::glm::vec<2, T, Q>& offset)
+	template <siz ARRAY_SIZE, typename T>
+	static inline bl GetMidpointCirclePoints(const dbl radius, con::array<::glm::vec<2, T>, ARRAY_SIZE>& points,
+											 siz& points_size, const ::glm::vec<2, T>& offset)
 	{
-		return GetMidpointCirclePoints<T, Q>(radius, points.data(), points_size, points.size(), offset);
+		return GetMidpointCirclePoints<T>(radius, points.data(), points_size, points.size(), offset);
 	}
 } // namespace np::alg
 
