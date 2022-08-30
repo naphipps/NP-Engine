@@ -94,8 +94,9 @@ namespace np::gfxalg
 			bl has_lower = p.y > 0;
 			bl has_right = p.x < _image_subview.GetWidth() - 1;
 			bl has_left = p.x > 0;
-
 			DmsPoint a, b, c, d;
+
+			// 1, 2, 4, p
 			if (has_upper && has_right)
 			{
 				a = b = c = d = p;
@@ -106,6 +107,7 @@ namespace np::gfxalg
 				GetLineSegments(segments, isothreshold, channel, a, b, c, d);
 			}
 
+			// 0, 1, p, 3
 			if (has_upper && has_left)
 			{
 				a = b = c = d = p;
@@ -116,6 +118,7 @@ namespace np::gfxalg
 				GetLineSegments(segments, isothreshold, channel, a, b, c, d);
 			}
 
+			// p, 4, 7, 6
 			if (has_lower && has_right)
 			{
 				a = b = c = d = p;
@@ -126,6 +129,7 @@ namespace np::gfxalg
 				GetLineSegments(segments, isothreshold, channel, a, b, c, d);
 			}
 
+			// 3, p, 6, 5
 			if (has_lower && has_left)
 			{
 				a = b = c = d = p;
