@@ -458,7 +458,6 @@ namespace np::gfxalg
 					extract_edge_points_flood.Fill(extract_edge_points_payload);
 
 					// gather segments from edge points
-					segments.clear();
 					for (const DmsPoint& edge_point : edge_points)
 						GetLineSegments(segments, isothreshold, channel, edge_point);
 				}
