@@ -103,13 +103,18 @@ namespace np::mem
 			{
 				if (IsConnected())
 					_function_ptr(_instance_ptr, *this);
+
+				return;
 			}
 			else
 			{
+				R r;
+
 				if (IsConnected())
-					return _function_ptr(_instance_ptr, *this);
+					r = _function_ptr(_instance_ptr, *this);
+
+				return r;
 			}
-			return;
 		}
 
 		bl IsConnected() const
