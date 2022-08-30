@@ -18,7 +18,7 @@ namespace np::geom
 	template <siz DIMENSION_COUNT, typename T>
 	struct Circular : public Shape<DIMENSION_COUNT, T>
 	{
-		using Point = Shape<DIMENSION_COUNT, T>::Point;
+		using Point = typename Shape<DIMENSION_COUNT, T>::Point;
 
 		Point Center;
 		dbl Radius;

@@ -69,11 +69,11 @@ namespace std
 				{
 					flt x;
 					flt y;
-				};
+				} p;
 			};
 
-			x = line.Midpoint().x;
-			y = line.Midpoint().y;
+			p.x = line.Midpoint().x;
+			p.y = line.Midpoint().y;
 			return h;
 		}
 	};
