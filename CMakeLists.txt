@@ -32,6 +32,7 @@ add_subdirectory(vendor/glfw_glfw)
 add_subdirectory(vendor/Tencent_rapidjson)
 add_subdirectory(vendor/tinyobjloader_tinyobjloader)
 add_subdirectory(vendor/naphipps_lodepng)
+add_subdirectory(vendor/mariusbancila_stduuid)
 add_subdirectory(src)
 
 option(NP_ENGINE_BUILD_TESTER "Build the tester for NP-Engine" true)

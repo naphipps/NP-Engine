@@ -300,6 +300,7 @@ set(NP_ENGINE_VENDOR_HPP
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Vendor/VulkanInclude.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Vendor/LodePngInclude.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Vendor/RapidJsonInclude.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Vendor/StduuidInclude.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Vendor/TinyObjLoaderInclude.hpp
 )
 
@@ -489,6 +490,7 @@ target_link_libraries(
 	${RapidJSON_LIBRARY}
 	tinyobjloader
 	lodepng
+	stduuid
 )
 
 target_include_directories(
@@ -496,6 +498,7 @@ target_include_directories(
 	${PROJECT_SOURCE_DIR}/include
 	${Box2D_SOURCE_DIR}
 	${RapidJSON_INCLUDE_DIR}
+	${stduuid_INCLUDE_DIR}
 )
 
 set_target_properties(

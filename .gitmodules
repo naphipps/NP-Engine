@@ -31,3 +31,6 @@
 [submodule "vendor/naphipps_lodepng"]
 	path = vendor/naphipps_lodepng
 	url = git@github.com:naphipps/lodepng.git
+[submodule "vendor/mariusbancila_stduuid"]
+	path = vendor/mariusbancila_stduuid
+	url = git@github.com:mariusbancila/stduuid.git
