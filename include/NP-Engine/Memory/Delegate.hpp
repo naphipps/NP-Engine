@@ -8,16 +8,20 @@
 #define NP_ENGINE_DELEGATE_HPP
 
 #include <utility>
+#include <type_traits>
+
+#include "NP-Engine/Primitive/Primitive.hpp"
 
 #include "PadObject.hpp"
 
 namespace np::mem
 {
-	class Delegate : public PadObject
+	template <typename R>
+	class DelegateTemplate : public PadObject
 	{
 	protected:
 		using InstancePtr = void*;
-		using FunctionPtr = void (*)(InstancePtr, Delegate&);
+		using FunctionPtr = R (*)(InstancePtr, DelegateTemplate<R>&);
 
 		InstancePtr _instance_ptr;
 		FunctionPtr _function_ptr;
@@ -25,8 +29,8 @@ namespace np::mem
 		/*
 			used to wrap a static function to our function pointer
 		*/
-		template <void (*Function)(Delegate&)>
-		inline static void wrap(InstancePtr, Delegate& del)
+		template <R (*Function)(DelegateTemplate<R>&)>
+		inline static R wrap(InstancePtr, DelegateTemplate<R>& del)
 		{
 			return (Function)(del);
 		}
@@ -34,30 +38,30 @@ namespace np::mem
 		/*
 			used to wrap a class method to our function pointer
 		*/
-		template <class C, void (C::*Function)(Delegate&)>
-		inline static void wrap(InstancePtr ptr, Delegate& del)
+		template <class C, R (C::*Function)(DelegateTemplate<R>&)>
+		inline static R wrap(InstancePtr ptr, DelegateTemplate<R>& del)
 		{
 			return (static_cast<C*>(ptr)->*Function)(del);
 		}
 
 	public:
-		Delegate(): _instance_ptr(nullptr), _function_ptr(nullptr) {}
+		DelegateTemplate(): _instance_ptr(nullptr), _function_ptr(nullptr) {}
 
-		Delegate(const Delegate& other):
+		DelegateTemplate(const DelegateTemplate<R>& other):
 			PadObject(static_cast<const PadObject&>(other)),
 			_instance_ptr(other._instance_ptr),
 			_function_ptr(other._function_ptr)
 		{}
 
-		Delegate(Delegate&& other) noexcept:
+		DelegateTemplate(DelegateTemplate<R>&& other) noexcept:
 			PadObject(static_cast<PadObject&&>(other)),
 			_instance_ptr(::std::move(other._instance_ptr)),
 			_function_ptr(::std::move(other._function_ptr))
 		{}
 
-		virtual ~Delegate() {}
+		virtual ~DelegateTemplate() {}
 
-		Delegate& operator=(const Delegate& other)
+		DelegateTemplate<R>& operator=(const DelegateTemplate<R>& other)
 		{
 			PadObject::operator=(static_cast<const PadObject&>(other));
 			_instance_ptr = other._instance_ptr;
@@ -65,7 +69,7 @@ namespace np::mem
 			return *this;
 		}
 
-		Delegate& operator=(Delegate&& other) noexcept
+		DelegateTemplate<R>& operator=(DelegateTemplate<R>&& other) noexcept
 		{
 			PadObject::operator=(static_cast<PadObject&&>(other));
 			_instance_ptr = ::std::move(other._instance_ptr);
@@ -76,7 +80,7 @@ namespace np::mem
 		/*
 			connects a static function to our function pointer
 		*/
-		template <void (*Function)(Delegate&)>
+		template <R (*Function)(DelegateTemplate<R>&)>
 		inline void Connect()
 		{
 			_instance_ptr = nullptr;
@@ -86,19 +90,26 @@ namespace np::mem
 		/*
 			connects a class method to our function pointer
 		*/
-		template <class C, void (C::*Method)(Delegate&)>
+		template <class C, R (C::*Method)(DelegateTemplate<R>&)>
 		inline void Connect(InstancePtr ptr)
 		{
 			_instance_ptr = ptr;
 			_function_ptr = &wrap<C, Method>;
 		}
 
-		inline void InvokeConnectedFunction()
+		inline R InvokeConnectedFunction()
 		{
-			if (IsConnected())
+			if constexpr (::std::is_same_v<void, R>)
 			{
-				_function_ptr(_instance_ptr, *this);
+				if (IsConnected())
+					_function_ptr(_instance_ptr, *this);
 			}
+			else
+			{
+				if (IsConnected())
+					return _function_ptr(_instance_ptr, *this);
+			}
+			return;
 		}
 
 		bl IsConnected() const
@@ -112,6 +123,21 @@ namespace np::mem
 			_function_ptr = nullptr;
 		}
 	};
+
+	using Delegate = DelegateTemplate<void>;
+	using VoidDelegate = DelegateTemplate<void>;
+	using BlDelegate = DelegateTemplate<bl>;
+	using Ui8Delegate = DelegateTemplate<ui8>;
+	using Ui16Delegate = DelegateTemplate<ui16>;
+	using Ui32Delegate = DelegateTemplate<ui32>;
+	using Ui64Delegate = DelegateTemplate<ui64>;
+	using I8Delegate = DelegateTemplate<i8>;
+	using I16Delegate = DelegateTemplate<i16>;
+	using I32Delegate = DelegateTemplate<i32>;
+	using I64Delegate = DelegateTemplate<i64>;
+	using FltDelegate = DelegateTemplate<flt>;
+	using DblDelegate = DelegateTemplate<dbl>;
+	using SizDelegate = DelegateTemplate<siz>;
 } // namespace np::mem
 
 #endif /* NP_ENGINE_DELEGATE_HPP */
