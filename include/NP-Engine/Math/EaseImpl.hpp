@@ -35,6 +35,26 @@ namespace np::mat
 		// we'll use the longest length (x or y direction) so our t value is accurate
 		return x_diff > y_diff ? (point.x - a.x) / (b.x - a.x) : (point.y - a.y) / (b.y - a.y);
 	}
+
+	flt SmoothMax(flt a, flt b, flt t)
+	{
+		return ::std::log(::std::exp(a * t) + ::std::exp(b * t)) / t;
+	}
+
+	dbl SmoothMax(dbl a, dbl b, dbl t)
+	{
+		return ::std::log(::std::exp(a * t) + ::std::exp(b * t)) / t;
+	}
+
+	flt SmoothMin(flt a, flt b, flt t)
+	{
+		return -SmoothMax(-a, -b, t);
+	}
+
+	dbl SmoothMin(dbl a, dbl b, dbl t)
+	{
+		return -SmoothMax(-a, -b, t);
+	}
 } // namespace np::mat
 
 #endif /* NP_ENGINE_EASE_FUNCTIONS_HPP */
