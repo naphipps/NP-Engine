@@ -2,4 +2,4 @@
 *.hpp	eol=lf
 *.txt	eol=lf
 *.sh	eol=lf
-*.mm	oel=lf
+*.mm	eol=lf
