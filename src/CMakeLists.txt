@@ -281,7 +281,6 @@ set(NP_ENGINE_THREAD_HPP
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Thread/Thread.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Thread/ThreadImpl.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Thread/ThreadPool.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Thread/ThreadToken.hpp
 )
 
 set(NP_ENGINE_TIME_HPP

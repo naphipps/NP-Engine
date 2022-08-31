@@ -32,14 +32,14 @@ namespace np::jsys
 
 		atm_bl _keep_working;
 		atm_bl _work_procedure_complete;
-		thr::ThreadToken _thread_token;
+		thr::Thread* _thread;
 		thr::ThreadPool* _thread_pool;
 		JobSystem* _job_system;
 		con::mpmc_queue<Job*> _immediate_job_queue;
 		con::vector<JobWorker*> _coworkers;
-		ui32 _coworker_index;
+		siz _coworker_index;
 		tim::DurationMilliseconds _bad_steal_sleep_duration;
-		rng::Random32 _random_engine;
+		rng::Random64 _random_engine;
 
 		/*
 			returns a valid && CanExecute() job, or invalid job
@@ -73,6 +73,7 @@ namespace np::jsys
 		JobWorker():
 			_keep_working(false),
 			_work_procedure_complete(true),
+			_thread(nullptr),
 			_thread_pool(nullptr),
 			_job_system(nullptr),
 			_coworker_index(0),
@@ -84,7 +85,7 @@ namespace np::jsys
 		JobWorker(JobWorker&& other) noexcept:
 			_keep_working(::std::move(other._keep_working.load(mo_acquire))),
 			_work_procedure_complete(::std::move(other._work_procedure_complete.load(mo_acquire))),
-			_thread_token(::std::move(other._thread_token)),
+			_thread(::std::move(other._thread)),
 			_thread_pool(::std::move(other._thread_pool)),
 			_job_system(::std::move(other._job_system)),
 			_immediate_job_queue(::std::move(other._immediate_job_queue)),
@@ -105,7 +106,7 @@ namespace np::jsys
 		{
 			_keep_working.store(::std::move(other._keep_working.load(mo_acquire)), mo_release);
 			_work_procedure_complete.store(::std::move(other._work_procedure_complete.load(mo_acquire)), mo_release);
-			_thread_token = ::std::move(other._thread_token);
+			_thread = ::std::move(other._thread);
 			_thread_pool = ::std::move(other._thread_pool);
 			_job_system = ::std::move(other._job_system);
 			_immediate_job_queue = ::std::move(other._immediate_job_queue);
@@ -132,7 +133,7 @@ namespace np::jsys
 					_coworkers.erase(it);
 		}
 
-		void ClearCorkers()
+		void ClearCoworkers()
 		{
 			_coworkers.clear();
 		}
@@ -150,7 +151,7 @@ namespace np::jsys
 			return return_job;
 		}
 
-		void StartWork(JobSystem& job_system, thr::ThreadPool& pool, i32 thread_affinity = -1)
+		void StartWork(JobSystem& job_system, thr::ThreadPool& pool, siz thread_affinity)
 		{
 			NP_ENGINE_PROFILE_FUNCTION();
 			_job_system = mem::AddressOf(job_system);
@@ -158,7 +159,9 @@ namespace np::jsys
 			_keep_working.store(true, mo_release);
 			_work_procedure_complete.store(false, mo_release);
 			_coworker_index = _random_engine.GetLemireWithinRange(_coworkers.size());
-			_thread_token = _thread_pool->CreateThread(thread_affinity, &JobWorker::WorkerThreadProcedure, this);
+			_thread = _thread_pool->CreateObject();
+			_thread->Run(&JobWorker::WorkerThreadProcedure, this);
+			_thread->SetAffinity(thread_affinity);
 		}
 
 		void StopWork()
@@ -166,17 +169,14 @@ namespace np::jsys
 			NP_ENGINE_PROFILE_FUNCTION();
 			_keep_working.store(false, mo_release);
 
-			do
-			{
+			while (!_work_procedure_complete.load(mo_acquire))
 				thr::ThisThread::yield();
-			}
-			while (!_work_procedure_complete.load(mo_acquire));
 
-			if (_thread_pool && _thread_token.IsValid())
+			if (_thread_pool && _thread)
 			{
-				_thread_pool->RemoveThread(_thread_token);
-				_thread_token.Invalidate();
+				_thread_pool->DestroyObject(_thread);
 				_thread_pool = nullptr;
+				_thread = nullptr;
 			}
 		}
 	};

@@ -28,12 +28,14 @@ namespace np::jsys
 	{
 	private:
 		constexpr static siz JOB_ALIGNED_SIZE = mem::CalcAlignedSize(sizeof(Job));
+		constexpr static siz THREAD_ALIGNED_SIZE = mem::CalcAlignedSize(sizeof(thr::Thread));
 
 		mem::TraitAllocator _allocator;
 		atm_bl _running;
 
 		con::vector<JobWorker> _job_workers;
-		thr::ThreadPool _thread_pool;
+		mem::Block _thread_pool_block;
+		thr::ThreadPool* _thread_pool;
 		mem::Block _job_pool_block;
 		JobPool* _job_pool;
 
@@ -43,26 +45,7 @@ namespace np::jsys
 		con::mpmc_queue<JobRecord> _lower_job_queue;
 		con::mpmc_queue<JobRecord> _lowest_job_queue;
 
-	public:
-		JobSystem(): _running(false)
-		{
-			_job_pool_block = _allocator.Allocate(JOB_ALIGNED_SIZE * NP_ENGINE_JOB_SYSTEM_POOL_DEFAULT_SIZE);
-			_job_pool = mem::Create<JobPool>(_allocator, _job_pool_block);
-
-			// we want to be sure we use one less the number of cores available so our main thread is not crowded
-			_job_workers.resize(::std::min(_thread_pool.ObjectCount() - 1, thr::ThreadPool::MAX_THREAD_COUNT));
-
-			for (auto it1 = _job_workers.begin(); it1 != _job_workers.end(); it1++)
-				for (auto it2 = _job_workers.begin(); it2 != _job_workers.end(); it2++)
-					it1->AddCoworker(mem::AddressOf(*it2));
-		}
-
-		~JobSystem()
-		{
-			Dispose();
-		}
-
-		void Dispose()
+		void DisposeJobPool()
 		{
 			Stop();
 
@@ -79,12 +62,72 @@ namespace np::jsys
 			}
 		}
 
-		void SetJobPoolSize(siz size)
+		void DisposeThreadPool()
+		{
+			Stop();
+
+			if (_thread_pool)
+			{
+				mem::Destroy<thr::ThreadPool>(_allocator, _thread_pool);
+				_thread_pool = nullptr;
+			}
+
+			if (_thread_pool_block.IsValid())
+			{
+				_allocator.Deallocate(_thread_pool_block);
+				_thread_pool_block.Invalidate();
+			}
+		}
+
+		void CreateDefaultJobPool()
+		{
+			SetJobPoolSize(NP_ENGINE_JOB_SYSTEM_POOL_DEFAULT_SIZE);
+		}
+
+		void CreateDefaultJobWorkerCount()
+		{
+			// we want to be sure we use one less the number of cores available so our main thread is not crowded
+			SetJobWorkerCount(thr::Thread::HardwareConcurrency() - 1);
+		}
+
+	public:
+		JobSystem() : _running(false), _thread_pool(nullptr), _job_pool(nullptr)
+		{
+			CreateDefaultJobPool();
+			CreateDefaultJobWorkerCount();
+		}
+
+		~JobSystem()
 		{
 			Dispose();
+		}
 
+		void Dispose()
+		{
+			DisposeJobPool();
+			DisposeThreadPool();
+		}
+
+		void SetJobPoolSize(siz size)
+		{
+			DisposeJobPool();
 			_job_pool_block = _allocator.Allocate(JOB_ALIGNED_SIZE * size);
 			_job_pool = mem::Create<JobPool>(_allocator, _job_pool_block);
+		}
+
+		void SetJobWorkerCount(siz count)
+		{
+			DisposeThreadPool();
+			_thread_pool_block = _allocator.Allocate(THREAD_ALIGNED_SIZE * count);
+			_thread_pool = mem::Create<thr::ThreadPool>(_allocator, _thread_pool_block);
+
+			_job_workers.resize(_thread_pool->ObjectCount());
+			for (auto it1 = _job_workers.begin(); it1 != _job_workers.end(); it1++)
+			{
+				it1->ClearCoworkers();
+				for (auto it2 = _job_workers.begin(); it2 != _job_workers.end(); it2++)
+					it1->AddCoworker(mem::AddressOf(*it2));
+			}
 		}
 
 		void Start()
@@ -92,15 +135,15 @@ namespace np::jsys
 			NP_ENGINE_PROFILE_FUNCTION();
 
 			if (!_job_pool)
-			{
-				_job_pool_block = _allocator.Allocate(JOB_ALIGNED_SIZE * NP_ENGINE_JOB_SYSTEM_POOL_DEFAULT_SIZE);
-				_job_pool = mem::Create<JobPool>(_allocator, _job_pool_block);
-			}
+				CreateDefaultJobPool();
+
+			if (!_thread_pool)
+				CreateDefaultJobWorkerCount();
 
 			_running.store(true, mo_release);
 
 			for (siz i = 0; i < _job_workers.size(); i++)
-				_job_workers[i].StartWork(*this, _thread_pool, (i + 1) % _thread_pool.ObjectCount());
+				_job_workers[i].StartWork(*this, *_thread_pool, (i + 1) % _thread_pool->ObjectCount());
 		}
 
 		void Stop()
@@ -114,7 +157,7 @@ namespace np::jsys
 					it->StopWork();
 
 				// stop threads
-				_thread_pool.Clear();
+				_thread_pool->Clear();
 				_running.store(false, mo_release);
 			}
 		}

@@ -10,7 +10,6 @@
 #include "NP-Engine/Foundation/Foundation.hpp"
 
 #include "ThreadPool.hpp"
-#include "ThreadToken.hpp"
 #include "Thread.hpp"
 
 #endif /* NP_ENGINE_THREAD_HPP */

@@ -7,63 +7,17 @@
 #ifndef NP_ENGINE_THREAD_POOL_HPP
 #define NP_ENGINE_THREAD_POOL_HPP
 
+#include <utility>
+
 #include "NP-Engine/Primitive/Primitive.hpp"
 #include "NP-Engine/Memory/Memory.hpp"
 #include "NP-Engine/Insight/Insight.hpp"
 
 #include "ThreadImpl.hpp"
-#include "ThreadToken.hpp"
 
 namespace np::thr
 {
-	class ThreadPool : protected mem::ObjectPool<Thread>
-	{
-	private:
-		using base = mem::ObjectPool<Thread>;
-
-	public:
-		constexpr static siz MAX_THREAD_COUNT = 128;
-
-	public:
-		ThreadPool(): base(Thread::HardwareConcurrency() < MAX_THREAD_COUNT ? Thread::HardwareConcurrency() : MAX_THREAD_COUNT)
-		{}
-
-		siz ObjectCount() const
-		{
-			return base::ObjectCount();
-		}
-
-		void Clear()
-		{
-			base::Clear();
-		}
-
-		template <class Function, class... Args>
-		ThreadToken CreateThread(Function&& f, Args&&... args)
-		{
-			return CreateThread(-1, f, args...);
-		}
-
-		template <class Function, class... Args>
-		ThreadToken CreateThread(i32 thread_affinity, Function&& f, Args&&... args)
-		{
-			NP_ENGINE_PROFILE_FUNCTION();
-
-			Thread* thread = base::CreateObject();
-			thread->Run(f, args...);
-
-			if (thread_affinity > -1)
-				thread->SetAffinity(thread_affinity);
-
-			ThreadToken token(thread);
-			return token;
-		}
-
-		bl RemoveThread(ThreadToken token)
-		{
-			return DestroyObject(&token.GetThread());
-		}
-	};
+	using ThreadPool = mem::ObjectPool<Thread>;
 } // namespace np::thr
 
 #endif /* NP_ENGINE_THREAD_POOL_HPP */

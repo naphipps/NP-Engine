@@ -17,7 +17,7 @@
 
 namespace np::thr
 {
-	bl Thread::SetAffinity(i32 core_number)
+	bl Thread::SetAffinity(siz core_number)
 	{
 #if NP_ENGINE_PLATFORM_IS_APPLE
 		// Apple does NOT support thread affinity - not even their pthread.h implementation supports it
@@ -50,7 +50,7 @@ namespace np::thr
 
 	namespace ThisThread
 	{
-		bl SetAffinity(i32 core_number)
+		bl SetAffinity(siz core_number)
 		{
 #if NP_ENGINE_PLATFORM_IS_APPLE
 			// Apple does NOT support thread affinity - not even their pthread.h implementation supports it

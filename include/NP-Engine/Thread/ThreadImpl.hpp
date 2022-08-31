@@ -36,15 +36,8 @@ namespace np::thr
 		bl IsThreadAllocationClear() const
 		{
 			bl is_clear = true;
-
-			for (siz i = 0; i < sizeof(::std::thread); i++)
-			{
-				if (_thread_allocation[i] != 0)
-				{
-					is_clear = false;
-					break;
-				}
-			}
+			for (siz i = 0; i < sizeof(::std::thread) && is_clear; i++)
+				is_clear = _thread_allocation[i] == 0;
 
 			return is_clear;
 		}
@@ -86,7 +79,7 @@ namespace np::thr
 			}
 		}
 
-		bl SetAffinity(i32 core_number);
+		bl SetAffinity(siz core_number);
 
 		bl IsRunning() const
 		{
@@ -103,7 +96,7 @@ namespace np::thr
 	{
 		using namespace ::std::this_thread;
 
-		bl SetAffinity(i32 core_number);
+		bl SetAffinity(siz core_number);
 	} // namespace ThisThread
 } // namespace np::thr
 
