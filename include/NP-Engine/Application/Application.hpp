@@ -183,6 +183,7 @@ namespace np::app
 
 			_running.store(true, mo_release);
 			evnt::EventQueue& event_queue = _services.GetEventQueue();
+			jsys::JobSystem& job_system = _services.GetJobSystem();
 
 			const tim::DurationMilliseconds max_loop_duration(NP_ENGINE_APPLICATION_LOOP_DURATION);
 
@@ -194,6 +195,7 @@ namespace np::app
 			tim::SteadyTimestamp update_prev_timestamp = tim::SteadyClock::now();
 			tim::DurationMilliseconds update_duration(0);
 
+			job_system.Start();
 			while (_running.load(mo_acquire))
 			{
 				update_next_timestamp = tim::SteadyClock::now();
@@ -248,6 +250,7 @@ namespace np::app
 					thr::ThisThread::sleep_for(max_loop_duration - loop_duration);
 				}
 			}
+			job_system.Stop();
 		}
 
 		Properties GetProperties() const

@@ -50,7 +50,7 @@ namespace np::gfx::rhi
 
 		void DrawLoopProcedure()
 		{
-			NP_ENGINE_PROFILE_FUNCTION();
+			NP_ENGINE_PROFILE_SCOPE("VulkanScene::DrawLoopProcedure " + to_str((ui64)this));
 
 			tim::SteadyTimestamp prev = tim::SteadyClock::now();
 			tim::SteadyTimestamp next;
@@ -150,6 +150,7 @@ namespace np::gfx::rhi
 			_dlp_keep_alive.store(true, mo_release);
 			_dlp_is_complete.store(false, mo_release);
 			_dlp_thread.Run(&VulkanScene::DrawLoopProcedure, this);
+			_dlp_thread.SetAffinity(1);
 		}
 
 		~VulkanScene()

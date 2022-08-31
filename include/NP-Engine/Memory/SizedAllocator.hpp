@@ -28,9 +28,7 @@ namespace np::mem
 		virtual ~SizedAllocator()
 		{
 			if (_owns_block)
-			{
 				CAllocator::Deallocate(_block);
-			}
 		}
 
 		virtual bl Contains(const Block& block) const override

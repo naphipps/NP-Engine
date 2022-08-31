@@ -73,9 +73,7 @@ namespace np::mem
 		{
 			bl destroyed = false;
 			if (_allocator.Contains(object) && Destruct<T>(object))
-			{
 				destroyed = _allocator.Deallocate(object);
-			}
 			return destroyed;
 		}
 

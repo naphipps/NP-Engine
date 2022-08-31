@@ -42,9 +42,14 @@ namespace np::jsys
 	{
 		NP_ENGINE_PROFILE_SCOPE("WorkerThreadProcedure: " + to_str((ui64)this));
 
+		Job* immediate = nullptr;
+		JobRecord record;
+		Job* j = nullptr;
+		Job* stolen = nullptr;
+
 		while (_keep_working.load(mo_acquire))
 		{
-			Job* immediate = GetImmediateJob();
+			immediate = GetImmediateJob();
 			if (immediate)
 			{
 				NP_ENGINE_PROFILE_SCOPE("executing immediate Job");
@@ -54,23 +59,23 @@ namespace np::jsys
 				else
 					SubmitImmediateJob(immediate);
 			}
-			else
+			else if (_keep_working.load(mo_acquire))
 			{
-				JobRecord record = GetNextJob();
+				record = GetNextJob();
 				if (record.IsValid())
 				{
 					NP_ENGINE_PROFILE_SCOPE("executing next Job");
-					Job* job = record.GetJob();
-					job->Execute();
-					if (job->IsComplete())
-						_job_system->DestroyJob(job);
+					j = record.GetJob();
+					j->Execute();
+					if (j->IsComplete())
+						_job_system->DestroyJob(j);
 					else
-						_job_system->SubmitJob(job->GetAttractedPriority(record.GetPriority()), job);
+						_job_system->SubmitJob(j->GetAttractedPriority(record.GetPriority()), j);
 				}
-				else
+				else if (_keep_working.load(mo_acquire))
 				{
 					// we did not find next job so we steal from coworker
-					Job* stolen = GetStolenJob();
+					stolen = GetStolenJob();
 					if (stolen)
 					{
 						NP_ENGINE_PROFILE_SCOPE("executing stolen Job");
@@ -80,8 +85,10 @@ namespace np::jsys
 						else
 							SubmitImmediateJob(stolen);
 					}
-					else
+					else if (_keep_working.load(mo_acquire))
 					{
+						NP_ENGINE_PROFILE_SCOPE("sleeping");
+
 						// we did not steal a good job thus we want to steal from someone else
 						_coworker_index = (_coworker_index + 1) % _coworkers.size();
 
