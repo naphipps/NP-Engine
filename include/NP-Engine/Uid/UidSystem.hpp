@@ -25,6 +25,29 @@ namespace np::uid
 	class UidSystem
 	{
 	private:
+
+		struct UidRecord
+		{
+			Uid* UidPtr = nullptr;
+			UidHandle::GenerationType Generation = NP_ENGINE_UID_INVALID_GENERATION;
+
+			bl IsValid() const
+			{
+				return UidPtr != nullptr && Generation != NP_ENGINE_UID_INVALID_GENERATION;
+			}
+
+			operator bl() const
+			{
+				return IsValid();
+			}
+
+			void Invalidate()
+			{
+				UidPtr = nullptr;
+				Generation = NP_ENGINE_UID_INVALID_GENERATION;
+			}
+		};
+
 		constexpr static siz UID_ALIGNED_SIZE = mem::CalcAlignedSize(sizeof(Uid));
 
 		Mutex _m; //TODO: don't know if an atomic lock would be faster??
@@ -32,8 +55,9 @@ namespace np::uid
 		mem::TraitAllocator _allocator;
 		con::vector<mem::Block> _uid_pool_blocks;
 		con::vector<UidPool*> _uid_pools;
-		con::umap<void*, UidHandle> _key_to_record;
-		siz _generation;
+		con::umap<UidHandle::KeyType, UidRecord> _key_to_record;
+		UidHandle::GenerationType _generation;
+		con::uset<Uid> _uid_master_set;
 
 		void AddPool()
 		{
@@ -41,9 +65,26 @@ namespace np::uid
 			_uid_pools.emplace_back(mem::Create<UidPool>(_allocator, _uid_pool_blocks.back()));
 		}
 
+		void AttemptToCreateHandle(UidPool& pool, UidHandle& h, UidRecord& r)
+		{
+			r.UidPtr = pool.CreateObject();
+			if (r.UidPtr)
+			{
+				*r.UidPtr = _uid_gen();
+				while (_uid_master_set.count(*r.UidPtr))
+					*r.UidPtr = _uid_gen();
+
+				_uid_master_set.emplace(*r.UidPtr);
+				h.Key = (siz)r.UidPtr; //TODO: we might would like to create a key in a better way? I don't think we need to
+				h.Generation = ++_generation;
+				r.Generation = h.Generation;
+				_key_to_record.emplace(h.Key, r);
+			}
+		}
+
 	public:
 
-		UidSystem() : _generation(1)
+		UidSystem() : _generation(NP_ENGINE_UID_INVALID_GENERATION)
 		{
 			AddPool();
 		}
@@ -71,33 +112,18 @@ namespace np::uid
 			Lock lock(_m);
 
 			UidHandle h{};
-			Uid* uid = nullptr;
+			UidRecord r{};
 
-			for (UidPool*& pool : _uid_pools)
-			{
-				uid = pool->CreateObject();
-				if (uid)
-				{
-					*uid = _uid_gen();
-					h = { uid, _generation++ };
-					_key_to_record.emplace(uid, h);
-					break;
-				}
-			}
+			for (auto it = _uid_pools.begin(); it != _uid_pools.end() && !h.IsValid(); it++)
+				AttemptToCreateHandle(*_uid_pools.back(), h, r);
 
-			if (!uid)
+			if (!h.IsValid())
 			{
 				AddPool();
-				uid = _uid_pools.back()->CreateObject();
-				if (uid)
-				{
-					*uid = _uid_gen();
-					h = { uid, _generation++ };
-					_key_to_record.emplace(uid, h);
-				}
+				AttemptToCreateHandle(*_uid_pools.back(), h, r);
 			}
 
-			if (_generation == 0)
+			if (_generation == NP_ENGINE_UID_INVALID_GENERATION)
 				_generation++;
 
 			return h;
@@ -108,9 +134,12 @@ namespace np::uid
 			Lock lock(_m);
 			Uid* uid = nullptr;
 
-			auto it = _key_to_record.find(h.Key);
-			if (it != _key_to_record.end() && h.Generation == it->second.Generation)
-				uid = (Uid*)it->second.Key;
+			if (h.IsValid())
+			{
+				auto it = _key_to_record.find(h.Key);
+				if (it != _key_to_record.end() && h.Generation == it->second.Generation)
+					uid = it->second.UidPtr;
+			}
 
 			return uid ? *uid : Uid{};
 		}
@@ -119,20 +148,31 @@ namespace np::uid
 		{
 			Lock lock(_m);
 
-			auto it = _key_to_record.find(h.Key);
-			if (it != _key_to_record.end() && h.Generation == it->second.Generation)
+			if (h.IsValid())
 			{
-				Uid* uid = (Uid*)it->second.Key;
-				_key_to_record.erase(uid);
-				for (UidPool*& pool : _uid_pools)
-					if (pool->Contains(uid))
-					{
-						pool->DestroyObject(uid);
-						break;
-					}
-
-				h.Key = nullptr;
+				auto it = _key_to_record.find(h.Key);
+				if (it != _key_to_record.end())
+				{
+					UidRecord r = it->second;
+					if (h.Generation == r.Generation)
+						for (UidPool*& pool : _uid_pools)
+							if (pool->Contains(r.UidPtr))
+							{
+								_key_to_record.erase(it);
+								pool->DestroyObject(r.UidPtr);
+								h.Invalidate();
+								break;
+							}
+				}
 			}
+		}
+
+		void Defragment()
+		{
+			Lock lock(_m);
+
+			//TODO: defragment our pools by putting all our uid's to the front pools, then removing all full pools
+
 		}
 	};
 }
