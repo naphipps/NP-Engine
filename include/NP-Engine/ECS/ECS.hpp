@@ -11,4 +11,6 @@
 
 #include "Entity.hpp"
 
+//TODO: I think we can add some abstraction of Entt... at least the registry object
+
 #endif /* NP_ENGINE_ECS_HPP */
