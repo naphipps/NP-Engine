@@ -32,5 +32,6 @@
 #include "System/System.hpp"
 #include "Thread/Thread.hpp"
 #include "Time/Time.hpp"
+#include "Uid/Uid.hpp"
 
 #endif /* NP_ENGINE_HPP */

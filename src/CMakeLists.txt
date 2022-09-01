@@ -287,6 +287,15 @@ set(NP_ENGINE_TIME_HPP
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Time/Time.hpp
 )
 
+set(NP_ENGINE_UID_HPP
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Uid/Uid.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Uid/UidImpl.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Uid/UidGenerator.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Uid/UidHandle.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Uid/UidPool.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Uid/UidSystem.hpp
+)
+
 set(NP_ENGINE_VENDOR_HPP
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Vendor/Box2dInclude.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Vendor/ConcurrentqueueInclude.hpp
@@ -342,6 +351,7 @@ set(NP_ENGINE_HEADER_FILES
 	${NP_ENGINE_SYSTEM_HPP}
 	${NP_ENGINE_THREAD_HPP}
 	${NP_ENGINE_TIME_HPP}
+	${NP_ENGINE_UID_HPP}
 	${NP_ENGINE_VENDOR_HPP}
 	${NP_ENGINE_WINDOW_HPP}
 )
@@ -600,5 +610,6 @@ source_group(String FILES ${NP_ENGINE_STRING_HPP})
 source_group(System FILES ${NP_ENGINE_SYSTEM_HPP} ${NP_ENGINE_SYSTEM_CPP})
 source_group(Thread FILES ${NP_ENGINE_THREAD_HPP} ${NP_ENGINE_THREAD_CPP})
 source_group(Time FILES ${NP_ENGINE_TIME_HPP})
+source_group(Uid FILES ${NP_ENGINE_UID_HPP})
 source_group(Vendor FILES ${NP_ENGINE_VENDOR_HPP})
 source_group(Window FILES ${NP_ENGINE_WINDOW_HPP} ${NP_ENGINE_WINDOW_CPP})

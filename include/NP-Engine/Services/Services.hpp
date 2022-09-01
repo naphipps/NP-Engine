@@ -10,6 +10,7 @@
 #include "NP-Engine/JobSystem/JobSystem.hpp"
 #include "NP-Engine/Event/Event.hpp"
 #include "NP-Engine/Memory/Memory.hpp"
+#include "NP-Engine/Uid/Uid.hpp"
 
 #include "NP-Engine/Vendor/EnttInclude.hpp"
 
@@ -23,6 +24,7 @@ namespace np::srvc
 		jsys::JobSystem _job_system;
 		evnt::EventQueue _event_queue;
 		evnt::EventSubmitter _event_submitter;
+		uid::UidSystem _uid_system;
 
 	public:
 		Services(): _allocator(), _ecs_registry(), _job_system(), _event_queue(), _event_submitter(_event_queue) {}
@@ -75,6 +77,16 @@ namespace np::srvc
 		const evnt::EventSubmitter& GetEventSubmitter() const
 		{
 			return _event_submitter;
+		}
+
+		uid::UidSystem& GetUidSystem()
+		{
+			return _uid_system;
+		}
+
+		const uid::UidSystem& GetUidSystem() const
+		{
+			return _uid_system;
 		}
 	};
 } // namespace np::srvc
