@@ -12,7 +12,6 @@
 #include "NP-Engine/Container/Container.hpp"
 #include "NP-Engine/Thread/Thread.hpp"
 #include "NP-Engine/Primitive/Primitive.hpp"
-#include "NP-Engine/Math/Math.hpp"
 #include "NP-Engine/Memory/Memory.hpp"
 
 #include "JobWorker.hpp"
@@ -79,22 +78,11 @@ namespace np::jsys
 			}
 		}
 
-		void CreateDefaultJobPool()
-		{
-			SetJobPoolSize(NP_ENGINE_JOB_SYSTEM_POOL_DEFAULT_SIZE);
-		}
-
-		void CreateDefaultJobWorkerCount()
-		{
-			// we want to be sure we use one less the number of cores available so our main thread is not crowded
-			SetJobWorkerCount(thr::Thread::HardwareConcurrency() - 1);
-		}
-
 	public:
 		JobSystem() : _running(false), _thread_pool(nullptr), _job_pool(nullptr)
 		{
-			CreateDefaultJobPool();
-			CreateDefaultJobWorkerCount();
+			SetDefaultJobPoolSize();
+			SetDefaultJobWorkerCount();
 		}
 
 		~JobSystem()
@@ -106,6 +94,17 @@ namespace np::jsys
 		{
 			DisposeJobPool();
 			DisposeThreadPool();
+		}
+
+		void SetDefaultJobPoolSize()
+		{
+			SetJobPoolSize(NP_ENGINE_JOB_SYSTEM_POOL_DEFAULT_SIZE);
+		}
+
+		void SetDefaultJobWorkerCount()
+		{
+			// we want to be sure we use one less the number of cores available so our main thread is not crowded
+			SetJobWorkerCount(thr::Thread::HardwareConcurrency() - 1);
 		}
 
 		void SetJobPoolSize(siz size)
@@ -135,10 +134,10 @@ namespace np::jsys
 			NP_ENGINE_PROFILE_FUNCTION();
 
 			if (!_job_pool)
-				CreateDefaultJobPool();
+				SetDefaultJobPoolSize();
 
 			if (!_thread_pool)
-				CreateDefaultJobWorkerCount();
+				SetDefaultJobWorkerCount();
 
 			_running.store(true, mo_release);
 
