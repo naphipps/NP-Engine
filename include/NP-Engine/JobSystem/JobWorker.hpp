@@ -46,7 +46,6 @@ namespace np::jsys
 		*/
 		Job* GetImmediateJob()
 		{
-			NP_ENGINE_PROFILE_FUNCTION();
 			Job* job = nullptr;
 			if (_immediate_job_queue.try_dequeue(job) && !job->CanExecute())
 			{
@@ -58,7 +57,6 @@ namespace np::jsys
 
 		Job* GetStolenJob()
 		{
-			NP_ENGINE_PROFILE_FUNCTION();
 			return _coworkers.empty() ? nullptr : _coworkers[_coworker_index]->GetImmediateJob();
 		}
 
@@ -77,7 +75,7 @@ namespace np::jsys
 			_thread_pool(nullptr),
 			_job_system(nullptr),
 			_coworker_index(0),
-			_bad_steal_sleep_duration(NP_ENGINE_APPLICATION_LOOP_DURATION)
+			_bad_steal_sleep_duration((flt)NP_ENGINE_APPLICATION_LOOP_DURATION / 2.f)
 		{}
 
 		JobWorker(const JobWorker& other) = delete;
