@@ -115,7 +115,7 @@ namespace np::uid
 			UidRecord r{};
 
 			for (auto it = _uid_pools.begin(); it != _uid_pools.end() && !h.IsValid(); it++)
-				AttemptToCreateHandle(*_uid_pools.back(), h, r);
+				AttemptToCreateHandle(*(*it), h, r);
 
 			if (!h.IsValid())
 			{
