@@ -153,7 +153,7 @@ namespace np::jsys
 		{
 			NP_ENGINE_PROFILE_FUNCTION();
 			_job_system = mem::AddressOf(job_system);
-			_thread_pool = &pool;
+			_thread_pool = mem::AddressOf(pool);
 			_keep_working.store(true, mo_release);
 			_work_procedure_complete.store(false, mo_release);
 			_coworker_index = _random_engine.GetLemireWithinRange(_coworkers.size());
