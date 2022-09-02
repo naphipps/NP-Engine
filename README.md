@@ -23,3 +23,7 @@ This game engine started out as my first video game, but since the project kept 
 ***
 
 **Note: This project is a work in progress. Tags will be implemented when the v0.0.0.1 backlog is complete so you can navigate official versions of the engine. Until then, commits are liable to break the build.**
+
+**Here is the internal dependency of how things are arranged. Everything is subject to change.**
+
+![](https://raw.githubusercontent.com/naphipps/NP-Engine/master/docs/uml-screenshot.png)
