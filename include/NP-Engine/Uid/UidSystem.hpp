@@ -75,7 +75,7 @@ namespace np::uid
 					*r.UidPtr = _uid_gen();
 
 				_uid_master_set.emplace(*r.UidPtr);
-				h.Key = (siz)r.UidPtr; //TODO: we might would like to create a key in a better way? I don't think we need to
+				h.Key = (siz)r.UidPtr;
 				h.Generation = ++_generation;
 				r.Generation = h.Generation;
 				_key_to_record.emplace(h.Key, r);
@@ -169,10 +169,7 @@ namespace np::uid
 
 		void Defragment()
 		{
-			Lock lock(_m);
-
 			//TODO: defragment our pools by putting all our uid's to the front pools, then removing all full pools
-
 		}
 	};
 }
