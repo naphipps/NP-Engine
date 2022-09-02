@@ -279,8 +279,6 @@ set(NP_ENGINE_SYSTEM_HPP
 
 set(NP_ENGINE_THREAD_HPP
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Thread/Thread.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Thread/ThreadImpl.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Thread/ThreadPool.hpp
 )
 
 set(NP_ENGINE_TIME_HPP
@@ -447,7 +445,7 @@ set(NP_ENGINE_SYSTEM_CPP
 )
 
 set(NP_ENGINE_THREAD_CPP
-	Thread/ThreadImpl.cpp
+	Thread/Thread.cpp
 )
 
 set(NP_ENGINE_WINDOW_CPP

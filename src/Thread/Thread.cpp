@@ -4,7 +4,7 @@
 //
 //##===----------------------------------------------------------------------===##//
 
-#include "NP-Engine/Thread/ThreadImpl.hpp"
+#include "NP-Engine/Thread/Thread.hpp"
 
 #if NP_ENGINE_PLATFORM_IS_LINUX
 	#include <pthread.h> //pthread_setaffinity_np
