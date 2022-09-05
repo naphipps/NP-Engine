@@ -12,6 +12,7 @@
 
 #elif NP_ENGINE_PLATFORM_IS_WINDOWS
 	#include <Windows.h>
+	#include <synchapi.h>
 
 #endif
 
@@ -73,11 +74,52 @@ namespace np::thr
 				SetThreadIdealProcessor(current_thread, (DWORD)core_number);
 				SetThreadAffinityMask(current_thread, (DWORD_PTR)((ui64)1 << (ui64)core_number));
 				set = true;
-
 	#endif
 			}
 			return set;
 #endif
+		}
+
+		namespace __detail
+		{
+			void SleepForNanoseconds(ui64 nanoseconds)
+			{
+#if NP_ENGINE_PLATFORM_IS_APPLE
+#error does apple have a good sleep function?
+
+#elif NP_ENGINE_PLATFORM_IS_LINUX
+#error use nanosleep() from <unistd.h>
+
+#elif NP_ENGINE_PLATFORM_IS_WINDOWS
+				Sleep(nanoseconds / 1000);
+#endif
+			}
+
+			void SleepForMilliseconds(ui64 milliseconds)
+			{
+#if NP_ENGINE_PLATFORM_IS_APPLE
+#error does apple have a good sleep function?
+
+#elif NP_ENGINE_PLATFORM_IS_LINUX
+#error use nanosleep() from <unistd.h>
+
+#elif NP_ENGINE_PLATFORM_IS_WINDOWS
+				Sleep(milliseconds);
+#endif
+			}
+
+			void SleepForSeconds(ui64 seconds)
+			{
+#if NP_ENGINE_PLATFORM_IS_APPLE
+#error does apple have a good sleep function?
+
+#elif NP_ENGINE_PLATFORM_IS_LINUX
+#error use nanosleep() from <unistd.h>
+
+#elif NP_ENGINE_PLATFORM_IS_WINDOWS
+				Sleep(seconds * 1000);
+#endif
+			}
 		}
 	} // namespace ThisThread
 } // namespace np::thr

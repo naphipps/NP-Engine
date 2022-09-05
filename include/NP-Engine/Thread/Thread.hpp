@@ -13,6 +13,7 @@
 #include "NP-Engine/Primitive/Primitive.hpp"
 #include "NP-Engine/Platform/Platform.hpp"
 #include "NP-Engine/Memory/Memory.hpp"
+#include "NP-Engine/Time/Time.hpp"
 
 namespace np::thr
 {
@@ -98,7 +99,30 @@ namespace np::thr
 	{
 		using namespace ::std::this_thread;
 
+		namespace __detail
+		{
+			void SleepForNanoseconds(ui64 nanoseconds);
+			void SleepForMilliseconds(ui64 milliseconds);
+			void SleepForSeconds(ui64 seconds);
+		}
+
 		bl SetAffinity(siz core_number);
+
+		template <class R, class P>
+		void SleepFor(const tim::Duration<R, P>& d)
+		{
+#if NP_ENGINE_PLATFORM_IS_APPLE
+			tim::Duration<ui64, ::std::milli> milliseconds = d;
+			__detail::SleepForMilliseconds(milliseconds.count());
+#elif NP_ENGINE_PLATFORM_IS_LINUX
+			tim::Duration<ui64, ::std::nano> nanoseconds = d;
+			__detail::SleepForNanoseconds(milliseconds.count());
+#elif NP_ENGINE_PLATFORM_IS_WINDOWS
+			using WindowsDuration = tim::Duration<ui64, ::std::milli>;
+			WindowsDuration milliseconds = tim::DurationCast<WindowsDuration, R, P>(d);
+			__detail::SleepForMilliseconds(milliseconds.count());
+#endif
+		}
 	} // namespace ThisThread
 
 	using ThreadPool = mem::ObjectPool<Thread>;
