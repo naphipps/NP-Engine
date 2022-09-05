@@ -50,7 +50,7 @@ namespace np::jsys
 		con::vector<JobWorker*> _coworkers;
 		siz _coworker_index;
 		atm<con::array<Fetch, 3>> _fetch_order;
-		
+
 		/*
 			returns a valid && CanExecute() job, or invalid job
 		*/

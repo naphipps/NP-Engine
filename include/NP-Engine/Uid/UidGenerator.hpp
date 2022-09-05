@@ -19,7 +19,7 @@ namespace np::uid
 		rng::Random64 _rng;
 
 	public:
-		UidGenerator() : uuids::basic_uuid_random_generator<rng::Random64>(_rng) {}
+		UidGenerator(): uuids::basic_uuid_random_generator<rng::Random64>(_rng) {}
 
 		rng::Random64& GetRng()
 		{
@@ -31,6 +31,6 @@ namespace np::uid
 			return _rng;
 		}
 	};
-}
+} // namespace np::uid
 
 #endif /* NP_ENGINE_UID_GENERATOR_HPP */

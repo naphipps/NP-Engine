@@ -12,6 +12,6 @@
 namespace np::uid
 {
 	using Uid = ::uuids::uuid;
-}
+} // namespace np::uid
 
 #endif /* NP_ENGINE_UID_IMPL_HPP */

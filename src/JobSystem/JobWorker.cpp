@@ -121,7 +121,7 @@ namespace np::jsys
 			fetch_order = _fetch_order.load(mo_acquire);
 			for (const Fetch& fetch : fetch_order)
 			{
-				switch(fetch)
+				switch (fetch)
 				{
 				case Fetch::Immediate:
 					success = TryImmediateJob();
@@ -159,7 +159,8 @@ namespace np::jsys
 						do
 						{
 							thr::ThisThread::yield();
-						} while (tim::SteadyClock::now() - start < duration);
+						}
+						while (tim::SteadyClock::now() - start < duration);
 
 						sleep_count++;
 					}

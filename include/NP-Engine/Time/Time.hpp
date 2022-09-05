@@ -13,7 +13,7 @@
 
 namespace np::tim
 {
-	//TODO: add all the time ratios, like nano seconds, etc
+	// TODO: add all the time ratios, like nano seconds, etc
 
 	/*
 		using nanoseconds = duration<long long, nano>;

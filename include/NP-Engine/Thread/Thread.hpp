@@ -104,7 +104,7 @@ namespace np::thr
 			void SleepForNanoseconds(ui64 nanoseconds);
 			void SleepForMilliseconds(ui64 milliseconds);
 			void SleepForSeconds(ui64 seconds);
-		}
+		} // namespace __detail
 
 		bl SetAffinity(siz core_number);
 
@@ -127,6 +127,5 @@ namespace np::thr
 
 	using ThreadPool = mem::ObjectPool<Thread>;
 } // namespace np::thr
-
 
 #endif /* NP_ENGINE_THREAD_HPP */

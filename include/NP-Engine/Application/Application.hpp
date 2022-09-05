@@ -170,14 +170,14 @@ namespace np::app
 			con::vector<jsys::JobWorker>& job_workers = job_system.GetJobWorkers();
 
 			using Fetch = jsys::JobWorker::Fetch;
-			con::array<Fetch, 3> default_order{ Fetch::Immediate, Fetch::PriorityBased, Fetch::Steal };
-			con::array<Fetch, 3> thief_order{ Fetch::Steal, Fetch::Immediate, Fetch::None };
-			con::array<Fetch, 3> priority_order{ Fetch::PriorityBased, Fetch::None, Fetch::None };
-			con::array<Fetch, 3> immediate_order{ Fetch::Immediate, Fetch::Steal, Fetch::None };
+			con::array<Fetch, 3> default_order{Fetch::Immediate, Fetch::PriorityBased, Fetch::Steal};
+			con::array<Fetch, 3> thief_order{Fetch::Steal, Fetch::Immediate, Fetch::None};
+			con::array<Fetch, 3> priority_order{Fetch::PriorityBased, Fetch::None, Fetch::None};
+			con::array<Fetch, 3> immediate_order{Fetch::Immediate, Fetch::Steal, Fetch::None};
 
 			if (job_workers.size())
 			{
-				//TODO: we can customize how our job workers operate depending on the number of them
+				// TODO: we can customize how our job workers operate depending on the number of them
 			}
 		}
 
@@ -200,7 +200,7 @@ namespace np::app
 		virtual void Run(i32 argc, chr** argv)
 		{
 			NP_ENGINE_PROFILE_SCOPE("application run");
-			
+
 			_running.store(true, mo_release);
 			evnt::EventQueue& event_queue = _services.GetEventQueue();
 			jsys::JobSystem& job_system = _services.GetJobSystem();

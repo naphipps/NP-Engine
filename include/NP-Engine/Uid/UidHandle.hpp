@@ -43,6 +43,6 @@ namespace np::uid
 			Generation = NP_ENGINE_UID_INVALID_GENERATION;
 		}
 	};
-}
+} // namespace np::uid
 
 #endif /* NP_ENGINE_UID_HANDLE_HPP */

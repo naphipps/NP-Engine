@@ -14,7 +14,7 @@
 
 namespace np::geom
 {
-	//TODO: make our AABB support 3D points
+	// TODO: make our AABB support 3D points
 
 	template <typename T>
 	struct AABB

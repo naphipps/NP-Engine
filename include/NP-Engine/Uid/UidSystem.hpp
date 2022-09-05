@@ -25,7 +25,6 @@ namespace np::uid
 	class UidSystem
 	{
 	private:
-
 		struct UidRecord
 		{
 			Uid* UidPtr = nullptr;
@@ -50,7 +49,7 @@ namespace np::uid
 
 		constexpr static siz UID_ALIGNED_SIZE = mem::CalcAlignedSize(sizeof(Uid));
 
-		Mutex _m; //TODO: don't know if an atomic lock would be faster??
+		Mutex _m; // TODO: don't know if an atomic lock would be faster??
 		UidGenerator _uid_gen;
 		mem::TraitAllocator _allocator;
 		con::vector<mem::Block> _uid_pool_blocks;
@@ -83,8 +82,7 @@ namespace np::uid
 		}
 
 	public:
-
-		UidSystem() : _generation(NP_ENGINE_UID_INVALID_GENERATION)
+		UidSystem(): _generation(NP_ENGINE_UID_INVALID_GENERATION)
 		{
 			AddPool();
 		}
@@ -169,9 +167,9 @@ namespace np::uid
 
 		void Defragment()
 		{
-			//TODO: defragment our pools by putting all our uid's to the front pools, then removing all full pools
+			// TODO: defragment our pools by putting all our uid's to the front pools, then removing all full pools
 		}
 	};
-}
+} // namespace np::uid
 
 #endif /* NP_ENGINE_UID_SYSTEM_HPP */

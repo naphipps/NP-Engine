@@ -79,7 +79,7 @@ namespace np::jsys
 		}
 
 	public:
-		JobSystem() : _running(false), _thread_pool(nullptr), _job_pool(nullptr)
+		JobSystem(): _running(false), _thread_pool(nullptr), _job_pool(nullptr)
 		{
 			SetDefaultJobPoolSize();
 			SetDefaultJobWorkerCount();
