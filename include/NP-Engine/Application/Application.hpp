@@ -193,21 +193,22 @@ namespace np::app
 			inspired by the following:
 				- http://www.gameprogrammingpatterns.com/game-loop.html
 				- https://gafferongames.com/post/fix_your_timestep/
+
+			//TODO: turn our loop and rendering into a fixed step loop
+			//TODO: ^ so we can set it to 60fps or something with 0 being infinite
 		*/
 		virtual void Run(i32 argc, chr** argv)
 		{
-			// TODO: this into a fixed step loop - aka, set this to loop at 60fps or something with 0 being infinitely fast
-
+			NP_ENGINE_PROFILE_SCOPE("application run");
+			
 			_running.store(true, mo_release);
 			evnt::EventQueue& event_queue = _services.GetEventQueue();
 			jsys::JobSystem& job_system = _services.GetJobSystem();
 
-			const tim::DurationMilliseconds max_loop_duration(NP_ENGINE_APPLICATION_LOOP_DURATION);
+			const tim::DurationMilliseconds min_loop_duration(NP_ENGINE_APPLICATION_LOOP_DURATION);
 
-			tim::SteadyTimestamp loop_next_timestamp = tim::SteadyClock::now();
-			tim::SteadyTimestamp loop_prev_timestamp = tim::SteadyClock::now();
-			tim::DurationMilliseconds loop_duration(0);
-
+			tim::SteadyTimestamp next_timestamp = tim::SteadyClock::now();
+			tim::SteadyTimestamp prev_timestamp = tim::SteadyClock::now();
 			tim::SteadyTimestamp update_next_timestamp = tim::SteadyClock::now();
 			tim::SteadyTimestamp update_prev_timestamp = tim::SteadyClock::now();
 			tim::DurationMilliseconds update_duration(0);
@@ -216,6 +217,8 @@ namespace np::app
 			job_system.Start();
 			while (_running.load(mo_acquire))
 			{
+				NP_ENGINE_PROFILE_SCOPE("loop");
+
 				update_next_timestamp = tim::SteadyClock::now();
 				update_duration = update_next_timestamp - update_prev_timestamp;
 				update_prev_timestamp = update_next_timestamp;
@@ -259,14 +262,12 @@ namespace np::app
 
 				_graphics_layer.Render();
 
-				loop_next_timestamp = tim::SteadyClock::now();
-				loop_duration = loop_next_timestamp - loop_prev_timestamp;
-				loop_prev_timestamp = loop_next_timestamp;
-				if (loop_duration < max_loop_duration)
-				{
+				for (next_timestamp = tim::SteadyClock::now();
+					next_timestamp - prev_timestamp < min_loop_duration;
+					next_timestamp = tim::SteadyClock::now())
 					thr::ThisThread::yield();
-					thr::ThisThread::sleep_for(max_loop_duration - loop_duration);
-				}
+
+				prev_timestamp = next_timestamp;
 			}
 
 			//TODO: add event_queue.Dispose();
