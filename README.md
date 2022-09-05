@@ -18,6 +18,7 @@ This game engine started out as my first video game, but since the project kept 
 	  - [x] controller over individual job workers
 	  - [x] automatic scaling up/down for the platform it runs on
 	  - [x] considerate of the main thread so thread scheduling does not throttle the main thread
+	  - [x] how a worker fetches jobs can be customized in real time to allow for direct control on how the worker works throughout the life of the session
 	- [x] A profiler that outputs a JSON file for Chrome's Tracing tool. (Type "chrome://tracing/" in Chrome's url.)
 
 ***
