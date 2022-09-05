@@ -30,17 +30,27 @@ namespace np::jsys
 	private:
 		friend class JobSystem;
 
+	public:
+		enum class Fetch : ui32
+		{
+			None = 0,
+			Immediate = BIT(0),
+			PriorityBased = BIT(1),
+			Steal = BIT(2)
+		};
+
+	private:
 		atm_bl _keep_working;
 		atm_bl _work_procedure_complete;
 		thr::Thread* _thread;
 		thr::ThreadPool* _thread_pool;
 		JobSystem* _job_system;
 		con::mpmc_queue<Job*> _immediate_job_queue;
+		rng::Random64 _random_engine;
 		con::vector<JobWorker*> _coworkers;
 		siz _coworker_index;
-		tim::DurationMilliseconds _bad_steal_sleep_duration;
-		rng::Random64 _random_engine;
-
+		atm<con::array<Fetch, 3>> _fetch_order;
+		
 		/*
 			returns a valid && CanExecute() job, or invalid job
 		*/
@@ -67,6 +77,12 @@ namespace np::jsys
 
 		void WorkerThreadProcedure();
 
+		bl TryImmediateJob();
+
+		bl TryPriorityBasedJob();
+
+		bl TryStealingJob();
+
 	public:
 		JobWorker():
 			_keep_working(false),
@@ -75,7 +91,7 @@ namespace np::jsys
 			_thread_pool(nullptr),
 			_job_system(nullptr),
 			_coworker_index(0),
-			_bad_steal_sleep_duration((flt)NP_ENGINE_APPLICATION_LOOP_DURATION / 2.f)
+			_fetch_order({Fetch::Immediate, Fetch::PriorityBased, Fetch::Steal})
 		{}
 
 		JobWorker(const JobWorker& other) = delete;
@@ -87,13 +103,13 @@ namespace np::jsys
 			_thread_pool(::std::move(other._thread_pool)),
 			_job_system(::std::move(other._job_system)),
 			_immediate_job_queue(::std::move(other._immediate_job_queue)),
+			_random_engine(::std::move(other._random_engine)),
 			_coworkers(::std::move(other._coworkers)),
 			_coworker_index(::std::move(other._coworker_index)),
-			_bad_steal_sleep_duration(::std::move(other._bad_steal_sleep_duration)),
-			_random_engine(::std::move(other._random_engine))
+			_fetch_order(::std::move(other._fetch_order.load(mo_acquire)))
 		{}
 
-		~JobWorker()
+		virtual ~JobWorker()
 		{
 			StopWork();
 		}
@@ -108,10 +124,10 @@ namespace np::jsys
 			_thread_pool = ::std::move(other._thread_pool);
 			_job_system = ::std::move(other._job_system);
 			_immediate_job_queue = ::std::move(other._immediate_job_queue);
+			_random_engine = ::std::move(other._random_engine);
 			_coworkers = ::std::move(other._coworkers);
 			_coworker_index = ::std::move(other._coworker_index);
-			_bad_steal_sleep_duration = ::std::move(other._bad_steal_sleep_duration);
-			_random_engine = ::std::move(other._random_engine);
+			_fetch_order = ::std::move(other._fetch_order.load(mo_acquire));
 			return *this;
 		}
 
@@ -147,6 +163,16 @@ namespace np::jsys
 				return_job = job;
 
 			return return_job;
+		}
+
+		con::array<Fetch, 3> GetFetchOrder()
+		{
+			return _fetch_order.load(mo_acquire);
+		}
+
+		void SetFetchOrder(const con::array<Fetch, 3>& fetch_order)
+		{
+			_fetch_order.store(fetch_order, mo_release);
 		}
 
 		void StartWork(JobSystem& job_system, thr::ThreadPool& pool, siz thread_affinity)

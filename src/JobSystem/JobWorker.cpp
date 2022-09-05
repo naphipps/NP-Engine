@@ -36,63 +36,137 @@ namespace np::jsys
 		return next_job;
 	}
 
-	void JobWorker::WorkerThreadProcedure()
+	bl JobWorker::TryImmediateJob()
 	{
-		NP_ENGINE_PROFILE_SCOPE("WorkerThreadProcedure: " + to_str((ui64)this));
+		bl success = !_keep_working.load(mo_acquire);
 
-		Job* immediate = nullptr;
-		JobRecord record;
-		Job* j = nullptr;
-		Job* stolen = nullptr;
-
-		while (_keep_working.load(mo_acquire))
+		if (!success)
 		{
-			immediate = GetImmediateJob();
+			Job* immediate = GetImmediateJob();
 			if (immediate)
 			{
 				NP_ENGINE_PROFILE_SCOPE("executing immediate Job");
+				success = true;
 				immediate->Execute();
 				if (immediate->IsComplete())
 					_job_system->DestroyJob(immediate);
 				else
 					SubmitImmediateJob(immediate);
 			}
-			else if (_keep_working.load(mo_acquire))
+		}
+
+		return success;
+	}
+
+	bl JobWorker::TryPriorityBasedJob()
+	{
+		bl success = !_keep_working.load(mo_acquire);
+
+		if (!success)
+		{
+			JobRecord record = GetNextJob();
+			if (record.IsValid())
 			{
-				record = GetNextJob();
-				if (record.IsValid())
+				NP_ENGINE_PROFILE_SCOPE("executing next Job");
+				success = true;
+				Job* j = record.GetJob();
+				j->Execute();
+				if (j->IsComplete())
+					_job_system->DestroyJob(j);
+				else
+					_job_system->SubmitJob(j->GetAttractedPriority(record.GetPriority()), j);
+			}
+		}
+
+		return success;
+	}
+
+	bl JobWorker::TryStealingJob()
+	{
+		bl success = !_keep_working.load(mo_acquire);
+
+		if (!success)
+		{
+			Job* stolen = GetStolenJob();
+			if (stolen)
+			{
+				NP_ENGINE_PROFILE_SCOPE("executing stolen Job");
+				success = true;
+				stolen->Execute();
+				if (stolen->IsComplete())
+					_job_system->DestroyJob(stolen);
+				else
+					SubmitImmediateJob(stolen);
+			}
+			else
+			{
+				// we did not steal a good job thus we want to steal from someone else
+				_coworker_index = (_coworker_index + 1) % _coworkers.size();
+			}
+		}
+
+		return success;
+	}
+
+	void JobWorker::WorkerThreadProcedure()
+	{
+		NP_ENGINE_PROFILE_SCOPE("WorkerThreadProcedure: " + to_str((ui64)this));
+
+		ui32 deep_sleep_threshold = _coworkers.size() * 3;
+		ui32 sleep_count = 0;
+		con::array<Fetch, 3> fetch_order;
+		bl success = false;
+		while (_keep_working.load(mo_acquire))
+		{
+			fetch_order = _fetch_order.load(mo_acquire);
+			for (const Fetch& fetch : fetch_order)
+			{
+				switch(fetch)
 				{
-					NP_ENGINE_PROFILE_SCOPE("executing next Job");
-					j = record.GetJob();
-					j->Execute();
-					if (j->IsComplete())
-						_job_system->DestroyJob(j);
-					else
-						_job_system->SubmitJob(j->GetAttractedPriority(record.GetPriority()), j);
+				case Fetch::Immediate:
+					success = TryImmediateJob();
+					break;
+				case Fetch::PriorityBased:
+					success = TryPriorityBasedJob();
+					break;
+				case Fetch::Steal:
+					success = TryStealingJob();
+					break;
+				case Fetch::None:
+				default:
+					continue;
+					break;
 				}
-				else if (_keep_working.load(mo_acquire))
+
+				if (success)
+					break;
+			}
+
+			if (_keep_working.load(mo_acquire))
+			{
+				if (success)
 				{
-					// we did not find next job so we steal from coworker
-					stolen = GetStolenJob();
-					if (stolen)
+					success = false;
+					sleep_count = 0;
+				}
+				else
+				{
+					if (sleep_count < deep_sleep_threshold)
 					{
-						NP_ENGINE_PROFILE_SCOPE("executing stolen Job");
-						stolen->Execute();
-						if (stolen->IsComplete())
-							_job_system->DestroyJob(stolen);
-						else
-							SubmitImmediateJob(stolen);
+						tim::DurationMilliseconds duration((flt)NP_ENGINE_APPLICATION_LOOP_DURATION / 2.f);
+						tim::SteadyTimestamp start = tim::SteadyClock::now();
+
+						do
+						{
+							thr::ThisThread::yield();
+						} while (tim::SteadyClock::now() - start < duration);
+
+						sleep_count++;
 					}
-					else if (_keep_working.load(mo_acquire))
+					else
 					{
-						NP_ENGINE_PROFILE_SCOPE("sleeping");
-
-						// we did not steal a good job thus we want to steal from someone else
-						_coworker_index = (_coworker_index + 1) % _coworkers.size();
-
-						// we yield/sleep just in case all jobs are done
-						thr::ThisThread::yield();
-						thr::ThisThread::sleep_for(_bad_steal_sleep_duration);
+						tim::DurationMilliseconds duration(NP_ENGINE_APPLICATION_LOOP_DURATION);
+						thr::ThisThread::SleepFor(duration);
 					}
 				}
 			}
