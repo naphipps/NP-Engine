@@ -164,6 +164,23 @@ namespace np::app
 			// TODO: do we need this??
 		}
 
+		virtual void CustomizeJobSystem()
+		{
+			jsys::JobSystem& job_system = _services.GetJobSystem();
+			con::vector<jsys::JobWorker>& job_workers = job_system.GetJobWorkers();
+
+			using Fetch = jsys::JobWorker::Fetch;
+			con::array<Fetch, 3> default_order{ Fetch::Immediate, Fetch::PriorityBased, Fetch::Steal };
+			con::array<Fetch, 3> thief_order{ Fetch::Steal, Fetch::Immediate, Fetch::None };
+			con::array<Fetch, 3> priority_order{ Fetch::PriorityBased, Fetch::None, Fetch::None };
+			con::array<Fetch, 3> immediate_order{ Fetch::Immediate, Fetch::Steal, Fetch::None };
+
+			if (job_workers.size())
+			{
+				//TODO: we can customize how our job workers operate depending on the number of them
+			}
+		}
+
 	public:
 		virtual ~Application() {}
 
@@ -195,6 +212,7 @@ namespace np::app
 			tim::SteadyTimestamp update_prev_timestamp = tim::SteadyClock::now();
 			tim::DurationMilliseconds update_duration(0);
 
+			CustomizeJobSystem();
 			job_system.Start();
 			while (_running.load(mo_acquire))
 			{
@@ -250,7 +268,11 @@ namespace np::app
 					thr::ThisThread::sleep_for(max_loop_duration - loop_duration);
 				}
 			}
+
+			//TODO: add event_queue.Dispose();
+
 			job_system.Stop();
+			job_system.Dispose();
 		}
 
 		Properties GetProperties() const
