@@ -205,13 +205,16 @@ namespace np::app
 			evnt::EventQueue& event_queue = _services.GetEventQueue();
 			jsys::JobSystem& job_system = _services.GetJobSystem();
 
-			const tim::DurationMilliseconds min_loop_duration(NP_ENGINE_APPLICATION_LOOP_DURATION);
+			tim::DurationMilliseconds min_duration(NP_ENGINE_APPLICATION_LOOP_DURATION);
 
-			tim::SteadyTimestamp next_timestamp = tim::SteadyClock::now();
-			tim::SteadyTimestamp prev_timestamp = tim::SteadyClock::now();
-			tim::SteadyTimestamp update_next_timestamp = tim::SteadyClock::now();
-			tim::SteadyTimestamp update_prev_timestamp = tim::SteadyClock::now();
+			tim::SteadyTimestamp next = tim::SteadyClock::now();
+			tim::SteadyTimestamp prev = tim::SteadyClock::now();
+			tim::SteadyTimestamp update_next = tim::SteadyClock::now();
+			tim::SteadyTimestamp update_prev = tim::SteadyClock::now();
 			tim::DurationMilliseconds update_duration(0);
+
+			evnt::Event* e = nullptr;
+			siz i = 0;
 
 			CustomizeJobSystem();
 			job_system.Start();
@@ -219,34 +222,34 @@ namespace np::app
 			{
 				NP_ENGINE_PROFILE_SCOPE("loop");
 
-				update_next_timestamp = tim::SteadyClock::now();
-				update_duration = update_next_timestamp - update_prev_timestamp;
-				update_prev_timestamp = update_next_timestamp;
+				update_next = tim::SteadyClock::now();
+				update_duration = update_next - update_prev;
+				update_prev = update_next;
 
-				for (Layer* layer : _layers)
-					layer->BeforeUdpate();
-				for (Layer* overlay : _overlays)
-					overlay->BeforeUdpate();
+				for (i = 0; i < _layers.size(); i++)
+					_layers[i]->BeforeUdpate();
+				for (i = 0; i < _overlays.size(); i++)
+					_overlays[i]->BeforeUdpate();
 
-				for (Layer* layer : _layers)
-					layer->Update(update_duration);
-				for (Layer* overlay : _overlays)
-					overlay->Update(update_duration);
+				for (i = 0; i < _layers.size(); i++)
+					_layers[i]->Update(update_duration);
+				for (i = 0; i < _overlays.size(); i++)
+					_overlays[i]->Update(update_duration);
 
-				for (Layer* layer : _layers)
-					layer->AfterUdpate();
-				for (Layer* overlay : _overlays)
-					overlay->AfterUdpate();
+				for (i = 0; i < _layers.size(); i++)
+					_layers[i]->AfterUdpate();
+				for (i = 0; i < _overlays.size(); i++)
+					_overlays[i]->AfterUdpate();
 
-				for (evnt::Event* e = event_queue.PopOther(); e != nullptr; e = event_queue.PopOther())
+				for (e = event_queue.PopOther(); e != nullptr; e = event_queue.PopOther())
 				{
 					e->SetCanBeHandled(false);
 
-					for (auto it = _overlays.rbegin(); !e->IsHandled() && it != _overlays.rend(); it++)
-						(*it)->OnEvent(*e);
+					for (i = _overlays.size() - 1; !e->IsHandled() && i < _overlays.size(); i--)
+						_overlays[i]->OnEvent(*e);
 
-					for (auto it = _layers.rbegin(); !e->IsHandled() && it != _layers.rend(); it++)
-						(*it)->OnEvent(*e);
+					for (i = _layers.size() - 1; !e->IsHandled() && i < _layers.size(); i--)
+						_layers[i]->OnEvent(*e);
 
 					if (!e->CanBeHandled())
 						event_queue.DestroyEvent(e);
@@ -255,25 +258,22 @@ namespace np::app
 				}
 				event_queue.SwapBuffers();
 
-				for (Layer* layer : _layers)
-					layer->Cleanup();
-				for (Layer* overlay : _overlays)
-					overlay->Cleanup();
+				for (i = 0; i < _layers.size(); i++)
+					_layers[i]->Cleanup();
+				for (i = 0; i < _overlays.size(); i++)
+					_overlays[i]->Cleanup();
 
 				_graphics_layer.Render();
 
-				for (next_timestamp = tim::SteadyClock::now();
-					next_timestamp - prev_timestamp < min_loop_duration;
-					next_timestamp = tim::SteadyClock::now())
+				for (next = tim::SteadyClock::now(); next - prev < min_duration; next = tim::SteadyClock::now())
 					thr::ThisThread::yield();
 
-				prev_timestamp = next_timestamp;
+				prev = next;
 			}
-
-			//TODO: add event_queue.Dispose();
 
 			job_system.Stop();
 			job_system.Dispose();
+			event_queue.Clear();
 		}
 
 		Properties GetProperties() const

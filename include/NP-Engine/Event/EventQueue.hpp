@@ -57,7 +57,7 @@ namespace np::evnt
 		template <typename T, typename... Args>
 		bl Emplace(Args&&... args)
 		{
-			NP_ENGINE_STATIC_ASSERT((::std::is_base_of_v<evnt::Event, T>), "T is requried to be a base of event:Event");
+			NP_ENGINE_STATIC_ASSERT((::std::is_base_of_v<Event, T>), "T is requried to be a base of event:Event");
 			T* e = mem::Create<T>(_allocator, ::std::forward<Args>(args)...);
 
 			if (e)
@@ -78,15 +78,25 @@ namespace np::evnt
 		/*
 			pop from the other buffer
 		*/
-		evnt::Event* PopOther()
+		Event* PopOther()
 		{
-			evnt::Event* e = nullptr;
+			Event* e = nullptr;
 			return GetOtherBuffer().try_dequeue(e) ? e : nullptr;
 		}
 
 		void DestroyEvent(Event* e)
 		{
 			mem::Destroy<Event>(_allocator, e);
+		}
+
+		void Clear()
+		{
+			Event* e = nullptr;
+			while (_buffer1.try_dequeue(e))
+				DestroyEvent(e);
+
+			while (_buffer2.try_dequeue(e))
+				DestroyEvent(e);
 		}
 	};
 } // namespace np::evnt
