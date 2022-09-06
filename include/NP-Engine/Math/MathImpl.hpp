@@ -100,21 +100,19 @@ namespace np::mat
 	{
 		// keeping union for performance
 		union {
-			flt result;
-			i32 i_result;
+			flt f;
+			i32 i;
 		};
 
-		result = n;
-		i_result = 0x5f3759df - (i_result >> 1);
+		f = n;
+		i = 0x5f3759df - (i >> 1);
 		flt half_n = n * 0.5f;
 
 		do
-		{
-			result *= 1.5f - (half_n * result * result);
-		}
+			f *= 1.5f - (half_n * f * f);
 		while (--newton_iteration_count > 0);
 
-		return result;
+		return f;
 	}
 
 	template <typename T>
