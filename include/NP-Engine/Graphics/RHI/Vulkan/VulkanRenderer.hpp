@@ -302,6 +302,7 @@ namespace np::gfx::rhi
 
 		void DrawFrame() override
 		{
+			NP_ENGINE_PROFILE_SCOPE("vulkan renderer draw frame");
 			ui32 image_index = GetSwapchain().GetAcquiredImageIndex();
 			ui32 current_index = GetSwapchain().GetCurrentImageIndex();
 			con::vector<VkCommandBuffer> buffers = {_command_buffers[current_index]};

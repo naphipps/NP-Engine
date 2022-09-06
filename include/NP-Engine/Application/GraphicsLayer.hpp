@@ -217,6 +217,7 @@ namespace np::app
 
 		void Render()
 		{
+			NP_ENGINE_PROFILE_SCOPE("rendering");
 			for (auto it = _acquired_scenes.begin(); it != _acquired_scenes.end(); it++)
 				(*it)->Render();
 		}

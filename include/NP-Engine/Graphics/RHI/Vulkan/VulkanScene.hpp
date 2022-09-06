@@ -80,6 +80,7 @@ namespace np::gfx::rhi
 
 		void Draw()
 		{
+			NP_ENGINE_PROFILE_SCOPE("vulkan scene draw");
 			bl expected = false;
 			while (!_is_drawing.compare_exchange_weak(expected, true, mo_release, mo_relaxed))
 				expected = false;
