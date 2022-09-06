@@ -11,8 +11,7 @@
 #include "NP-Engine/Event/Event.hpp"
 #include "NP-Engine/Memory/Memory.hpp"
 #include "NP-Engine/Uid/Uid.hpp"
-
-#include "NP-Engine/Vendor/EnttInclude.hpp"
+#include "NP-Engine/ECS/ECS.hpp"
 
 namespace np::srvc
 {
@@ -20,7 +19,7 @@ namespace np::srvc
 	{
 	private:
 		mem::TraitAllocator _allocator;
-		::entt::registry _ecs_registry;
+		ecs::Registry _ecs_registry;
 		jsys::JobSystem _job_system;
 		evnt::EventQueue _event_queue;
 		evnt::EventSubmitter _event_submitter;
@@ -39,12 +38,12 @@ namespace np::srvc
 			return _allocator;
 		}
 
-		::entt::registry& GetEcsRegistry()
+		ecs::Registry& GetEcsRegistry()
 		{
 			return _ecs_registry;
 		}
 
-		const ::entt::registry& GetEcsRegistry() const
+		const ecs::Registry& GetEcsRegistry() const
 		{
 			return _ecs_registry;
 		}

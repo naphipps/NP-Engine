@@ -34,7 +34,6 @@ set(NP_ENGINE_CONTAINER_HPP
 
 set(NP_ENGINE_ECS_HPP
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/ECS/ECS.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/ECS/Entity.hpp
 )
 
 set(NP_ENGINE_EVENT_HPP

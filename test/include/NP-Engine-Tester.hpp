@@ -32,7 +32,7 @@ namespace np::app
 			{
 				_scene->Dispose();
 				_scene = nullptr; // TODO: destroy content for scene
-				_model_entity.Clear();
+				_model_entity.clear();
 			}
 		}
 
@@ -91,7 +91,7 @@ namespace np::app
 			_renderable_model->GetUpdateMetaValuesOnFrameDelegate().Connect<GameLayer, &GameLayer::UpdateMetaValuesOnFrame>(
 				this);
 
-			_model_entity.Add<gfx::RenderableObject*>(_renderable_model);
+			_model_entity.add<gfx::RenderableObject*>(_renderable_model);
 
 			_camera.Eye = {2.0f, 2.0f, 2.0f};
 			_camera.Fovy = ::glm::radians(45.0f);
