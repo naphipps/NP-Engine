@@ -112,14 +112,13 @@ namespace np::thr
 		void SleepFor(const tim::Duration<R, P>& d)
 		{
 #if NP_ENGINE_PLATFORM_IS_APPLE
-			tim::Duration<ui64, ::std::milli> milliseconds = d;
+			tim::Ui64Milliseconds milliseconds = tim::DurationCast<tim::Ui64Milliseconds, R, P>(d);
 			__detail::SleepForMilliseconds(milliseconds.count());
 #elif NP_ENGINE_PLATFORM_IS_LINUX
-			tim::Duration<ui64, ::std::nano> nanoseconds = d;
-			__detail::SleepForNanoseconds(milliseconds.count());
+			tim::Ui64Nanoseconds nanoseconds = tim::DurationCast<tim::Ui64Nanoseconds, R, P>(d);
+			__detail::SleepForNanoseconds(nanoseconds.count());
 #elif NP_ENGINE_PLATFORM_IS_WINDOWS
-			using WindowsDuration = tim::Duration<ui64, ::std::milli>;
-			WindowsDuration milliseconds = tim::DurationCast<WindowsDuration, R, P>(d);
+			tim::Ui64Milliseconds milliseconds = tim::DurationCast<tim::Ui64Milliseconds, R, P>(d);
 			__detail::SleepForMilliseconds(milliseconds.count());
 #endif
 		}

@@ -73,7 +73,7 @@ namespace np::app
 			return _windows.emplace_back(mem::Create<win::Window>(_allocator, properties, _services));
 		}
 
-		virtual void Update(tim::DurationMilliseconds time_delta) override
+		virtual void Update(tim::DblMilliseconds time_delta) override
 		{
 			glfwPollEvents();
 

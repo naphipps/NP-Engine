@@ -18,8 +18,8 @@ namespace np::nsit
 	{
 		::std::string Name;
 		tim::SteadyTimestamp StartTimestamp;
-		tim::DurationMicroseconds ElapsedMicroseconds;
-		tim::DurationMilliseconds ElapsedMilliseconds;
+		tim::DblMicroseconds ElapsedMicroseconds;
+		tim::DblMilliseconds ElapsedMilliseconds;
 		::std::thread::id ThreadId;
 	};
 } // namespace np::nsit

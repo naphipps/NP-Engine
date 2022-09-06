@@ -50,7 +50,7 @@ namespace np::app
 
 		void SceneOnDraw(mem::Delegate& d)
 		{
-			tim::DurationMilliseconds duration = tim::SteadyClock::now() - _start_timestamp;
+			tim::DblMilliseconds duration = tim::SteadyClock::now() - _start_timestamp;
 			flt seconds = duration.count() / 1000.0f;
 			flt s = ::std::sinf(seconds * 1.2f);
 			flt e = s + 3.f;
@@ -68,7 +68,7 @@ namespace np::app
 		void UpdateMetaValuesOnFrame(mem::Delegate& d)
 		{
 			gfx::RenderableMetaValues& meta_values = _renderable_model->GetMetaValues();
-			tim::DurationMilliseconds duration = tim::SteadyClock::now() - _start_timestamp;
+			tim::DblMilliseconds duration = tim::SteadyClock::now() - _start_timestamp;
 			flt seconds = duration.count() / 1000.0f;
 			meta_values.object.Model =
 				::glm::rotate(glm::mat4(1.0f), seconds * glm::radians(90.0f) / 4.0f, glm::vec3(0.0f, 0.0f, 1.0f));
@@ -113,7 +113,7 @@ namespace np::app
 			_scene->Prepare();
 		}
 
-		void Update(tim::DurationMilliseconds time_delta) override {}
+		void Update(tim::DblMilliseconds time_delta) override {}
 
 		virtual evnt::EventCategory GetHandledCategories() const override
 		{

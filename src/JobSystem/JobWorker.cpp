@@ -153,21 +153,18 @@ namespace np::jsys
 				{
 					if (sleep_count < deep_sleep_threshold)
 					{
-						tim::DurationMilliseconds duration((flt)NP_ENGINE_APPLICATION_LOOP_DURATION / 2.f);
-						tim::SteadyTimestamp start = tim::SteadyClock::now();
+						const tim::DblMilliseconds duration((dbl)NP_ENGINE_APPLICATION_LOOP_DURATION / 2.0);
+						const tim::SteadyTimestamp start = tim::SteadyClock::now();
 
 						do
-						{
 							thr::ThisThread::yield();
-						}
 						while (tim::SteadyClock::now() - start < duration);
 
 						sleep_count++;
 					}
 					else
 					{
-						tim::DurationMilliseconds duration(NP_ENGINE_APPLICATION_LOOP_DURATION);
-						thr::ThisThread::SleepFor(duration);
+						thr::ThisThread::SleepFor(tim::DblMilliseconds(NP_ENGINE_APPLICATION_LOOP_DURATION));
 					}
 				}
 			}

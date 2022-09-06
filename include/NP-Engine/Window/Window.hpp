@@ -161,7 +161,7 @@ namespace np::win
 			return _properties;
 		}
 
-		virtual void Update(tim::DurationMilliseconds duration_milliseconds) {}
+		virtual void Update(tim::DblMilliseconds time_delta) {}
 
 		virtual void SetTitle(str title)
 		{

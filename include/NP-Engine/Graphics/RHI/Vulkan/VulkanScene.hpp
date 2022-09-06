@@ -52,25 +52,27 @@ namespace np::gfx::rhi
 		{
 			NP_ENGINE_PROFILE_SCOPE("VulkanScene::DrawLoopProcedure " + to_str((ui64)this));
 
-			tim::SteadyTimestamp prev = tim::SteadyClock::now();
-			tim::SteadyTimestamp next;
-			tim::DurationMilliseconds duration;
+			tim::SteadyTimestamp next = tim::SteadyClock::now();
+			tim::SteadyTimestamp prev = next;
+			const tim::DblMilliseconds min_duration(NP_ENGINE_APPLICATION_LOOP_DURATION);
 			VulkanRenderer& vulkan_renderer = (VulkanRenderer&)_renderer;
-
-			siz max_duration = NP_ENGINE_APPLICATION_LOOP_DURATION;
 
 			while (_dlp_keep_alive.load(mo_acquire))
 			{
 				vulkan_renderer.SetOutOfDate();
 
 				if (_dlp_enable_draw.load(mo_acquire))
+				{
 					Draw();
+					for (next = tim::SteadyClock::now(); next - prev < min_duration; next = tim::SteadyClock::now())
+						thr::ThisThread::yield();
 
-				next = tim::SteadyClock::now();
-				duration = next - prev;
-				prev = next;
-				if (duration.count() < max_duration)
-					thr::ThisThread::sleep_for(tim::DurationMilliseconds(max_duration - duration.count()));
+					prev = next;
+				}
+				else
+				{
+					thr::ThisThread::sleep_for(min_duration);
+				}
 			}
 
 			_dlp_is_complete.store(true, mo_release);

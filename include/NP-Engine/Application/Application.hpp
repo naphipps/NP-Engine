@@ -206,13 +206,12 @@ namespace np::app
 			evnt::EventQueue& event_queue = _services.GetEventQueue();
 			jsys::JobSystem& job_system = _services.GetJobSystem();
 
-			tim::DurationMilliseconds min_duration(NP_ENGINE_APPLICATION_LOOP_DURATION);
-
 			tim::SteadyTimestamp next = tim::SteadyClock::now();
-			tim::SteadyTimestamp prev = tim::SteadyClock::now();
-			tim::SteadyTimestamp update_next = tim::SteadyClock::now();
-			tim::SteadyTimestamp update_prev = tim::SteadyClock::now();
-			tim::DurationMilliseconds update_duration(0);
+			tim::SteadyTimestamp prev = next;
+			const tim::DblMilliseconds min_duration(NP_ENGINE_APPLICATION_LOOP_DURATION);
+			tim::SteadyTimestamp update_next = next;
+			tim::SteadyTimestamp update_prev = next;
+			tim::DblMilliseconds update_delta(0);
 
 			evnt::Event* e = nullptr;
 			siz i = 0;
@@ -224,7 +223,7 @@ namespace np::app
 				NP_ENGINE_PROFILE_SCOPE("loop");
 
 				update_next = tim::SteadyClock::now();
-				update_duration = update_next - update_prev;
+				update_delta = update_next - update_prev;
 				update_prev = update_next;
 
 				for (i = 0; i < _layers.size(); i++)
@@ -233,9 +232,9 @@ namespace np::app
 					_overlays[i]->BeforeUdpate();
 
 				for (i = 0; i < _layers.size(); i++)
-					_layers[i]->Update(update_duration);
+					_layers[i]->Update(update_delta);
 				for (i = 0; i < _overlays.size(); i++)
-					_overlays[i]->Update(update_duration);
+					_overlays[i]->Update(update_delta);
 
 				for (i = 0; i < _layers.size(); i++)
 					_layers[i]->AfterUdpate();

@@ -58,18 +58,14 @@ namespace np::nsit
 			return _name;
 		}
 
-		tim::DurationMilliseconds GetElapsedMilliseconds()
+		tim::DblMilliseconds GetElapsedMilliseconds()
 		{
-			tim::DurationMilliseconds start(_start_timestamp.time_since_epoch());
-			tim::DurationMilliseconds end(_end_timestamp.time_since_epoch());
-			return end - start;
+			return _end_timestamp.time_since_epoch() - _start_timestamp.time_since_epoch();
 		}
 
-		tim::DurationMicroseconds GetElapsedMicroseconds()
+		tim::DblMilliseconds GetElapsedMicroseconds()
 		{
-			tim::DurationMicroseconds start(_start_timestamp.time_since_epoch());
-			tim::DurationMicroseconds end(_end_timestamp.time_since_epoch());
-			return end - start;
+			return _end_timestamp.time_since_epoch() - _start_timestamp.time_since_epoch();
 		}
 	};
 } // namespace np::nsit

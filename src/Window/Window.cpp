@@ -36,11 +36,10 @@ namespace np::win
 
 	void Window::ShowProcedure()
 	{
+		const tim::Ui64Milliseconds duration(NP_ENGINE_WINDOW_LOOP_DURATION);
+
 		while (!glfwWindowShouldClose(_glfw_window))
-		{
-			thr::ThisThread::yield();
-			thr::ThisThread::sleep_for(tim::Milliseconds(NP_ENGINE_WINDOW_LOOP_DURATION));
-		}
+			thr::ThisThread::sleep_for(duration);
 
 		_show_procedure_is_complete.store(true, mo_release);
 	}
