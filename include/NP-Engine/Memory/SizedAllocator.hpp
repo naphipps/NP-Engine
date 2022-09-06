@@ -14,7 +14,7 @@
 
 namespace np::mem
 {
-	class SizedAllocator : public CAllocator
+	class SizedAllocator : public CAllocator //TODO: should we refactor this to something else?
 	{
 	protected:
 		Block _block;
