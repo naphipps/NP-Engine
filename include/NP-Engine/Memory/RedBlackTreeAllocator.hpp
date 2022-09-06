@@ -560,19 +560,6 @@ namespace np::mem
 			_tree.Insert(node);
 		}
 
-		Block ExtractBlock(void* block_ptr)
-		{
-			Block block;
-
-			if (Contains(block_ptr))
-			{
-				MarginPtr block_header = (MarginPtr)((ui8*)block_ptr - __detail::MARGIN_ALIGNED_SIZE);
-				block = {block_ptr, block_header->GetSize() - (__detail::MARGIN_ALIGNED_SIZE << 1)};
-			}
-
-			return block;
-		}
-
 		ui8* FindAllocation(siz required_aligned_size, bl true_best_false_first)
 		{
 			ui8* allocation = nullptr;
@@ -677,6 +664,19 @@ namespace np::mem
 		Block AllocateFirst(siz size)
 		{
 			return Allocate(size, false);
+		}
+
+		Block ExtractBlock(void* block_ptr)
+		{
+			Block block;
+
+			if (Contains(block_ptr))
+			{
+				MarginPtr block_header = (MarginPtr)((ui8*)block_ptr - __detail::MARGIN_ALIGNED_SIZE);
+				block = { block_ptr, block_header->GetSize() - (__detail::MARGIN_ALIGNED_SIZE << 1) };
+			}
+
+			return block;
 		}
 
 		Block Reallocate(Block& old_block, siz new_size) override

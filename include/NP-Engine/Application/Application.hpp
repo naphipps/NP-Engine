@@ -26,6 +26,7 @@
 #include "WindowLayer.hpp"
 #include "GraphicsLayer.hpp"
 #include "Popup.hpp"
+#include "AccumulatingAllocator.hpp"
 
 namespace np::app
 {

@@ -24,32 +24,16 @@ i32 main(i32 argc, chr** argv)
 	try
 	{
 		::np::sys::Init();
-		::np::mem::CAllocator main_allocator;
-		::np::mem::Block main_block = main_allocator.Allocate(NP_ENGINE_MAIN_MEMORY_SIZE);
-
-		if (main_block.IsValid())
-		{
-			::np::mem::RedBlackTreeAllocator app_allocator(main_block);
-			::np::mem::TraitAllocator::Register(app_allocator);
-			::np::srvc::Services* app_services = ::np::mem::Create<::np::srvc::Services>(app_allocator);
-			::np::app::Application* application = ::np::app::CreateApplication(*app_services);
-			application->Run(argc, argv);
-			::np::mem::Destroy<::np::app::Application>(app_allocator, application);
-			::np::mem::Destroy<::np::srvc::Services>(app_allocator, app_services);
-			NP_ENGINE_PROFILE_SAVE();
-			NP_ENGINE_PROFILE_RESET();
-			::np::mem::TraitAllocator::ResetRegistration();
-			main_allocator.Deallocate(main_block);
-		}
-		else
-		{
-			::np::mem::TraitAllocator::ResetRegistration();
-			exit_val = NP_ENGINE_EXIT_MEMORY_ERROR;
-			message = "WAS NOT ABLE TO ALLOCATE ENOUGH MEMORY\n";
-			message += "Log file can be found here: " + ::np::nsit::Log::GetFileLoggerFilePath();
-			style = ::np::app::Popup::Style::Error;
-			NP_ENGINE_LOG_ERROR(message);
-		}
+		::np::app::AccumulatingAllocator allocator;
+		::np::mem::TraitAllocator::Register(allocator);
+		::np::srvc::Services* services = ::np::mem::Create<::np::srvc::Services>(allocator);
+		::np::app::Application* application = ::np::app::CreateApplication(*services);
+		application->Run(argc, argv);
+		::np::mem::Destroy<::np::app::Application>(allocator, application);
+		::np::mem::Destroy<::np::srvc::Services>(allocator, services);
+		NP_ENGINE_PROFILE_SAVE();
+		NP_ENGINE_PROFILE_RESET();
+		::np::mem::TraitAllocator::ResetRegistration();
 	}
 	catch (const ::std::exception& e)
 	{

@@ -11,10 +11,6 @@
 
 #include "cmake_include.hpp"
 
-#ifndef NP_ENGINE_MAIN_MEMORY_SIZE
-	#define NP_ENGINE_MAIN_MEMORY_SIZE (2000000000)
-#endif
-
 #if DEBUG
 	#ifndef NP_ENGINE_PROFILE_ENABLE
 		#define NP_ENGINE_PROFILE_ENABLE true

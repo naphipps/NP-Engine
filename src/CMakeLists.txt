@@ -18,6 +18,7 @@ set(NP_ENGINE_ALGORITHMS_HPP
 
 set(NP_ENGINE_APPLICATION_HPP
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Application/Application.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Application/AccumulatingAllocator.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Application/ApplicationCloseEvent.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Application/Layer.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Application/WindowLayer.hpp

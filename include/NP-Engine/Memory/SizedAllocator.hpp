@@ -69,9 +69,9 @@ namespace np::mem
 		virtual bl DeallocateAll() = 0;
 	};
 
-	constexpr static ui32 KILOBYTE_SIZE = 1000;
-	constexpr static ui32 MEGABYTE_SIZE = 1000000;
-	constexpr static ui32 GIGABYTE_SIZE = 1000000000;
+	constexpr static siz KILOBYTE_SIZE = 1000;
+	constexpr static siz MEGABYTE_SIZE = 1000000;
+	constexpr static siz GIGABYTE_SIZE = 1000000000;
 } // namespace np::mem
 
 #endif /* NP_ENGINE_SIZED_ALLOCATOR_HPP */
