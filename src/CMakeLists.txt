@@ -63,7 +63,7 @@ set(NP_ENGINE_GEOMETRY_HPP
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Geometry/Line.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Geometry/Polygon.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Geometry/Circular.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Geometry/AABB.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Geometry/Aabb.hpp
 )
 
 set(NP_ENGINE_GRAPHICS_HPP

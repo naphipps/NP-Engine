@@ -43,6 +43,12 @@ namespace np::mat
 		return {(a.x + b.x) / (T)2, (a.y + b.y) / (T)2};
 	}
 
+	template <typename T>
+	static inline ::glm::vec<3, T> Midpoint(const ::glm::vec<3, T>& a, const ::glm::vec<3, T>& b)
+	{
+		return { (a.x + b.x) / (T)2, (a.y + b.y) / (T)2, (a.z + b.z) / (T)2 };
+	}
+
 	static inline flt RoundTo32nd(const flt n)
 	{
 		return ::std::round((dbl)n * 32.0) / 32.0;
