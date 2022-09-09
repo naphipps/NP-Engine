@@ -21,7 +21,7 @@ namespace np::geom
 		using Point = typename Shape<DIMENSION_COUNT, T>::Point;
 
 		Point Center = {0};
-		dbl Radius = 0;
+		T Radius = 0;
 	};
 
 	template <typename T>
