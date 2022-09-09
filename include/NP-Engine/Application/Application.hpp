@@ -109,16 +109,6 @@ namespace np::app
 			_layers.emplace_back(mem::AddressOf(_graphics_layer));
 		}
 
-		virtual WindowLayer& GetWindowLayer()
-		{
-			return _window_layer;
-		}
-
-		virtual GraphicsLayer& GetGraphicsLayer()
-		{
-			return _graphics_layer;
-		}
-
 		void HandlePopup(evnt::Event& e)
 		{
 			ApplicationPopupEvent::DataType& data = e.GetData<ApplicationPopupEvent::DataType>();
