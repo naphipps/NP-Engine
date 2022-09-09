@@ -187,18 +187,30 @@ namespace np::mat
 		return {RoundTo16th(point.x), RoundTo16th(point.y)};
 	}
 
+	template <typename T>
+	static inline ::glm::vec<3, T> RoundTo32nd(const ::glm::vec<3, T>& point)
+	{
+		return { RoundTo32nd(point.x), RoundTo32nd(point.y), RoundTo32nd(point.z) };
+	}
+
+	template <typename T>
+	static inline ::glm::vec<3, T> RoundTo16th(const ::glm::vec<3, T>& point)
+	{
+		return { RoundTo16th(point.x), RoundTo16th(point.y),  RoundTo16th(point.z) };
+	}
+
 	static inline dbl DistanceSquared(const flt ax, const flt ay, const flt bx, const flt by)
 	{
 		dbl x_diff = ax < bx ? bx - ax : ax - bx;
 		dbl y_diff = ay < by ? by - ay : ay - by;
-		return x_diff * x_diff + y_diff * y_diff;
+		return Pow2(x_diff) + Pow2(y_diff);
 	}
 
 	static inline dbl DistanceSquared(const dbl ax, const dbl ay, const dbl bx, const dbl by)
 	{
 		dbl x_diff = ax < bx ? bx - ax : ax - bx;
 		dbl y_diff = ay < by ? by - ay : ay - by;
-		return x_diff * x_diff + y_diff * y_diff;
+		return Pow2(x_diff) + Pow2(y_diff);
 	}
 
 	template <typename T>
@@ -206,7 +218,7 @@ namespace np::mat
 	{
 		ui64 x_diff = ax < bx ? bx - ax : ax - bx;
 		ui64 y_diff = ay < by ? by - ay : ay - by;
-		return x_diff * x_diff + y_diff * y_diff;
+		return Pow2(x_diff) + Pow2(y_diff);
 	}
 
 	static inline dbl DistanceSquared(const ::glm::vec<2, flt>& a, const ::glm::vec<2, flt>& b)
@@ -222,7 +234,48 @@ namespace np::mat
 	template <typename T>
 	static inline ui64 DistanceSquared(const ::glm::vec<2, T>& a, const ::glm::vec<2, T>& b)
 	{
-		return DistanceSquared(a.x, a.y, b.x, b.y);
+		return DistanceSquared<T>(a.x, a.y, b.x, b.y);
+	}
+
+	static inline dbl DistanceSquared(const flt ax, const flt ay, const flt az, const flt bx, const flt by, const flt bz)
+	{
+		dbl x_diff = ax < bx ? bx - ax : ax - bx;
+		dbl y_diff = ay < by ? by - ay : ay - by;
+		dbl z_diff = az < bz ? bz - az : az - bz;
+		return Pow2(x_diff) + Pow2(y_diff) + Pow2(z_diff);
+	}
+
+	static inline dbl DistanceSquared(const dbl ax, const dbl ay, const dbl az, const dbl bx, const dbl by, const dbl bz)
+	{
+		dbl x_diff = ax < bx ? bx - ax : ax - bx;
+		dbl y_diff = ay < by ? by - ay : ay - by;
+		dbl z_diff = az < bz ? bz - az : az - bz;
+		return Pow2(x_diff) + Pow2(y_diff) + Pow2(z_diff);
+	}
+
+	template <typename T>
+	static inline ui64 DistanceSquared(const T ax, const T ay, const T az, const T bx, const T by, const T bz)
+	{
+		ui64 x_diff = ax < bx ? bx - ax : ax - bx;
+		ui64 y_diff = ay < by ? by - ay : ay - by;
+		ui64 z_diff = az < bz ? bz - az : az - bz;
+		return Pow2(x_diff) + Pow2(y_diff) + Pow2(z_diff);
+	}
+
+	static inline dbl DistanceSquared(const ::glm::vec<3, flt>& a, const ::glm::vec<3, flt>& b)
+	{
+		return DistanceSquared(a.x, a.y, a.z, b.x, b.y, b.z);
+	}
+
+	static inline dbl DistanceSquared(const ::glm::vec<3, dbl>& a, const ::glm::vec<3, dbl>& b)
+	{
+		return DistanceSquared(a.x, a.y, a.z, b.x, b.y, b.z);
+	}
+
+	template <typename T>
+	static inline ui64 DistanceSquared(const ::glm::vec<3, T>& a, const ::glm::vec<3, T>& b)
+	{
+		return DistanceSquared<T>(a.x, a.y, a.z, b.x, b.y, b.z);
 	}
 
 	static inline flt RoundToInvPowOfTwo(const flt n, const ui8 pow_of_two)
