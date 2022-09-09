@@ -30,6 +30,7 @@
 #include "Shader.hpp"
 #include "Texture.hpp"
 #include "Vertex.hpp"
+#include "VisibleObject.hpp"
 
 // TODO: when we complete our renderer, we need to cleanup/remove files we are not using
 
