@@ -22,8 +22,8 @@ namespace np::geom
 	{
 		using Point = typename Shape<DIMENSION_COUNT, T>::Point;
 
-		Point Begin;
-		Point End;
+		Point Begin = {0};
+		Point End = {0};
 	};
 
 	template <typename T>
