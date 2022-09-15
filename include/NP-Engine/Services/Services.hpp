@@ -12,6 +12,7 @@
 #include "NP-Engine/Memory/Memory.hpp"
 #include "NP-Engine/Uid/Uid.hpp"
 #include "NP-Engine/ECS/ECS.hpp"
+#include "NP-Engine/Input/Input.hpp"
 
 namespace np::srvc
 {
@@ -24,6 +25,7 @@ namespace np::srvc
 		evnt::EventQueue _event_queue;
 		evnt::EventSubmitter _event_submitter;
 		uid::UidSystem _uid_system;
+		nput::InputQueue _input_queue;
 
 	public:
 		Services(): _allocator(), _ecs_registry(), _job_system(), _event_queue(), _event_submitter(_event_queue) {}
@@ -86,6 +88,16 @@ namespace np::srvc
 		const uid::UidSystem& GetUidSystem() const
 		{
 			return _uid_system;
+		}
+
+		nput::InputQueue& GetInputQueue()
+		{
+			return _input_queue;
+		}
+
+		const nput::InputQueue& GetInputQueue() const
+		{
+			return _input_queue;
 		}
 	};
 } // namespace np::srvc

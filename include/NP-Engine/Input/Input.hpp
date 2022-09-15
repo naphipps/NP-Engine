@@ -7,9 +7,13 @@
 #ifndef NP_ENGINE_INPUT_HPP
 #define NP_ENGINE_INPUT_HPP
 
-#include "KeyCodes.hpp"
-#include "KeyEvent.hpp"
-#include "MouseCodes.hpp"
-#include "MouseEvent.hpp"
+#include "NP-Engine/Foundation/Foundation.hpp"
+
+#include "InputState.hpp"
+#include "KeyCode.hpp"
+#include "MouseCode.hpp"
+#include "MousePosition.hpp"
+#include "ControllerCode.hpp"
+#include "InputQueue.hpp"
 
 #endif /* NP_ENGINE_INPUT_HPP */

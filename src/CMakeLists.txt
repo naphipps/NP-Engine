@@ -161,10 +161,12 @@ set(NP_ENGINE_GRAPHICS_ALGORITHMS_HPP
 
 set(NP_ENGINE_INPUT_HPP
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Input/Input.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Input/KeyCodes.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Input/KeyEvent.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Input/MouseCodes.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Input/MouseEvent.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Input/KeyCode.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Input/MouseCode.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Input/MousePosition.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Input/ControllerCode.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Input/InputQueue.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Input/InputState.hpp
 )
 
 set(NP_ENGINE_INSIGHT_HPP

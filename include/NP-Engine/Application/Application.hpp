@@ -146,6 +146,12 @@ namespace np::app
 		gfx::Scene* CreateWindowScene(win::Window::Properties& window_properties)
 		{
 			win::Window* w = _window_layer.CreateWindow(window_properties);
+
+			w->SetKeyCallback(&_services.GetInputQueue(), nput::InputQueue::SubmitKeyCallback);
+			w->SetMouseCallback(&_services.GetInputQueue(), nput::InputQueue::SubmitMouseCallback);
+			w->SetMousePositionCallback(&_services.GetInputQueue(), nput::InputQueue::SubmitMousePositionCallback);
+			w->SetControllerCallback(&_services.GetInputQueue(), nput::InputQueue::SubmitControllerCallback);
+
 			_graphics_layer.CreateRenderer(*w);
 			return _graphics_layer.AcquireScene();
 		}
@@ -195,6 +201,7 @@ namespace np::app
 			_running.store(true, mo_release);
 			evnt::EventQueue& event_queue = _services.GetEventQueue();
 			jsys::JobSystem& job_system = _services.GetJobSystem();
+			nput::InputQueue& input_queue = _services.GetInputQueue();
 
 			tim::SteadyTimestamp next = tim::SteadyClock::now();
 			tim::SteadyTimestamp prev = next;
@@ -215,6 +222,8 @@ namespace np::app
 				update_next = tim::SteadyClock::now();
 				update_delta = update_next - update_prev;
 				update_prev = update_next;
+
+				input_queue.ApplySubmissions();
 
 				for (i = 0; i < _layers.size(); i++)
 					_layers[i]->BeforeUdpate();

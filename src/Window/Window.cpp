@@ -68,5 +68,27 @@ namespace np::win
 		glfwSetWindowCloseCallback(glfw_window, WindowCloseCallback);
 		glfwSetWindowSizeCallback(glfw_window, WindowSizeCallback);
 		glfwSetWindowPosCallback(glfw_window, WindowPositionCallback);
+		glfwSetKeyCallback(glfw_window, WindowKeyCallback);
+		glfwSetMouseButtonCallback(glfw_window, WindowMouseCallback);
+		glfwSetCursorPosCallback(glfw_window, WindowMousePositionCallback);
+		glfwSetCursorEnterCallback(glfw_window, WindowMouseEnterCallback);
+		glfwSetJoystickCallback(WindowControllerCallback);
+
+		glfwSetJoystickUserPointer(GLFW_JOYSTICK_1, glfw_window);
+		glfwSetJoystickUserPointer(GLFW_JOYSTICK_2, glfw_window);
+		glfwSetJoystickUserPointer(GLFW_JOYSTICK_3, glfw_window);
+		glfwSetJoystickUserPointer(GLFW_JOYSTICK_4, glfw_window);
+		glfwSetJoystickUserPointer(GLFW_JOYSTICK_5, glfw_window);
+		glfwSetJoystickUserPointer(GLFW_JOYSTICK_6, glfw_window);
+		glfwSetJoystickUserPointer(GLFW_JOYSTICK_7, glfw_window);
+		glfwSetJoystickUserPointer(GLFW_JOYSTICK_8, glfw_window);
+		glfwSetJoystickUserPointer(GLFW_JOYSTICK_9, glfw_window);
+		glfwSetJoystickUserPointer(GLFW_JOYSTICK_10, glfw_window);
+		glfwSetJoystickUserPointer(GLFW_JOYSTICK_11, glfw_window);
+		glfwSetJoystickUserPointer(GLFW_JOYSTICK_12, glfw_window);
+		glfwSetJoystickUserPointer(GLFW_JOYSTICK_13, glfw_window);
+		glfwSetJoystickUserPointer(GLFW_JOYSTICK_14, glfw_window);
+		glfwSetJoystickUserPointer(GLFW_JOYSTICK_15, glfw_window);
+		glfwSetJoystickUserPointer(GLFW_JOYSTICK_16, glfw_window);
 	}
 } // namespace np::win
