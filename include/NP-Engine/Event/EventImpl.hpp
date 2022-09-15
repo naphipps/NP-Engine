@@ -23,19 +23,11 @@ namespace np::evnt
 		WindowLostFocus,
 		WindowMoved,
 
-		KeyPressed,
-		KeyReleased,
-		KeyRepeated,
-
-		MouseButtonPressed,
-		MouseButtonReleased,
-		MouseMoved,
-		MouseScrolled,
-
 		ApplicationClose,
 		ApplicationPopup,
 
 		GraphicsCreateRendererForWindow,
+		Max
 	};
 
 	/*
@@ -51,11 +43,7 @@ namespace np::evnt
 		None = 0,
 		Application = BIT(0),
 		Window = BIT(1),
-		Input = BIT(2),
-		Key = BIT(3),
-		Mouse = BIT(4),
-		MouseButton = BIT(5) | Mouse,
-		Graphics = BIT(6),
+		Graphics = BIT(2),
 	};
 
 	/*

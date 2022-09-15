@@ -240,7 +240,7 @@ namespace np::app
 				for (i = 0; i < _overlays.size(); i++)
 					_overlays[i]->AfterUdpate();
 
-				for (e = event_queue.PopOther(); e != nullptr; e = event_queue.PopOther())
+				for (e = event_queue.Pop(); e != nullptr; e = event_queue.Pop())
 				{
 					e->SetCanBeHandled(false);
 

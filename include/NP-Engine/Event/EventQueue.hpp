@@ -23,37 +23,22 @@ namespace np::evnt
 	protected:
 		atm_bl _flag;
 		mem::TraitAllocator _allocator;
-		con::mpmc_queue<Event*> _buffer1;
-		con::mpmc_queue<Event*> _buffer2;
+		con::array<con::mpmc_queue<Event*>, 2> _buffers;
 
-		/*
-			gets the event queue based on the queue flag
-		*/
-		con::mpmc_queue<Event*>& GetBuffer()
+		con::mpmc_queue<Event*>& GetBuffer(bl flag)
 		{
-			return _flag.load(mo_acquire) ? _buffer1 : _buffer2;
-		}
-
-		/*
-			gets the other event queue based on the queue flag
-		*/
-		con::mpmc_queue<Event*>& GetOtherBuffer()
-		{
-			return _flag.load(mo_acquire) ? _buffer2 : _buffer1;
+			return flag ? _buffers.front() : _buffers.back();
 		}
 
 	public:
-		EventQueue(siz buffer_size = 100): _flag(true), _buffer1(buffer_size), _buffer2(buffer_size) {}
+		EventQueue(): _flag(true) {}
 
 		void SwapBuffers()
 		{
 			bl flag = _flag.load(mo_acquire);
-			while (_flag.compare_exchange_weak(flag, !flag, mo_release, mo_relaxed)) {}
+			while (!_flag.compare_exchange_weak(flag, !flag, mo_release, mo_relaxed)) {}
 		}
 
-		/*
-			emplace into the current buffer
-		*/
 		template <typename T, typename... Args>
 		bl Emplace(Args&&... args)
 		{
@@ -72,16 +57,13 @@ namespace np::evnt
 
 		bl Emplace(Event* e)
 		{
-			return GetBuffer().enqueue(e);
+			return GetBuffer(_flag.load(mo_acquire)).enqueue(e);
 		}
 
-		/*
-			pop from the other buffer
-		*/
-		Event* PopOther()
+		Event* Pop()
 		{
 			Event* e = nullptr;
-			return GetOtherBuffer().try_dequeue(e) ? e : nullptr;
+			return GetBuffer(!_flag.load(mo_acquire)).try_dequeue(e) ? e : nullptr;
 		}
 
 		void DestroyEvent(Event* e)
@@ -92,11 +74,9 @@ namespace np::evnt
 		void Clear()
 		{
 			Event* e = nullptr;
-			while (_buffer1.try_dequeue(e))
-				DestroyEvent(e);
-
-			while (_buffer2.try_dequeue(e))
-				DestroyEvent(e);
+			for (auto it = _buffers.begin(); it != _buffers.end(); it++)
+				while (it->try_dequeue(e))
+					DestroyEvent(e);
 		}
 	};
 } // namespace np::evnt
