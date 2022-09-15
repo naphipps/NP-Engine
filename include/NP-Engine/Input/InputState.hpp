@@ -33,12 +33,22 @@ namespace np::nput
 
 		flt GetActivityLevel() const
 		{
-			return _activity != Activity::Active ? 0.f : _activity_level;
+			return IsActive() ? 0.f : _activity_level;
 		}
 
 		Activity GetActivity() const
 		{
 			return _activity;
+		}
+
+		bl IsActive() const
+		{
+			return GetActivity() == Activity::Active;
+		}
+
+		bl IsInactive() const
+		{
+			return !IsActive();
 		}
 
 		InputCode GetCode() const
