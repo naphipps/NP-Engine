@@ -8,6 +8,7 @@
 #define NP_ENGINE_MOUSE_CODE_HPP
 
 #include "NP-Engine/Primitive/Primitive.hpp"
+#include "NP-Engine/String/String.hpp"
 
 #include "InputState.hpp"
 
@@ -23,34 +24,35 @@ namespace np::nput
 	};
 
 	using MouseCodeState = InputState<MouseCode>;
-
-	static str GetMouseCodeName(MouseCode code)
-	{
-		str name;
-
-		switch (code)
-		{
-		case MouseCode::LeftButton:
-			name = "LeftButton";
-			break;
-
-		case MouseCode::MiddleButton:
-			name = "MiddleButton";
-			break;
-
-		case MouseCode::RightButton:
-			name = "RightButton";
-			break;
-
-		case MouseCode::Max:
-		case MouseCode::Unkown:
-		default:
-			name = "Unkown";
-			break;
-		}
-
-		return name;
-	}
+	using MouseCodeStates = InputStates<MouseCode, (siz)MouseCode::Max>;
 } // namespace np::nput
+
+static str to_str(::np::nput::MouseCode code)
+{
+	str name;
+
+	switch (code)
+	{
+	case ::np::nput::MouseCode::LeftButton:
+		name = "LeftButton";
+		break;
+
+	case ::np::nput::MouseCode::MiddleButton:
+		name = "MiddleButton";
+		break;
+
+	case ::np::nput::MouseCode::RightButton:
+		name = "RightButton";
+		break;
+
+	case ::np::nput::MouseCode::Max:
+	case ::np::nput::MouseCode::Unkown:
+	default:
+		name = "Unkown";
+		break;
+	}
+
+	return name;
+}
 
 #endif /* NP_ENGINE_MOUSE_CODE_HPP */

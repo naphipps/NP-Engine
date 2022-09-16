@@ -25,10 +25,6 @@ namespace np::nput
 	class InputQueue
 	{
 	public:
-		using KeyCodeStates = con::array<KeyCodeState, (siz)KeyCode::Max>;
-		using MouseCodeStates = con::array<MouseCodeState, (siz)MouseCode::Max>;
-		using ControllerCodeStates = con::array<ControllerCodeState, (siz)ControllerCode::Max>;
-
 		static void SubmitKeyCallback(void* caller, const KeyCodeState& state)
 		{
 			((InputQueue*)caller)->Submit(state);
@@ -91,13 +87,13 @@ namespace np::nput
 			_flag(true)
 		{
 			for (siz i = 0; i < (siz)KeyCode::Max; i++)
-				_key_states[i].SetCode((KeyCode)i);
+				_key_states[i].SetCode(i);
 
 			for (siz i = 0; i < (siz)MouseCode::Max; i++)
-				_mouse_states[i].SetCode((MouseCode)i);
+				_mouse_states[i].SetCode(i);
 
 			for (siz i = 0; i < (siz)ControllerCode::Max; i++)
-				_controller_states[i].SetCode((ControllerCode)i);
+				_controller_states[i].SetCode(i);
 		}
 
 		void ApplySubmissions()
@@ -111,15 +107,15 @@ namespace np::nput
 
 			KeyCodeState key_state;
 			while (key_other_buffer.try_dequeue(key_state))
-				_key_states[(siz)key_state.GetCode()] = key_state;
+				_key_states[key_state.GetCode()] = key_state;
 
 			MouseCodeState mouse_state;
 			while (mouse_other_buffer.try_dequeue(mouse_state))
-				_mouse_states[(siz)mouse_state.GetCode()] = mouse_state;
+				_mouse_states[mouse_state.GetCode()] = mouse_state;
 
 			ControllerCodeState controller_state;
 			while (controller_other_buffer.try_dequeue(controller_state))
-				_controller_states[(siz)controller_state.GetCode()] = controller_state;
+				_controller_states[controller_state.GetCode()] = controller_state;
 
 			_mouse_position = GetMousePositionBuffer(flag);
 			GetMousePositionBuffer(!flag) = _mouse_position;
@@ -136,12 +132,12 @@ namespace np::nput
 
 			mouse_msg += "Mouse Buttons: ";
 			for (auto it = _mouse_states.begin(); it != _mouse_states.end(); it++)
-				mouse_msg += it->GetActivity() == MouseCodeState::Activity::Active ? GetMouseCodeName(it->GetCode()) + ", " : "";
+				mouse_msg += it->GetActivity() == MouseCodeState::Activity::Active ? to_str(it->GetCode()) + ", " : "";
 			mouse_msg += "\n";
 
 			str keys_msg = "Active keys: ";
 			for (auto it = _key_states.begin(); it != _key_states.end(); it++)
-				keys_msg += it->GetActivity() == KeyCodeState::Activity::Active ? GetKeyCodeName(it->GetCode()) + ", " : "";
+				keys_msg += it->GetActivity() == KeyCodeState::Activity::Active ? to_str(it->GetCode()) + ", " : "";
 			keys_msg += "\n";
 
 			NP_ENGINE_LOG_INFO(mouse_msg + keys_msg);

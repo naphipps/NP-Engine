@@ -8,6 +8,7 @@
 #define NP_ENGINE_INPUT_STATE_HPP
 
 #include "NP-Engine/Primitive/Primitive.hpp"
+#include "NP-Engine/Container/Container.hpp"
 #include "NP-Engine/Math/Math.hpp"
 
 namespace np::nput
@@ -69,6 +70,36 @@ namespace np::nput
 		void SetCode(InputCode code)
 		{
 			_code = code;
+		}
+
+		void SetCode(siz code)
+		{
+			_code = (InputCode)code;
+		}
+	};
+
+	template <typename InputCode, siz SIZE>
+	class InputStates : public con::array<InputState<InputCode>, SIZE>
+	{
+	public:
+		InputState<InputCode>& operator[](siz index)
+		{
+			return con::array<InputState<InputCode>, SIZE>::operator[](index);
+		}
+
+		const InputState<InputCode>& operator[](siz index) const
+		{
+			return con::array<InputState<InputCode>, SIZE>::operator[](index);
+		}
+
+		InputState<InputCode>& operator[](InputCode code)
+		{
+			return operator[]((siz)code);
+		}
+
+		const InputState<InputCode>& operator[](InputCode code) const
+		{
+			return operator[]((siz)code);
 		}
 	};
 }

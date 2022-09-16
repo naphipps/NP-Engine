@@ -8,6 +8,7 @@
 #define NP_ENGINE_CONTROLLER_CODE_HPP
 
 #include "NP-Engine/Primitive/Primitive.hpp"
+#include "NP-Engine/String/String.hpp"
 
 #include "InputState.hpp"
 
@@ -43,90 +44,91 @@ namespace np::nput
 	};
 
 	using ControllerCodeState = InputState<ControllerCode>;
+	using ControllerCodeStates = InputStates<ControllerCode, (siz)ControllerCode::Max>;
+}
 
-	static str GetControllerCodeName(ControllerCode code)
+static str to_str(::np::nput::ControllerCode code)
+{
+	str name;
+
+	switch (code)
 	{
-		str name;
+	case ::np::nput::ControllerCode::Start:
+		name = "Start";
+		break;
 
-		switch (code)
-		{
-		case ControllerCode::Start:
-			name = "Start";
-			break;
+	case ::np::nput::ControllerCode::Select:
+		name = "Select";
+		break;
 
-		case ControllerCode::Select:
-			name = "Select";
-			break;
+	case ::np::nput::ControllerCode::Home:
+		name = "Home";
+		break;
 
-		case ControllerCode::Home:
-			name = "Home";
-			break;
+	case ::np::nput::ControllerCode::RightTrigger:
+		name = "RightTrigger";
+		break;
 
-		case ControllerCode::RightTrigger:
-			name = "RightTrigger";
-			break;
+	case ::np::nput::ControllerCode::RightBumper:
+		name = "RightBumper";
+		break;
 
-		case ControllerCode::RightBumper:
-			name = "RightBumper";
-			break;
+	case ::np::nput::ControllerCode::RightStickButton:
+		name = "RightStickButton";
+		break;
 
-		case ControllerCode::RightStickButton:
-			name = "RightStickButton";
-			break;
+	case ::np::nput::ControllerCode::RightPadUp:
+		name = "RightPadUp";
+		break;
 
-		case ControllerCode::RightPadUp:
-			name = "RightPadUp";
-			break;
+	case ::np::nput::ControllerCode::RightPadRight:
+		name = "RightPadRight";
+		break;
 
-		case ControllerCode::RightPadRight:
-			name = "RightPadRight";
-			break;
+	case ::np::nput::ControllerCode::RightPadDown:
+		name = "RightPadDown";
+		break;
 
-		case ControllerCode::RightPadDown:
-			name = "RightPadDown";
-			break;
+	case ::np::nput::ControllerCode::RightPadLeft:
+		name = "RightPadLeft";
+		break;
 
-		case ControllerCode::RightPadLeft:
-			name = "RightPadLeft";
-			break;
+	case ::np::nput::ControllerCode::LeftTrigger:
+		name = "LeftTrigger";
+		break;
 
-		case ControllerCode::LeftTrigger:
-			name = "LeftTrigger";
-			break;
+	case ::np::nput::ControllerCode::LeftBumper:
+		name = "LeftBumper";
+		break;
 
-		case ControllerCode::LeftBumper:
-			name = "LeftBumper";
-			break;
+	case ::np::nput::ControllerCode::LeftStickButton:
+		name = "LeftStickButton";
+		break;
 
-		case ControllerCode::LeftStickButton:
-			name = "LeftStickButton";
-			break;
+	case ::np::nput::ControllerCode::LeftPadUp:
+		name = "LeftPadUp";
+		break;
 
-		case ControllerCode::LeftPadUp:
-			name = "LeftPadUp";
-			break;
+	case ::np::nput::ControllerCode::LeftPadRight:
+		name = "LeftPadRight";
+		break;
 
-		case ControllerCode::LeftPadRight:
-			name = "LeftPadRight";
-			break;
+	case ::np::nput::ControllerCode::LeftPadDown:
+		name = "LeftPadDown";
+		break;
 
-		case ControllerCode::LeftPadDown:
-			name = "LeftPadDown";
-			break;
+	case ::np::nput::ControllerCode::LeftPadLeft:
+		name = "LeftPadLeft";
+		break;
 
-		case ControllerCode::LeftPadLeft:
-			name = "LeftPadLeft";
-			break;
-
-		case ControllerCode::Max:
-		case ControllerCode::Unkown:
-		default:
-			name = "Unkown";
-			break;
-		}
-
-		return name;
+	case ::np::nput::ControllerCode::Max:
+	case ::np::nput::ControllerCode::Unkown:
+	default:
+		name = "Unkown";
+		break;
 	}
+
+	return name;
 }
 
 #endif /* NP_ENGINE_CONTROLLER_CODE_HPP */
