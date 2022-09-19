@@ -22,6 +22,11 @@ namespace np::mem
 		Allocator* _fallback;
 		siz _size_threshold;
 
+		virtual Block Reallocate(void* old_ptr, siz new_size) override
+		{
+			return {};
+		}
+
 	public:
 		SegregatedAllocator(Allocator* primary, Allocator* fallback, siz size_threshold):
 			_primary(primary),
@@ -72,20 +77,16 @@ namespace np::mem
 		{
 			Block block;
 			if (size <= _size_threshold)
-			{
 				block = _primary->Allocate(size);
-			}
 			if (!block.IsValid())
-			{
 				block = _fallback->Allocate(size);
-			}
+
 			return block;
 		}
 
 		virtual Block Reallocate(Block& old_block, siz new_size) override
 		{
 			Block new_block = Allocate(new_size);
-
 			if (Contains(old_block))
 			{
 				CopyBytes(new_block.Begin(), old_block.Begin(), old_block.size);
@@ -94,12 +95,6 @@ namespace np::mem
 			}
 
 			return new_block;
-		}
-
-		virtual Block Reallocate(void* old_ptr, siz new_size) override
-		{
-			NP_ENGINE_ASSERT(false, "SegregatedAllocator does not support Reallocate(void*, siz), use Reallocate(Block&, siz)");
-			return {};
 		}
 
 		virtual bl Deallocate(Block& block) override

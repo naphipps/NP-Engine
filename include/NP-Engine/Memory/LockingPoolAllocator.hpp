@@ -10,13 +10,13 @@
 #include "NP-Engine/Foundation/Foundation.hpp"
 #include "NP-Engine/Primitive/Primitive.hpp"
 
-#include "SizedAllocator.hpp"
+#include "BlockedAllocator.hpp"
 #include "MemoryFunctions.hpp"
 
 namespace np::mem
 {
 	template <typename T>
-	class LockingPoolAllocator : public SizedAllocator
+	class LockingPoolAllocator : public BlockedAllocator
 	{
 	public:
 		constexpr static siz CHUNK_ALIGNED_SIZE = CalcAlignedSize(sizeof(T));
@@ -34,8 +34,7 @@ namespace np::mem
 		void Init()
 		{
 			Block block{.size = CHUNK_ALIGNED_SIZE};
-
-			for (ui32 i = 0; i < ChunkCount() - 1; i++)
+			for (siz i = 0; i < ChunkCount() - 1; i++)
 			{
 				block.ptr = &static_cast<ui8*>(_block.ptr)[i * CHUNK_ALIGNED_SIZE];
 				Construct<void*>(block, &static_cast<ui8*>(_block.ptr)[(i + 1) * CHUNK_ALIGNED_SIZE]);
@@ -47,13 +46,18 @@ namespace np::mem
 			_alloc_iterator = _block.ptr;
 		}
 
+		Block Reallocate(void* old_ptr, siz new_size) override
+		{
+			return {};
+		}
+
 	public:
-		LockingPoolAllocator(Block block): SizedAllocator(block), _deallocation_true_sort_false_constant(false)
+		LockingPoolAllocator(Block block): BlockedAllocator(block), _deallocation_true_sort_false_constant(false)
 		{
 			Init();
 		}
 
-		LockingPoolAllocator(siz size): SizedAllocator(size), _deallocation_true_sort_false_constant(false)
+		LockingPoolAllocator(siz size): BlockedAllocator(size), _deallocation_true_sort_false_constant(false)
 		{
 			Init();
 		}
@@ -81,7 +85,7 @@ namespace np::mem
 		void Zeroize() override
 		{
 			Lock lock(_mutex);
-			SizedAllocator::Zeroize();
+			BlockedAllocator::Zeroize();
 			Init();
 		}
 
@@ -103,7 +107,6 @@ namespace np::mem
 		Block Reallocate(Block& old_block, siz new_size) override
 		{
 			Block new_block = Allocate(new_size);
-
 			if (Contains(old_block))
 			{
 				CopyBytes(new_block.Begin(), old_block.Begin(), old_block.size);
@@ -112,11 +115,6 @@ namespace np::mem
 			}
 
 			return new_block;
-		}
-
-		Block Reallocate(void* old_ptr, siz new_size) override
-		{
-			return {};
 		}
 
 		bl Deallocate(Block& block, bl true_sort_false_constant)
@@ -135,9 +133,7 @@ namespace np::mem
 						deallocation_address = it;
 
 						if (*it > block.ptr)
-						{
 							break;
-						}
 					}
 
 					NP_ENGINE_ASSERT(deallocation_address != nullptr, "our sorted insert failed");

@@ -8,64 +8,18 @@
 #define NP_ENGINE_STACK_ALLOCATOR_HPP
 
 #include "NP-Engine/Primitive/Primitive.hpp"
+#include "NP-Engine/Foundation/Foundation.hpp"
 
-#include "SizedAllocator.hpp"
+#include "BlockedAllocator.hpp"
 #include "Block.hpp"
 #include "MemoryFunctions.hpp"
 
 namespace np::mem
 {
-	class LinearAllocator : public SizedAllocator
+	class LinearAllocator : public BlockedAllocator
 	{
 	private:
-		atm<void*> _alloc_iterator;
-
-	public:
-		LinearAllocator(Block block): SizedAllocator(block), _alloc_iterator(_block.ptr) {}
-
-		LinearAllocator(siz size): SizedAllocator(size), _alloc_iterator(_block.ptr) {}
-
-		void Zeroize() override
-		{
-			_alloc_iterator.store(nullptr, mo_release);
-			SizedAllocator::Zeroize();
-			_alloc_iterator.store(_block.ptr, mo_release);
-		}
-
-		Block Allocate(siz size) override
-		{
-			void* allocated = _alloc_iterator.load(mo_acquire);
-			size = CalcAlignedSize(size);
-
-			while (
-				allocated && static_cast<ui8*>(allocated) + size <= _block.End() &&
-				!_alloc_iterator.compare_exchange_weak(allocated, static_cast<ui8*>(allocated) + size, mo_release, mo_relaxed))
-				;
-
-			Block block;
-
-			if (allocated && static_cast<ui8*>(allocated) + size <= _block.End())
-			{
-				block.ptr = allocated;
-				block.size = size;
-			}
-
-			return block;
-		}
-
-		Block Reallocate(Block& old_block, siz new_size) override
-		{
-			Block new_block = Allocate(new_size);
-
-			if (Contains(old_block))
-			{
-				CopyBytes(new_block.Begin(), old_block.Begin(), old_block.size);
-				Deallocate(old_block);
-				old_block.Invalidate();
-			}
-
-			return new_block;
-		}
+		atm<void*> _allocation;
 
 		Block Reallocate(void* old_ptr, siz new_size) override
 		{
@@ -82,9 +36,54 @@ namespace np::mem
 			return false;
 		}
 
+	public:
+		LinearAllocator(Block block): BlockedAllocator(block), _allocation(_block.ptr) {}
+
+		LinearAllocator(siz size): BlockedAllocator(size), _allocation(_block.ptr) {}
+
+		void Zeroize() override
+		{
+			_allocation.store(nullptr, mo_release);
+			BlockedAllocator::Zeroize();
+			_allocation.store(_block.ptr, mo_release);
+		}
+
+		Block Allocate(siz size) override
+		{
+			void* allocated = _allocation.load(mo_acquire);
+			size = CalcAlignedSize(size);
+
+			while (allocated && static_cast<ui8*>(allocated) + size <= _block.End() &&
+				   !_allocation.compare_exchange_weak(allocated, static_cast<ui8*>(allocated) + size, mo_release, mo_relaxed))
+			{}
+
+			Block block;
+
+			if (allocated && static_cast<ui8*>(allocated) + size <= _block.End())
+			{
+				block.ptr = allocated;
+				block.size = size;
+			}
+
+			return block;
+		}
+
+		Block Reallocate(Block& old_block, siz new_size) override
+		{
+			Block new_block = Allocate(new_size);
+			if (Contains(old_block))
+			{
+				CopyBytes(new_block.Begin(), old_block.Begin(), old_block.size);
+				Deallocate(old_block);
+				old_block.Invalidate();
+			}
+
+			return new_block;
+		}
+
 		bl DeallocateAll() override
 		{
-			_alloc_iterator.store(_block.ptr, mo_release);
+			_allocation.store(_block.ptr, mo_release);
 			return true;
 		}
 	};

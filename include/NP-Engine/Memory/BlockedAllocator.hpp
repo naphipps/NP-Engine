@@ -14,18 +14,18 @@
 
 namespace np::mem
 {
-	class SizedAllocator : public CAllocator //TODO: should we refactor this to something else?
+	class BlockedAllocator : public CAllocator
 	{
 	protected:
 		Block _block;
 		const bl _owns_block;
 
 	public:
-		SizedAllocator(Block block): CAllocator(), _block(block), _owns_block(false) {}
+		BlockedAllocator(Block block): CAllocator(), _block(block), _owns_block(false) {}
 
-		SizedAllocator(siz size): CAllocator(), _block(CAllocator::Allocate(size)), _owns_block(true) {}
+		BlockedAllocator(siz size): CAllocator(), _block(CAllocator::Allocate(size)), _owns_block(true) {}
 
-		virtual ~SizedAllocator()
+		virtual ~BlockedAllocator()
 		{
 			if (_owns_block)
 				CAllocator::Deallocate(_block);
@@ -68,10 +68,6 @@ namespace np::mem
 
 		virtual bl DeallocateAll() = 0;
 	};
-
-	constexpr static siz KILOBYTE_SIZE = 1000;
-	constexpr static siz MEGABYTE_SIZE = 1000000;
-	constexpr static siz GIGABYTE_SIZE = 1000000000;
 } // namespace np::mem
 
 #endif /* NP_ENGINE_SIZED_ALLOCATOR_HPP */

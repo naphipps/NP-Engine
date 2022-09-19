@@ -21,6 +21,11 @@ namespace np::mem
 		Allocator* _primary;
 		Allocator* _fallback;
 
+		virtual Block Reallocate(void* old_ptr, siz new_size) override
+		{
+			return {};
+		}
+
 	public:
 		FallbackAllocator(Allocator* primary, Allocator* fallback): _primary(primary), _fallback(fallback)
 		{
@@ -62,16 +67,14 @@ namespace np::mem
 		{
 			Block block = _primary->Allocate(size);
 			if (!block.IsValid())
-			{
 				block = _fallback->Allocate(size);
-			}
+
 			return block;
 		}
 
 		virtual Block Reallocate(Block& old_block, siz new_size) override
 		{
 			Block new_block = Allocate(new_size);
-
 			if (Contains(old_block))
 			{
 				CopyBytes(new_block.Begin(), old_block.Begin(), old_block.size);
@@ -80,11 +83,6 @@ namespace np::mem
 			}
 
 			return new_block;
-		}
-
-		virtual Block Reallocate(void* old_ptr, siz new_size) override
-		{
-			return {};
 		}
 
 		virtual bl Deallocate(Block& block) override

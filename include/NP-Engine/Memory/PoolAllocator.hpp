@@ -9,19 +9,19 @@
 
 #include "NP-Engine/Primitive/Primitive.hpp"
 
-#include "SizedAllocator.hpp"
+#include "BlockedAllocator.hpp"
 #include "MemoryFunctions.hpp"
 
 namespace np::mem
 {
 	template <typename T>
-	class PoolAllocator : public SizedAllocator
+	class PoolAllocator : public BlockedAllocator
 	{
 	public:
 		constexpr static siz CHUNK_ALIGNED_SIZE = CalcAlignedSize(sizeof(T));
 
 	private:
-		atm<void*> _alloc_iterator;
+		atm<void*> _allocation;
 
 		bl IsChunkPtr(void* ptr) const
 		{
@@ -31,8 +31,7 @@ namespace np::mem
 		void Init()
 		{
 			Block block{nullptr, CHUNK_ALIGNED_SIZE};
-
-			for (ui32 i = 0; i < ChunkCount() - 1; i++)
+			for (siz i = 0; i < ChunkCount() - 1; i++)
 			{
 				block.ptr = &static_cast<ui8*>(_block.ptr)[i * CHUNK_ALIGNED_SIZE];
 				Construct<void*>(block, &static_cast<ui8*>(_block.ptr)[(i + 1) * CHUNK_ALIGNED_SIZE]);
@@ -41,16 +40,21 @@ namespace np::mem
 			block.ptr = &static_cast<ui8*>(_block.ptr)[(ChunkCount() - 1) * CHUNK_ALIGNED_SIZE];
 			Construct<void*>(block, nullptr);
 
-			_alloc_iterator.store(_block.ptr, mo_release);
+			_allocation.store(_block.ptr, mo_release);
+		}
+
+		Block Reallocate(void* old_ptr, siz new_size) override
+		{
+			return {};
 		}
 
 	public:
-		PoolAllocator(Block block): SizedAllocator(block)
+		PoolAllocator(Block block): BlockedAllocator(block)
 		{
 			Init();
 		}
 
-		PoolAllocator(siz size): SizedAllocator(size)
+		PoolAllocator(siz size): BlockedAllocator(size)
 		{
 			Init();
 		}
@@ -67,23 +71,22 @@ namespace np::mem
 
 		void Zeroize() override
 		{
-			_alloc_iterator.store(nullptr, mo_release);
-			SizedAllocator::Zeroize();
+			_allocation.store(nullptr, mo_release);
+			BlockedAllocator::Zeroize();
 			Init();
 		}
 
 		Block Allocate(siz size) override
 		{
 			Block block;
-
 			if (size <= CHUNK_ALIGNED_SIZE)
 			{
-				void* allocated = _alloc_iterator.load(mo_acquire);
+				void* allocated = _allocation.load(mo_acquire);
 
 				while (allocated &&
-					   !_alloc_iterator.compare_exchange_weak(allocated, *(void**)(&static_cast<ui8*>(allocated)[0]),
-															  mo_release, mo_relaxed))
-					;
+					   !_allocation.compare_exchange_weak(allocated, *(void**)(&static_cast<ui8*>(allocated)[0]), mo_release,
+														  mo_relaxed))
+				{}
 
 				if (allocated)
 				{
@@ -98,7 +101,6 @@ namespace np::mem
 		Block Reallocate(Block& old_block, siz new_size) override
 		{
 			Block new_block = Allocate(new_size);
-
 			if (Contains(old_block))
 			{
 				CopyBytes(new_block.Begin(), old_block.Begin(), old_block.size);
@@ -109,22 +111,16 @@ namespace np::mem
 			return new_block;
 		}
 
-		Block Reallocate(void* old_ptr, siz new_size) override
-		{
-			return {};
-		}
-
 		bl Deallocate(Block& block) override
 		{
 			bl deallocated = false;
-
 			if (IsChunkPtr(block.ptr) && block.size == CHUNK_ALIGNED_SIZE)
 			{
-				Construct<void*>(block, _alloc_iterator.load(mo_acquire));
+				Construct<void*>(block, _allocation.load(mo_acquire));
 
-				while (!_alloc_iterator.compare_exchange_weak(*(void**)(&static_cast<ui8*>(block.ptr)[0]), block.ptr,
-															  mo_release, mo_relaxed))
-					;
+				while (!_allocation.compare_exchange_weak(*(void**)(&static_cast<ui8*>(block.ptr)[0]), block.ptr, mo_release,
+														  mo_relaxed))
+				{}
 
 				block.Invalidate();
 				deallocated = true;
@@ -141,7 +137,7 @@ namespace np::mem
 
 		bl DeallocateAll() override
 		{
-			_alloc_iterator.store(nullptr, mo_release);
+			_allocation.store(nullptr, mo_release);
 			Init();
 			return true;
 		}

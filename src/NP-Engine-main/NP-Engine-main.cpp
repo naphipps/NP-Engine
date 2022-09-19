@@ -24,7 +24,7 @@ i32 main(i32 argc, chr** argv)
 	try
 	{
 		::np::sys::Init();
-		::np::app::AccumulatingAllocator allocator;
+		::np::mem::AccumulatingAllocator<::np::mem::RedBlackTreeAllocator> allocator;
 		::np::mem::TraitAllocator::Register(allocator);
 		::np::srvc::Services* services = ::np::mem::Create<::np::srvc::Services>(allocator);
 		::np::app::Application* application = ::np::app::CreateApplication(*services);

@@ -10,7 +10,7 @@
 #include "NP-Engine/Foundation/Foundation.hpp"
 #include "NP-Engine/Primitive/Primitive.hpp"
 
-#include "SizedAllocator.hpp"
+#include "BookkeepingAllocator.hpp"
 #include "Margin.hpp"
 #include "MemoryFunctions.hpp"
 
@@ -18,19 +18,14 @@ namespace np::mem
 {
 	namespace __detail
 	{
-		class ExplicitListAllocatorNode
+		struct ExplicitListAllocatorNode
 		{
-		private:
-			using Node = ExplicitListAllocatorNode;
-			using NodePtr = Node*;
-
-		public:
-			NodePtr Next = nullptr;
-			NodePtr Prev = nullptr;
+			ExplicitListAllocatorNode* Next = nullptr;
+			ExplicitListAllocatorNode* Prev = nullptr;
 		};
 	} // namespace __detail
 
-	class ExplicitListAllocator : public SizedAllocator
+	class ExplicitListAllocator : public BookkeepingAllocator
 	{
 	private:
 		using Node = __detail::ExplicitListAllocatorNode;
@@ -38,53 +33,46 @@ namespace np::mem
 		using Margin = __detail::Margin;
 		using MarginPtr = __detail::MarginPtr;
 
-		constexpr static siz NODE_ALIGNED_SIZE = CalcAlignedSize(sizeof(Node));
-		constexpr static siz OVERHEAD_ALIGNED_SIZE = (__detail::MARGIN_ALIGNED_SIZE << 1) + NODE_ALIGNED_SIZE;
+		constexpr static siz MARGIN_SIZE = __detail::MARGIN_SIZE;
+		constexpr static siz NODE_SIZE = CalcAlignedSize(sizeof(Node));
 
+	public:
+		constexpr static siz BOOKKEEPING_SIZE = (MARGIN_SIZE * 2);
+		constexpr static siz OVERHEAD_SIZE = BOOKKEEPING_SIZE + NODE_SIZE;
+
+	private:
 		Mutex _mutex;
 		NodePtr _root;
 
 		void DetachNode(NodePtr node)
 		{
-			if (node->Next != nullptr)
-			{
+			if (node->Next)
 				node->Next->Prev = node->Prev;
-			}
 
-			if (node->Prev != nullptr)
-			{
+			if (node->Prev)
 				node->Prev->Next = node->Next;
-			}
 			else
-			{
 				_root = node->Next;
-			}
 		}
 
 		bl InitFreeBlock(Block& block)
 		{
 			bl initialized = false;
-
-			if (block.size >= OVERHEAD_ALIGNED_SIZE)
+			if (block.size >= OVERHEAD_SIZE)
 			{
-				Block header_block{block.Begin(), __detail::MARGIN_ALIGNED_SIZE};
-				Block footer_block{(ui8*)block.End() - __detail::MARGIN_ALIGNED_SIZE, __detail::MARGIN_ALIGNED_SIZE};
+				Block header_block{block.Begin(), MARGIN_SIZE};
+				Block footer_block{(ui8*)block.End() - MARGIN_SIZE, MARGIN_SIZE};
 				Construct<Margin>(header_block);
 				Construct<Margin>(footer_block);
 				MarginPtr header = static_cast<MarginPtr>(header_block.ptr);
 				MarginPtr footer = static_cast<MarginPtr>(footer_block.ptr);
-				header->SetSize(block.size);
-				header->SetDeallocated();
-				footer->Value = header->Value;
+				header->Size = block.size;
+				*footer = *header;
 
-				Block node_block{header_block.End(), NODE_ALIGNED_SIZE};
+				Block node_block{header_block.End(), NODE_SIZE};
 				Construct<Node>(node_block);
 
 				initialized = true;
-			}
-			else
-			{
-				block.Zeroize();
 			}
 
 			return initialized;
@@ -92,77 +80,48 @@ namespace np::mem
 
 		void StowFreeBlock(Block& block)
 		{
-			// init our block as free
 			bl init_success = InitFreeBlock(block);
 			NP_ENGINE_ASSERT(init_success, "our init here should always succeed");
-			NodePtr node = (NodePtr)((ui8*)block.Begin() + __detail::MARGIN_ALIGNED_SIZE);
+			NodePtr node = (NodePtr)((ui8*)block.Begin() + MARGIN_SIZE);
 
-			// store block in next_free's list
-			{
-				NodePtr insert = nullptr;
-				for (NodePtr it = _root; Contains(it); it = it->Next)
-				{
-					insert = it;
+			NodePtr insert = _root;
+			while (Contains(insert) && insert->Next && insert->Next < node->Next)
+				insert = insert->Next;
 
-					if (it->Next > node->Next)
-					{
-						break;
-					}
-				}
+			node->Next = insert ? insert->Next : nullptr;
+			node->Prev = insert;
 
-				node->Next = insert != nullptr ? insert->Next : nullptr;
-				node->Prev = insert;
+			if (node->Next)
+				node->Next->Prev = node;
 
-				if (node->Next != nullptr)
-				{
-					node->Next->Prev = node;
-				}
-
-				if (node->Prev != nullptr)
-				{
-					node->Prev->Next = node;
-				}
-				else
-				{
-					_root = node;
-				}
-			}
+			if (node->Prev)
+				node->Prev->Next = node;
+			else
+				_root = node;
 		}
 
-		Block ExtractBlock(void* block_ptr)
+		MarginPtr FindAllocationHeader(siz size, bl true_best_false_first)
 		{
-			Block block;
-
-			if (Contains(block_ptr))
-			{
-				MarginPtr block_header = (MarginPtr)((ui8*)block_ptr - __detail::MARGIN_ALIGNED_SIZE);
-				block = {block_ptr, block_header->GetSize() - (__detail::MARGIN_ALIGNED_SIZE << 1)};
-			}
-
-			return block;
-		}
-
-		ui8* FindAllocation(siz required_aligned_size, bl true_best_false_first)
-		{
-			ui8* allocation = nullptr;
+			MarginPtr node_header, header = nullptr;
+			NodePtr node;
 
 			if (true_best_false_first)
 			{
-				siz min_diff = _block.size + 1;
-				for (NodePtr it = _root; _block.Contains(it); it = it->Next)
+				siz diff, min_diff = SIZ_MAX;
+				for (node = _root; Contains(node); node = node->Next)
 				{
-					MarginPtr header = (MarginPtr)((ui8*)it - __detail::MARGIN_ALIGNED_SIZE);
-					if (!header->IsAllocated())
+					node_header = (MarginPtr)((ui8*)node - MARGIN_SIZE);
+					if (!node_header->IsAllocated && node_header->Size >= size)
 					{
-						siz diff = header->GetSize() - required_aligned_size;
+						diff = node_header->Size - size;
 						if (diff == 0)
 						{
-							allocation = (ui8*)header;
+							header = node_header;
 							break;
 						}
 						else if (diff < min_diff)
 						{
-							allocation = (ui8*)header;
+							header = node_header;
 							min_diff = diff;
 						}
 					}
@@ -170,73 +129,135 @@ namespace np::mem
 			}
 			else
 			{
-				for (NodePtr it = _root; _block.Contains(it); it = it->Next)
+				for (node = _root; Contains(node) && !header; node = node->Next)
 				{
-					MarginPtr header = (MarginPtr)((ui8*)it - __detail::MARGIN_ALIGNED_SIZE);
-					if (!header->IsAllocated() && header->GetSize() >= required_aligned_size)
-					{
-						allocation = (ui8*)header;
-						break;
-					}
+					node_header = (MarginPtr)((ui8*)node - MARGIN_SIZE);
+					if (!node_header->IsAllocated && node_header->Size >= size)
+						header = node_header;
 				}
 			}
 
-			return allocation;
+			return header;
 		}
 
-		Block Allocate(siz size, bl true_best_false_first)
+		Block InternalAllocate(siz size, bl true_best_false_first)
 		{
-			Lock lock(_mutex);
-			Block block;
-			siz required_alloc_size = CalcAlignedSize(size) + (__detail::MARGIN_ALIGNED_SIZE << 1);
-			if (required_alloc_size < OVERHEAD_ALIGNED_SIZE)
-			{
-				required_alloc_size = OVERHEAD_ALIGNED_SIZE;
-			}
-			ui8* alloc = FindAllocation(required_alloc_size, true_best_false_first);
+			Block block{}, split{};
+			size = CalcAlignedSize(size) + BOOKKEEPING_SIZE;
+			if (size < OVERHEAD_SIZE)
+				size = OVERHEAD_SIZE;
 
-			if (alloc != nullptr)
+			MarginPtr header = FindAllocationHeader(size, true_best_false_first);
+			if (header)
 			{
-				MarginPtr header = (MarginPtr)alloc;
-				NodePtr node = (NodePtr)(alloc + __detail::MARGIN_ALIGNED_SIZE);
-				Block alloc_block{header, header->GetSize()};
-
-				DetachNode(node);
+				siz size_check = header->Size;
+				block = {header, header->Size};
+				DetachNode((NodePtr)((ui8*)header + MARGIN_SIZE));
 
 				// can we split?
-				if (header->GetSize() - required_alloc_size >= OVERHEAD_ALIGNED_SIZE)
+				if (block.size - size >= OVERHEAD_SIZE)
 				{
-					Block split_block{alloc + required_alloc_size, header->GetSize() - required_alloc_size};
-					alloc_block.size -= split_block.size;
-					StowFreeBlock(split_block);
+					split = {(ui8*)block.Begin() + size, block.size - size};
+					block.size -= split.size;
 
-					bl alloc_success = InitFreeBlock(alloc_block);
-					NP_ENGINE_ASSERT(alloc_success, "alloc_success must happen here");
+					bl success = InitFreeBlock(split);
+					NP_ENGINE_ASSERT(success, "InitFreeBlock must be successful here");
+
+					success = InitFreeBlock(block);
+					NP_ENGINE_ASSERT(success, "InitFreeBlock must be successful here");
 				}
 
-				header->SetAllocated();
-				MarginPtr footer = (MarginPtr)((ui8*)alloc_block.End() - __detail::MARGIN_ALIGNED_SIZE);
-				footer->Value = header->Value;
+				header->IsAllocated = true;
+				MarginPtr footer = (MarginPtr)((ui8*)block.End() - MARGIN_SIZE);
+				*footer = *header;
 
-				block.ptr = (ui8*)alloc_block.Begin() + __detail::MARGIN_ALIGNED_SIZE;
-				block.size = alloc_block.size - (__detail::MARGIN_ALIGNED_SIZE << 1);
+				// only deallocate split after our block is considered allocated
+				if (split.IsValid())
+				{
+					bl success = InternalDeallocate((ui8*)split.Begin() + MARGIN_SIZE);
+					NP_ENGINE_ASSERT(success, "InternalDeallocate here must succeed");
+				}
+
+				block.ptr = (ui8*)block.Begin() + MARGIN_SIZE;
+				block.size -= BOOKKEEPING_SIZE;
 			}
 
 			return block;
 		}
 
+		bl InternalDeallocate(void* ptr)
+		{
+			bl deallocated = false;
+			if (Contains(ptr))
+			{
+				MarginPtr header = (MarginPtr)((ui8*)ptr - MARGIN_SIZE);
+				header->IsAllocated = false;
+
+				// claim previous blocks
+				for (MarginPtr prev_footer = (MarginPtr)((ui8*)header - MARGIN_SIZE); Contains(prev_footer);
+					 prev_footer = (MarginPtr)((ui8*)header - MARGIN_SIZE))
+				{
+					if (!prev_footer->IsAllocated)
+					{
+						MarginPtr claim_header = (MarginPtr)((ui8*)prev_footer + MARGIN_SIZE - prev_footer->Size);
+						claim_header->Size = claim_header->Size + header->Size;
+						MarginPtr claim_footer = (MarginPtr)((ui8*)claim_header + claim_header->Size - MARGIN_SIZE);
+						*claim_footer = *claim_header;
+						header = claim_header;
+
+						NodePtr claim_node = (NodePtr)((ui8*)claim_header + MARGIN_SIZE);
+						DetachNode(claim_node);
+						continue;
+					}
+					break;
+				}
+
+				// claim next blocks
+				for (MarginPtr next_header = (MarginPtr)((ui8*)header + header->Size); Contains(next_header);
+					 next_header = (MarginPtr)((ui8*)header + header->Size))
+				{
+					if (!next_header->IsAllocated)
+					{
+						MarginPtr claim_header = next_header;
+						header->Size = header->Size + claim_header->Size;
+						MarginPtr claim_footer = (MarginPtr)((ui8*)header + header->Size - MARGIN_SIZE);
+						*claim_footer = *header;
+
+						NodePtr claim_node = (NodePtr)((ui8*)claim_header + MARGIN_SIZE);
+						DetachNode(claim_node);
+						continue;
+					}
+					break;
+				}
+
+				Block block{header, header->Size};
+				StowFreeBlock(block);
+				deallocated = true;
+			}
+
+			return deallocated;
+		}
+
 		void Init()
 		{
-			_root = InitFreeBlock(_block) ? (NodePtr)((ui8*)_block.Begin() + __detail::MARGIN_ALIGNED_SIZE) : nullptr;
+			if (InitFreeBlock(_block))
+			{
+				_root = (NodePtr)((ui8*)_block.Begin() + MARGIN_SIZE);
+			}
+			else
+			{
+				_block.Zeroize();
+				_root = nullptr;
+			}
 		}
 
 	public:
-		ExplicitListAllocator(Block block): SizedAllocator(block), _root(nullptr)
+		ExplicitListAllocator(Block block): BookkeepingAllocator(block), _root(nullptr)
 		{
 			Init();
 		}
 
-		ExplicitListAllocator(siz size): SizedAllocator(size), _root(nullptr)
+		ExplicitListAllocator(siz size): BookkeepingAllocator(size), _root(nullptr)
 		{
 			Init();
 		}
@@ -248,12 +269,26 @@ namespace np::mem
 
 		Block AllocateBest(siz size)
 		{
-			return Allocate(size, true);
+			Lock lock(_mutex);
+			return InternalAllocate(size, true);
 		}
 
 		Block AllocateFirst(siz size)
 		{
-			return Allocate(size, false);
+			Lock lock(_mutex);
+			return InternalAllocate(size, false);
+		}
+
+		Block ExtractBlock(void* block_ptr) const override
+		{
+			Block block;
+			if (Contains(block_ptr))
+			{
+				MarginPtr block_header = (MarginPtr)((ui8*)block_ptr - MARGIN_SIZE);
+				block = {block_ptr, block_header->Size - BOOKKEEPING_SIZE};
+			}
+
+			return block;
 		}
 
 		Block Reallocate(Block& old_block, siz new_size) override
@@ -269,7 +304,6 @@ namespace np::mem
 		Block ReallocateBest(Block& old_block, siz new_size)
 		{
 			Block new_block = AllocateBest(new_size);
-
 			if (Contains(old_block))
 			{
 				CopyBytes(new_block.Begin(), old_block.Begin(), old_block.size);
@@ -289,7 +323,6 @@ namespace np::mem
 		Block ReallocateFirst(Block& old_block, siz new_size)
 		{
 			Block new_block = AllocateFirst(new_size);
-
 			if (Contains(old_block))
 			{
 				CopyBytes(new_block.Begin(), old_block.Begin(), old_block.size);
@@ -310,77 +343,15 @@ namespace np::mem
 		{
 			bl deallocated = Deallocate(block.ptr);
 			if (deallocated)
-			{
 				block.Invalidate();
-			}
+
 			return deallocated;
 		}
 
 		bl Deallocate(void* ptr) override
 		{
 			Lock lock(_mutex);
-			bl deallocated = false;
-
-			if (Contains(ptr))
-			{
-				MarginPtr header = (MarginPtr)((ui8*)ptr - __detail::MARGIN_ALIGNED_SIZE);
-				header->SetDeallocated();
-
-				// coalesce
-				{
-					// claim previous blocks
-					for (void* prev_footer = (ui8*)header - __detail::MARGIN_ALIGNED_SIZE; Contains(prev_footer);
-						 prev_footer = (ui8*)header - __detail::MARGIN_ALIGNED_SIZE)
-					{
-						if (((MarginPtr)prev_footer)->IsAllocated())
-						{
-							break;
-						}
-						else
-						{
-							// claim header
-							MarginPtr claim_header = (MarginPtr)((ui8*)prev_footer + __detail::MARGIN_ALIGNED_SIZE -
-																 ((MarginPtr)prev_footer)->GetSize());
-							claim_header->SetSize(claim_header->GetSize() + header->GetSize());
-							MarginPtr claim_footer =
-								(MarginPtr)((ui8*)claim_header + claim_header->GetSize() - __detail::MARGIN_ALIGNED_SIZE);
-							claim_footer->Value = claim_header->Value;
-							header = claim_header;
-
-							NodePtr claim_node = (NodePtr)((ui8*)claim_header + __detail::MARGIN_ALIGNED_SIZE);
-							DetachNode(claim_node);
-						}
-					}
-
-					// claim next blocks
-					for (void* next_header = (ui8*)header + header->GetSize(); Contains(next_header);
-						 next_header = (ui8*)header + header->GetSize())
-					{
-						if (((MarginPtr)next_header)->IsAllocated())
-						{
-							break;
-						}
-						else
-						{
-							// claim header
-							MarginPtr claim_header = (MarginPtr)next_header;
-							header->SetSize(header->GetSize() + claim_header->GetSize());
-							MarginPtr claim_footer =
-								(MarginPtr)((ui8*)header + header->GetSize() - __detail::MARGIN_ALIGNED_SIZE);
-							claim_footer->Value = header->Value;
-
-							NodePtr claim_node = (NodePtr)((ui8*)claim_header + __detail::MARGIN_ALIGNED_SIZE);
-							DetachNode(claim_node);
-						}
-					}
-				}
-
-				Block dealloc_block{header, header->GetSize()};
-				StowFreeBlock(dealloc_block);
-				deallocated = true;
-			}
-
-			return deallocated;
+			return InternalDeallocate(ptr);
 		}
 
 		bl DeallocateAll() override

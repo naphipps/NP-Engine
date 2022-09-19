@@ -18,7 +18,6 @@ set(NP_ENGINE_ALGORITHMS_HPP
 
 set(NP_ENGINE_APPLICATION_HPP
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Application/Application.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Application/AccumulatingAllocator.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Application/ApplicationCloseEvent.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Application/Layer.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Application/WindowLayer.hpp
@@ -217,12 +216,14 @@ set(NP_ENGINE_MEMORY_HPP
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Memory/PoolAllocator.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Memory/RedBlackTreeAllocator.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Memory/SegregatedAllocator.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Memory/SizedAllocator.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Memory/BlockedAllocator.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Memory/StdAllocator.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Memory/TraitAllocator.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Memory/SmartPtr.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Memory/PadObject.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Memory/Delegate.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Memory/AccumulatingAllocator.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Memory/BookkeepingAllocator.hpp
 )
 
 set(NP_ENGINE_NOISE_HPP

@@ -46,6 +46,7 @@ using bl = bool;
 #define UI32_MAX UINT32_MAX
 #define UI64_MIN 0
 #define UI64_MAX UINT64_MAX
+#define SIZ_MAX UINT64_MAX
 #define I8_MIN INT8_MIN
 #define I8_MAX INT8_MAX
 #define I16_MIN INT16_MIN

@@ -44,10 +44,8 @@ namespace np::mem
 			ptr = ::aligned_alloc(ALIGNMENT, size);
 #endif
 
-			if (ptr != nullptr)
-			{
+			if (ptr)
 				block = {ptr, size};
-			}
 			return block;
 		}
 
@@ -61,16 +59,13 @@ namespace np::mem
 		virtual Block Reallocate(void* old_ptr, siz new_size) override
 		{
 			Block new_block;
-
 			if (old_ptr)
 			{
 				new_size = CalcAlignedSize(new_size);
 				void* ptr = ::std::realloc(old_ptr, new_size);
 
-				if (ptr != nullptr)
-				{
+				if (ptr)
 					new_block = {ptr, new_size};
-				}
 			}
 			else
 			{

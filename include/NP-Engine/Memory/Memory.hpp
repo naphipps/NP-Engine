@@ -9,8 +9,10 @@
 
 #include "NP-Engine/Foundation/Foundation.hpp"
 
+#include "AccumulatingAllocator.hpp"
 #include "Allocator.hpp"
 #include "Block.hpp"
+#include "BookkeepingAllocator.hpp"
 #include "CAllocator.hpp"
 #include "Delegate.hpp"
 #include "ExplicitListAllocator.hpp"
@@ -26,7 +28,7 @@
 #include "PoolAllocator.hpp"
 #include "RedBlackTreeAllocator.hpp"
 #include "SegregatedAllocator.hpp"
-#include "SizedAllocator.hpp"
+#include "BlockedAllocator.hpp"
 #include "SmartPtr.hpp"
 #include "StdAllocator.hpp"
 #include "TraitAllocator.hpp"

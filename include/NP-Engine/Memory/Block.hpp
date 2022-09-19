@@ -54,10 +54,16 @@ namespace np::mem
 
 		void Zeroize()
 		{
-			for (siz i = 0; i < size; i++)
-			{
-				static_cast<ui8*>(ptr)[i] = 0;
-			}
+			ui8* it = (ui8*)ptr;
+			const siz stride = sizeof(siz);
+
+			siz loops = size / stride; // we'll zeroize 8 bytes at a time to start
+			for (siz i = 0; i < loops; i++, it += stride)
+				*(siz*)it = 0;
+
+			loops = size % stride; // now we'll zeroize the remaining bytes to finish
+			for (siz i = 0; i < loops; i++, it++)
+				*it = 0;
 		}
 	};
 } // namespace np::mem
