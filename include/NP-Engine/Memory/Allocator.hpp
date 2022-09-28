@@ -90,6 +90,7 @@ namespace np::mem
 		the alignment our allocators will adhere to
 	*/
 	constexpr static siz ALIGNMENT = BIT(3);
+	constexpr static siz ALIGNMENT_MINUS_ONE = (ALIGNMENT - 1);
 
 	constexpr static siz CalcAlignedSize(const siz size)
 	{

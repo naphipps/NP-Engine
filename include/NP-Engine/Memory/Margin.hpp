@@ -15,6 +15,9 @@ namespace np::mem::__detail
 	{
 		siz Size = 0;
 		bl IsAllocated = false;
+
+		//TODO: go back to a POD class with setters and getters
+		//TODO: go back to a compressed size and allocation
 	};
 
 	using MarginPtr = Margin*;

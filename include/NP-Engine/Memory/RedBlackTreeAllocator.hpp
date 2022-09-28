@@ -7,6 +7,11 @@
 #ifndef NP_ENGINE_RED_BLACK_TREE_ALLOCATOR_HPP
 #define NP_ENGINE_RED_BLACK_TREE_ALLOCATOR_HPP
 
+#include <iostream> //TODO: remove
+#include <set> //TODO: remove
+#include <vector> //TODO: remove
+#include <map> //TODO: remove
+
 #include "NP-Engine/Foundation/Foundation.hpp"
 #include "NP-Engine/Primitive/Primitive.hpp"
 
@@ -18,23 +23,103 @@ namespace np::mem
 {
 	namespace __detail
 	{
+		class NodeT
+		{
+		private:
+			NP_ENGINE_STATIC_ASSERT(ALIGNMENT >= 4, "This implementation requires ALIGNMENT >= 4 because we use those last two bits.");
+
+			siz _parent_prev_rank = 0;
+			NodeT* _left = nullptr;
+			NodeT* _right = nullptr;
+			NodeT* _next = nullptr;
+
+		public:
+
+			constexpr static siz RED_TREE_NODE_RANK = 0;
+			constexpr static siz BLACK_TREE_NODE_RANK = BIT(0);
+			constexpr static siz DOUBLE_BLACK_TREE_NODE_RANK = BIT(1);
+			constexpr static siz LIST_NODE_RANK = BIT(0) | BIT(1);
+
+			NodeT* GetParent() const
+			{
+				return (NodeT*)(_parent_prev_rank & ~ALIGNMENT_MINUS_ONE);
+			}
+
+			NodeT* GetLeft() const
+			{
+				return _left;
+			}
+
+			NodeT* GetRight() const
+			{
+				return _right;
+			}
+
+			NodeT* GetPrev() const
+			{
+				return GetRank() == LIST_NODE_RANK ? GetParent() : nullptr;
+			}
+
+			NodeT* GetNext() const
+			{
+				return _next;
+			}
+
+			siz GetRank() const
+			{
+				return _parent_prev_rank & ALIGNMENT_MINUS_ONE;
+			}
+
+			void SetParent(NodeT* parent)
+			{
+				_parent_prev_rank = (siz)parent & GetRank();
+			}
+
+			void SetLeft(NodeT* left)
+			{
+				_left = left;
+			}
+
+			void SetRight(NodeT* right)
+			{
+				_right = right;
+			}
+
+			void SetPrev(NodeT* prev)
+			{
+				if (GetRank() == LIST_NODE_RANK)
+					SetParent(prev);
+			}
+
+			void SetNext(NodeT* next) 
+			{
+				_next = next;
+			}
+
+			void SetRank(siz rank)
+			{
+				_parent_prev_rank = (siz)GetParent() | (rank & ALIGNMENT_MINUS_ONE);
+			}
+
+			//TODO: go back to POD class with setters and getters
+			//TODO: compress rank with parent
+		};
+
 		struct RedBlackTreeAllocatorNode
 		{
-			RedBlackTreeAllocatorNode* Left = nullptr;
-			RedBlackTreeAllocatorNode* Right = nullptr;
-			RedBlackTreeAllocatorNode* Parent = nullptr;
-			bl IsRed = false;
+			RedBlackTreeAllocatorNode* left = nullptr;
+			RedBlackTreeAllocatorNode* right = nullptr;
+			RedBlackTreeAllocatorNode* parent = nullptr;
 
-			siz GetSize() const
-			{
-				// TODO: I think we can figure out something better than this -- improve our tree too
-				return ((MarginPtr)((ui8*)this - MARGIN_SIZE))->Size;
-			}
+			RedBlackTreeAllocatorNode* next = nullptr;
+			RedBlackTreeAllocatorNode* prev = nullptr;
+
+			i32 rank = 0;
 		};
 
 		/*
 			rules:
-			1- root and leaves(nil's) are block
+			1- root and leaves(nil's) are black
 			2- if node is red, the parent is black
 			3- all simple paths from any node x to descendent leaf have the same number of black nodes
 		*/
@@ -42,234 +127,308 @@ namespace np::mem
 		{
 		public:
 			using Node = RedBlackTreeAllocatorNode;
-			using NodePtr = Node*;
 
 		private:
-			NodePtr _root;
-			Margin _nil_margin; // required for _nil.GetSize()
-			Node _nil;
+			Node* _root;
 
-			NodePtr GetMinFrom(NodePtr node)
+			siz GetSize(Node* node) const //TODO: this could probably go back to the newer Node implementation
 			{
-				NodePtr min = node;
-				for (; min->Left != &_nil; min = min->Left) {}
-				return min;
+				return node ? ((MarginPtr)((ui8*)node - MARGIN_SIZE))->Size : 0;
 			}
 
-			/*
-				transplants node b to a
-			*/
-			void Transplant(NodePtr a, NodePtr b)
+			void InsertInList(Node* prev, Node* node)
 			{
-				Node* parent = a->Parent;
-				if (parent == nullptr)
-					_root = b;
-				else if (a == parent->Left)
-					parent->Left = b;
-				else
-					parent->Right = b;
+				//prev stays in-place, so properties of the top node (tree properties) are maintained
+				node->prev = prev;
+				node->next = prev->next;
+				prev->next = node;
 
-				b->Parent = parent;
+				if (node->next)
+					node->next->prev = node;
 			}
 
-			void RotateCCW(NodePtr node)
+			void RemoveInList(Node* node)
 			{
-				NodePtr parent = node->Parent;
-				NodePtr right = node->Right;
+				//TODO: I think we can simplify and remove the two ptrs below
+				Node* prev = node->prev;
+				Node* next = node->next;
 
-				node->Right = right->Left;
-				if (right->Left != &_nil)
-					right->Left->Parent = node;
+				if (next)
+					next->prev = prev;
 
-				right->Parent = parent;
-
-				if (parent == nullptr)
-					_root = right;
-				else if (parent->Left == node)
-					parent->Left = right;
-				else
-					parent->Right = right;
-
-				right->Left = node;
-				node->Parent = right;
-			}
-
-			void RotateCW(NodePtr node)
-			{
-				NodePtr parent = node->Parent;
-				NodePtr left = node->Left;
-
-				node->Left = left->Right;
-				if (left->Right != &_nil)
-					left->Right->Parent = node;
-
-				left->Parent = parent;
-
-				if (parent == nullptr)
-					_root = left;
-				else if (parent->Left == node)
-					parent->Left = left;
-				else
-					parent->Right = left;
-
-				left->Right = node;
-				node->Parent = left;
-			}
-
-			void InsertCleanup(NodePtr node)
-			{
-				while (node->Parent != nullptr && node->Parent->IsRed)
+				if (prev)
+					prev->next = next;
+				else if (next)
 				{
-					NodePtr y = nullptr;
-					if (node->Parent == node->Parent->Parent->Left)
+					//no prev means our node was on the top, so we need to pass our tree properties to next
+					next->left = node->left;
+					next->right = node->right;
+					next->parent = node->parent;
+					next->rank = node->rank;
+
+					if (next->left)
+						next->left->parent = next;
+
+					if (next->right)
+						next->right->parent = next;
+
+					if (next->parent)
 					{
-						y = node->Parent->Parent->Right;
-
-						if (y->IsRed)
-						{
-							node->Parent->IsRed = false;
-							y->IsRed = false;
-							node->Parent->Parent->IsRed = true;
-							node = node->Parent->Parent;
-						}
+						if (next->parent->left == node)
+							next->parent->left = next;
 						else
-						{
-							if (node == node->Parent->Right)
-							{
-								node = node->Parent;
-								RotateCCW(node);
-							}
-
-							node->Parent->IsRed = false;
-							node->Parent->Parent->IsRed = true;
-							RotateCW(node->Parent->Parent);
-						}
+							next->parent->right = next;
 					}
 					else
 					{
-						y = node->Parent->Parent->Left;
-
-						if (y->IsRed)
-						{
-							node->Parent->IsRed = false;
-							y->IsRed = false;
-							node->Parent->Parent->IsRed = true;
-							node = node->Parent->Parent;
-						}
-						else
-						{
-							if (node == node->Parent->Left)
-							{
-								node = node->Parent;
-								RotateCW(node);
-							}
-
-							node->Parent->IsRed = false;
-							node->Parent->Parent->IsRed = true;
-							RotateCCW(node->Parent->Parent);
-						}
+						_root = next;
 					}
 				}
-
-				_root->IsRed = false;
 			}
 
-			void RemoveCleanup(NodePtr node)
+			Node* GetMin(Node* node)
 			{
-				while (node != _root && !node->IsRed)
+				if (node)
+					while (node->left)
+						node = node->left;
+
+				return node;
+			}
+
+			Node* GetMax(Node* node) //TODO: remove??
+			{
+				if (node)
+					while (node->right)
+						node = node->right;
+
+				return node;
+			}
+
+			Node* FindInsertParent(Node* node)
+			{
+				Node* it = _root;
+				Node* parent = nullptr;
+				siz node_size = GetSize(node);
+
+				while (it)
 				{
-					NodePtr temp = nullptr;
-					if (node->Parent->Left == node)
+					siz it_size = GetSize(it);
+					i32 cmp = node_size < it_size ? -1 : node_size - it_size;
+
+					parent = it;
+					if (cmp < 0)
+						it = it->left;
+					else if (cmp > 0)
+						it = it->right;
+					else
+						break;
+				}
+
+				return parent;
+			}
+
+			void InternalInsert(Node* parent, Node* node)
+			{
+				if (!parent)
+				{
+					_root = node;
+				}
+				else
+				{
+					siz parent_size = GetSize(parent);
+					siz node_size = GetSize(node);
+					i32 cmp = node_size < parent_size ? -1 : node_size - parent_size;
+
+					if (cmp < 0)
 					{
-						temp = node->Parent->Right;
-						if (temp->IsRed)
-						{
-							temp->IsRed = false;
-							node->Parent->IsRed = true;
-							RotateCCW(node->Parent);
-							temp = node->Parent->Right;
-						}
-						if ((temp->Right == &_nil || !temp->Right->IsRed) && (temp->Left == &_nil || !temp->Left->IsRed))
-						{
-							temp->IsRed = true;
-							node = node->Parent;
-						}
+						if (GetSize(parent->left) < node_size)
+							node->left = parent->left;
 						else
-						{
-							if (temp->Right == &_nil || !temp->Right->IsRed)
-							{
-								temp->Left->IsRed = false;
-								temp->IsRed = true;
-								RotateCW(temp);
-								temp = node->Parent->Right;
-							}
+							node->right = parent->left;
 
-							if (!node->Parent->IsRed)
-								temp->IsRed = false;
-							else
-								temp->IsRed = true;
+						parent->left = node;
+						node->parent = parent;
 
-							node->Parent->IsRed = false;
-							temp->Right->IsRed = false;
-							RotateCCW(node->Parent);
-							node = _root;
-						}
+						if (node->left)
+							node->left->parent = node;
+
+						if (node->right)
+							node->right->parent = node;
+
+						//TODO: tree changed - call cleanup here
+					}
+					else if (cmp > 0)
+					{
+						if (GetSize(parent->right) < node_size)
+							node->left = parent->right;
+						else
+							node->right = parent->right;
+
+						parent->right = node;
+						node->parent = parent;
+
+						if (node->left)
+							node->left->parent = node;
+
+						if (node->right)
+							node->right->parent = node;
+
+						//TODO: tree changed - call cleanup here
 					}
 					else
 					{
-						temp = node->Parent->Left;
-						if (temp->IsRed)
-						{
-							temp->IsRed = false;
-							node->Parent->IsRed = true;
-							RotateCW(node->Parent);
-							temp = node->Parent->Left;
-						}
-						if ((temp->Right == &_nil || !temp->Right->IsRed) && (temp->Left == &_nil || !temp->Left->IsRed))
-						{
-							temp->IsRed = true;
-							node = node->Parent;
-						}
-						else
-						{
-							if (temp->Left == &_nil || !temp->Left->IsRed)
-							{
-								temp->Right->IsRed = false;
-								temp->IsRed = true;
-								RotateCCW(temp);
-								temp = node->Parent->Left;
-							}
-
-							if (!node->Parent->IsRed)
-								temp->IsRed = false;
-							else
-								temp->IsRed = true;
-
-							node->Parent->IsRed = false;
-							temp->Left->IsRed = false;
-							RotateCW(node->Parent);
-							node = _root;
-						}
+						InsertInList(parent, node);
 					}
 				}
-				node->IsRed = false;
+
+				if (_root)
+					_root->parent = nullptr;
+			}
+
+			void InternalInsertCleanup(Node* node) {}
+
+			void InternalRemove(Node* node)
+			{
+				Node* replacer = GetMin(node->right);
+				if (replacer)
+				{
+					//detach replacer
+					if (replacer->parent->left == replacer)
+					{
+						replacer->parent->left = replacer->right;
+						if (replacer->parent->left)
+							replacer->parent->left->parent = replacer->parent;
+					}
+					else //replacer is node_right
+					{
+						node->right = replacer->right;
+						if (node->right)
+							node->right->parent = node;
+					}
+
+					//replace node
+					replacer->left = node->left;
+					replacer->right = node->right;
+					replacer->parent = node->parent;
+
+					if (replacer->left)
+						replacer->left->parent = replacer;
+
+					if (replacer->right)
+						replacer->right->parent = replacer;
+
+					if (replacer->parent)
+					{
+						if (replacer->parent->left == node)
+							replacer->parent->left = replacer;
+						else
+							replacer->parent->right = replacer;
+					}
+					else
+					{
+						_root = replacer;
+					}
+				}
+				else if (node->left)
+				{
+					node->left->parent = node->parent;
+
+					if (node->left->parent)
+					{
+						if (node->left->parent->left == node)
+							node->left->parent->left = node->left;
+						else
+							node->left->parent->right = node->left;
+					}
+					else
+					{
+						_root = node->left;
+					}
+				}
+				else if (node->parent)
+				{
+					if (node->parent->left == node)
+						node->parent->left = nullptr;
+					else
+						node->parent->right = nullptr;
+				}
+				else
+				{
+					_root = nullptr;
+				}
+
+				if (_root)
+					_root->parent = nullptr;
+
+				//TODO: tree changed - call cleanup here
+			}
+
+			void InternalRemoveCleanup(Node* node) {}
+
+			void PushBlack(Node* node)
+			{
+				node->rank = 0;
+				 
+				if (node->left)
+					node->left->rank = 1;
+
+				if (node->right)
+					node->right->rank = 1;
+			}
+
+			void PullBlack(Node* node)
+			{
+				node->rank = 1;
+
+				if (node->left)
+					node->left->rank = 0;
+
+				if (node->right)
+					node->right->rank = 0;
+			}
+
+			void SwapColors(Node* a, Node* b)
+			{
+				i32 rank = a->rank;
+				a->rank = b->rank;
+				b->rank = rank;
+			}
+
+			void RotateLeft(Node* node)
+			{
+
+			}
+
+			void RotateRight(Node* node)
+			{
+
+			}
+
+			void FlipLeft(Node* node)
+			{
+				SwapColors(node, node->right);
+				RotateLeft(node);
+			}
+
+			void FlipRight(Node* node)
+			{
+				SwapColors(node, node->left);
+				RotateRight(node);
 			}
 
 		public:
-			RedBlackTreeAllocatorTree(): _root(nullptr)
-			{
-				Clear();
-			}
+			RedBlackTreeAllocatorTree(): _root(nullptr) {}
 
-			NodePtr SearchBest(siz size)
+			Node* SearchBest(siz size)
 			{
-				NodePtr found = nullptr;
+				Node* found = nullptr;
 				siz diff, min_diff = SIZ_MAX;
-				for (NodePtr it = _root; it != &_nil;)
+				for (Node* it = _root; it;
+					it = GetSize(it) > size ? it->left : it->right)
 				{
-					if (it->GetSize() >= size)
+					if (GetSize(it) >= size)
 					{
-						diff = it->GetSize() - size;
+						diff = GetSize(it) - size;
 						if (diff == 0)
 						{
 							found = it;
@@ -281,98 +440,195 @@ namespace np::mem
 							min_diff = diff;
 						}
 					}
-
-					if (it->GetSize() > size)
-						it = it->Left;
-					else
-						it = it->Right;
 				}
 				return found;
 			}
 
-			NodePtr SearchFirst(siz size)
+			Node* SearchFirst(siz size)
 			{
-				NodePtr found = nullptr;
-				for (NodePtr it = _root; it != &_nil && !found; it = it->Right)
-					if (it->GetSize() >= size)
+				Node* found = nullptr;
+				for (Node* it = _root; it && !found; it = it->right)
+					if (GetSize(it) >= size)
 						found = it;
 
 				return found;
 			}
 
-			void Insert(NodePtr node)
+			void Insert(Node* node)
 			{
-				NodePtr parent = nullptr;
-				if (node != _root)
-					for (NodePtr it = _root; it != &_nil; it = node->GetSize() < it->GetSize() ? it->Left : it->Right)
-						parent = it;
+				//PrepFoundNodes();
 
-				node->Parent = parent;
+				*node = {};
+				InternalInsert(FindInsertParent(node), node);
 
-				if (parent == nullptr)
-					_root = node;
-				else if (node->GetSize() < parent->GetSize())
-					parent->Left = node;
-				else
-					parent->Right = node;
-
-				node->Left = &_nil;
-				node->Right = &_nil;
-				node->IsRed = true;
-
-				InsertCleanup(node);
+				/*
+				_found_nodes.emplace_back(node);
+				ErrorCheck();
+				*/
 			}
 
-			void Remove(NodePtr node)
+			::std::vector<Node*> _original_found_nodes; //TODO: remove
+
+			void Remove(Node* node)
 			{
-				NodePtr successor = nullptr;
-				bl successor_is_black = !node->IsRed;
+				/*
+				PrepFoundNodes();
+				for (auto it = _found_nodes.begin(); it != _found_nodes.end(); it++)
+				{
+					if (*it == node)
+					{
+						_found_nodes.erase(it);
+						break;
+					}
+				}
+				*/
 
-				if (node->Left == &_nil)
-				{
-					successor = node->Right;
-					Transplant(node, successor);
-				}
-				else if (node->Right == &_nil)
-				{
-					successor = node->Left;
-					Transplant(node, successor);
-				}
+				if (node->prev || node->next)
+					RemoveInList(node);
 				else
-				{
-					NodePtr min = GetMinFrom(node->Right);
-					successor_is_black = !min->IsRed;
-					successor = min->Right;
+					InternalRemove(node);
 
-					if (min->Parent == node)
-					{
-						successor->Parent = min;
-					}
-					else
-					{
-						Transplant(min, min->Right);
-						min->Right = node->Right;
-						if (min->Right != &_nil)
-							min->Right->Parent = min;
-					}
+				//ErrorCheck();
 
-					Transplant(node, min);
-					min->Left = node->Left;
-					if (min->Left != &_nil)
-						min->Left->Parent = min;
-
-					min->IsRed = node->IsRed;
-				}
-
-				if (successor_is_black)
-					RemoveCleanup(successor);
+				*node = {};
 			}
 
 			void Clear()
 			{
-				_nil = {};
-				NP_ENGINE_ASSERT(_nil.GetSize() == 0, "our nil size must always be 0");
-				_root = &_nil;
+				_root = nullptr;
+			}
+
+
+
+			//TODO: remove methods and fields below
+
+
+			Block _block;
+
+			bl Contains(void* ptr)
+			{
+				return _block.Contains(ptr);
+			}
+
+			::std::vector<Node*> _found_nodes;
+
+			void PrepFoundNodes()
+			{
+				_found_nodes.clear();
+
+				FindNodes(_root);
+
+				_original_found_nodes.clear();
+				for (Node*& node : _found_nodes)
+					_original_found_nodes.emplace_back(node);
+			}
+
+			void FindNodes(Node* node)
+			{
+				if (node)
+				{
+					_found_nodes.emplace_back(node);
+					FindNodes(node->left);
+					FindNodes(node->right);
+
+					Node* it = node->prev;
+					while (it)
+					{
+						_found_nodes.emplace_back(it);
+						it = it->prev;
+					}
+
+					it = node->next;
+					while (it)
+					{
+						_found_nodes.emplace_back(it);
+						it = it->next;
+					}
+				}
+			}
+
+			bl TreeHasNode(Node* node, Node* find)
+			{
+				bl has = false;
+
+				if (node)
+				{
+					has |= TreeHasNode(node->left, find);
+					has |= TreeHasNode(node->right, find);
+
+					Node* it = node;
+					while (it)
+					{
+						has |= it == find;
+						it = it->prev;
+					}
+
+					it = node->next;
+					while (it)
+					{
+						has |= it == find;
+						it = it->next;
+					}
+				}
+
+				return has;
+			}
+
+			void ErrorCheck()
+			{
+				ErrorCheck(_root);
+
+				for (Node*& node : _found_nodes)
+				{
+					//NP_ENGINE_ASSERT(TreeHasNode(_root, node), "tree must have all expected nodes");
+					if (!TreeHasNode(_root, node))
+					{
+						::std::cout << "tree must contain expected nodes\n";
+					}
+
+				}
+			}
+
+			void ErrorCheck(Node* it)
+			{
+				if (it)
+				{
+					if (it->parent)
+					{
+						NP_ENGINE_ASSERT(it != it->parent, "it cannot be its parent");
+						NP_ENGINE_ASSERT(it->parent->left == it || it->parent->right == it, "its parent does not recognize it");
+					}
+					else
+					{
+						NP_ENGINE_ASSERT(_root == it, "root should be it");
+					}
+
+					NP_ENGINE_ASSERT(Contains(it), "it is not contined");
+					NP_ENGINE_ASSERT(GetSize(it) <= _block.size, "it size is out of bounds");
+
+					ErrorCheck(it->left);
+					ErrorCheck(it->right);
+
+					ErrorListCheck(it->prev);
+					ErrorListCheck(it);
+					ErrorListCheck(it->next);
+				}
+			}
+
+			void ErrorListCheck(Node* node)
+			{
+				if (node)
+				{
+					if (node->prev)
+					{
+						NP_ENGINE_ASSERT(node->prev->next == node, "prev->next must be node");
+					}
+
+					if (node->next)
+					{
+						NP_ENGINE_ASSERT(node->next->prev == node, "next->prev must be node");
+					}
+				}
 			}
 		};
 	} // namespace __detail
@@ -382,9 +638,9 @@ namespace np::mem
 	private:
 		using Tree = __detail::RedBlackTreeAllocatorTree;
 		using Node = Tree::Node;
-		using NodePtr = Tree::NodePtr;
+		using NodePtr = Tree::Node*; //TODO: I think we can get rid of this
 		using Margin = __detail::Margin;
-		using MarginPtr = __detail::MarginPtr;
+		using MarginPtr = __detail::MarginPtr; //TODO: I think we can get rid of this? maybe
 
 		constexpr static siz MARGIN_SIZE = __detail::MARGIN_SIZE;
 		constexpr static siz NODE_SIZE = CalcAlignedSize(sizeof(Node));
@@ -392,6 +648,10 @@ namespace np::mem
 	public:
 		constexpr static siz BOOKKEEPING_SIZE = (MARGIN_SIZE * 2);
 		constexpr static siz OVERHEAD_SIZE = BOOKKEEPING_SIZE + NODE_SIZE;
+
+		siz _allocated_ = 0;
+		flt _allocated_rate_ = 0.f;
+		siz _allocation_count_ = 0;
 
 	private:
 		Mutex _mutex;
@@ -436,6 +696,8 @@ namespace np::mem
 
 		Block InternalAllocate(siz size, bl true_best_false_first)
 		{
+			//TODO: I think we can move our locks to these internal methods
+
 			Block block{}, split{};
 			size = CalcAlignedSize(size) + BOOKKEEPING_SIZE;
 			if (size < OVERHEAD_SIZE)
@@ -451,7 +713,7 @@ namespace np::mem
 				if (block.size - size >= OVERHEAD_SIZE)
 				{
 					split = {(ui8*)block.Begin() + size, block.size - size};
-					block.size -= split.size;
+					block.size = size;
 
 					bl success = InitFreeBlock(split);
 					NP_ENGINE_ASSERT(success, "InitFreeBlock must be successful here");
@@ -466,10 +728,11 @@ namespace np::mem
 
 				// only deallocate split after our block is considered allocated
 				if (split.IsValid())
-				{
-					bl success = InternalDeallocate((ui8*)split.Begin() + MARGIN_SIZE);
-					NP_ENGINE_ASSERT(success, "InternalDeallocate here must succeed");
-				}
+					StowFreeBlock(split);
+
+				_allocated_ += header->Size;
+				_allocated_rate_ = (flt)_allocated_ / (flt)_block.size;
+				_allocation_count_++;
 
 				block.ptr = (ui8*)block.Begin() + MARGIN_SIZE;
 				block.size -= BOOKKEEPING_SIZE;
@@ -486,6 +749,9 @@ namespace np::mem
 			{
 				MarginPtr header = (MarginPtr)((ui8*)ptr - MARGIN_SIZE);
 				header->IsAllocated = false;
+				_allocated_ -= header->Size;
+				_allocated_rate_ = (flt)_allocated_ / (flt)_block.size;
+				_allocation_count_--;
 
 				MarginPtr prev_footer, next_header, claim_footer, claim_header;
 				NodePtr claim_node;
@@ -538,6 +804,7 @@ namespace np::mem
 		void Init()
 		{
 			_tree.Clear();
+			_tree._block = _block;
 
 			if (InitFreeBlock(_block))
 			{
