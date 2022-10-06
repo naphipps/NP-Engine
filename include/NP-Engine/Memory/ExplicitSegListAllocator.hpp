@@ -21,9 +21,7 @@ namespace np::mem
 	{
 	private:
 		using Node = __detail::ExplicitListAllocatorNode;
-		using NodePtr = Node*;
 		using Margin = __detail::Margin;
-		using MarginPtr = __detail::MarginPtr;
 
 		constexpr static siz MARGIN_SIZE = __detail::MARGIN_SIZE;
 		constexpr static siz NODE_SIZE = CalcAlignedSize(sizeof(Node));
@@ -36,14 +34,14 @@ namespace np::mem
 		Mutex _mutex;
 
 		// roots are from aligned sizes A to B
-		NodePtr _root_1_16;
-		NodePtr _root_17_32;
-		NodePtr _root_33_64;
-		NodePtr _root_65_;
+		Node* _root_1_16;
+		Node* _root_17_32;
+		Node* _root_33_64;
+		Node* _root_65_;
 
-		NodePtr* GetRoot(siz size)
+		Node** GetRoot(siz size)
 		{
-			NodePtr* root = nullptr;
+			Node** root = nullptr;
 			if (_root_1_16 && size <= 16)
 				root = &_root_1_16;
 			else if (_root_17_32 && size <= 32)
@@ -56,9 +54,9 @@ namespace np::mem
 			return root;
 		}
 
-		NodePtr* GetRootMatching(NodePtr ptr)
+		Node** GetRootMatching(Node* ptr)
 		{
-			NodePtr* root = nullptr;
+			Node** root = nullptr;
 			if (_root_1_16 == ptr)
 				root = &_root_1_16;
 			else if (_root_17_32 == ptr)
@@ -71,7 +69,7 @@ namespace np::mem
 			return root;
 		}
 
-		void DetachNode(NodePtr node, NodePtr* root)
+		void DetachNode(Node* node, Node** root)
 		{
 			if (node->Next)
 				node->Next->Prev = node->Prev;
@@ -91,9 +89,9 @@ namespace np::mem
 				Block footer_block{(ui8*)block.End() - MARGIN_SIZE, MARGIN_SIZE};
 				Construct<Margin>(header_block);
 				Construct<Margin>(footer_block);
-				MarginPtr header = static_cast<MarginPtr>(header_block.ptr);
-				MarginPtr footer = static_cast<MarginPtr>(footer_block.ptr);
-				header->Size = block.size;
+				Margin* header = static_cast<Margin*>(header_block.ptr);
+				Margin* footer = static_cast<Margin*>(footer_block.ptr);
+				header->SetSize(block.size);
 				*footer = *header;
 
 				Block node_block{header_block.End(), NODE_SIZE};
@@ -110,9 +108,9 @@ namespace np::mem
 			bl init_success = InitFreeBlock(block);
 			NP_ENGINE_ASSERT(init_success, "our init here should always succeed");
 
-			NodePtr node = (NodePtr)((ui8*)block.Begin() + MARGIN_SIZE);
-			NodePtr* root = GetRoot(block.size);
-			NodePtr insert = *root;
+			Node* node = (Node*)((ui8*)block.Begin() + MARGIN_SIZE);
+			Node** root = GetRoot(block.size);
+			Node* insert = *root;
 
 			while (Contains(insert) && insert->Next && insert->Next < node->Next)
 				insert = insert->Next;
@@ -129,20 +127,20 @@ namespace np::mem
 				*root = node;
 		}
 
-		MarginPtr FindAllocationHeader(siz size, bl true_best_false_first)
+		Margin* FindAllocationHeader(siz size, bl true_best_false_first)
 		{
-			MarginPtr node_header, header = nullptr;
-			NodePtr node, root = *GetRoot(size);
+			Margin* node_header, *header = nullptr;
+			Node* node, *root = *GetRoot(size);
 
 			if (true_best_false_first)
 			{
 				siz diff, min_diff = SIZ_MAX;
 				for (node = root; Contains(node); node = node->Next)
 				{
-					node_header = (MarginPtr)((ui8*)node - MARGIN_SIZE);
-					if (!node_header->IsAllocated && node_header->Size >= size)
+					node_header = (Margin*)((ui8*)node - MARGIN_SIZE);
+					if (!node_header->IsAllocated() && node_header->GetSize() >= size)
 					{
-						diff = node_header->Size - size;
+						diff = node_header->GetSize() - size;
 						if (diff == 0)
 						{
 							header = node_header;
@@ -160,8 +158,8 @@ namespace np::mem
 			{
 				for (node = root; Contains(node) && !header; node = node->Next)
 				{
-					node_header = (MarginPtr)((ui8*)node - MARGIN_SIZE);
-					if (!node_header->IsAllocated && node_header->Size >= size)
+					node_header = (Margin*)((ui8*)node - MARGIN_SIZE);
+					if (!node_header->IsAllocated() && node_header->GetSize() >= size)
 						header = node_header;
 				}
 			}
@@ -176,11 +174,11 @@ namespace np::mem
 			if (size < OVERHEAD_SIZE)
 				size = OVERHEAD_SIZE;
 
-			MarginPtr header = FindAllocationHeader(size, true_best_false_first);
+			Margin* header = FindAllocationHeader(size, true_best_false_first);
 			if (header)
 			{
-				block = {header, header->Size};
-				DetachNode((NodePtr)((ui8*)header + MARGIN_SIZE), GetRoot(size));
+				block = {header, header->GetSize() };
+				DetachNode((Node*)((ui8*)header + MARGIN_SIZE), GetRoot(size));
 
 				// can we split?
 				if (block.size - size >= OVERHEAD_SIZE)
@@ -195,8 +193,8 @@ namespace np::mem
 					NP_ENGINE_ASSERT(success, "InitFreeBlock must be successful here");
 				}
 
-				header->IsAllocated = true;
-				MarginPtr footer = (MarginPtr)((ui8*)block.End() - MARGIN_SIZE);
+				header->SetIsAllocated(true);
+				Margin* footer = (Margin*)((ui8*)block.End() - MARGIN_SIZE);
 				*footer = *header;
 
 				// only deallocate split after our block is considered allocated
@@ -218,24 +216,24 @@ namespace np::mem
 			bl deallocated = false;
 			if (Contains(ptr))
 			{
-				MarginPtr header = (MarginPtr)((ui8*)ptr - MARGIN_SIZE);
-				header->IsAllocated = false;
+				Margin* header = (Margin*)((ui8*)ptr - MARGIN_SIZE);
+				header->SetIsAllocated(false);
 
-				MarginPtr prev_footer, next_header, claim_header, claim_footer;
-				NodePtr claim_node;
+				Margin* prev_footer, * next_header, * claim_header, * claim_footer;
+				Node* claim_node;
 
 				// claim previous blocks
-				for (prev_footer = (MarginPtr)((ui8*)header - MARGIN_SIZE); Contains(prev_footer);
-					 prev_footer = (MarginPtr)((ui8*)header - MARGIN_SIZE))
+				for (prev_footer = (Margin*)((ui8*)header - MARGIN_SIZE); Contains(prev_footer);
+					 prev_footer = (Margin*)((ui8*)header - MARGIN_SIZE))
 				{
-					if (!prev_footer->IsAllocated)
+					if (!prev_footer->IsAllocated())
 					{
-						claim_header = (MarginPtr)((ui8*)prev_footer + MARGIN_SIZE - prev_footer->Size);
-						claim_node = (NodePtr)((ui8*)claim_header + MARGIN_SIZE);
-						DetachNode(claim_node, GetRoot(claim_header->Size));
+						claim_header = (Margin*)((ui8*)prev_footer + MARGIN_SIZE - prev_footer->GetSize());
+						claim_node = (Node*)((ui8*)claim_header + MARGIN_SIZE);
+						DetachNode(claim_node, GetRoot(claim_header->GetSize()));
 
-						claim_header->Size = claim_header->Size + header->Size;
-						claim_footer = (MarginPtr)((ui8*)claim_header + claim_header->Size - MARGIN_SIZE);
+						claim_header->SetSize(claim_header->GetSize() + header->GetSize());
+						claim_footer = (Margin*)((ui8*)claim_header + claim_header->GetSize() - MARGIN_SIZE);
 						*claim_footer = *claim_header;
 						header = claim_header;
 						continue;
@@ -244,24 +242,24 @@ namespace np::mem
 				}
 
 				// claim next blocks
-				for (next_header = (MarginPtr)((ui8*)header + header->Size); Contains(next_header);
-					 next_header = (MarginPtr)((ui8*)header + header->Size))
+				for (next_header = (Margin*)((ui8*)header + header->GetSize()); Contains(next_header);
+					 next_header = (Margin*)((ui8*)header + header->GetSize()))
 				{
-					if (!next_header->IsAllocated)
+					if (!next_header->IsAllocated())
 					{
 						claim_header = next_header;
-						claim_node = (NodePtr)((ui8*)claim_header + MARGIN_SIZE);
-						DetachNode(claim_node, GetRoot(claim_header->Size));
+						claim_node = (Node*)((ui8*)claim_header + MARGIN_SIZE);
+						DetachNode(claim_node, GetRoot(claim_header->GetSize()));
 
-						header->Size = header->Size + claim_header->Size;
-						claim_footer = (MarginPtr)((ui8*)header + header->Size - MARGIN_SIZE);
+						header->SetSize(header->GetSize() + claim_header->GetSize());
+						claim_footer = (Margin*)((ui8*)header + header->GetSize() - MARGIN_SIZE);
 						*claim_footer = *header;
 						continue;
 					}
 					break;
 				}
 
-				Block block{header, header->Size};
+				Block block{header, header->GetSize() };
 				StowFreeBlock(block);
 				deallocated = true;
 			}
@@ -277,7 +275,7 @@ namespace np::mem
 			_root_65_ = nullptr;
 
 			if (InitFreeBlock(_block))
-				*GetRoot(_block.size) = (NodePtr)((ui8*)_block.Begin() + MARGIN_SIZE);
+				*GetRoot(_block.size) = (Node*)((ui8*)_block.Begin() + MARGIN_SIZE);
 			else
 				_block.Zeroize();
 		}
@@ -325,8 +323,8 @@ namespace np::mem
 			Block block;
 			if (Contains(block_ptr))
 			{
-				MarginPtr block_header = (MarginPtr)((ui8*)block_ptr - MARGIN_SIZE);
-				block = {block_ptr, block_header->Size - BOOKKEEPING_SIZE};
+				Margin* block_header = (Margin*)((ui8*)block_ptr - MARGIN_SIZE);
+				block = {block_ptr, block_header->GetSize() - BOOKKEEPING_SIZE};
 			}
 
 			return block;

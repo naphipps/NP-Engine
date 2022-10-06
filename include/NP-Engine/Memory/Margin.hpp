@@ -9,18 +9,39 @@
 
 #include "NP-Engine/Primitive/Primitive.hpp"
 
+#include "Allocator.hpp"
+
 namespace np::mem::__detail
 {
-	struct Margin
+	class Margin
 	{
-		siz Size = 0;
-		bl IsAllocated = false;
+	private:
+		NP_ENGINE_STATIC_ASSERT(ALIGNMENT >= 2, "This implementation requires ALIGNMENT >= 2 because we use that last bit.");
 
-		//TODO: go back to a POD class with setters and getters
-		//TODO: go back to a compressed size and allocation
+		siz _size_and_is_allocated = 0;
+
+	public:
+
+		siz GetSize() const
+		{
+			return _size_and_is_allocated & ~ALIGNMENT_MINUS_ONE;
+		}
+
+		bl IsAllocated() const
+		{
+			return (_size_and_is_allocated & ALIGNMENT_MINUS_ONE) == 1;
+		}
+
+		void SetSize(siz size)
+		{
+			_size_and_is_allocated = (size & ~ALIGNMENT_MINUS_ONE) | (_size_and_is_allocated & ALIGNMENT_MINUS_ONE);
+		}
+
+		void SetIsAllocated(bl is_allocated)
+		{
+			_size_and_is_allocated = GetSize() | ((is_allocated ? 1 : 0) & ALIGNMENT_MINUS_ONE);
+		}
 	};
-
-	using MarginPtr = Margin*;
 
 	const static siz MARGIN_SIZE = CalcAlignedSize(sizeof(Margin));
 } // namespace np::mem::__detail
