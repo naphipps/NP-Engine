@@ -20,7 +20,6 @@ namespace np::nput
 		::glm::vec2 _position{0};
 
 	public:
-
 		bl IsOverSurface() const
 		{
 			return _is_over_surface;
@@ -41,6 +40,6 @@ namespace np::nput
 			_position = position;
 		}
 	};
-}
+} // namespace np::nput
 
 #endif /* NP_ENGINE_MOUSE_POSITION_HPP */

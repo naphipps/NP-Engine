@@ -20,8 +20,8 @@ namespace np::geom
 	template <typename T>
 	struct Aabb<2, T>
 	{
-		::glm::vec<2, T> LowerLeft = { 0 };
-		::glm::vec<2, T> UpperRight = { 0 };
+		::glm::vec<2, T> LowerLeft = {0};
+		::glm::vec<2, T> UpperRight = {0};
 
 		bl Contains(::glm::vec<2, T> point) const
 		{

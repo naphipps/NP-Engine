@@ -94,7 +94,7 @@ namespace np::mem
 			Margin* header = FindAllocationHeader(size, true_best_false_first);
 			if (header)
 			{
-				block = {header, header->GetSize() };
+				block = {header, header->GetSize()};
 
 				// can we split?
 				if (block.size - size >= OVERHEAD_SIZE)
@@ -135,7 +135,7 @@ namespace np::mem
 			{
 				Margin* header = (Margin*)((ui8*)ptr - MARGIN_SIZE);
 				Margin* footer = (Margin*)((ui8*)header + header->GetSize() - MARGIN_SIZE);
-				Margin* prev_footer, *next_header;
+				Margin *prev_footer, *next_header;
 
 				// claim previous blocks
 				for (prev_footer = (Margin*)((ui8*)header - MARGIN_SIZE); Contains(prev_footer) && !prev_footer->IsAllocated();

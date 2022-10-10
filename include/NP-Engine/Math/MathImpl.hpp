@@ -46,7 +46,7 @@ namespace np::mat
 	template <typename T>
 	static inline ::glm::vec<3, T> Midpoint(const ::glm::vec<3, T>& a, const ::glm::vec<3, T>& b)
 	{
-		return { (a.x + b.x) / (T)2, (a.y + b.y) / (T)2, (a.z + b.z) / (T)2 };
+		return {(a.x + b.x) / (T)2, (a.y + b.y) / (T)2, (a.z + b.z) / (T)2};
 	}
 
 	static inline flt RoundTo32nd(const flt n)
@@ -190,13 +190,13 @@ namespace np::mat
 	template <typename T>
 	static inline ::glm::vec<3, T> RoundTo32nd(const ::glm::vec<3, T>& point)
 	{
-		return { RoundTo32nd(point.x), RoundTo32nd(point.y), RoundTo32nd(point.z) };
+		return {RoundTo32nd(point.x), RoundTo32nd(point.y), RoundTo32nd(point.z)};
 	}
 
 	template <typename T>
 	static inline ::glm::vec<3, T> RoundTo16th(const ::glm::vec<3, T>& point)
 	{
-		return { RoundTo16th(point.x), RoundTo16th(point.y),  RoundTo16th(point.z) };
+		return {RoundTo16th(point.x), RoundTo16th(point.y), RoundTo16th(point.z)};
 	}
 
 	static inline dbl DistanceSquared(const flt ax, const flt ay, const flt bx, const flt by)

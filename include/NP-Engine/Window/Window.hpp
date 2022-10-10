@@ -37,10 +37,10 @@ namespace np::win
 
 		using ResizeCallback = void (*)(void* caller, ui32 width, ui32 height);
 		using PositionCallback = void (*)(void* caller, i32 x, i32 y);
-		using KeyCallback = void(*)(void* caller, const nput::KeyCodeState& key_code_state);
-		using MouseCallback = void(*)(void* caller, const nput::MouseCodeState& mouse_code_state);
-		using MousePositionCallback = void(*)(void* caller, const nput::MousePosition& mouse_potition);
-		using ControllerCallback = void(*)(void* caller, const nput::ControllerCodeState& controller_state);
+		using KeyCallback = void (*)(void* caller, const nput::KeyCodeState& key_code_state);
+		using MouseCallback = void (*)(void* caller, const nput::MouseCodeState& mouse_code_state);
+		using MousePositionCallback = void (*)(void* caller, const nput::MousePosition& mouse_potition);
+		using ControllerCallback = void (*)(void* caller, const nput::ControllerCodeState& controller_state);
 
 	protected:
 		Properties _properties;
@@ -78,7 +78,7 @@ namespace np::win
 			Window* window = (Window*)glfwGetWindowUserPointer(glfw_window);
 			nput::KeyCodeState state;
 
-			//TODO: what is scancode?!
+			// TODO: what is scancode?!
 
 			switch (action)
 			{
@@ -93,7 +93,7 @@ namespace np::win
 				state.SetActivity(nput::KeyCodeState::Activity::Inactive);
 				break;
 			}
-			
+
 			switch (key)
 			{
 			case GLFW_KEY_SPACE:
@@ -579,7 +579,7 @@ namespace np::win
 		{
 			Window* window = (Window*)glfwGetWindowUserPointer(glfw_window);
 			nput::MousePosition& position = window->GetMousePosition();
-			position.SetPosition({ x, y });
+			position.SetPosition({x, y});
 			window->InvokeMousePositionCallbacks(position);
 		}
 
@@ -609,9 +609,9 @@ namespace np::win
 				break;
 			}
 
-			//TODO: controller support in window's callbacks is not finished
+			// TODO: controller support in window's callbacks is not finished
 
-			//window->InvokeControllerCallbacks(state);
+			// window->InvokeControllerCallbacks(state);
 		}
 
 		void InvokeResizeCallbacks(ui32 width, ui32 height)
@@ -692,7 +692,6 @@ namespace np::win
 		}
 
 	public:
-
 		static const chr** GetRequiredGfxExtentions(ui32* count)
 		{
 			return glfwGetRequiredInstanceExtensions(count);

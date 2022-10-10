@@ -21,7 +21,6 @@ namespace np::mem::__detail
 		siz _size_and_is_allocated = 0;
 
 	public:
-
 		siz GetSize() const
 		{
 			return _size_and_is_allocated & ~ALIGNMENT_MINUS_ONE;

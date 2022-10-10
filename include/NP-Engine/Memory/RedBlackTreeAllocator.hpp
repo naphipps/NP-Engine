@@ -21,7 +21,8 @@ namespace np::mem
 		class RedBlackTreeAllocatorNode
 		{
 		private:
-			NP_ENGINE_STATIC_ASSERT(ALIGNMENT >= 4, "This implementation requires ALIGNMENT >= 4 because we use those last two bits.");
+			NP_ENGINE_STATIC_ASSERT(ALIGNMENT >= 4,
+									"This implementation requires ALIGNMENT >= 4 because we use those last two bits.");
 
 		public:
 			constexpr static siz RED_TREE_NODE_RANK = 0;
@@ -122,7 +123,7 @@ namespace np::mem
 			{
 				node->SetRank(Node::LIST_NODE_RANK);
 
-				//prev stays in-place, so properties of the top node (tree properties) are maintained
+				// prev stays in-place, so properties of the top node (tree properties) are maintained
 				node->SetPrev(prev);
 				node->SetNext(prev->GetNext());
 				prev->SetNext(node);
@@ -140,7 +141,7 @@ namespace np::mem
 					node->GetPrev()->SetNext(node->GetNext());
 				else if (node->GetNext())
 				{
-					//no prev means our node was on the top, so we need to pass our tree properties to next
+					// no prev means our node was on the top, so we need to pass our tree properties to next
 					Node* next = node->GetNext();
 					next->SetRank(node->GetRank());
 					next->SetLeft(node->GetLeft());
@@ -297,8 +298,7 @@ namespace np::mem
 			{
 				if (node->GetParent())
 				{
-					if (node->GetParent()->GetRank() == Node::RED_TREE_NODE_RANK 
-						&& node->GetParent()->GetParent())
+					if (node->GetParent()->GetRank() == Node::RED_TREE_NODE_RANK && node->GetParent()->GetParent())
 					{
 						Node* parent = node->GetParent();
 						Node* grand_parent = parent->GetParent();
@@ -312,7 +312,7 @@ namespace np::mem
 						{
 							if (parent_size < grand_parent_size)
 							{
-								//parent is grand_parent->left
+								// parent is grand_parent->left
 								if (parent_size < node_size)
 								{
 									SwapRanks(node, parent);
@@ -327,7 +327,7 @@ namespace np::mem
 							}
 							else
 							{
-								//parent is grand_parent->right
+								// parent is grand_parent->right
 								if (node_size < parent_size)
 								{
 									SwapRanks(node, parent);
@@ -347,8 +347,7 @@ namespace np::mem
 							uncle->SetRank(Node::BLACK_TREE_NODE_RANK);
 							grand_parent->SetRank(Node::RED_TREE_NODE_RANK);
 
-							if (!grand_parent->GetParent() || 
-								grand_parent->GetParent()->GetRank() == Node::RED_TREE_NODE_RANK)
+							if (!grand_parent->GetParent() || grand_parent->GetParent()->GetRank() == Node::RED_TREE_NODE_RANK)
 								InternalInsertCleanup(grand_parent);
 						}
 					}
@@ -457,7 +456,7 @@ namespace np::mem
 
 			void InternalRemoveCleanup(Node* node)
 			{
-				//node has no children
+				// node has no children
 				Node* sibling = nullptr;
 				if (node->GetParent()->GetLeft() == node)
 					sibling = node->GetParent()->GetRight();
@@ -468,9 +467,9 @@ namespace np::mem
 				{
 					if ((sibling->GetLeft() && sibling->GetLeft()->GetRank() == Node::RED_TREE_NODE_RANK) ||
 						(sibling->GetRight() && sibling->GetRight()->GetRank() == Node::RED_TREE_NODE_RANK))
-						InternalRemoveCleanupCase1(node); //sibling has a red child
+						InternalRemoveCleanupCase1(node); // sibling has a red child
 					else
-						InternalRemoveCleanupCase2(node); //sibling has no red children
+						InternalRemoveCleanupCase2(node); // sibling has no red children
 				}
 				else
 				{
@@ -480,7 +479,7 @@ namespace np::mem
 
 			void InternalRemoveCleanupCase1(Node* node)
 			{
-				//sibling is black and has a red child
+				// sibling is black and has a red child
 				Node* sibling = nullptr;
 				if (node->GetParent()->GetLeft() == node)
 					sibling = node->GetParent()->GetRight();
@@ -490,11 +489,11 @@ namespace np::mem
 				i32 old_parent_rank = sibling->GetParent()->GetRank();
 				if (GetSize(sibling) < GetSize(node))
 				{
-					//sibling is node->parent->left
+					// sibling is node->parent->left
 					if (sibling->GetRight() && sibling->GetRight()->GetRank() == Node::RED_TREE_NODE_RANK)
 					{
-						//sibling has red child on right
-						//we need to prep sibling for a rotate right
+						// sibling has red child on right
+						// we need to prep sibling for a rotate right
 						SwapRanks(sibling, sibling->GetRight());
 						RotateLeft(sibling);
 						sibling = sibling->GetParent();
@@ -504,11 +503,11 @@ namespace np::mem
 				}
 				else
 				{
-					//sibling is node->parent->right
+					// sibling is node->parent->right
 					if (sibling->GetLeft() && sibling->GetLeft()->GetRank() == Node::RED_TREE_NODE_RANK)
 					{
-						//sibling has red child on left
-						//we need to prep sibling for a rotate left
+						// sibling has red child on left
+						// we need to prep sibling for a rotate left
 						SwapRanks(sibling, sibling->GetLeft());
 						RotateRight(sibling);
 						sibling = sibling->GetParent();
@@ -529,8 +528,8 @@ namespace np::mem
 
 			void InternalRemoveCleanupCase2(Node* node)
 			{
-				//sibling has no red children
-				//sibling may have any number of black children
+				// sibling has no red children
+				// sibling may have any number of black children
 				Node* sibling = nullptr;
 				if (node->GetParent()->GetLeft() == node)
 					sibling = node->GetParent()->GetRight();
@@ -548,7 +547,7 @@ namespace np::mem
 
 			void InternalRemoveCleanupCase3(Node* node)
 			{
-				//sibling is red and node->parent is black
+				// sibling is red and node->parent is black
 				Node* sibling = nullptr;
 				if (node->GetParent()->GetLeft() == node)
 					sibling = node->GetParent()->GetRight();
@@ -556,9 +555,9 @@ namespace np::mem
 					sibling = node->GetParent()->GetLeft();
 
 				if (GetSize(sibling) < GetSize(node))
-					RotateRight(sibling->GetParent()); //sibling is node->parent->left
+					RotateRight(sibling->GetParent()); // sibling is node->parent->left
 				else
-					RotateLeft(sibling->GetParent()); //sibling is node->parent->right
+					RotateLeft(sibling->GetParent()); // sibling is node->parent->right
 
 				sibling->SetRank(Node::BLACK_TREE_NODE_RANK);
 				node->GetParent()->SetRank(Node::RED_TREE_NODE_RANK);
@@ -572,8 +571,7 @@ namespace np::mem
 			{
 				Node* found = nullptr;
 				siz diff, min_diff = SIZ_MAX;
-				for (Node* it = _root; it;
-					it = GetSize(it) > size ? it->GetLeft() : it->GetRight())
+				for (Node* it = _root; it; it = GetSize(it) > size ? it->GetLeft() : it->GetRight())
 				{
 					if (GetSize(it) >= size)
 					{
@@ -733,7 +731,7 @@ namespace np::mem
 				Margin* header = (Margin*)((ui8*)ptr - MARGIN_SIZE);
 				header->SetIsAllocated(false);
 
-				Margin* prev_footer, *next_header, *claim_footer, *claim_header;
+				Margin *prev_footer, *next_header, *claim_footer, *claim_header;
 				Node* claim_node;
 
 				// claim previous blocks
@@ -773,7 +771,7 @@ namespace np::mem
 					break;
 				}
 
-				Block block{header, header->GetSize() };
+				Block block{header, header->GetSize()};
 				StowFreeBlock(block);
 				deallocated = true;
 			}

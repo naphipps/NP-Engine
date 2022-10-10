@@ -17,7 +17,7 @@ namespace np::nput
 	enum class ControllerCode : ui32
 	{
 		Unkown = 0,
-		
+
 		Start,
 		Select,
 		Home,
@@ -34,7 +34,7 @@ namespace np::nput
 		LeftTrigger,
 		LeftBumper,
 		LeftStickButton,
-		
+
 		LeftPadUp,
 		LeftPadRight,
 		LeftPadDown,
@@ -45,7 +45,7 @@ namespace np::nput
 
 	using ControllerCodeState = InputState<ControllerCode>;
 	using ControllerCodeStates = InputStates<ControllerCode, (siz)ControllerCode::Max>;
-}
+} // namespace np::nput
 
 static str to_str(::np::nput::ControllerCode code)
 {

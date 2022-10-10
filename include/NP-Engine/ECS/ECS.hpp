@@ -45,15 +45,15 @@ namespace np::ecs
 			return Entity(e, r).add<T, Args...>(::std::forward<Args>(args)...);
 		}
 
-		Entity() : _entity(::entt::null), _registry(nullptr) {}
+		Entity(): _entity(::entt::null), _registry(nullptr) {}
 
-		Entity(Registry& registry) : _entity(registry.create()), _registry(mem::AddressOf(registry)) {}
+		Entity(Registry& registry): _entity(registry.create()), _registry(mem::AddressOf(registry)) {}
 
-		Entity(EntityHandle entity, Registry& registry) : _entity(entity), _registry(mem::AddressOf(registry)) {}
+		Entity(EntityHandle entity, Registry& registry): _entity(entity), _registry(mem::AddressOf(registry)) {}
 
-		Entity(const Entity& other) : _entity(other._entity), _registry(other._registry) {}
+		Entity(const Entity& other): _entity(other._entity), _registry(other._registry) {}
 
-		Entity(Entity&& other) noexcept : _entity(::std::move(other._entity)), _registry(::std::move(other._registry))
+		Entity(Entity&& other) noexcept: _entity(::std::move(other._entity)), _registry(::std::move(other._registry))
 		{
 			other.invalidate();
 		}

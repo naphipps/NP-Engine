@@ -31,7 +31,6 @@ namespace np::nput
 		flt _activity_level = 1.f;
 
 	public:
-
 		flt GetActivityLevel() const
 		{
 			return IsActive() ? 0.f : _activity_level;
@@ -102,6 +101,6 @@ namespace np::nput
 			return operator[]((siz)code);
 		}
 	};
-}
+} // namespace np::nput
 
 #endif /* NP_ENGINE_INPUT_STATE_HPP */

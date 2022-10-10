@@ -129,8 +129,8 @@ namespace np::mem
 
 		Margin* FindAllocationHeader(siz size, bl true_best_false_first)
 		{
-			Margin* node_header, *header = nullptr;
-			Node* node, *root = *GetRoot(size);
+			Margin *node_header, *header = nullptr;
+			Node *node, *root = *GetRoot(size);
 
 			if (true_best_false_first)
 			{
@@ -177,7 +177,7 @@ namespace np::mem
 			Margin* header = FindAllocationHeader(size, true_best_false_first);
 			if (header)
 			{
-				block = {header, header->GetSize() };
+				block = {header, header->GetSize()};
 				DetachNode((Node*)((ui8*)header + MARGIN_SIZE), GetRoot(size));
 
 				// can we split?
@@ -219,7 +219,7 @@ namespace np::mem
 				Margin* header = (Margin*)((ui8*)ptr - MARGIN_SIZE);
 				header->SetIsAllocated(false);
 
-				Margin* prev_footer, * next_header, * claim_header, * claim_footer;
+				Margin *prev_footer, *next_header, *claim_header, *claim_footer;
 				Node* claim_node;
 
 				// claim previous blocks
@@ -259,7 +259,7 @@ namespace np::mem
 					break;
 				}
 
-				Block block{header, header->GetSize() };
+				Block block{header, header->GetSize()};
 				StowFreeBlock(block);
 				deallocated = true;
 			}

@@ -83,8 +83,7 @@ namespace np::nput
 		}
 
 	public:
-		InputQueue() :
-			_flag(true)
+		InputQueue(): _flag(true)
 		{
 			for (siz i = 0; i < (siz)KeyCode::Max; i++)
 				_key_states[i].SetCode(i);
@@ -120,11 +119,11 @@ namespace np::nput
 			_mouse_position = GetMousePositionBuffer(flag);
 			GetMousePositionBuffer(!flag) = _mouse_position;
 
-			//TODO: remove log below
+			// TODO: remove log below
 			/*
-			
+
 			str mouse_msg = "Mouse Position: ";
-			str mouse_position_msg = "(" + to_str(_mouse_position.GetPosition().x) + 
+			str mouse_position_msg = "(" + to_str(_mouse_position.GetPosition().x) +
 				", " + to_str(_mouse_position.GetPosition().y) + ")";
 			mouse_msg += _mouse_position.IsOverSurface() ? mouse_position_msg : "(outside surface)";
 			mouse_msg += "\n";
@@ -184,6 +183,6 @@ namespace np::nput
 			return _mouse_position;
 		}
 	};
-}
+} // namespace np::nput
 
 #endif /* NP_ENGINE_INPUT_QUEUE_HPP */
