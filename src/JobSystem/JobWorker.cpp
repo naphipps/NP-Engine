@@ -164,7 +164,7 @@ namespace np::jsys
 					}
 					else
 					{
-						thr::ThisThread::SleepFor(tim::DblMilliseconds(NP_ENGINE_APPLICATION_LOOP_DURATION));
+						thr::ThisThread::sleep_for(tim::DblMilliseconds(NP_ENGINE_APPLICATION_LOOP_DURATION));
 					}
 				}
 			}

@@ -99,29 +99,7 @@ namespace np::thr
 	{
 		using namespace ::std::this_thread;
 
-		namespace __detail
-		{
-			void SleepForNanoseconds(ui64 nanoseconds);
-			void SleepForMilliseconds(ui64 milliseconds);
-			void SleepForSeconds(ui64 seconds);
-		} // namespace __detail
-
 		bl SetAffinity(siz core_number);
-
-		template <class R, class P>
-		void SleepFor(const tim::Duration<R, P>& d)
-		{
-#if NP_ENGINE_PLATFORM_IS_APPLE
-			tim::Ui64Milliseconds milliseconds = tim::DurationCast<tim::Ui64Milliseconds, R, P>(d);
-			__detail::SleepForMilliseconds(milliseconds.count());
-#elif NP_ENGINE_PLATFORM_IS_LINUX
-			tim::Ui64Nanoseconds nanoseconds = tim::DurationCast<tim::Ui64Nanoseconds, R, P>(d);
-			__detail::SleepForNanoseconds(nanoseconds.count());
-#elif NP_ENGINE_PLATFORM_IS_WINDOWS
-			tim::Ui64Milliseconds milliseconds = tim::DurationCast<tim::Ui64Milliseconds, R, P>(d);
-			__detail::SleepForMilliseconds(milliseconds.count());
-#endif
-		}
 	} // namespace ThisThread
 
 	using ThreadPool = mem::ObjectPool<Thread>;
