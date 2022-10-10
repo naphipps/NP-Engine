@@ -13,6 +13,6 @@
 #include "Line.hpp"
 #include "Polygon.hpp"
 #include "Circular.hpp"
-#include "AABB.hpp"
+#include "Aabb.hpp"
 
 #endif /* NP_ENGINE_GEOMETRY_HPP */

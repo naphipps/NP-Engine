@@ -35,7 +35,7 @@ namespace np::mem
 
 		virtual bl Deallocate(void* ptr) override = 0;
 
-		virtual bl DeallocateAll() = 0;
+		virtual bl DeallocateAll() override = 0;
 	};
 } // namespace np::mem
 

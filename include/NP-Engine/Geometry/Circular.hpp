@@ -20,7 +20,7 @@ namespace np::geom
 	{
 		using Point = typename Shape<DIMENSION_COUNT, T>::Point;
 
-		Point Center = {0};
+		Point Center = {};
 		T Radius = 0;
 	};
 
