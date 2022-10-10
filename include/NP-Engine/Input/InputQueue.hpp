@@ -120,10 +120,9 @@ namespace np::nput
 			_mouse_position = GetMousePositionBuffer(flag);
 			GetMousePositionBuffer(!flag) = _mouse_position;
 
+			//TODO: remove log below
 			/*
-			TODO: remove log below
-			//* /
-
+			
 			str mouse_msg = "Mouse Position: ";
 			str mouse_position_msg = "(" + to_str(_mouse_position.GetPosition().x) + 
 				", " + to_str(_mouse_position.GetPosition().y) + ")";
