@@ -39,6 +39,8 @@ namespace np::jsys
 			Steal = BIT(2)
 		};
 
+		using FetchOrderArray = con::array<Fetch, 3>;
+
 	private:
 		atm_bl _keep_working;
 		atm_bl _work_procedure_complete;
@@ -49,7 +51,8 @@ namespace np::jsys
 		rng::Random64 _random_engine;
 		con::vector<JobWorker*> _coworkers;
 		siz _coworker_index;
-		atm<con::array<Fetch, 3>> _fetch_order;
+		atm<FetchOrderArray> _fetch_order;
+		//TODO: ^ we need to remove the atm on this and add a mutex for getting/setting
 
 		/*
 			returns a valid && CanExecute() job, or invalid job

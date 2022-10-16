@@ -7,6 +7,9 @@
 #ifndef NP_ENGINE_RPI_HPP
 #define NP_ENGINE_RPI_HPP
 
+//TODO: I think we need to change how we name these RPI/RHI organizations...
+//TODO: ^ maybe Interface and Detail (namespace __detail)
+
 #include "Buffer.hpp"
 #include "Camera.hpp"
 #include "Color.hpp"
