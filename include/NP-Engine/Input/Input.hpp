@@ -15,5 +15,7 @@
 #include "MousePosition.hpp"
 #include "ControllerCode.hpp"
 #include "InputQueue.hpp"
+#include "InputSource.hpp"
+#include "InputListener.hpp"
 
 #endif /* NP_ENGINE_INPUT_HPP */

@@ -10,41 +10,12 @@
 #include "NP-Engine/Primitive/Primitive.hpp"
 #include "NP-Engine/Container/Container.hpp"
 
-#include "NP-Engine/Insight/Insight.hpp" //TODO: remove
-#include "NP-Engine/String/String.hpp" //TODO: remove
-
-#include "NP-Engine/Vendor/GlmInclude.hpp"
-
-#include "KeyCode.hpp"
-#include "MouseCode.hpp"
-#include "ControllerCode.hpp"
-#include "MousePosition.hpp"
+#include "InputListener.hpp"
 
 namespace np::nput
 {
-	class InputQueue
+	class InputQueue : public InputListener
 	{
-	public:
-		static void SubmitKeyCallback(void* caller, const KeyCodeState& state)
-		{
-			((InputQueue*)caller)->Submit(state);
-		}
-
-		static void SubmitMouseCallback(void* caller, const MouseCodeState& state)
-		{
-			((InputQueue*)caller)->Submit(state);
-		}
-
-		static void SubmitMousePositionCallback(void* caller, const MousePosition& position)
-		{
-			((InputQueue*)caller)->Submit(position);
-		}
-
-		static void SubmitControllerCallback(void* caller, const ControllerCodeState& state)
-		{
-			((InputQueue*)caller)->Submit(state);
-		}
-
 	protected:
 		using KeyCodeStateBuffer = con::mpmc_queue<KeyCodeState>;
 		using MouseCodeStateBuffer = con::mpmc_queue<MouseCodeState>;
@@ -59,9 +30,9 @@ namespace np::nput
 
 		con::array<KeyCodeStateBuffer, 2> _key_buffers;
 		con::array<MouseCodeStateBuffer, 2> _mouse_buffers;
-		con::array<ControllerCodeStateBuffer, 2> _controller_buffers;
 		con::array<MousePosition, 2> _mouse_position_buffer;
-
+		con::array<ControllerCodeStateBuffer, 2> _controller_buffers;
+		
 		KeyCodeStateBuffer& GetKeyCodeBuffer(bl flag)
 		{
 			return flag ? _key_buffers.front() : _key_buffers.back();
@@ -72,14 +43,14 @@ namespace np::nput
 			return flag ? _mouse_buffers.front() : _mouse_buffers.back();
 		}
 
-		ControllerCodeStateBuffer& GetControllerCodeBuffer(bl flag)
-		{
-			return flag ? _controller_buffers.front() : _controller_buffers.back();
-		}
-
 		MousePosition& GetMousePositionBuffer(bl flag)
 		{
 			return flag ? _mouse_position_buffer.front() : _mouse_position_buffer.back();
+		}
+
+		ControllerCodeStateBuffer& GetControllerCodeBuffer(bl flag)
+		{
+			return flag ? _controller_buffers.front() : _controller_buffers.back();
 		}
 
 	public:
@@ -118,54 +89,36 @@ namespace np::nput
 
 			_mouse_position = GetMousePositionBuffer(flag);
 			GetMousePositionBuffer(!flag) = _mouse_position;
-
-			// TODO: remove log below
-			/*
-
-			str mouse_msg = "Mouse Position: ";
-			str mouse_position_msg = "(" + to_str(_mouse_position.GetPosition().x) +
-				", " + to_str(_mouse_position.GetPosition().y) + ")";
-			mouse_msg += _mouse_position.IsOverSurface() ? mouse_position_msg : "(outside surface)";
-			mouse_msg += "\n";
-
-			mouse_msg += "Mouse Buttons: ";
-			for (auto it = _mouse_states.begin(); it != _mouse_states.end(); it++)
-				mouse_msg += it->GetActivity() == MouseCodeState::Activity::Active ? to_str(it->GetCode()) + ", " : "";
-			mouse_msg += "\n";
-
-			str keys_msg = "Active keys: ";
-			for (auto it = _key_states.begin(); it != _key_states.end(); it++)
-				keys_msg += it->GetActivity() == KeyCodeState::Activity::Active ? to_str(it->GetCode()) + ", " : "";
-			keys_msg += "\n";
-
-			NP_ENGINE_LOG_INFO(mouse_msg + keys_msg);
-
-			//*/
 		}
 
-		void Submit(const KeyCodeState& key_code_state)
+		void Submit(const KeyCodeState& key_code_state) override
 		{
 			GetKeyCodeBuffer(_flag.load(mo_acquire)).enqueue(key_code_state);
 		}
 
-		void Submit(const MouseCodeState& mouse_code_state)
+		void Submit(const MouseCodeState& mouse_code_state) override
 		{
 			GetMouseCodeBuffer(_flag.load(mo_acquire)).enqueue(mouse_code_state);
 		}
 
-		void Submit(const ControllerCodeState& controller_code_state)
-		{
-			GetControllerCodeBuffer(_flag.load(mo_acquire)).enqueue(controller_code_state);
-		}
-
-		void Submit(const MousePosition& mouse_position)
+		void Submit(const MousePosition& mouse_position) override
 		{
 			GetMousePositionBuffer(_flag.load(mo_acquire)) = mouse_position;
+		}
+
+		void Submit(const ControllerCodeState& controller_code_state) override
+		{
+			GetControllerCodeBuffer(_flag.load(mo_acquire)).enqueue(controller_code_state);
 		}
 
 		const KeyCodeStates& GetKeyCodeStates() const
 		{
 			return _key_states;
+		}
+
+		const MousePosition& GetMousePosition() const
+		{
+			return _mouse_position;
 		}
 
 		const MouseCodeStates& GetMouseCodeStates() const
@@ -176,11 +129,6 @@ namespace np::nput
 		const ControllerCodeStates& GetControllerCodeStates() const
 		{
 			return _controller_states;
-		}
-
-		const MousePosition& GetMousePosition() const
-		{
-			return _mouse_position;
 		}
 	};
 } // namespace np::nput

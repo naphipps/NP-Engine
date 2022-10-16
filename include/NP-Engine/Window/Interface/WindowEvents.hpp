@@ -10,9 +10,13 @@
 #include "NP-Engine/Foundation/Foundation.hpp"
 
 #include "WindowResizeEvent.hpp"
-#include "WindowCloseEvent.hpp"
+#include "WindowClosedEvent.hpp"
+#include "WindowClosingEvent.hpp"
 #include "WindowCreateEvent.hpp"
-
-// TODO: add events? WindowFocus, WindowLostFocus, WindowMoved
+#include "WindowFocusEvent.hpp"
+#include "WindowFramebufferEvent.hpp"
+#include "WindowPositionEvent.hpp"
+#include "WindowMinimizeEvent.hpp"
+#include "WindowMaximizeEvent.hpp"
 
 #endif /* NP_ENGINE_WINDOW_EVENTS_HPP */

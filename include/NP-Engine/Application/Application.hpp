@@ -142,14 +142,22 @@ namespace np::app
 			_overlays.emplace_back(overlay);
 		}
 
+		//TODO: I think CreateWindowScene should be replaced with WindowLayer.CreateWindow and GraphicsLayer.CreateScene
+		//TODO: ^ this should be like the following:
+		/*
+		
+			win::Window* window = _window_layer.CreateWindow(properties);
+			gfx::Renderer* renderer = _graphics_layer.CreateRenderer(*window);
+			gfx::Scene* scene = _graphics_layer.CreateScene(*renderer);
+			//set our viewport shapes for each scene so we can have minimaps, etc
+
+		*/
+
 		gfx::Scene* CreateWindowScene(win::Window::Properties& window_properties)
 		{
 			win::Window* w = _window_layer.CreateWindow(window_properties);
 
-			w->SetKeyCallback(&_services.GetInputQueue(), nput::InputQueue::SubmitKeyCallback);
-			w->SetMouseCallback(&_services.GetInputQueue(), nput::InputQueue::SubmitMouseCallback);
-			w->SetMousePositionCallback(&_services.GetInputQueue(), nput::InputQueue::SubmitMousePositionCallback);
-			w->SetControllerCallback(&_services.GetInputQueue(), nput::InputQueue::SubmitControllerCallback);
+			w->SetListener(mem::AddressOf(_services.GetInputQueue()));
 
 			_graphics_layer.CreateRenderer(*w);
 			return _graphics_layer.AcquireScene();

@@ -127,6 +127,7 @@ namespace np::nput
 
 	using KeyCodeState = InputState<KeyCode>;
 	using KeyCodeStates = InputStates<KeyCode, (siz)KeyCode::Max>;
+	using KeyCallback = void (*)(void* caller, const nput::KeyCodeState& key_code_state);
 } // namespace np::nput
 
 static str to_str(::np::nput::KeyCode code)

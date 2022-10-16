@@ -13,7 +13,7 @@
 #include "NP-Engine/Memory/Memory.hpp"
 #include "NP-Engine/Services/Services.hpp"
 
-#include "NP-Engine/Window/WindowEvents.hpp"
+#include "NP-Engine/Window/Interface/WindowEvents.hpp"
 
 #include "NP-Engine/Graphics/RHI/Vulkan/VulkanGraphics.hpp"
 
@@ -37,9 +37,9 @@ namespace np::app
 		con::uset<gfx::Scene*> _unacquired_scenes;
 		con::uset<gfx::Scene*> _acquired_scenes;
 
-		virtual void AdjustForWindowClose(evnt::Event& e)
+		virtual void AdjustForWindowClosing(evnt::Event& e)
 		{
-			win::Window& window = *e.GetData<win::WindowCloseEvent::DataType>().window;
+			win::Window& window = *e.GetData<win::WindowClosingEvent::DataType>().window;
 
 			for (auto it = _scenes.begin(); it != _scenes.end(); it++)
 				if ((*it)->GetRenderer().IsAttachedToWindow(window))
@@ -63,7 +63,7 @@ namespace np::app
 
 		virtual void AdjustForWindowResize(evnt::Event& e)
 		{
-			win::Window& window = *e.GetData<win::WindowCloseEvent::DataType>().window;
+			win::Window& window = *e.GetData<win::WindowResizeEvent::DataType>().window;
 
 			for (gfx::Scene*& scene : _scenes)
 				if (scene->GetRenderer().IsAttachedToWindow(window))
@@ -84,8 +84,8 @@ namespace np::app
 		{
 			switch (e.GetType())
 			{
-			case evnt::EventType::WindowClose:
-				AdjustForWindowClose(e);
+			case evnt::EventType::WindowClosing:
+				AdjustForWindowClosing(e);
 				break;
 			case evnt::EventType::WindowResize:
 				AdjustForWindowResize(e);

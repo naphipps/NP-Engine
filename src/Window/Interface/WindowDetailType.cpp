@@ -4,11 +4,9 @@
 //
 //##===----------------------------------------------------------------------===##//
 
-#ifndef NP_ENGINE_WINDOW_HPP
-#define NP_ENGINE_WINDOW_HPP
+#include "NP-Engine/Window/Interface/WindowInterface.hpp"
 
-#include "NP-Engine/Foundation/Foundation.hpp"
-
-#include "Interface/WindowInterface.hpp"
-
-#endif /* NP_ENGINE_WINDOW_HPP */
+namespace np::win::__detail
+{
+	atm<WindowDetailType> RegisteredWindowDetailType(WindowDetailType::None);
+}

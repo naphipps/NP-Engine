@@ -75,14 +75,12 @@ namespace np::gfx::rhi
 			}
 			else
 			{
-				i32 width, height;
-				glfwGetFramebufferSize((GLFWwindow*)GetSurface().GetWindow().GetNativeWindow(), &width, &height);
-
+				VkExtent2D framebuffer_extent = GetSurface().GetFramebufferExtent();
 				VkExtent2D min_extent = capabilities.minImageExtent;
 				VkExtent2D max_extent = capabilities.maxImageExtent;
 
-				extent = {::std::clamp((ui32)width, min_extent.width, max_extent.width),
-						  ::std::clamp((ui32)height, min_extent.height, max_extent.height)};
+				extent = {::std::clamp(framebuffer_extent.width, min_extent.width, max_extent.width),
+						  ::std::clamp(framebuffer_extent.height, min_extent.height, max_extent.height)};
 			}
 
 			return extent;

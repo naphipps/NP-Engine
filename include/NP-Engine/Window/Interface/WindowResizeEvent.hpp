@@ -11,7 +11,7 @@
 #include "NP-Engine/Memory/Memory.hpp"
 #include "NP-Engine/Event/Event.hpp"
 
-#include "Window.hpp"
+#include "WindowImpl.hpp"
 
 namespace np::win
 {
@@ -25,9 +25,9 @@ namespace np::win
 			ui32 height;
 		};
 
-		WindowResizeEvent(Window& window, ui32 width, ui32 height): evnt::Event()
+		WindowResizeEvent(Window* window, ui32 width, ui32 height): evnt::Event()
 		{
-			SetData<DataType>({mem::AddressOf(window), width, height});
+			SetData<DataType>({ window, width, height });
 		}
 
 		i32 GetWidth() const

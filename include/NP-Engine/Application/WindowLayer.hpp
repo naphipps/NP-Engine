@@ -13,24 +13,41 @@
 #include "NP-Engine/Memory/Memory.hpp"
 #include "NP-Engine/Services/Services.hpp"
 
-#include "NP-Engine/Vendor/GlfwInclude.hpp"
-
 #include "Layer.hpp"
 #include "ApplicationCloseEvent.hpp"
+
+//TODO: I think we should get rid of all glfw calls here
 
 namespace np::app
 {
 	class WindowLayer : public Layer
 	{
 	private:
-		mem::TraitAllocator _allocator;
+		//TODO: should this be a set?? I think vector is good for Cleanup(), but we could use a map for fast index lookup
 		con::vector<win::Window*> _windows;
-		con::vector<void*> _native_windows;
 
 	protected:
 		virtual void HandleWindowCreate(evnt::Event& e)
 		{
 			CreateWindow(e.GetData<win::Window::Properties>());
+			e.SetHandled();
+		}
+
+		virtual void HandleWindowClosing(evnt::Event& e)
+		{
+			win::Window* window = e.GetData<win::WindowClosingEvent::DataType>().window;
+			mem::Destroy<win::Window>(_services.GetAllocator(), window);
+
+			for (auto it = _windows.begin(); it != _windows.end(); it++)
+				if (*it == window)
+				{
+					_windows.erase(it);
+					break;
+				}
+
+			if (_windows.size() == 0)
+				_services.GetEventSubmitter().Emplace<ApplicationCloseEvent>();
+
 			e.SetHandled();
 		}
 
@@ -41,63 +58,60 @@ namespace np::app
 			case evnt::EventType::WindowCreate:
 				HandleWindowCreate(e);
 				break;
+
+			case evnt::EventType::WindowClosing:
+				HandleWindowClosing(e);
+				break;
+
 			default:
 				break;
 			}
+		}
 
-			for (auto it = _windows.begin(); !e.IsHandled() && it != _windows.end(); it++)
-			{
-				(*it)->OnEvent(e);
-			}
+		void ChooseWindowDetailType()
+		{
+			win::__detail::RegisteredWindowDetailType = win::WindowDetailType::Glfw;
 		}
 
 	public:
 		WindowLayer(srvc::Services& services): Layer(services)
 		{
-			glfwInit();
+			ChooseWindowDetailType();
+			win::Window::Init();
 		}
 
 		virtual ~WindowLayer()
 		{
 			for (auto it = _windows.begin(); it != _windows.end(); it++)
-			{
-				mem::Destruct(*it);
-				_allocator.Deallocate(*it);
-			}
+				mem::Destroy<win::Window>(_services.GetAllocator(), *it);
 
-			glfwTerminate();
+			win::Window::Terminate();
 		}
 
 		virtual win::Window* CreateWindow(win::Window::Properties& properties)
 		{
-			return _windows.emplace_back(mem::Create<win::Window>(_allocator, properties, _services));
+			return _windows.emplace_back(win::Window::Create(_services, properties));
 		}
 
 		virtual void Update(tim::DblMilliseconds time_delta) override
 		{
-			glfwPollEvents();
-
-			for (win::Window* window : _windows)
-			{
-				window->Update(time_delta);
-			}
+			//TODO: if glfwPollEvents takes longer than our preferred application loop duration,
+			//	then I think we should double check we did not miss any inputs
+			//TODO: ^ should this be here??
+			win::Window::Update();
 		}
 
 		virtual void Cleanup() override
 		{
 			for (i32 i = _windows.size() - 1; i >= 0; i--)
-			{
 				if (!_windows[i]->IsRunning())
 				{
-					mem::Destroy<win::Window>(_allocator, _windows[i]);
+					mem::Destroy<win::Window>(_services.GetAllocator(), _windows[i]);
 					_windows.erase(_windows.begin() + i);
 				}
-			}
 
 			if (_windows.size() == 0)
-			{
 				_services.GetEventSubmitter().Emplace<ApplicationCloseEvent>();
-			}
 		}
 
 		virtual evnt::EventCategory GetHandledCategories() const override

@@ -1,20 +1,20 @@
 //##===----------------------------------------------------------------------===##//
 //
-//  Author: Nathan Phipps 2/10/21
+//  Author: Nathan Phipps 10/15/22
 //
 //##===----------------------------------------------------------------------===##//
 
-#ifndef NP_ENGINE_WINDOW_CLOSE_EVENT_HPP
-#define NP_ENGINE_WINDOW_CLOSE_EVENT_HPP
+#ifndef NP_ENGINE_WINDOW_CLOSING_EVENT_HPP
+#define NP_ENGINE_WINDOW_CLOSING_EVENT_HPP
 
 #include "NP-Engine/Event/Event.hpp"
 #include "NP-Engine/Memory/Memory.hpp"
 
-#include "Window.hpp"
+#include "WindowImpl.hpp"
 
 namespace np::win
 {
-	class WindowCloseEvent : public evnt::Event
+	class WindowClosingEvent : public evnt::Event
 	{
 	public:
 		struct DataType
@@ -22,14 +22,14 @@ namespace np::win
 			Window* window;
 		};
 
-		WindowCloseEvent(Window& window): evnt::Event()
+		WindowClosingEvent(Window* window) : evnt::Event()
 		{
-			SetData<DataType>({mem::AddressOf(window)});
+			SetData<DataType>({ window });
 		}
 
 		evnt::EventType GetType() const override
 		{
-			return evnt::EventType::WindowClose;
+			return evnt::EventType::WindowClosing;
 		}
 
 		evnt::EventCategory GetCategory() const override
@@ -37,6 +37,6 @@ namespace np::win
 			return evnt::EventCategory::Window;
 		}
 	};
-} // namespace np::win
+}
 
-#endif /* NP_ENGINE_WINDOW_CLOSE_EVENT_HPP */
+#endif /* NP_ENGINE_WINDOW_CLOSING_EVENT_HPP */

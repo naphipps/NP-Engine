@@ -25,10 +25,10 @@ namespace np::app
 		ecs::Entity _model_entity;
 		tim::SteadyTimestamp _start_timestamp;
 
-		virtual void AdjustForWindowClose(evnt::Event& e)
+		virtual void AdjustForWindowClosing(evnt::Event& e)
 		{
 			if (_scene != nullptr &&
-				_scene->GetRenderer().IsAttachedToWindow(*e.GetData<win::WindowCloseEvent::DataType>().window))
+				_scene->GetRenderer().IsAttachedToWindow(*e.GetData<win::WindowClosingEvent::DataType>().window))
 			{
 				_scene->Dispose();
 				_scene = nullptr; // TODO: destroy content for scene
@@ -40,8 +40,8 @@ namespace np::app
 		{
 			switch (e.GetType())
 			{
-			case evnt::EventType::WindowClose:
-				AdjustForWindowClose(e);
+			case evnt::EventType::WindowClosing:
+				AdjustForWindowClosing(e);
 				break;
 			default:
 				break;

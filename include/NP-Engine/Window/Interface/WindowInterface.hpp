@@ -4,11 +4,13 @@
 //
 //##===----------------------------------------------------------------------===##//
 
-#ifndef NP_ENGINE_WINDOW_HPP
-#define NP_ENGINE_WINDOW_HPP
+#ifndef NP_ENGINE_WINDOW_INTERFACE_HPP
+#define NP_ENGINE_WINDOW_INTERFACE_HPP
 
 #include "NP-Engine/Foundation/Foundation.hpp"
 
-#include "Interface/WindowInterface.hpp"
+#include "WindowDetailType.hpp"
+#include "WindowImpl.hpp"
+#include "WindowEvents.hpp"
 
-#endif /* NP_ENGINE_WINDOW_HPP */
+#endif /* NP_ENGINE_WINDOW_INTERFACE_HPP */

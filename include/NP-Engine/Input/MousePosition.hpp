@@ -40,6 +40,8 @@ namespace np::nput
 			_position = position;
 		}
 	};
+
+	using MousePositionCallback = void (*)(void* caller, const nput::MousePosition& mouse_potition);
 } // namespace np::nput
 
 #endif /* NP_ENGINE_MOUSE_POSITION_HPP */

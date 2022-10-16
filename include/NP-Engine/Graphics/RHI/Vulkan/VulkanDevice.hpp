@@ -15,7 +15,6 @@
 #include "NP-Engine/Primitive/Primitive.hpp"
 
 #include "NP-Engine/Vendor/VulkanInclude.hpp"
-#include "NP-Engine/Vendor/GlfwInclude.hpp"
 
 #include "VulkanInstance.hpp"
 #include "VulkanSurface.hpp"

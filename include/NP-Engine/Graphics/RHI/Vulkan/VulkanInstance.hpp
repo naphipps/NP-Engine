@@ -15,7 +15,6 @@
 #include "NP-Engine/Platform/Platform.hpp"
 
 #include "NP-Engine/Vendor/VulkanInclude.hpp"
-#include "NP-Engine/Vendor/GlfwInclude.hpp"
 
 namespace np::gfx::rhi
 {
@@ -118,14 +117,11 @@ namespace np::gfx::rhi
 		con::vector<str> GetRequiredInstanceExtensionNames() const
 		{
 			con::uset<str> extension_set;
-
-			ui32 count;
-			const chr** glfw_required = glfwGetRequiredInstanceExtensions(&count);
-
-			for (ui32 i = 0; i < count; i++)
-				extension_set.emplace(glfw_required[i]);
-
 			extension_set.emplace(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
+
+			con::vector<str> window_required = win::Window::GetRequiredGfxExtentions();
+			for (const str& extension : window_required)
+				extension_set.emplace(extension);
 
 			con::vector<str> extensions;
 			for (const str& extension : extension_set)

@@ -166,6 +166,8 @@ set(NP_ENGINE_INPUT_HPP
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Input/ControllerCode.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Input/InputQueue.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Input/InputState.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Input/InputSource.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Input/InputListener.hpp
 )
 
 set(NP_ENGINE_INSIGHT_HPP
@@ -316,10 +318,26 @@ set(NP_ENGINE_VENDOR_HPP
 
 set(NP_ENGINE_WINDOW_HPP
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Window/Window.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Window/WindowCloseEvent.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Window/WindowCreateEvent.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Window/WindowEvents.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Window/WindowResizeEvent.hpp
+)
+
+set(NP_ENGINE_WINDOW_INTERFACE_HPP
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Window/Interface/WindowDetailType.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Window/Interface/WindowImpl.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Window/Interface/WindowClosedEvent.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Window/Interface/WindowClosingEvent.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Window/Interface/WindowCreateEvent.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Window/Interface/WindowEvents.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Window/Interface/WindowResizeEvent.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Window/Interface/WindowInterface.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Window/Interface/WindowPositionEvent.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Window/Interface/WindowFramebufferEvent.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Window/Interface/WindowMinimizeEvent.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Window/Interface/WindowMaximizeEvent.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Window/Interface/WindowFocusEvent.hpp
+)
+
+set(NP_ENGINE_WINDOW_GLFW_HPP
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Window/Detail/Glfw/GlfwWindow.hpp
 )
 
 set(NP_ENGINE_HEADER_FILES
@@ -356,6 +374,8 @@ set(NP_ENGINE_HEADER_FILES
 	${NP_ENGINE_UID_HPP}
 	${NP_ENGINE_VENDOR_HPP}
 	${NP_ENGINE_WINDOW_HPP}
+	${NP_ENGINE_WINDOW_INTERFACE_HPP}
+	${NP_ENGINE_WINDOW_GLFW_HPP}
 )
 
 ##==--------------------------------------------------------==##
@@ -415,6 +435,10 @@ set(NP_ENGINE_GRAPHICS_VULKAN_SHADERS_GLSL
 	${PROJECT_SOURCE_DIR}/src/Graphics/RHI/Vulkan/shaders/light_fragment.glsl
 )
 
+set(NP_ENGINE_INPUT_CPP
+	Input/InputSource.cpp
+)
+
 set(NP_ENGINE_INSIGHT_CPP
 	Insight/Instrumentor.cpp
 	Insight/Log.cpp
@@ -452,19 +476,21 @@ set(NP_ENGINE_THREAD_CPP
 	Thread/Thread.cpp
 )
 
-set(NP_ENGINE_WINDOW_CPP
-	Window/Window.cpp
+set(NP_ENGINE_WINDOW_INTERFACE_CPP
+	Window/Interface/WindowImpl.cpp
+	Window/Interface/WindowDetailType.cpp
 )
 
 set(NP_ENGINE_SOURCE_FILES
 	${NP_ENGINE_THREAD_CPP}
+	${NP_ENGINE_INPUT_CPP}
 	${NP_ENGINE_INSIGHT_CPP}
 	${NP_ENGINE_JOBSYSTEM_CPP}
 	${NP_ENGINE_MATH_CPP}
 	${NP_ENGINE_MEMORY_CPP}
 	${NP_ENGINE_NP_ENGINE_MAIN_CPP}
 	${NP_ENGINE_PHYSICS_CPP}
-	${NP_ENGINE_WINDOW_CPP}
+	${NP_ENGINE_WINDOW_INTERFACE_CPP}
 	${NP_ENGINE_GRAPHICS_RPI_CPP}
 	${NP_ENGINE_GRAPHICS_OPENGL_CPP}
 	${NP_ENGINE_GRAPHICS_VULKAN_CPP}
@@ -595,7 +621,7 @@ source_group(Graphics/RHI/OpenGL FILES ${NP_ENGINE_GRAPHICS_OPENGL_HPP} ${NP_ENG
 source_group(Graphics/RHI/Vulkan FILES ${NP_ENGINE_GRAPHICS_VULKAN_HPP} ${NP_ENGINE_GRAPHICS_VULKAN_CPP})
 source_group(Graphics/RHI/Vulkan/shaders FILES ${NP_ENGINE_GRAPHICS_VULKAN_SHADERS_GLSL})
 source_group(Graphics-Algorithms FILES ${NP_ENGINE_GRAPHICS_ALGORITHMS_HPP})
-source_group(Input FILES ${NP_ENGINE_INPUT_HPP})
+source_group(Input FILES ${NP_ENGINE_INPUT_HPP} ${NP_ENGINE_INPUT_CPP})
 source_group(Insight FILES ${NP_ENGINE_INSIGHT_HPP} ${NP_ENGINE_INSIGHT_CPP})
 source_group(JobSystem FILES ${NP_ENGINE_JOBSYSTEM_HPP} ${NP_ENGINE_JOBSYSTEM_CPP})
 source_group(Math FILES ${NP_ENGINE_MATH_HPP} ${NP_ENGINE_MATH_CPP})
@@ -614,4 +640,6 @@ source_group(Thread FILES ${NP_ENGINE_THREAD_HPP} ${NP_ENGINE_THREAD_CPP})
 source_group(Time FILES ${NP_ENGINE_TIME_HPP})
 source_group(Uid FILES ${NP_ENGINE_UID_HPP})
 source_group(Vendor FILES ${NP_ENGINE_VENDOR_HPP})
-source_group(Window FILES ${NP_ENGINE_WINDOW_HPP} ${NP_ENGINE_WINDOW_CPP})
+source_group(Window FILES ${NP_ENGINE_WINDOW_HPP})
+source_group(Window/Interface FILES ${NP_ENGINE_WINDOW_INTERFACE_HPP} ${NP_ENGINE_WINDOW_INTERFACE_CPP})
+source_group(Window/Detail/Glfw FILES ${NP_ENGINE_WINDOW_GLFW_HPP})

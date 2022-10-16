@@ -25,6 +25,7 @@ namespace np::nput
 
 	using MouseCodeState = InputState<MouseCode>;
 	using MouseCodeStates = InputStates<MouseCode, (siz)MouseCode::Max>;
+	using MouseCallback = void (*)(void* caller, const nput::MouseCodeState& mouse_code_state);
 } // namespace np::nput
 
 static str to_str(::np::nput::MouseCode code)

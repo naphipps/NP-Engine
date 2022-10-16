@@ -273,10 +273,10 @@ namespace np::gfx::rhi
 		Frame& BeginFrame() override
 		{
 			_frame.Invalidate();
-			i32 width = 0;
-			i32 height = 0;
-			glfwGetFramebufferSize((GLFWwindow*)GetSurface().GetWindow().GetNativeWindow(), &width, &height);
-			if (width != 0 && height != 0)
+
+			VkExtent2D framebuffer_extent = GetSurface().GetFramebufferExtent();
+			if (framebuffer_extent.width != 0 && framebuffer_extent.height != 0 && 
+				!GetSurface().GetWindow().IsMinimized())
 			{
 				VkResult result = GetSwapchain().AcquireImage();
 				if (result == VK_SUCCESS || result == VK_SUBOPTIMAL_KHR)

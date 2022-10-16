@@ -15,7 +15,6 @@
 #include "NP-Engine/FileSystem/FileSystem.hpp"
 
 #include "NP-Engine/Vendor/VulkanInclude.hpp"
-#include "NP-Engine/Vendor/GlfwInclude.hpp"
 
 #include "NP-Engine/Graphics/RPI/RPI.hpp"
 

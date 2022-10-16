@@ -9,7 +9,7 @@
 
 #include "NP-Engine/Event/Event.hpp"
 
-#include "Window.hpp"
+#include "WindowImpl.hpp"
 
 namespace np::win
 {
@@ -21,7 +21,7 @@ namespace np::win
 			Window::Properties window_properties;
 		};
 
-		WindowCreateEvent(Window::Properties window_properties): evnt::Event()
+		WindowCreateEvent(const Window::Properties& window_properties): evnt::Event()
 		{
 			SetData<DataType>({window_properties});
 		}
