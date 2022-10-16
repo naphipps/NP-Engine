@@ -81,13 +81,13 @@ namespace np::win::__detail
 			{
 			case GLFW_PRESS:
 			case GLFW_REPEAT:
-				state.SetActivity(nput::KeyCodeState::Activity::Active);
+				state.SetIsActive(true);
 				state.SetActivityLevel(1);
 				break;
 
 			case GLFW_RELEASE:
 			default:
-				state.SetActivity(nput::KeyCodeState::Activity::Inactive);
+				state.SetIsActive(false);
 				break;
 			}
 
@@ -540,13 +540,13 @@ namespace np::win::__detail
 			{
 			case GLFW_PRESS:
 			case GLFW_REPEAT:
-				state.SetActivity(nput::MouseCodeState::Activity::Active);
+				state.SetIsActive(true);
 				state.SetActivityLevel(1);
 				break;
 
 			case GLFW_RELEASE:
 			default:
-				state.SetActivity(nput::MouseCodeState::Activity::Inactive);
+				state.SetIsActive(false);
 				break;
 			}
 
