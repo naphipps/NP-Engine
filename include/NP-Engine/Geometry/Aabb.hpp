@@ -8,9 +8,8 @@
 #define NP_ENGINE_AABB_HPP
 
 #include "NP-Engine/Primitive/Primitive.hpp"
-#include "NP-Engine/Math/Math.hpp"
 
-#include "NP-Engine/Vendor/GlmInclude.hpp"
+#include "Shape.hpp"
 
 namespace np::geom
 {
@@ -18,38 +17,33 @@ namespace np::geom
 	struct Aabb;
 
 	template <typename T>
-	struct Aabb<2, T>
+	struct Aabb<2, T> : public Shape<2, T>
 	{
-		::glm::vec<2, T> LowerLeft = {0};
-		::glm::vec<2, T> UpperRight = {0};
+		using Point = typename Shape<2, T>::Point;
 
-		bl Contains(::glm::vec<2, T> point) const
-		{
-			return point.x >= LowerLeft.x && point.x <= UpperRight.x - 1 && point.y >= LowerLeft.y &&
-				point.y <= UpperRight.y - 1;
-		}
+		Point Center = {0};
+		Point HalfLengths = {0};
 
-		::glm::vec<2, T> GetCenter() const
+		virtual bl Contains(const Point& point) const
 		{
-			return mat::Midpoint(LowerLeft, UpperRight);
+			return point.x >= Center.x - HalfLengths.x && point.x <= Center.x + HalfLengths.x &&
+				point.y >= Center.y - HalfLengths.y && point.y <= Center.y + HalfLengths.y;
 		}
 	};
 
 	template <typename T>
-	struct Aabb<3, T>
+	struct Aabb<3, T> : public Shape<3, T>
 	{
-		::glm::vec<3, T> LowerLeft = {0};
-		::glm::vec<3, T> UpperRight = {0};
+		using Point = typename Shape<3, T>::Point;
 
-		bl Contains(::glm::vec<3, T> point) const
-		{
-			return point.x >= LowerLeft.x && point.x <= UpperRight.x - 1 && point.y >= LowerLeft.y &&
-				point.y <= UpperRight.y - 1 && point.z >= LowerLeft.z && point.z <= UpperRight.z - 1;
-		}
+		Point Center = {0};
+		Point HalfLengths = {0};
 
-		::glm::vec<3, T> GetCenter() const
+		virtual bl Contains(const Point& point) const
 		{
-			return mat::Midpoint(LowerLeft, UpperRight);
+			return point.x >= Center.x - HalfLengths.x && point.x <= Center.x + HalfLengths.x &&
+				point.y >= Center.y - HalfLengths.y && point.y <= Center.y + HalfLengths.y &&
+				point.z > Center.z - HalfLengths.z && point.z <= Center.z + HalfLengths.z;
 		}
 	};
 

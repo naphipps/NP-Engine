@@ -14,5 +14,6 @@
 #include "Polygon.hpp"
 #include "Circular.hpp"
 #include "Aabb.hpp"
+#include "Obb.hpp"
 
 #endif /* NP_ENGINE_GEOMETRY_HPP */

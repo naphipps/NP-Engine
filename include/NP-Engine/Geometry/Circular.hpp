@@ -22,6 +22,11 @@ namespace np::geom
 
 		Point Center = {};
 		T Radius = 0;
+
+		virtual bl IntersectsWith(const Circular<DIMENSION_COUNT, T>& other) const
+		{
+			return mat::DistanceSquared(Center, other.Center) <= mat::Pow2(Radius + other.Radius);
+		}
 	};
 
 	template <typename T>
@@ -29,9 +34,6 @@ namespace np::geom
 
 	template <typename T>
 	using Sphere = Circular<3, T>;
-
-	template <typename T>
-	using HyperSphere = Circular<4, T>;
 
 	using Ui8Circle = Circle<ui8>;
 	using Ui16Circle = Circle<ui16>;
@@ -58,19 +60,6 @@ namespace np::geom
 	using FltSphere = Sphere<flt>;
 	using DblSphere = Sphere<dbl>;
 	using LdblSphere = Sphere<ldbl>;
-
-	using Ui8HyperSphere = HyperSphere<ui8>;
-	using Ui16HyperSphere = HyperSphere<ui16>;
-	using Ui32HyperSphere = HyperSphere<ui32>;
-	using Ui64HyperSphere = HyperSphere<ui64>;
-	using I8HyperSphere = HyperSphere<i8>;
-	using I16HyperSphere = HyperSphere<i16>;
-	using I32HyperSphere = HyperSphere<i32>;
-	using I64HyperSphere = HyperSphere<i64>;
-	using SizHyperSphere = HyperSphere<siz>;
-	using FltHyperSphere = HyperSphere<flt>;
-	using DblHyperSphere = HyperSphere<dbl>;
-	using LdblHyperSphere = HyperSphere<ldbl>;
 } // namespace np::geom
 
 #endif /* NP_ENGINE_CIRCLE_HPP */
