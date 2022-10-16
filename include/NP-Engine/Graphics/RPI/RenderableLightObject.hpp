@@ -16,21 +16,13 @@
 
 namespace np::gfx
 {
-	struct RenderableLightObject
+	class RenderableLightObject : public RenderableObject
 	{
-		// TODO: does this need a virtual destructor?
+	private:
+		virtual void RenderToFrame(Frame& frame, Pipeline& pipline) override {} //lights do not need this
 
-		virtual RenderableType GetType() const = 0;
-
+	public:
 		virtual void RenderToFrame(Frame& frame, Pipeline& pipline, RenderableObject& object) = 0;
-
-		virtual void PrepareForPipeline(Pipeline& pipeline) = 0;
-
-		virtual void DisposeForPipeline(Pipeline& pipeline) = 0;
-
-		virtual bl IsOutOfDate() const = 0;
-
-		virtual void SetOutOfDate(bl is_out_of_date = true) = 0;
 	};
 } // namespace np::gfx
 

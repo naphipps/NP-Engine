@@ -168,7 +168,14 @@ namespace np::gfx::rhi
 
 		void UpdateCamera()
 		{
-			_camera.AspectRatio = ((VulkanRenderer&)_renderer).GetSwapchain().GetAspectRatio();
+			VulkanRenderer& vulkan_renderer = (VulkanRenderer&)_renderer;
+			VkExtent2D extent = vulkan_renderer.GetSwapchain().GetExtent();
+
+			_camera.AspectRatio = vulkan_renderer.GetSwapchain().GetAspectRatio();
+			_camera.LeftPlane = -(flt)extent.width / 2.f;
+			_camera.RightPlane = (flt)extent.width / 2.f;
+			_camera.BottomPlane = -(flt)extent.height / 2.f;
+			_camera.TopPlane = (flt)extent.height / 2.f;
 			_camera.Update();
 		}
 

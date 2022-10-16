@@ -24,6 +24,7 @@ namespace np::app
 		gfx::RenderableModel* _renderable_model;
 		ecs::Entity _model_entity;
 		tim::SteadyTimestamp _start_timestamp;
+		flt _rate = 1.f;
 
 		virtual void AdjustForWindowClosing(evnt::Event& e)
 		{
@@ -50,28 +51,52 @@ namespace np::app
 
 		void SceneOnDraw(mem::Delegate& d)
 		{
-			tim::DblMilliseconds duration = tim::SteadyClock::now() - _start_timestamp;
-			flt seconds = duration.count() / 1000.0f;
-			flt s = ::std::sinf(seconds * 1.2f);
-			flt e = s + 3.f;
-			flt f = ::glm::radians(45.f + 20.f * (s + 1.f));
+			nput::InputQueue& input = _services.GetInputQueue();
+			const nput::KeyCodeStates& key_states = input.GetKeyCodeStates();
 
-			_camera.Eye = {e, e, e};
-			_camera.Fovy = f;
+			if (key_states[nput::KeyCode::A].IsActive())
+				_camera.Position.x -= _rate;
 
-			if (_scene != nullptr)
-			{
+			if (key_states[nput::KeyCode::D].IsActive())
+				_camera.Position.x += _rate;
+
+			if (key_states[nput::KeyCode::W].IsActive())
+				_camera.Position.y += _rate;
+
+			if (key_states[nput::KeyCode::S].IsActive())
+				_camera.Position.y -= _rate;
+
+			if (key_states[nput::KeyCode::Q].IsActive())
+				_camera.Position.z += _rate;
+
+			if (key_states[nput::KeyCode::E].IsActive())
+				_camera.Position.z -= _rate;
+
+			if (key_states[nput::KeyCode::R].IsActive() && _rate < DBL_MAX)
+				_rate += 0.1;
+
+			if (key_states[nput::KeyCode::T].IsActive() && _rate > 0)
+				_rate -= 0.1;
+
+			if (key_states[nput::KeyCode::O].IsActive())
+				_camera.SetProjectionType(gfx::Camera::ProjectionType::Orthographic);
+
+			if (key_states[nput::KeyCode::P].IsActive())
+				_camera.SetProjectionType(gfx::Camera::ProjectionType::Perspective);
+
+			if (_scene)
 				_scene->SetCamera(_camera);
-			}
 		}
 
 		void UpdateMetaValuesOnFrame(mem::Delegate& d)
 		{
 			gfx::RenderableMetaValues& meta_values = _renderable_model->GetMetaValues();
-			tim::DblMilliseconds duration = tim::SteadyClock::now() - _start_timestamp;
-			flt seconds = duration.count() / 1000.0f;
-			meta_values.object.Model =
-				::glm::rotate(glm::mat4(1.0f), seconds * glm::radians(90.0f) / 4.0f, glm::vec3(0.0f, 0.0f, 1.0f));
+			flt scale = _camera.GetProjectionType() == gfx::Camera::ProjectionType::Perspective ? 10.f : 100.f;
+
+			meta_values.object.Model = glm::mat4(1.0f);
+			meta_values.object.Model = ::glm::scale(meta_values.object.Model, ::glm::vec3(scale, scale, scale));
+			// meta_values.object.Model = ::glm::translate(meta_values.object.Model, ::glm::vec3(-10, -10, -10));
+			meta_values.object.Model = ::glm::rotate(meta_values.object.Model, 90.f, _camera.Up);
 		}
 
 	public:
@@ -93,10 +118,10 @@ namespace np::app
 
 			_model_entity.add<gfx::RenderableObject*>(_renderable_model);
 
-			_camera.Eye = {2.0f, 2.0f, 2.0f};
-			_camera.Fovy = ::glm::radians(45.0f);
-			_camera.NearPlane = 0.1f;
-			_camera.FarPlane = 10.0f;
+			_camera.Eye = {30.f, 30.f, 30.f};
+			_camera.Fovy = 70.f;
+			_camera.NearPlane = 0.01f;
+			_camera.FarPlane = 1000.0f;
 		}
 
 		~GameLayer()
