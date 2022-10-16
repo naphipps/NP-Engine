@@ -47,7 +47,7 @@ namespace np::uid
 			}
 		};
 
-		constexpr static siz UID_ALIGNED_SIZE = mem::CalcAlignedSize(sizeof(Uid));
+		constexpr static siz UID_SIZE = mem::CalcAlignedSize(sizeof(Uid));
 
 		Mutex _m; // TODO: don't know if an atomic lock would be faster??
 		UidGenerator _uid_gen;
@@ -60,7 +60,7 @@ namespace np::uid
 
 		void AddPool()
 		{
-			_uid_pool_blocks.emplace_back(_allocator.Allocate(UID_ALIGNED_SIZE * NP_ENGINE_UID_SYSTEM_POOL_DEFAULT_SIZE));
+			_uid_pool_blocks.emplace_back(_allocator.Allocate(UID_SIZE * NP_ENGINE_UID_SYSTEM_POOL_DEFAULT_SIZE));
 			_uid_pools.emplace_back(mem::Create<UidPool>(_allocator, _uid_pool_blocks.back()));
 		}
 

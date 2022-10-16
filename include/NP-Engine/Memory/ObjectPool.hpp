@@ -34,7 +34,7 @@ namespace np::mem
 	public:
 		ObjectPool(Block block): _allocator(block) {}
 
-		ObjectPool(siz object_count): _allocator(object_count * A::CHUNK_ALIGNED_SIZE) {}
+		ObjectPool(siz object_count): _allocator(object_count * A::CHUNK_SIZE) {}
 
 		siz ObjectCount() const
 		{

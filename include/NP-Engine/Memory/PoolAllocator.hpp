@@ -18,26 +18,26 @@ namespace np::mem
 	class PoolAllocator : public BlockedAllocator
 	{
 	public:
-		constexpr static siz CHUNK_ALIGNED_SIZE = CalcAlignedSize(sizeof(T));
+		constexpr static siz CHUNK_SIZE = CalcAlignedSize(sizeof(T));
 
 	private:
 		atm<void*> _allocation;
 
 		bl IsChunkPtr(void* ptr) const
 		{
-			return Contains(ptr) && ((ui8*)ptr - (ui8*)_block.Begin()) % CHUNK_ALIGNED_SIZE == 0;
+			return Contains(ptr) && ((ui8*)ptr - (ui8*)_block.Begin()) % CHUNK_SIZE == 0;
 		}
 
 		void Init()
 		{
-			Block block{nullptr, CHUNK_ALIGNED_SIZE};
+			Block block{nullptr, CHUNK_SIZE};
 			for (siz i = 0; i < ChunkCount() - 1; i++)
 			{
-				block.ptr = &static_cast<ui8*>(_block.ptr)[i * CHUNK_ALIGNED_SIZE];
-				Construct<void*>(block, &static_cast<ui8*>(_block.ptr)[(i + 1) * CHUNK_ALIGNED_SIZE]);
+				block.ptr = &static_cast<ui8*>(_block.ptr)[i * CHUNK_SIZE];
+				Construct<void*>(block, &static_cast<ui8*>(_block.ptr)[(i + 1) * CHUNK_SIZE]);
 			}
 
-			block.ptr = &static_cast<ui8*>(_block.ptr)[(ChunkCount() - 1) * CHUNK_ALIGNED_SIZE];
+			block.ptr = &static_cast<ui8*>(_block.ptr)[(ChunkCount() - 1) * CHUNK_SIZE];
 			Construct<void*>(block, nullptr);
 
 			_allocation.store(_block.ptr, mo_release);
@@ -61,12 +61,12 @@ namespace np::mem
 
 		siz ChunkCount() const
 		{
-			return _block.size / CHUNK_ALIGNED_SIZE;
+			return _block.size / CHUNK_SIZE;
 		}
 
 		siz ChunkSize() const
 		{
-			return CHUNK_ALIGNED_SIZE;
+			return CHUNK_SIZE;
 		}
 
 		void Zeroize() override
@@ -79,7 +79,7 @@ namespace np::mem
 		Block Allocate(siz size) override
 		{
 			Block block;
-			if (size <= CHUNK_ALIGNED_SIZE)
+			if (size <= CHUNK_SIZE)
 			{
 				void* allocated = _allocation.load(mo_acquire);
 
@@ -91,7 +91,7 @@ namespace np::mem
 				if (allocated)
 				{
 					block.ptr = allocated;
-					block.size = CHUNK_ALIGNED_SIZE;
+					block.size = CHUNK_SIZE;
 				}
 			}
 
@@ -114,7 +114,7 @@ namespace np::mem
 		bl Deallocate(Block& block) override
 		{
 			bl deallocated = false;
-			if (IsChunkPtr(block.ptr) && block.size == CHUNK_ALIGNED_SIZE)
+			if (IsChunkPtr(block.ptr) && block.size == CHUNK_SIZE)
 			{
 				Construct<void*>(block, _allocation.load(mo_acquire));
 
@@ -131,7 +131,7 @@ namespace np::mem
 
 		bl Deallocate(void* ptr) override
 		{
-			Block dealloc_block{ptr, CHUNK_ALIGNED_SIZE};
+			Block dealloc_block{ptr, CHUNK_SIZE};
 			return Deallocate(dealloc_block);
 		}
 

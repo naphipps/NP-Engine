@@ -26,8 +26,8 @@ namespace np::jsys
 	class JobSystem
 	{
 	private:
-		constexpr static siz JOB_ALIGNED_SIZE = mem::CalcAlignedSize(sizeof(Job));
-		constexpr static siz THREAD_ALIGNED_SIZE = mem::CalcAlignedSize(sizeof(thr::Thread));
+		constexpr static siz JOB_SIZE = mem::CalcAlignedSize(sizeof(Job));
+		constexpr static siz THREAD_SIZE = mem::CalcAlignedSize(sizeof(thr::Thread));
 
 		mem::TraitAllocator _allocator;
 		atm_bl _running;
@@ -110,14 +110,14 @@ namespace np::jsys
 		void SetJobPoolSize(siz size)
 		{
 			DisposeJobPool();
-			_job_pool_block = _allocator.Allocate(JOB_ALIGNED_SIZE * size);
+			_job_pool_block = _allocator.Allocate(JOB_SIZE * size);
 			_job_pool = mem::Create<JobPool>(_allocator, _job_pool_block);
 		}
 
 		void SetJobWorkerCount(siz count)
 		{
 			DisposeThreadPool();
-			_thread_pool_block = _allocator.Allocate(THREAD_ALIGNED_SIZE * count);
+			_thread_pool_block = _allocator.Allocate(THREAD_SIZE * count);
 			_thread_pool = mem::Create<thr::ThreadPool>(_allocator, _thread_pool_block);
 
 			_job_workers.resize(_thread_pool->ObjectCount());

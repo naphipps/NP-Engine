@@ -19,7 +19,7 @@ namespace np::mem
 	class LockingPoolAllocator : public BlockedAllocator
 	{
 	public:
-		constexpr static siz CHUNK_ALIGNED_SIZE = CalcAlignedSize(sizeof(T));
+		constexpr static siz CHUNK_SIZE = CalcAlignedSize(sizeof(T));
 
 	private:
 		Mutex _mutex;
@@ -28,19 +28,19 @@ namespace np::mem
 
 		bl IsChunkPtr(void* ptr) const
 		{
-			return Contains(ptr) && ((ui8*)ptr - (ui8*)_block.Begin()) % CHUNK_ALIGNED_SIZE == 0;
+			return Contains(ptr) && ((ui8*)ptr - (ui8*)_block.Begin()) % CHUNK_SIZE == 0;
 		}
 
 		void Init()
 		{
-			Block block{.size = CHUNK_ALIGNED_SIZE};
+			Block block{.size = CHUNK_SIZE};
 			for (siz i = 0; i < ChunkCount() - 1; i++)
 			{
-				block.ptr = &static_cast<ui8*>(_block.ptr)[i * CHUNK_ALIGNED_SIZE];
-				Construct<void*>(block, &static_cast<ui8*>(_block.ptr)[(i + 1) * CHUNK_ALIGNED_SIZE]);
+				block.ptr = &static_cast<ui8*>(_block.ptr)[i * CHUNK_SIZE];
+				Construct<void*>(block, &static_cast<ui8*>(_block.ptr)[(i + 1) * CHUNK_SIZE]);
 			}
 
-			block.ptr = &static_cast<ui8*>(_block.ptr)[(ChunkCount() - 1) * CHUNK_ALIGNED_SIZE];
+			block.ptr = &static_cast<ui8*>(_block.ptr)[(ChunkCount() - 1) * CHUNK_SIZE];
 			Construct<void*>(block, nullptr);
 
 			_alloc_iterator = _block.ptr;
@@ -64,12 +64,12 @@ namespace np::mem
 
 		siz ChunkCount() const
 		{
-			return _block.size / CHUNK_ALIGNED_SIZE;
+			return _block.size / CHUNK_SIZE;
 		}
 
 		siz ChunkSize() const
 		{
-			return CHUNK_ALIGNED_SIZE;
+			return CHUNK_SIZE;
 		}
 
 		bl GetDeallocationReclaimBehavior() const
@@ -94,10 +94,10 @@ namespace np::mem
 			Lock lock(_mutex);
 			Block block;
 
-			if (size <= CHUNK_ALIGNED_SIZE && _alloc_iterator != nullptr)
+			if (size <= CHUNK_SIZE && _alloc_iterator != nullptr)
 			{
 				block.ptr = _alloc_iterator;
-				block.size = CHUNK_ALIGNED_SIZE;
+				block.size = CHUNK_SIZE;
 				_alloc_iterator = *(void**)(&static_cast<ui8*>(_alloc_iterator)[0]);
 			}
 
@@ -122,7 +122,7 @@ namespace np::mem
 			Lock lock(_mutex);
 			bl deallocated = false;
 
-			if (IsChunkPtr(block.ptr) && block.size == CHUNK_ALIGNED_SIZE)
+			if (IsChunkPtr(block.ptr) && block.size == CHUNK_SIZE)
 			{
 				void** deallocation_address = nullptr;
 
@@ -159,13 +159,13 @@ namespace np::mem
 
 		bl Deallocate(void* ptr, bl true_sort_false_constant)
 		{
-			Block dealloc_block{ptr, CHUNK_ALIGNED_SIZE};
+			Block dealloc_block{ptr, CHUNK_SIZE};
 			return Deallocate(dealloc_block, true_sort_false_constant);
 		}
 
 		bl Deallocate(void* ptr) override
 		{
-			Block dealloc_block{ptr, CHUNK_ALIGNED_SIZE};
+			Block dealloc_block{ptr, CHUNK_SIZE};
 			return Deallocate(dealloc_block);
 		}
 
