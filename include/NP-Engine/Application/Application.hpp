@@ -174,10 +174,11 @@ namespace np::app
 			con::vector<jsys::JobWorker>& job_workers = job_system.GetJobWorkers();
 
 			using Fetch = jsys::JobWorker::Fetch;
-			con::array<Fetch, 3> default_order{Fetch::Immediate, Fetch::PriorityBased, Fetch::Steal};
-			con::array<Fetch, 3> thief_order{Fetch::Steal, Fetch::Immediate, Fetch::None};
-			con::array<Fetch, 3> priority_order{Fetch::PriorityBased, Fetch::None, Fetch::None};
-			con::array<Fetch, 3> immediate_order{Fetch::Immediate, Fetch::Steal, Fetch::None};
+			using FetchOrderArray = jsys::JobWorker::FetchOrderArray;
+			FetchOrderArray default_order{Fetch::Immediate, Fetch::PriorityBased, Fetch::Steal};
+			FetchOrderArray thief_order{Fetch::Steal, Fetch::Immediate, Fetch::None};
+			FetchOrderArray priority_order{Fetch::PriorityBased, Fetch::None, Fetch::None};
+			FetchOrderArray immediate_order{Fetch::Immediate, Fetch::Steal, Fetch::None};
 
 			if (job_workers.size())
 			{

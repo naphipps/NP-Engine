@@ -114,11 +114,11 @@ namespace np::jsys
 
 		ui32 deep_sleep_threshold = _coworkers.size() * 3;
 		ui32 sleep_count = 0;
-		con::array<Fetch, 3> fetch_order;
+		FetchOrderArray fetch_order;
 		bl success = false;
 		while (_keep_working.load(mo_acquire))
 		{
-			fetch_order = _fetch_order.load(mo_acquire);
+			fetch_order = GetFetchOrder();
 			for (const Fetch& fetch : fetch_order)
 			{
 				switch (fetch)

@@ -51,8 +51,8 @@ namespace np::jsys
 		rng::Random64 _random_engine;
 		con::vector<JobWorker*> _coworkers;
 		siz _coworker_index;
-		atm<FetchOrderArray> _fetch_order;
-		//TODO: ^ we need to remove the atm on this and add a mutex for getting/setting
+		Mutex _fetch_order_mutex;
+		FetchOrderArray _fetch_order;
 
 		/*
 			returns a valid && CanExecute() job, or invalid job
@@ -109,7 +109,7 @@ namespace np::jsys
 			_random_engine(::std::move(other._random_engine)),
 			_coworkers(::std::move(other._coworkers)),
 			_coworker_index(::std::move(other._coworker_index)),
-			_fetch_order(::std::move(other._fetch_order.load(mo_acquire)))
+			_fetch_order(::std::move(other._fetch_order))
 		{}
 
 		virtual ~JobWorker()
@@ -130,7 +130,7 @@ namespace np::jsys
 			_random_engine = ::std::move(other._random_engine);
 			_coworkers = ::std::move(other._coworkers);
 			_coworker_index = ::std::move(other._coworker_index);
-			_fetch_order = ::std::move(other._fetch_order.load(mo_acquire));
+			_fetch_order = ::std::move(other._fetch_order);
 			return *this;
 		}
 
@@ -168,14 +168,16 @@ namespace np::jsys
 			return return_job;
 		}
 
-		con::array<Fetch, 3> GetFetchOrder()
+		FetchOrderArray GetFetchOrder()
 		{
-			return _fetch_order.load(mo_acquire);
+			Lock lock(_fetch_order_mutex);
+			return _fetch_order;
 		}
 
-		void SetFetchOrder(const con::array<Fetch, 3>& fetch_order)
+		void SetFetchOrder(const FetchOrderArray& fetch_order)
 		{
-			_fetch_order.store(fetch_order, mo_release);
+			Lock lock(_fetch_order_mutex);
+			_fetch_order = fetch_order;
 		}
 
 		void StartWork(JobSystem& job_system, thr::ThreadPool& pool, siz thread_affinity)
