@@ -226,6 +226,26 @@ namespace np::app
 			{
 				NP_ENGINE_PROFILE_SCOPE("loop");
 
+				for (e = event_queue.Pop(); e; e = event_queue.Pop())
+				{
+					e->SetCanBeHandled(false);
+
+					for (i = _overlays.size() - 1; !e->IsHandled() && i < _overlays.size(); i--)
+						_overlays[i]->OnEvent(*e);
+
+					for (i = _layers.size() - 1; !e->IsHandled() && i < _layers.size(); i--)
+						_layers[i]->OnEvent(*e);
+
+					if (!e->CanBeHandled())
+						event_queue.DestroyEvent(e);
+					else if (!event_queue.Emplace(e))
+						NP_ENGINE_ASSERT(false, "all events must emplace successfully here");
+				}
+				event_queue.SwapBuffers();
+
+				if (!_running.load(mo_acquire))
+					break;
+
 				update_next = tim::SteadyClock::now();
 				update_delta = update_next - update_prev;
 				update_prev = update_next;
@@ -246,23 +266,6 @@ namespace np::app
 					_layers[i]->AfterUdpate();
 				for (i = 0; i < _overlays.size(); i++)
 					_overlays[i]->AfterUdpate();
-
-				for (e = event_queue.Pop(); e != nullptr; e = event_queue.Pop())
-				{
-					e->SetCanBeHandled(false);
-
-					for (i = _overlays.size() - 1; !e->IsHandled() && i < _overlays.size(); i--)
-						_overlays[i]->OnEvent(*e);
-
-					for (i = _layers.size() - 1; !e->IsHandled() && i < _layers.size(); i--)
-						_layers[i]->OnEvent(*e);
-
-					if (!e->CanBeHandled())
-						event_queue.DestroyEvent(e);
-					else if (!event_queue.Emplace(e))
-						NP_ENGINE_ASSERT(false, "all events must emplace successfully here");
-				}
-				event_queue.SwapBuffers();
 
 				for (i = 0; i < _layers.size(); i++)
 					_layers[i]->Cleanup();
