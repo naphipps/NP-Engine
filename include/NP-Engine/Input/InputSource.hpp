@@ -17,8 +17,6 @@
 
 namespace np::nput
 {
-	class InputListener;
-
 	class InputSource
 	{
 	protected:
@@ -52,8 +50,6 @@ namespace np::nput
 		}
 
 	public:
-
-		void SetListener(InputListener* listener);
 
 		virtual void SetKeyCodeCallback(void* caller, KeyCallback callback)
 		{

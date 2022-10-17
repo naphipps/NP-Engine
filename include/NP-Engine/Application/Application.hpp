@@ -157,7 +157,11 @@ namespace np::app
 		{
 			win::Window* w = _window_layer.CreateWindow(window_properties);
 
-			w->SetListener(mem::AddressOf(_services.GetInputQueue()));
+			void* caller = mem::AddressOf(_services.GetInputQueue());
+			w->SetKeyCodeCallback(caller, nput::InputListener::SubmitKeyCodeState);
+			w->SetMouseCodeCallback(caller, nput::InputListener::SubmitMouseCodeState);
+			w->SetMousePositionCallback(caller, nput::InputListener::SubmitMousePosition);
+			w->SetControllerCodeCallback(caller, nput::InputListener::SubmitControllerCodeState);
 
 			_graphics_layer.CreateRenderer(*w);
 			return _graphics_layer.AcquireScene();
