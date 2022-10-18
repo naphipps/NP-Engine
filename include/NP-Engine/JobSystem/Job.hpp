@@ -26,16 +26,16 @@ namespace np::jsys
 		atm_i32 _antecedent_count;
 		mem::Delegate _delegate;
 		atm<atm_bl*> _confirm_completion_flag;
-		JobPriority _priority_attractor;
+		bl _can_be_stolen;
 
 	public:
-		Job(): _antecedent_count(-1), _confirm_completion_flag(nullptr), _priority_attractor(JobPriority::Normal) {}
+		Job(): _antecedent_count(-1), _confirm_completion_flag(nullptr), _can_be_stolen(true) {}
 
 		Job(mem::Delegate&& d):
 			_antecedent_count(1),
 			_delegate(d),
 			_confirm_completion_flag(nullptr),
-			_priority_attractor(JobPriority::Normal)
+			_can_be_stolen(true)
 		{}
 
 		Job(const Job& other):
@@ -43,7 +43,7 @@ namespace np::jsys
 			_antecedent_count(other._antecedent_count.load(mo_acquire)),
 			_delegate(other._delegate),
 			_confirm_completion_flag(other._confirm_completion_flag.load(mo_acquire)),
-			_priority_attractor(other._priority_attractor)
+			_can_be_stolen(other._can_be_stolen)
 		{}
 
 		Job(Job&& other) noexcept:
@@ -51,7 +51,7 @@ namespace np::jsys
 			_antecedent_count(::std::move(other._antecedent_count.load(mo_acquire))),
 			_delegate(::std::move(other._delegate)),
 			_confirm_completion_flag(::std::move(other._confirm_completion_flag.load(mo_acquire))),
-			_priority_attractor(::std::move(other._priority_attractor))
+			_can_be_stolen(::std::move(other._can_be_stolen))
 		{}
 
 		~Job()
@@ -65,7 +65,7 @@ namespace np::jsys
 			_antecedent_count.store(other._antecedent_count.load(mo_acquire), mo_release);
 			_delegate = other._delegate;
 			_confirm_completion_flag.store(other._confirm_completion_flag.load(mo_acquire), mo_release);
-			_priority_attractor = other._priority_attractor;
+			_can_be_stolen = other._can_be_stolen;
 			return *this;
 		}
 
@@ -75,7 +75,7 @@ namespace np::jsys
 			_antecedent_count.store(::std::move(other._antecedent_count.load(mo_acquire)), mo_release);
 			_delegate = ::std::move(other._delegate);
 			_confirm_completion_flag.store(::std::move(other._confirm_completion_flag.load(mo_acquire)), mo_release);
-			_priority_attractor = ::std::move(other._priority_attractor);
+			_can_be_stolen = ::std::move(other._can_be_stolen);
 			return *this;
 		}
 
@@ -95,7 +95,7 @@ namespace np::jsys
 			_antecedent_count.store(-1, mo_release);
 			_delegate.DisconnectFunction();
 			_confirm_completion_flag.store(nullptr, mo_release);
-			_priority_attractor = JobPriority::Normal;
+			_can_be_stolen = true;
 		}
 
 		bl CanExecute() const
@@ -167,27 +167,14 @@ namespace np::jsys
 					}
 		}
 
-		void SetPriorityAttractor(JobPriority priority)
+		void SetCanBeStolen(bl can_be_stolen)
 		{
-			_priority_attractor = priority;
+			_can_be_stolen = can_be_stolen;
 		}
 
-		void ResetPriorityAttractor()
+		bl CanBeStolen() const
 		{
-			_priority_attractor = JobPriority::Normal;
-		}
-
-		JobPriority GetAttractedPriority(JobPriority priority)
-		{
-			ui32 attractor = (ui32)_priority_attractor;
-			ui32 priority_ui32 = (ui32)priority;
-
-			if (priority_ui32 < attractor)
-				priority_ui32++;
-			else if (priority_ui32 > attractor)
-				priority_ui32--;
-
-			return (JobPriority)priority_ui32;
+			return _can_be_stolen;
 		}
 	};
 } // namespace np::jsys

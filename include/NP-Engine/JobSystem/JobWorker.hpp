@@ -57,10 +57,10 @@ namespace np::jsys
 		/*
 			returns a valid && CanExecute() job, or invalid job
 		*/
-		Job* GetImmediateJob()
+		Job* GetImmediateJob(bl stealing = false)
 		{
 			Job* job = nullptr;
-			if (_immediate_job_queue.try_dequeue(job) && !job->CanExecute())
+			if (_immediate_job_queue.try_dequeue(job) && (!job->CanExecute() || (stealing && !job->CanBeStolen())))
 			{
 				SubmitImmediateJob(job);
 				job = nullptr;
@@ -70,7 +70,7 @@ namespace np::jsys
 
 		Job* GetStolenJob()
 		{
-			return _coworkers.empty() ? nullptr : _coworkers[_coworker_index]->GetImmediateJob();
+			return _coworkers.empty() ? nullptr : _coworkers[_coworker_index]->GetImmediateJob(true);
 		}
 
 		/*

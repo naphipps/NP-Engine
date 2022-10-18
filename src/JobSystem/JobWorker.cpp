@@ -22,8 +22,7 @@ namespace np::jsys
 				{
 					if (!job->CanExecute())
 					{
-						// TODO: pretty sure using NormalizePriority function is faster, so profile this
-						_job_system->SubmitJob(job->GetAttractedPriority(next_job.GetPriority()), job);
+						_job_system->SubmitJob(NormalizePriority(next_job.GetPriority()), job);
 						next_job.Invalidate();
 					}
 				}
@@ -69,12 +68,12 @@ namespace np::jsys
 			{
 				NP_ENGINE_PROFILE_SCOPE("executing next Job");
 				success = true;
-				Job* j = record.GetJob();
-				j->Execute();
-				if (j->IsComplete())
-					_job_system->DestroyJob(j);
+				Job* job = record.GetJob();
+				job->Execute();
+				if (job->IsComplete())
+					_job_system->DestroyJob(job);
 				else
-					_job_system->SubmitJob(j->GetAttractedPriority(record.GetPriority()), j);
+					_job_system->SubmitJob(NormalizePriority(record.GetPriority()), job);
 			}
 		}
 
