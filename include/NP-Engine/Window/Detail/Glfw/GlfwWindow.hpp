@@ -9,6 +9,7 @@
 
 #include "NP-Engine/Foundation/Foundation.hpp"
 #include "NP-Engine/Time/Time.hpp"
+#include "NP-Engine/String/String.hpp"
 
 #include "NP-Engine/Vendor/GlfwInclude.hpp"
 #include "NP-Engine/Vendor/GlmInclude.hpp"
@@ -22,6 +23,42 @@ namespace np::win::__detail
 	protected:
 		atm<GLFWwindow*> _glfw_window;
 		nput::MousePosition _mouse_position;
+
+#if NP_ENGINE_PLATFORM_IS_WINDOWS
+		WNDPROC _prev_window_procedure;
+		bl _is_windows_ncl_mousedown;
+		POINT _prev_mouse_position;
+
+		static LRESULT CALLBACK GlfwWindowProcedure(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
+		{
+			LRESULT result = -1; //assuming -1 is an error value
+			GlfwWindow* glfw_window = (GlfwWindow*)GetWindowLongPtrA(hwnd, GWLP_USERDATA);
+			bl call_prev_window_procedure = true;
+
+			switch (msg)
+			{
+			case WM_NCLBUTTONDOWN:
+				glfw_window->_is_windows_ncl_mousedown = GET_NCHITTEST_WPARAM(wparam) == HTCAPTION;
+				if (glfw_window->_is_windows_ncl_mousedown)
+				{
+					POINTS point = MAKEPOINTS(lparam); //screen point
+					glfw_window->_prev_mouse_position.x = point.x;
+					glfw_window->_prev_mouse_position.y = point.y;
+					call_prev_window_procedure = false;
+					result = 0; //assuming 0 is a success value
+				}
+				break;
+			case WM_NCLBUTTONUP:
+				glfw_window->_is_windows_ncl_mousedown = false;
+				break;
+			}
+
+			if (call_prev_window_procedure)
+				result = CallWindowProcA(glfw_window->_prev_window_procedure, hwnd, msg, wparam, lparam);
+
+			return result;
+		}
+#endif
 
 		static void WindowCloseCallback(GLFWwindow* glfw_window)
 		{
@@ -643,6 +680,13 @@ namespace np::win::__detail
 			glfwSetCursorPosCallback(glfw_window, MousePositionCallback);
 			glfwSetCursorEnterCallback(glfw_window, MouseEnterCallback);
 			glfwSetJoystickCallback(ControllerCallback);
+
+#if NP_ENGINE_PLATFORM_IS_WINDOWS
+			HWND native_window = (HWND)GetNativeWindow();
+			LONG_PTR prev_window_procedure = SetWindowLongPtrA(native_window, GWLP_WNDPROC, (LONG_PTR)&GlfwWindowProcedure);
+			SetWindowLongPtrA(native_window, GWLP_USERDATA, (LONG_PTR)this);
+			_prev_window_procedure = (WNDPROC)prev_window_procedure;
+#endif
 		}
 
 		void UnsetGlfwCallbacks()
@@ -679,6 +723,13 @@ namespace np::win::__detail
 			glfwSetCursorPosCallback(glfw_window, nullptr);
 			glfwSetCursorEnterCallback(glfw_window, nullptr);
 			glfwSetJoystickCallback(nullptr);
+
+#if NP_ENGINE_PLATFORM_IS_WINDOWS
+			HWND native_window = (HWND)GetNativeWindow();
+			SetWindowLongPtrA(native_window, GWLP_WNDPROC, (LONG_PTR)_prev_window_procedure);
+			SetWindowLongPtrA(native_window, GWLP_USERDATA, (LONG_PTR)nullptr);
+			_prev_window_procedure = nullptr;
+#endif
 		}
 
 		void DetailShowProcedure() override
@@ -745,9 +796,14 @@ namespace np::win::__detail
 			return extensions;
 		}
 
-		GlfwWindow(const Window::Properties& properties, srvc::Services& services):
+		GlfwWindow(const Window::Properties& properties, srvc::Services& services) :
 			Window(properties, services),
 			_glfw_window(nullptr)
+#if NP_ENGINE_PLATFORM_IS_WINDOWS
+			,
+			_prev_window_procedure(nullptr),
+			_is_windows_ncl_mousedown(false)
+#endif
 		{
 			Show();
 		}
@@ -755,6 +811,33 @@ namespace np::win::__detail
 		virtual ~GlfwWindow()
 		{
 			DestroyGlfwWindow();
+		}
+
+		virtual void Update(tim::DblMilliseconds milliseconds) override
+		{
+			GLFWwindow* glfw_window = _glfw_window.load(mo_acquire);
+			if (glfw_window)
+			{
+#if NP_ENGINE_PLATFORM_IS_WINDOWS
+				if (_is_windows_ncl_mousedown)
+				{
+					HWND native_window = (HWND)GetNativeWindow();
+					POINT point;
+					WINDOWINFO info{};
+					GetCursorPos(&point);
+					GetWindowInfo(native_window, &info);
+
+					::glm::i32vec2 pos
+					{ 
+						info.rcWindow.left + point.x - _prev_mouse_position.x , 
+						info.rcWindow.top + point.y - _prev_mouse_position.y
+					};
+
+					SetWindowPos(native_window, nullptr, pos.x, pos.y, 0, 0, SWP_NOSIZE | SWP_NOZORDER | SWP_SHOWWINDOW);
+					_prev_mouse_position = point;
+				}
+#endif
+			}
 		}
 
 		virtual WindowDetailType GetDetailType() const
@@ -881,15 +964,27 @@ namespace np::win::__detail
 			return size;
 		}
 
-		virtual void* GetDetailWindow() const
+		virtual void* GetDetailWindow() const override
 		{
 			return _glfw_window.load(mo_acquire);
 		}
 
-		virtual void* GetNativeWindow() const
+		virtual void* GetNativeWindow() const override
 		{
-			//TODO: get native window - this is platform dependent
-			return nullptr; 
+			void* native_window = nullptr;
+
+#if NP_ENGINE_PLATFORM_IS_APPLE
+			//TODO: GetNativeWindow for apple
+
+#elif NP_ENGINE_PLATFORM_IS_LINUX
+			//TODO: GetNativeWindow for linux
+
+#elif NP_ENGINE_PLATFORM_IS_WINDOWS
+			GLFWwindow* glfw_window = _glfw_window.load(mo_acquire);
+			native_window = glfw_window ? glfwGetWin32Window(glfw_window) : nullptr;
+
+#endif
+			return native_window;
 		}
 	};
 }

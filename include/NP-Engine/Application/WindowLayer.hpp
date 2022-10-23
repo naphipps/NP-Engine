@@ -95,10 +95,10 @@ namespace np::app
 
 		virtual void Update(tim::DblMilliseconds time_delta) override
 		{
-			//TODO: if glfwPollEvents takes longer than our preferred application loop duration,
-			//	then I think we should double check we did not miss any inputs
-			//TODO: ^ should this be here??
 			win::Window::Update();
+
+			for (auto it = _windows.begin(); it != _windows.end(); it++)
+				(*it)->Update(time_delta);
 		}
 
 		virtual void Cleanup() override

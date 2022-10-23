@@ -95,6 +95,8 @@ namespace np::win
 		{
 			DisposeThread();
 		}
+		
+		virtual void Update(tim::DblMilliseconds milliseconds) {}
 
 		virtual void RegisterDetailType() const
 		{
