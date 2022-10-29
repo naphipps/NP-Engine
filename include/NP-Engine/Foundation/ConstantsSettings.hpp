@@ -18,8 +18,8 @@
 	#ifndef NP_ENGINE_LOG_ENABLE
 		#define NP_ENGINE_LOG_ENABLE true
 	#endif
-	#ifndef NP_ENGINE_ENABLE_ASSERT
-		#define NP_ENGINE_ENABLE_ASSERT true
+	#ifndef NP_ENGINE_ASSERT_ENABLE
+		#define NP_ENGINE_ASSERT_ENABLE true
 	#endif
 #endif
 

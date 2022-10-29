@@ -10,7 +10,7 @@
 #include "ConstantsSettings.hpp"
 #include "Constants.hpp"
 
-#if defined(NP_ENGINE_ENABLE_ASSERT) && NP_ENGINE_ENABLE_ASSERT
+#if defined(NP_ENGINE_ASSERT_ENABLE) && NP_ENGINE_ASSERT_ENABLE
 	#include <cassert>
 
 	#ifndef NP_ENGINE_ASSERT
