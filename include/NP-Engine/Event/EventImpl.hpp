@@ -16,7 +16,6 @@ namespace np::evnt
 	{
 		None,
 
-		WindowCreate,
 		WindowClosing,
 		WindowClosed,
 		WindowResize,
@@ -29,7 +28,6 @@ namespace np::evnt
 		ApplicationClose,
 		ApplicationPopup,
 
-		GraphicsCreateRendererForWindow,
 		Max
 	};
 
@@ -47,6 +45,7 @@ namespace np::evnt
 		Application = BIT(0),
 		Window = BIT(1),
 		Graphics = BIT(2),
+		All = ~0
 	};
 
 	/*
