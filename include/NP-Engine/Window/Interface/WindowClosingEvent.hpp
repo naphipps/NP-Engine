@@ -9,6 +9,7 @@
 
 #include "NP-Engine/Event/Event.hpp"
 #include "NP-Engine/Memory/Memory.hpp"
+#include "NP-Engine/JobSystem/JobSystem.hpp"
 
 #include "WindowImpl.hpp"
 
@@ -20,11 +21,12 @@ namespace np::win
 		struct DataType
 		{
 			Window* window;
+			jsys::Job* job;
 		};
 
-		WindowClosingEvent(Window* window) : evnt::Event()
+		WindowClosingEvent(Window* window, jsys::Job* job) : evnt::Event()
 		{
-			SetData<DataType>({ window });
+			SetData<DataType>({ window, job });
 		}
 
 		evnt::EventType GetType() const override

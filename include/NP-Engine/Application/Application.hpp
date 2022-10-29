@@ -116,13 +116,18 @@ namespace np::app
 			e.SetHandled();
 		}
 
+		void HandleApplicationClose(evnt::Event& e)
+		{
+			StopRunning();
+			e.SetHandled();
+		}
+
 		void HandleEvent(evnt::Event& e) override
 		{
 			switch (e.GetType())
 			{
 			case evnt::EventType::ApplicationClose:
-				StopRunning();
-				e.SetHandled();
+				HandleApplicationClose(e);
 				break;
 			case evnt::EventType::ApplicationPopup:
 				HandlePopup(e);

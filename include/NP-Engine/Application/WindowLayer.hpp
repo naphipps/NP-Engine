@@ -27,33 +27,46 @@ namespace np::app
 		con::vector<win::Window*> _windows;
 
 	protected:
-		virtual void HandleWindowCreate(evnt::Event& e)
-		{
-			CreateWindow(e.GetData<win::Window::Properties>());
-			e.SetHandled();
-		}
 
 		virtual void HandleWindowClosing(evnt::Event& e)
 		{
-			NP_ENGINE_PROFILE_FUNCTION();
+			win::WindowClosingEvent::DataType& closing_data = e.GetData<win::WindowClosingEvent::DataType>();
+			jsys::JobSystem& job_system = _services.GetJobSystem();
 
-			//TODO: what if our windows had a dependency counter (similar to jobs)...
-			//TODO: what if WindowClosingEvent had a pointer to our window closing job, and everyone else could add their own dependency
-			//TODO: then when we get the event here, we can start our job
-			//TODO: then window layer would need to listen for the window closed event, check _windows.size to trigger application close
-
-			win::Window* window = e.GetData<win::WindowClosingEvent::DataType>().window;
-			mem::Destroy<win::Window>(_services.GetAllocator(), window);
-
+			//window ownership has gone to the closing job
 			for (auto it = _windows.begin(); it != _windows.end(); it++)
-				if (*it == window)
+				if (*it == closing_data.window)
 				{
 					_windows.erase(it);
 					break;
 				}
 
+			//our closing job must be submitted here
+			job_system.SubmitJob(jsys::JobPriority::Normal, closing_data.job);
+			e.SetHandled();
+		}
+
+		void HandleWindowClosedProcedure(mem::Delegate& d)
+		{
+			//ownership of window is now resolved in this job procedure by destroying it here
+			mem::Destroy<win::Window>(_services.GetAllocator(), d.GetData<win::Window*>());
+
 			if (_windows.size() == 0)
 				_services.GetEventSubmitter().Emplace<ApplicationCloseEvent>();
+		}
+
+		virtual void HandleWindowClosed(evnt::Event& e)
+		{
+			win::WindowClosedEvent::DataType& closed_data = e.GetData<win::WindowClosedEvent::DataType>();
+			jsys::JobSystem& job_system = _services.GetJobSystem();
+
+			mem::Delegate procedure{};
+			//ownership of window is moving from the event to our job procedure
+			procedure.SetData<win::Window*>(closed_data.window);
+			procedure.Connect<WindowLayer, &WindowLayer::HandleWindowClosedProcedure>(this);
+
+			jsys::Job* handle_job = job_system.CreateJob(::std::move(procedure));
+			job_system.SubmitJob(jsys::JobPriority::Higher, handle_job);
 
 			e.SetHandled();
 		}
@@ -62,12 +75,12 @@ namespace np::app
 		{
 			switch (e.GetType())
 			{
-			case evnt::EventType::WindowCreate:
-				HandleWindowCreate(e);
-				break;
-
 			case evnt::EventType::WindowClosing:
 				HandleWindowClosing(e);
+				break;
+
+			case evnt::EventType::WindowClosed:
+				HandleWindowClosed(e);
 				break;
 
 			default:
@@ -106,19 +119,6 @@ namespace np::app
 
 			for (auto it = _windows.begin(); it != _windows.end(); it++)
 				(*it)->Update(time_delta);
-		}
-
-		virtual void Cleanup() override
-		{
-			for (i32 i = _windows.size() - 1; i >= 0; i--)
-				if (!_windows[i]->IsRunning())
-				{
-					mem::Destroy<win::Window>(_services.GetAllocator(), _windows[i]);
-					_windows.erase(_windows.begin() + i);
-				}
-
-			if (_windows.size() == 0)
-				_services.GetEventSubmitter().Emplace<ApplicationCloseEvent>();
 		}
 
 		virtual evnt::EventCategory GetHandledCategories() const override

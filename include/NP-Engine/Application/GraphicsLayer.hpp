@@ -7,6 +7,8 @@
 #ifndef NP_ENGINE_GRAPHICS_LAYER_HPP
 #define NP_ENGINE_GRAPHICS_LAYER_HPP
 
+#include <utility>
+
 #include "NP-Engine/Graphics/Graphics.hpp"
 #include "NP-Engine/Container/Container.hpp"
 #include "NP-Engine/Platform/Platform.hpp"
@@ -37,12 +39,12 @@ namespace np::app
 		con::uset<gfx::Scene*> _unacquired_scenes;
 		con::uset<gfx::Scene*> _acquired_scenes;
 
-		virtual void AdjustForWindowClosing(evnt::Event& e)
+		void AdjustForWindowClosingProcedure(mem::Delegate& d)
 		{
-			win::Window& window = *e.GetData<win::WindowClosingEvent::DataType>().window;
+			win::Window* window = d.GetData<win::Window*>();
 
 			for (auto it = _scenes.begin(); it != _scenes.end(); it++)
-				if ((*it)->GetRenderer().IsAttachedToWindow(window))
+				if ((*it)->GetRenderer().IsAttachedToWindow(*window))
 				{
 					_unacquired_scenes.erase(*it);
 					_acquired_scenes.erase(*it);
@@ -52,32 +54,26 @@ namespace np::app
 				}
 
 			for (auto it = _renderers.begin(); it != _renderers.end(); it++)
-				if ((*it)->IsAttachedToWindow(window))
+				if ((*it)->IsAttachedToWindow(*window))
 				{
-					(*it)->DetachFromWindow(window);
+					(*it)->DetachFromWindow(*window);
 					mem::Destroy<gfx::Renderer>(_services.GetAllocator(), *it);
 					_renderers.erase(it);
 					break;
 				}
 		}
 
-		virtual void AdjustForWindowResize(evnt::Event& e)
+		virtual void AdjustForWindowClosing(evnt::Event& e)
 		{
-			win::Window& window = *e.GetData<win::WindowResizeEvent::DataType>().window;
+			win::WindowClosingEvent::DataType& closing_data = e.GetData<win::WindowClosingEvent::DataType>();
 
-			for (gfx::Scene*& scene : _scenes)
-				if (scene->GetRenderer().IsAttachedToWindow(window))
-				{
-					scene->AdjustForWindowResize(window);
-					break;
-				}
+			mem::Delegate procedure{};
+			procedure.SetData<win::Window*>(closing_data.window);
+			procedure.Connect<GraphicsLayer, &GraphicsLayer::AdjustForWindowClosingProcedure>(this);
 
-			for (gfx::Renderer*& renderer : _renderers)
-				if (renderer->IsAttachedToWindow(window))
-				{
-					renderer->AdjustForWindowResize(window);
-					break;
-				}
+			jsys::Job* adjust_job = _services.GetJobSystem().CreateJob(::std::move(procedure));
+			closing_data.job->AddDependency(*adjust_job);
+			_services.GetJobSystem().SubmitJob(jsys::JobPriority::Higher, adjust_job);
 		}
 
 		virtual void HandleEvent(evnt::Event& e) override
@@ -86,9 +82,6 @@ namespace np::app
 			{
 			case evnt::EventType::WindowClosing:
 				AdjustForWindowClosing(e);
-				break;
-			case evnt::EventType::WindowResize:
-				AdjustForWindowResize(e);
 				break;
 			default:
 				break;

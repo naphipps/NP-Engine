@@ -137,20 +137,30 @@ namespace np::win
 			it->second(it->first, focused);
 	}
 
-	void Window::DisposeThread()
+	void Window::ClosingProcedure(mem::Delegate& d)
 	{
-		if (_thread.IsRunning())
+		while (!_show_procedure_is_complete.load(mo_acquire))
 		{
-			_thread.Dispose();
-			_services.GetEventSubmitter().Emplace<WindowClosedEvent>(this);
+			Close();
+			thr::ThisThread::yield();
 		}
+
+		_thread.Dispose();
+
+		//ownership of window is now moving from this job procedure to the closed event
+		_services.GetEventSubmitter().Emplace<WindowClosedEvent>(this);
 	}
 
 	void Window::ShowProcedure()
 	{
 		DetailShowProcedure();
+		
+		mem::Delegate procedure{};
+		procedure.Connect<Window, &Window::ClosingProcedure>(this);
+		jsys::Job* window_closing_job = _services.GetJobSystem().CreateJob(::std::move(procedure));
+		_services.GetEventSubmitter().Emplace<WindowClosingEvent>(this, window_closing_job);
+
 		_show_procedure_is_complete.store(true, mo_release);
-		_services.GetEventSubmitter().Emplace<WindowClosingEvent>(this);
 	}
 
 	void Window::Resize(ui32 width, ui32 height)

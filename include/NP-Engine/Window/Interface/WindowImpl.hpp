@@ -71,7 +71,7 @@ namespace np::win
 
 		virtual void ShowProcedure();
 
-		virtual void DisposeThread();
+		virtual void ClosingProcedure(mem::Delegate& d);
 
 		virtual void DetailShowProcedure() = 0;
 
@@ -97,7 +97,7 @@ namespace np::win
 
 		virtual ~Window()
 		{
-			DisposeThread();
+			_thread.Dispose();
 		}
 		
 		virtual void Update(tim::DblMilliseconds milliseconds) {}
@@ -115,9 +115,7 @@ namespace np::win
 
 		virtual void Close()
 		{
-			if (_show_procedure_is_complete.load(mo_acquire))
-				DisposeThread();
-			else
+			if (!_show_procedure_is_complete.load(mo_acquire))
 				DetailCloseProcedure();
 		}
 

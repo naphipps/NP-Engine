@@ -26,15 +26,30 @@ namespace np::app
 		tim::SteadyTimestamp _start_timestamp;
 		flt _rate = 1.f;
 
-		virtual void AdjustForWindowClosing(evnt::Event& e)
+		void AdjustForWindowClosingProcedure(mem::Delegate& d)
 		{
+			win::Window* window = d.GetData<win::Window*>();
+
 			if (_scene != nullptr &&
-				_scene->GetRenderer().IsAttachedToWindow(*e.GetData<win::WindowClosingEvent::DataType>().window))
+				_scene->GetRenderer().IsAttachedToWindow(*window))
 			{
 				_scene->Dispose();
 				_scene = nullptr; // TODO: destroy content for scene
 				_model_entity.clear();
 			}
+		}
+
+		virtual void AdjustForWindowClosing(evnt::Event& e)
+		{
+			win::WindowClosingEvent::DataType& closing_data = e.GetData<win::WindowClosingEvent::DataType>();
+
+			mem::Delegate procedure{};
+			procedure.SetData<win::Window*>(closing_data.window);
+			procedure.Connect<GameLayer, &GameLayer::AdjustForWindowClosingProcedure>(this);
+
+			jsys::Job* adjust_job = _services.GetJobSystem().CreateJob(::std::move(procedure));
+			closing_data.job->AddDependency(*adjust_job);
+			_services.GetJobSystem().SubmitJob(jsys::JobPriority::Higher, adjust_job);
 		}
 
 		virtual void HandleEvent(evnt::Event& e) override
