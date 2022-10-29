@@ -27,6 +27,10 @@
 #include "GraphicsLayer.hpp"
 #include "Popup.hpp"
 
+#ifndef NP_ENGINE_APPLICATION_LOOP_DURATION
+	#define NP_ENGINE_APPLICATION_LOOP_DURATION 0 // milliseconds
+#endif
+
 namespace np::app
 {
 	namespace __detail
@@ -147,52 +151,31 @@ namespace np::app
 			_overlays.emplace_back(overlay);
 		}
 
-		//TODO: I think CreateWindowScene should be replaced with WindowLayer.CreateWindow and GraphicsLayer.CreateScene
-		//TODO: ^ this should be like the following:
-		/*
-		
-			win::Window* window = _window_layer.CreateWindow(properties);
-			gfx::Renderer* renderer = _graphics_layer.CreateRenderer(*window);
-			gfx::Scene* scene = _graphics_layer.CreateScene(*renderer);
-			//set our viewport shapes for each scene so we can have minimaps, etc
-
-		*/
-
-		gfx::Scene* CreateWindowScene(win::Window::Properties& window_properties)
-		{
-			win::Window* w = _window_layer.CreateWindow(window_properties);
-
-			void* caller = mem::AddressOf(_services.GetInputQueue());
-			w->SetKeyCodeCallback(caller, nput::InputListener::SubmitKeyCodeState);
-			w->SetMouseCodeCallback(caller, nput::InputListener::SubmitMouseCodeState);
-			w->SetMousePositionCallback(caller, nput::InputListener::SubmitMousePosition);
-			w->SetControllerCodeCallback(caller, nput::InputListener::SubmitControllerCodeState);
-
-			_graphics_layer.CreateRenderer(*w);
-			return _graphics_layer.AcquireScene();
-		}
-
-		void DestroyWindowScene(gfx::Scene& scene)
-		{
-			// TODO: do we need this??
-		}
-
 		virtual void CustomizeJobSystem()
 		{
 			jsys::JobSystem& job_system = _services.GetJobSystem();
 			con::vector<jsys::JobWorker>& job_workers = job_system.GetJobWorkers();
 
-			using Fetch = jsys::JobWorker::Fetch;
-			using FetchOrderArray = jsys::JobWorker::FetchOrderArray;
-			FetchOrderArray default_order{Fetch::Immediate, Fetch::PriorityBased, Fetch::Steal};
-			FetchOrderArray thief_order{Fetch::Steal, Fetch::Immediate, Fetch::None};
-			FetchOrderArray priority_order{Fetch::PriorityBased, Fetch::None, Fetch::None};
-			FetchOrderArray immediate_order{Fetch::Immediate, Fetch::Steal, Fetch::None};
+			NP_ENGINE_ASSERT(thr::Thread::HardwareConcurrency() >= 4, "NP Engine requires at least four cores");
 
-			if (job_workers.size())
-			{
-				// TODO: we can customize how our job workers operate depending on the number of them
-			}
+			using Fetch = jsys::JobWorker::Fetch;
+			//using FetchOrderArray = jsys::JobWorker::FetchOrderArray;
+			/*
+				Examples:
+					FetchOrderArray default_order{Fetch::Immediate, Fetch::PriorityBased, Fetch::Steal};
+					FetchOrderArray thief_order{Fetch::Steal, Fetch::Immediate, Fetch::None};
+					FetchOrderArray priority_order{Fetch::PriorityBased, Fetch::None, Fetch::None};
+					FetchOrderArray immediate_order{Fetch::Immediate, Fetch::Steal, Fetch::None};
+					FetchOrderArray only_immediate_order{ Fetch::Immediate, Fetch::Immediate, Fetch::Immediate };
+			*/
+			
+			//rendering loop
+			job_workers[0].SetFetchOrder({ Fetch::Immediate, Fetch::None, Fetch::None }); 
+			_graphics_layer.SetJobWorkerIndex(0);
+
+			//all other workers
+			for (siz i = 1; i < job_workers.size(); i++)
+				job_workers[i].SetFetchOrder({ Fetch::Immediate, Fetch::PriorityBased, Fetch::Steal });
 		}
 
 	public:
@@ -215,6 +198,8 @@ namespace np::app
 		{
 			NP_ENGINE_PROFILE_SCOPE("application run");
 
+			//app::Popup::Show("Application Start Of Run", "We're about to run");
+
 			_running.store(true, mo_release);
 			evnt::EventQueue& event_queue = _services.GetEventQueue();
 			jsys::JobSystem& job_system = _services.GetJobSystem();
@@ -231,7 +216,9 @@ namespace np::app
 			siz i = 0;
 
 			CustomizeJobSystem();
+			_graphics_layer.SubmitRenderingJob();
 			job_system.Start();
+
 			while (_running.load(mo_acquire))
 			{
 				NP_ENGINE_PROFILE_SCOPE("loop");
@@ -282,14 +269,12 @@ namespace np::app
 				for (i = 0; i < _overlays.size(); i++)
 					_overlays[i]->Cleanup();
 
-				_graphics_layer.Render();
-
 				for (next = tim::SteadyClock::now(); next - prev < min_duration; next = tim::SteadyClock::now())
 					thr::ThisThread::yield();
-
 				prev = next;
 			}
 
+			_graphics_layer.StopRenderingJob();
 			job_system.Stop();
 			job_system.Dispose();
 			event_queue.Clear();

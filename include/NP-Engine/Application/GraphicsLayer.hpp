@@ -14,6 +14,7 @@
 #include "NP-Engine/Platform/Platform.hpp"
 #include "NP-Engine/Memory/Memory.hpp"
 #include "NP-Engine/Services/Services.hpp"
+#include "NP-Engine/Insight/Insight.hpp"
 
 #include "NP-Engine/Window/Interface/WindowEvents.hpp"
 
@@ -29,15 +30,21 @@
 // TODO: looks like our big-picture is going to expand to support a Task Graph Architecture of some sort...
 // TODO: ^ Halcyon's RenderGraph idea is pretty nice, but it is inspired by Frostbite's FrameGraph [O'Donnell 2017]
 
+#ifndef NP_ENGINE_RENDERING_LOOP_DURATION
+	#define NP_ENGINE_RENDERING_LOOP_DURATION 0 // milliseconds
+#endif
+
 namespace np::app
 {
 	class GraphicsLayer : public Layer
 	{
 	protected:
 		con::vector<gfx::Renderer*> _renderers;
-		con::vector<gfx::Scene*> _scenes; // TODO: I feel like we need to redesign how we store all these
-		con::uset<gfx::Scene*> _unacquired_scenes;
-		con::uset<gfx::Scene*> _acquired_scenes;
+		con::vector<gfx::Scene*> _scenes;
+
+		siz _job_worker_index;
+		jsys::Job* _rendering_job;
+		atm_bl _keep_rendering;
 
 		void AdjustForWindowClosingProcedure(mem::Delegate& d)
 		{
@@ -46,8 +53,6 @@ namespace np::app
 			for (auto it = _scenes.begin(); it != _scenes.end(); it++)
 				if ((*it)->GetRenderer().IsAttachedToWindow(*window))
 				{
-					_unacquired_scenes.erase(*it);
-					_acquired_scenes.erase(*it);
 					mem::Destroy<gfx::Scene>(_services.GetAllocator(), *it);
 					_scenes.erase(it);
 					break;
@@ -88,83 +93,133 @@ namespace np::app
 			}
 		}
 
-		void ChooseRhi()
+		void ChooseGraphicsDetailType()
 		{
-			mem::TraitAllocator allocator;
-			con::deque<gfx::Renderer*> renderers;
-			gfx::Renderer* opengl = nullptr;
-			gfx::Renderer* vulkan = nullptr;
+			gfx::__detail::RegisteredRhiType.store(gfx::RhiType::Vulkan);
 
-			// TODO: we need to redo how we choose our rhi... look at Renderer.IsValid methods or something similar
-
-			// TODO: read graphics config file for renderer preference - then we could put our found renderers into multimap
-			// TODO: read from config file about which renderer was used last, if not available, ask user which renderer with
-			// popups
-			// TODO: store chosen renderer in config file
-			// TODO: read a config file to determine renderer order preference
-
-#if NP_ENGINE_PLATFORM_IS_WINDOWS
-			// TODO: we're keeping this here for testing purposes - when renderer is complete we can probably remove
-			opengl = mem::Create<gfx::rhi::OpenGLRenderer>(allocator, _services);
-
-#endif
-			vulkan = mem::Create<gfx::rhi::VulkanRenderer>(allocator, _services);
-
-			if (vulkan != nullptr)
-				renderers.emplace_back(vulkan);
-			if (opengl != nullptr)
-				renderers.emplace_back(opengl);
-
-			str available_renderers;
-
-			for (gfx::Renderer* renderer : renderers)
-				available_renderers += "\t- " + renderer->GetName() + "\n";
-
-			str title = "NP Engine";
-			str choose_message;
-			Popup::Select select = Popup::Select::Yes;
-			Popup::Buttons buttons = Popup::Buttons::YesNo;
-
-			if (renderers.size() == 0)
-			{
-				Popup::Show(title, "Could not find suitible renderers.", Popup::Style::Error);
-			}
-			else
-			{
-				while (true)
-				{
-					choose_message = "Click Yes for " + renderers.front()->GetName() + ", or click No to cycle to the next.";
-					select = Popup::Show(title, "Available renderers:\n" + available_renderers + choose_message, buttons);
-
-					if (select == Popup::Select::Yes)
-						break;
-
-					renderers.emplace_back(renderers.front());
-					renderers.pop_front();
-				}
-
-				renderers.front()->RegisterRhiType();
-			}
-
-			for (gfx::Renderer* renderer : renderers)
-				mem::Destroy<gfx::Renderer>(allocator, renderer);
+			// TODO: we need to redo how we choose our rhi... look at Renderer.IsValid methods or something similar??
+			// TODO: we might ought to interact with a config file and the user (popups) to determine??
 		}
 
-		gfx::Scene* CreateScene(gfx::Renderer& renderer)
+
+
+
+
+		class FramePacket
 		{
-			gfx::Scene* scene = gfx::Scene::Create(_services, renderer);
-			_unacquired_scenes.insert(scene);
-			return _scenes.emplace_back(scene);
+		private:
+			Mutex _mutex;
+			ecs::Registry _registry;
+			con::uset<ecs::Entity> _entities_to_add;
+			con::uset<ecs::Entity> _entities_to_remove;
+
+		public:
+
+			void RemoveEntities()
+			{
+				Lock lock(_mutex);
+			}
+
+			void AddEntities()
+			{
+				Lock lock(_mutex);
+			}
+
+			void SetEntityToRemove(ecs::Entity e)
+			{
+				Lock lock(_mutex);
+			}
+
+			void SetEntityToAdd(ecs::Entity e)
+			{
+				Lock lock(_mutex);
+			}
+		};
+
+
+
+
+		atm<FramePacket*> _staged_for_producing;
+		atm<FramePacket*> _producing;
+		atm<FramePacket*> _staged_for_consuming;
+		atm<FramePacket*> _consuming;
+
+
+		FramePacket* GetNextFramePacket()
+		{
+			FramePacket* packet = nullptr;
+
+			packet = _staged_for_consuming.load(mo_acquire);
+			_staged_for_consuming.store(nullptr);
+
+			return packet;
+		}
+
+		void RenderingProcedure(mem::Delegate& d)
+		{
+			NP_ENGINE_PROFILE_FUNCTION();
+
+			_keep_rendering.store(true, mo_release);
+			tim::SteadyTimestamp next = tim::SteadyClock::now();
+			tim::SteadyTimestamp prev = next;
+			const tim::DblMilliseconds min_duration(NP_ENGINE_RENDERING_LOOP_DURATION);
+
+			
+
+			
+			FramePacket* prev_packet;
+			FramePacket* packet = nullptr;
+
+			while (_keep_rendering.load(mo_acquire))
+			{
+				//NP_ENGINE_PROFILE_SCOPE("rendering loop");
+
+				prev_packet = packet;
+				packet = GetNextFramePacket();
+
+				if (packet)
+				{
+					NP_ENGINE_PROFILE_SCOPE("frame packet:" + to_str((siz)packet));
+
+					if (packet == prev_packet)
+					{
+						NP_ENGINE_PROFILE_SCOPE("consider velocity");
+					}
+					else
+					{
+						NP_ENGINE_PROFILE_SCOPE("ignore velocity");
+					}
+				}
+				else
+				{
+					NP_ENGINE_PROFILE_SCOPE("no frame packet");
+				}
+
+				for (next = tim::SteadyClock::now(); next - prev < min_duration; next = tim::SteadyClock::now())
+					thr::ThisThread::yield();
+				prev = next;
+			}
+		}
+
+		void CreateRenderingJob()
+		{
+			mem::Delegate procedure{};
+			procedure.Connect<GraphicsLayer, &GraphicsLayer::RenderingProcedure>(this);
+			_rendering_job = _services.GetJobSystem().CreateJob(::std::move(procedure));
+			_rendering_job->SetCanBeStolen(false);
 		}
 
 	public:
-		GraphicsLayer(srvc::Services& services): Layer(services)
+		GraphicsLayer(srvc::Services& services): Layer(services), _job_worker_index(0), _rendering_job(nullptr), _keep_rendering(false)
 		{
-			ChooseRhi();
+			ChooseGraphicsDetailType();
+			CreateRenderingJob();
 		}
 
 		virtual ~GraphicsLayer()
 		{
+			StopRenderingJob();
+
 			for (auto it = _scenes.begin(); it != _scenes.end(); it++)
 				mem::Destroy<gfx::Scene>(_services.GetAllocator(), *it);
 
@@ -176,8 +231,13 @@ namespace np::app
 		{
 			gfx::Renderer* renderer = gfx::Renderer::Create(_services);
 			renderer->AttachToWindow(window);
-			CreateScene(*renderer);
 			return _renderers.emplace_back(renderer);
+		}
+
+		gfx::Scene* CreateScene(gfx::Renderer& renderer)
+		{
+			gfx::Scene* scene = gfx::Scene::Create(_services, renderer);
+			return _scenes.emplace_back(scene);
 		}
 
 		virtual evnt::EventCategory GetHandledCategories() const override
@@ -185,34 +245,28 @@ namespace np::app
 			return (evnt::EventCategory)((ui64)evnt::EventCategory::Graphics | (ui64)evnt::EventCategory::Window);
 		}
 
-		gfx::Scene* AcquireScene()
+		void SetJobWorkerIndex(siz index)
 		{
-			gfx::Scene* scene = nullptr;
-
-			if (!_unacquired_scenes.empty())
-			{
-				scene = *_unacquired_scenes.begin();
-				_unacquired_scenes.erase(scene);
-				_acquired_scenes.insert(scene);
-			}
-
-			return scene;
+			_job_worker_index = index;
 		}
 
-		void ReleaseScene(gfx::Scene* scene)
+		void SubmitRenderingJob()
 		{
-			if (_acquired_scenes.find(scene) != _acquired_scenes.end())
-			{
-				_acquired_scenes.erase(scene);
-				_unacquired_scenes.insert(scene);
-			}
+			if (!_rendering_job)
+				CreateRenderingJob();
+
+			_services.GetJobSystem().GetJobWorkers()[_job_worker_index].SubmitImmediateJob(_rendering_job);
 		}
 
-		void Render()
+		void StopRenderingJob()
 		{
-			NP_ENGINE_PROFILE_SCOPE("rendering");
-			for (auto it = _acquired_scenes.begin(); it != _acquired_scenes.end(); it++)
-				(*it)->Render();
+			if (_rendering_job)
+			{
+				while (_rendering_job->IsEnabled() && !_rendering_job->IsComplete())
+					_keep_rendering.store(false, mo_release);
+
+				_rendering_job = nullptr;
+			}
 		}
 	};
 } // namespace np::app

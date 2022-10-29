@@ -24,6 +24,11 @@ namespace np::gfx
 	{
 		extern atm<RhiType> RegisteredRhiType;
 	} // namespace __detail
+
+	static RhiType GetRegisteredRhiType()
+	{
+		return __detail::RegisteredRhiType.load(mo_acquire);
+	}
 } // namespace np::gfx
 
 #endif /* NP_ENGINE_RHI_TYPE_HPP */

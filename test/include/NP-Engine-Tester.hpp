@@ -16,6 +16,10 @@ namespace np::app
 	class GameLayer : public Layer
 	{
 	private:
+		WindowLayer& _window_layer;
+		GraphicsLayer& _graphics_layer;
+		win::Window* _window;
+		gfx::Renderer* _renderer;
 		gfx::Scene* _scene;
 		gfx::Camera _camera;
 		str _model_filename;
@@ -28,14 +32,11 @@ namespace np::app
 
 		void AdjustForWindowClosingProcedure(mem::Delegate& d)
 		{
-			win::Window* window = d.GetData<win::Window*>();
-
-			if (_scene != nullptr &&
-				_scene->GetRenderer().IsAttachedToWindow(*window))
+			if (_window == d.GetData<win::Window*>())
 			{
-				_scene->Dispose();
-				_scene = nullptr; // TODO: destroy content for scene
-				_model_entity.clear();
+				_scene = nullptr;
+				_renderer = nullptr;
+				_window = nullptr;
 			}
 		}
 
@@ -52,6 +53,26 @@ namespace np::app
 			_services.GetJobSystem().SubmitJob(jsys::JobPriority::Higher, adjust_job);
 		}
 
+		void AdjustForWindowClosedProcedure(mem::Delegate& d)
+		{
+			win::Window* window = d.GetData<win::Window*>();
+
+			// TODO: destroy content for scene
+			_model_entity.clear();
+		}
+
+		virtual void AdjustForWindowClosed(evnt::Event& e)
+		{
+			win::WindowClosedEvent::DataType& closing_data = e.GetData<win::WindowClosedEvent::DataType>();
+
+			mem::Delegate procedure{};
+			procedure.SetData<win::Window*>(closing_data.window);
+			procedure.Connect<GameLayer, &GameLayer::AdjustForWindowClosedProcedure>(this);
+
+			jsys::Job* adjust_job = _services.GetJobSystem().CreateJob(::std::move(procedure));
+			_services.GetJobSystem().SubmitJob(jsys::JobPriority::Higher, adjust_job);
+		}
+
 		virtual void HandleEvent(evnt::Event& e) override
 		{
 			switch (e.GetType())
@@ -59,6 +80,11 @@ namespace np::app
 			case evnt::EventType::WindowClosing:
 				AdjustForWindowClosing(e);
 				break;
+
+			case evnt::EventType::WindowClosed:
+				AdjustForWindowClosed(e);
+				break;
+
 			default:
 				break;
 			}
@@ -115,8 +141,12 @@ namespace np::app
 		}
 
 	public:
-		GameLayer(srvc::Services& services):
+		GameLayer(srvc::Services& services, WindowLayer& window_layer, GraphicsLayer& graphics_layer) :
 			Layer(services),
+			_window_layer(window_layer),
+			_graphics_layer(graphics_layer),
+			_window(nullptr),
+			_renderer(nullptr),
 			_scene(nullptr),
 			_model_filename(
 				fsys::Append(fsys::Append(fsys::Append(NP_ENGINE_WORKING_DIR, "test"), "assets"), "viking_room.obj")),
@@ -144,12 +174,35 @@ namespace np::app
 			mem::Destroy<gfx::RenderableModel>(_services.GetAllocator(), _renderable_model);
 		}
 
-		void SetScene(gfx::Scene& scene)
+		void PrepareForRun()
 		{
-			_scene = mem::AddressOf(scene);
-			// TODO: init scene, and destroy content for last scene??
+			//TODO: I think CreateWindowScene should be replaced with WindowLayer.CreateWindow and GraphicsLayer.CreateScene
+			//TODO: ^ this should be like the following:
+			/*
 
-			_scene->GetOnDrawDelegate().Connect<GameLayer, &GameLayer::SceneOnDraw>(this);
+				win::Window* window = _window_layer.CreateWindow(properties);
+				gfx::Renderer* renderer = _graphics_layer.CreateRenderer(*window);
+				gfx::Scene* scene = _graphics_layer.CreateScene(*renderer);
+				//set our viewport shapes for each scene so we can have minimaps, etc
+
+			*/
+
+			void* caller = mem::AddressOf(_services.GetInputQueue());
+			win::Window::Properties window_properties;
+			window_properties.Title = "My Game Window >:D";
+
+			_window = _window_layer.CreateWindow(window_properties);
+			_window->SetKeyCodeCallback(caller, nput::InputListener::SubmitKeyCodeState);
+			_window->SetMouseCodeCallback(caller, nput::InputListener::SubmitMouseCodeState);
+			_window->SetMousePositionCallback(caller, nput::InputListener::SubmitMousePosition);
+			_window->SetControllerCodeCallback(caller, nput::InputListener::SubmitControllerCodeState);
+
+			_renderer = _graphics_layer.CreateRenderer(*_window);
+			_scene = _graphics_layer.CreateScene(*_renderer);
+
+
+			// TODO: init scene, and destroy content for last scene??
+			_scene->GetOnDrawDelegate().Connect<GameLayer, &GameLayer::SceneOnDraw>(this); //TODO: do we need this??
 			_scene->Prepare();
 		}
 
@@ -169,7 +222,7 @@ namespace np::app
 	public:
 		GameApp(::np::srvc::Services& app_services):
 			Application(Application::Properties{"My Game App"}, app_services),
-			_game_layer(app_services)
+			_game_layer(app_services, _window_layer, _graphics_layer)
 		{
 			PushLayer(mem::AddressOf(_game_layer));
 		}
@@ -177,12 +230,7 @@ namespace np::app
 		void Run(i32 argc, chr** argv) override
 		{
 			NP_ENGINE_LOG_INFO("Hello world from my game app! My title is '" + GetTitle() + "'");
-
-			win::Window::Properties window_properties;
-			window_properties.Title = "My Game Window >:D";
-			gfx::Scene* scene = CreateWindowScene(window_properties);
-			_game_layer.SetScene(*scene);
-
+			_game_layer.PrepareForRun();
 			Application::Run(argc, argv);
 		}
 	};

@@ -27,63 +27,36 @@ namespace np::gfx::rhi
 	class VulkanScene : public Scene
 	{
 	private:
-		// TODO: I think our scene needs it's own ecs registry!! //TODO: put this in RPI
+		// TODO: I think our scene needs it's own ecs registry?? //TODO: put this in RPI
 
 		VulkanCamera _camera;
-		thr::Thread _dlp_thread; // dlp = drawing loop procedure
-		atm_bl _dlp_is_complete;
-		atm_bl _dlp_keep_alive;
-		atm_bl _dlp_enable_draw;
-		atm_bl _is_drawing;
 
-		static void WindowResizeCallback(void* scene, ui32 width, ui32 height)
+	public:
+		VulkanScene(srvc::Services& services, Renderer& renderer):
+			Scene(services, renderer)
+		{}
+
+		~VulkanScene()
 		{
-			VulkanScene& vulkan_scene = (VulkanScene&)*((VulkanScene*)scene);
-			vulkan_scene._dlp_enable_draw.store(true, mo_release);
+			Dispose();
 		}
 
-		static void WindowPositionCallback(void* scene, i32 x, i32 y)
+		void UpdateCamera()
 		{
-			VulkanScene& vulkan_scene = (VulkanScene&)*((VulkanScene*)scene);
-			vulkan_scene._dlp_enable_draw.store(true, mo_release);
-		}
-
-		void DrawLoopProcedure()
-		{
-			NP_ENGINE_PROFILE_SCOPE("VulkanScene::DrawLoopProcedure " + to_str((ui64)this));
-
-			tim::SteadyTimestamp next = tim::SteadyClock::now();
-			tim::SteadyTimestamp prev = next;
-			const tim::DblMilliseconds min_duration(NP_ENGINE_APPLICATION_LOOP_DURATION);
 			VulkanRenderer& vulkan_renderer = (VulkanRenderer&)_renderer;
+			VkExtent2D extent = vulkan_renderer.GetSwapchain().GetExtent();
 
-			while (_dlp_keep_alive.load(mo_acquire))
-			{
-				vulkan_renderer.SetOutOfDate();
-
-				if (_dlp_enable_draw.load(mo_acquire))
-				{
-					Draw();
-					for (next = tim::SteadyClock::now(); next - prev < min_duration; next = tim::SteadyClock::now())
-						thr::ThisThread::yield();
-
-					prev = next;
-				}
-				else
-				{
-					thr::ThisThread::sleep_for(min_duration);
-				}
-			}
-
-			_dlp_is_complete.store(true, mo_release);
+			_camera.AspectRatio = vulkan_renderer.GetSwapchain().GetAspectRatio();
+			_camera.LeftPlane = -(flt)extent.width / 2.f;
+			_camera.RightPlane = (flt)extent.width / 2.f;
+			_camera.BottomPlane = -(flt)extent.height / 2.f;
+			_camera.TopPlane = (flt)extent.height / 2.f;
+			_camera.Update();
 		}
 
-		void Draw()
+		void Render() override
 		{
 			NP_ENGINE_PROFILE_SCOPE("vulkan scene draw");
-			bl expected = false;
-			while (!_is_drawing.compare_exchange_weak(expected, true, mo_release, mo_relaxed))
-				expected = false;
 
 			_on_draw_delegate.InvokeConnectedFunction();
 			VulkanFrame& vulkan_frame = (VulkanFrame&)_renderer.BeginFrame();
@@ -135,54 +108,6 @@ namespace np::gfx::rhi
 				_renderer.EndFrame();
 				_renderer.DrawFrame();
 			}
-
-			_is_drawing.store(false, mo_release);
-		}
-
-	public:
-		VulkanScene(srvc::Services& services, Renderer& renderer):
-			Scene(services, renderer),
-			_dlp_is_complete(true),
-			_dlp_keep_alive(false),
-			_dlp_enable_draw(false),
-			_is_drawing(false)
-		{
-			((VulkanRenderer&)_renderer).GetSurface().GetWindow().SetResizeCallback(this, WindowResizeCallback);
-			((VulkanRenderer&)_renderer).GetSurface().GetWindow().SetPositionCallback(this, WindowPositionCallback);
-
-			_dlp_keep_alive.store(true, mo_release);
-			_dlp_is_complete.store(false, mo_release);
-			_dlp_thread.Run(&VulkanScene::DrawLoopProcedure, this);
-			_dlp_thread.SetAffinity(1);
-		}
-
-		~VulkanScene()
-		{
-			while (!_dlp_is_complete.load(mo_acquire))
-				_dlp_keep_alive.store(false, mo_release);
-
-			_dlp_thread.Dispose();
-
-			Dispose();
-		}
-
-		void UpdateCamera()
-		{
-			VulkanRenderer& vulkan_renderer = (VulkanRenderer&)_renderer;
-			VkExtent2D extent = vulkan_renderer.GetSwapchain().GetExtent();
-
-			_camera.AspectRatio = vulkan_renderer.GetSwapchain().GetAspectRatio();
-			_camera.LeftPlane = -(flt)extent.width / 2.f;
-			_camera.RightPlane = (flt)extent.width / 2.f;
-			_camera.BottomPlane = -(flt)extent.height / 2.f;
-			_camera.TopPlane = (flt)extent.height / 2.f;
-			_camera.Update();
-		}
-
-		void Render() override
-		{
-			_dlp_enable_draw.store(false, mo_release);
-			Draw();
 		}
 
 		void Prepare() override
@@ -206,10 +131,6 @@ namespace np::gfx::rhi
 
 		void Dispose() override
 		{
-			_dlp_enable_draw.store(false, mo_release);
-			while (_is_drawing.load(mo_acquire))
-				thr::ThisThread::yield();
-
 			ecs::Registry& ecs_registry = _services.GetEcsRegistry();
 
 			auto object_entities = ecs_registry.view<RenderableObject*>();
