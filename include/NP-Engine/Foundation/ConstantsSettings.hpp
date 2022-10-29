@@ -28,7 +28,7 @@
 #endif
 
 #ifndef NP_ENGINE_WINDOW_LOOP_DURATION
-	#define NP_ENGINE_WINDOW_LOOP_DURATION 8 // milliseconds
+	#define NP_ENGINE_WINDOW_LOOP_DURATION 8 //4 // milliseconds
 #endif
 
 #endif /* NP_ENGINE_CONSTANTS_SETTINGS_HPP */

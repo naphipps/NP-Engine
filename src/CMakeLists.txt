@@ -326,7 +326,6 @@ set(NP_ENGINE_WINDOW_INTERFACE_HPP
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Window/Interface/WindowImpl.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Window/Interface/WindowClosedEvent.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Window/Interface/WindowClosingEvent.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Window/Interface/WindowCreateEvent.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Window/Interface/WindowEvents.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Window/Interface/WindowResizeEvent.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Window/Interface/WindowInterface.hpp

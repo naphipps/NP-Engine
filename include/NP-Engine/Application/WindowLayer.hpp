@@ -35,6 +35,13 @@ namespace np::app
 
 		virtual void HandleWindowClosing(evnt::Event& e)
 		{
+			NP_ENGINE_PROFILE_FUNCTION();
+
+			//TODO: what if our windows had a dependency counter (similar to jobs)...
+			//TODO: what if WindowClosingEvent had a pointer to our window closing job, and everyone else could add their own dependency
+			//TODO: then when we get the event here, we can start our job
+			//TODO: then window layer would need to listen for the window closed event, check _windows.size to trigger application close
+
 			win::Window* window = e.GetData<win::WindowClosingEvent::DataType>().window;
 			mem::Destroy<win::Window>(_services.GetAllocator(), window);
 

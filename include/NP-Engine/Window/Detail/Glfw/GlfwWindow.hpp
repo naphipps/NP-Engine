@@ -10,6 +10,7 @@
 #include "NP-Engine/Foundation/Foundation.hpp"
 #include "NP-Engine/Time/Time.hpp"
 #include "NP-Engine/String/String.hpp"
+#include "NP-Engine/Math/Math.hpp"
 
 #include "NP-Engine/Vendor/GlfwInclude.hpp"
 #include "NP-Engine/Vendor/GlmInclude.hpp"
@@ -25,32 +26,154 @@ namespace np::win::__detail
 		nput::MousePosition _mouse_position;
 
 #if NP_ENGINE_PLATFORM_IS_WINDOWS
+
+		using HitFlags = ui32;
+		constexpr static HitFlags HitNone = 0;
+		constexpr static HitFlags HitCaption = BIT(0);
+		constexpr static HitFlags HitTop = BIT(1);
+		constexpr static HitFlags HitRight = BIT(2);
+		constexpr static HitFlags HitBottom = BIT(3);
+		constexpr static HitFlags HitLeft = BIT(4);
+		constexpr static HitFlags HitMinimize = BIT(5);
+		constexpr static HitFlags HitMaximize = BIT(6);
+		constexpr static HitFlags HitClose = BIT(7);
+
 		WNDPROC _prev_window_procedure;
-		bl _is_windows_ncl_mousedown;
+		HitFlags _hit_flags;
 		POINT _prev_mouse_position;
+		WINDOWPLACEMENT _prev_window_placement;
 
 		static LRESULT CALLBACK GlfwWindowProcedure(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 		{
 			LRESULT result = -1; //assuming -1 is an error value
 			GlfwWindow* glfw_window = (GlfwWindow*)GetWindowLongPtrA(hwnd, GWLP_USERDATA);
 			bl call_prev_window_procedure = true;
-
+			POINTS point = MAKEPOINTS(lparam); //screen point
+			
 			switch (msg)
 			{
+			case WM_NCLBUTTONDBLCLK:
+			case WM_NCRBUTTONDBLCLK:
+				call_prev_window_procedure = GET_NCHITTEST_WPARAM(wparam) != HTSYSMENU;
+				break;
+
+			case WM_NCRBUTTONDOWN:
+				call_prev_window_procedure = false;
+				break;
+
 			case WM_NCLBUTTONDOWN:
-				glfw_window->_is_windows_ncl_mousedown = GET_NCHITTEST_WPARAM(wparam) == HTCAPTION;
-				if (glfw_window->_is_windows_ncl_mousedown)
+			{
+				switch (GET_NCHITTEST_WPARAM(wparam))
 				{
-					POINTS point = MAKEPOINTS(lparam); //screen point
+				case HTCAPTION:
+					glfw_window->_hit_flags = HitCaption;
+					break;
+
+				case HTTOP:
+					glfw_window->_hit_flags = HitTop;
+					break;
+
+				case HTLEFT:
+					glfw_window->_hit_flags = HitLeft;
+					break;
+
+				case HTRIGHT:
+					glfw_window->_hit_flags = HitRight;
+					break;
+
+				case HTBOTTOM:
+					glfw_window->_hit_flags = HitBottom;
+					break;
+
+				case HTTOPLEFT:
+					glfw_window->_hit_flags = HitTop | HitLeft;
+					break;
+
+				case HTTOPRIGHT:
+					glfw_window->_hit_flags = HitTop | HitRight;
+					break;
+
+				case HTBOTTOMLEFT:
+					glfw_window->_hit_flags = HitLeft | HitBottom;
+					break;
+
+				case HTBOTTOMRIGHT:
+					glfw_window->_hit_flags = HitRight | HitBottom;
+					break;
+
+				case HTMINBUTTON:
+					glfw_window->_hit_flags = HitMinimize;
+					break;
+
+				case HTMAXBUTTON:
+					glfw_window->_hit_flags = HitMaximize;
+					break;
+
+				case HTCLOSE:
+					glfw_window->_hit_flags = HitClose;
+					break;
+
+				case HTSYSMENU:
+				{
+					call_prev_window_procedure = false;
+					break;
+				}
+				default:
+					glfw_window->_hit_flags = HitNone;
+					break;
+				}
+
+				if (glfw_window->_hit_flags)
+				{
 					glfw_window->_prev_mouse_position.x = point.x;
 					glfw_window->_prev_mouse_position.y = point.y;
 					call_prev_window_procedure = false;
 					result = 0; //assuming 0 is a success value
 				}
+
 				break;
+			}
 			case WM_NCLBUTTONUP:
-				glfw_window->_is_windows_ncl_mousedown = false;
+			{
+				switch (GET_NCHITTEST_WPARAM(wparam))
+				{
+				case HTMINBUTTON:
+				{
+					if (glfw_window->_hit_flags == HitMinimize)
+					{
+						glfw_window->Minimize();
+						call_prev_window_procedure = false;
+					}
+					break;
+				}
+				case HTMAXBUTTON:
+				{
+					if (glfw_window->_hit_flags == HitMaximize)
+					{
+						if (glfw_window->IsMaximized())
+							glfw_window->RestoreFromMaximize();
+						else
+							glfw_window->Maximize();
+						call_prev_window_procedure = false;
+					}
+					break;
+				}
+				case HTCLOSE:
+				{
+					if (glfw_window->_hit_flags == HitClose)
+					{
+						glfw_window->Close();
+						call_prev_window_procedure = false;
+					}
+					break;
+				}
+				default:
+					break;
+				}
+
+				glfw_window->_hit_flags = HitNone;
 				break;
+			}
 			}
 
 			if (call_prev_window_procedure)
@@ -802,7 +925,7 @@ namespace np::win::__detail
 #if NP_ENGINE_PLATFORM_IS_WINDOWS
 			,
 			_prev_window_procedure(nullptr),
-			_is_windows_ncl_mousedown(false)
+			_hit_flags(HitNone)
 #endif
 		{
 			Show();
@@ -819,23 +942,119 @@ namespace np::win::__detail
 			if (glfw_window)
 			{
 #if NP_ENGINE_PLATFORM_IS_WINDOWS
-				if (_is_windows_ncl_mousedown)
+				HWND native_window = (HWND)GetNativeWindow();
+				POINT point;
+				WINDOWINFO info{};
+				UINT flags = 0;
+				bl call_set_window_pos = false;
+				GetCursorPos(&point);
+				GetWindowInfo(native_window, &info);
+
+				::glm::i32vec2 offset
 				{
-					HWND native_window = (HWND)GetNativeWindow();
-					POINT point;
-					WINDOWINFO info{};
-					GetCursorPos(&point);
-					GetWindowInfo(native_window, &info);
+					point.x - _prev_mouse_position.x ,
+					point.y - _prev_mouse_position.y
+				};
 
-					::glm::i32vec2 pos
-					{ 
-						info.rcWindow.left + point.x - _prev_mouse_position.x , 
-						info.rcWindow.top + point.y - _prev_mouse_position.y
-					};
+				switch (_hit_flags)
+				{
+				case HitCaption:
+					if (IsMaximized())
+					{
+						if (offset.x != 0 || offset.y != 0)
+						{
+							dbl t = mat::GetT((dbl)info.rcWindow.left, (dbl)info.rcWindow.right, (dbl)point.x);
+							siz width = _prev_window_placement.rcNormalPosition.right - _prev_window_placement.rcNormalPosition.left;
+							siz height = _prev_window_placement.rcNormalPosition.bottom - _prev_window_placement.rcNormalPosition.top;
+							
+							_prev_window_placement.rcNormalPosition.left = point.x - (t * width) + offset.x;
+							_prev_window_placement.rcNormalPosition.top = offset.y;
+							_prev_window_placement.rcNormalPosition.right = _prev_window_placement.rcNormalPosition.left + width;
+							_prev_window_placement.rcNormalPosition.bottom = _prev_window_placement.rcNormalPosition.top + height;
 
-					SetWindowPos(native_window, nullptr, pos.x, pos.y, 0, 0, SWP_NOSIZE | SWP_NOZORDER | SWP_SHOWWINDOW);
-					_prev_mouse_position = point;
+							_prev_window_placement.showCmd |= SW_RESTORE;
+							SetWindowPlacement(native_window, &_prev_window_placement);
+						}
+						//else do nothing on purpose
+					}
+					else
+					{
+						info.rcWindow.left += offset.x;
+						info.rcWindow.top += offset.y;
+						flags = SWP_NOSIZE | SWP_NOZORDER | SWP_SHOWWINDOW;
+						call_set_window_pos = true;
+					}
+					break;
+
+				case HitTop:
+					info.rcWindow.top += offset.y;
+					flags = SWP_NOZORDER | SWP_SHOWWINDOW;
+					call_set_window_pos = true;
+					break;
+
+				case HitBottom:
+					info.rcWindow.bottom += offset.y;
+					flags = SWP_NOZORDER | SWP_SHOWWINDOW;
+					call_set_window_pos = true;
+					break;
+
+				case HitLeft:
+					info.rcWindow.left += offset.x;
+					flags = SWP_NOZORDER | SWP_SHOWWINDOW;
+					call_set_window_pos = true;
+					break;
+
+				case HitRight:
+					info.rcWindow.right += offset.x;
+					flags = SWP_NOZORDER | SWP_SHOWWINDOW;
+					call_set_window_pos = true;
+					break;
+
+				case HitTop | HitLeft:
+					info.rcWindow.top += offset.y;
+					info.rcWindow.left += offset.x;
+					flags = SWP_NOZORDER | SWP_SHOWWINDOW;
+					call_set_window_pos = true;
+					break;
+
+				case HitTop | HitRight:
+					info.rcWindow.top += offset.y;
+					info.rcWindow.right += offset.x;
+					flags = SWP_NOZORDER | SWP_SHOWWINDOW;
+					call_set_window_pos = true;
+					break;
+
+				case HitBottom | HitLeft:
+					info.rcWindow.bottom += offset.y;
+					info.rcWindow.left += offset.x;
+					flags = SWP_NOZORDER | SWP_SHOWWINDOW;
+					call_set_window_pos = true;
+					break;
+
+				case HitBottom | HitRight:
+					info.rcWindow.bottom += offset.y;
+					info.rcWindow.right += offset.x;
+					flags = SWP_NOZORDER | SWP_SHOWWINDOW;
+					call_set_window_pos = true;
+					break;
+
+				case HitMinimize:
+				case HitMaximize:
+				case HitClose:
+				default:
+					break;
 				}
+
+				if (call_set_window_pos)
+				{
+					SetWindowPos(native_window, nullptr, 
+						info.rcWindow.left, info.rcWindow.top,
+						info.rcWindow.right - info.rcWindow.left,
+						info.rcWindow.bottom - info.rcWindow.top, 
+						flags);
+				}
+
+				_prev_mouse_position = point;
 #endif
 			}
 		}
@@ -908,6 +1127,11 @@ namespace np::win::__detail
 		virtual void Maximize() override
 		{
 			GLFWwindow* glfw_window = _glfw_window.load(mo_acquire);
+
+#if NP_ENGINE_PLATFORM_IS_WINDOWS
+			GetWindowPlacement(glfwGetWin32Window(glfw_window), &_prev_window_placement);
+
+#endif
 			if (glfw_window && !glfwGetWindowAttrib(glfw_window, GLFW_MAXIMIZED))
 				glfwMaximizeWindow(glfw_window);
 

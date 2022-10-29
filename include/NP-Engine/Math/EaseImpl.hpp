@@ -23,6 +23,16 @@ namespace np::mat
 		return 1.0 - n;
 	}
 
+	static inline flt GetT(const flt& a, const flt& b, const flt& p)
+	{
+		return (p - a) / (b - a);
+	}
+
+	static inline dbl GetT(const dbl& a, const dbl& b, const dbl& p)
+	{
+		return (p - a) / (b - a);
+	}
+
 	/*
 		gets the t value from given point, from a to b
 	*/

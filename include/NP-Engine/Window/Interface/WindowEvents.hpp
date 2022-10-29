@@ -12,7 +12,6 @@
 #include "WindowResizeEvent.hpp"
 #include "WindowClosedEvent.hpp"
 #include "WindowClosingEvent.hpp"
-#include "WindowCreateEvent.hpp"
 #include "WindowFocusEvent.hpp"
 #include "WindowFramebufferEvent.hpp"
 #include "WindowPositionEvent.hpp"
