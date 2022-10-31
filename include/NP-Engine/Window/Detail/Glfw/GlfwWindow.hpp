@@ -1059,7 +1059,7 @@ namespace np::win::__detail
 			}
 		}
 
-		virtual WindowDetailType GetDetailType() const
+		virtual WindowDetailType GetDetailType() const override
 		{
 			return WindowDetailType::Glfw;
 		}
@@ -1097,7 +1097,7 @@ namespace np::win::__detail
 			Window::SetTitle(title);
 		}
 
-		virtual void Resize(ui32 width, ui32 height)
+		virtual void Resize(ui32 width, ui32 height) override
 		{
 			GLFWwindow* glfw_window = _glfw_window.load(mo_acquire);
 			if (glfw_window)
@@ -1147,13 +1147,13 @@ namespace np::win::__detail
 			Window::RestoreFromMaximize();
 		}
 
-		virtual bl IsMinimized() const
+		virtual bl IsMinimized() const override
 		{
 			GLFWwindow* glfw_window = _glfw_window.load(mo_acquire);
 			return glfw_window && glfwGetWindowAttrib(glfw_window, GLFW_ICONIFIED);
 		}
 
-		virtual bl IsMaximized() const
+		virtual bl IsMaximized() const override
 		{
 			GLFWwindow* glfw_window = _glfw_window.load(mo_acquire);
 			return glfw_window && glfwGetWindowAttrib(glfw_window, GLFW_MAXIMIZED);
@@ -1174,7 +1174,7 @@ namespace np::win::__detail
 			return glfw_window && glfwGetWindowAttrib(glfw_window, GLFW_FOCUSED);
 		}
 
-		virtual ::glm::uvec2 GetFramebufferSize()
+		virtual ::glm::uvec2 GetFramebufferSize() override
 		{
 			::glm::uvec2 size{};
 			i32 width = 0, height = 0;
