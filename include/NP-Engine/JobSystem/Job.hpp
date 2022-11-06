@@ -29,10 +29,10 @@ namespace np::jsys
 		bl _can_be_stolen;
 
 	public:
-		Job(): _antecedent_count(-1), _confirm_completion_flag(nullptr), _can_be_stolen(true) {}
+		Job(): _antecedent_count(0), _confirm_completion_flag(nullptr), _can_be_stolen(true) {}
 
-		Job(mem::Delegate&& d):
-			_antecedent_count(1),
+		Job(mem::Delegate& d):
+			_antecedent_count(0),
 			_delegate(d),
 			_confirm_completion_flag(nullptr),
 			_can_be_stolen(true)
@@ -56,7 +56,7 @@ namespace np::jsys
 
 		~Job()
 		{
-			Dispose();
+			Reset();
 		}
 
 		Job& operator=(const Job& other)
@@ -88,11 +88,16 @@ namespace np::jsys
 		{
 			return _delegate;
 		}
-
-		void Dispose()
+		
+		void SetDelegate(mem::Delegate& d)
+		{
+			_delegate = d;
+		}
+		
+		void Reset()
 		{
 			_dependents.clear();
-			_antecedent_count.store(-1, mo_release);
+			_antecedent_count.store(0, mo_release);
 			_delegate.DisconnectFunction();
 			_confirm_completion_flag.store(nullptr, mo_release);
 			_can_be_stolen = true;
@@ -100,7 +105,7 @@ namespace np::jsys
 
 		bl CanExecute() const
 		{
-			return _antecedent_count.load(mo_acquire) == 1;
+			return _antecedent_count.load(mo_acquire) == 0;
 		}
 
 		void Execute()
@@ -131,7 +136,7 @@ namespace np::jsys
 
 		bl IsComplete() const
 		{
-			return _antecedent_count.load(mo_acquire) == 0;
+			return _antecedent_count.load(mo_acquire) == -1;
 		}
 
 		bl IsEnabled() const
