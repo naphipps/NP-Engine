@@ -17,58 +17,19 @@
 
 namespace np::jsys
 {
-	class JobRecord
+	struct JobRecord
 	{
-	private:
-		JobPriority _priority;
-		Job* _job;
-
-	public:
-		JobRecord(): JobRecord(JobPriority::Normal, nullptr) {}
-
-		JobRecord(JobPriority priority, Job* job): _priority(priority), _job(job) {}
-
-		JobRecord(const JobRecord& other): _priority(other._priority), _job(other._job) {}
-
-		JobRecord(JobRecord&& other) noexcept: _priority(::std::move(other._priority)), _job(::std::move(other._job)) {}
-
-		JobRecord& operator=(const JobRecord& other)
-		{
-			_priority = other._priority;
-			_job = other._job;
-			return *this;
-		}
-
-		JobRecord& operator=(JobRecord&& other) noexcept
-		{
-			_priority = ::std::move(other._priority);
-			_job = ::std::move(other._job);
-			return *this;
-		}
+		JobPriority priority = JobPriority::Normal;
+		Job* job = nullptr;
 
 		bl IsValid() const
 		{
-			return _job != nullptr;
+			return job != nullptr;
 		}
 
 		void Invalidate()
 		{
-			_job = nullptr;
-		}
-
-		Job* GetJob() const
-		{
-			return _job;
-		}
-
-		void Execute()
-		{
-			_job->Execute();
-		}
-
-		JobPriority GetPriority() const
-		{
-			return _priority;
+			job = nullptr;
 		}
 	};
 } // namespace np::jsys

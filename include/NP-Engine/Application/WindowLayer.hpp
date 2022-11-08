@@ -60,12 +60,10 @@ namespace np::app
 			win::WindowClosedEvent::DataType& closed_data = e.GetData<win::WindowClosedEvent::DataType>();
 			jsys::JobSystem& job_system = _services.GetJobSystem();
 
-			mem::Delegate procedure{};
+			jsys::Job* handle_job = job_system.CreateJob();
 			//ownership of window is moving from the event to our job procedure
-			procedure.SetData<win::Window*>(closed_data.window);
-			procedure.Connect<WindowLayer, &WindowLayer::HandleWindowClosedProcedure>(this);
-
-			jsys::Job* handle_job = job_system.CreateJob(::std::move(procedure));
+			handle_job->GetDelegate().SetData<win::Window*>(closed_data.window);
+			handle_job->GetDelegate().Connect<WindowLayer, &WindowLayer::HandleWindowClosedProcedure>(this);
 			job_system.SubmitJob(jsys::JobPriority::Higher, handle_job);
 
 			e.SetHandled();

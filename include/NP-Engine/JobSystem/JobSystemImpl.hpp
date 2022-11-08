@@ -202,25 +202,20 @@ namespace np::jsys
 
 		JobRecord SubmitJob(JobPriority priority, Job* job)
 		{
-			return SubmitJob(JobRecord(priority, job));
+			return SubmitJob({priority, job});
 		}
 
 		JobRecord SubmitJob(JobRecord record)
 		{
 			NP_ENGINE_ASSERT(record.IsValid(), "attempted to add an invalid Job -- do not do that my guy");
-			NP_ENGINE_ASSERT(record.GetJob()->IsEnabled(), "the dude not enabled bro - why it do");
+			NP_ENGINE_ASSERT(record.job->IsEnabled(), "the dude not enabled bro - why it do");
 
 			JobRecord return_record;
 
-			if (GetQueueForPriority(record.GetPriority()).enqueue(record))
+			if (GetQueueForPriority(record.priority).enqueue(record))
 				return_record = record;
 
 			return return_record;
-		}
-
-		Job* CreateJob(mem::Delegate&& d)
-		{
-			return _job_pool->CreateObject(::std::move(d));
 		}
 
 		Job* CreateJob()

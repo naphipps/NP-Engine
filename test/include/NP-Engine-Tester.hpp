@@ -44,11 +44,10 @@ namespace np::app
 		{
 			win::WindowClosingEvent::DataType& closing_data = e.GetData<win::WindowClosingEvent::DataType>();
 
-			mem::Delegate procedure{};
-			procedure.SetData<win::Window*>(closing_data.window);
-			procedure.Connect<GameLayer, &GameLayer::AdjustForWindowClosingProcedure>(this);
+			jsys::Job* adjust_job = _services.GetJobSystem().CreateJob();
+			adjust_job->GetDelegate().SetData<win::Window*>(closing_data.window);
+			adjust_job->GetDelegate().Connect<GameLayer, &GameLayer::AdjustForWindowClosingProcedure>(this);
 
-			jsys::Job* adjust_job = _services.GetJobSystem().CreateJob(::std::move(procedure));
 			closing_data.job->AddDependency(*adjust_job);
 			_services.GetJobSystem().SubmitJob(jsys::JobPriority::Higher, adjust_job);
 		}
@@ -65,11 +64,10 @@ namespace np::app
 		{
 			win::WindowClosedEvent::DataType& closing_data = e.GetData<win::WindowClosedEvent::DataType>();
 
-			mem::Delegate procedure{};
-			procedure.SetData<win::Window*>(closing_data.window);
-			procedure.Connect<GameLayer, &GameLayer::AdjustForWindowClosedProcedure>(this);
+			jsys::Job* adjust_job = _services.GetJobSystem().CreateJob();
+			adjust_job->GetDelegate().SetData<win::Window*>(closing_data.window);
+			adjust_job->GetDelegate().Connect<GameLayer, &GameLayer::AdjustForWindowClosedProcedure>(this);
 
-			jsys::Job* adjust_job = _services.GetJobSystem().CreateJob(::std::move(procedure));
 			_services.GetJobSystem().SubmitJob(jsys::JobPriority::Higher, adjust_job);
 		}
 

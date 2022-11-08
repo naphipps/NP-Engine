@@ -17,12 +17,12 @@ namespace np::jsys
 			_job_system->GetQueueForPriority(JobPrioritiesHighToLow[i]).try_dequeue(next_job);
 			if (next_job.IsValid())
 			{
-				Job* job = next_job.GetJob();
+				Job* job = next_job.job;
 				if (job->IsEnabled())
 				{
 					if (!job->CanExecute())
 					{
-						_job_system->SubmitJob(NormalizePriority(next_job.GetPriority()), job);
+						_job_system->SubmitJob(NormalizePriority(next_job.priority), job);
 						next_job.Invalidate();
 					}
 				}
@@ -68,12 +68,12 @@ namespace np::jsys
 			{
 				NP_ENGINE_PROFILE_SCOPE("executing next Job");
 				success = true;
-				Job* job = record.GetJob();
+				Job* job = record.job;
 				job->Execute();
 				if (job->IsComplete())
 					_job_system->DestroyJob(job);
 				else
-					_job_system->SubmitJob(NormalizePriority(record.GetPriority()), job);
+					_job_system->SubmitJob(NormalizePriority(record.priority), job);
 			}
 		}
 

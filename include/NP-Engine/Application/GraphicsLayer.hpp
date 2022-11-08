@@ -72,11 +72,9 @@ namespace np::app
 		{
 			win::WindowClosingEvent::DataType& closing_data = e.GetData<win::WindowClosingEvent::DataType>();
 
-			mem::Delegate procedure{};
-			procedure.SetData<win::Window*>(closing_data.window);
-			procedure.Connect<GraphicsLayer, &GraphicsLayer::AdjustForWindowClosingProcedure>(this);
+			jsys::Job* adjust_job = _services.GetJobSystem().CreateJob();
+			adjust_job->GetDelegate().Connect<GraphicsLayer, &GraphicsLayer::AdjustForWindowClosingProcedure>(this);
 
-			jsys::Job* adjust_job = _services.GetJobSystem().CreateJob(::std::move(procedure));
 			closing_data.job->AddDependency(*adjust_job);
 			_services.GetJobSystem().SubmitJob(jsys::JobPriority::Higher, adjust_job);
 		}
@@ -201,19 +199,10 @@ namespace np::app
 			}
 		}
 
-		void CreateRenderingJob()
-		{
-			mem::Delegate procedure{};
-			procedure.Connect<GraphicsLayer, &GraphicsLayer::RenderingProcedure>(this);
-			_rendering_job = _services.GetJobSystem().CreateJob(::std::move(procedure));
-			_rendering_job->SetCanBeStolen(false);
-		}
-
 	public:
 		GraphicsLayer(srvc::Services& services): Layer(services), _job_worker_index(0), _rendering_job(nullptr), _keep_rendering(false)
 		{
 			ChooseGraphicsDetailType();
-			CreateRenderingJob();
 		}
 
 		virtual ~GraphicsLayer()
@@ -253,9 +242,16 @@ namespace np::app
 		void SubmitRenderingJob()
 		{
 			if (!_rendering_job)
-				CreateRenderingJob();
-
-			_services.GetJobSystem().GetJobWorkers()[_job_worker_index].SubmitImmediateJob(_rendering_job);
+			{
+				_rendering_job = _services.GetJobSystem().CreateJob();
+				_rendering_job->GetDelegate().Connect<GraphicsLayer, &GraphicsLayer::RenderingProcedure>(this);
+				_rendering_job->SetCanBeStolen(false);
+				_services.GetJobSystem().GetJobWorkers()[_job_worker_index].SubmitImmediateJob(_rendering_job);
+			}
+			else
+			{
+				NP_ENGINE_ASSERT(false, "call StopRenderingJob before calling SubmitRenderingJob again");
+			}
 		}
 
 		void StopRenderingJob()

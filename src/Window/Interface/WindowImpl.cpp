@@ -155,9 +155,8 @@ namespace np::win
 	{
 		DetailShowProcedure();
 		
-		mem::Delegate procedure{};
-		procedure.Connect<Window, &Window::ClosingProcedure>(this);
-		jsys::Job* window_closing_job = _services.GetJobSystem().CreateJob(::std::move(procedure));
+		jsys::Job* window_closing_job = _services.GetJobSystem().CreateJob();
+		window_closing_job->GetDelegate().Connect<Window, &Window::ClosingProcedure >(this);
 		_services.GetEventSubmitter().Emplace<WindowClosingEvent>(this, window_closing_job);
 
 		_show_procedure_is_complete.store(true, mo_release);
