@@ -22,6 +22,10 @@
 #include "VulkanRenderableModel.hpp"
 #include "VulkanCamera.hpp"
 
+/*
+	TODO: idea: make scenes accept a ptr to a registry, and it is nullptr, then use the registry in the services???
+*/
+
 namespace np::gfx::rhi
 {
 	class VulkanScene : public Scene

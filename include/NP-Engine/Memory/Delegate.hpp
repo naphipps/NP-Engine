@@ -14,6 +14,12 @@
 
 #include "PadObject.hpp"
 
+/*
+	TODO: I think our delegate could make use of callbacks like how glfw does it.
+		I’m not a fan of the template connect methods.
+		Just pass in the static callback, and inside that, we can cast to our instance, etc
+*/
+
 namespace np::mem
 {
 	template <typename R>

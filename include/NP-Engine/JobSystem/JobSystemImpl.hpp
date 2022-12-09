@@ -38,6 +38,7 @@ namespace np::jsys
 		mem::Block _job_pool_block;
 		JobPool* _job_pool;
 
+		//TODO: use tokens with mpmc_queue
 		con::mpmc_queue<JobRecord> _highest_job_queue;
 		con::mpmc_queue<JobRecord> _higher_job_queue;
 		con::mpmc_queue<JobRecord> _normal_job_queue;
