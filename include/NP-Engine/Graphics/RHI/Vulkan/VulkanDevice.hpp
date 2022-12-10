@@ -176,7 +176,7 @@ namespace np::gfx::rhi
 					score += 200;
 				}
 
-				bl has_queuegraphics_bit = false; // we require the VK_QUEUEgraphics_BIT
+				bl has_queue_graphics_bit = false; // we require the VK_QUEUE_GRAPHICS_BIT
 				bl has_queue_present_bit = false; // we require KHR present support
 				bl supports_required_extensions = false;
 				bl supports_required_layers = false;
@@ -188,9 +188,9 @@ namespace np::gfx::rhi
 
 					for (siz i = 0; i < queue_family_properties.size(); i++)
 					{
-						if (!has_queuegraphics_bit && (queue_family_properties[i].queueFlags & VK_QUEUE_GRAPHICS_BIT))
+						if (!has_queue_graphics_bit && (queue_family_properties[i].queueFlags & VK_QUEUE_GRAPHICS_BIT))
 						{
-							has_queuegraphics_bit = true;
+							has_queue_graphics_bit = true;
 						}
 
 						if (!has_queue_present_bit)
@@ -241,7 +241,7 @@ namespace np::gfx::rhi
 					supports_timeline_semaphores = features12.timelineSemaphore == VK_TRUE;
 				}
 
-				if (!has_queuegraphics_bit || !has_queue_present_bit || !supports_required_extensions ||
+				if (!has_queue_graphics_bit || !has_queue_present_bit || !supports_required_extensions ||
 					!supports_required_layers || !supports_timeline_semaphores)
 				{
 					score = 0;
