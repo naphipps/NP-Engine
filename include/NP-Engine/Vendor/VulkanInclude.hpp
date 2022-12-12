@@ -17,12 +17,6 @@
 	// TODO: ^ get to the point where we can just change this arbitarily .. I think we can do that?
 #endif
 
-#if NP_ENGINE_PLATFORM_IS_APPLE || NP_ENGINE_PLATFORM_IS_LINUX
-	#define NP_ENGINE_PLATFORM_SUPPORTS_VULKAN_TIMELINE_SEMAPHORES false
-#elif NP_ENGINE_PLATFORM_IS_WINDOWS
-	#define NP_ENGINE_PLATFORM_SUPPORTS_VULKAN_TIMELINE_SEMAPHORES true
-#endif
-
 // TODO: add a bunch of helper functions like CreateSubmitInfo that sets "our default" SubmitInfo values
 namespace np::gfx::rhi
 {

@@ -180,7 +180,6 @@ namespace np::gfx::rhi
 				bl has_queue_present_bit = false; // we require KHR present support
 				bl supports_required_extensions = false;
 				bl supports_required_layers = false;
-				bl supports_timeline_semaphores = false;
 
 				// check queue families
 				{
@@ -236,13 +235,8 @@ namespace np::gfx::rhi
 					}
 				}
 
-				// check timeline semaphores
-				{
-					supports_timeline_semaphores = features12.timelineSemaphore == VK_TRUE;
-				}
-
 				if (!has_queue_graphics_bit || !has_queue_present_bit || !supports_required_extensions ||
-					!supports_required_layers || !supports_timeline_semaphores)
+					!supports_required_layers)
 				{
 					score = 0;
 				}

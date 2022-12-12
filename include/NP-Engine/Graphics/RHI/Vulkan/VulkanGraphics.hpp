@@ -34,7 +34,6 @@
 #include "VulkanSurface.hpp"
 #include "VulkanSwapchain.hpp"
 #include "VulkanTexture.hpp"
-#include "VulkanTimelineSemaphore.hpp"
 #include "VulkanVertex.hpp"
 
 #endif /* NP_ENGINE_VULKAN_GRAPHICS_HPP */
