@@ -21,6 +21,8 @@
 
 #include "NP-Engine/Window/Interface/WindowInterface.hpp"
 
+//TODO: resizing window smaller than min siz results with mouse offset to be incorrect
+
 namespace np::win::__detail
 {
 	class GlfwWindow : public Window
