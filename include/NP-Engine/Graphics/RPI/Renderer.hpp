@@ -50,7 +50,6 @@ namespace np::gfx
 		virtual void EndFrame() = 0;
 		virtual void DrawFrame() = 0;
 
-		virtual void AdjustForWindowResize(win::Window& window) = 0;
 		virtual bl IsAttachedToWindow(win::Window& window) const = 0;
 	};
 } // namespace np::gfx

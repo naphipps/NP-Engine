@@ -352,8 +352,6 @@ namespace np::gfx::rhi
 			_frame.Invalidate();
 		}
 
-		void AdjustForWindowResize(win::Window& window) override {}
-
 		VulkanInstance& GetInstance()
 		{
 			return *_instance;

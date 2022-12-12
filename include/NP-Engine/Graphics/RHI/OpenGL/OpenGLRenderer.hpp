@@ -62,8 +62,6 @@ namespace np::gfx::rhi
 
 		void DrawFrame() override {}
 
-		void AdjustForWindowResize(win::Window& window) override {}
-
 		virtual bl IsAttachedToWindow(win::Window& window) const override
 		{
 			return false;
