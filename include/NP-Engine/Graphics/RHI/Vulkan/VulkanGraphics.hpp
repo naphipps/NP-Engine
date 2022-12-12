@@ -7,7 +7,7 @@
 #ifndef NP_ENGINE_VULKAN_GRAPHICS_HPP
 #define NP_ENGINE_VULKAN_GRAPHICS_HPP
 
-#include "VulkanBinarySemaphore.hpp"
+#include "VulkanSemaphore.hpp"
 #include "VulkanBuffer.hpp"
 #include "VulkanCamera.hpp"
 #include "VulkanCommandBuffer.hpp"

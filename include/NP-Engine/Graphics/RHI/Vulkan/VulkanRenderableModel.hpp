@@ -24,7 +24,7 @@
 #include "VulkanDescriptorSets.hpp"
 #include "VulkanSampler.hpp"
 #include "VulkanFence.hpp"
-#include "VulkanBinarySemaphore.hpp"
+#include "VulkanSemaphore.hpp"
 
 namespace np::gfx::rhi
 {
@@ -160,13 +160,13 @@ namespace np::gfx::rhi
 			con::vector<VkPipelineStageFlags> wait_dst_flags{VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT};
 
 			// create texture submit infos
-			VulkanBinarySemaphore transition_to_dst_semaphore(vulkan_device);
+			VulkanSemaphore transition_to_dst_semaphore(vulkan_device);
 			VkSemaphore transition_to_dst_complete = transition_to_dst_semaphore;
 
-			VulkanBinarySemaphore assign_image_semaphore(vulkan_device);
+			VulkanSemaphore assign_image_semaphore(vulkan_device);
 			VkSemaphore assign_image_complete = assign_image_semaphore;
 
-			VulkanBinarySemaphore transition_to_shader_semaphore(vulkan_device);
+			VulkanSemaphore transition_to_shader_semaphore(vulkan_device);
 			VkSemaphore transition_to_shader_complete = transition_to_shader_semaphore;
 
 			VkSubmitInfo transition_to_dst_submit = VulkanQueue::CreateSubmitInfo();
@@ -207,7 +207,7 @@ namespace np::gfx::rhi
 													   command_buffers, texture_complete_fence);
 
 			// create vertex submit infos
-			VulkanBinarySemaphore vertex_buffer_copy_semaphore(vulkan_device);
+			VulkanSemaphore vertex_buffer_copy_semaphore(vulkan_device);
 			VkSemaphore vertex_buffer_copy_complete = vertex_buffer_copy_semaphore;
 
 			VkSubmitInfo vertex_buffer_copy_submit = VulkanQueue::CreateSubmitInfo();
@@ -224,7 +224,7 @@ namespace np::gfx::rhi
 			_vertex_staging->AsyncCopyTo(*_vertex_buffer, vertex_buffer_copy_submit, command_buffers, vertex_complete_fence);
 
 			// create index submit infos
-			VulkanBinarySemaphore index_buffer_copy_semaphore(vulkan_device);
+			VulkanSemaphore index_buffer_copy_semaphore(vulkan_device);
 			VkSemaphore index_buffer_copy_complete = index_buffer_copy_semaphore;
 
 			VkSubmitInfo index_buffer_copy_submit = VulkanQueue::CreateSubmitInfo();

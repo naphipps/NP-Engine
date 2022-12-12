@@ -145,7 +145,7 @@ set(NP_ENGINE_GRAPHICS_VULKAN_HPP
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RHI/Vulkan/VulkanCommandPushConstants.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RHI/Vulkan/VulkanQueue.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RHI/Vulkan/VulkanFence.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RHI/Vulkan/VulkanBinarySemaphore.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RHI/Vulkan/VulkanSemaphore.hpp
 )
 
 set(NP_ENGINE_GRAPHICS_ALGORITHMS_HPP

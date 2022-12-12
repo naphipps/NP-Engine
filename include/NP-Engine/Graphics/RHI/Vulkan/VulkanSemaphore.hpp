@@ -4,14 +4,14 @@
 //
 //##===----------------------------------------------------------------------===##//
 
-#ifndef NP_ENGINE_VULKAN_BINARY_SEMAPHORE_HPP
-#define NP_ENGINE_VULKAN_BINARY_SEMAPHORE_HPP
+#ifndef NP_ENGINE_VULKAN_SEMAPHORE_HPP
+#define NP_ENGINE_VULKAN_SEMAPHORE_HPP
 
 #include "NP-Engine/Vendor/VulkanInclude.hpp"
 
 namespace np::gfx::rhi
 {
-	class VulkanBinarySemaphore
+	class VulkanSemaphore
 	{
 	private:
 		VkDevice _device;
@@ -35,9 +35,9 @@ namespace np::gfx::rhi
 		}
 
 	public:
-		VulkanBinarySemaphore(VkDevice device): _device(device), _semaphore(CreateSemaphore()) {}
+		VulkanSemaphore(VkDevice device): _device(device), _semaphore(CreateSemaphore()) {}
 
-		~VulkanBinarySemaphore()
+		~VulkanSemaphore()
 		{
 			if (_semaphore)
 			{
@@ -53,4 +53,4 @@ namespace np::gfx::rhi
 	};
 } // namespace np::gfx::rhi
 
-#endif /* NP_ENGINE_VULKAN_BINARY_SEMAPHORE_HPP */
+#endif /* NP_ENGINE_VULKAN_SEMAPHORE_HPP */
