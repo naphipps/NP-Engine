@@ -7,6 +7,10 @@
 #ifndef NP_ENGINE_GLFW_WINDOW_HPP
 #define NP_ENGINE_GLFW_WINDOW_HPP
 
+#if NP_ENGINE_PLATFORM_IS_WINDOWS
+	#include <dwmapi.h>
+#endif
+
 #include "NP-Engine/Foundation/Foundation.hpp"
 #include "NP-Engine/Time/Time.hpp"
 #include "NP-Engine/String/String.hpp"
@@ -877,6 +881,33 @@ namespace np::win::__detail
 			glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
 			_glfw_window.store(glfwCreateWindow(GetWidth(), GetHeight(), GetTitle().c_str(), nullptr, nullptr), mo_release);
 			SetGlfwCallbacks();
+
+#if NP_ENGINE_PLATFORM_IS_WINDOWS
+			{
+				LPCSTR subkey = "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize";
+				LPCSTR value = "SystemUsesLightTheme";
+				DWORD word = 0;
+				DWORD size = sizeof(DWORD);
+				LSTATUS status = RegGetValueA(HKEY_CURRENT_USER, subkey, value, RRF_RT_DWORD, nullptr, &word, &size);
+				bl is_dark_mode = status == ERROR_SUCCESS && word == 0;
+
+				if (is_dark_mode)
+				{
+					HWND native_window = (HWND)GetNativeWindow();
+					BOOL value = true;
+					DwmSetWindowAttribute(native_window, 20, &value, sizeof(value));
+
+					WPARAM wparam{};
+					LPARAM lparam{};
+					wparam = FALSE;
+					CallWindowProcA(_prev_window_procedure, native_window, WM_NCACTIVATE, wparam, lparam);
+					wparam = TRUE;
+					CallWindowProcA(_prev_window_procedure, native_window, WM_NCACTIVATE, wparam, lparam);
+				}
+
+				//TODO: we could use a callback to detect when the system goes back-n-forth to dark mode??
+			}
+#endif
 		}
 
 		void DestroyGlfwWindow()

@@ -555,6 +555,7 @@ elseif (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 	endif()
 elseif(MSVC)
 	file(TO_NATIVE_PATH "$ENV{ALLUSERSPROFILE}/NP-Engine" NP_ENGINE_WORKING_DIR)
+	target_link_libraries(${PROJECT_NAME} PUBLIC "dwmapi.lib")
 endif()
 
 find_package(Vulkan REQUIRED FATAL_ERROR)
