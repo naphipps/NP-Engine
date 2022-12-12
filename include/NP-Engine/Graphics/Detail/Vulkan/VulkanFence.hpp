@@ -9,7 +9,7 @@
 
 #include "NP-Engine/Vendor/VulkanInclude.hpp"
 
-namespace np::gfx::rhi
+namespace np::gfx::__detail
 {
 	class VulkanFence
 	{
@@ -60,6 +60,6 @@ namespace np::gfx::rhi
 			vkResetFences(_device, 1, &_fence);
 		}
 	};
-} // namespace np::gfx::rhi
+} // namespace np::gfx::__detail
 
 #endif /* NP_ENGINE_VULKAN_FENCE_HPP */

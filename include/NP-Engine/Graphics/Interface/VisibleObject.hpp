@@ -4,8 +4,8 @@
 //
 //##===----------------------------------------------------------------------===##//
 
-#ifndef NP_ENGINE_RPI_VISIBLE_OBJECT_HPP
-#define NP_ENGINE_RPI_VISIBLE_OBJECT_HPP
+#ifndef NP_ENGINE_GRAPHICS_INTERFACE_VISIBLE_OBJECT_HPP
+#define NP_ENGINE_GRAPHICS_INTERFACE_VISIBLE_OBJECT_HPP
 
 #include "NP-Engine/Geometry/Geometry.hpp"
 
@@ -20,4 +20,4 @@ namespace np::gfx
 	};
 } // namespace np::gfx
 
-#endif /* NP_ENGINE_RPI_VISIBLE_OBJECT_HPP */
+#endif /* NP_ENGINE_GRAPHICS_INTERFACE_VISIBLE_OBJECT_HPP */

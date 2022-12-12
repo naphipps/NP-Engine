@@ -4,8 +4,8 @@
 //
 //##===----------------------------------------------------------------------===##//
 
-#ifndef NP_ENGINE_RPI_IMAGE_HPP
-#define NP_ENGINE_RPI_IMAGE_HPP
+#ifndef NP_ENGINE_GRAPHICS_INTERFACE_IMAGE_HPP
+#define NP_ENGINE_GRAPHICS_INTERFACE_IMAGE_HPP
 
 #include <utility>
 
@@ -174,4 +174,4 @@ namespace np::gfx
 	};
 } // namespace np::gfx
 
-#endif /* NP_ENGINE_RPI_IMAGE_HPP */
+#endif /* NP_ENGINE_GRAPHICS_INTERFACE_IMAGE_HPP */

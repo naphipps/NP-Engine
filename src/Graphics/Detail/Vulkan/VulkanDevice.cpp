@@ -4,4 +4,4 @@
 //
 //##===----------------------------------------------------------------------===##//
 
-#include "NP-Engine/Graphics/RHI/Vulkan/VulkanDevice.hpp"
+#include "NP-Engine/Graphics/Detail/Vulkan/VulkanDevice.hpp"

@@ -9,11 +9,11 @@
 
 #include "NP-Engine/Vendor/VulkanInclude.hpp"
 
-#include "NP-Engine/Graphics/RPI/RPI.hpp"
+#include "NP-Engine/Graphics/Interface/Interface.hpp"
 
-namespace np::gfx::rhi
+namespace np::gfx::__detail
 {
 	using VulkanCamera = Camera;
-} // namespace np::gfx::rhi
+} // namespace np::gfx::__detail
 
 #endif /* NP_ENGINE_VULKAN_CAMERA_HPP */

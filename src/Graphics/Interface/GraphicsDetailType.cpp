@@ -4,9 +4,9 @@
 //
 //##===----------------------------------------------------------------------===##//
 
-#include "NP-Engine/Graphics/RPI/RhiType.hpp"
+#include "NP-Engine/Graphics/Interface/GraphicsDetailType.hpp"
 
 namespace np::gfx::__detail
 {
-	atm<RhiType> RegisteredRhiType(RhiType::None);
+	atm<GraphicsDetailType> RegisteredGraphicsDetailType(GraphicsDetailType::None);
 } // namespace np::gfx::__detail

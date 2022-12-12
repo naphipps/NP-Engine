@@ -15,7 +15,7 @@
 
 #include "NP-Engine/Vendor/VulkanInclude.hpp"
 
-#include "NP-Engine/Graphics/RPI/RPI.hpp"
+#include "NP-Engine/Graphics/Interface/Interface.hpp"
 
 #include "VulkanRenderer.hpp"
 #include "VulkanFrame.hpp"
@@ -26,7 +26,7 @@
 	TODO: idea: make scenes accept a ptr to a registry, and it is nullptr, then use the registry in the services???
 */
 
-namespace np::gfx::rhi
+namespace np::gfx::__detail
 {
 	class VulkanScene : public Scene
 	{
@@ -161,6 +161,6 @@ namespace np::gfx::rhi
 
 		virtual void AdjustForWindowResize(win::Window& window) override {}
 	};
-} // namespace np::gfx::rhi
+} // namespace np::gfx::__detail
 
 #endif /* NP_ENGINE_VULKAN_SCENE_HPP */

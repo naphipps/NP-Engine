@@ -4,15 +4,15 @@
 //
 //##===----------------------------------------------------------------------===##//
 
-#ifndef NP_ENGINE_RPI_RENDERABLE_LIGHT_HPP
-#define NP_ENGINE_RPI_RENDERABLE_LIGHT_HPP
+#ifndef NP_ENGINE_GRAPHICS_INTERFACE_RENDERABLE_LIGHT_HPP
+#define NP_ENGINE_GRAPHICS_INTERFACE_RENDERABLE_LIGHT_HPP
 
 #include "NP-Engine/Foundation/Foundation.hpp"
 #include "NP-Engine/Platform/Platform.hpp"
 #include "NP-Engine/Memory/Memory.hpp"
 #include "NP-Engine/Services/Services.hpp"
 
-#include "RhiType.hpp"
+#include "GraphicsDetailType.hpp"
 #include "RenderableLightObject.hpp"
 #include "RenderableType.hpp"
 #include "Light.hpp"
@@ -49,4 +49,4 @@ namespace np::gfx
 	};
 } // namespace np::gfx
 
-#endif /* NP_ENGINE_RPI_RENDERABLE_LIGHT_HPP */
+#endif /* NP_ENGINE_GRAPHICS_INTERFACE_RENDERABLE_LIGHT_HPP */

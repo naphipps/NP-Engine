@@ -11,7 +11,7 @@
 
 #include "VulkanDevice.hpp"
 
-namespace np::gfx::rhi
+namespace np::gfx::__detail
 {
 	class VulkanSampler
 	{
@@ -85,6 +85,6 @@ namespace np::gfx::rhi
 			return _device;
 		}
 	};
-} // namespace np::gfx::rhi
+} // namespace np::gfx::__detail
 
 #endif /* NP_ENGINE_VULKAN_SAMPLER_HPP */

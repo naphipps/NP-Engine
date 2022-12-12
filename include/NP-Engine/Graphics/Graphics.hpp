@@ -9,6 +9,6 @@
 
 #include "NP-Engine/Foundation/Foundation.hpp"
 
-#include "RPI/RPI.hpp"
+#include "Interface/Interface.hpp"
 
 #endif /* NP_ENGINE_GRAPHICS_HPP */

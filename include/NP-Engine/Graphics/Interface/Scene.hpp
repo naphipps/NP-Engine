@@ -4,8 +4,8 @@
 //
 //##===----------------------------------------------------------------------===##//
 
-#ifndef NP_ENGINE_RPI_SCENE_HPP
-#define NP_ENGINE_RPI_SCENE_HPP
+#ifndef NP_ENGINE_GRAPHICS_INTERFACE_SCENE_HPP
+#define NP_ENGINE_GRAPHICS_INTERFACE_SCENE_HPP
 
 #include "NP-Engine/Primitive/Primitive.hpp"
 #include "NP-Engine/ECS/ECS.hpp"
@@ -14,7 +14,7 @@
 #include "NP-Engine/Platform/Platform.hpp"
 #include "NP-Engine/Services/Services.hpp"
 
-#include "RhiType.hpp"
+#include "GraphicsDetailType.hpp"
 #include "Renderer.hpp"
 #include "Camera.hpp"
 
@@ -68,4 +68,4 @@ namespace np::gfx
 	};
 } // namespace np::gfx
 
-#endif /* NP_ENGINE_RPI_SCENE_HPP */
+#endif /* NP_ENGINE_GRAPHICS_INTERFACE_SCENE_HPP */

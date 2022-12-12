@@ -4,8 +4,8 @@
 //
 //##===----------------------------------------------------------------------===##//
 
-#ifndef NP_ENGINE_RPI_LIGHT_HPP
-#define NP_ENGINE_RPI_LIGHT_HPP
+#ifndef NP_ENGINE_GRAPHICS_INTERFACE_LIGHT_HPP
+#define NP_ENGINE_GRAPHICS_INTERFACE_LIGHT_HPP
 
 #include "NP-Engine/Primitive/Primitive.hpp"
 
@@ -42,4 +42,4 @@ namespace np::gfx
 	};
 } // namespace np::gfx
 
-#endif /* NP_ENGINE_RPI_LIGHT_HPP */
+#endif /* NP_ENGINE_GRAPHICS_INTERFACE_LIGHT_HPP */

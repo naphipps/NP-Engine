@@ -4,8 +4,8 @@
 //
 //##===----------------------------------------------------------------------===##//
 
-#ifndef NP_ENGINE_RPI_RENDERABLE_LIGHT_OBJECT_HPP
-#define NP_ENGINE_RPI_RENDERABLE_LIGHT_OBJECT_HPP
+#ifndef NP_ENGINE_GRAPHICS_INTERFACE_RENDERABLE_LIGHT_OBJECT_HPP
+#define NP_ENGINE_GRAPHICS_INTERFACE_RENDERABLE_LIGHT_OBJECT_HPP
 
 #include "NP-Engine/Primitive/Primitive.hpp"
 
@@ -26,4 +26,4 @@ namespace np::gfx
 	};
 } // namespace np::gfx
 
-#endif /* NP_ENGINE_RPI_RENDERABLE_LIGHT_OBJECT_HPP */
+#endif /* NP_ENGINE_GRAPHICS_INTERFACE_RENDERABLE_LIGHT_OBJECT_HPP */

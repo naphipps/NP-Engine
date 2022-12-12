@@ -4,11 +4,8 @@
 //
 //##===----------------------------------------------------------------------===##//
 
-#ifndef NP_ENGINE_RPI_HPP
-#define NP_ENGINE_RPI_HPP
-
-//TODO: I think we need to change how we name these RPI/RHI organizations...
-//TODO: ^ maybe Interface and Detail (namespace __detail)
+#ifndef NP_ENGINE_GRAPHICS_INTERFACE_HPP
+#define NP_ENGINE_GRAPHICS_INTERFACE_HPP
 
 #include "Buffer.hpp"
 #include "Camera.hpp"
@@ -28,7 +25,7 @@
 #include "RenderableObject.hpp"
 #include "RenderableType.hpp"
 #include "Renderer.hpp"
-#include "RhiType.hpp"
+#include "GraphicsDetailType.hpp"
 #include "Scene.hpp"
 #include "Shader.hpp"
 #include "Texture.hpp"
@@ -37,4 +34,4 @@
 
 // TODO: when we complete our renderer, we need to cleanup/remove files we are not using
 
-#endif /* NP_ENGINE_RPI_HPP */
+#endif /* NP_ENGINE_GRAPHICS_INTERFACE_HPP */

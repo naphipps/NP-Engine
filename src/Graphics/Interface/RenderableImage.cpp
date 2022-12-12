@@ -4,13 +4,13 @@
 //
 //##===----------------------------------------------------------------------===##//
 
-#include "NP-Engine/Graphics/RPI/RenderableImage.hpp"
+#include "NP-Engine/Graphics/Interface/RenderableImage.hpp"
 
 #if NP_ENGINE_PLATFORM_IS_LINUX || NP_ENGINE_PLATFORM_IS_WINDOWS
-	#include "NP-Engine/Graphics/RHI/OpenGL/OpenGLGraphics.hpp"
+	#include "NP-Engine/Graphics/Detail/OpenGL/OpenGLGraphics.hpp"
 #endif
 
-#include "NP-Engine/Graphics/RHI/Vulkan/VulkanGraphics.hpp"
+#include "NP-Engine/Graphics/Detail/Vulkan/VulkanGraphics.hpp"
 
 namespace np::gfx
 {
@@ -18,10 +18,10 @@ namespace np::gfx
 	{
 		RenderableImage* renderable_image = nullptr;
 
-		switch (__detail::RegisteredRhiType.load(mo_acquire))
+		switch (__detail::RegisteredGraphicsDetailType.load(mo_acquire))
 		{
-		case RhiType::Vulkan:
-			renderable_image = mem::Create<rhi::VulkanRenderableImage>(services.GetAllocator(), services, image);
+		case GraphicsDetailType::Vulkan:
+			renderable_image = mem::Create<__detail::VulkanRenderableImage>(services.GetAllocator(), services, image);
 			break;
 		default:
 			break;

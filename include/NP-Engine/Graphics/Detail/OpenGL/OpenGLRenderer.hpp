@@ -14,9 +14,9 @@
 
 #include "NP-Engine/Vendor/EnttInclude.hpp"
 
-#include "NP-Engine/Graphics/RPI/RPI.hpp"
+#include "NP-Engine/Graphics/Interface/Interface.hpp"
 
-namespace np::gfx::rhi
+namespace np::gfx::__detail
 {
 	namespace __detail
 	{
@@ -39,9 +39,9 @@ namespace np::gfx::rhi
 	public:
 		OpenGLRenderer(srvc::Services& services): Renderer(services) {}
 
-		RhiType GetRhiType() const override
+		GraphicsDetailType GetGraphicsDetailType() const override
 		{
-			return RhiType::OpenGL;
+			return GraphicsDetailType::OpenGL;
 		}
 
 		str GetName() const override
@@ -67,6 +67,6 @@ namespace np::gfx::rhi
 			return false;
 		}
 	};
-} // namespace np::gfx::rhi
+} // namespace np::gfx::__detail
 
 #endif /* NP_ENGINE_GRAPHICS_OPENGL_RENDERER_HPP */

@@ -11,7 +11,7 @@
 
 #include "VulkanCommand.hpp"
 
-namespace np::gfx::rhi
+namespace np::gfx::__detail
 {
 	class VulkanCommandBindIndexBuffer : public VulkanCommand
 	{
@@ -31,6 +31,6 @@ namespace np::gfx::rhi
 			vkCmdBindIndexBuffer(command_buffer, Buffer, Offset, IndexType);
 		}
 	};
-} // namespace np::gfx::rhi
+} // namespace np::gfx::__detail
 
 #endif /* NP_ENGINE_VULKAN_COMMAND_BIND_INDEX_BUFFER_HPP */

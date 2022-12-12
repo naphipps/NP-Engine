@@ -16,7 +16,7 @@
 
 #include "NP-Engine/Vendor/VulkanInclude.hpp"
 
-namespace np::gfx::rhi
+namespace np::gfx::__detail
 {
 	class VulkanInstance
 	{
@@ -267,6 +267,6 @@ namespace np::gfx::rhi
 			return _instance;
 		}
 	};
-} // namespace np::gfx::rhi
+} // namespace np::gfx::__detail
 
 #endif /* NP_ENGINE_VULKAN_INSTANCE_HPP */

@@ -18,7 +18,7 @@
 #include "VulkanTexture.hpp"
 #include "VulkanFrame.hpp"
 
-namespace np::gfx::rhi
+namespace np::gfx::__detail
 {
 	class VulkanRenderPass
 	{
@@ -305,6 +305,6 @@ namespace np::gfx::rhi
 			frame.StageCommand(_end_render_pass);
 		}
 	};
-} // namespace np::gfx::rhi
+} // namespace np::gfx::__detail
 
 #endif /* NP_ENGINE_VULKAN_RENDER_PASS_HPP */

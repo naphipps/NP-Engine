@@ -4,8 +4,8 @@
 //
 //##===----------------------------------------------------------------------===##//
 
-#ifndef NP_ENGINE_RPI_RENDERER_HPP
-#define NP_ENGINE_RPI_RENDERER_HPP
+#ifndef NP_ENGINE_GRAPHICS_INTERFACE_RENDERER_HPP
+#define NP_ENGINE_GRAPHICS_INTERFACE_RENDERER_HPP
 
 #include "NP-Engine/Primitive/Primitive.hpp"
 #include "NP-Engine/String/String.hpp"
@@ -14,7 +14,7 @@
 #include "NP-Engine/Window/Window.hpp"
 #include "NP-Engine/Services/Services.hpp"
 
-#include "RhiType.hpp"
+#include "GraphicsDetailType.hpp"
 #include "Model.hpp"
 #include "Frame.hpp"
 #include "RenderableLight.hpp"
@@ -34,12 +34,12 @@ namespace np::gfx
 
 		virtual ~Renderer() {}
 
-		virtual void RegisterRhiType() const
+		virtual void RegisterGraphicsDetailType() const
 		{
-			__detail::RegisteredRhiType.store(GetRhiType(), mo_release);
+			__detail::RegisteredGraphicsDetailType.store(GetGraphicsDetailType(), mo_release);
 		}
 
-		virtual RhiType GetRhiType() const = 0;
+		virtual GraphicsDetailType GetGraphicsDetailType() const = 0;
 
 		virtual str GetName() const = 0;
 
@@ -54,4 +54,4 @@ namespace np::gfx
 	};
 } // namespace np::gfx
 
-#endif /* NP_ENGINE_RPI_RENDERER_HPP */
+#endif /* NP_ENGINE_GRAPHICS_INTERFACE_RENDERER_HPP */

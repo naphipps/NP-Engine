@@ -4,14 +4,14 @@
 //
 //##===----------------------------------------------------------------------===##//
 
-#ifndef NP_ENGINE_RHI_TYPE_HPP
-#define NP_ENGINE_RHI_TYPE_HPP
+#ifndef NP_ENGINE_GRAPHICS_DETAIL_TYPE_HPP
+#define NP_ENGINE_GRAPHICS_DETAIL_TYPE_HPP
 
 #include "NP-Engine/Primitive/Primitive.hpp"
 
 namespace np::gfx
 {
-	enum class RhiType : ui32
+	enum class GraphicsDetailType : ui32
 	{
 		None,
 		Vulkan,
@@ -22,13 +22,13 @@ namespace np::gfx
 
 	namespace __detail
 	{
-		extern atm<RhiType> RegisteredRhiType;
+		extern atm<GraphicsDetailType> RegisteredGraphicsDetailType;
 	} // namespace __detail
 
-	static RhiType GetRegisteredRhiType()
+	static GraphicsDetailType GetRegisteredGraphicsDetailType()
 	{
-		return __detail::RegisteredRhiType.load(mo_acquire);
+		return __detail::RegisteredGraphicsDetailType.load(mo_acquire);
 	}
 } // namespace np::gfx
 
-#endif /* NP_ENGINE_RHI_TYPE_HPP */
+#endif /* NP_ENGINE_GRAPHICS_DETAIL_TYPE_HPP */

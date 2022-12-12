@@ -11,14 +11,14 @@
 
 #include "NP-Engine/Vendor/VulkanInclude.hpp"
 
-#include "NP-Engine/Graphics/RPI/RPI.hpp"
+#include "NP-Engine/Graphics/Interface/Interface.hpp"
 
 #include "VulkanDevice.hpp"
 #include "VulkanImage.hpp"
 #include "VulkanImageView.hpp"
 #include "VulkanSampler.hpp"
 
-namespace np::gfx::rhi
+namespace np::gfx::__detail
 {
 	class VulkanTexture
 	{
@@ -115,6 +115,6 @@ namespace np::gfx::rhi
 			return _height;
 		}
 	};
-} // namespace np::gfx::rhi
+} // namespace np::gfx::__detail
 
 #endif /* NP_ENGINE_VULKAN_TEXTURE_HPP */

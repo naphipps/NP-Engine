@@ -11,13 +11,13 @@
 
 #include "NP-Engine/Vendor/VulkanInclude.hpp"
 
-#include "NP-Engine/Graphics/RPI/RPI.hpp"
+#include "NP-Engine/Graphics/Interface/Interface.hpp"
 
 #include "VulkanDevice.hpp"
 #include "VulkanCommands.hpp"
 #include "VulkanFence.hpp"
 
-namespace np::gfx::rhi
+namespace np::gfx::__detail
 {
 	class VulkanBuffer : public Buffer
 	{
@@ -194,6 +194,6 @@ namespace np::gfx::rhi
 			return _buffer;
 		}
 	};
-} // namespace np::gfx::rhi
+} // namespace np::gfx::__detail
 
 #endif /* NP_ENGINE_VULKAN_BUFFER_HPP */

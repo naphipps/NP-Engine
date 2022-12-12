@@ -4,8 +4,8 @@
 //
 //##===----------------------------------------------------------------------===##//
 
-#ifndef NP_ENGINE_RPI_RENDERABLE_META_VALUES_HPP
-#define NP_ENGINE_RPI_RENDERABLE_META_VALUES_HPP
+#ifndef NP_ENGINE_GRAPHICS_INTERFACE_RENDERABLE_META_VALUES_HPP
+#define NP_ENGINE_GRAPHICS_INTERFACE_RENDERABLE_META_VALUES_HPP
 
 #include "NP-Engine/Primitive/Primitive.hpp"
 #include "NP-Engine/Foundation/Foundation.hpp"
@@ -35,4 +35,4 @@ namespace np::gfx
 	NP_ENGINE_STATIC_ASSERT(sizeof(RenderableMetaValues) <= 128, "RenderableMetaValues should never exceed 128 bytes.");
 } // namespace np::gfx
 
-#endif /* NP_ENGINE_RPI_RENDERABLE_META_VALUES_HPP */
+#endif /* NP_ENGINE_GRAPHICS_INTERFACE_RENDERABLE_META_VALUES_HPP */

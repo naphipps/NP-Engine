@@ -14,7 +14,7 @@
 #include "VulkanRenderPass.hpp"
 #include "VulkanSwapchain.hpp"
 
-namespace np::gfx::rhi
+namespace np::gfx::__detail
 {
 	class VulkanFramebuffers
 	{
@@ -142,6 +142,6 @@ namespace np::gfx::rhi
 			_framebuffers = CreateFramebuffers();
 		}
 	};
-} // namespace np::gfx::rhi
+} // namespace np::gfx::__detail
 
 #endif /* NP_ENGINE_VULKAN_FRAMEBUFFERS_HPP */

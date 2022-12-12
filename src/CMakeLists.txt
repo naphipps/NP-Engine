@@ -80,7 +80,7 @@ set(NP_ENGINE_GRAPHICS_INTERFACE_HPP
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/Interface/Scene.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/Interface/Shader.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/Interface/Texture.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/Interface/RhiType.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/Interface/GraphicsDetailType.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/Interface/Vertex.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/Interface/Color.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/Interface/Image.hpp
@@ -401,7 +401,7 @@ set(NP_ENGINE_GRAPHICS_CPP
 )
 
 set(NP_ENGINE_GRAPHICS_INTERFACE_CPP
-	Graphics/Interface/RhiType.cpp
+	Graphics/Interface/GraphicsDetailType.cpp
 	#Graphics/Interface/Camera.cpp
 	#Graphics/Interface/Command.cpp
 	#Graphics/Interface/Buffer.cpp

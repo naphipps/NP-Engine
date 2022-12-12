@@ -9,14 +9,14 @@
 
 #include "NP-Engine/Vendor/VulkanInclude.hpp"
 
-#include "NP-Engine/Graphics/RPI/RPI.hpp"
+#include "NP-Engine/Graphics/Interface/Interface.hpp"
 
-namespace np::gfx::rhi
+namespace np::gfx::__detail
 {
 	struct VulkanCommand : public Command
 	{
 		virtual void ApplyTo(VkCommandBuffer command_buffer) = 0;
 	};
-} // namespace np::gfx::rhi
+} // namespace np::gfx::__detail
 
 #endif /* NP_ENGINE_VULKAN_COMMAND_HPP */

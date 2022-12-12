@@ -16,7 +16,7 @@
 
 #include "NP-Engine/Vendor/VulkanInclude.hpp"
 
-#include "NP-Engine/Graphics/RPI/RPI.hpp"
+#include "NP-Engine/Graphics/Interface/Interface.hpp"
 
 #include "VulkanSwapchain.hpp"
 #include "VulkanRenderPass.hpp"
@@ -35,7 +35,7 @@
 // TODO: there might be some methods with zero references...
 // TODO: remove Optional comments
 
-namespace np::gfx::rhi
+namespace np::gfx::__detail
 {
 	class VulkanPipeline : public Pipeline
 	{
@@ -606,6 +606,6 @@ namespace np::gfx::rhi
 			_pipeline = CreatePipeline();
 		}
 	};
-} // namespace np::gfx::rhi
+} // namespace np::gfx::__detail
 
 #endif /* NP_ENGINE_VULKAN_PIPELINE_HPP */

@@ -4,15 +4,15 @@
 //
 //##===----------------------------------------------------------------------===##//
 
-#ifndef NP_ENGINE_RPI_RENDERABLE_MODEL_HPP
-#define NP_ENGINE_RPI_RENDERABLE_MODEL_HPP
+#ifndef NP_ENGINE_GRAPHICS_INTERFACE_RENDERABLE_MODEL_HPP
+#define NP_ENGINE_GRAPHICS_INTERFACE_RENDERABLE_MODEL_HPP
 
 #include "NP-Engine/Foundation/Foundation.hpp"
 #include "NP-Engine/Platform/Platform.hpp"
 #include "NP-Engine/Memory/Memory.hpp"
 #include "NP-Engine/Services/Services.hpp"
 
-#include "RhiType.hpp"
+#include "GraphicsDetailType.hpp"
 #include "RenderableObject.hpp"
 #include "RenderableType.hpp"
 #include "RenderableMetaValues.hpp"
@@ -79,4 +79,4 @@ namespace np::gfx
 	};
 } // namespace np::gfx
 
-#endif /* NP_ENGINE_RPI_RENDERABLE_MODEL_HPP */
+#endif /* NP_ENGINE_GRAPHICS_INTERFACE_RENDERABLE_MODEL_HPP */

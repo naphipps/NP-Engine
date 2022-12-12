@@ -4,8 +4,8 @@
 //
 //##===----------------------------------------------------------------------===##//
 
-#ifndef NP_ENGINE_RPI_CAMERA_HPP
-#define NP_ENGINE_RPI_CAMERA_HPP
+#ifndef NP_ENGINE_GRAPHICS_INTERFACE_CAMERA_HPP
+#define NP_ENGINE_GRAPHICS_INTERFACE_CAMERA_HPP
 
 #include "NP-Engine/Primitive/Primitive.hpp"
 
@@ -102,4 +102,4 @@ namespace np::gfx
 	};
 } // namespace np::gfx
 
-#endif /* NP_ENGINE_RPI_CAMERA_HPP */
+#endif /* NP_ENGINE_GRAPHICS_INTERFACE_CAMERA_HPP */

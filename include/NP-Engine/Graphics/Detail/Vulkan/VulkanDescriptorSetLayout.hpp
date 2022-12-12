@@ -14,7 +14,7 @@
 
 #include "VulkanDevice.hpp"
 
-namespace np::gfx::rhi
+namespace np::gfx::__detail
 {
 	class VulkanDescriptorSetLayout
 	{
@@ -100,6 +100,6 @@ namespace np::gfx::rhi
 			return _layout_bindings;
 		}
 	};
-} // namespace np::gfx::rhi
+} // namespace np::gfx::__detail
 
 #endif /* NP_ENGINE_VULKAN_DESCRIPTOR_SET_LAYOUT_HPP */

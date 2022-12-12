@@ -11,7 +11,7 @@
 
 #include "VulkanCommand.hpp"
 
-namespace np::gfx::rhi
+namespace np::gfx::__detail
 {
 	class VulkanCommandBindVertexBuffers : public VulkanCommand
 	{
@@ -33,6 +33,6 @@ namespace np::gfx::rhi
 			vkCmdBindVertexBuffers(command_buffer, FirstBinding, BindingCount, Buffers, Offsets);
 		}
 	};
-} // namespace np::gfx::rhi
+} // namespace np::gfx::__detail
 
 #endif /* NP_ENGINE_VULKAN_COMMAND_BIND_VERTEX_BUFFERS_HPP */

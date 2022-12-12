@@ -11,7 +11,7 @@
 
 #include "VulkanCommand.hpp"
 
-namespace np::gfx::rhi
+namespace np::gfx::__detail
 {
 	class VulkanCommandPipelineBarrier : public VulkanCommand
 	{
@@ -49,6 +49,6 @@ namespace np::gfx::rhi
 								 ImageMemoryBarrierCount, ImageMemoryBarriers);
 		}
 	};
-} // namespace np::gfx::rhi
+} // namespace np::gfx::__detail
 
 #endif /* NP_ENGINE_VULKAN_COMMAND_PIPELINE_BARRIER_HPP */

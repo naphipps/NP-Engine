@@ -11,7 +11,7 @@
 
 #include "VulkanCommand.hpp"
 
-namespace np::gfx::rhi
+namespace np::gfx::__detail
 {
 	class VulkanCommandDrawIndexed : public VulkanCommand
 	{
@@ -36,6 +36,6 @@ namespace np::gfx::rhi
 			vkCmdDrawIndexed(command_buffer, IndexCount, InstanceCount, FirstIndex, VertexOffset, FirstInstance);
 		}
 	};
-} // namespace np::gfx::rhi
+} // namespace np::gfx::__detail
 
 #endif /* NP_ENGINE_VULKAN_COMMAND_DRAW_INDEXED_HPP */

@@ -18,10 +18,10 @@
 
 #include "NP-Engine/Window/Interface/WindowEvents.hpp"
 
-#include "NP-Engine/Graphics/RHI/Vulkan/VulkanGraphics.hpp"
+#include "NP-Engine/Graphics/Detail/Vulkan/VulkanGraphics.hpp"
 
 #if NP_ENGINE_PLATFORM_IS_LINUX || NP_ENGINE_PLATFORM_IS_WINDOWS
-	#include "NP-Engine/Graphics/RHI/OpenGL/OpenGLGraphics.hpp"
+	#include "NP-Engine/Graphics/Detail/OpenGL/OpenGLGraphics.hpp"
 #endif
 
 #include "Layer.hpp"
@@ -93,9 +93,9 @@ namespace np::app
 
 		void ChooseGraphicsDetailType()
 		{
-			gfx::__detail::RegisteredRhiType.store(gfx::RhiType::Vulkan);
+			gfx::__detail::RegisteredGraphicsDetailType.store(gfx::GraphicsDetailType::Vulkan);
 
-			// TODO: we need to redo how we choose our rhi... look at Renderer.IsValid methods or something similar??
+			// TODO: we need to redo how we choose our detail... look at Renderer.IsValid methods or something similar??
 			// TODO: we might ought to interact with a config file and the user (popups) to determine??
 		}
 

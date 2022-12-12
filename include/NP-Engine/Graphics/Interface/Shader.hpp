@@ -4,8 +4,8 @@
 //
 //##===----------------------------------------------------------------------===##//
 
-#ifndef NP_ENGINE_RPI_SHADER_HPP
-#define NP_ENGINE_RPI_SHADER_HPP
+#ifndef NP_ENGINE_GRAPHICS_INTERFACE_SHADER_HPP
+#define NP_ENGINE_GRAPHICS_INTERFACE_SHADER_HPP
 
 #include <iostream> //TODO: remove
 
@@ -107,4 +107,4 @@ namespace np::gfx
 	};
 } // namespace np::gfx
 
-#endif /* NP_ENGINE_RPI_SHADER_HPP */
+#endif /* NP_ENGINE_GRAPHICS_INTERFACE_SHADER_HPP */

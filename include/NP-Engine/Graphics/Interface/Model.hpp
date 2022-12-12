@@ -4,8 +4,8 @@
 //
 //##===----------------------------------------------------------------------===##//
 
-#ifndef NP_ENGINE_RPI_MODEL_HPP
-#define NP_ENGINE_RPI_MODEL_HPP
+#ifndef NP_ENGINE_GRAPHICS_INTERFACE_MODEL_HPP
+#define NP_ENGINE_GRAPHICS_INTERFACE_MODEL_HPP
 
 #include <utility>
 
@@ -229,4 +229,4 @@ namespace np::gfx
 	};
 } // namespace np::gfx
 
-#endif /* NP_ENGINE_RPI_MODEL_HPP */
+#endif /* NP_ENGINE_GRAPHICS_INTERFACE_MODEL_HPP */

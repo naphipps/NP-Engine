@@ -4,4 +4,4 @@
 //
 //##===----------------------------------------------------------------------===##//
 
-#include "NP-Engine/Graphics/RHI/Vulkan/VulkanRenderer.hpp"
+#include "NP-Engine/Graphics/Detail/Vulkan/VulkanRenderer.hpp"

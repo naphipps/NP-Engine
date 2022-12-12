@@ -14,7 +14,7 @@
 
 #include "VulkanInstance.hpp"
 
-namespace np::gfx::rhi
+namespace np::gfx::__detail
 {
 	class VulkanSurface
 	{
@@ -90,6 +90,6 @@ namespace np::gfx::rhi
 			return _surface;
 		}
 	};
-} // namespace np::gfx::rhi
+} // namespace np::gfx::__detail
 
 #endif /* NP_ENGINE_VULKAN_SURFACE_HPP */

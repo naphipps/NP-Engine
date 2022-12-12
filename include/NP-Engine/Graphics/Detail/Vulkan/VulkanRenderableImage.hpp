@@ -13,9 +13,9 @@
 #include "NP-Engine/String/String.hpp"
 #include "NP-Engine/Services/Services.hpp"
 
-#include "NP-Engine/Graphics/RPI/RPI.hpp"
+#include "NP-Engine/Graphics/Interface/Interface.hpp"
 
-namespace np::gfx::rhi
+namespace np::gfx::__detail
 {
 	class VulkanRenderableImage : public RenderableImage
 	{
@@ -55,6 +55,6 @@ namespace np::gfx::rhi
 
 		void SetOutOfDate(bl is_out_of_date = true) override {}
 	};
-} // namespace np::gfx::rhi
+} // namespace np::gfx::__detail
 
 #endif /* NP_ENGINE_VULKAN_RENDERABLE_IMAGE_HPP */

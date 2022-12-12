@@ -17,7 +17,7 @@
 
 #include "NP-Engine/Vendor/VulkanInclude.hpp"
 
-#include "NP-Engine/Graphics/RPI/RPI.hpp"
+#include "NP-Engine/Graphics/Interface/Interface.hpp"
 
 #include "VulkanInstance.hpp"
 #include "VulkanSurface.hpp"
@@ -29,7 +29,7 @@
 #include "VulkanFrame.hpp"
 #include "VulkanFramebuffers.hpp"
 
-namespace np::gfx::rhi
+namespace np::gfx::__detail
 {
 	class VulkanRenderer : public Renderer
 	{
@@ -200,9 +200,9 @@ namespace np::gfx::rhi
 			Dispose();
 		}
 
-		RhiType GetRhiType() const override
+		GraphicsDetailType GetGraphicsDetailType() const override
 		{
-			return RhiType::Vulkan;
+			return GraphicsDetailType::Vulkan;
 		}
 
 		str GetName() const override
@@ -432,6 +432,6 @@ namespace np::gfx::rhi
 			return *_light_pipeline;
 		}
 	};
-} // namespace np::gfx::rhi
+} // namespace np::gfx::__detail
 
 #endif /* NP_ENGINE_VULKAN_RENDERER_HPP */

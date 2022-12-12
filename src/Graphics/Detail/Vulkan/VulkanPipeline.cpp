@@ -5,7 +5,7 @@
 //##===----------------------------------------------------------------------===##//
 
 /*
-#include "NP-Engine/Graphics/RHI/Vulkan/VulkanPipeline.hpp"
+#include "NP-Engine/Graphics/Detail/Vulkan/VulkanPipeline.hpp"
 
 namespace np::gfx::rhi
 {

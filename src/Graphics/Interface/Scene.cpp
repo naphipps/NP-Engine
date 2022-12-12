@@ -4,13 +4,13 @@
 //
 //##===----------------------------------------------------------------------===##//
 
-#include "NP-Engine/Graphics/RPI/Scene.hpp"
+#include "NP-Engine/Graphics/Interface/Scene.hpp"
 
 #if NP_ENGINE_PLATFORM_IS_LINUX || NP_ENGINE_PLATFORM_IS_WINDOWS
-	#include "NP-Engine/Graphics/RHI/OpenGL/OpenGLGraphics.hpp"
+	#include "NP-Engine/Graphics/Detail/OpenGL/OpenGLGraphics.hpp"
 #endif
 
-#include "NP-Engine/Graphics/RHI/Vulkan/VulkanGraphics.hpp"
+#include "NP-Engine/Graphics/Detail/Vulkan/VulkanGraphics.hpp"
 
 namespace np::gfx
 {
@@ -18,10 +18,10 @@ namespace np::gfx
 	{
 		Scene* scene = nullptr;
 
-		switch (__detail::RegisteredRhiType.load(mo_acquire))
+		switch (__detail::RegisteredGraphicsDetailType.load(mo_acquire))
 		{
-		case RhiType::Vulkan:
-			scene = mem::Create<rhi::VulkanScene>(services.GetAllocator(), services, renderer);
+		case GraphicsDetailType::Vulkan:
+			scene = mem::Create<__detail::VulkanScene>(services.GetAllocator(), services, renderer);
 			break;
 		default:
 			break;

@@ -4,8 +4,8 @@
 //
 //##===----------------------------------------------------------------------===##//
 
-#ifndef NP_ENGINE_RPI_VERTEX_HPP
-#define NP_ENGINE_RPI_VERTEX_HPP
+#ifndef NP_ENGINE_GRAPHICS_INTERFACE_VERTEX_HPP
+#define NP_ENGINE_GRAPHICS_INTERFACE_VERTEX_HPP
 
 #include "NP-Engine/Primitive/Primitive.hpp"
 
@@ -39,4 +39,4 @@ namespace std
 	};
 } // namespace std
 
-#endif /* NP_ENGINE_RPI_VERTEX_HPP */
+#endif /* NP_ENGINE_GRAPHICS_INTERFACE_VERTEX_HPP */

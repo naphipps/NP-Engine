@@ -13,7 +13,7 @@
 
 #include "NP-Engine/Vendor/GlmInclude.hpp"
 
-#include "NP-Engine/Graphics/RPI/RPI.hpp"
+#include "NP-Engine/Graphics/Interface/Interface.hpp"
 
 #include "VulkanBuffer.hpp"
 #include "VulkanFrame.hpp"
@@ -26,7 +26,7 @@
 #include "VulkanFence.hpp"
 #include "VulkanSemaphore.hpp"
 
-namespace np::gfx::rhi
+namespace np::gfx::__detail
 {
 	class VulkanRenderableModel : public RenderableModel
 	{
@@ -440,6 +440,6 @@ namespace np::gfx::rhi
 			_descriptor_info.sampler = *_sampler;
 		}
 	};
-} // namespace np::gfx::rhi
+} // namespace np::gfx::__detail
 
 #endif /* NP_ENGINE_VULKAN_RENDERABLE_MODEL_HPP */

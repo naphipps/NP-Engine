@@ -12,12 +12,12 @@
 #include "NP-Engine/Primitive/Primitive.hpp"
 #include "NP-Engine/Services/Services.hpp"
 
-#include "NP-Engine/Graphics/RPI/RPI.hpp"
+#include "NP-Engine/Graphics/Interface/Interface.hpp"
 
 #include "VulkanRenderableImage.hpp"
 #include "VulkanRenderableModel.hpp"
 
-namespace np::gfx::rhi
+namespace np::gfx::__detail
 {
 	// TODO: implement this
 	class VulkanRenderableLight : public RenderableLight
@@ -68,6 +68,6 @@ namespace np::gfx::rhi
 
 		void SetOutOfDate(bl is_out_of_date = true) override {}
 	};
-} // namespace np::gfx::rhi
+} // namespace np::gfx::__detail
 
 #endif /* NP_ENGINE_VULKAN_RENDERABLE_LIGHT_HPP */

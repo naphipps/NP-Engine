@@ -18,11 +18,11 @@
 
 #include "NP-Engine/Vendor/VulkanInclude.hpp"
 
-#include "../../RPI/RPI.hpp"
+#include "../../Interface/Interface.hpp"
 
 #include "VulkanDevice.hpp"
 
-namespace np::gfx::rhi
+namespace np::gfx::__detail
 {
 	class VulkanShader : public Shader
 	{
@@ -158,6 +158,6 @@ namespace np::gfx::rhi
 			return _shader_module;
 		}
 	};
-} // namespace np::gfx::rhi
+} // namespace np::gfx::__detail
 
 #endif /* NP_ENGINE_VULKAN_SHADER_HPP */

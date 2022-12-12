@@ -12,7 +12,7 @@
 #include "VulkanSwapchain.hpp"
 #include "VulkanDescriptorSetLayout.hpp"
 
-namespace np::gfx::rhi
+namespace np::gfx::__detail
 {
 	class VulkanDescriptorSets
 	{
@@ -139,6 +139,6 @@ namespace np::gfx::rhi
 			vkUpdateDescriptorSets(GetDevice(), (ui32)writers.size(), writers.data(), 0, nullptr);
 		}
 	};
-} // namespace np::gfx::rhi
+} // namespace np::gfx::__detail
 
 #endif /* NP_ENGINE_VULKAN_DESCRIPTOR_SETS_HPP */
