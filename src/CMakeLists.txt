@@ -70,82 +70,82 @@ set(NP_ENGINE_GRAPHICS_HPP
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/Graphics.hpp
 )
 
-set(NP_ENGINE_GRAPHICS_RPI_HPP
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/RPI.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/Renderer.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/Camera.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/Command.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/Buffer.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/Pipeline.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/Scene.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/Shader.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/Texture.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/RhiType.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/Vertex.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/Color.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/Image.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/Model.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/Frame.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/Light.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/RenderableObject.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/RenderableLightObject.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/RenderableImage.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/RenderableModel.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/RenderableLight.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/RenderableType.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/RenderableMetaValues.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/PipelineMetaValues.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RPI/VisibleObject.hpp
+set(NP_ENGINE_GRAPHICS_INTERFACE_HPP
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/Interface/Interface.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/Interface/Renderer.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/Interface/Camera.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/Interface/Command.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/Interface/Buffer.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/Interface/Pipeline.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/Interface/Scene.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/Interface/Shader.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/Interface/Texture.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/Interface/RhiType.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/Interface/Vertex.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/Interface/Color.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/Interface/Image.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/Interface/Model.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/Interface/Frame.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/Interface/Light.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/Interface/RenderableObject.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/Interface/RenderableLightObject.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/Interface/RenderableImage.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/Interface/RenderableModel.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/Interface/RenderableLight.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/Interface/RenderableType.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/Interface/RenderableMetaValues.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/Interface/PipelineMetaValues.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/Interface/VisibleObject.hpp
 )
 
 set(NP_ENGINE_GRAPHICS_OPENGL_HPP
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RHI/OpenGL/OpenGLRenderer.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RHI/OpenGL/OpenGLGraphics.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/Detail/OpenGL/OpenGLRenderer.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/Detail/OpenGL/OpenGLGraphics.hpp
 )
 
 set(NP_ENGINE_GRAPHICS_VULKAN_HPP
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RHI/Vulkan/VulkanGraphics.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RHI/Vulkan/VulkanRenderer.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RHI/Vulkan/VulkanRenderPass.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RHI/Vulkan/VulkanDevice.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RHI/Vulkan/VulkanInstance.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RHI/Vulkan/VulkanSurface.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RHI/Vulkan/VulkanPipeline.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RHI/Vulkan/VulkanShader.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RHI/Vulkan/VulkanSwapchain.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RHI/Vulkan/VulkanVertex.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RHI/Vulkan/VulkanScene.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RHI/Vulkan/VulkanBuffer.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RHI/Vulkan/VulkanImage.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RHI/Vulkan/VulkanImageView.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RHI/Vulkan/VulkanSampler.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RHI/Vulkan/VulkanCommandPool.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RHI/Vulkan/VulkanCommandBuffer.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RHI/Vulkan/VulkanDescriptorSets.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RHI/Vulkan/VulkanDescriptorSetLayout.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RHI/Vulkan/VulkanTexture.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RHI/Vulkan/VulkanFrame.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RHI/Vulkan/VulkanFramebuffers.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RHI/Vulkan/VulkanCamera.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RHI/Vulkan/VulkanRenderableModel.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RHI/Vulkan/VulkanRenderableImage.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RHI/Vulkan/VulkanRenderableLight.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RHI/Vulkan/VulkanCommand.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RHI/Vulkan/VulkanCommands.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RHI/Vulkan/VulkanCommandBeginRenderPass.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RHI/Vulkan/VulkanCommandBindPipeline.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RHI/Vulkan/VulkanCommandBindVertexBuffers.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RHI/Vulkan/VulkanCommandBindIndexBuffer.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RHI/Vulkan/VulkanCommandBindDescriptorSets.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RHI/Vulkan/VulkanCommandDrawIndexed.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RHI/Vulkan/VulkanCommandEndRenderPass.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RHI/Vulkan/VulkanCommandCopyBuffers.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RHI/Vulkan/VulkanCommandPipelineBarrier.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RHI/Vulkan/VulkanCommandCopyBufferToImage.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RHI/Vulkan/VulkanCommandPushConstants.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RHI/Vulkan/VulkanQueue.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RHI/Vulkan/VulkanFence.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/RHI/Vulkan/VulkanSemaphore.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/Detail/Vulkan/VulkanGraphics.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/Detail/Vulkan/VulkanRenderer.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/Detail/Vulkan/VulkanRenderPass.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/Detail/Vulkan/VulkanDevice.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/Detail/Vulkan/VulkanInstance.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/Detail/Vulkan/VulkanSurface.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/Detail/Vulkan/VulkanPipeline.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/Detail/Vulkan/VulkanShader.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/Detail/Vulkan/VulkanSwapchain.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/Detail/Vulkan/VulkanVertex.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/Detail/Vulkan/VulkanScene.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/Detail/Vulkan/VulkanBuffer.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/Detail/Vulkan/VulkanImage.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/Detail/Vulkan/VulkanImageView.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/Detail/Vulkan/VulkanSampler.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/Detail/Vulkan/VulkanCommandPool.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/Detail/Vulkan/VulkanCommandBuffer.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/Detail/Vulkan/VulkanDescriptorSets.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/Detail/Vulkan/VulkanDescriptorSetLayout.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/Detail/Vulkan/VulkanTexture.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/Detail/Vulkan/VulkanFrame.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/Detail/Vulkan/VulkanFramebuffers.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/Detail/Vulkan/VulkanCamera.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/Detail/Vulkan/VulkanRenderableModel.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/Detail/Vulkan/VulkanRenderableImage.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/Detail/Vulkan/VulkanRenderableLight.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/Detail/Vulkan/VulkanCommand.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/Detail/Vulkan/VulkanCommands.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/Detail/Vulkan/VulkanCommandBeginRenderPass.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/Detail/Vulkan/VulkanCommandBindPipeline.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/Detail/Vulkan/VulkanCommandBindVertexBuffers.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/Detail/Vulkan/VulkanCommandBindIndexBuffer.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/Detail/Vulkan/VulkanCommandBindDescriptorSets.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/Detail/Vulkan/VulkanCommandDrawIndexed.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/Detail/Vulkan/VulkanCommandEndRenderPass.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/Detail/Vulkan/VulkanCommandCopyBuffers.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/Detail/Vulkan/VulkanCommandPipelineBarrier.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/Detail/Vulkan/VulkanCommandCopyBufferToImage.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/Detail/Vulkan/VulkanCommandPushConstants.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/Detail/Vulkan/VulkanQueue.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/Detail/Vulkan/VulkanFence.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics/Detail/Vulkan/VulkanSemaphore.hpp
 )
 
 set(NP_ENGINE_GRAPHICS_ALGORITHMS_HPP
@@ -349,7 +349,7 @@ set(NP_ENGINE_HEADER_FILES
 	${NP_ENGINE_FOUNDATION_HPP}
 	${NP_ENGINE_GEOMETRY_HPP}
 	${NP_ENGINE_GRAPHICS_HPP}
-	${NP_ENGINE_GRAPHICS_RPI_HPP}
+	${NP_ENGINE_GRAPHICS_INTERFACE_HPP}
 	${NP_ENGINE_GRAPHICS_OPENGL_HPP}
 	${NP_ENGINE_GRAPHICS_VULKAN_HPP}
 	${NP_ENGINE_GRAPHICS_ALGORITHMS_HPP}
@@ -400,38 +400,38 @@ set(NP_ENGINE_GRAPHICS_CPP
 	#Graphics/Graphics.cpp
 )
 
-set(NP_ENGINE_GRAPHICS_RPI_CPP
-	Graphics/RPI/RhiType.cpp
-	#Graphics/RPI/Camera.cpp
-	#Graphics/RPI/Command.cpp
-	#Graphics/RPI/Buffer.cpp
-	Graphics/RPI/RenderableImage.cpp
-	Graphics/RPI/RenderableModel.cpp
-	Graphics/RPI/RenderableLight.cpp
-	#Graphics/RPI/Pipeline.cpp
-	Graphics/RPI/Scene.cpp
-	#Graphics/RPI/Shader.cpp
-	#Graphics/RPI/Texture.cpp
-	Graphics/RPI/Renderer.cpp
+set(NP_ENGINE_GRAPHICS_INTERFACE_CPP
+	Graphics/Interface/RhiType.cpp
+	#Graphics/Interface/Camera.cpp
+	#Graphics/Interface/Command.cpp
+	#Graphics/Interface/Buffer.cpp
+	Graphics/Interface/RenderableImage.cpp
+	Graphics/Interface/RenderableModel.cpp
+	Graphics/Interface/RenderableLight.cpp
+	#Graphics/Interface/Pipeline.cpp
+	Graphics/Interface/Scene.cpp
+	#Graphics/Interface/Shader.cpp
+	#Graphics/Interface/Texture.cpp
+	Graphics/Interface/Renderer.cpp
 )
 
 # TODO: we can remove these
 set(NP_ENGINE_GRAPHICS_OPENGL_CPP
-	#Graphics/RHI/OpenGL/OpenGLRenderer.cpp
+	#Graphics/Detail/OpenGL/OpenGLRenderer.cpp
 )
 
 # TODO: we can remove these
 set(NP_ENGINE_GRAPHICS_VULKAN_CPP
-	#Graphics/RHI/Vulkan/VulkanDevice.cpp
-	#Graphics/RHI/Vulkan/VulkanRenderer.cpp
-	#Graphics/RHI/Vulkan/VulkanPipeline.cpp
+	#Graphics/Detail/Vulkan/VulkanDevice.cpp
+	#Graphics/Detail/Vulkan/VulkanRenderer.cpp
+	#Graphics/Detail/Vulkan/VulkanPipeline.cpp
 )
 
 set(NP_ENGINE_GRAPHICS_VULKAN_SHADERS_GLSL
-	${PROJECT_SOURCE_DIR}/src/Graphics/RHI/Vulkan/shaders/object_vertex.glsl
-	${PROJECT_SOURCE_DIR}/src/Graphics/RHI/Vulkan/shaders/object_fragment.glsl
-	${PROJECT_SOURCE_DIR}/src/Graphics/RHI/Vulkan/shaders/light_vertex.glsl
-	${PROJECT_SOURCE_DIR}/src/Graphics/RHI/Vulkan/shaders/light_fragment.glsl
+	${PROJECT_SOURCE_DIR}/src/Graphics/Detail/Vulkan/shaders/object_vertex.glsl
+	${PROJECT_SOURCE_DIR}/src/Graphics/Detail/Vulkan/shaders/object_fragment.glsl
+	${PROJECT_SOURCE_DIR}/src/Graphics/Detail/Vulkan/shaders/light_vertex.glsl
+	${PROJECT_SOURCE_DIR}/src/Graphics/Detail/Vulkan/shaders/light_fragment.glsl
 )
 
 set(NP_ENGINE_INSIGHT_CPP
@@ -485,7 +485,7 @@ set(NP_ENGINE_SOURCE_FILES
 	${NP_ENGINE_NP_ENGINE_MAIN_CPP}
 	${NP_ENGINE_PHYSICS_CPP}
 	${NP_ENGINE_WINDOW_INTERFACE_CPP}
-	${NP_ENGINE_GRAPHICS_RPI_CPP}
+	${NP_ENGINE_GRAPHICS_INTERFACE_CPP}
 	${NP_ENGINE_GRAPHICS_OPENGL_CPP}
 	${NP_ENGINE_GRAPHICS_VULKAN_CPP}
 	${NP_ENGINE_GRAPHICS_VULKAN_SHADERS_GLSL}
@@ -610,10 +610,10 @@ source_group(FileSystem FILES ${NP_ENGINE_FILESYSTEM_HPP})
 source_group(Foundation FILES ${NP_ENGINE_FOUNDATION_HPP})
 source_group(Geometry FILES ${NP_ENGINE_GEOMETRY_HPP})
 source_group(Graphics FILES ${NP_ENGINE_GRAPHICS_HPP} ${NP_ENGINE_GRAPHICS_CPP})
-source_group(Graphics/RPI FILES ${NP_ENGINE_GRAPHICS_RPI_HPP} ${NP_ENGINE_GRAPHICS_RPI_CPP})
-source_group(Graphics/RHI/OpenGL FILES ${NP_ENGINE_GRAPHICS_OPENGL_HPP} ${NP_ENGINE_GRAPHICS_OPENGL_CPP})
-source_group(Graphics/RHI/Vulkan FILES ${NP_ENGINE_GRAPHICS_VULKAN_HPP} ${NP_ENGINE_GRAPHICS_VULKAN_CPP})
-source_group(Graphics/RHI/Vulkan/shaders FILES ${NP_ENGINE_GRAPHICS_VULKAN_SHADERS_GLSL})
+source_group(Graphics/Interface FILES ${NP_ENGINE_GRAPHICS_INTERFACE_HPP} ${NP_ENGINE_GRAPHICS_INTERFACE_CPP})
+source_group(Graphics/Detail/OpenGL FILES ${NP_ENGINE_GRAPHICS_OPENGL_HPP} ${NP_ENGINE_GRAPHICS_OPENGL_CPP})
+source_group(Graphics/Detail/Vulkan FILES ${NP_ENGINE_GRAPHICS_VULKAN_HPP} ${NP_ENGINE_GRAPHICS_VULKAN_CPP})
+source_group(Graphics/Detail/Vulkan/shaders FILES ${NP_ENGINE_GRAPHICS_VULKAN_SHADERS_GLSL})
 source_group(Graphics-Algorithms FILES ${NP_ENGINE_GRAPHICS_ALGORITHMS_HPP})
 source_group(Input FILES ${NP_ENGINE_INPUT_HPP})
 source_group(Insight FILES ${NP_ENGINE_INSIGHT_HPP} ${NP_ENGINE_INSIGHT_CPP})
