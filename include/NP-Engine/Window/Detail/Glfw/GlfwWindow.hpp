@@ -885,7 +885,6 @@ namespace np::win::__detail
 			glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
 			_glfw_window.store(glfwCreateWindow(GetWidth(), GetHeight(), GetTitle().c_str(), nullptr, nullptr), mo_release);
 			SetGlfwCallbacks();
-
 			ApplySystemTheme();
 		}
 
