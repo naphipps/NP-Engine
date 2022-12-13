@@ -15,7 +15,7 @@ This game engine started out as my first video game, but since the project kept 
 	- [ ] 3D Physics via [Bullet](https://github.com/bulletphysics/bullet3)
 	- [x] A feature-rich JobSystem (task graph architecture):
 	  - [x] priority-based jobs
-	  - [x] controller over individual job workers
+	  - [x] control over individual job workers
 	  - [x] automatic scaling up/down for the platform it runs on
 	  - [x] considerate of the main thread so thread scheduling does not throttle the main thread
 	  - [x] how a worker fetches jobs can be customized in real time to allow for direct control on how the worker works throughout the life of the session
