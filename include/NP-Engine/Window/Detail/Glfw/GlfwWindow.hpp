@@ -901,10 +901,10 @@ namespace np::win::__detail
 			BOOL dark_mode_value = status == ERROR_SUCCESS && word == 0;
 
 			DwmSetWindowAttribute(native_window, 20, &dark_mode_value, sizeof(dark_mode_value));
-			CallWindowProcA(_prev_window_procedure, native_window, WM_NCACTIVATE, false, 0);
+			GlfwWindowProcedure(native_window, WM_NCACTIVATE, false, 0);
 
 			if (IsFocused())
-				CallWindowProcA(_prev_window_procedure, native_window, WM_NCACTIVATE, true, 0);
+				GlfwWindowProcedure(native_window, WM_NCACTIVATE, true, 0);
 #endif
 		}
 
