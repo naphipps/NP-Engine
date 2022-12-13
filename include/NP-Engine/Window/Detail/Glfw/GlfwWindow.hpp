@@ -22,6 +22,8 @@
 #include "NP-Engine/Window/Interface/WindowInterface.hpp"
 
 //TODO: resizing window smaller than min siz results with mouse offset to be incorrect
+//TODO: something about dragging the window and then quickly closing it causes race condition
+//	^ between dragging logic and closing logic
 
 namespace np::win::__detail
 {
