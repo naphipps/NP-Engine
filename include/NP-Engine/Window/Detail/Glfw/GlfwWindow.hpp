@@ -1085,6 +1085,7 @@ namespace np::win::__detail
 				_prev_mouse_position = point;
 #endif
 
+				//TODO: we don't have to apply the system theme every update call - just about once per couple seconds will do I think
 				ApplySystemTheme();
 			}
 		}
