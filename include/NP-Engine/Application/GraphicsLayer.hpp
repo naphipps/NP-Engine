@@ -193,6 +193,11 @@ namespace np::app
 					NP_ENGINE_PROFILE_SCOPE("no frame packet");
 				}
 
+				/*
+				for (auto it = _scenes.begin(); it != _scenes.end(); it++)
+					(*it)->Render();
+				//*/
+
 				for (next = tim::SteadyClock::now(); next - prev < min_duration; next = tim::SteadyClock::now())
 					thr::ThisThread::yield();
 				prev = next;
