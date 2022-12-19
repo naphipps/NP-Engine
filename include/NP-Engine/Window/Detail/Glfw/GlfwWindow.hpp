@@ -61,6 +61,7 @@ namespace np::win::__detail
 			switch (msg)
 			{
 			case WM_NCLBUTTONDBLCLK:
+				GetWindowPlacement(hwnd, &glfw_window->_prev_window_placement);
 			case WM_NCRBUTTONDBLCLK:
 				call_prev_window_procedure = GET_NCHITTEST_WPARAM(wparam) != HTSYSMENU;
 				break;
@@ -898,12 +899,19 @@ namespace np::win::__detail
 			LSTATUS status = RegGetValueA(HKEY_CURRENT_USER, subkey, value, RRF_RT_DWORD, nullptr, &word, &size);
 			HWND native_window = (HWND)GetNativeWindow();
 			BOOL dark_mode_value = status == ERROR_SUCCESS && word == 0;
+			BOOL existing_dark_mode_value = false;
+			DWORD DARK_MODE_ATTRIBUTE = 20;
 
-			DwmSetWindowAttribute(native_window, 20, &dark_mode_value, sizeof(dark_mode_value));
-			GlfwWindowProcedure(native_window, WM_NCACTIVATE, false, 0);
+			DwmGetWindowAttribute(native_window, DARK_MODE_ATTRIBUTE, &existing_dark_mode_value, sizeof(BOOL));
 
-			if (IsFocused())
-				GlfwWindowProcedure(native_window, WM_NCACTIVATE, true, 0);
+			if (existing_dark_mode_value != dark_mode_value)
+			{
+				DwmSetWindowAttribute(native_window, DARK_MODE_ATTRIBUTE, &dark_mode_value, sizeof(BOOL));
+				GlfwWindowProcedure(native_window, WM_NCACTIVATE, false, 0);
+
+				if (IsFocused())
+					GlfwWindowProcedure(native_window, WM_NCACTIVATE, true, 0);
+			}
 #endif
 		}
 
