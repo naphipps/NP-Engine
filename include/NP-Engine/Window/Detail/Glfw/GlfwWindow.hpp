@@ -1161,8 +1161,8 @@ namespace np::win::__detail
 
 #if NP_ENGINE_PLATFORM_IS_WINDOWS
 			GetWindowPlacement(glfwGetWin32Window(glfw_window), &_prev_window_placement);
-
 #endif
+
 			if (glfw_window && !glfwGetWindowAttrib(glfw_window, GLFW_MAXIMIZED))
 				glfwMaximizeWindow(glfw_window);
 
