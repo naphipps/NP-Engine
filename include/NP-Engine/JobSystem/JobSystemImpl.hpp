@@ -121,7 +121,7 @@ namespace np::jsys
 			_thread_pool_block = _allocator.Allocate(THREAD_SIZE * count);
 			_thread_pool = mem::Create<thr::ThreadPool>(_allocator, _thread_pool_block);
 
-			_job_workers.resize(_thread_pool->ObjectCount());
+			_job_workers.resize(count);
 			for (auto it1 = _job_workers.begin(); it1 != _job_workers.end(); it1++)
 			{
 				it1->ClearCoworkers();
