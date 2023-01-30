@@ -56,16 +56,16 @@ if (EXISTS ${NP_ENGINE_WORKING_DIR})
 		${PROJECT_SOURCE_DIR}/test/assets/viking_room.png
 	)
 
-	file(TO_NATIVE_PATH "${NP_ENGINE_WORKING_DIR}/fake" NP_ENGINE_FAKE)
+	file(TO_NATIVE_PATH "${NP_ENGINE_WORKING_DIR}/test/fake" NP_ENGINE_TEST_FAKE)
 	file(TO_NATIVE_PATH "${NP_ENGINE_WORKING_DIR}/test/assets" NP_ENGINE_TEST_ASSETS_DST)
 
-	if (EXISTS ${NP_ENGINE_FAKE})
-		message(FATAL_ERROR "ERROR: \"${NP_ENGINE_FAKE}\" found, this should never be created, remove!")
+	if (EXISTS ${NP_ENGINE_TEST_FAKE})
+		message(FATAL_ERROR "ERROR: \"${NP_ENGINE_TEST_FAKE}\" found, this should never be created, remove!")
 	endif()
 
-	add_custom_target("${PROJECT_NAME}-Copy-Test-Assets" ALL DEPENDS ${NP_ENGINE_FAKE})
+	add_custom_target("${PROJECT_NAME}-Copy-Test-Assets" ALL DEPENDS ${NP_ENGINE_TEST_FAKE})
 
-	add_custom_command(OUTPUT ${NP_ENGINE_FAKE} # outputing the fake ensures we run our command(s)
+	add_custom_command(OUTPUT ${NP_ENGINE_TEST_FAKE} # outputing the fake ensures we run our command(s)
 		COMMAND ${CMAKE_COMMAND} -E make_directory ${NP_ENGINE_TEST_ASSETS_DST}
 		COMMAND ${CMAKE_COMMAND} -E copy ${NP_ENGINE_TEST_ASSETS_FILES} ${NP_ENGINE_TEST_ASSETS_DST}
 		COMMENT "Updating test assets in ${NP_ENGINE_WORKING_DIR}"
@@ -73,7 +73,7 @@ if (EXISTS ${NP_ENGINE_WORKING_DIR})
 
 	unset(NP_ENGINE_TEST_ASSETS_FILES)
 	unset(NP_ENGINE_TEST_ASSETS_DST)
-	unset(NP_ENGINE_FAKE)
+	unset(NP_ENGINE_TEST_FAKE)
 endif()
 
 source_group(include FILES ${NP_ENGINE_TESTER_HEADER_FILES})
