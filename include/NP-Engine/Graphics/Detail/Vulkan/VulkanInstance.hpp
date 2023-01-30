@@ -118,6 +118,10 @@ namespace np::gfx::__detail
 		{
 			con::uset<str> extension_set;
 			extension_set.emplace(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
+			
+#if NP_ENGINE_PLATFORM_IS_APPLE
+			extension_set.emplace(VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME);
+#endif
 
 			con::vector<str> window_required = win::Window::GetRequiredGfxExtentions();
 			for (const str& extension : window_required)
@@ -171,6 +175,11 @@ namespace np::gfx::__detail
 		{
 			VkInstanceCreateInfo info{};
 			info.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
+			
+#if NP_ENGINE_PLATFORM_IS_APPLE
+			info.flags = VK_INSTANCE_CREATE_ENUMERATE_PORTABILITY_BIT_KHR;
+#endif
+			
 			return info;
 		}
 
