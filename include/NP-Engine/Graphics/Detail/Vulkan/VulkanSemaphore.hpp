@@ -21,13 +21,8 @@ namespace np::gfx::__detail
 		{
 			VkSemaphore semaphore = nullptr;
 
-			VkSemaphoreTypeCreateInfo type{};
-			type.sType = VK_STRUCTURE_TYPE_SEMAPHORE_TYPE_CREATE_INFO;
-			type.semaphoreType = VK_SEMAPHORE_TYPE_BINARY;
-
 			VkSemaphoreCreateInfo info{};
 			info.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
-			info.pNext = &type;
 
 			if (vkCreateSemaphore(_device, &info, nullptr, &semaphore) != VK_SUCCESS)
 				semaphore = nullptr;
