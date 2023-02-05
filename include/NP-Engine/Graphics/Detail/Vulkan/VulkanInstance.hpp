@@ -50,12 +50,12 @@ namespace np::gfx::__detail
 					(msg_severity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT) != 0)
 				{
 					retval = VK_FALSE;
-					str msg = "\nNP Validation Layer: ";
+					str msg = "NP Validation Layer: ";
 					msg += "[[" + to_str(callback_data->pMessageIdName) + ", " + to_str(callback_data->messageIdNumber) + "]] ";
 					msg += to_str(callback_data->pMessage);
-					msg += "\n";
 
-					::std::cerr << msg;
+					NP_ENGINE_LOG_ERROR(msg);
+
 					// NP_ENGINE_ASSERT(false, msg); // here in case for issues that cause a gpu crash
 				}
 			}
