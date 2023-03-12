@@ -13,6 +13,9 @@
 #include "NP-Engine/Random/Random.hpp"
 #include "NP-Engine/Math/Math.hpp"
 
+//TODO: use Random64
+//TODO: add SIMD
+
 namespace np::noiz
 {
 	/*
@@ -331,7 +334,7 @@ namespace np::noiz
 			return _warp_octave_displacement;
 		}
 
-		inline flt Noise(flt x, flt y, flt z) const
+		inline flt Noise(flt x, flt y, flt z) const //TODO: this could be an operator()
 		{
 			return GetAmplitude() * PureNoise(GetFrequency() * x, GetFrequency() * y, GetFrequency() * z);
 		}
@@ -339,7 +342,7 @@ namespace np::noiz
 		/*
 			calculates noise value based directly on params and not affected by internal properties
 		*/
-		inline flt PureNoise(flt x, flt y, flt z) const
+		inline flt PureNoise(flt x, flt y, flt z) const //TODO: consider refactoring to CalculateNoiseValue
 		{
 			// Find the unit cube that contains the point
 			i32 X = mat::FastFloor(x);

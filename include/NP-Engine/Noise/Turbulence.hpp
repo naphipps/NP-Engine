@@ -14,6 +14,8 @@
 #include "Perlin.hpp"
 #include "Simplex.hpp"
 
+//TODO: use Random64
+
 namespace np::noiz
 {
 	/*
@@ -37,7 +39,7 @@ namespace np::noiz
 			flt _scalar;
 				- can be anything
 				- default to 0.1f
-		*/
+	*/
 
 	class Turbulence : public rng::Random32Base
 	{
@@ -45,7 +47,7 @@ namespace np::noiz
 		constexpr static flt DEFAULT_SCALAR = 0.1f;
 
 	private:
-		con::array<Perlin, 3> _perlins;
+		con::array<Perlin, 3> _perlins; //TODO: I think we could make PerlinTurbulence and SimplexTurbulence classes to seperate these arrays for when they're needed?
 		con::array<Simplex, 4> _simplexes;
 		flt _scalar;
 
