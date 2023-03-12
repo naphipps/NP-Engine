@@ -11,7 +11,7 @@
 
 namespace np::app
 {
-    Popup::Select Popup::Show(str title, str message, Popup::Style style, Popup::Buttons buttons)
+    Popup::Select Popup::Show(::std::string title, ::std::string message, Popup::Style style, Popup::Buttons buttons)
     {
         NSAlert *alert = [[NSAlert alloc] init];
         
