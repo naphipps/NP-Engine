@@ -107,7 +107,7 @@ namespace np::win
 
 		static con::vector<str> GetRequiredGfxExtentions(WindowDetailType detail_type);
 
-		static Window* Create(WindowDetailType detail_type, srvc::Services& services, const Properties& properties);
+		static Window* Create(WindowDetailType detail_type, srvc::Services& services, Properties& properties);
 
 		virtual ~Window()
 		{

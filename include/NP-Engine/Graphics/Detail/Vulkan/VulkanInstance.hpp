@@ -123,7 +123,7 @@ namespace np::gfx::__detail
 			extension_set.emplace(VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME);
 #endif
 
-			con::vector<str> window_required = win::Window::GetRequiredGfxExtentions();
+			con::vector<str> window_required = win::Window::GetRequiredGfxExtentions(win::WindowDetailType::Glfw);
 			for (const str& extension : window_required)
 				extension_set.emplace(extension);
 

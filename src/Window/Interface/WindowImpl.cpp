@@ -66,7 +66,7 @@ namespace np::win
 		return extensions;
 	}
 
-	Window* Window::Create(WindowDetailType detail_type, srvc::Services& services, const Window::Properties& properties)
+	Window* Window::Create(WindowDetailType detail_type, srvc::Services& services, Window::Properties& properties)
 	{
 		Window* window = nullptr;
 

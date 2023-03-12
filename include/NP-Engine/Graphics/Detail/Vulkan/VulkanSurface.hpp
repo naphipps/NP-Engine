@@ -33,8 +33,9 @@ namespace np::gfx::__detail
 		VkSurfaceKHR CreateSurface()
 		{
 			VkSurfaceKHR surface = nullptr;
+			win::WindowDetailType win_detail_type = win::WindowDetailType::Glfw; //TODO: make this depenedent on RenderTarget's window detail type
 
-			switch (win::__detail::RegisteredWindowDetailType.load(mo_acquire))
+			switch (win_detail_type)
 			{
 			case win::WindowDetailType::Glfw:
 				if ((VkInstance)_instance)
