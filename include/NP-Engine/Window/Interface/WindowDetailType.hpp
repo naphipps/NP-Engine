@@ -17,16 +17,6 @@ namespace np::win
 		Glfw,
 		Sdl
 	};
-
-	namespace __detail
-	{
-		extern atm<WindowDetailType> RegisteredWindowDetailType;
-	}
-
-	static WindowDetailType GetRegisteredWindowDetailType()
-	{
-		return __detail::RegisteredWindowDetailType.load(mo_acquire);
-	}
 }
 
 #endif /* NP_ENGINE_WINDOW_DETAIL_TYPE_HPP */

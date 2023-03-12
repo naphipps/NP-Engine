@@ -104,16 +104,11 @@ namespace np::app
 			}
 		}
 
-		void ChooseWindowDetailType()
-		{
-			win::__detail::RegisteredWindowDetailType = win::WindowDetailType::Glfw;
-		}
-
 	public:
 		WindowLayer(srvc::Services& services): Layer(services)
 		{
-			ChooseWindowDetailType();
-			win::Window::Init();
+			win::Window::Init(win::WindowDetailType::Glfw);
+			win::Window::Init(win::WindowDetailType::Sdl);
 		}
 
 		virtual ~WindowLayer()
@@ -123,17 +118,19 @@ namespace np::app
 
 			Cleanup();
 
-			win::Window::Terminate();
+			win::Window::Terminate(win::WindowDetailType::Glfw);
+			win::Window::Terminate(win::WindowDetailType::Sdl);
 		}
 
-		virtual win::Window* CreateWindow(win::Window::Properties& properties)
+		virtual win::Window* CreateWindow(win::WindowDetailType detail_type, win::Window::Properties& properties)
 		{
-			return _windows.emplace_back(win::Window::Create(_services, properties));
+			return _windows.emplace_back(win::Window::Create(detail_type, _services, properties));
 		}
 
 		virtual void Update(tim::DblMilliseconds time_delta) override
 		{
-			win::Window::Update();
+			win::Window::Update(win::WindowDetailType::Glfw);
+			win::Window::Update(win::WindowDetailType::Sdl);
 
 			for (auto it = _windows.begin(); it != _windows.end(); it++)
 				(*it)->Update(time_delta);

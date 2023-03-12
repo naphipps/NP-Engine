@@ -10,9 +10,9 @@
 
 namespace np::win
 {
-	void Window::Init()
+	void Window::Init(WindowDetailType detail_type)
 	{
-		switch (__detail::RegisteredWindowDetailType.load(mo_acquire))
+		switch (detail_type)
 		{
 		case WindowDetailType::Glfw:
 			__detail::GlfwWindow::Init();
@@ -23,9 +23,9 @@ namespace np::win
 		}
 	}
 
-	void Window::Terminate()
+	void Window::Terminate(WindowDetailType detail_type)
 	{
-		switch (__detail::RegisteredWindowDetailType.load(mo_acquire))
+		switch (detail_type)
 		{
 		case WindowDetailType::Glfw:
 			__detail::GlfwWindow::Terminate();
@@ -36,9 +36,9 @@ namespace np::win
 		}
 	}
 
-	void Window::Update()
+	void Window::Update(WindowDetailType detail_type)
 	{
-		switch (__detail::RegisteredWindowDetailType.load(mo_acquire))
+		switch (detail_type)
 		{
 		case WindowDetailType::Glfw:
 			__detail::GlfwWindow::Update();
@@ -49,11 +49,11 @@ namespace np::win
 		}
 	}
 
-	con::vector<str> Window::GetRequiredGfxExtentions()
+	con::vector<str> Window::GetRequiredGfxExtentions(WindowDetailType detail_type)
 	{
 		con::vector<str> extensions;
 
-		switch (__detail::RegisteredWindowDetailType.load(mo_acquire))
+		switch (detail_type)
 		{
 		case WindowDetailType::Glfw:
 			extensions = __detail::GlfwWindow::GetRequiredGfxExtentions();
@@ -66,11 +66,11 @@ namespace np::win
 		return extensions;
 	}
 
-	Window* Window::Create(srvc::Services& services, const Window::Properties& properties)
+	Window* Window::Create(WindowDetailType detail_type, srvc::Services& services, const Window::Properties& properties)
 	{
 		Window* window = nullptr;
 
-		switch (__detail::RegisteredWindowDetailType.load(mo_acquire))
+		switch (detail_type)
 		{
 		case WindowDetailType::Glfw:
 			window = mem::Create<__detail::GlfwWindow>(services.GetAllocator(), properties, services);
@@ -196,8 +196,8 @@ namespace np::win
 	{
 		if (IsRunning())
 		{
-			_properties.Width = width;
-			_properties.Height = height;
+			_properties.width = width;
+			_properties.height = height;
 			_services.GetEventSubmitter().Emplace<WindowResizeEvent>(this, width, height);
 		}
 	}

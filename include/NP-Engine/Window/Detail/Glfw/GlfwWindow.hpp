@@ -32,6 +32,7 @@ namespace np::win::__detail
 	protected:
 		atm<GLFWwindow*> _glfw_window;
 		nput::MousePosition _mouse_position;
+		tim::SteadyTimestamp _apply_system_theme_timestamp;
 
 #if NP_ENGINE_PLATFORM_IS_WINDOWS
 
@@ -889,7 +890,7 @@ namespace np::win::__detail
 			ApplySystemTheme();
 		}
 
-		void ApplySystemTheme()
+		void ApplySystemTheme() //TODO: we might want this pushed to Window??
 		{
 #if NP_ENGINE_PLATFORM_IS_WINDOWS
 			LPCSTR subkey = "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize";
@@ -899,18 +900,19 @@ namespace np::win::__detail
 			LSTATUS status = RegGetValueA(HKEY_CURRENT_USER, subkey, value, RRF_RT_DWORD, nullptr, &word, &size);
 			HWND native_window = (HWND)GetNativeWindow();
 			BOOL dark_mode_value = status == ERROR_SUCCESS && word == 0;
-			BOOL existing_dark_mode_value = false;
+			BOOL prev_dark_mode_value = false;
 			DWORD DARK_MODE_ATTRIBUTE = 20;
 
-			DwmGetWindowAttribute(native_window, DARK_MODE_ATTRIBUTE, &existing_dark_mode_value, sizeof(BOOL));
+			DwmGetWindowAttribute(native_window, DARK_MODE_ATTRIBUTE, &prev_dark_mode_value, sizeof(BOOL));
 
-			if (existing_dark_mode_value != dark_mode_value)
+			if (prev_dark_mode_value != dark_mode_value)
 			{
 				DwmSetWindowAttribute(native_window, DARK_MODE_ATTRIBUTE, &dark_mode_value, sizeof(BOOL));
-				GlfwWindowProcedure(native_window, WM_NCACTIVATE, false, 0);
 
-				if (IsFocused())
-					GlfwWindowProcedure(native_window, WM_NCACTIVATE, true, 0);
+				//TODO: test this
+				bl is_active = native_window == GetActiveWindow();
+				GlfwWindowProcedure(native_window, WM_NCACTIVATE, !is_active, 0);
+				GlfwWindowProcedure(native_window, WM_NCACTIVATE, is_active, 0);
 			}
 #endif
 		}
@@ -955,9 +957,10 @@ namespace np::win::__detail
 			return extensions;
 		}
 
-		GlfwWindow(const Window::Properties& properties, srvc::Services& services) :
+		GlfwWindow(Window::Properties& properties, srvc::Services& services) :
 			Window(properties, services),
-			_glfw_window(nullptr)
+			_glfw_window(nullptr),
+			_apply_system_theme_timestamp(tim::SteadyClock::now())
 #if NP_ENGINE_PLATFORM_IS_WINDOWS
 			,
 			_prev_window_procedure(nullptr),
@@ -1093,8 +1096,12 @@ namespace np::win::__detail
 				_prev_mouse_position = point;
 #endif
 
-				//TODO: we don't have to apply the system theme every update call - just about once per couple seconds will do I think
-				ApplySystemTheme();
+				tim::SteadyTimestamp timestamp = tim::SteadyClock::now();
+				if (timestamp - _apply_system_theme_timestamp >= tim::DblSeconds(2)) //TODO: we might want this pushed to Window
+				{
+					ApplySystemTheme();
+					_apply_system_theme_timestamp = timestamp;
+				}
 			}
 		}
 
@@ -1131,7 +1138,7 @@ namespace np::win::__detail
 		{
 			GLFWwindow* glfw_window = _glfw_window.load(mo_acquire);
 			if (glfw_window)
-				glfwSetWindowTitle(glfw_window, _properties.Title.c_str());
+				glfwSetWindowTitle(glfw_window, _properties.title.c_str());
 
 			Window::SetTitle(title);
 		}

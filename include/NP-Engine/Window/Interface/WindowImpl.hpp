@@ -18,6 +18,8 @@
 
 #include "NP-Engine/Vendor/GlmInclude.hpp"
 
+#include "WindowDetailType.hpp"
+
 #ifndef NP_ENGINE_WINDOW_LOOP_DURATION
 	#define NP_ENGINE_WINDOW_LOOP_DURATION 0 // milliseconds
 #endif
@@ -32,9 +34,9 @@ namespace np::win
 
 		struct Properties
 		{
-			str Title = "NP Window";
-			ui32 Width = DEFAULT_WIDTH;
-			ui32 Height = DEFAULT_HEIGHT;
+			str title = "NP Window";
+			ui32 width = DEFAULT_WIDTH;
+			ui32 height = DEFAULT_HEIGHT;
 		};
 
 		using ResizeCallback = void (*)(void* caller, ui32 width, ui32 height);
@@ -133,17 +135,17 @@ namespace np::win
 
 		virtual ui32 GetWidth() const
 		{
-			return _properties.Width;
+			return _properties.width;
 		}
 
 		virtual ui32 GetHeight() const
 		{
-			return _properties.Height;
+			return _properties.height;
 		}
 
 		virtual str GetTitle() const
 		{
-			return _properties.Title;
+			return _properties.title;
 		}
 
 		virtual Properties GetProperties() const
@@ -153,7 +155,7 @@ namespace np::win
 
 		virtual void SetTitle(str title)
 		{
-			_properties.Title = title;
+			_properties.title = title;
 		}
 
 		virtual void Resize(ui32 width, ui32 height);
