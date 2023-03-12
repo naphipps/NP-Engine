@@ -53,15 +53,12 @@ namespace np::gfxalg
 
 		void Init()
 		{
-			_is_approved.DisconnectFunction();
 			_is_approved.Clear();
 			_is_approved.SetData<Payload*>(nullptr);
 
-			_approved_action.DisconnectFunction();
 			_approved_action.Clear();
 			_approved_action.SetData<Payload*>(nullptr);
 
-			_rejected_action.DisconnectFunction();
 			_rejected_action.Clear();
 			_rejected_action.SetData<Payload*>(nullptr);
 		}
@@ -119,8 +116,9 @@ namespace np::gfxalg
 
 		void Fill(Payload payload)
 		{
-			NP_ENGINE_ASSERT(_is_approved.IsConnected(), "FloodFill requires IsApproved to be connected to a function");
-			NP_ENGINE_ASSERT(_approved_action.IsConnected(), "FloodFill requires ApprovedAction to be connected to a function");
+			//TODO: do we need some asserts for the following??
+			//TODO: FloodFill requires IsApproved to be connected to a function
+			//TODO: FloodFill requires ApprovedAction to be connected to a function
 
 			payload.relation = PointRelation::None;
 
@@ -132,67 +130,67 @@ namespace np::gfxalg
 			ui32 width = _image_subview.GetWidth();
 			con::queue<Point> flood;
 
-			if (_is_approved.InvokeConnectedFunction())
+			if (_is_approved())
 				flood.emplace(payload.point);
 			else
-				_rejected_action.InvokeConnectedFunction();
+				_rejected_action();
 
 			while (!flood.empty())
 			{
 				payload.point = flood.front();
 				payload.relation = PointRelation::None;
-				_approved_action.InvokeConnectedFunction();
+				_approved_action();
 
 				payload.relation = PointRelation::Upper;
 				if (payload.point.y < height)
 				{
-					if (_is_approved.InvokeConnectedFunction())
+					if (_is_approved())
 						flood.emplace(payload.point.x, payload.point.y + 1);
 					else
-						_rejected_action.InvokeConnectedFunction();
+						_rejected_action();
 				}
 				else
 				{
-					_rejected_action.InvokeConnectedFunction();
+					_rejected_action();
 				}
 
 				payload.relation = PointRelation::Lower;
 				if (payload.point.y >= 0)
 				{
-					if (_is_approved.InvokeConnectedFunction())
+					if (_is_approved())
 						flood.emplace(payload.point.x, payload.point.y - 1);
 					else
-						_rejected_action.InvokeConnectedFunction();
+						_rejected_action();
 				}
 				else
 				{
-					_rejected_action.InvokeConnectedFunction();
+					_rejected_action();
 				}
 
 				payload.relation = PointRelation::Right;
 				if (payload.point.x < width)
 				{
-					if (_is_approved.InvokeConnectedFunction())
+					if (_is_approved())
 						flood.emplace(payload.point.x + 1, payload.point.y);
 					else
-						_rejected_action.InvokeConnectedFunction();
+						_rejected_action();
 				}
 				else
 				{
-					_rejected_action.InvokeConnectedFunction();
+					_rejected_action();
 				}
 
 				payload.relation = PointRelation::Left;
 				if (payload.point.x >= 0)
 				{
-					if (_is_approved.InvokeConnectedFunction())
+					if (_is_approved())
 						flood.emplace(payload.point.x - 1, payload.point.y);
 					else
-						_rejected_action.InvokeConnectedFunction();
+						_rejected_action();
 				}
 				else
 				{
-					_rejected_action.InvokeConnectedFunction();
+					_rejected_action();
 				}
 
 				if (payload.enable_diagonal)
@@ -200,53 +198,53 @@ namespace np::gfxalg
 					payload.relation = PointRelation::UpperRight;
 					if (payload.point.x < width && payload.point.y < height)
 					{
-						if (_is_approved.InvokeConnectedFunction())
+						if (_is_approved())
 							flood.emplace(payload.point.x + 1, payload.point.y + 1);
 						else
-							_rejected_action.InvokeConnectedFunction();
+							_rejected_action();
 					}
 					else
 					{
-						_rejected_action.InvokeConnectedFunction();
+						_rejected_action();
 					}
 
 					payload.relation = PointRelation::UpperLeft;
 					if (payload.point.x >= 0 && payload.point.y < height)
 					{
-						if (_is_approved.InvokeConnectedFunction())
+						if (_is_approved())
 							flood.emplace(payload.point.x - 1, payload.point.y + 1);
 						else
-							_rejected_action.InvokeConnectedFunction();
+							_rejected_action();
 					}
 					else
 					{
-						_rejected_action.InvokeConnectedFunction();
+						_rejected_action();
 					}
 
 					payload.relation = PointRelation::LowerRight;
 					if (payload.point.x < width && payload.point.y >= 0)
 					{
-						if (_is_approved.InvokeConnectedFunction())
+						if (_is_approved())
 							flood.emplace(payload.point.x + 1, payload.point.y - 1);
 						else
-							_rejected_action.InvokeConnectedFunction();
+							_rejected_action();
 					}
 					else
 					{
-						_rejected_action.InvokeConnectedFunction();
+						_rejected_action();
 					}
 
 					payload.relation = PointRelation::LowerLeft;
 					if (payload.point.x >= 0 && payload.point.y >= 0)
 					{
-						if (_is_approved.InvokeConnectedFunction())
+						if (_is_approved())
 							flood.emplace(payload.point.x - 1, payload.point.y - 1);
 						else
-							_rejected_action.InvokeConnectedFunction();
+							_rejected_action();
 					}
 					else
 					{
-						_rejected_action.InvokeConnectedFunction();
+						_rejected_action();
 					}
 				}
 

@@ -389,7 +389,7 @@ namespace np::gfx::__detail
 			VulkanPipeline& vulkan_pipeline = (VulkanPipeline&)pipeline;
 
 			PrepareForPipeline(pipeline);
-			_update_meta_values_on_frame.InvokeConnectedFunction();
+			_update_meta_values_on_frame();
 
 			vulkan_frame.StageCommand(*_push_constants);
 			vulkan_frame.StageCommand(*_bind_vertex_buffers);
