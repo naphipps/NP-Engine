@@ -46,6 +46,11 @@ namespace np::app
 		jsys::Job* _rendering_job;
 		atm_bl _keep_rendering;
 
+		static void AdjustForWindowClosingCallback(void* caller, mem::Delegate& d)
+		{
+			((GraphicsLayer*)caller)->AdjustForWindowClosingProcedure(d);
+		}
+
 		void AdjustForWindowClosingProcedure(mem::Delegate& d)
 		{
 			win::Window* window = d.GetData<win::Window*>();
@@ -73,7 +78,7 @@ namespace np::app
 			win::WindowClosingEvent::DataType& closing_data = e.GetData<win::WindowClosingEvent::DataType>();
 
 			jsys::Job* adjust_job = _services.GetJobSystem().CreateJob();
-			adjust_job->GetDelegate().Connect<GraphicsLayer, &GraphicsLayer::AdjustForWindowClosingProcedure>(this);
+			adjust_job->GetDelegate().SetCallback(this, AdjustForWindowClosingCallback);
 
 			closing_data.job->AddDependency(*adjust_job);
 			_services.GetJobSystem().SubmitJob(jsys::JobPriority::Higher, adjust_job);
@@ -151,6 +156,11 @@ namespace np::app
 			_staged_for_consuming.store(nullptr);
 
 			return packet;
+		}
+
+		static void RenderingCallback(void* caller, mem::Delegate& d)
+		{
+			((GraphicsLayer*)caller)->RenderingProcedure(d);
 		}
 
 		void RenderingProcedure(mem::Delegate& d)
@@ -249,7 +259,7 @@ namespace np::app
 			if (!_rendering_job)
 			{
 				_rendering_job = _services.GetJobSystem().CreateJob();
-				_rendering_job->GetDelegate().Connect<GraphicsLayer, &GraphicsLayer::RenderingProcedure>(this);
+				_rendering_job->GetDelegate().SetCallback(this, RenderingCallback);
 				_rendering_job->SetCanBeStolen(false);
 				_services.GetJobSystem().GetJobWorkers()[_job_worker_index].SubmitImmediateJob(_rendering_job);
 			}

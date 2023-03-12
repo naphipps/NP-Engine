@@ -697,7 +697,7 @@ namespace np::win::__detail
 				break;
 			}
 
-			window->InvokeKeyCodeCallbacks(state);
+			window->InvokeKeyCallbacks(state);
 		}
 
 		static void MouseButtonCallback(GLFWwindow* glfw_window, i32 button, i32 action, i32 modifiers)
@@ -738,7 +738,7 @@ namespace np::win::__detail
 				break;
 			}
 
-			window->InvokeMouseCodeCallbacks(state);
+			window->InvokeMouseCallbacks(state);
 		}
 
 		static void MousePositionCallback(GLFWwindow* glfw_window, dbl x, dbl y)
@@ -775,7 +775,7 @@ namespace np::win::__detail
 
 			// TODO: controller support in window's callbacks is not finished
 
-			// window->InvokeControllerCodeCallbacks(state);
+			// window->InvokeControllerCallbacks(state);
 		}
 
 		void SetGlfwCallbacks()

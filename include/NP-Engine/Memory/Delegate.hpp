@@ -14,55 +14,31 @@
 
 #include "PadObject.hpp"
 
-/*
-	TODO: I think our delegate could make use of callbacks like how glfw does it.
-		I’m not a fan of the template connect methods.
-		Just pass in the static callback, and inside that, we can cast to our instance, etc
-*/
-
 namespace np::mem
 {
 	template <typename R>
 	class DelegateTemplate : public PadObject
 	{
+	public:
+		using Callback = R (*)(void*, DelegateTemplate<R>&);
+
 	protected:
-		using InstancePtr = void*;
-		using FunctionPtr = R (*)(InstancePtr, DelegateTemplate<R>&);
-
-		InstancePtr _instance_ptr;
-		FunctionPtr _function_ptr;
-
-		/*
-			used to wrap a static function to our function pointer
-		*/
-		template <R (*Function)(DelegateTemplate<R>&)>
-		inline static R wrap(InstancePtr, DelegateTemplate<R>& del)
-		{
-			return (Function)(del);
-		}
-
-		/*
-			used to wrap a class method to our function pointer
-		*/
-		template <class C, R (C::*Function)(DelegateTemplate<R>&)>
-		inline static R wrap(InstancePtr ptr, DelegateTemplate<R>& del)
-		{
-			return (static_cast<C*>(ptr)->*Function)(del);
-		}
+		void* _caller;
+		Callback _callback;
 
 	public:
-		DelegateTemplate(): _instance_ptr(nullptr), _function_ptr(nullptr) {}
+		DelegateTemplate(): _caller(nullptr), _callback(nullptr) {}
 
 		DelegateTemplate(const DelegateTemplate<R>& other):
 			PadObject(static_cast<const PadObject&>(other)),
-			_instance_ptr(other._instance_ptr),
-			_function_ptr(other._function_ptr)
+			_caller(other._caller),
+			_callback(other._callback)
 		{}
 
 		DelegateTemplate(DelegateTemplate<R>&& other) noexcept:
 			PadObject(static_cast<PadObject&&>(other)),
-			_instance_ptr(::std::move(other._instance_ptr)),
-			_function_ptr(::std::move(other._function_ptr))
+			_caller(::std::move(other._caller)),
+			_callback(::std::move(other._callback))
 		{}
 
 		virtual ~DelegateTemplate() {}
@@ -70,45 +46,36 @@ namespace np::mem
 		DelegateTemplate<R>& operator=(const DelegateTemplate<R>& other)
 		{
 			PadObject::operator=(static_cast<const PadObject&>(other));
-			_instance_ptr = other._instance_ptr;
-			_function_ptr = other._function_ptr;
+			_caller = other._caller;
+			_callback = other._callback;
 			return *this;
 		}
 
 		DelegateTemplate<R>& operator=(DelegateTemplate<R>&& other) noexcept
 		{
 			PadObject::operator=(static_cast<PadObject&&>(other));
-			_instance_ptr = ::std::move(other._instance_ptr);
-			_function_ptr = ::std::move(other._function_ptr);
+			_caller = ::std::move(other._caller);
+			_callback = ::std::move(other._callback);
 			return *this;
 		}
 
-		/*
-			connects a static function to our function pointer
-		*/
-		template <R (*Function)(DelegateTemplate<R>&)>
-		inline void Connect()
+		virtual void SetCallback(void* caller, Callback callback)
 		{
-			_instance_ptr = nullptr;
-			_function_ptr = &wrap<Function>;
+			_caller = caller;
+			_callback = callback;
 		}
 
-		/*
-			connects a class method to our function pointer
-		*/
-		template <class C, R (C::*Method)(DelegateTemplate<R>&)>
-		inline void Connect(InstancePtr ptr)
+		virtual void SetCallback(Callback callback)
 		{
-			_instance_ptr = ptr;
-			_function_ptr = &wrap<C, Method>;
+			SetCallback(nullptr, callback);
 		}
 
-		inline R InvokeConnectedFunction()
+		virtual R operator()()
 		{
 			if constexpr (::std::is_same_v<void, R>)
 			{
 				if (IsConnected())
-					_function_ptr(_instance_ptr, *this);
+					_callback(_caller, *this);
 
 				return;
 			}
@@ -117,21 +84,20 @@ namespace np::mem
 				R r;
 
 				if (IsConnected())
-					r = _function_ptr(_instance_ptr, *this);
+					r = _callback(_caller, *this);
 
 				return r;
 			}
+
+			//return IsConnected() ? _callback(_caller, *this) : R; //TODO: does this work with void??
 		}
 
-		bl IsConnected() const
+		virtual void Clear() override
 		{
-			return _function_ptr != nullptr;
-		}
+			_caller = nullptr;
+			_callback = nullptr;
 
-		inline void DisconnectFunction()
-		{
-			_instance_ptr = nullptr;
-			_function_ptr = nullptr;
+			PadObject::Clear();
 		}
 	};
 

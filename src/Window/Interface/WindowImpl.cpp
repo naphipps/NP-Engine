@@ -86,55 +86,85 @@ namespace np::win
 	void Window::InvokeResizeCallbacks(ui32 width, ui32 height)
 	{
 		if (IsRunning())
+		{
 			_services.GetEventSubmitter().Emplace<WindowResizeEvent>(this, width, height);
 
-		for (auto it = _resize_callbacks.begin(); it != _resize_callbacks.end(); it++)
-			it->second(it->first, width, height);
+			for (auto it = _resize_callbacks.begin(); it != _resize_callbacks.end(); it++)
+				(*it)(nullptr, width, height);
+
+			for (auto it = _resize_caller_callbacks.begin(); it != _resize_caller_callbacks.end(); it++)
+				it->second(it->first, width, height);
+		}
 	}
 
 	void Window::InvokePositionCallbacks(i32 x, i32 y)
 	{
 		if (IsRunning())
+		{
 			_services.GetEventSubmitter().Emplace<WindowPositionEvent>(this, x, y);
 
-		for (auto it = _position_callbacks.begin(); it != _position_callbacks.end(); it++)
-			it->second(it->first, x, y);
+			for (auto it = _position_callbacks.begin(); it != _position_callbacks.end(); it++)
+				(*it)(nullptr, x, y);
+
+			for (auto it = _position_caller_callbacks.begin(); it != _position_caller_callbacks.end(); it++)
+				it->second(it->first, x, y);
+		}
 	}
 
 	void Window::InvokeFramebufferCallbacks(ui32 width, ui32 height)
 	{
 		if (IsRunning())
+		{
 			_services.GetEventSubmitter().Emplace<WindowFramebufferEvent>(this, width, width);
 
-		for (auto it = _framebuffer_callbacks.begin(); it != _framebuffer_callbacks.end(); it++)
-			it->second(it->first, width, height);
+			for (auto it = _framebuffer_callbacks.begin(); it != _framebuffer_callbacks.end(); it++)
+				(*it)(nullptr, width, height);
+
+			for (auto it = _framebuffer_caller_callbacks.begin(); it != _framebuffer_caller_callbacks.end(); it++)
+				it->second(it->first, width, height);
+		}
 	}
 
 	void Window::InvokeMinimizeCallbacks(bl minimized)
 	{
 		if (IsRunning())
+		{
 			_services.GetEventSubmitter().Emplace<WindowMinimizeEvent>(this, minimized);
 
-		for (auto it = _minimize_callbacks.begin(); it != _minimize_callbacks.end(); it++)
-			it->second(it->first, minimized);
+			for (auto it = _minimize_callbacks.begin(); it != _minimize_callbacks.end(); it++)
+				(*it)(nullptr, minimized);
+
+			for (auto it = _minimize_caller_callbacks.begin(); it != _minimize_caller_callbacks.end(); it++)
+				it->second(it->first, minimized);
+		}
 	}
 
 	void Window::InvokeMaximizeCallbacks(bl maximized)
 	{
 		if (IsRunning())
+		{
 			_services.GetEventSubmitter().Emplace<WindowMaximizeEvent>(this, maximized);
 
-		for (auto it = _maximize_callbacks.begin(); it != _maximize_callbacks.end(); it++)
-			it->second(it->first, maximized);
+			for (auto it = _maximize_callbacks.begin(); it != _maximize_callbacks.end(); it++)
+				(*it)(nullptr, maximized);
+
+			for (auto it = _maximize_caller_callbacks.begin(); it != _maximize_caller_callbacks.end(); it++)
+				it->second(it->first, maximized);
+		}
 	}
 
 	void Window::InvokeFocusCallbacks(bl focused)
 	{
 		if (IsRunning())
+		{
 			_services.GetEventSubmitter().Emplace<WindowFocusEvent>(this, focused);
 
-		for (auto it = _focus_callbacks.begin(); it != _focus_callbacks.end(); it++)
-			it->second(it->first, focused);
+			for (auto it = _focus_callbacks.begin(); it != _focus_callbacks.end(); it++)
+				(*it)(nullptr, focused);
+
+			for (auto it = _focus_caller_callbacks.begin(); it != _focus_caller_callbacks.end(); it++)
+				it->second(it->first, focused);
+		}
 	}
 
 	void Window::ClosingProcedure(mem::Delegate& d)
@@ -156,7 +186,7 @@ namespace np::win
 		DetailShowProcedure();
 		
 		jsys::Job* window_closing_job = _services.GetJobSystem().CreateJob();
-		window_closing_job->GetDelegate().Connect<Window, &Window::ClosingProcedure >(this);
+		window_closing_job->GetDelegate().SetCallback(this, ClosingCallback);
 		_services.GetEventSubmitter().Emplace<WindowClosingEvent>(this, window_closing_job);
 
 		_show_procedure_is_complete.store(true, mo_release);

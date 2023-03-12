@@ -50,6 +50,11 @@ namespace np::app
 			e.SetHandled();
 		}
 
+		static void HandleWindowClosedCallback(void* caller, mem::Delegate& d)
+		{
+			((WindowLayer*)caller)->HandleWindowClosedProcedure(d);
+		}
+
 		void HandleWindowClosedProcedure(mem::Delegate& d)
 		{
 			win::Window* closed_window = d.GetData<win::Window*>();
@@ -76,7 +81,7 @@ namespace np::app
 			jsys::Job* handle_job = job_system.CreateJob();
 			//ownership of window is moving from the event to our job procedure
 			handle_job->GetDelegate().SetData<win::Window*>(closed_data.window);
-			handle_job->GetDelegate().Connect<WindowLayer, &WindowLayer::HandleWindowClosedProcedure>(this);
+			handle_job->GetDelegate().SetCallback(this, HandleWindowClosedCallback);
 			job_system.SubmitJob(jsys::JobPriority::Higher, handle_job);
 
 			e.SetHandled();

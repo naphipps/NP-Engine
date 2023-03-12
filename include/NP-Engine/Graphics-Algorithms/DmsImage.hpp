@@ -33,7 +33,7 @@ namespace np::gfxalg
 		ImageSubview _image_subview;
 
 	private:
-		static bl IsNotVisitedAndUnderIsothreshold(mem::BlDelegate& d)
+		static bl IsNotVisitedAndUnderIsothreshold(void* caller, mem::BlDelegate& d)
 		{
 			using Relation = FloodFillImage::PointRelation;
 			FloodFillImage::Payload& payload = *d.GetData<FloodFillImage::Payload*>();
@@ -53,14 +53,14 @@ namespace np::gfxalg
 				user_data.self->GetIsovalue(point, user_data.channel) < user_data.isothreshold;
 		}
 
-		static void MarkAsVisited(mem::VoidDelegate& d)
+		static void MarkAsVisited(void* caller, mem::VoidDelegate& d)
 		{
 			FloodFillImage::Payload& payload = *d.GetData<FloodFillImage::Payload*>();
 			ExtractEdgePointsUserData& user_data = *((ExtractEdgePointsUserData*)payload.user_data);
 			user_data.visited->emplace(payload.point);
 		}
 
-		static void ExtractEdgePoint(mem::VoidDelegate& d)
+		static void ExtractEdgePoint(void* caller, mem::VoidDelegate& d)
 		{
 			FloodFillImage::Payload& payload = *d.GetData<FloodFillImage::Payload*>();
 			ExtractEdgePointsUserData& user_data = *((ExtractEdgePointsUserData*)payload.user_data);
@@ -287,9 +287,9 @@ namespace np::gfxalg
 			extract_edge_points_payload.user_data = &extract_edge_points_user_data;
 
 			FloodFillImage extract_edge_points_flood(_image_subview);
-			extract_edge_points_flood.GetIsApprovedDelegate().Connect<&DmsImage::IsNotVisitedAndUnderIsothreshold>();
-			extract_edge_points_flood.GetApprovedActionDelegate().Connect<&DmsImage::MarkAsVisited>();
-			extract_edge_points_flood.GetRejectedActionDelegate().Connect<&DmsImage::ExtractEdgePoint>();
+			extract_edge_points_flood.GetIsApprovedDelegate().SetCallback(IsNotVisitedAndUnderIsothreshold);
+			extract_edge_points_flood.GetApprovedActionDelegate().SetCallback(MarkAsVisited);
+			extract_edge_points_flood.GetRejectedActionDelegate().SetCallback(ExtractEdgePoint);
 
 			DmsPoint point;
 			for (ui32 y = 0; y < height; y++)
@@ -441,9 +441,9 @@ namespace np::gfxalg
 			extract_edge_points_payload.user_data = &extract_edge_points_user_data;
 
 			FloodFillImage extract_edge_points_flood(_image_subview);
-			extract_edge_points_flood.GetIsApprovedDelegate().Connect<&DmsImage::IsNotVisitedAndUnderIsothreshold>();
-			extract_edge_points_flood.GetApprovedActionDelegate().Connect<&DmsImage::MarkAsVisited>();
-			extract_edge_points_flood.GetRejectedActionDelegate().Connect<&DmsImage::ExtractEdgePoint>();
+			extract_edge_points_flood.GetIsApprovedDelegate().SetCallback(IsNotVisitedAndUnderIsothreshold);
+			extract_edge_points_flood.GetApprovedActionDelegate().SetCallback(MarkAsVisited);
+			extract_edge_points_flood.GetRejectedActionDelegate().SetCallback(ExtractEdgePoint);
 
 			ui32 width = _image_subview.GetWidth();
 			ui32 height = _image_subview.GetHeight();

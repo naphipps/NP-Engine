@@ -116,7 +116,7 @@ namespace np::app
 		{
 			ApplicationPopupEvent::DataType& data = e.GetData<ApplicationPopupEvent::DataType>();
 			data.select = Popup::Show(GetTitle(), data.message, data.style, data.buttons);
-			e.InvokeConnectedFunction();
+			e();
 			e.SetHandled();
 		}
 

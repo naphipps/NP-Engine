@@ -46,7 +46,7 @@ namespace np::jsys
 			{
 				NP_ENGINE_PROFILE_SCOPE("executing immediate Job");
 				success = true;
-				immediate->Execute();
+				(*immediate)();
 				if (immediate->IsComplete())
 					_job_system->DestroyJob(immediate);
 				else
@@ -69,7 +69,7 @@ namespace np::jsys
 				NP_ENGINE_PROFILE_SCOPE("executing next Job");
 				success = true;
 				Job* job = record.job;
-				job->Execute();
+				(*job)();
 				if (job->IsComplete())
 					_job_system->DestroyJob(job);
 				else
@@ -91,7 +91,7 @@ namespace np::jsys
 			{
 				NP_ENGINE_PROFILE_SCOPE("executing stolen Job");
 				success = true;
-				stolen->Execute();
+				(*stolen)();
 				if (stolen->IsComplete())
 					_job_system->DestroyJob(stolen);
 				else

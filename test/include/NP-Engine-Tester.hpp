@@ -30,14 +30,16 @@ namespace np::app
 		tim::SteadyTimestamp _start_timestamp;
 		flt _rate = 1.f;
 
+		static void AdjustForWindowClosingCallback(void* caller, mem::Delegate& d)
+		{
+			((GameLayer*)caller)->AdjustForWindowClosingProcedure(d);
+		}
+
 		void AdjustForWindowClosingProcedure(mem::Delegate& d)
 		{
-			if (_window == d.GetData<win::Window*>())
-			{
-				_scene = nullptr;
-				_renderer = nullptr;
-				_window = nullptr;
-			}
+			win::Window* window = d.GetData<win::Window*>();
+
+			//TODO: handle all references that use this window
 		}
 
 		virtual void AdjustForWindowClosing(evnt::Event& e)
@@ -46,10 +48,16 @@ namespace np::app
 
 			jsys::Job* adjust_job = _services.GetJobSystem().CreateJob();
 			adjust_job->GetDelegate().SetData<win::Window*>(closing_data.window);
-			adjust_job->GetDelegate().Connect<GameLayer, &GameLayer::AdjustForWindowClosingProcedure>(this);
+			adjust_job->GetDelegate().SetCallback(this, AdjustForWindowClosingCallback);
 
 			closing_data.job->AddDependency(*adjust_job);
 			_services.GetJobSystem().SubmitJob(jsys::JobPriority::Higher, adjust_job);
+
+		}
+
+		static void AdjustForWindowClosedCallback(void* caller, mem::Delegate& d)
+		{
+			((GameLayer*)caller)->AdjustForWindowClosedProcedure(d);
 		}
 
 		void AdjustForWindowClosedProcedure(mem::Delegate& d)
@@ -66,7 +74,7 @@ namespace np::app
 
 			jsys::Job* adjust_job = _services.GetJobSystem().CreateJob();
 			adjust_job->GetDelegate().SetData<win::Window*>(closing_data.window);
-			adjust_job->GetDelegate().Connect<GameLayer, &GameLayer::AdjustForWindowClosedProcedure>(this);
+			adjust_job->GetDelegate().SetCallback(this, AdjustForWindowClosedCallback);
 
 			_services.GetJobSystem().SubmitJob(jsys::JobPriority::Higher, adjust_job);
 		}
@@ -86,6 +94,11 @@ namespace np::app
 			default:
 				break;
 			}
+		}
+
+		static void SceneOnDrawCallback(void* caller, mem::Delegate& d)
+		{
+			((GameLayer*)caller)->SceneOnDraw(d);
 		}
 
 		void SceneOnDraw(mem::Delegate& d)
@@ -127,6 +140,11 @@ namespace np::app
 				_scene->SetCamera(_camera);
 		}
 
+		static void UpdateMetaValuesOnFrameCallback(void* caller, mem::Delegate& d)
+		{
+			((GameLayer*)caller)->UpdateMetaValuesOnFrame(d);
+		}
+
 		void UpdateMetaValuesOnFrame(mem::Delegate& d)
 		{
 			gfx::RenderableMetaValues& meta_values = _renderable_model->GetMetaValues();
@@ -156,8 +174,7 @@ namespace np::app
 			_start_timestamp(tim::SteadyClock::now())
 		{
 			_model.GetTexture().SetHotReloadable();
-			_renderable_model->GetUpdateMetaValuesOnFrameDelegate().Connect<GameLayer, &GameLayer::UpdateMetaValuesOnFrame>(
-				this);
+			_renderable_model->GetUpdateMetaValuesOnFrameDelegate().SetCallback(this, UpdateMetaValuesOnFrameCallback);
 
 			_model_entity.add<gfx::RenderableObject*>(_renderable_model);
 
@@ -200,7 +217,7 @@ namespace np::app
 
 
 			// TODO: init scene, and destroy content for last scene??
-			_scene->GetOnDrawDelegate().Connect<GameLayer, &GameLayer::SceneOnDraw>(this); //TODO: do we need this??
+			_scene->GetOnDrawDelegate().SetCallback(this, SceneOnDrawCallback); //TODO: do we need this?? I don't think so
 			_scene->Prepare();
 		}
 

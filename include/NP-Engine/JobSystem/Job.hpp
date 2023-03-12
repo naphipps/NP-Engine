@@ -98,7 +98,7 @@ namespace np::jsys
 		{
 			_dependents.clear();
 			_antecedent_count.store(0, mo_release);
-			_delegate.DisconnectFunction();
+			_delegate.Clear();
 			_confirm_completion_flag.store(nullptr, mo_release);
 			_can_be_stolen = true;
 		}
@@ -108,11 +108,11 @@ namespace np::jsys
 			return _antecedent_count.load(mo_acquire) == 0;
 		}
 
-		void Execute()
+		void operator()()
 		{
 			if (CanExecute())
 			{
-				_delegate.InvokeConnectedFunction();
+				_delegate();
 				atm_bl* flag = _confirm_completion_flag.load(mo_acquire);
 
 				if (!flag || flag->load(mo_acquire))

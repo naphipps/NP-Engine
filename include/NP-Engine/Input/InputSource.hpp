@@ -20,75 +20,196 @@ namespace np::nput
 	class InputSource
 	{
 	protected:
-		con::omap<void*, KeyCallback> _key_callbacks;
-		con::omap<void*, MouseCallback> _mouse_callbacks;
-		con::omap<void*, MousePositionCallback> _mouse_position_callbacks;
-		con::omap<void*, ControllerCallback> _controller_callbacks;
+		con::uset<KeyCallback> _key_callbacks;
+		con::uset<MouseCallback> _mouse_callbacks;
+		con::uset<MousePositionCallback> _mouse_position_callbacks;
+		con::uset<ControllerCallback> _controller_callbacks;
 
-		virtual void InvokeKeyCodeCallbacks(const KeyCodeState& state)
+		con::umap<void*, KeyCallback> _key_caller_callbacks;
+		con::umap<void*, MouseCallback> _mouse_caller_callbacks;
+		con::umap<void*, MousePositionCallback> _mouse_position_caller_callbacks;
+		con::umap<void*, ControllerCallback> _controller_caller_callbacks;
+
+		virtual void InvokeKeyCallbacks(const KeyCodeState& state)
 		{
 			for (auto it = _key_callbacks.begin(); it != _key_callbacks.end(); it++)
+				(*it)(nullptr, state);
+
+			for (auto it = _key_caller_callbacks.begin(); it != _key_caller_callbacks.end(); it++)
 				it->second(it->first, state);
 		}
 
-		virtual void InvokeMouseCodeCallbacks(const MouseCodeState& state)
+		virtual void InvokeMouseCallbacks(const MouseCodeState& state)
 		{
 			for (auto it = _mouse_callbacks.begin(); it != _mouse_callbacks.end(); it++)
+				(*it)(nullptr, state);
+
+			for (auto it = _mouse_caller_callbacks.begin(); it != _mouse_caller_callbacks.end(); it++)
 				it->second(it->first, state);
 		}
 
 		virtual void InvokeMousePositionCallbacks(const MousePosition& position)
 		{
 			for (auto it = _mouse_position_callbacks.begin(); it != _mouse_position_callbacks.end(); it++)
+				(*it)(nullptr, position);
+
+			for (auto it = _mouse_position_caller_callbacks.begin(); it != _mouse_position_caller_callbacks.end(); it++)
 				it->second(it->first, position);
 		}
 
-		virtual void InvokeControllerCodeCallbacks(const ControllerCodeState& state)
+		virtual void InvokeControllerCallbacks(const ControllerCodeState& state)
 		{
 			for (auto it = _controller_callbacks.begin(); it != _controller_callbacks.end(); it++)
+				(*it)(nullptr, state);
+
+			for (auto it = _controller_caller_callbacks.begin(); it != _controller_caller_callbacks.end(); it++)
 				it->second(it->first, state);
 		}
 
 	public:
 
-		virtual void SetKeyCodeCallback(void* caller, KeyCallback callback)
+		virtual void SetKeyCallback(KeyCallback callback)
 		{
-			if (callback)
-				_key_callbacks[caller] = callback;
-			else
-				_key_callbacks.erase(caller);
+			SetKeyCallback(nullptr, callback);
 		}
 
-		virtual void SetMouseCodeCallback(void* caller, MouseCallback callback)
+		virtual void SetMouseCallback(MouseCallback callback)
 		{
-			if (callback)
-				_mouse_callbacks[caller] = callback;
-			else
-				_mouse_callbacks.erase(caller);
+			SetMouseCallback(nullptr, callback);
+		}
+
+		virtual void SetMousePositionCallback(MousePositionCallback callback)
+		{
+			SetMousePositionCallback(nullptr, callback);
+		}
+
+		virtual void SetControllerCallback(ControllerCallback callback)
+		{
+			SetControllerCallback(nullptr, callback);
+		}
+
+		virtual void SetKeyCallback(void* caller, KeyCallback callback)
+		{
+			if (caller)
+			{
+				if (callback)
+					_key_caller_callbacks[caller] = callback;
+				else
+					_key_caller_callbacks.erase(caller);
+			}
+			else if (callback)
+			{
+				_key_callbacks.insert(callback);
+			}
+		}
+
+		virtual void SetMouseCallback(void* caller, MouseCallback callback)
+		{
+			if (caller)
+			{
+				if (callback)
+					_mouse_caller_callbacks[caller] = callback;
+				else
+					_mouse_caller_callbacks.erase(caller);
+			}
+			else if (callback)
+			{
+				_mouse_callbacks.insert(callback);
+			}
 		}
 
 		virtual void SetMousePositionCallback(void* caller, MousePositionCallback callback)
 		{
-			if (callback)
-				_mouse_position_callbacks[caller] = callback;
-			else
-				_mouse_position_callbacks.erase(caller);
+			if (caller)
+			{
+				if (callback)
+					_mouse_position_caller_callbacks[caller] = callback;
+				else
+					_mouse_position_caller_callbacks.erase(caller);
+			}
+			else if (callback)
+			{
+				_mouse_position_callbacks.insert(callback);
+			}
 		}
 
-		virtual void SetControllerCodeCallback(void* caller, ControllerCallback callback)
+		virtual void SetControllerCallback(void* caller, ControllerCallback callback)
+		{
+			if (caller)
+			{
+				if (callback)
+					_controller_caller_callbacks[caller] = callback;
+				else
+					_controller_caller_callbacks.erase(caller);
+			}
+			else if (callback)
+			{
+				_controller_callbacks.insert(callback);
+			}
+		}
+
+		virtual void UnsetKeyCallback(KeyCallback callback)
 		{
 			if (callback)
-				_controller_callbacks[caller] = callback;
-			else
-				_controller_callbacks.erase(caller);
+				_key_callbacks.erase(callback);
+		}
+
+		virtual void UnsetKeyCallback(void* caller)
+		{
+			SetKeyCallback(caller, nullptr);
+		}
+
+		virtual void UnsetMouseCallback(MouseCallback callback)
+		{
+			if (callback)
+				_mouse_callbacks.erase(callback);
+		}
+
+		virtual void UnsetMouseCallback(void* caller)
+		{
+			SetMouseCallback(caller, nullptr);
+		}
+
+		virtual void UnsetMousePositionCallback(MousePositionCallback callback)
+		{
+			if (callback)
+				_mouse_position_callbacks.erase(callback);
+		}
+
+		virtual void UnsetMousePositionCallback(void* caller)
+		{
+			SetMousePositionCallback(caller, nullptr);
+		}
+
+		virtual void UnsetControllerCallback(ControllerCallback callback)
+		{
+			if (callback)
+				_controller_callbacks.erase(callback);
+		}
+
+		virtual void UnsetControllerCallback(void* caller)
+		{
+			SetControllerCallback(caller, nullptr);
+		}
+
+		virtual void UnsetAllCallbacks()
+		{
+			_key_callbacks.clear();
+			_key_caller_callbacks.clear();
+			_mouse_callbacks.clear();
+			_mouse_caller_callbacks.clear();
+			_mouse_position_callbacks.clear();
+			_mouse_position_caller_callbacks.clear();
+			_controller_callbacks.clear();
+			_controller_caller_callbacks.clear();
 		}
 
 		virtual void UnsetAllCallbacks(void* caller)
 		{
-			SetKeyCodeCallback(caller, nullptr);
-			SetMouseCodeCallback(caller, nullptr);
-			SetMousePositionCallback(caller, nullptr);
-			SetControllerCodeCallback(caller, nullptr);
+			UnsetKeyCallback(caller);
+			UnsetMouseCallback(caller);
+			UnsetMousePositionCallback(caller);
+			UnsetControllerCallback(caller);
 		}
 	};
 }
