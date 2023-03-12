@@ -30,7 +30,7 @@ namespace np::mem
 			constexpr static siz LIST_NODE_RANK = BIT(1);
 
 		private:
-			siz _parent_prev_rank = RED_TREE_NODE_RANK;
+			siz _parent_prev_rank = RED_TREE_NODE_RANK; //rank is in the unused bits due to alignment
 			RedBlackTreeAllocatorNode* _left = nullptr;
 			RedBlackTreeAllocatorNode* _right = nullptr;
 			RedBlackTreeAllocatorNode* _next = nullptr;
@@ -105,6 +105,7 @@ namespace np::mem
 				- (3) red property: children of a red node are black
 				- (4) depth property: all external nodes have the same black-depth
 					- black-depth: the count of black nodes along the simple path from the root to the given node
+				- (5) same sized node are put on top of each other in a dbl linked list
 		*/
 		class RedBlackTreeAllocatorTree
 		{
