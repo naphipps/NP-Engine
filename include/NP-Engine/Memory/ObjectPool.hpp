@@ -55,6 +55,11 @@ namespace np::mem
 		{
 			return _allocator;
 		}
+		
+		const A& GetAllocator() const
+		{
+			return _allocator;
+		}
 
 		bl Contains(ObjectTypePtr object)
 		{
@@ -79,7 +84,7 @@ namespace np::mem
 
 		virtual void Clear()
 		{
-			_allocator.Zeroize();
+			_allocator.DellocateAll();
 		}
 	};
 

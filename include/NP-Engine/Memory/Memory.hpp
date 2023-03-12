@@ -32,5 +32,6 @@
 #include "SmartPtr.hpp"
 #include "StdAllocator.hpp"
 #include "TraitAllocator.hpp"
+#include "AccumulatingPool.hpp"
 
 #endif /* NP_ENGINE_MEMORY_HPP */

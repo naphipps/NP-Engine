@@ -8,10 +8,10 @@
 #define NP_ENGINE_ACCUMULATING_ALLOCATOR_HPP
 
 #ifndef NP_ENGINE_ACCUMULATING_ALLOCATOR_BLOCK_SIZE
-	#define NP_ENGINE_ACCUMULATING_ALLOCATOR_BLOCK_SIZE (GIGABYTE_SIZE * 2)
+	#define NP_ENGINE_ACCUMULATING_ALLOCATOR_BLOCK_SIZE GIGABYTE_SIZE
 #endif
 
-#include <vector> //TODO: can we remove this??
+#include <vector>
 #include <type_traits>
 
 #include "MemoryFunctions.hpp"
@@ -26,7 +26,7 @@ namespace np::mem
 		NP_ENGINE_STATIC_ASSERT((::std::is_base_of_v<BookkeepingAllocator, AllocatorType>),
 								"AllocatorType must derive from BookkeepingAllocator");
 
-		NP_ENGINE_STATIC_ASSERT(CalcAlignedSize(sizeof(AllocatorType)) < NP_ENGINE_ACCUMULATING_ALLOCATOR_BLOCK_SIZE,
+		NP_ENGINE_STATIC_ASSERT((CalcAlignedSize(sizeof(AllocatorType)) < NP_ENGINE_ACCUMULATING_ALLOCATOR_BLOCK_SIZE),
 								"make NP_ENGINE_APPLICATION_ALLOCATOR_BLOCK_SIZE larger");
 
 		constexpr static siz ALLOCATOR_TYPE_SIZE = CalcAlignedSize(sizeof(AllocatorType));
@@ -126,6 +126,15 @@ namespace np::mem
 					deallocated = _allocators[i]->Deallocate(ptr);
 
 			return deallocated;
+		}
+
+		bl DeallocateAll()
+		{
+			for (AllocatorType* allocator : _allocators)
+				Destroy<AllocatorType>(_c_allocator, allocator);
+
+			_allocators.clear();
+			return true;
 		}
 	};
 } // namespace np::mem
