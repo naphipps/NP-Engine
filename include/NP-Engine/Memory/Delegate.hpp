@@ -74,7 +74,7 @@ namespace np::mem
 		{
 			if constexpr (::std::is_same_v<void, R>)
 			{
-				if (IsConnected())
+				if (_callback)
 					_callback(_caller, *this);
 
 				return;
@@ -83,20 +83,18 @@ namespace np::mem
 			{
 				R r;
 
-				if (IsConnected())
+				if (_callback)
 					r = _callback(_caller, *this);
 
 				return r;
 			}
 
-			//return IsConnected() ? _callback(_caller, *this) : R; //TODO: does this work with void??
+			//return _callback ? _callback(_caller, *this) : R; //TODO: does this work with void??
 		}
 
 		virtual void Clear() override
 		{
-			_caller = nullptr;
-			_callback = nullptr;
-
+			SetCallback(nullptr, nullptr);
 			PadObject::Clear();
 		}
 	};

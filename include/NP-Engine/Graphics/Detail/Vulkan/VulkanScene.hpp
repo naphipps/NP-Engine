@@ -62,7 +62,7 @@ namespace np::gfx::__detail
 		{
 			NP_ENGINE_PROFILE_SCOPE("vulkan scene draw");
 
-			_on_draw_delegate.InvokeConnectedFunction();
+			_on_draw_delegate();
 			VulkanFrame& vulkan_frame = (VulkanFrame&)_renderer.BeginFrame();
 			if (vulkan_frame.IsValid())
 			{
@@ -151,7 +151,7 @@ namespace np::gfx::__detail
 				light.DisposeForPipeline(((VulkanRenderer&)_renderer).GetLightPipeline());
 			}
 
-			_on_draw_delegate.DisconnectFunction();
+			_on_draw_delegate.Clear();
 		}
 
 		virtual void SetCamera(Camera& camera) override

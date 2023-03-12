@@ -88,7 +88,7 @@ namespace np::mem
 			return _padding[CACHE_LINE_SIZE - 1] != 0;
 		}
 
-		void Clear()
+		virtual void Clear()
 		{
 			for (siz i = 0; i < CACHE_LINE_SIZE; i++)
 				_padding[i] = 0;
