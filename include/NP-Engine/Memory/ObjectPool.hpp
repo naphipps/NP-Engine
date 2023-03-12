@@ -84,7 +84,7 @@ namespace np::mem
 
 		virtual void Clear()
 		{
-			_allocator.DellocateAll();
+			_allocator.DeallocateAll();
 		}
 	};
 
