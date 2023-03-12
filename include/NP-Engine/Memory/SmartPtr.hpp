@@ -59,7 +59,6 @@ namespace np::mem
 	{
 		NP_ENGINE_ASSERT((::std::is_constructible_v<T, Args...>), "T must be constructible with the given args.");
 		TraitAllocator allocator;
-		Block block = allocator.Allocate(sizeof(T));
 		T* ptr = Create<T>(allocator, ::std::forward<Args>(args)...);
 		NP_ENGINE_ASSERT(ptr, "We require a successful construction here.");
 		return sptr<T>(ptr, __detail::SmartPtrDeleter<T>{});
