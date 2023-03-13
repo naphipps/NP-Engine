@@ -17,10 +17,6 @@
 #include "JobWorker.hpp"
 #include "JobPool.hpp"
 
-#ifndef NP_ENGINE_JOB_SYSTEM_POOL_DEFAULT_SIZE
-	#define NP_ENGINE_JOB_SYSTEM_POOL_DEFAULT_SIZE 2000
-#endif
-
 namespace np::jsys
 {
 	class JobSystem
@@ -35,8 +31,7 @@ namespace np::jsys
 		con::vector<JobWorker> _job_workers;
 		mem::Block _thread_pool_block;
 		thr::ThreadPool* _thread_pool;
-		mem::Block _job_pool_block;
-		JobPool* _job_pool;
+		JobPool _job_pool;
 
 		//TODO: use tokens with mpmc_queue
 		con::mpmc_queue<JobRecord> _highest_job_queue;
@@ -48,18 +43,7 @@ namespace np::jsys
 		void DisposeJobPool()
 		{
 			Stop();
-
-			if (_job_pool)
-			{
-				mem::Destroy<JobPool>(_allocator, _job_pool);
-				_job_pool = nullptr;
-			}
-
-			if (_job_pool_block.IsValid())
-			{
-				_allocator.Deallocate(_job_pool_block);
-				_job_pool_block.Invalidate();
-			}
+			_job_pool.Clear();
 		}
 
 		void DisposeThreadPool()
@@ -80,9 +64,8 @@ namespace np::jsys
 		}
 
 	public:
-		JobSystem(): _running(false), _thread_pool(nullptr), _job_pool(nullptr)
+		JobSystem(): _running(false), _thread_pool(nullptr)
 		{
-			SetDefaultJobPoolSize();
 			SetDefaultJobWorkerCount();
 		}
 
@@ -97,22 +80,10 @@ namespace np::jsys
 			DisposeThreadPool();
 		}
 
-		void SetDefaultJobPoolSize()
-		{
-			SetJobPoolSize(NP_ENGINE_JOB_SYSTEM_POOL_DEFAULT_SIZE);
-		}
-
 		void SetDefaultJobWorkerCount()
 		{
 			// we want to be sure we use one less the number of cores available so our main thread is not crowded
 			SetJobWorkerCount(thr::Thread::HardwareConcurrency() - 1);
-		}
-
-		void SetJobPoolSize(siz size)
-		{
-			DisposeJobPool();
-			_job_pool_block = _allocator.Allocate(JOB_SIZE * size);
-			_job_pool = mem::Create<JobPool>(_allocator, _job_pool_block);
 		}
 
 		void SetJobWorkerCount(siz count)
@@ -134,12 +105,10 @@ namespace np::jsys
 		{
 			NP_ENGINE_PROFILE_FUNCTION();
 
-			if (!_job_pool)
-				SetDefaultJobPoolSize();
-
 			if (!_thread_pool)
 				SetDefaultJobWorkerCount();
 
+			_job_pool.Clear();
 			_running.store(true, mo_release);
 
 			for (siz i = 0; i < _job_workers.size(); i++)
@@ -158,6 +127,7 @@ namespace np::jsys
 
 				// stop threads
 				_thread_pool->Clear();
+				_job_pool.Clear();
 				_running.store(false, mo_release);
 			}
 		}
@@ -221,12 +191,12 @@ namespace np::jsys
 
 		Job* CreateJob()
 		{
-			return _job_pool->CreateObject();
+			return _job_pool.CreateObject();
 		}
 
 		bl DestroyJob(Job* job)
 		{
-			return _job_pool->DestroyObject(job);
+			return _job_pool.DestroyObject(job);
 		}
 
 		con::vector<JobWorker>& GetJobWorkers()

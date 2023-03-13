@@ -13,7 +13,7 @@
 
 namespace np::jsys
 {
-	using JobPool = mem::ObjectPool<Job>;
+	using JobPool = mem::AccumulatingPool<Job>;
 } // namespace np::jsys
 
 #endif /* NP_ENGINE_JOB_POOL_HPP */
