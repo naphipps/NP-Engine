@@ -21,8 +21,8 @@
 
 #include "NP-Engine/Window/Interface/WindowInterface.hpp"
 
-//TODO: resizing window smaller than min siz results with mouse offset to be incorrect
-//TODO: something about dragging the window and then quickly closing it causes race condition
+// TODO: resizing window smaller than min siz results with mouse offset to be incorrect
+// TODO: something about dragging the window and then quickly closing it causes race condition
 //	^ between dragging logic and closing logic
 
 namespace np::win::__detail
@@ -54,11 +54,11 @@ namespace np::win::__detail
 
 		static LRESULT CALLBACK GlfwWindowProcedure(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 		{
-			LRESULT result = -1; //assuming -1 is an error value
+			LRESULT result = -1; // assuming -1 is an error value
 			GlfwWindow* glfw_window = (GlfwWindow*)GetWindowLongPtrA(hwnd, GWLP_USERDATA);
 			bl call_prev_window_procedure = true;
-			POINTS point = MAKEPOINTS(lparam); //screen point
-			
+			POINTS point = MAKEPOINTS(lparam); // screen point
+
 			switch (msg)
 			{
 			case WM_NCLBUTTONDBLCLK:
@@ -138,7 +138,7 @@ namespace np::win::__detail
 					glfw_window->_prev_mouse_position.x = point.x;
 					glfw_window->_prev_mouse_position.y = point.y;
 					call_prev_window_procedure = false;
-					result = 0; //assuming 0 is a success value
+					result = 0; // assuming 0 is a success value
 				}
 
 				break;
@@ -745,7 +745,7 @@ namespace np::win::__detail
 		static void MousePositionCallback(GLFWwindow* glfw_window, dbl x, dbl y)
 		{
 			GlfwWindow* window = (GlfwWindow*)glfwGetWindowUserPointer(glfw_window);
-			window->_mouse_position.SetPosition({ x, y });
+			window->_mouse_position.SetPosition({x, y});
 			window->InvokeMousePositionCallbacks(window->_mouse_position);
 		}
 
@@ -860,7 +860,7 @@ namespace np::win::__detail
 #if NP_ENGINE_PLATFORM_IS_WINDOWS
 			HWND native_window = (HWND)GetNativeWindow();
 			SetWindowLongPtrA(native_window, GWLP_WNDPROC, (LONG_PTR)_prev_window_procedure);
-			SetWindowLongPtrA(native_window, GWLP_USERDATA, (LONG_PTR)nullptr);
+			SetWindowLongPtrA(native_window, GWLP_USERDATA, (LONG_PTR) nullptr);
 			_prev_window_procedure = nullptr;
 #endif
 		}
@@ -890,7 +890,7 @@ namespace np::win::__detail
 			ApplySystemTheme();
 		}
 
-		void ApplySystemTheme() //TODO: we might want this pushed to Window??
+		void ApplySystemTheme() // TODO: we might want this pushed to Window??
 		{
 #if NP_ENGINE_PLATFORM_IS_WINDOWS
 			LPCSTR subkey = "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize";
@@ -909,7 +909,7 @@ namespace np::win::__detail
 			{
 				DwmSetWindowAttribute(native_window, DARK_MODE_ATTRIBUTE, &dark_mode_value, sizeof(BOOL));
 
-				//TODO: test this
+				// TODO: test this
 				bl is_active = native_window == GetActiveWindow();
 				GlfwWindowProcedure(native_window, WM_NCACTIVATE, !is_active, 0);
 				GlfwWindowProcedure(native_window, WM_NCACTIVATE, is_active, 0);
@@ -929,7 +929,6 @@ namespace np::win::__detail
 		}
 
 	public:
-
 		static void Init()
 		{
 			glfwInit();
@@ -957,7 +956,7 @@ namespace np::win::__detail
 			return extensions;
 		}
 
-		GlfwWindow(Window::Properties& properties, srvc::Services& services) :
+		GlfwWindow(Window::Properties& properties, srvc::Services& services):
 			Window(properties, services),
 			_glfw_window(nullptr),
 			_apply_system_theme_timestamp(tim::SteadyClock::now())
@@ -989,11 +988,7 @@ namespace np::win::__detail
 				GetCursorPos(&point);
 				GetWindowInfo(native_window, &info);
 
-				::glm::i32vec2 offset
-				{
-					point.x - _prev_mouse_position.x ,
-					point.y - _prev_mouse_position.y
-				};
+				::glm::i32vec2 offset{point.x - _prev_mouse_position.x, point.y - _prev_mouse_position.y};
 
 				switch (_hit_flags)
 				{
@@ -1003,18 +998,22 @@ namespace np::win::__detail
 						if (offset.x != 0 || offset.y != 0)
 						{
 							dbl t = mat::GetT((dbl)info.rcWindow.left, (dbl)info.rcWindow.right, (dbl)point.x);
-							siz width = _prev_window_placement.rcNormalPosition.right - _prev_window_placement.rcNormalPosition.left;
-							siz height = _prev_window_placement.rcNormalPosition.bottom - _prev_window_placement.rcNormalPosition.top;
-							
+							siz width =
+								_prev_window_placement.rcNormalPosition.right - _prev_window_placement.rcNormalPosition.left;
+							siz height =
+								_prev_window_placement.rcNormalPosition.bottom - _prev_window_placement.rcNormalPosition.top;
+
 							_prev_window_placement.rcNormalPosition.left = point.x - (t * width) + offset.x;
 							_prev_window_placement.rcNormalPosition.top = offset.y;
-							_prev_window_placement.rcNormalPosition.right = _prev_window_placement.rcNormalPosition.left + width;
-							_prev_window_placement.rcNormalPosition.bottom = _prev_window_placement.rcNormalPosition.top + height;
+							_prev_window_placement.rcNormalPosition.right =
+								_prev_window_placement.rcNormalPosition.left + width;
+							_prev_window_placement.rcNormalPosition.bottom =
+								_prev_window_placement.rcNormalPosition.top + height;
 
 							_prev_window_placement.showCmd |= SW_RESTORE;
 							SetWindowPlacement(native_window, &_prev_window_placement);
 						}
-						//else do nothing on purpose
+						// else do nothing on purpose
 					}
 					else
 					{
@@ -1086,18 +1085,16 @@ namespace np::win::__detail
 
 				if (call_set_window_pos)
 				{
-					SetWindowPos(native_window, nullptr, 
-						info.rcWindow.left, info.rcWindow.top,
-						info.rcWindow.right - info.rcWindow.left,
-						info.rcWindow.bottom - info.rcWindow.top, 
-						flags);
+					SetWindowPos(native_window, nullptr, info.rcWindow.left, info.rcWindow.top,
+								 info.rcWindow.right - info.rcWindow.left, info.rcWindow.bottom - info.rcWindow.top, flags);
 				}
 
 				_prev_mouse_position = point;
 #endif
 
 				tim::SteadyTimestamp timestamp = tim::SteadyClock::now();
-				if (timestamp - _apply_system_theme_timestamp >= tim::DblSeconds(2)) //TODO: we might want this pushed to Window
+				if (timestamp - _apply_system_theme_timestamp >= tim::DblSeconds(2)) // TODO: we might want this pushed to
+																					 // Window
 				{
 					ApplySystemTheme();
 					_apply_system_theme_timestamp = timestamp;
@@ -1244,10 +1241,10 @@ namespace np::win::__detail
 			void* native_window = nullptr;
 
 #if NP_ENGINE_PLATFORM_IS_APPLE
-			//TODO: GetNativeWindow for apple
+				// TODO: GetNativeWindow for apple
 
 #elif NP_ENGINE_PLATFORM_IS_LINUX
-			//TODO: GetNativeWindow for linux
+				// TODO: GetNativeWindow for linux
 
 #elif NP_ENGINE_PLATFORM_IS_WINDOWS
 			GLFWwindow* glfw_window = _glfw_window.load(mo_acquire);
@@ -1257,6 +1254,6 @@ namespace np::win::__detail
 			return native_window;
 		}
 	};
-}
+} // namespace np::win::__detail
 
 #endif /* NP_ENGINE_GLFW_WINDOW_HPP */

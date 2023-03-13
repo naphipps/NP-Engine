@@ -17,6 +17,6 @@ namespace np::win
 		Glfw,
 		Sdl
 	};
-}
+} // namespace np::win
 
 #endif /* NP_ENGINE_WINDOW_DETAIL_TYPE_HPP */

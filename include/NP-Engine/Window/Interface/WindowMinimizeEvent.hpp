@@ -23,9 +23,9 @@ namespace np::win
 			bl maximized;
 		};
 
-		WindowMinimizeEvent(Window* window, bl minimized) : evnt::Event()
+		WindowMinimizeEvent(Window* window, bl minimized): evnt::Event()
 		{
-			SetData<DataType>({ window, minimized });
+			SetData<DataType>({window, minimized});
 		}
 
 		evnt::EventType GetType() const override
@@ -38,6 +38,6 @@ namespace np::win
 			return evnt::EventCategory::Window;
 		}
 	};
-}
+} // namespace np::win
 
 #endif /* NP_ENGINE_WINDOW_MINIMIZE_EVENT_HPP */

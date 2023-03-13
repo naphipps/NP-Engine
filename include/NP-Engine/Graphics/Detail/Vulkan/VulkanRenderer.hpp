@@ -275,8 +275,7 @@ namespace np::gfx::__detail
 			_frame.Invalidate();
 
 			VkExtent2D framebuffer_extent = GetSurface().GetFramebufferExtent();
-			if (framebuffer_extent.width != 0 && framebuffer_extent.height != 0 && 
-				!GetSurface().GetWindow().IsMinimized())
+			if (framebuffer_extent.width != 0 && framebuffer_extent.height != 0 && !GetSurface().GetWindow().IsMinimized())
 			{
 				VkResult result = GetSwapchain().AcquireImage();
 				if (result == VK_SUCCESS || result == VK_SUBOPTIMAL_KHR)

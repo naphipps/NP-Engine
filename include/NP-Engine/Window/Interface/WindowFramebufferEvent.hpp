@@ -24,9 +24,9 @@ namespace np::win
 			ui32 height;
 		};
 
-		WindowFramebufferEvent(Window* window, ui32 width, ui32 height) : evnt::Event()
+		WindowFramebufferEvent(Window* window, ui32 width, ui32 height): evnt::Event()
 		{
-			SetData<DataType>({ window, width, height });
+			SetData<DataType>({window, width, height});
 		}
 
 		evnt::EventType GetType() const override
@@ -39,6 +39,6 @@ namespace np::win
 			return evnt::EventCategory::Window;
 		}
 	};
-}
+} // namespace np::win
 
 #endif /* NP_ENGINE_WINDOW_FRAMEBUFFER_EVENT_HPP */

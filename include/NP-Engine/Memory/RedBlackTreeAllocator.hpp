@@ -30,7 +30,7 @@ namespace np::mem
 			constexpr static siz LIST_NODE_RANK = BIT(1);
 
 		private:
-			siz _parent_prev_rank = RED_TREE_NODE_RANK; //rank is in the unused bits due to alignment
+			siz _parent_prev_rank = RED_TREE_NODE_RANK; // rank is in the unused bits due to alignment
 			RedBlackTreeAllocatorNode* _left = nullptr;
 			RedBlackTreeAllocatorNode* _right = nullptr;
 			RedBlackTreeAllocatorNode* _next = nullptr;

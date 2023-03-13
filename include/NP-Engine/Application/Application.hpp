@@ -159,7 +159,7 @@ namespace np::app
 			NP_ENGINE_ASSERT(thr::Thread::HardwareConcurrency() >= 4, "NP Engine requires at least four cores");
 
 			using Fetch = jsys::JobWorker::Fetch;
-			//using FetchOrderArray = jsys::JobWorker::FetchOrderArray;
+			// using FetchOrderArray = jsys::JobWorker::FetchOrderArray;
 			/*
 				Examples:
 					FetchOrderArray default_order{Fetch::Immediate, Fetch::PriorityBased, Fetch::Steal};
@@ -168,14 +168,14 @@ namespace np::app
 					FetchOrderArray immediate_order{Fetch::Immediate, Fetch::Steal, Fetch::None};
 					FetchOrderArray only_immediate_order{ Fetch::Immediate, Fetch::Immediate, Fetch::Immediate };
 			*/
-			
-			//rendering loop
-			job_workers[0].SetFetchOrder({ Fetch::Immediate, Fetch::None, Fetch::None }); 
+
+			// rendering loop
+			job_workers[0].SetFetchOrder({Fetch::Immediate, Fetch::None, Fetch::None});
 			_graphics_layer.SetJobWorkerIndex(0);
 
-			//all other workers
+			// all other workers
 			for (siz i = 1; i < job_workers.size(); i++)
-				job_workers[i].SetFetchOrder({ Fetch::Immediate, Fetch::PriorityBased, Fetch::Steal });
+				job_workers[i].SetFetchOrder({Fetch::Immediate, Fetch::PriorityBased, Fetch::Steal});
 		}
 
 	public:
@@ -198,7 +198,7 @@ namespace np::app
 		{
 			NP_ENGINE_PROFILE_SCOPE("application run");
 
-			//app::Popup::Show("Application Start Of Run", "We're about to run");
+			// app::Popup::Show("Application Start Of Run", "We're about to run");
 
 			_running.store(true, mo_release);
 			evnt::EventQueue& event_queue = _services.GetEventQueue();

@@ -24,9 +24,9 @@ namespace np::win
 			jsys::Job* job;
 		};
 
-		WindowClosingEvent(Window* window, jsys::Job* job) : evnt::Event()
+		WindowClosingEvent(Window* window, jsys::Job* job): evnt::Event()
 		{
-			SetData<DataType>({ window, job });
+			SetData<DataType>({window, job});
 		}
 
 		evnt::EventType GetType() const override
@@ -39,6 +39,6 @@ namespace np::win
 			return evnt::EventCategory::Window;
 		}
 	};
-}
+} // namespace np::win
 
 #endif /* NP_ENGINE_WINDOW_CLOSING_EVENT_HPP */

@@ -33,35 +33,12 @@ namespace np::jsys
 		thr::ThreadPool* _thread_pool;
 		JobPool _job_pool;
 
-		//TODO: use tokens with mpmc_queue
+		// TODO: use tokens with mpmc_queue
 		con::mpmc_queue<JobRecord> _highest_job_queue;
 		con::mpmc_queue<JobRecord> _higher_job_queue;
 		con::mpmc_queue<JobRecord> _normal_job_queue;
 		con::mpmc_queue<JobRecord> _lower_job_queue;
 		con::mpmc_queue<JobRecord> _lowest_job_queue;
-
-		void DisposeJobPool()
-		{
-			Stop();
-			_job_pool.Clear();
-		}
-
-		void DisposeThreadPool()
-		{
-			Stop();
-
-			if (_thread_pool)
-			{
-				mem::Destroy<thr::ThreadPool>(_allocator, _thread_pool);
-				_thread_pool = nullptr;
-			}
-
-			if (_thread_pool_block.IsValid())
-			{
-				_allocator.Deallocate(_thread_pool_block);
-				_thread_pool_block.Invalidate();
-			}
-		}
 
 	public:
 		JobSystem(): _running(false), _thread_pool(nullptr)
@@ -76,8 +53,24 @@ namespace np::jsys
 
 		void Dispose()
 		{
-			DisposeJobPool();
-			DisposeThreadPool();
+			Stop();
+			_job_workers.clear();
+
+			JobRecord record{};
+			for (auto priority_it = JobPrioritiesHighToLow.begin(); priority_it != JobPrioritiesHighToLow.end(); priority_it++)
+			{
+				con::mpmc_queue<JobRecord>& queue = GetQueueForPriority(*priority_it);
+				while (queue.try_dequeue(record)) {}
+			}
+			_job_pool.Clear();
+
+			if (_thread_pool)
+			{
+				mem::Destroy<thr::ThreadPool>(_allocator, _thread_pool);
+				_allocator.Deallocate(_thread_pool_block);
+				_thread_pool_block.Invalidate();
+				_thread_pool = nullptr;
+			}
 		}
 
 		void SetDefaultJobWorkerCount()
@@ -86,9 +79,12 @@ namespace np::jsys
 			SetJobWorkerCount(thr::Thread::HardwareConcurrency() - 1);
 		}
 
+		/*
+			This method also calls Dispose, so setup jobs after calling this
+		*/
 		void SetJobWorkerCount(siz count)
 		{
-			DisposeThreadPool();
+			Dispose();
 			_thread_pool_block = _allocator.Allocate(THREAD_SIZE * count);
 			_thread_pool = mem::Create<thr::ThreadPool>(_allocator, _thread_pool_block);
 
@@ -108,7 +104,6 @@ namespace np::jsys
 			if (!_thread_pool)
 				SetDefaultJobWorkerCount();
 
-			_job_pool.Clear();
 			_running.store(true, mo_release);
 
 			for (siz i = 0; i < _job_workers.size(); i++)
@@ -127,7 +122,6 @@ namespace np::jsys
 
 				// stop threads
 				_thread_pool->Clear();
-				_job_pool.Clear();
 				_running.store(false, mo_release);
 			}
 		}

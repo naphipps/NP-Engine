@@ -41,10 +41,10 @@ namespace np::win
 
 		using ResizeCallback = void (*)(void* caller, ui32 width, ui32 height);
 		using PositionCallback = void (*)(void* caller, i32 x, i32 y);
-		using FramebufferCallback = void(*)(void* caller, ui32 width, ui32 height);
-		using MinimizeCallback = void(*)(void* caller, bl minimized);
-		using MaximizeCallback = void(*)(void* caller, bl maximized);
-		using FocusCallback = void(*)(void* caller, bl focused);
+		using FramebufferCallback = void (*)(void* caller, ui32 width, ui32 height);
+		using MinimizeCallback = void (*)(void* caller, bl minimized);
+		using MaximizeCallback = void (*)(void* caller, bl maximized);
+		using FocusCallback = void (*)(void* caller, bl focused);
 
 	protected:
 		Properties _properties;
@@ -91,14 +91,13 @@ namespace np::win
 
 		virtual void DetailCloseProcedure() = 0;
 
-		Window(Window::Properties& properties, srvc::Services& services) :
+		Window(Window::Properties& properties, srvc::Services& services):
 			_properties(properties),
 			_services(services),
 			_show_procedure_is_complete(true)
 		{}
 
 	public:
-
 		static void Init(WindowDetailType detail_type);
 
 		static void Terminate(WindowDetailType detail_type);
@@ -113,7 +112,7 @@ namespace np::win
 		{
 			_thread.Dispose();
 		}
-		
+
 		virtual void Update(tim::DblMilliseconds milliseconds) {}
 
 		virtual void Show()
@@ -243,7 +242,7 @@ namespace np::win
 				_position_callbacks.insert(callback);
 			}
 		}
-		
+
 		virtual void SetFramebufferCallback(void* caller, FramebufferCallback callback)
 		{
 			if (caller)

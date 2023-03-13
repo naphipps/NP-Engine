@@ -27,19 +27,21 @@ namespace np::gfx::__detail
 		static void FramebufferCallback(void* caller, ui32 width, ui32 height)
 		{
 			VulkanSurface* surface = (VulkanSurface*)caller;
-			surface->_framebuffer_extent = { width, height };
+			surface->_framebuffer_extent = {width, height};
 		}
 
 		VkSurfaceKHR CreateSurface()
 		{
 			VkSurfaceKHR surface = nullptr;
-			win::WindowDetailType win_detail_type = win::WindowDetailType::Glfw; //TODO: make this depenedent on RenderTarget's window detail type
+			win::WindowDetailType win_detail_type =
+				win::WindowDetailType::Glfw; // TODO: make this depenedent on RenderTarget's window detail type
 
 			switch (win_detail_type)
 			{
 			case win::WindowDetailType::Glfw:
 				if ((VkInstance)_instance)
-					if (glfwCreateWindowSurface(_instance, (GLFWwindow*)_window.GetDetailWindow(), nullptr, &surface) != VK_SUCCESS)
+					if (glfwCreateWindowSurface(_instance, (GLFWwindow*)_window.GetDetailWindow(), nullptr, &surface) !=
+						VK_SUCCESS)
 						surface = nullptr;
 				break;
 

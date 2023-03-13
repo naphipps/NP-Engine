@@ -27,7 +27,7 @@ namespace np::win
 
 		WindowResizeEvent(Window* window, ui32 width, ui32 height): evnt::Event()
 		{
-			SetData<DataType>({ window, width, height });
+			SetData<DataType>({window, width, height});
 		}
 
 		i32 GetWidth() const

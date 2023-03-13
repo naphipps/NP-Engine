@@ -4,7 +4,7 @@
 //
 //##===----------------------------------------------------------------------===##//
 
-//TODO: I think we can remove this file
+// TODO: I think we can remove this file
 
 #include "NP-Engine/Graphics/Interface/Device.hpp" //main include
 

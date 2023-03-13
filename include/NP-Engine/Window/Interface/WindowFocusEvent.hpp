@@ -23,9 +23,9 @@ namespace np::win
 			bl focused;
 		};
 
-		WindowFocusEvent(Window* window, bl focused) : evnt::Event()
+		WindowFocusEvent(Window* window, bl focused): evnt::Event()
 		{
-			SetData<DataType>({ window, focused });
+			SetData<DataType>({window, focused});
 		}
 
 		evnt::EventType GetType() const override
@@ -38,6 +38,6 @@ namespace np::win
 			return evnt::EventCategory::Window;
 		}
 	};
-}
+} // namespace np::win
 
 #endif /* NP_ENGINE_WINDOW_FOCUS_EVENT_HPP */

@@ -159,13 +159,7 @@ namespace np::jsys
 		{
 			NP_ENGINE_ASSERT(job != nullptr, "attempted to add an invalid Job -- do not do that my guy");
 			NP_ENGINE_ASSERT(job->IsEnabled(), "the dude not enabled bro - why it do");
-
-			Job* return_job = nullptr;
-
-			if (_immediate_job_queue.enqueue(job))
-				return_job = job;
-
-			return return_job;
+			return _immediate_job_queue.enqueue(job) ? job : nullptr;
 		}
 
 		FetchOrderArray GetFetchOrder()

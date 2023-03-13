@@ -13,8 +13,8 @@
 #include "NP-Engine/Random/Random.hpp"
 #include "NP-Engine/Math/Math.hpp"
 
-//TODO: use Random64
-//TODO: add SIMD
+// TODO: use Random64
+// TODO: add SIMD
 
 namespace np::noiz
 {
@@ -358,22 +358,22 @@ namespace np::noiz
 			return _warp_octave_displacement;
 		}
 
-		inline flt Noise(flt x) const //TODO: this could be an operator()
+		inline flt Noise(flt x) const // TODO: this could be an operator()
 		{
 			return GetAmplitude() * PureNoise(GetFrequency() * x);
 		}
 
-		inline flt Noise(flt x, flt y) const //TODO: this could be an operator()
+		inline flt Noise(flt x, flt y) const // TODO: this could be an operator()
 		{
 			return GetAmplitude() * PureNoise(GetFrequency() * x, GetFrequency() * y);
 		}
 
-		inline flt Noise(flt x, flt y, flt z) const //TODO: this could be an operator()
+		inline flt Noise(flt x, flt y, flt z) const // TODO: this could be an operator()
 		{
 			return GetAmplitude() * PureNoise(GetFrequency() * x, GetFrequency() * y, GetFrequency() * z);
 		}
 
-		inline flt Noise(flt x, flt y, flt z, flt w) const //TODO: this could be an operator()
+		inline flt Noise(flt x, flt y, flt z, flt w) const // TODO: this could be an operator()
 		{
 			return GetAmplitude() * PureNoise(GetFrequency() * x, GetFrequency() * y, GetFrequency() * z, GetFrequency() * w);
 		}
@@ -381,7 +381,7 @@ namespace np::noiz
 		/*
 			calculates noise value based directly on params and not affected by internal properties
 		*/
-		inline flt PureNoise(flt x) const //TODO: consider refactoring to CalculateNoiseValue
+		inline flt PureNoise(flt x) const // TODO: consider refactoring to CalculateNoiseValue
 		{
 			flt n0, n1; // Noise contributions from the two "corners"
 
@@ -414,7 +414,7 @@ namespace np::noiz
 		/*
 			calculates noise value based directly on params and not affected by internal properties
 		*/
-		inline flt PureNoise(flt x, flt y) const //TODO: consider refactoring to CalculateNoiseValue
+		inline flt PureNoise(flt x, flt y) const // TODO: consider refactoring to CalculateNoiseValue
 		{
 			flt n0, n1, n2; // Noise contributions from the three corners
 
@@ -509,13 +509,13 @@ namespace np::noiz
 		/*
 			calculates noise value based directly on params and not affected by internal properties
 		*/
-		inline flt PureNoise(flt x, flt y, flt z) const //TODO: consider refactoring to CalculateNoiseValue
+		inline flt PureNoise(flt x, flt y, flt z) const // TODO: consider refactoring to CalculateNoiseValue
 		{
 			flt n0, n1, n2, n3; // Noise contributions from the four corners
 
 			// Skewing/Unskewing factors for 3D
-			static const flt F3 = 1.0f / 3.0f; //TODO: consider writing out the result
-			static const flt G3 = 1.0f / 6.0f; //TODO: consider writing out the result
+			static const flt F3 = 1.0f / 3.0f; // TODO: consider writing out the result
+			static const flt G3 = 1.0f / 6.0f; // TODO: consider writing out the result
 
 			// Skew the input space to determine which simplex cell we're in
 			flt s = (x + y + z) * F3; // Very nice and simple skew factor for 3D
@@ -669,13 +669,13 @@ namespace np::noiz
 		/*
 			calculates noise value based directly on params and not affected by internal properties
 		*/
-		inline flt PureNoise(flt x, flt y, flt z, flt w) const //TODO: consider refactoring to CalculateNoiseValue
+		inline flt PureNoise(flt x, flt y, flt z, flt w) const // TODO: consider refactoring to CalculateNoiseValue
 		{
 			flt n0, n1, n2, n3, n4;
 
 			// Skewing/Unskewing factors for 4D
-			static const flt F4 = (flt)(::std::sqrt(5.f) - 1.f) / 4.f; //TODO: consider writing out the result
-			static const flt G4 = (flt)(5.f - ::std::sqrt(5.f)) / 20.f;  //TODO: consider writing out the result
+			static const flt F4 = (flt)(::std::sqrt(5.f) - 1.f) / 4.f; // TODO: consider writing out the result
+			static const flt G4 = (flt)(5.f - ::std::sqrt(5.f)) / 20.f; // TODO: consider writing out the result
 
 			flt t = (x + y + z + w) * F4;
 			i32 i = mat::FastFloor(x + t);

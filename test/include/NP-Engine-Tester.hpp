@@ -39,7 +39,7 @@ namespace np::app
 		{
 			win::Window* window = d.GetData<win::Window*>();
 
-			//TODO: handle all references that use this window
+			// TODO: handle all references that use this window
 		}
 
 		virtual void AdjustForWindowClosing(evnt::Event& e)
@@ -52,7 +52,6 @@ namespace np::app
 
 			closing_data.job->AddDependency(*adjust_job);
 			_services.GetJobSystem().SubmitJob(jsys::JobPriority::Higher, adjust_job);
-
 		}
 
 		static void AdjustForWindowClosedCallback(void* caller, mem::Delegate& d)
@@ -157,7 +156,7 @@ namespace np::app
 		}
 
 	public:
-		GameLayer(srvc::Services& services, WindowLayer& window_layer, GraphicsLayer& graphics_layer) :
+		GameLayer(srvc::Services& services, WindowLayer& window_layer, GraphicsLayer& graphics_layer):
 			Layer(services),
 			_window_layer(window_layer),
 			_graphics_layer(graphics_layer),
@@ -191,8 +190,8 @@ namespace np::app
 
 		void PrepareForRun()
 		{
-			//TODO: I think CreateWindowScene should be replaced with WindowLayer.CreateWindow and GraphicsLayer.CreateScene
-			//TODO: ^ this should be like the following:
+			// TODO: I think CreateWindowScene should be replaced with WindowLayer.CreateWindow and GraphicsLayer.CreateScene
+			// TODO: ^ this should be like the following:
 			/*
 
 				win::Window* window = _window_layer.CreateWindow(properties);
@@ -215,9 +214,8 @@ namespace np::app
 			_renderer = _graphics_layer.CreateRenderer(*_window);
 			_scene = _graphics_layer.CreateScene(*_renderer);
 
-
 			// TODO: init scene, and destroy content for last scene??
-			_scene->GetOnDrawDelegate().SetCallback(this, SceneOnDrawCallback); //TODO: do we need this?? I don't think so
+			_scene->GetOnDrawDelegate().SetCallback(this, SceneOnDrawCallback); // TODO: do we need this?? I don't think so
 			_scene->Prepare();
 		}
 

@@ -55,7 +55,7 @@ namespace np::mem
 		{
 			return _allocator;
 		}
-		
+
 		const A& GetAllocator() const
 		{
 			return _allocator;
