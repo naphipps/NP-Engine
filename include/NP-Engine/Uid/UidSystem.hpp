@@ -8,7 +8,7 @@
 #define NP_ENGINE_UID_SYSTEM_HPP
 
 #ifndef NP_ENGINE_UID_SYSTEM_POOL_DEFAULT_SIZE
-	#define NP_ENGINE_UID_SYSTEM_POOL_DEFAULT_SIZE 500
+	#define NP_ENGINE_UID_SYSTEM_POOL_DEFAULT_SIZE 500 //TODO: use the default size from AccumulatingPool
 #endif
 
 #include "NP-Engine/Primitive/Primitive.hpp"
@@ -28,11 +28,11 @@ namespace np::uid
 		struct UidRecord
 		{
 			Uid* UidPtr = nullptr;
-			UidHandle::GenerationType Generation = NP_ENGINE_UID_INVALID_GENERATION;
+			UidHandle::GenerationType Generation = NP_ENGINE_UID_HANDLE_INVALID_GENERATION;
 
 			bl IsValid() const
 			{
-				return UidPtr != nullptr && Generation != NP_ENGINE_UID_INVALID_GENERATION;
+				return UidPtr != nullptr && Generation != NP_ENGINE_UID_HANDLE_INVALID_GENERATION;
 			}
 
 			operator bl() const
@@ -43,19 +43,21 @@ namespace np::uid
 			void Invalidate()
 			{
 				UidPtr = nullptr;
-				Generation = NP_ENGINE_UID_INVALID_GENERATION;
+				Generation = NP_ENGINE_UID_HANDLE_INVALID_GENERATION;
 			}
 		};
 
 		constexpr static siz UID_SIZE = mem::CalcAlignedSize(sizeof(Uid));
 
 		Mutex _m; // TODO: don't know if an atomic lock would be faster??
-		UidGenerator _uid_gen;
 		mem::TraitAllocator _allocator;
+		UidGenerator _uid_gen;
 		con::vector<mem::Block> _uid_pool_blocks;
 		con::vector<UidPool*> _uid_pools;
-		con::umap<UidHandle::KeyType, UidRecord> _key_to_record;
+		UidHandle::KeyType _key;
 		UidHandle::GenerationType _generation;
+		con::uset<UidHandle::KeyType> _released_keys;
+		con::umap<UidHandle::KeyType, UidRecord> _key_to_record;
 		con::uset<Uid> _uid_master_set;
 
 		void AddPool()
@@ -64,25 +66,49 @@ namespace np::uid
 			_uid_pools.emplace_back(mem::Create<UidPool>(_allocator, _uid_pool_blocks.back()));
 		}
 
+		UidHandle::KeyType GetNextKey()
+		{
+			UidHandle::KeyType k = NP_ENGINE_UID_HANDLE_INVALID_KEY;
+
+			if (_released_keys.size())
+			{
+				k = *_released_keys.begin();
+				_released_keys.erase(_released_keys.begin());
+			}
+			else
+			{
+				do ++_key;
+				while (_key == NP_ENGINE_UID_HANDLE_INVALID_KEY);
+				k = _key;
+			}
+
+			return k;
+		}
+
+		UidHandle::GenerationType GetNextGeneration()
+		{
+			do ++_generation;
+			while (_generation == NP_ENGINE_UID_HANDLE_INVALID_GENERATION);
+			return _generation;
+		}
+
 		void AttemptToCreateHandle(UidPool& pool, UidHandle& h, UidRecord& r)
 		{
 			r.UidPtr = pool.CreateObject();
 			if (r.UidPtr)
 			{
-				*r.UidPtr = _uid_gen();
-				while (_uid_master_set.count(*r.UidPtr))
-					*r.UidPtr = _uid_gen();
-
+				do *r.UidPtr = _uid_gen();
+				while (_uid_master_set.count(*r.UidPtr));
 				_uid_master_set.emplace(*r.UidPtr);
-				h.Key = (siz)r.UidPtr;
-				h.Generation = ++_generation;
+
+				h = { GetNextKey(), GetNextGeneration() };
 				r.Generation = h.Generation;
 				_key_to_record.emplace(h.Key, r);
 			}
 		}
 
 	public:
-		UidSystem(): _generation(NP_ENGINE_UID_INVALID_GENERATION)
+		UidSystem(): _key(NP_ENGINE_UID_HANDLE_INVALID_KEY), _generation(NP_ENGINE_UID_HANDLE_INVALID_GENERATION)
 		{
 			AddPool();
 		}
@@ -113,7 +139,7 @@ namespace np::uid
 			UidRecord r{};
 
 			for (auto it = _uid_pools.begin(); it != _uid_pools.end() && !h.IsValid(); it++)
-				AttemptToCreateHandle(*(*it), h, r);
+				AttemptToCreateHandle(**it, h, r);
 
 			if (!h.IsValid())
 			{
@@ -121,25 +147,22 @@ namespace np::uid
 				AttemptToCreateHandle(*_uid_pools.back(), h, r);
 			}
 
-			if (_generation == NP_ENGINE_UID_INVALID_GENERATION)
-				_generation++;
-
 			return h;
 		}
 
 		Uid GetUid(const UidHandle& h)
 		{
 			Lock lock(_m);
-			Uid* uid = nullptr;
+			Uid* id = nullptr;
 
 			if (h.IsValid())
 			{
 				auto it = _key_to_record.find(h.Key);
 				if (it != _key_to_record.end() && h.Generation == it->second.Generation)
-					uid = it->second.UidPtr;
+					id = it->second.UidPtr;
 			}
 
-			return uid ? *uid : Uid{};
+			return id ? *id : Uid{};
 		}
 
 		void DestroyUidHandle(UidHandle& h)
@@ -158,6 +181,7 @@ namespace np::uid
 							{
 								_key_to_record.erase(it);
 								pool->DestroyObject(r.UidPtr);
+								_released_keys.emplace(h.Key);
 								h.Invalidate();
 								break;
 							}
@@ -167,7 +191,8 @@ namespace np::uid
 
 		void Defragment()
 		{
-			// TODO: defragment our pools by putting all our uid's to the front pools, then removing all full pools
+			Lock lock(_m);
+			// TODO: defragment our pools by putting all our uid's to the front pools, then removing all empty pools
 		}
 	};
 } // namespace np::uid
