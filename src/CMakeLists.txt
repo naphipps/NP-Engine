@@ -474,7 +474,6 @@ set(NP_ENGINE_THREAD_CPP
 
 set(NP_ENGINE_WINDOW_INTERFACE_CPP
 	Window/Interface/WindowImpl.cpp
-	Window/Interface/WindowDetailType.cpp
 )
 
 set(NP_ENGINE_SOURCE_FILES
