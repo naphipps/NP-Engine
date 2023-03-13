@@ -8,7 +8,7 @@
 #define NP_ENGINE_UID_SYSTEM_HPP
 
 #ifndef NP_ENGINE_UID_SYSTEM_POOL_DEFAULT_SIZE
-	#define NP_ENGINE_UID_SYSTEM_POOL_DEFAULT_SIZE 500 //TODO: use the default size from AccumulatingPool
+	#define NP_ENGINE_UID_SYSTEM_POOL_DEFAULT_SIZE 500 // TODO: use the default size from AccumulatingPool
 #endif
 
 #include "NP-Engine/Primitive/Primitive.hpp"
@@ -77,7 +77,8 @@ namespace np::uid
 			}
 			else
 			{
-				do ++_key;
+				do
+					++_key;
 				while (_key == NP_ENGINE_UID_HANDLE_INVALID_KEY);
 				k = _key;
 			}
@@ -87,7 +88,8 @@ namespace np::uid
 
 		UidHandle::GenerationType GetNextGeneration()
 		{
-			do ++_generation;
+			do
+				++_generation;
 			while (_generation == NP_ENGINE_UID_HANDLE_INVALID_GENERATION);
 			return _generation;
 		}
@@ -97,11 +99,12 @@ namespace np::uid
 			r.UidPtr = pool.CreateObject();
 			if (r.UidPtr)
 			{
-				do *r.UidPtr = _uid_gen();
+				do
+					*r.UidPtr = _uid_gen();
 				while (_uid_master_set.count(*r.UidPtr));
 				_uid_master_set.emplace(*r.UidPtr);
 
-				h = { GetNextKey(), GetNextGeneration() };
+				h = {GetNextKey(), GetNextGeneration()};
 				r.Generation = h.Generation;
 				_key_to_record.emplace(h.Key, r);
 			}
