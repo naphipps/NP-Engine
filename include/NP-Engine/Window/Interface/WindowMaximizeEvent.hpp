@@ -23,9 +23,9 @@ namespace np::win
 			bl maximized;
 		};
 
-		WindowMaximizeEvent(Window* window, bl maximized) : evnt::Event()
+		WindowMaximizeEvent(Window* window, bl maximized): evnt::Event()
 		{
-			SetData<DataType>({ window, maximized });
+			SetData<DataType>({window, maximized});
 		}
 
 		evnt::EventType GetType() const override
@@ -38,6 +38,6 @@ namespace np::win
 			return evnt::EventCategory::Window;
 		}
 	};
-}
+} // namespace np::win
 
 #endif /* NP_ENGINE_WINDOW_MAXIMIZE_EVENT_HPP */

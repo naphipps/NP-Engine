@@ -19,7 +19,7 @@ namespace np::gfx
 	class RenderableLightObject : public RenderableObject
 	{
 	private:
-		virtual void RenderToFrame(Frame& frame, Pipeline& pipline) override {} //lights do not need this
+		virtual void RenderToFrame(Frame& frame, Pipeline& pipline) override {} // lights do not need this
 
 	public:
 		virtual void RenderToFrame(Frame& frame, Pipeline& pipline, RenderableObject& object) = 0;

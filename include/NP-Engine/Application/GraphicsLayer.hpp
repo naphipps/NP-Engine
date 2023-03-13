@@ -104,10 +104,6 @@ namespace np::app
 			// TODO: we might ought to interact with a config file and the user (popups) to determine??
 		}
 
-
-
-
-
 		class FramePacket
 		{
 		private:
@@ -117,7 +113,6 @@ namespace np::app
 			con::uset<ecs::Entity> _entities_to_remove;
 
 		public:
-
 			void RemoveEntities()
 			{
 				Lock lock(_mutex);
@@ -139,14 +134,10 @@ namespace np::app
 			}
 		};
 
-
-
-
 		atm<FramePacket*> _staged_for_producing;
 		atm<FramePacket*> _producing;
 		atm<FramePacket*> _staged_for_consuming;
 		atm<FramePacket*> _consuming;
-
 
 		FramePacket* GetNextFramePacket()
 		{
@@ -172,15 +163,12 @@ namespace np::app
 			tim::SteadyTimestamp prev = next;
 			const tim::DblMilliseconds min_duration(NP_ENGINE_RENDERING_LOOP_DURATION);
 
-			
-
-			
 			FramePacket* prev_packet;
 			FramePacket* packet = nullptr;
 
 			while (_keep_rendering.load(mo_acquire))
 			{
-				//NP_ENGINE_PROFILE_SCOPE("rendering loop");
+				// NP_ENGINE_PROFILE_SCOPE("rendering loop");
 
 				prev_packet = packet;
 				packet = GetNextFramePacket();
@@ -215,7 +203,11 @@ namespace np::app
 		}
 
 	public:
-		GraphicsLayer(srvc::Services& services): Layer(services), _job_worker_index(0), _rendering_job(nullptr), _keep_rendering(false)
+		GraphicsLayer(srvc::Services& services):
+			Layer(services),
+			_job_worker_index(0),
+			_rendering_job(nullptr),
+			_keep_rendering(false)
 		{
 			ChooseGraphicsDetailType();
 		}

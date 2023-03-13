@@ -116,9 +116,9 @@ namespace np::gfxalg
 
 		void Fill(Payload payload)
 		{
-			//TODO: do we need some asserts for the following??
-			//TODO: FloodFill requires IsApproved to be connected to a function
-			//TODO: FloodFill requires ApprovedAction to be connected to a function
+			// TODO: do we need some asserts for the following??
+			// TODO: FloodFill requires IsApproved to be connected to a function
+			// TODO: FloodFill requires ApprovedAction to be connected to a function
 
 			payload.relation = PointRelation::None;
 

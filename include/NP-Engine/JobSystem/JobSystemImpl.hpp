@@ -33,7 +33,7 @@ namespace np::jsys
 		thr::ThreadPool* _thread_pool;
 		JobPool _job_pool;
 
-		//TODO: use tokens with mpmc_queue
+		// TODO: use tokens with mpmc_queue
 		con::mpmc_queue<JobRecord> _highest_job_queue;
 		con::mpmc_queue<JobRecord> _higher_job_queue;
 		con::mpmc_queue<JobRecord> _normal_job_queue;
@@ -60,7 +60,7 @@ namespace np::jsys
 			for (auto priority_it = JobPrioritiesHighToLow.begin(); priority_it != JobPrioritiesHighToLow.end(); priority_it++)
 			{
 				con::mpmc_queue<JobRecord>& queue = GetQueueForPriority(*priority_it);
-				while (queue.try_dequeue(record));
+				while (queue.try_dequeue(record)) {}
 			}
 			_job_pool.Clear();
 

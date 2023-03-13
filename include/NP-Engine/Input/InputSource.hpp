@@ -67,7 +67,6 @@ namespace np::nput
 		}
 
 	public:
-
 		virtual void SetKeyCallback(KeyCallback callback)
 		{
 			SetKeyCallback(nullptr, callback);
@@ -212,6 +211,6 @@ namespace np::nput
 			UnsetControllerCallback(caller);
 		}
 	};
-}
+} // namespace np::nput
 
 #endif /* NP_ENGINE_INPUT_SOURCE_HPP */

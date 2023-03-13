@@ -45,6 +45,6 @@ namespace np::nput
 
 		virtual void Submit(const MousePosition& mouse_position) = 0;
 	};
-}
+} // namespace np::nput
 
 #endif /* NP_ENGINE_INPUT_LISTENER_HPP */

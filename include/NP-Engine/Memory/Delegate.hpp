@@ -89,7 +89,7 @@ namespace np::mem
 				return r;
 			}
 
-			//return _callback ? _callback(_caller, *this) : R; //TODO: does this work with void??
+			// return _callback ? _callback(_caller, *this) : R; //TODO: does this work with void??
 		}
 
 		virtual void Clear() override

@@ -94,7 +94,7 @@ namespace np::mat
 	}
 
 	template <typename T>
-	static inline T Clamp(const T& n, const T& min, const T& max) //TODO: ::std::clamp already exists - what is this for??
+	static inline T Clamp(const T& n, const T& min, const T& max) // TODO: ::std::clamp already exists - what is this for??
 	{
 		return n > max ? max : (n < min ? min : n);
 	}

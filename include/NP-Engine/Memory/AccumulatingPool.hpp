@@ -16,7 +16,7 @@
 #include "Allocator.hpp"
 #include "ObjectPool.hpp"
 
-//TODO: AccumulatingPool has not been tested
+// TODO: AccumulatingPool has not been tested
 
 namespace np::mem
 {
@@ -59,15 +59,15 @@ namespace np::mem
 		{
 			ObjectTypePtr object = nullptr;
 
-			for (siz i = 0; i < _pools.size() && !object; i++) 
+			for (siz i = 0; i < _pools.size() && !object; i++)
 				object = _pools[i]->CreateObject(::std::forward<Args>(args)...);
 
 			if (!object)
 			{
 				siz size = POOL_TYPE_SIZE + (A::CHUNK_SIZE * NP_ENGINE_ACCUMULATING_POOL_OBJECT_COUNT);
 				Block block = _c_allocator.Allocate(size);
-				Block pool_block{ block.ptr, POOL_TYPE_SIZE };
-				Block pool_given_block{ pool_block.End(), block.size - pool_block.size };
+				Block pool_block{block.ptr, POOL_TYPE_SIZE};
+				Block pool_given_block{pool_block.End(), block.size - pool_block.size};
 				Construct<PoolType>(pool_block, pool_given_block);
 				_pools.emplace_back((PoolType*)pool_block.ptr);
 
@@ -80,7 +80,7 @@ namespace np::mem
 		bl DestroyObject(ObjectTypePtr object)
 		{
 			bl destroyed = false;
-			for (siz i=0; i<_pools.size() && !destroyed; i++)
+			for (siz i = 0; i < _pools.size() && !destroyed; i++)
 				if (_pools[i]->Contains(object))
 					destroyed = _pools[i]->DestroyObject(object);
 
@@ -95,6 +95,6 @@ namespace np::mem
 			_pools.clear();
 		}
 	};
-}
+} // namespace np::mem
 
 #endif /* NP_ENGINE_ACCUMULATING_POOL_HPP */

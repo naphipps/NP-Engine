@@ -32,7 +32,7 @@ namespace np::nput
 		con::array<MouseCodeStateBuffer, 2> _mouse_buffers;
 		con::array<MousePosition, 2> _mouse_position_buffer;
 		con::array<ControllerCodeStateBuffer, 2> _controller_buffers;
-		
+
 		KeyCodeStateBuffer& GetKeyCodeBuffer(bl flag)
 		{
 			return flag ? _key_buffers.front() : _key_buffers.back();

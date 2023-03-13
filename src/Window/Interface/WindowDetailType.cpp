@@ -9,4 +9,4 @@
 namespace np::win::__detail
 {
 	atm<WindowDetailType> RegisteredWindowDetailType(WindowDetailType::None);
-}
+} // namespace np::win::__detail

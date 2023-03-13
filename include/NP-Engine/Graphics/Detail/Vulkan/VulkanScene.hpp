@@ -36,9 +36,7 @@ namespace np::gfx::__detail
 		VulkanCamera _camera;
 
 	public:
-		VulkanScene(srvc::Services& services, Renderer& renderer):
-			Scene(services, renderer)
-		{}
+		VulkanScene(srvc::Services& services, Renderer& renderer): Scene(services, renderer) {}
 
 		~VulkanScene()
 		{

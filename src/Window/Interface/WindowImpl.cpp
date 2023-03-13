@@ -177,14 +177,14 @@ namespace np::win
 
 		_thread.Dispose();
 
-		//ownership of window is now moving from this job procedure to the closed event
+		// ownership of window is now moving from this job procedure to the closed event
 		_services.GetEventSubmitter().Emplace<WindowClosedEvent>(this);
 	}
 
 	void Window::ShowProcedure()
 	{
 		DetailShowProcedure();
-		
+
 		jsys::Job* window_closing_job = _services.GetJobSystem().CreateJob();
 		window_closing_job->GetDelegate().SetCallback(this, ClosingCallback);
 		_services.GetEventSubmitter().Emplace<WindowClosingEvent>(this, window_closing_job);

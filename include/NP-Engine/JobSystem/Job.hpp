@@ -31,12 +31,7 @@ namespace np::jsys
 	public:
 		Job(): _antecedent_count(0), _confirm_completion_flag(nullptr), _can_be_stolen(true) {}
 
-		Job(mem::Delegate& d):
-			_antecedent_count(0),
-			_delegate(d),
-			_confirm_completion_flag(nullptr),
-			_can_be_stolen(true)
-		{}
+		Job(mem::Delegate& d): _antecedent_count(0), _delegate(d), _confirm_completion_flag(nullptr), _can_be_stolen(true) {}
 
 		Job(const Job& other):
 			_dependents(other._dependents),
@@ -88,12 +83,12 @@ namespace np::jsys
 		{
 			return _delegate;
 		}
-		
+
 		void SetDelegate(mem::Delegate& d)
 		{
 			_delegate = d;
 		}
-		
+
 		void Reset()
 		{
 			_dependents.clear();

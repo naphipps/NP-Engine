@@ -24,9 +24,9 @@ namespace np::win
 			i32 y;
 		};
 
-		WindowPositionEvent(Window* window, i32 x, i32 y) : evnt::Event()
+		WindowPositionEvent(Window* window, i32 x, i32 y): evnt::Event()
 		{
-			SetData<DataType>({ window, x, y });
+			SetData<DataType>({window, x, y});
 		}
 
 		evnt::EventType GetType() const override
@@ -39,6 +39,6 @@ namespace np::win
 			return evnt::EventCategory::Window;
 		}
 	};
-}
+} // namespace np::win
 
 #endif /* NP_ENGINE_WINDOW_POSITION_EVENT_HPP */
