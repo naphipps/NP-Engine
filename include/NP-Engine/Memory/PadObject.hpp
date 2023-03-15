@@ -67,7 +67,7 @@ namespace np::mem
 
 			NP_ENGINE_ASSERT(::std::is_copy_assignable_v<T>, "T must be copy assignable");
 
-			*((T*)_padding) = object;
+			*((T*)_padding) = object; //TODO: I think we need a better-well-defined behavior with this object
 			_padding[CACHE_LINE_SIZE - 1] = 1;
 		}
 

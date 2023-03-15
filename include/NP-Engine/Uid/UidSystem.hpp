@@ -20,6 +20,8 @@
 #include "UidGenerator.hpp"
 #include "UidHandle.hpp"
 
+//TODO: should we setup some kind of sptr<UidHandle> so our handles return to us automatically just like pools?
+
 namespace np::uid
 {
 	class UidSystem
