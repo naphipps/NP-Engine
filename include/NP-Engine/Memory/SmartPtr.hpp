@@ -18,50 +18,57 @@
 
 namespace np::mem
 {
-	namespace __detail
+	template <typename T>
+	class UptrDeleter : public ::std::default_delete<T>
 	{
-		template <class T>
-		struct SmartPtrDeleter : public ::std::default_delete<T>
+	public:
+		using AllocatorType = TraitAllocator;
+
+		void operator()(T* ptr) const noexcept
 		{
-			constexpr SmartPtrDeleter() noexcept = default;
-
-			template <class U, ::std::enable_if_t<::std::is_convertible_v<U*, T*>, i32> = 0>
-			SmartPtrDeleter(const SmartPtrDeleter<U>&) noexcept
-			{}
-
-			void operator()(T* ptr) const noexcept
-			{
-				NP_ENGINE_STATIC_ASSERT(0 < sizeof(T), "can't delete an incomplete type");
-				TraitAllocator allocator;
-				Destroy<T>(allocator, ptr);
-			}
-		};
-	} // namespace __detail
+			AllocatorType allocator;
+			Destroy<T>(allocator, ptr);
+		}
+	};
 
 	template <class T>
-	using uptr = ::std::unique_ptr<T, __detail::SmartPtrDeleter<T>>;
+	using uptr = ::std::unique_ptr<T, UptrDeleter<T>>;
 
 	template <typename T, typename... Args>
 	constexpr uptr<T> CreateUptr(Args&&... args)
 	{
 		NP_ENGINE_ASSERT((::std::is_constructible_v<T, Args...>), "T must be constructible with the given args.");
-		TraitAllocator allocator;
-		T* ptr = Create<T>(allocator, ::std::forward<Args>(args)...);
-		NP_ENGINE_ASSERT(ptr, "We require a successful construction here.");
-		return uptr<T>(ptr);
+		typename uptr<T>::deleter_type::AllocatorType allocator;
+		return uptr<T>(Create<T>(allocator, ::std::forward<Args>(args)...));
 	}
+
+	template <typename T>
+	class SptrDeleter : public ::std::default_delete<T>
+	{
+	private:
+		Allocator& _allocator;
+
+	public:
+		SptrDeleter(Allocator& allocator) : _allocator(allocator) {}
+
+		SptrDeleter(const SptrDeleter& other) : _allocator(other._allocator) {}
+
+		SptrDeleter(SptrDeleter&& other) noexcept : _allocator(other._allocator) {}
+
+		void operator()(T* ptr) const noexcept
+		{
+			Destroy<T>(_allocator, ptr);
+		}
+	};
 
 	template <typename T>
 	using sptr = ::std::shared_ptr<T>;
 
 	template <typename T, typename... Args>
-	constexpr sptr<T> CreateSptr(Args&&... args)
+	constexpr sptr<T> CreateSptr(Allocator& allocator, Args&&... args)
 	{
 		NP_ENGINE_ASSERT((::std::is_constructible_v<T, Args...>), "T must be constructible with the given args.");
-		TraitAllocator allocator;
-		T* ptr = Create<T>(allocator, ::std::forward<Args>(args)...);
-		NP_ENGINE_ASSERT(ptr, "We require a successful construction here.");
-		return sptr<T>(ptr, __detail::SmartPtrDeleter<T>{});
+		return sptr<T>(Create<T>(allocator, ::std::forward<Args>(args)...), SptrDeleter<T>(allocator));
 	}
 
 	template <typename T>
