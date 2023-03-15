@@ -22,30 +22,22 @@ namespace np::jsys
 	class Job
 	{
 	private:
-		con::vector<Job*> _dependents;
+		con::vector<mem::wptr<Job>> _dependents;
 		atm_i32 _antecedent_count;
 		mem::Delegate _delegate;
-		atm<atm_bl*> _confirm_completion_flag;
 		bl _can_be_stolen;
 
 	public:
-		Job(): _antecedent_count(0), _confirm_completion_flag(nullptr), _can_be_stolen(true) {}
+		Job(): _antecedent_count(0), _can_be_stolen(true) {}
 
-		Job(mem::Delegate& d): _antecedent_count(0), _delegate(d), _confirm_completion_flag(nullptr), _can_be_stolen(true) {}
+		Job(mem::Delegate& d): _antecedent_count(0), _delegate(d), _can_be_stolen(true) {}
 
-		Job(const Job& other):
-			_dependents(other._dependents),
-			_antecedent_count(other._antecedent_count.load(mo_acquire)),
-			_delegate(other._delegate),
-			_confirm_completion_flag(other._confirm_completion_flag.load(mo_acquire)),
-			_can_be_stolen(other._can_be_stolen)
-		{}
+		Job(const Job& other) = delete;
 
 		Job(Job&& other) noexcept:
 			_dependents(::std::move(other._dependents)),
 			_antecedent_count(::std::move(other._antecedent_count.load(mo_acquire))),
 			_delegate(::std::move(other._delegate)),
-			_confirm_completion_flag(::std::move(other._confirm_completion_flag.load(mo_acquire))),
 			_can_be_stolen(::std::move(other._can_be_stolen))
 		{}
 
@@ -54,22 +46,13 @@ namespace np::jsys
 			Reset();
 		}
 
-		Job& operator=(const Job& other)
-		{
-			_dependents = other._dependents;
-			_antecedent_count.store(other._antecedent_count.load(mo_acquire), mo_release);
-			_delegate = other._delegate;
-			_confirm_completion_flag.store(other._confirm_completion_flag.load(mo_acquire), mo_release);
-			_can_be_stolen = other._can_be_stolen;
-			return *this;
-		}
+		Job& operator=(const Job& other) = delete;
 
 		Job& operator=(Job&& other) noexcept
 		{
 			_dependents = ::std::move(other._dependents);
 			_antecedent_count.store(::std::move(other._antecedent_count.load(mo_acquire)), mo_release);
 			_delegate = ::std::move(other._delegate);
-			_confirm_completion_flag.store(::std::move(other._confirm_completion_flag.load(mo_acquire)), mo_release);
 			_can_be_stolen = ::std::move(other._can_be_stolen);
 			return *this;
 		}
@@ -94,7 +77,6 @@ namespace np::jsys
 			_dependents.clear();
 			_antecedent_count.store(0, mo_release);
 			_delegate.Clear();
-			_confirm_completion_flag.store(nullptr, mo_release);
 			_can_be_stolen = true;
 		}
 
@@ -108,25 +90,15 @@ namespace np::jsys
 			if (CanExecute())
 			{
 				_delegate();
-				atm_bl* flag = _confirm_completion_flag.load(mo_acquire);
+				_antecedent_count--;
 
-				if (!flag || flag->load(mo_acquire))
+				for (auto it = _dependents.begin(); it != _dependents.end(); it++)
 				{
-					_antecedent_count--;
-					for (auto it = _dependents.begin(); it != _dependents.end(); it++)
-						(*it)->_antecedent_count--;
+					mem::sptr<Job> dependent = it->lock();
+					if (dependent)
+						dependent->_antecedent_count--;
 				}
 			}
-		}
-
-		void WatchConfirmCompletionFlag(atm_bl* completion_flag)
-		{
-			_confirm_completion_flag.store(completion_flag, mo_release);
-		}
-
-		void UnwatchConfirmCompletionFlag()
-		{
-			_confirm_completion_flag.store(nullptr, mo_release);
 		}
 
 		bl IsComplete() const
@@ -139,32 +111,49 @@ namespace np::jsys
 			return _antecedent_count.load(mo_acquire) > -1;
 		}
 
-		void AddDependency(Job& other)
+		/*
+			make a depend on b
+		*/
+		static void AddDependency(mem::sptr<Job> a, mem::sptr<Job> b)
 		{
-			if (IsEnabled())
+			if (a->IsEnabled() && b->IsEnabled())
 			{
 				bl found = false;
-				for (auto it = other._dependents.begin(); it != other._dependents.end() && !found; it++)
-					found = *it == this;
+				con::vector<mem::wptr<Job>>& dependents = b->_dependents;
+				for (auto it = dependents.begin(); it != dependents.end() && !found; it++)
+				{
+					mem::sptr<Job> dependent = it->lock();
+					found = dependent && dependent.get() == a.get();
+				}
 
 				if (!found)
 				{
-					other._dependents.emplace_back(this);
-					_antecedent_count++;
+					dependents.emplace_back(a);
+					a->_antecedent_count++;
 				}
 			}
 		}
 
-		void RemoveDependency(Job& other)
+		/*
+			stop a from depending on b if it is
+		*/
+		static void RemoveDependency(mem::sptr<Job> a, mem::sptr<Job> b)
 		{
-			if (IsEnabled())
-				for (auto it = other._dependents.begin(); it != other._dependents.end(); it++)
-					if (*it == this)
+			if (a->IsEnabled() && b->IsEnabled())
+			{
+				con::vector<mem::wptr<Job>>& dependents = b->_dependents;
+				for (auto it = dependents.begin(); it != dependents.end(); it++)
+				{
+					mem::sptr<Job> dependent = it->lock();
+					if (dependent.get() == a.get())
 					{
-						other._dependents.erase(it);
-						_antecedent_count--;
+						dependent.reset();
+						dependents.erase(it);
+						a->_antecedent_count--;
 						break;
 					}
+				}
+			}
 		}
 
 		void SetCanBeStolen(bl can_be_stolen)

@@ -17,6 +17,7 @@
 #include "ObjectPool.hpp"
 
 // TODO: AccumulatingPool has not been tested
+// TODO: add AccumulatingPool.Reserve(count) to reserve "count" objects in advance
 
 namespace np::mem
 {
@@ -32,9 +33,6 @@ namespace np::mem
 		::std::vector<PoolType*> _pools;
 
 	public:
-		using ObjectType = typename PoolType::ObjectType;
-		using ObjectTypePtr = typename PoolType::ObjectTypePtr;
-
 		siz ObjectSize() const
 		{
 			return sizeof(T);
@@ -45,7 +43,7 @@ namespace np::mem
 			return A::CHUNK_SIZE;
 		}
 
-		bl Contains(ObjectTypePtr object) const
+		bl Contains(sptr<T>& object) const
 		{
 			bl contains = false;
 			for (siz i = 0; i < _pools.size() && !contains; i++)
@@ -55,16 +53,19 @@ namespace np::mem
 		}
 
 		template <typename... Args>
-		ObjectTypePtr CreateObject(Args&&... args)
+		sptr<T> CreateObject(Args&&... args)
 		{
-			ObjectTypePtr object = nullptr;
+			sptr<T> object = nullptr;
 
 			for (siz i = 0; i < _pools.size() && !object; i++)
 				object = _pools[i]->CreateObject(::std::forward<Args>(args)...);
 
 			if (!object)
 			{
+				//TODO: can we simplify a pool's construction?? I don't think so
+				//TODO: put this "AddPool" behavior in a method
 				siz size = POOL_TYPE_SIZE + (A::CHUNK_SIZE * NP_ENGINE_ACCUMULATING_POOL_OBJECT_COUNT);
+				//TODO: size should be POOL_TYPE_SIZE + <twice the size of the last pool OR CHUNK_SIZE * POOL_OBJECT_COUNT>
 				Block block = _c_allocator.Allocate(size);
 				Block pool_block{block.ptr, POOL_TYPE_SIZE};
 				Block pool_given_block{pool_block.End(), block.size - pool_block.size};
@@ -75,16 +76,6 @@ namespace np::mem
 			}
 
 			return object;
-		}
-
-		bl DestroyObject(ObjectTypePtr object)
-		{
-			bl destroyed = false;
-			for (siz i = 0; i < _pools.size() && !destroyed; i++)
-				if (_pools[i]->Contains(object))
-					destroyed = _pools[i]->DestroyObject(object);
-
-			return destroyed;
 		}
 
 		void Clear()

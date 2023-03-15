@@ -13,7 +13,7 @@
 
 namespace np::uid
 {
-	using UidPool = mem::ObjectPool<Uid>;
+	using UidPool = mem::AccumulatingPool<Uid>;
 } // namespace np::uid
 
 #endif /* NP_ENGINE_UID_POOL_HPP */

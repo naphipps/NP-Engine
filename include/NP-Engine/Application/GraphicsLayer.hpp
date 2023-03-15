@@ -43,7 +43,7 @@ namespace np::app
 		con::vector<gfx::Scene*> _scenes;
 
 		siz _job_worker_index;
-		jsys::Job* _rendering_job;
+		mem::sptr<jsys::Job> _rendering_job;
 		atm_bl _keep_rendering;
 
 		static void AdjustForWindowClosingCallback(void* caller, mem::Delegate& d)
@@ -77,10 +77,10 @@ namespace np::app
 		{
 			win::WindowClosingEvent::DataType& closing_data = e.GetData<win::WindowClosingEvent::DataType>();
 
-			jsys::Job* adjust_job = _services.GetJobSystem().CreateJob();
+			mem::sptr<jsys::Job> adjust_job = _services.GetJobSystem().CreateJob();
 			adjust_job->GetDelegate().SetCallback(this, AdjustForWindowClosingCallback);
 
-			closing_data.job->AddDependency(*adjust_job);
+			jsys::Job::AddDependency(closing_data.job, adjust_job);
 			_services.GetJobSystem().SubmitJob(jsys::JobPriority::Higher, adjust_job);
 		}
 
@@ -268,7 +268,7 @@ namespace np::app
 				while (_rendering_job->IsEnabled() && !_rendering_job->IsComplete())
 					_keep_rendering.store(false, mo_release);
 
-				_rendering_job = nullptr;
+				_rendering_job.reset();
 			}
 		}
 	};

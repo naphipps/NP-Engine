@@ -25,12 +25,9 @@ namespace np::jsys
 		constexpr static siz JOB_SIZE = mem::CalcAlignedSize(sizeof(Job));
 		constexpr static siz THREAD_SIZE = mem::CalcAlignedSize(sizeof(thr::Thread));
 
-		mem::TraitAllocator _allocator;
 		atm_bl _running;
-
 		con::vector<JobWorker> _job_workers;
-		mem::Block _thread_pool_block;
-		thr::ThreadPool* _thread_pool;
+		mem::uptr<thr::ThreadPool> _thread_pool;
 		JobPool _job_pool;
 
 		// TODO: use tokens with mpmc_queue
@@ -54,23 +51,17 @@ namespace np::jsys
 		void Dispose()
 		{
 			Stop();
-			_job_workers.clear();
-
+			
 			JobRecord record{};
 			for (auto priority_it = JobPrioritiesHighToLow.begin(); priority_it != JobPrioritiesHighToLow.end(); priority_it++)
 			{
 				con::mpmc_queue<JobRecord>& queue = GetQueueForPriority(*priority_it);
 				while (queue.try_dequeue(record)) {}
 			}
-			_job_pool.Clear();
 
-			if (_thread_pool)
-			{
-				mem::Destroy<thr::ThreadPool>(_allocator, _thread_pool);
-				_allocator.Deallocate(_thread_pool_block);
-				_thread_pool_block.Invalidate();
-				_thread_pool = nullptr;
-			}
+			_job_workers.clear();
+			_thread_pool.reset();
+			_job_pool.Clear();
 		}
 
 		void SetDefaultJobWorkerCount()
@@ -85,15 +76,19 @@ namespace np::jsys
 		void SetJobWorkerCount(siz count)
 		{
 			Dispose();
-			_thread_pool_block = _allocator.Allocate(THREAD_SIZE * count);
-			_thread_pool = mem::Create<thr::ThreadPool>(_allocator, _thread_pool_block);
+			_thread_pool = mem::CreateUptr<thr::ThreadPool>(count);
 
-			_job_workers.resize(count);
+			while (_job_workers.size() < count)
+				_job_workers.emplace_back(*this);
+
+			while (_job_workers.size() > count)
+				_job_workers.pop_back();
+
 			for (auto it1 = _job_workers.begin(); it1 != _job_workers.end(); it1++)
 			{
 				it1->ClearCoworkers();
 				for (auto it2 = _job_workers.begin(); it2 != _job_workers.end(); it2++)
-					it1->AddCoworker(mem::AddressOf(*it2));
+					it1->AddCoworker(*it2);
 			}
 		}
 
@@ -107,7 +102,7 @@ namespace np::jsys
 			_running.store(true, mo_release);
 
 			for (siz i = 0; i < _job_workers.size(); i++)
-				_job_workers[i].StartWork(*this, *_thread_pool, (i + 1) % _thread_pool->ObjectCount());
+				_job_workers[i].StartWork(*_thread_pool, (i + 1) % _thread_pool->ObjectCount());
 		}
 
 		void Stop()
@@ -116,12 +111,9 @@ namespace np::jsys
 
 			if (IsRunning())
 			{
-				// stop workers
 				for (auto it = _job_workers.begin(); it != _job_workers.end(); it++)
 					it->StopWork();
 
-				// stop threads
-				_thread_pool->Clear();
 				_running.store(false, mo_release);
 			}
 		}
@@ -165,7 +157,7 @@ namespace np::jsys
 			return *deque;
 		}
 
-		JobRecord SubmitJob(JobPriority priority, Job* job)
+		JobRecord SubmitJob(JobPriority priority, mem::sptr<Job> job)
 		{
 			return SubmitJob({priority, job});
 		}
@@ -183,14 +175,9 @@ namespace np::jsys
 			return return_record;
 		}
 
-		Job* CreateJob()
+		mem::sptr<Job> CreateJob()
 		{
 			return _job_pool.CreateObject();
-		}
-
-		bl DestroyJob(Job* job)
-		{
-			return _job_pool.DestroyObject(job);
 		}
 
 		con::vector<JobWorker>& GetJobWorkers()

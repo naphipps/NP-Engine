@@ -14,16 +14,15 @@ namespace np::jsys
 		JobRecord next_job;
 		for (siz i = 0; i < JobPrioritiesHighToLow.size() && !next_job.IsValid(); i++)
 		{
-			_job_system->GetQueueForPriority(JobPrioritiesHighToLow[i]).try_dequeue(next_job);
+			_job_system.GetQueueForPriority(JobPrioritiesHighToLow[i]).try_dequeue(next_job);
 			if (next_job.IsValid())
 			{
-				Job* job = next_job.job;
-				if (job->IsEnabled())
+				if (next_job.job->IsEnabled())
 				{
-					if (!job->CanExecute())
+					if (!next_job.job->CanExecute())
 					{
-						_job_system->SubmitJob(NormalizePriority(next_job.priority), job);
-						next_job.Invalidate();
+						_job_system.SubmitJob(NormalizePriority(next_job.priority), next_job.job);
+						next_job.Invalidate(); //done with record
 					}
 				}
 				else
@@ -41,16 +40,16 @@ namespace np::jsys
 
 		if (!success)
 		{
-			Job* immediate = GetImmediateJob();
+			mem::sptr<Job> immediate = GetImmediateJob();
 			if (immediate)
 			{
 				NP_ENGINE_PROFILE_SCOPE("executing immediate Job");
 				success = true;
 				(*immediate)();
-				if (immediate->IsComplete())
-					_job_system->DestroyJob(immediate);
-				else
+				if (!immediate->IsComplete())
 					SubmitImmediateJob(immediate);
+
+				immediate.reset(); //done with job
 			}
 		}
 
@@ -68,12 +67,12 @@ namespace np::jsys
 			{
 				NP_ENGINE_PROFILE_SCOPE("executing next Job");
 				success = true;
-				Job* job = record.job;
-				(*job)();
-				if (job->IsComplete())
-					_job_system->DestroyJob(job);
-				else
-					_job_system->SubmitJob(NormalizePriority(record.priority), job);
+				(*record.job)();
+
+				if (!record.job->IsComplete())
+					_job_system.SubmitJob(NormalizePriority(record.priority), record.job);
+
+				record.Invalidate(); //done with record
 			}
 		}
 
@@ -86,16 +85,16 @@ namespace np::jsys
 
 		if (!success)
 		{
-			Job* stolen = GetStolenJob();
+			mem::sptr<Job> stolen = GetStolenJob();
 			if (stolen)
 			{
 				NP_ENGINE_PROFILE_SCOPE("executing stolen Job");
 				success = true;
 				(*stolen)();
-				if (stolen->IsComplete())
-					_job_system->DestroyJob(stolen);
-				else
+				if (!stolen->IsComplete())
 					SubmitImmediateJob(stolen);
+
+				stolen.reset(); //done with job
 			}
 			else
 			{

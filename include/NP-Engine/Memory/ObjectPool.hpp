@@ -14,6 +14,7 @@
 
 #include "PoolAllocator.hpp"
 #include "LockingPoolAllocator.hpp"
+#include "SmartPtr.hpp"
 
 namespace np::mem
 {
@@ -24,17 +25,35 @@ namespace np::mem
 		NP_ENGINE_STATIC_ASSERT((::std::is_base_of_v<PoolAllocator<T>, A> || ::std::is_base_of_v<LockingPoolAllocator<T>, A>),
 								"our given allocator must be our PoolAllocator or LockingPoolAllocator");
 
-	public:
-		using ObjectType = T;
-		using ObjectTypePtr = T*;
+		class ObjectPoolSptrDeleter : public ::std::default_delete<T>
+		{
+		private:
+			ObjectPool<T, A>& _pool;
 
+		public:
+
+			ObjectPoolSptrDeleter(ObjectPool<T, A>& pool) : _pool(pool) {}
+
+			void operator()(T* ptr) const noexcept
+			{
+				_pool.DestroyObject(ptr);
+			}
+		};
+		
 	protected:
 		A _allocator;
+		ObjectPoolSptrDeleter _ptr_deleter;
+
+		virtual void DestroyObject(T* object)
+		{
+			if (_allocator.Contains(object))
+				Destroy<T>(_allocator, object);
+		}
 
 	public:
-		ObjectPool(Block block): _allocator(block) {}
+		ObjectPool(Block block): _allocator(block), _ptr_deleter(*this) {}
 
-		ObjectPool(siz object_count): _allocator(object_count * A::CHUNK_SIZE) {}
+		ObjectPool(siz object_count): _allocator(object_count * A::CHUNK_SIZE), _ptr_deleter(*this) {}
 
 		siz ObjectCount() const
 		{
@@ -61,30 +80,15 @@ namespace np::mem
 			return _allocator;
 		}
 
-		bl Contains(ObjectTypePtr object)
+		bl Contains(sptr<T>& object) const
 		{
-			return _allocator.Contains(object);
+			return _allocator.Contains(object.get());
 		}
 
 		template <typename... Args>
-		ObjectTypePtr CreateObject(Args&&... args)
+		sptr<T> CreateObject(Args&&... args)
 		{
-			Block block = _allocator.Allocate(ObjectSize());
-			Construct<T>(block, ::std::forward<Args>(args)...);
-			return static_cast<ObjectTypePtr>(block.ptr);
-		}
-
-		virtual bl DestroyObject(ObjectTypePtr object)
-		{
-			bl destroyed = false;
-			if (_allocator.Contains(object) && Destruct<T>(object))
-				destroyed = _allocator.Deallocate(object);
-			return destroyed;
-		}
-
-		virtual void Clear()
-		{
-			_allocator.DeallocateAll();
+			return sptr<T>(Create<T>(_allocator, ::std::forward<Args>(args)...), _ptr_deleter);
 		}
 	};
 

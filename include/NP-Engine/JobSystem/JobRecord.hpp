@@ -20,16 +20,17 @@ namespace np::jsys
 	struct JobRecord
 	{
 		JobPriority priority = JobPriority::Normal;
-		Job* job = nullptr;
+		mem::sptr<Job> job = nullptr;
 
 		bl IsValid() const
 		{
-			return job != nullptr;
+			return (bl)job;
 		}
 
 		void Invalidate()
 		{
-			job = nullptr;
+			priority = JobPriority::Normal;
+			job.reset();
 		}
 	};
 } // namespace np::jsys

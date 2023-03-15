@@ -21,10 +21,16 @@ namespace np::win
 		struct DataType
 		{
 			Window* window;
-			jsys::Job* job;
+			mem::sptr<jsys::Job> job;
 		};
 
-		WindowClosingEvent(Window* window, jsys::Job* job): evnt::Event()
+		virtual ~WindowClosingEvent()
+		{
+			DataType& data = GetData<DataType>();
+			data.job.reset();
+		}
+
+		WindowClosingEvent(Window* window, mem::sptr<jsys::Job> job): evnt::Event()
 		{
 			SetData<DataType>({window, job});
 		}

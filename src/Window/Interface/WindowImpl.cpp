@@ -185,7 +185,7 @@ namespace np::win
 	{
 		DetailShowProcedure();
 
-		jsys::Job* window_closing_job = _services.GetJobSystem().CreateJob();
+		mem::sptr<jsys::Job> window_closing_job = _services.GetJobSystem().CreateJob();
 		window_closing_job->GetDelegate().SetCallback(this, ClosingCallback);
 		_services.GetEventSubmitter().Emplace<WindowClosingEvent>(this, window_closing_job);
 

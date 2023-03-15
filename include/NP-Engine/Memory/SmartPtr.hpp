@@ -63,6 +63,9 @@ namespace np::mem
 		NP_ENGINE_ASSERT(ptr, "We require a successful construction here.");
 		return sptr<T>(ptr, __detail::SmartPtrDeleter<T>{});
 	}
+
+	template <typename T>
+	using wptr = ::std::weak_ptr<T>;
 } // namespace np::mem
 
 #endif /* NP_ENGINE_SMART_PTR_HPP */
