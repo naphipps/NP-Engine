@@ -213,7 +213,7 @@ namespace np::app
 			tim::DblMilliseconds update_delta(0);
 
 			evnt::Event* e = nullptr;
-			siz i = 0;
+			i64 i = 0;
 
 			CustomizeJobSystem();
 			_graphics_layer.SubmitRenderingJob();
@@ -227,10 +227,10 @@ namespace np::app
 				{
 					e->SetCanBeHandled(false);
 
-					for (i = _overlays.size() - 1; !e->IsHandled() && i < _overlays.size(); i--)
+					for (i = _overlays.size() - 1; !e->IsHandled() && i >= 0; i--)
 						_overlays[i]->OnEvent(*e);
 
-					for (i = _layers.size() - 1; !e->IsHandled() && i < _layers.size(); i--)
+					for (i = _layers.size() - 1; !e->IsHandled() && i >= 0; i--)
 						_layers[i]->OnEvent(*e);
 
 					if (!e->CanBeHandled())
