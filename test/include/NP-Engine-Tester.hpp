@@ -44,12 +44,12 @@ namespace np::app
 
 		virtual void AdjustForWindowClosing(evnt::Event& e)
 		{
-			win::WindowClosingEvent::DataType& closing_data = e.GetData<win::WindowClosingEvent::DataType>();
+			win::WindowClosingEvent& closing_event = (win::WindowClosingEvent&)e;
+			win::WindowClosingEvent::DataType& closing_data = closing_event.GetData();
 
 			mem::sptr<jsys::Job> adjust_job = _services.GetJobSystem().CreateJob();
-			adjust_job->GetDelegate().SetData<win::Window*>(closing_data.window);
+			adjust_job->GetDelegate().ConstructData<win::Window*>(closing_data.window);
 			adjust_job->GetDelegate().SetCallback(this, AdjustForWindowClosingCallback);
-
 			jsys::Job::AddDependency(closing_data.job, adjust_job);
 			_services.GetJobSystem().SubmitJob(jsys::JobPriority::Higher, adjust_job);
 		}
@@ -72,7 +72,7 @@ namespace np::app
 			win::WindowClosedEvent::DataType& closing_data = e.GetData<win::WindowClosedEvent::DataType>();
 
 			mem::sptr<jsys::Job> adjust_job = _services.GetJobSystem().CreateJob();
-			adjust_job->GetDelegate().SetData<win::Window*>(closing_data.window);
+			adjust_job->GetDelegate().ConstructData<win::Window*>(closing_data.window);
 			adjust_job->GetDelegate().SetCallback(this, AdjustForWindowClosedCallback);
 
 			_services.GetJobSystem().SubmitJob(jsys::JobPriority::Higher, adjust_job);

@@ -8,11 +8,12 @@
 #define NP_ENGINE_PAD_OBJECT_HPP
 
 #include <utility>
-#include <string>
 #include <type_traits>
 
 #include "NP-Engine/Foundation/Foundation.hpp"
 #include "NP-Engine/Primitive/Primitive.hpp"
+
+#include "Allocator.hpp"
 
 namespace np::mem
 {
@@ -21,60 +22,22 @@ namespace np::mem
 
 	class PadObject
 	{
-	protected:
+	private:
 		CacheLinePadding _padding;
 
 	public:
-		PadObject()
+		template <typename T, typename... Args>
+		bl ConstructData(Args&&... args)
 		{
-			Clear();
-		}
-
-		PadObject(const PadObject& other)
-		{
-			for (siz i = 0; i < CACHE_LINE_SIZE; i++)
-				_padding[i] = other._padding[i];
-		}
-
-		PadObject(PadObject&& other) noexcept
-		{
-			for (siz i = 0; i < CACHE_LINE_SIZE; i++)
-				_padding[i] = ::std::move(other._padding[i]);
-		}
-
-		virtual ~PadObject() {}
-
-		PadObject& operator=(const PadObject& other)
-		{
-			for (siz i = 0; i < CACHE_LINE_SIZE; i++)
-				_padding[i] = other._padding[i];
-			return *this;
-		}
-
-		PadObject& operator=(PadObject&& other) noexcept
-		{
-			for (siz i = 0; i < CACHE_LINE_SIZE; i++)
-				_padding[i] = ::std::move(other._padding[i]);
-			return *this;
+			NP_ENGINE_ASSERT(sizeof(T) <= CACHE_LINE_SIZE, "given T must be <= CACHE_LINE_SIZE");
+			Block block{ (void*)_padding, CACHE_LINE_SIZE };
+			return Construct<T>(block, ::std::forward<Args>(args)...);
 		}
 
 		template <typename T>
-		void SetData(const T& object)
+		bl DestructData()
 		{
-			NP_ENGINE_ASSERT(sizeof(T) <= CACHE_LINE_SIZE - 1,
-							 "cannot assign padding struct of size (" + ::std::to_string(sizeof(T)) + ")\nplease keep it <= (" +
-								 ::std::to_string(CACHE_LINE_SIZE - 1) + ")");
-
-			NP_ENGINE_ASSERT(::std::is_copy_assignable_v<T>, "T must be copy assignable");
-
-			*((T*)_padding) = object; //TODO: I think we need a better-well-defined behavior with this object
-			_padding[CACHE_LINE_SIZE - 1] = 1;
-		}
-
-		template <typename T>
-		const T& GetData() const
-		{
-			return *((T*)_padding);
+			return Destruct<T>((T*)_padding);
 		}
 
 		template <typename T>
@@ -83,15 +46,10 @@ namespace np::mem
 			return *((T*)_padding);
 		}
 
-		bl IsDirty() const
+		template <typename T>
+		const T& GetData() const
 		{
-			return _padding[CACHE_LINE_SIZE - 1] != 0;
-		}
-
-		virtual void Clear()
-		{
-			for (siz i = 0; i < CACHE_LINE_SIZE; i++)
-				_padding[i] = 0;
+			return *((T*)_padding);
 		}
 	};
 } // namespace np::mem

@@ -26,7 +26,22 @@ namespace np::win
 
 		WindowPositionEvent(Window* window, i32 x, i32 y): evnt::Event()
 		{
-			SetData<DataType>({window, x, y});
+			ConstructData<DataType>(DataType{ window, x, y });
+		}
+
+		~WindowPositionEvent()
+		{
+			DestructData<DataType>();
+		}
+
+		DataType& GetData()
+		{
+			return mem::PadObject::GetData<DataType>();
+		}
+
+		const DataType& GetData() const
+		{
+			return mem::PadObject::GetData<DataType>();
 		}
 
 		evnt::EventType GetType() const override

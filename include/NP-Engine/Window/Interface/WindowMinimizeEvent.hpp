@@ -25,7 +25,22 @@ namespace np::win
 
 		WindowMinimizeEvent(Window* window, bl minimized): evnt::Event()
 		{
-			SetData<DataType>({window, minimized});
+			ConstructData<DataType>(DataType{ window, minimized });
+		}
+
+		~WindowMinimizeEvent()
+		{
+			DestructData<DataType>();
+		}
+
+		DataType& GetData()
+		{
+			return mem::PadObject::GetData<DataType>();
+		}
+
+		const DataType& GetData() const
+		{
+			return mem::PadObject::GetData<DataType>();
 		}
 
 		evnt::EventType GetType() const override

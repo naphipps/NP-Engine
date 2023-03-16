@@ -149,7 +149,7 @@ namespace np::gfx::__detail
 				light.DisposeForPipeline(((VulkanRenderer&)_renderer).GetLightPipeline());
 			}
 
-			_on_draw_delegate.Clear();
+			_on_draw_delegate.UnsetCallback();
 		}
 
 		virtual void SetCamera(Camera& camera) override

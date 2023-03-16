@@ -29,15 +29,21 @@ namespace np::gfxalg
 		using DmsLineSegmentLoop = con::vector<DmsLineSegment>;
 		using Extraction = con::vector<con::vector<con::vector<DmsPoint>>>;
 
+		struct Payload : public FloodFillImage::Payload
+		{
+			dbl isothreshold = 0.5;
+			gfx::ColorChannel channel = gfx::ColorChannel::Alpha;
+			con::uset<DmsPoint>* edgePoints = nullptr;
+			con::uset<DmsPoint>* visited = nullptr;
+		};
+
 	private:
 		ImageSubview _image_subview;
 
-	private:
 		static bl IsNotVisitedAndUnderIsothreshold(void* caller, mem::BlDelegate& d)
 		{
 			using Relation = FloodFillImage::PointRelation;
-			FloodFillImage::Payload& payload = *d.GetData<FloodFillImage::Payload*>();
-			ExtractEdgePointsUserData& user_data = *((ExtractEdgePointsUserData*)payload.user_data);
+			Payload& payload = *d.GetData<Payload*>();
 			Point point = payload.point;
 
 			if (FloodFillImage::PointRelationContains(payload.relation, Relation::Upper))
@@ -49,32 +55,31 @@ namespace np::gfxalg
 			if (FloodFillImage::PointRelationContains(payload.relation, Relation::Left))
 				point.x--;
 
-			return !user_data.visited->count(point) &&
-				user_data.self->GetIsovalue(point, user_data.channel) < user_data.isothreshold;
+			return !payload.visited->count(point) &&
+				GetIsovalue(*payload.imageSubview, point, payload.channel) < payload.isothreshold;
 		}
 
 		static void MarkAsVisited(void* caller, mem::VoidDelegate& d)
 		{
-			FloodFillImage::Payload& payload = *d.GetData<FloodFillImage::Payload*>();
-			ExtractEdgePointsUserData& user_data = *((ExtractEdgePointsUserData*)payload.user_data);
-			user_data.visited->emplace(payload.point);
+			Payload& payload = *d.GetData<Payload*>();
+			payload.visited->emplace(payload.point);
 		}
 
 		static void ExtractEdgePoint(void* caller, mem::VoidDelegate& d)
 		{
-			FloodFillImage::Payload& payload = *d.GetData<FloodFillImage::Payload*>();
-			ExtractEdgePointsUserData& user_data = *((ExtractEdgePointsUserData*)payload.user_data);
-			user_data.edge_points->emplace(payload.point);
+			Payload& payload = *d.GetData<Payload*>();
+			payload.edgePoints->emplace(payload.point);
 		}
 
-		struct ExtractEdgePointsUserData
+		/*
+			- gets the dms iso value [0.0 - 1.0] at given point
+			- isovalue: fraction of maximum value
+				- example: 128 / 255 = 0.501960784313725 isovalue
+		*/
+		static dbl GetIsovalue(const ImageSubview& image_subview, const Point& point, gfx::ColorChannel channel)
 		{
-			DmsImage* self = nullptr;
-			dbl isothreshold = 0.5;
-			gfx::ColorChannel channel = gfx::ColorChannel::Alpha;
-			con::uset<DmsPoint>* edge_points = nullptr;
-			con::uset<DmsPoint>* visited = nullptr;
-		};
+			return ((dbl)image_subview.Get(point).GetChannelValue(channel)) / ((dbl)UINT8_MAX);
+		}
 
 		void AddLineSegment(con::uset<DmsLineSegment>& segments, const DmsPoint& a, const DmsPoint& b)
 		{
@@ -248,14 +253,9 @@ namespace np::gfxalg
 
 		DmsImage(gfx::Image& image, Subview subview): _image_subview(image, subview) {}
 
-		/*
-			- gets the dms iso value [0.0 - 1.0] at given point
-			- isovalue: fraction of maximum value
-				- example: 128 / 255 = 0.501960784313725 isovalue
-		*/
 		dbl GetIsovalue(const Point& point, gfx::ColorChannel channel) const
 		{
-			return ((dbl)_image_subview.Get(point).GetChannelValue(channel)) / ((dbl)UINT8_MAX);
+			return GetIsovalue(_image_subview, point, channel);
 		}
 
 		/*
@@ -275,16 +275,12 @@ namespace np::gfxalg
 			con::uset<DmsLineSegment> segments;
 			con::vector<DmsLineSegmentLoop> loops;
 
-			ExtractEdgePointsUserData extract_edge_points_user_data{};
-			extract_edge_points_user_data.self = this;
-			extract_edge_points_user_data.isothreshold = isothreshold;
-			extract_edge_points_user_data.channel = channel;
-			extract_edge_points_user_data.edge_points = &edge_points;
-			extract_edge_points_user_data.visited = &visited;
-
-			FloodFillImage::Payload extract_edge_points_payload;
-			extract_edge_points_payload.enable_diagonal = true;
-			extract_edge_points_payload.user_data = &extract_edge_points_user_data;
+			Payload payload{};
+			payload.isothreshold = isothreshold;
+			payload.channel = channel;
+			payload.edgePoints = &edge_points;
+			payload.visited = &visited;
+			payload.enableDiagonal = true;
 
 			FloodFillImage extract_edge_points_flood(_image_subview);
 			extract_edge_points_flood.GetIsApprovedDelegate().SetCallback(IsNotVisitedAndUnderIsothreshold);
@@ -302,8 +298,8 @@ namespace np::gfxalg
 
 					// extract edge points
 					edge_points.clear();
-					extract_edge_points_payload.point = point;
-					extract_edge_points_flood.Fill(extract_edge_points_payload);
+					payload.point = point;
+					extract_edge_points_flood.Fill(payload);
 
 					// gather segments from edge points
 					segments.clear();
@@ -429,16 +425,12 @@ namespace np::gfxalg
 			con::uset<DmsPoint> edge_points;
 			con::uset<DmsLineSegment> segments;
 
-			ExtractEdgePointsUserData extract_edge_points_user_data{};
-			extract_edge_points_user_data.self = this;
-			extract_edge_points_user_data.isothreshold = isothreshold;
-			extract_edge_points_user_data.channel = channel;
-			extract_edge_points_user_data.edge_points = &edge_points;
-			extract_edge_points_user_data.visited = &visited;
-
-			FloodFillImage::Payload extract_edge_points_payload;
-			extract_edge_points_payload.enable_diagonal = true;
-			extract_edge_points_payload.user_data = &extract_edge_points_user_data;
+			Payload payload{};
+			payload.isothreshold = isothreshold;
+			payload.channel = channel;
+			payload.edgePoints = &edge_points;
+			payload.visited = &visited;
+			payload.enableDiagonal = true;
 
 			FloodFillImage extract_edge_points_flood(_image_subview);
 			extract_edge_points_flood.GetIsApprovedDelegate().SetCallback(IsNotVisitedAndUnderIsothreshold);
@@ -458,8 +450,8 @@ namespace np::gfxalg
 
 					// extract edge points
 					edge_points.clear();
-					extract_edge_points_payload.point = point;
-					extract_edge_points_flood.Fill(extract_edge_points_payload);
+					payload.point = point;
+					extract_edge_points_flood.Fill(payload);
 
 					// gather segments from edge points
 					for (const DmsPoint& edge_point : edge_points)

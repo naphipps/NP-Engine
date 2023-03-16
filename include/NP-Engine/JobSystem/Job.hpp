@@ -76,7 +76,7 @@ namespace np::jsys
 		{
 			_dependents.clear();
 			_antecedent_count.store(0, mo_release);
-			_delegate.Clear();
+			_delegate.UnsetCallback();
 			_can_be_stolen = true;
 		}
 

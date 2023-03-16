@@ -25,7 +25,22 @@ namespace np::win
 
 		WindowMaximizeEvent(Window* window, bl maximized): evnt::Event()
 		{
-			SetData<DataType>({window, maximized});
+			ConstructData<DataType>(DataType{ window, maximized });
+		}
+
+		~WindowMaximizeEvent()
+		{
+			DestructData<DataType>();
+		}
+
+		DataType& GetData()
+		{
+			return mem::PadObject::GetData<DataType>();
+		}
+
+		const DataType& GetData() const
+		{
+			return mem::PadObject::GetData<DataType>();
 		}
 
 		evnt::EventType GetType() const override

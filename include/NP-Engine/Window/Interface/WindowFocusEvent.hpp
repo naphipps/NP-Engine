@@ -25,7 +25,22 @@ namespace np::win
 
 		WindowFocusEvent(Window* window, bl focused): evnt::Event()
 		{
-			SetData<DataType>({window, focused});
+			ConstructData<DataType>(DataType{ window, focused });
+		}
+
+		~WindowFocusEvent()
+		{
+			DestructData<DataType>();
+		}
+
+		DataType& GetData()
+		{
+			return mem::PadObject::GetData<DataType>();
+		}
+
+		const DataType& GetData() const
+		{
+			return mem::PadObject::GetData<DataType>();
 		}
 
 		evnt::EventType GetType() const override

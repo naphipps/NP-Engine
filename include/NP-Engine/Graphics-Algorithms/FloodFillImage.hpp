@@ -39,10 +39,10 @@ namespace np::gfxalg
 
 		struct Payload
 		{
+			ImageSubview* imageSubview = nullptr;
 			Point point;
 			PointRelation relation = PointRelation::None;
-			bl enable_diagonal = false;
-			void* user_data = nullptr;
+			bl enableDiagonal = false;
 		};
 
 	private:
@@ -51,38 +51,14 @@ namespace np::gfxalg
 		mem::VoidDelegate _approved_action;
 		mem::VoidDelegate _rejected_action;
 
-		void Init()
-		{
-			_is_approved.Clear();
-			_is_approved.SetData<Payload*>(nullptr);
-
-			_approved_action.Clear();
-			_approved_action.SetData<Payload*>(nullptr);
-
-			_rejected_action.Clear();
-			_rejected_action.SetData<Payload*>(nullptr);
-		}
-
 	public:
-		FloodFillImage(const ImageSubview& image_subview): _image_subview(image_subview)
-		{
-			Init();
-		}
+		FloodFillImage(const ImageSubview& image_subview): _image_subview(image_subview) {}
 
-		FloodFillImage(ImageSubview&& image_subview): _image_subview(::std::move(image_subview))
-		{
-			Init();
-		}
+		FloodFillImage(ImageSubview&& image_subview): _image_subview(::std::move(image_subview)) {}
 
-		FloodFillImage(gfx::Image& image): _image_subview(image)
-		{
-			Init();
-		}
+		FloodFillImage(gfx::Image& image): _image_subview(image) {}
 
-		FloodFillImage(gfx::Image& image, Subview subview): _image_subview(image, subview)
-		{
-			Init();
-		}
+		FloodFillImage(gfx::Image& image, Subview subview): _image_subview(image, subview) {}
 
 		mem::BlDelegate& GetIsApprovedDelegate()
 		{
@@ -114,17 +90,21 @@ namespace np::gfxalg
 			return _rejected_action;
 		}
 
-		void Fill(Payload payload)
+		void Fill(Payload& payload)
 		{
 			// TODO: do we need some asserts for the following??
 			// TODO: FloodFill requires IsApproved to be connected to a function
 			// TODO: FloodFill requires ApprovedAction to be connected to a function
 
+			ImageSubview* prev_image_subview = payload.imageSubview;
+			if (!prev_image_subview)
+				payload.imageSubview = mem::AddressOf(_image_subview);
+
 			payload.relation = PointRelation::None;
 
-			_is_approved.SetData<Payload*>(&payload);
-			_approved_action.SetData<Payload*>(&payload);
-			_rejected_action.SetData<Payload*>(&payload);
+			_is_approved.ConstructData<Payload*>(mem::AddressOf(payload));
+			_approved_action.ConstructData<Payload*>(mem::AddressOf(payload));
+			_rejected_action.ConstructData<Payload*>(mem::AddressOf(payload));
 
 			ui32 height = _image_subview.GetHeight();
 			ui32 width = _image_subview.GetWidth();
@@ -193,7 +173,7 @@ namespace np::gfxalg
 					_rejected_action();
 				}
 
-				if (payload.enable_diagonal)
+				if (payload.enableDiagonal)
 				{
 					payload.relation = PointRelation::UpperRight;
 					if (payload.point.x < width && payload.point.y < height)
@@ -250,6 +230,12 @@ namespace np::gfxalg
 
 				flood.pop();
 			}
+
+			_is_approved.DestructData<Payload*>();
+			_approved_action.DestructData<Payload*>();
+			_rejected_action.DestructData<Payload*>();
+
+			payload.imageSubview = prev_image_subview;
 		}
 	};
 } // namespace np::gfxalg

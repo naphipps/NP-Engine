@@ -32,23 +32,21 @@ namespace np::gfxalg
 		using Polygon = geom::Polygon2D<Point::value_type>;
 		using Circle = geom::Circle<Point::value_type>;
 
+		struct Payload : public FloodFillImage::Payload
+		{
+			gfx::Color oldColor;
+			gfx::Color newColor;
+			con::uset<OutsidePoint>* outsideEdgePoints = nullptr;
+			con::uset<Point>* edgePoints = nullptr;
+		};
+
 	private:
 		ImageSubview _image_subview;
-
-		struct FloodFillUserData
-		{
-			DrawableImage* self = nullptr;
-			gfx::Color old_color;
-			gfx::Color new_color;
-			con::uset<OutsidePoint>* outside_edge_points = nullptr;
-			con::uset<Point>* edge_points = nullptr;
-		};
 
 		static bl IsOldColor(void* caller, mem::BlDelegate& d)
 		{
 			using Relation = FloodFillImage::PointRelation;
-			FloodFillImage::Payload& payload = *d.GetData<FloodFillImage::Payload*>();
-			FloodFillUserData& user_data = *((FloodFillUserData*)payload.user_data);
+			Payload& payload = *d.GetData<Payload*>();
 			Point point = payload.point;
 
 			if (FloodFillImage::PointRelationContains(payload.relation, Relation::Upper))
@@ -60,21 +58,19 @@ namespace np::gfxalg
 			if (FloodFillImage::PointRelationContains(payload.relation, Relation::Left))
 				point.x--;
 
-			return user_data.self->_image_subview.Get(point) == user_data.old_color;
+			return payload.imageSubview->Get(point) == payload.oldColor;
 		}
 
 		static void SetToNewColor(void* caller, mem::VoidDelegate& d)
 		{
-			FloodFillImage::Payload& payload = *d.GetData<FloodFillImage::Payload*>();
-			FloodFillUserData& user_data = *((FloodFillUserData*)payload.user_data);
-			user_data.self->_image_subview.Set(payload.point, user_data.new_color);
+			Payload& payload = *d.GetData<Payload*>();
+			payload.imageSubview->Set(payload.point, payload.newColor);
 		}
 
 		static void GetOutsideEdgePoints(void* caller, mem::VoidDelegate& d)
 		{
 			using Relation = FloodFillImage::PointRelation;
-			FloodFillImage::Payload& payload = *d.GetData<FloodFillImage::Payload*>();
-			FloodFillUserData& user_data = *((FloodFillUserData*)payload.user_data);
+			Payload& payload = *d.GetData<Payload*>();
 			OutsidePoint point = payload.point;
 
 			if (FloodFillImage::PointRelationContains(payload.relation, Relation::Upper))
@@ -86,14 +82,13 @@ namespace np::gfxalg
 			if (FloodFillImage::PointRelationContains(payload.relation, Relation::Left))
 				point.x--;
 
-			user_data.outside_edge_points->emplace(point);
+			payload.outsideEdgePoints->emplace(point);
 		}
 
 		static void GetEdgePoints(void* caller, mem::VoidDelegate& d)
 		{
-			FloodFillImage::Payload& payload = *d.GetData<FloodFillImage::Payload*>();
-			FloodFillUserData& user_data = *((FloodFillUserData*)payload.user_data);
-			user_data.edge_points->emplace(payload.point);
+			Payload& payload = *d.GetData<Payload*>();
+			payload.edgePoints->emplace(payload.point);
 		}
 
 	public:
@@ -151,20 +146,16 @@ namespace np::gfxalg
 
 		void FloodFill(const Point& point, gfx::Color old_color, gfx::Color new_color, bl enable_diagonal = false)
 		{
-			FloodFillUserData user_data{};
-			user_data.self = this;
-			user_data.old_color = old_color;
-			user_data.new_color = new_color;
-
-			FloodFillImage::Payload payload{};
-			payload.user_data = &user_data;
+			Payload payload{};
+			payload.oldColor = old_color;
+			payload.newColor = new_color;
 			payload.point = point;
-			payload.enable_diagonal = enable_diagonal;
+			payload.enableDiagonal = enable_diagonal;
 
 			FloodFillImage flood(_image_subview);
 			flood.GetIsApprovedDelegate().SetCallback(IsOldColor);
 			flood.GetApprovedActionDelegate().SetCallback(SetToNewColor);
-			flood.GetRejectedActionDelegate().Clear();
+			flood.GetRejectedActionDelegate().UnsetCallback();
 			flood.Fill(payload);
 		}
 
@@ -173,16 +164,12 @@ namespace np::gfxalg
 		{
 			con::uset<OutsidePoint> outside_edge_points;
 
-			FloodFillUserData user_data;
-			user_data.self = this;
-			user_data.old_color = old_color;
-			user_data.new_color = new_color;
-			user_data.outside_edge_points = &outside_edge_points;
-
-			FloodFillImage::Payload payload;
-			payload.user_data = &user_data;
+			Payload payload{};
+			payload.oldColor = old_color;
+			payload.newColor = new_color;
 			payload.point = point;
-			payload.enable_diagonal = enable_diagonal;
+			payload.enableDiagonal = enable_diagonal;
+			payload.outsideEdgePoints = &outside_edge_points;
 
 			FloodFillImage flood(_image_subview);
 			flood.GetIsApprovedDelegate().SetCallback(IsOldColor);
@@ -198,16 +185,12 @@ namespace np::gfxalg
 		{
 			con::uset<Point> edge_points;
 
-			FloodFillUserData user_data;
-			user_data.self = this;
-			user_data.old_color = old_color;
-			user_data.new_color = new_color;
-			user_data.edge_points = &edge_points;
-
-			FloodFillImage::Payload payload;
-			payload.enable_diagonal = enable_diagonal;
+			Payload payload{};
+			payload.oldColor = old_color;
+			payload.newColor = new_color;
 			payload.point = point;
-			payload.user_data = &user_data;
+			payload.enableDiagonal = enable_diagonal;
+			payload.edgePoints = &edge_points;
 
 			FloodFillImage flood(_image_subview);
 			flood.GetIsApprovedDelegate().SetCallback(IsOldColor);

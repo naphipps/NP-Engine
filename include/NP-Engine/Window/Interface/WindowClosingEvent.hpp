@@ -24,15 +24,24 @@ namespace np::win
 			mem::sptr<jsys::Job> job;
 		};
 
-		virtual ~WindowClosingEvent()
-		{
-			DataType& data = GetData<DataType>();
-			data.job.reset();
-		}
-
 		WindowClosingEvent(Window* window, mem::sptr<jsys::Job> job): evnt::Event()
 		{
-			SetData<DataType>({window, job});
+			ConstructData<DataType>(DataType{ window, job });
+		}
+
+		~WindowClosingEvent()
+		{
+			DestructData<DataType>();
+		}
+
+		DataType& GetData()
+		{
+			return mem::PadObject::GetData<DataType>();
+		}
+
+		const DataType& GetData() const
+		{
+			return mem::PadObject::GetData<DataType>();
 		}
 
 		evnt::EventType GetType() const override

@@ -33,7 +33,8 @@ namespace np::app
 	protected:
 		virtual void HandleWindowClosing(evnt::Event& e)
 		{
-			win::WindowClosingEvent::DataType& closing_data = e.GetData<win::WindowClosingEvent::DataType>();
+			win::WindowClosingEvent& closing_event = (win::WindowClosingEvent&)e;
+			win::WindowClosingEvent::DataType& closing_data = closing_event.GetData();
 			jsys::JobSystem& job_system = _services.GetJobSystem();
 
 			// window ownership has gone to the closing job
@@ -76,12 +77,13 @@ namespace np::app
 
 		virtual void HandleWindowClosed(evnt::Event& e)
 		{
-			win::WindowClosedEvent::DataType& closed_data = e.GetData<win::WindowClosedEvent::DataType>();
+			win::WindowClosedEvent& closed_event = (win::WindowClosedEvent&)e;
+			win::WindowClosedEvent::DataType& closed_data = closed_event.GetData();
 			jsys::JobSystem& job_system = _services.GetJobSystem();
 
 			mem::sptr<jsys::Job> handle_job = job_system.CreateJob();
 			// ownership of window is moving from the event to our job procedure
-			handle_job->GetDelegate().SetData<win::Window*>(closed_data.window);
+			handle_job->GetDelegate().ConstructData<win::Window*>(closed_data.window);
 			handle_job->GetDelegate().SetCallback(this, HandleWindowClosedCallback);
 			job_system.SubmitJob(jsys::JobPriority::Higher, handle_job);
 

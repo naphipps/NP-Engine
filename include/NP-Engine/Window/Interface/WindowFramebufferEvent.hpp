@@ -26,7 +26,22 @@ namespace np::win
 
 		WindowFramebufferEvent(Window* window, ui32 width, ui32 height): evnt::Event()
 		{
-			SetData<DataType>({window, width, height});
+			ConstructData<DataType>(DataType{ window, width, height });
+		}
+
+		~WindowFramebufferEvent()
+		{
+			DestructData<DataType>();
+		}
+
+		DataType& GetData()
+		{
+			return mem::PadObject::GetData<DataType>();
+		}
+
+		const DataType& GetData() const
+		{
+			return mem::PadObject::GetData<DataType>();
 		}
 
 		evnt::EventType GetType() const override

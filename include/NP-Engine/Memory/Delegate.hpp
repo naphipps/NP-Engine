@@ -70,6 +70,11 @@ namespace np::mem
 			SetCallback(nullptr, callback);
 		}
 
+		virtual void UnsetCallback()
+		{
+			SetCallback(nullptr, nullptr);
+		}
+
 		virtual R operator()()
 		{
 			if constexpr (::std::is_same_v<void, R>)
@@ -90,12 +95,6 @@ namespace np::mem
 			}
 
 			// return _callback ? _callback(_caller, *this) : R; //TODO: does this work with void??
-		}
-
-		virtual void Clear() override
-		{
-			SetCallback(nullptr, nullptr);
-			PadObject::Clear();
 		}
 	};
 
