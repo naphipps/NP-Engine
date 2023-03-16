@@ -233,9 +233,9 @@ namespace np::app
 		GameLayer _game_layer;
 
 	public:
-		GameApp(::np::srvc::Services& app_services):
-			Application(Application::Properties{"My Game App"}, app_services),
-			_game_layer(app_services, _window_layer, _graphics_layer)
+		GameApp(srvc::Services& services):
+			Application(Application::Properties{"My Game App"}, services),
+			_game_layer(services, _window_layer, _graphics_layer)
 		{
 			PushLayer(mem::AddressOf(_game_layer));
 		}

@@ -97,11 +97,11 @@ namespace np::app
 		con::vector<Layer*> _overlays;
 		atm_bl _running;
 
-		Application(const Application::Properties& app_properties, srvc::Services& app_services):
-			Layer(app_services),
+		Application(const Application::Properties& app_properties, srvc::Services& services):
+			Layer(services),
 			_properties(app_properties),
-			_window_layer(app_services),
-			_graphics_layer(app_services),
+			_window_layer(services),
+			_graphics_layer(services),
 			_running(false)
 		{
 			sys::SetTerminateHandler(__detail::HandleTerminate);
@@ -306,7 +306,7 @@ namespace np::app
 		}
 	};
 
-	Application* CreateApplication(srvc::Services& app_services);
+	extern mem::sptr<Application> CreateApplication(srvc::Services& services);
 } // namespace np::app
 
 #endif /* NP_ENGINE_APPLICATION_HPP */

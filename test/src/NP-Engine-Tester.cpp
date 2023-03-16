@@ -8,9 +8,9 @@
 
 namespace np::app
 {
-	Application* CreateApplication(::np::srvc::Services& app_services)
+	mem::sptr<Application> CreateApplication(::np::srvc::Services& services)
 	{
 		NP_ENGINE_LOG_INFO("Hello world from game create application.");
-		return mem::Create<GameApp>(app_services.GetAllocator(), app_services);
+		return mem::CreateSptr<GameApp>(services.GetAllocator(), services);
 	}
 } // namespace np::app
