@@ -51,7 +51,7 @@ namespace np::gfx::__detail
 
 		void AttachToWindow(win::Window& window) override {}
 
-		void DetachFromWindow(win::Window& window) override {}
+		void DetachFromWindow(uid::Uid windowId) override {}
 
 		Frame& BeginFrame() override
 		{
@@ -62,7 +62,7 @@ namespace np::gfx::__detail
 
 		void DrawFrame() override {}
 
-		virtual bl IsAttachedToWindow(win::Window& window) const override
+		virtual bl IsAttachedToWindow(uid::Uid windowId) const override
 		{
 			return false;
 		}

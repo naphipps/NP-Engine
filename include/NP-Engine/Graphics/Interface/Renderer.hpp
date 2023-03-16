@@ -44,13 +44,13 @@ namespace np::gfx
 		virtual str GetName() const = 0;
 
 		virtual void AttachToWindow(win::Window& window) = 0;
-		virtual void DetachFromWindow(win::Window& window) = 0;
+		virtual void DetachFromWindow(uid::Uid windowId) = 0;
 
 		virtual Frame& BeginFrame() = 0;
 		virtual void EndFrame() = 0;
 		virtual void DrawFrame() = 0;
 
-		virtual bl IsAttachedToWindow(win::Window& window) const = 0;
+		virtual bl IsAttachedToWindow(uid::Uid windowId) const = 0;
 	};
 } // namespace np::gfx
 

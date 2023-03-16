@@ -19,14 +19,14 @@ namespace np::win
 	public:
 		struct DataType
 		{
-			Window* window;
+			uid::Uid windowId;
 			ui32 width;
 			ui32 height;
 		};
 
-		WindowFramebufferEvent(Window* window, ui32 width, ui32 height): evnt::Event()
+		WindowFramebufferEvent(uid::Uid windowId, ui32 width, ui32 height): evnt::Event()
 		{
-			ConstructData<DataType>(DataType{ window, width, height });
+			ConstructData<DataType>(DataType{ windowId, width, height });
 		}
 
 		~WindowFramebufferEvent()

@@ -53,10 +53,10 @@ namespace np::app
 
 		void AdjustForWindowClosingProcedure(mem::Delegate& d)
 		{
-			win::Window* window = d.GetData<win::Window*>();
+			uid::Uid windowId = d.GetData<uid::Uid>();
 
 			for (auto it = _scenes.begin(); it != _scenes.end(); it++)
-				if ((*it)->GetRenderer().IsAttachedToWindow(*window))
+				if ((*it)->GetRenderer().IsAttachedToWindow(windowId))
 				{
 					mem::Destroy<gfx::Scene>(_services.GetAllocator(), *it);
 					_scenes.erase(it);
@@ -64,13 +64,15 @@ namespace np::app
 				}
 
 			for (auto it = _renderers.begin(); it != _renderers.end(); it++)
-				if ((*it)->IsAttachedToWindow(*window))
+				if ((*it)->IsAttachedToWindow(windowId))
 				{
-					(*it)->DetachFromWindow(*window);
+					(*it)->DetachFromWindow(windowId);
 					mem::Destroy<gfx::Renderer>(_services.GetAllocator(), *it);
 					_renderers.erase(it);
 					break;
 				}
+
+			d.DestructData<uid::Uid>();
 		}
 
 		virtual void AdjustForWindowClosing(evnt::Event& e)
@@ -78,6 +80,7 @@ namespace np::app
 			win::WindowClosingEvent::DataType& closing_data = e.GetData<win::WindowClosingEvent::DataType>();
 
 			mem::sptr<jsys::Job> adjust_job = _services.GetJobSystem().CreateJob();
+			adjust_job->GetDelegate().ConstructData<uid::Uid>(closing_data.windowId);
 			adjust_job->GetDelegate().SetCallback(this, AdjustForWindowClosingCallback);
 
 			jsys::Job::AddDependency(closing_data.job, adjust_job);

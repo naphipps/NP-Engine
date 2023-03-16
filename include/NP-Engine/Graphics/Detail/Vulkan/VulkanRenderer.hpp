@@ -210,9 +210,9 @@ namespace np::gfx::__detail
 			return "Vulkan";
 		}
 
-		virtual bl IsAttachedToWindow(win::Window& window) const override
+		virtual bl IsAttachedToWindow(uid::Uid windowId) const override
 		{
-			return _surface && mem::AddressOf(_surface->GetWindow()) == mem::AddressOf(window);
+			return _surface && _surface->GetWindow().GetUid() == windowId;
 		}
 
 		void AttachToWindow(win::Window& window) override
@@ -240,9 +240,9 @@ namespace np::gfx::__detail
 														  *_light_vertex_shader, *_light_fragment_shader);
 		}
 
-		void DetachFromWindow(win::Window& window) override
+		void DetachFromWindow(uid::Uid windowId) override
 		{
-			if (IsAttachedToWindow(window))
+			if (IsAttachedToWindow(windowId))
 			{
 				Dispose();
 				_frame.Invalidate();

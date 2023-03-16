@@ -18,7 +18,7 @@ namespace np::app
 	private:
 		WindowLayer& _window_layer;
 		GraphicsLayer& _graphics_layer;
-		win::Window* _window;
+		mem::sptr<win::Window> _window;
 		gfx::Renderer* _renderer;
 		gfx::Scene* _scene;
 		gfx::Camera _camera;
@@ -37,9 +37,14 @@ namespace np::app
 
 		void AdjustForWindowClosingProcedure(mem::Delegate& d)
 		{
-			win::Window* window = d.GetData<win::Window*>();
+			uid::Uid windowId = d.GetData<uid::Uid>();
 
-			// TODO: handle all references that use this window
+			// TODO: handle all references that use this windowId
+
+			if (_window->GetUid() == windowId)
+				_window.reset();
+
+			d.DestructData<uid::Uid>();
 		}
 
 		virtual void AdjustForWindowClosing(evnt::Event& e)
@@ -48,33 +53,9 @@ namespace np::app
 			win::WindowClosingEvent::DataType& closing_data = closing_event.GetData();
 
 			mem::sptr<jsys::Job> adjust_job = _services.GetJobSystem().CreateJob();
-			adjust_job->GetDelegate().ConstructData<win::Window*>(closing_data.window);
+			adjust_job->GetDelegate().ConstructData<uid::Uid>(closing_data.windowId);
 			adjust_job->GetDelegate().SetCallback(this, AdjustForWindowClosingCallback);
 			jsys::Job::AddDependency(closing_data.job, adjust_job);
-			_services.GetJobSystem().SubmitJob(jsys::JobPriority::Higher, adjust_job);
-		}
-
-		static void AdjustForWindowClosedCallback(void* caller, mem::Delegate& d)
-		{
-			((GameLayer*)caller)->AdjustForWindowClosedProcedure(d);
-		}
-
-		void AdjustForWindowClosedProcedure(mem::Delegate& d)
-		{
-			win::Window* window = d.GetData<win::Window*>();
-
-			// TODO: destroy content for scene
-			_model_entity.clear();
-		}
-
-		virtual void AdjustForWindowClosed(evnt::Event& e)
-		{
-			win::WindowClosedEvent::DataType& closing_data = e.GetData<win::WindowClosedEvent::DataType>();
-
-			mem::sptr<jsys::Job> adjust_job = _services.GetJobSystem().CreateJob();
-			adjust_job->GetDelegate().ConstructData<win::Window*>(closing_data.window);
-			adjust_job->GetDelegate().SetCallback(this, AdjustForWindowClosedCallback);
-
 			_services.GetJobSystem().SubmitJob(jsys::JobPriority::Higher, adjust_job);
 		}
 
@@ -84,10 +65,6 @@ namespace np::app
 			{
 			case evnt::EventType::WindowClosing:
 				AdjustForWindowClosing(e);
-				break;
-
-			case evnt::EventType::WindowClosed:
-				AdjustForWindowClosed(e);
 				break;
 
 			default:

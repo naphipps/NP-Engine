@@ -20,13 +20,13 @@ namespace np::win
 	public:
 		struct DataType
 		{
-			Window* window;
+			uid::Uid windowId;
 			mem::sptr<jsys::Job> job;
 		};
 
-		WindowClosingEvent(Window* window, mem::sptr<jsys::Job> job): evnt::Event()
+		WindowClosingEvent(uid::Uid windowId, mem::sptr<jsys::Job> job): evnt::Event()
 		{
-			ConstructData<DataType>(DataType{ window, job });
+			ConstructData<DataType>(DataType{ windowId, job });
 		}
 
 		~WindowClosingEvent()

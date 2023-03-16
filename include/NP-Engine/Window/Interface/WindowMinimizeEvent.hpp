@@ -19,13 +19,13 @@ namespace np::win
 	public:
 		struct DataType
 		{
-			Window* window;
+			uid::Uid windowId;
 			bl maximized;
 		};
 
-		WindowMinimizeEvent(Window* window, bl minimized): evnt::Event()
+		WindowMinimizeEvent(uid::Uid windowId, bl minimized): evnt::Event()
 		{
-			ConstructData<DataType>(DataType{ window, minimized });
+			ConstructData<DataType>(DataType{ windowId, minimized });
 		}
 
 		~WindowMinimizeEvent()

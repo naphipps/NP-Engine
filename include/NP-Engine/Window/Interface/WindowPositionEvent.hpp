@@ -19,14 +19,14 @@ namespace np::win
 	public:
 		struct DataType
 		{
-			Window* window;
+			uid::Uid windowId;
 			i32 x;
 			i32 y;
 		};
 
-		WindowPositionEvent(Window* window, i32 x, i32 y): evnt::Event()
+		WindowPositionEvent(uid::Uid windowId, i32 x, i32 y): evnt::Event()
 		{
-			ConstructData<DataType>(DataType{ window, x, y });
+			ConstructData<DataType>(DataType{ windowId, x, y });
 		}
 
 		~WindowPositionEvent()

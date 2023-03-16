@@ -19,13 +19,13 @@ namespace np::win
 	public:
 		struct DataType
 		{
-			Window* window;
+			uid::Uid windowId;
 			bl maximized;
 		};
 
-		WindowMaximizeEvent(Window* window, bl maximized): evnt::Event()
+		WindowMaximizeEvent(uid::Uid windowId, bl maximized): evnt::Event()
 		{
-			ConstructData<DataType>(DataType{ window, maximized });
+			ConstructData<DataType>(DataType{ windowId, maximized });
 		}
 
 		~WindowMaximizeEvent()

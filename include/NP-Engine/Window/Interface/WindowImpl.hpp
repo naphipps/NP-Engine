@@ -49,6 +49,7 @@ namespace np::win
 	protected:
 		Properties _properties;
 		srvc::Services& _services;
+		mem::sptr<uid::UidHandle> _uid_handle;
 		thr::Thread _thread;
 		atm_bl _show_procedure_is_complete;
 
@@ -94,6 +95,7 @@ namespace np::win
 		Window(Window::Properties& properties, srvc::Services& services):
 			_properties(properties),
 			_services(services),
+			_uid_handle(_services.GetUidSystem().CreateUidHandle()),
 			_show_procedure_is_complete(true)
 		{}
 
@@ -106,11 +108,16 @@ namespace np::win
 
 		static con::vector<str> GetRequiredGfxExtentions(WindowDetailType detail_type);
 
-		static Window* Create(WindowDetailType detail_type, srvc::Services& services, Properties& properties);
+		static mem::sptr<Window> Create(WindowDetailType detail_type, srvc::Services& services, Properties& properties);
 
 		virtual ~Window()
 		{
 			_thread.Dispose();
+		}
+
+		bl operator==(const Window& other) const
+		{
+			return GetUid() == GetUid();
 		}
 
 		virtual void Update(tim::DblMilliseconds milliseconds) {}
@@ -125,6 +132,11 @@ namespace np::win
 		{
 			if (!_show_procedure_is_complete.load(mo_acquire))
 				DetailCloseProcedure();
+		}
+
+		uid::Uid GetUid() const
+		{
+			return _services.GetUidSystem().GetUid(_uid_handle);
 		}
 
 		virtual bl IsRunning() const

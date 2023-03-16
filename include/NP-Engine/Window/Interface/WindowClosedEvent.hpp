@@ -19,10 +19,10 @@ namespace np::win
 	public:
 		struct DataType
 		{
-			Window* window;
+			mem::sptr<Window> window;
 		};
 
-		WindowClosedEvent(Window* window): evnt::Event()
+		WindowClosedEvent(mem::sptr<Window> window): evnt::Event()
 		{
 			ConstructData<DataType>(DataType{ window });
 		}

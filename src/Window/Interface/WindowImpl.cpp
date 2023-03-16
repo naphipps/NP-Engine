@@ -66,14 +66,14 @@ namespace np::win
 		return extensions;
 	}
 
-	Window* Window::Create(WindowDetailType detail_type, srvc::Services& services, Window::Properties& properties)
+	mem::sptr<Window> Window::Create(WindowDetailType detail_type, srvc::Services& services, Window::Properties& properties)
 	{
-		Window* window = nullptr;
+		mem::sptr<Window> window = nullptr;
 
 		switch (detail_type)
 		{
 		case WindowDetailType::Glfw:
-			window = mem::Create<__detail::GlfwWindow>(services.GetAllocator(), properties, services);
+			window = mem::CreateSptr<__detail::GlfwWindow>(services.GetAllocator(), properties, services);
 			break;
 
 		default:
@@ -87,7 +87,7 @@ namespace np::win
 	{
 		if (IsRunning())
 		{
-			_services.GetEventSubmitter().Emplace<WindowResizeEvent>(this, width, height);
+			_services.GetEventSubmitter().Emplace<WindowResizeEvent>(GetUid(), width, height);
 
 			for (auto it = _resize_callbacks.begin(); it != _resize_callbacks.end(); it++)
 				(*it)(nullptr, width, height);
@@ -101,7 +101,7 @@ namespace np::win
 	{
 		if (IsRunning())
 		{
-			_services.GetEventSubmitter().Emplace<WindowPositionEvent>(this, x, y);
+			_services.GetEventSubmitter().Emplace<WindowPositionEvent>(GetUid(), x, y);
 
 			for (auto it = _position_callbacks.begin(); it != _position_callbacks.end(); it++)
 				(*it)(nullptr, x, y);
@@ -115,7 +115,7 @@ namespace np::win
 	{
 		if (IsRunning())
 		{
-			_services.GetEventSubmitter().Emplace<WindowFramebufferEvent>(this, width, width);
+			_services.GetEventSubmitter().Emplace<WindowFramebufferEvent>(GetUid(), width, width);
 
 			for (auto it = _framebuffer_callbacks.begin(); it != _framebuffer_callbacks.end(); it++)
 				(*it)(nullptr, width, height);
@@ -129,7 +129,7 @@ namespace np::win
 	{
 		if (IsRunning())
 		{
-			_services.GetEventSubmitter().Emplace<WindowMinimizeEvent>(this, minimized);
+			_services.GetEventSubmitter().Emplace<WindowMinimizeEvent>(GetUid(), minimized);
 
 			for (auto it = _minimize_callbacks.begin(); it != _minimize_callbacks.end(); it++)
 				(*it)(nullptr, minimized);
@@ -143,7 +143,7 @@ namespace np::win
 	{
 		if (IsRunning())
 		{
-			_services.GetEventSubmitter().Emplace<WindowMaximizeEvent>(this, maximized);
+			_services.GetEventSubmitter().Emplace<WindowMaximizeEvent>(GetUid(), maximized);
 
 			for (auto it = _maximize_callbacks.begin(); it != _maximize_callbacks.end(); it++)
 				(*it)(nullptr, maximized);
@@ -157,7 +157,7 @@ namespace np::win
 	{
 		if (IsRunning())
 		{
-			_services.GetEventSubmitter().Emplace<WindowFocusEvent>(this, focused);
+			_services.GetEventSubmitter().Emplace<WindowFocusEvent>(GetUid(), focused);
 
 			for (auto it = _focus_callbacks.begin(); it != _focus_callbacks.end(); it++)
 				(*it)(nullptr, focused);
@@ -169,6 +169,7 @@ namespace np::win
 
 	void Window::ClosingProcedure(mem::Delegate& d)
 	{
+		//just in case _show_procedure_is_complete is still false
 		while (!_show_procedure_is_complete.load(mo_acquire))
 		{
 			Close();
@@ -177,17 +178,19 @@ namespace np::win
 
 		_thread.Dispose();
 
+		// window layer should have constructed a mem::sptr<Window> in d.GetData
 		// ownership of window is now moving from this job procedure to the closed event
-		_services.GetEventSubmitter().Emplace<WindowClosedEvent>(this);
+		_services.GetEventSubmitter().Emplace<WindowClosedEvent>(d.GetData<mem::sptr<Window>>());
+		d.DestructData<mem::sptr<Window>>();
 	}
 
 	void Window::ShowProcedure()
 	{
 		DetailShowProcedure();
 
-		mem::sptr<jsys::Job> window_closing_job = _services.GetJobSystem().CreateJob();
-		window_closing_job->GetDelegate().SetCallback(this, ClosingCallback);
-		_services.GetEventSubmitter().Emplace<WindowClosingEvent>(this, window_closing_job);
+		mem::sptr<jsys::Job> closing_job = _services.GetJobSystem().CreateJob();
+		closing_job->GetDelegate().SetCallback(this, ClosingCallback);
+		_services.GetEventSubmitter().Emplace<WindowClosingEvent>(GetUid(), closing_job);
 
 		_show_procedure_is_complete.store(true, mo_release);
 	}
@@ -198,37 +201,37 @@ namespace np::win
 		{
 			_properties.width = width;
 			_properties.height = height;
-			_services.GetEventSubmitter().Emplace<WindowResizeEvent>(this, width, height);
+			_services.GetEventSubmitter().Emplace<WindowResizeEvent>(GetUid(), width, height);
 		}
 	}
 
 	void Window::Minimize()
 	{
 		if (IsRunning())
-			_services.GetEventSubmitter().Emplace<WindowMinimizeEvent>(this, true);
+			_services.GetEventSubmitter().Emplace<WindowMinimizeEvent>(GetUid(), true);
 	}
 
 	void Window::RestoreFromMinimize()
 	{
 		if (IsRunning())
-			_services.GetEventSubmitter().Emplace<WindowMinimizeEvent>(this, false);
+			_services.GetEventSubmitter().Emplace<WindowMinimizeEvent>(GetUid(), false);
 	}
 
 	void Window::Maximize()
 	{
 		if (IsRunning())
-			_services.GetEventSubmitter().Emplace<WindowMaximizeEvent>(this, true);
+			_services.GetEventSubmitter().Emplace<WindowMaximizeEvent>(GetUid(), true);
 	}
 
 	void Window::RestoreFromMaximize()
 	{
 		if (IsRunning())
-			_services.GetEventSubmitter().Emplace<WindowMaximizeEvent>(this, false);
+			_services.GetEventSubmitter().Emplace<WindowMaximizeEvent>(GetUid(), false);
 	}
 
 	void Window::Focus()
 	{
 		if (IsRunning())
-			_services.GetEventSubmitter().Emplace<WindowFocusEvent>(this, true);
+			_services.GetEventSubmitter().Emplace<WindowFocusEvent>(GetUid(), true);
 	}
 } // namespace np::win

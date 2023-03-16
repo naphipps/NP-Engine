@@ -880,6 +880,12 @@ namespace np::win::__detail
 				glfwSetWindowShouldClose(glfw_window, GLFW_TRUE);
 		}
 
+		void ClosingProcedure(mem::Delegate& d) override
+		{
+			Window::ClosingProcedure(d);
+			DestroyGlfwWindow();
+		}
+
 		void CreateGlfwWindow()
 		{
 			DestroyGlfwWindow();
@@ -1118,16 +1124,6 @@ namespace np::win::__detail
 			else
 			{
 				Focus();
-			}
-		}
-
-		virtual void Close() override
-		{
-			if (_glfw_window.load(mo_acquire))
-			{
-				Window::Close();
-				if (!IsRunning())
-					DestroyGlfwWindow();
 			}
 		}
 

@@ -20,14 +20,14 @@ namespace np::win
 	public:
 		struct DataType
 		{
-			Window* window;
+			uid::Uid windowId;
 			ui32 width;
 			ui32 height;
 		};
 
-		WindowResizeEvent(Window* window, ui32 width, ui32 height): evnt::Event()
+		WindowResizeEvent(uid::Uid windowId, ui32 width, ui32 height): evnt::Event()
 		{
-			ConstructData<DataType>(DataType{ window, width, height });
+			ConstructData<DataType>(DataType{ windowId, width, height });
 		}
 
 		~WindowResizeEvent()

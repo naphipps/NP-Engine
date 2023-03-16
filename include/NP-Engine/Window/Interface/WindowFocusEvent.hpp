@@ -19,13 +19,13 @@ namespace np::win
 	public:
 		struct DataType
 		{
-			Window* window;
+			uid::Uid windowId;
 			bl focused;
 		};
 
-		WindowFocusEvent(Window* window, bl focused): evnt::Event()
+		WindowFocusEvent(uid::Uid windowId, bl focused): evnt::Event()
 		{
-			ConstructData<DataType>(DataType{ window, focused });
+			ConstructData<DataType>(DataType{ windowId, focused });
 		}
 
 		~WindowFocusEvent()
