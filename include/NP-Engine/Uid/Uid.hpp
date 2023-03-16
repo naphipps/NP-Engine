@@ -12,7 +12,6 @@
 #include "UidImpl.hpp"
 #include "UidGenerator.hpp"
 #include "UidHandle.hpp"
-#include "UidPool.hpp"
 #include "UidSystem.hpp"
 
 #endif /* NP_ENGINE_UID_HPP */

@@ -297,7 +297,6 @@ set(NP_ENGINE_UID_HPP
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Uid/UidImpl.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Uid/UidGenerator.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Uid/UidHandle.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Uid/UidPool.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Uid/UidSystem.hpp
 )
 

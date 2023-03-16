@@ -16,7 +16,6 @@
 #include "NP-Engine/Memory/Memory.hpp"
 
 #include "UidImpl.hpp"
-#include "UidPool.hpp"
 #include "UidGenerator.hpp"
 #include "UidHandle.hpp"
 
@@ -26,6 +25,25 @@ namespace np::uid
 {
 	class UidSystem
 	{
+	public:
+		class SptrDeleter : public ::std::default_delete<UidHandle>
+		{
+		private:
+			UidSystem& _uid_system;
+
+		public:
+			SptrDeleter(UidSystem& uid_system) : _uid_system(uid_system) {}
+
+			SptrDeleter(const SptrDeleter& other) : _uid_system(other._uid_system) {}
+
+			SptrDeleter(SptrDeleter&& other) noexcept : _uid_system(other._uid_system) {}
+
+			void operator()(UidHandle* hndl_ptr) const noexcept
+			{
+				_uid_system.DestroyUidHandle(hndl_ptr);
+			}
+		};
+
 	private:
 		struct UidRecord
 		{
@@ -52,8 +70,11 @@ namespace np::uid
 		constexpr static siz UID_SIZE = mem::CalcAlignedSize(sizeof(Uid));
 
 		Mutex _m; // TODO: don't know if an atomic lock would be faster??
+		mem::TraitAllocator _allocator;
+		SptrDeleter _uid_handle_deleter;
 		UidGenerator _uid_gen;
 		UidPool _uid_pool;
+		UidHandlePool _uid_handle_pool;
 		UidHandle _next_handle;
 		con::uset<UidHandle::KeyType> _released_keys;
 		con::umap<UidHandle::KeyType, UidRecord> _key_to_record;
@@ -87,8 +108,35 @@ namespace np::uid
 			return _next_handle.Generation;
 		}
 
+		void DestroyUidHandle(UidHandle* hndl_ptr)
+		{
+			if (hndl_ptr)
+			{
+				Lock lock(_m);
+
+				UidHandle& hndl = *hndl_ptr;
+				if (hndl.IsValid())
+				{
+					auto it = _key_to_record.find(hndl.Key);
+					if (it != _key_to_record.end())
+					{
+						UidRecord record = it->second;
+						if (hndl.Generation == record.Generation && _uid_pool.Contains(record.UidPtr))
+						{
+							record.Invalidate();
+							_key_to_record.erase(it);
+							_released_keys.emplace(hndl.Key);
+							hndl.Invalidate();
+						}
+					}
+				}
+
+				mem::Destroy<UidHandle>(_allocator, hndl_ptr);
+			}
+		}
+
 	public:
-		UidSystem() {}
+		UidSystem() : _uid_handle_deleter(*this) {}
 
 		~UidSystem()
 		{
@@ -105,10 +153,10 @@ namespace np::uid
 			_uid_master_set.clear();
 		}
 
-		UidHandle CreateUidHandle()
+		mem::sptr<UidHandle> CreateUidHandle()
 		{
 			Lock lock(_m);
-			UidHandle hndl{};
+			mem::sptr<UidHandle> hndl = nullptr;
 			mem::sptr<Uid> id = _uid_pool.CreateObject();
 
 			if (id)
@@ -118,46 +166,26 @@ namespace np::uid
 				while (_uid_master_set.count(*id));
 				_uid_master_set.emplace(*id);
 
-				hndl = { GetNextKey(), GetNextGeneration() };
-				_key_to_record.emplace(hndl.Key, UidRecord{ id, hndl.Generation });
+				hndl = mem::sptr<UidHandle>(mem::Create<UidHandle>(_allocator, UidHandle{GetNextKey(), GetNextGeneration()}), _uid_handle_deleter);
+				_key_to_record.emplace(hndl->Key, UidRecord{ id, hndl->Generation });
 			}
 
 			return hndl;
 		}
 
-		Uid GetUid(const UidHandle& hndl)
+		Uid GetUid(mem::sptr<UidHandle> hndl)
 		{
 			Lock lock(_m);
 			mem::sptr<Uid> id = nullptr;
 
-			if (hndl.IsValid())
+			if (hndl->IsValid())
 			{
-				auto it = _key_to_record.find(hndl.Key);
-				if (it != _key_to_record.end() && hndl.Generation == it->second.Generation)
+				auto it = _key_to_record.find(hndl->Key);
+				if (it != _key_to_record.end() && hndl->Generation == it->second.Generation)
 					id = it->second.UidPtr;
 			}
 
 			return id ? *id : Uid{};
-		}
-
-		void DestroyUidHandle(UidHandle& hndl)
-		{
-			Lock lock(_m);
-			if (hndl.IsValid())
-			{
-				auto it = _key_to_record.find(hndl.Key);
-				if (it != _key_to_record.end())
-				{
-					UidRecord record = it->second;
-					if (hndl.Generation == record.Generation && _uid_pool.Contains(record.UidPtr))
-					{
-						record.Invalidate();
-						_key_to_record.erase(it);
-						_released_keys.emplace(hndl.Key);
-						hndl.Invalidate();
-					}
-				}
-			}
 		}
 	};
 } // namespace np::uid
