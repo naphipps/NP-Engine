@@ -101,7 +101,7 @@ namespace np::jsys
 			_keep_working(::std::move(other._keep_working.load(mo_acquire))),
 			_work_procedure_complete(::std::move(other._work_procedure_complete.load(mo_acquire))),
 			_thread(::std::move(other._thread)),
-			_job_system(::std::move(other._job_system)),
+			_job_system(other._job_system),
 			_immediate_job_queue(::std::move(other._immediate_job_queue)),
 			_random_engine(::std::move(other._random_engine)),
 			_coworkers(::std::move(other._coworkers)),
