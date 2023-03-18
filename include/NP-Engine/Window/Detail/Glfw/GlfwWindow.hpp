@@ -945,7 +945,20 @@ namespace np::win::__detail
 
 		void* GetNativeFromGlfw(GLFWwindow* glfw_window) const
 		{
-			return glfw_window ? glfwGetWin32Window(glfw_window) : nullptr;
+			void* native_window = nullptr;
+
+#if NP_ENGINE_PLATFORM_IS_APPLE
+				// TODO: GetNativeWindow for apple
+
+#elif NP_ENGINE_PLATFORM_IS_LINUX
+				// TODO: GetNativeWindow for linux
+
+#elif NP_ENGINE_PLATFORM_IS_WINDOWS
+			if (glfw_window)
+				native_window = glfwGetWin32Window(glfw_window);
+
+#endif
+			return native_window;
 		}
 
 	public:
@@ -1254,19 +1267,7 @@ namespace np::win::__detail
 
 		virtual void* GetNativeWindow() const override
 		{
-			void* native_window = nullptr;
-
-#if NP_ENGINE_PLATFORM_IS_APPLE
-				// TODO: GetNativeWindow for apple
-
-#elif NP_ENGINE_PLATFORM_IS_LINUX
-				// TODO: GetNativeWindow for linux
-
-#elif NP_ENGINE_PLATFORM_IS_WINDOWS
-			native_window = GetNativeFromGlfw(_glfw_window.load(mo_acquire));
-
-#endif
-			return native_window;
+			return GetNativeFromGlfw(_glfw_window.load(mo_acquire));
 		}
 	};
 } // namespace np::win::__detail
