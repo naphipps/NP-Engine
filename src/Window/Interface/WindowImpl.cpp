@@ -176,7 +176,7 @@ namespace np::win
 			thr::ThisThread::yield();
 		}
 
-		_thread.Dispose();
+		_thread.Clear();
 
 		// window layer should have constructed a mem::sptr<Window> in d.GetData
 		// ownership of window is now moving from this job procedure to the closed event

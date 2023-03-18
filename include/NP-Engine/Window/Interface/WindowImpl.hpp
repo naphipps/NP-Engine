@@ -112,7 +112,7 @@ namespace np::win
 
 		virtual ~Window()
 		{
-			_thread.Dispose();
+			_thread.Clear();
 		}
 
 		bl operator==(const Window& other) const

@@ -7,6 +7,7 @@
 #ifndef NP_ENGINE_THREAD_HPP
 #define NP_ENGINE_THREAD_HPP
 
+#include <utility>
 #include <thread>
 
 #include "NP-Engine/Foundation/Foundation.hpp"
@@ -28,57 +29,61 @@ namespace np::thr
 		}
 
 	private:
-		ui8 _thread_allocation[sizeof(::std::thread)];
+		constexpr static siz THREAD_SIZE = mem::CalcAlignedSize(sizeof(::std::thread));
+		ui8 _thread_allocation[THREAD_SIZE];
 
-		void ClearThreadAllocation()
+		void ZeroizeThreadBlock()
 		{
-			for (siz i = 0; i < sizeof(::std::thread); i++)
-				_thread_allocation[i] = 0;
+			mem::Block block = GetThreadBlock();
+			block.Zeroize();
 		}
 
-		bl IsThreadAllocationClear() const
+		bl HasThread() const
 		{
-			bl is_clear = true;
-			for (siz i = 0; i < sizeof(::std::thread) && is_clear; i++)
-				is_clear = _thread_allocation[i] == 0;
+			bl has_thread = false;
+			for (siz i = 0; i < THREAD_SIZE && !has_thread; i++)
+				has_thread = _thread_allocation[i] != 0;
 
-			return is_clear;
+			return has_thread;
 		}
 
-		::std::thread* GetStdThreadPtr() const
+		::std::thread* GetThread() const
 		{
-			return (::std::thread*)_thread_allocation;
+			return HasThread() ? (::std::thread*)_thread_allocation : nullptr;
+		}
+
+		mem::Block GetThreadBlock() const
+		{
+			return { (void*)_thread_allocation, THREAD_SIZE };
 		}
 
 	public:
 		Thread()
 		{
-			ClearThreadAllocation();
+			ZeroizeThreadBlock();
 		}
 
 		~Thread()
 		{
-			Dispose();
+			Clear();
 		}
 
-		template <class Function, class... Args>
-		void Run(Function&& f, Args&&... args)
+		template <typename... Args>
+		void Run(Args&&... args)
 		{
-			new (_thread_allocation)::std::thread(f, args...);
+			Clear();
+			mem::Block block = GetThreadBlock();
+			mem::Construct<::std::thread>(block, ::std::forward<Args>(args)...);
 		}
 
-		void Dispose()
+		void Clear()
 		{
-			if (!IsThreadAllocationClear())
+			::std::thread* thread = GetThread();
+			if (thread)
 			{
-				// deallocate std::Thread -- should always be joinable here
-				::std::thread* std_thread = GetStdThreadPtr();
-				if (std_thread->joinable())
-				{
-					std_thread->join();
-					std_thread->::std::thread::~thread();
-					ClearThreadAllocation();
-				}
+				thread->join();
+				mem::Destruct<::std::thread>(thread);
+				ZeroizeThreadBlock();
 			}
 		}
 
@@ -86,12 +91,13 @@ namespace np::thr
 
 		bl IsRunning() const
 		{
-			return !IsThreadAllocationClear();
+			return HasThread();
 		}
 
 		Id GetId() const
 		{
-			return !IsThreadAllocationClear() ? GetStdThreadPtr()->get_id() : Id();
+			::std::thread* thread = GetThread();
+			return thread ? thread->get_id() : Id();
 		}
 	};
 
