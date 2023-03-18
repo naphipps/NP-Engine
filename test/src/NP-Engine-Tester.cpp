@@ -4,6 +4,9 @@
 //
 //##===----------------------------------------------------------------------===##//
 
+//TODO: I think our test app should change working dir
+//TODO: I think our test app should contain all assets, including shaders
+
 #include "NP-Engine-Tester.hpp"
 
 namespace np::app
