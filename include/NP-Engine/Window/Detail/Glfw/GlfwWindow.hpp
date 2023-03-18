@@ -779,90 +779,95 @@ namespace np::win::__detail
 			// window->InvokeControllerCallbacks(state);
 		}
 
-		void SetGlfwCallbacks()
+		void SetGlfwCallbacks(GLFWwindow* glfw_window)
 		{
-			GLFWwindow* glfw_window = _glfw_window.load(mo_acquire);
+			if (glfw_window)
+			{
+				glfwSetWindowUserPointer(glfw_window, this);
+				glfwSetJoystickUserPointer(GLFW_JOYSTICK_1, glfw_window);
+				glfwSetJoystickUserPointer(GLFW_JOYSTICK_2, glfw_window);
+				glfwSetJoystickUserPointer(GLFW_JOYSTICK_3, glfw_window);
+				glfwSetJoystickUserPointer(GLFW_JOYSTICK_4, glfw_window);
+				glfwSetJoystickUserPointer(GLFW_JOYSTICK_5, glfw_window);
+				glfwSetJoystickUserPointer(GLFW_JOYSTICK_6, glfw_window);
+				glfwSetJoystickUserPointer(GLFW_JOYSTICK_7, glfw_window);
+				glfwSetJoystickUserPointer(GLFW_JOYSTICK_8, glfw_window);
+				glfwSetJoystickUserPointer(GLFW_JOYSTICK_9, glfw_window);
+				glfwSetJoystickUserPointer(GLFW_JOYSTICK_10, glfw_window);
+				glfwSetJoystickUserPointer(GLFW_JOYSTICK_11, glfw_window);
+				glfwSetJoystickUserPointer(GLFW_JOYSTICK_12, glfw_window);
+				glfwSetJoystickUserPointer(GLFW_JOYSTICK_13, glfw_window);
+				glfwSetJoystickUserPointer(GLFW_JOYSTICK_14, glfw_window);
+				glfwSetJoystickUserPointer(GLFW_JOYSTICK_15, glfw_window);
+				glfwSetJoystickUserPointer(GLFW_JOYSTICK_16, glfw_window);
 
-			glfwSetWindowUserPointer(glfw_window, this);
-			glfwSetJoystickUserPointer(GLFW_JOYSTICK_1, glfw_window);
-			glfwSetJoystickUserPointer(GLFW_JOYSTICK_2, glfw_window);
-			glfwSetJoystickUserPointer(GLFW_JOYSTICK_3, glfw_window);
-			glfwSetJoystickUserPointer(GLFW_JOYSTICK_4, glfw_window);
-			glfwSetJoystickUserPointer(GLFW_JOYSTICK_5, glfw_window);
-			glfwSetJoystickUserPointer(GLFW_JOYSTICK_6, glfw_window);
-			glfwSetJoystickUserPointer(GLFW_JOYSTICK_7, glfw_window);
-			glfwSetJoystickUserPointer(GLFW_JOYSTICK_8, glfw_window);
-			glfwSetJoystickUserPointer(GLFW_JOYSTICK_9, glfw_window);
-			glfwSetJoystickUserPointer(GLFW_JOYSTICK_10, glfw_window);
-			glfwSetJoystickUserPointer(GLFW_JOYSTICK_11, glfw_window);
-			glfwSetJoystickUserPointer(GLFW_JOYSTICK_12, glfw_window);
-			glfwSetJoystickUserPointer(GLFW_JOYSTICK_13, glfw_window);
-			glfwSetJoystickUserPointer(GLFW_JOYSTICK_14, glfw_window);
-			glfwSetJoystickUserPointer(GLFW_JOYSTICK_15, glfw_window);
-			glfwSetJoystickUserPointer(GLFW_JOYSTICK_16, glfw_window);
-
-			glfwSetWindowCloseCallback(glfw_window, WindowCloseCallback);
-			glfwSetWindowSizeCallback(glfw_window, WindowSizeCallback);
-			glfwSetWindowPosCallback(glfw_window, WindowPositionCallback);
-			glfwSetFramebufferSizeCallback(glfw_window, FramebufferSizeCallback);
-			glfwSetWindowIconifyCallback(glfw_window, WindowIconifyCallback);
-			glfwSetWindowMaximizeCallback(glfw_window, WindowMaximizeCallback);
-			glfwSetWindowFocusCallback(glfw_window, WindowFocusCallback);
-			glfwSetKeyCallback(glfw_window, KeyCallback);
-			glfwSetMouseButtonCallback(glfw_window, MouseButtonCallback);
-			glfwSetCursorPosCallback(glfw_window, MousePositionCallback);
-			glfwSetCursorEnterCallback(glfw_window, MouseEnterCallback);
-			glfwSetJoystickCallback(ControllerCallback);
+				glfwSetWindowCloseCallback(glfw_window, WindowCloseCallback);
+				glfwSetWindowSizeCallback(glfw_window, WindowSizeCallback);
+				glfwSetWindowPosCallback(glfw_window, WindowPositionCallback);
+				glfwSetFramebufferSizeCallback(glfw_window, FramebufferSizeCallback);
+				glfwSetWindowIconifyCallback(glfw_window, WindowIconifyCallback);
+				glfwSetWindowMaximizeCallback(glfw_window, WindowMaximizeCallback);
+				glfwSetWindowFocusCallback(glfw_window, WindowFocusCallback);
+				glfwSetKeyCallback(glfw_window, KeyCallback);
+				glfwSetMouseButtonCallback(glfw_window, MouseButtonCallback);
+				glfwSetCursorPosCallback(glfw_window, MousePositionCallback);
+				glfwSetCursorEnterCallback(glfw_window, MouseEnterCallback);
+				glfwSetJoystickCallback(ControllerCallback);
 
 #if NP_ENGINE_PLATFORM_IS_WINDOWS
-			HWND native_window = (HWND)GetNativeWindow();
-			LONG_PTR prev_window_procedure = SetWindowLongPtrA(native_window, GWLP_WNDPROC, (LONG_PTR)&GlfwWindowProcedure);
-			SetWindowLongPtrA(native_window, GWLP_USERDATA, (LONG_PTR)this);
-			_prev_window_procedure = (WNDPROC)prev_window_procedure;
+				HWND native_window = (HWND)GetNativeFromGlfw(glfw_window);
+				LONG_PTR prev_window_procedure = SetWindowLongPtrA(native_window, GWLP_WNDPROC, (LONG_PTR)&GlfwWindowProcedure);
+				SetWindowLongPtrA(native_window, GWLP_USERDATA, (LONG_PTR)this);
+				_prev_window_procedure = (WNDPROC)prev_window_procedure;
 #endif
+			}
 		}
 
-		void UnsetGlfwCallbacks()
+		void UnsetGlfwCallbacks(GLFWwindow* glfw_window)
 		{
-			GLFWwindow* glfw_window = _glfw_window.load(mo_acquire);
+			if (glfw_window)
+			{
+				glfwSetWindowUserPointer(glfw_window, nullptr);
+				glfwSetJoystickUserPointer(GLFW_JOYSTICK_1, nullptr);
+				glfwSetJoystickUserPointer(GLFW_JOYSTICK_2, nullptr);
+				glfwSetJoystickUserPointer(GLFW_JOYSTICK_3, nullptr);
+				glfwSetJoystickUserPointer(GLFW_JOYSTICK_4, nullptr);
+				glfwSetJoystickUserPointer(GLFW_JOYSTICK_5, nullptr);
+				glfwSetJoystickUserPointer(GLFW_JOYSTICK_6, nullptr);
+				glfwSetJoystickUserPointer(GLFW_JOYSTICK_7, nullptr);
+				glfwSetJoystickUserPointer(GLFW_JOYSTICK_8, nullptr);
+				glfwSetJoystickUserPointer(GLFW_JOYSTICK_9, nullptr);
+				glfwSetJoystickUserPointer(GLFW_JOYSTICK_10, nullptr);
+				glfwSetJoystickUserPointer(GLFW_JOYSTICK_11, nullptr);
+				glfwSetJoystickUserPointer(GLFW_JOYSTICK_12, nullptr);
+				glfwSetJoystickUserPointer(GLFW_JOYSTICK_13, nullptr);
+				glfwSetJoystickUserPointer(GLFW_JOYSTICK_14, nullptr);
+				glfwSetJoystickUserPointer(GLFW_JOYSTICK_15, nullptr);
+				glfwSetJoystickUserPointer(GLFW_JOYSTICK_16, nullptr);
 
-			glfwSetWindowUserPointer(glfw_window, nullptr);
-			glfwSetJoystickUserPointer(GLFW_JOYSTICK_1, nullptr);
-			glfwSetJoystickUserPointer(GLFW_JOYSTICK_2, nullptr);
-			glfwSetJoystickUserPointer(GLFW_JOYSTICK_3, nullptr);
-			glfwSetJoystickUserPointer(GLFW_JOYSTICK_4, nullptr);
-			glfwSetJoystickUserPointer(GLFW_JOYSTICK_5, nullptr);
-			glfwSetJoystickUserPointer(GLFW_JOYSTICK_6, nullptr);
-			glfwSetJoystickUserPointer(GLFW_JOYSTICK_7, nullptr);
-			glfwSetJoystickUserPointer(GLFW_JOYSTICK_8, nullptr);
-			glfwSetJoystickUserPointer(GLFW_JOYSTICK_9, nullptr);
-			glfwSetJoystickUserPointer(GLFW_JOYSTICK_10, nullptr);
-			glfwSetJoystickUserPointer(GLFW_JOYSTICK_11, nullptr);
-			glfwSetJoystickUserPointer(GLFW_JOYSTICK_12, nullptr);
-			glfwSetJoystickUserPointer(GLFW_JOYSTICK_13, nullptr);
-			glfwSetJoystickUserPointer(GLFW_JOYSTICK_14, nullptr);
-			glfwSetJoystickUserPointer(GLFW_JOYSTICK_15, nullptr);
-			glfwSetJoystickUserPointer(GLFW_JOYSTICK_16, nullptr);
-
-			glfwSetWindowCloseCallback(glfw_window, nullptr);
-			glfwSetWindowSizeCallback(glfw_window, nullptr);
-			glfwSetWindowPosCallback(glfw_window, nullptr);
-			glfwSetFramebufferSizeCallback(glfw_window, nullptr);
-			glfwSetWindowIconifyCallback(glfw_window, nullptr);
-			glfwSetWindowMaximizeCallback(glfw_window, nullptr);
-			glfwSetWindowFocusCallback(glfw_window, nullptr);
-			glfwSetKeyCallback(glfw_window, nullptr);
-			glfwSetMouseButtonCallback(glfw_window, nullptr);
-			glfwSetCursorPosCallback(glfw_window, nullptr);
-			glfwSetCursorEnterCallback(glfw_window, nullptr);
-			glfwSetJoystickCallback(nullptr);
+				glfwSetWindowCloseCallback(glfw_window, nullptr);
+				glfwSetWindowSizeCallback(glfw_window, nullptr);
+				glfwSetWindowPosCallback(glfw_window, nullptr);
+				glfwSetFramebufferSizeCallback(glfw_window, nullptr);
+				glfwSetWindowIconifyCallback(glfw_window, nullptr);
+				glfwSetWindowMaximizeCallback(glfw_window, nullptr);
+				glfwSetWindowFocusCallback(glfw_window, nullptr);
+				glfwSetKeyCallback(glfw_window, nullptr);
+				glfwSetMouseButtonCallback(glfw_window, nullptr);
+				glfwSetCursorPosCallback(glfw_window, nullptr);
+				glfwSetCursorEnterCallback(glfw_window, nullptr);
+				glfwSetJoystickCallback(nullptr);
 
 #if NP_ENGINE_PLATFORM_IS_WINDOWS
-			HWND native_window = (HWND)GetNativeWindow();
-			SetWindowLongPtrA(native_window, GWLP_WNDPROC, (LONG_PTR)_prev_window_procedure);
-			SetWindowLongPtrA(native_window, GWLP_USERDATA, (LONG_PTR) nullptr);
-			_prev_window_procedure = nullptr;
+				HWND native_window = (HWND)GetNativeFromGlfw(glfw_window);
+				if (native_window)
+				{
+					SetWindowLongPtrA(native_window, GWLP_WNDPROC, (LONG_PTR)_prev_window_procedure);
+					SetWindowLongPtrA(native_window, GWLP_USERDATA, (LONG_PTR) nullptr);
+				}
+				_prev_window_procedure = nullptr;
 #endif
+			}
 		}
 
 		void DetailShowProcedure() override
@@ -883,55 +888,64 @@ namespace np::win::__detail
 		void ClosingProcedure(mem::Delegate& d) override
 		{
 			Window::ClosingProcedure(d);
-			DestroyGlfwWindow();
+
+			GLFWwindow* glfw_window = nullptr;
+			if (_glfw_window.compare_exchange_strong(glfw_window, nullptr))
+				DestroyGlfwWindow(glfw_window);
 		}
 
-		void CreateGlfwWindow()
+		GLFWwindow* CreateGlfwWindow()
 		{
-			DestroyGlfwWindow();
 			glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 			glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
-			_glfw_window.store(glfwCreateWindow(GetWidth(), GetHeight(), GetTitle().c_str(), nullptr, nullptr), mo_release);
-			SetGlfwCallbacks();
-			ApplySystemTheme();
+			GLFWwindow* glfw_window = glfwCreateWindow(GetWidth(), GetHeight(), GetTitle().c_str(), nullptr, nullptr);
+			SetGlfwCallbacks(glfw_window);
+			ApplySystemThemeOnGlfw(glfw_window);
+			return glfw_window;
 		}
 
-		void ApplySystemTheme() // TODO: we might want this pushed to Window??
+		void ApplySystemThemeOnGlfw(GLFWwindow* glfw_window) // TODO: maybe add "void ApplySystemThemeOnGlfw()" to Window??
 		{
-#if NP_ENGINE_PLATFORM_IS_WINDOWS
-			LPCSTR subkey = "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize";
-			LPCSTR value = "SystemUsesLightTheme";
-			DWORD word = 0;
-			DWORD size = sizeof(DWORD);
-			LSTATUS status = RegGetValueA(HKEY_CURRENT_USER, subkey, value, RRF_RT_DWORD, nullptr, &word, &size);
-			HWND native_window = (HWND)GetNativeWindow();
-			BOOL dark_mode_value = status == ERROR_SUCCESS && word == 0;
-			BOOL prev_dark_mode_value = false;
-			DWORD DARK_MODE_ATTRIBUTE = 20;
-
-			DwmGetWindowAttribute(native_window, DARK_MODE_ATTRIBUTE, &prev_dark_mode_value, sizeof(BOOL));
-
-			if (prev_dark_mode_value != dark_mode_value)
-			{
-				DwmSetWindowAttribute(native_window, DARK_MODE_ATTRIBUTE, &dark_mode_value, sizeof(BOOL));
-
-				// TODO: test this
-				bl is_active = native_window == GetActiveWindow();
-				GlfwWindowProcedure(native_window, WM_NCACTIVATE, !is_active, 0);
-				GlfwWindowProcedure(native_window, WM_NCACTIVATE, is_active, 0);
-			}
-#endif
-		}
-
-		void DestroyGlfwWindow()
-		{
-			GLFWwindow* glfw_window = _glfw_window.load(mo_acquire);
 			if (glfw_window)
 			{
-				UnsetGlfwCallbacks();
-				glfwDestroyWindow(glfw_window);
-				_glfw_window.store(nullptr, mo_release);
+#if NP_ENGINE_PLATFORM_IS_WINDOWS
+				LPCSTR subkey = "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize";
+				LPCSTR value = "SystemUsesLightTheme";
+				DWORD word = 0;
+				DWORD size = sizeof(DWORD);
+				LSTATUS status = RegGetValueA(HKEY_CURRENT_USER, subkey, value, RRF_RT_DWORD, nullptr, &word, &size);
+				HWND native_window = (HWND)GetNativeFromGlfw(glfw_window);
+				BOOL dark_mode_value = status == ERROR_SUCCESS && word == 0;
+				BOOL prev_dark_mode_value = false;
+				DWORD DARK_MODE_ATTRIBUTE = 20;
+
+				DwmGetWindowAttribute(native_window, DARK_MODE_ATTRIBUTE, &prev_dark_mode_value, sizeof(BOOL));
+
+				if (prev_dark_mode_value != dark_mode_value)
+				{
+					DwmSetWindowAttribute(native_window, DARK_MODE_ATTRIBUTE, &dark_mode_value, sizeof(BOOL));
+
+					// TODO: test this
+					bl is_active = native_window == GetActiveWindow();
+					GlfwWindowProcedure(native_window, WM_NCACTIVATE, !is_active, 0);
+					GlfwWindowProcedure(native_window, WM_NCACTIVATE, is_active, 0);
+				}
+#endif
 			}
+		}
+
+		void DestroyGlfwWindow(GLFWwindow* glfw_window)
+		{
+			if (glfw_window)
+			{
+				UnsetGlfwCallbacks(glfw_window);
+				glfwDestroyWindow(glfw_window);
+			}
+		}
+
+		void* GetNativeFromGlfw(GLFWwindow* glfw_window) const
+		{
+			return glfw_window ? glfwGetWin32Window(glfw_window) : nullptr;
 		}
 
 	public:
@@ -977,7 +991,9 @@ namespace np::win::__detail
 
 		virtual ~GlfwWindow()
 		{
-			DestroyGlfwWindow();
+			GLFWwindow* glfw_window = _glfw_window.load(mo_acquire);
+			while (!_glfw_window.compare_exchange_weak(glfw_window, nullptr))
+				DestroyGlfwWindow(glfw_window);
 		}
 
 		virtual void Update(tim::DblMilliseconds milliseconds) override
@@ -1102,7 +1118,7 @@ namespace np::win::__detail
 				if (timestamp - _apply_system_theme_timestamp >= tim::DblSeconds(2)) // TODO: we might want this pushed to
 																					 // Window
 				{
-					ApplySystemTheme();
+					ApplySystemThemeOnGlfw(glfw_window);
 					_apply_system_theme_timestamp = timestamp;
 				}
 			}
@@ -1118,7 +1134,11 @@ namespace np::win::__detail
 			GLFWwindow* glfw_window = _glfw_window.load(mo_acquire);
 			if (!glfw_window)
 			{
-				CreateGlfwWindow();
+				GLFWwindow* glfw_window = CreateGlfwWindow();
+				GLFWwindow* expected = nullptr;
+				while (!_glfw_window.compare_exchange_weak(expected, glfw_window))
+					DestroyGlfwWindow(expected);
+
 				Window::Show();
 			}
 			else
@@ -1168,7 +1188,7 @@ namespace np::win::__detail
 			GLFWwindow* glfw_window = _glfw_window.load(mo_acquire);
 
 #if NP_ENGINE_PLATFORM_IS_WINDOWS
-			GetWindowPlacement(glfwGetWin32Window(glfw_window), &_prev_window_placement);
+			GetWindowPlacement((HWND)GetNativeFromGlfw(glfw_window), &_prev_window_placement);
 #endif
 
 			if (glfw_window && !glfwGetWindowAttrib(glfw_window, GLFW_MAXIMIZED))
@@ -1243,8 +1263,7 @@ namespace np::win::__detail
 				// TODO: GetNativeWindow for linux
 
 #elif NP_ENGINE_PLATFORM_IS_WINDOWS
-			GLFWwindow* glfw_window = _glfw_window.load(mo_acquire);
-			native_window = glfw_window ? glfwGetWin32Window(glfw_window) : nullptr;
+			native_window = GetNativeFromGlfw(_glfw_window.load(mo_acquire));
 
 #endif
 			return native_window;
