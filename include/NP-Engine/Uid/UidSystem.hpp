@@ -74,7 +74,6 @@ namespace np::uid
 		SptrDeleter _uid_handle_deleter;
 		UidGenerator _uid_gen;
 		UidPool _uid_pool;
-		UidHandlePool _uid_handle_pool;
 		UidHandle _next_handle;
 		con::uset<UidHandle::KeyType> _released_keys;
 		con::umap<UidHandle::KeyType, UidRecord> _key_to_record;

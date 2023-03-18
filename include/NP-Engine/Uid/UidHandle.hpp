@@ -44,8 +44,6 @@ namespace np::uid
 			Generation = NP_ENGINE_UID_HANDLE_INVALID_GENERATION;
 		}
 	};
-
-	using UidHandlePool = mem::AccumulatingPool<UidHandle>;
 } // namespace np::uid
 
 #endif /* NP_ENGINE_UID_HANDLE_HPP */
