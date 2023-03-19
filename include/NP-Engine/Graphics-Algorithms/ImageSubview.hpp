@@ -34,18 +34,18 @@ namespace np::gfxalg
 	public:
 		ImageSubview(Image& image): _image(image)
 		{
-			_subview.Origin = {0, 0};
-			_subview.Boundary = {_image.GetWidth(), _image.GetHeight()};
+			_subview.origin = {0, 0};
+			_subview.boundary = {_image.GetWidth(), _image.GetHeight()};
 		}
 
 		ImageSubview(Image& image, Subview subview): _image(image), _subview(subview) {}
 
 		void SetSubview(Subview subview)
 		{
-			NP_ENGINE_ASSERT(subview.Origin.x <= _image.GetWidth(), "subview Origin needs to be within image width");
-			NP_ENGINE_ASSERT(subview.Origin.y <= _image.GetHeight(), "subview Origin needs to be within image height");
-			NP_ENGINE_ASSERT(subview.Boundary.x <= _image.GetWidth(), "subview Boundary needs to be within image width");
-			NP_ENGINE_ASSERT(subview.Boundary.y <= _image.GetHeight(), "subview Boundary needs to be within image height");
+			NP_ENGINE_ASSERT(subview.origin.x <= _image.GetWidth(), "subview origin needs to be within image width");
+			NP_ENGINE_ASSERT(subview.origin.y <= _image.GetHeight(), "subview origin needs to be within image height");
+			NP_ENGINE_ASSERT(subview.boundary.x <= _image.GetWidth(), "subview boundary needs to be within image width");
+			NP_ENGINE_ASSERT(subview.boundary.y <= _image.GetHeight(), "subview boundary needs to be within image height");
 			_subview = subview;
 		}
 
@@ -56,24 +56,24 @@ namespace np::gfxalg
 
 		ui32 GetWidth() const
 		{
-			return _subview.Boundary.x;
+			return _subview.boundary.x;
 		}
 
 		ui32 GetHeight() const
 		{
-			return _subview.Boundary.y;
+			return _subview.boundary.y;
 		}
 
 		void Set(const Point& point, Color color)
 		{
-			Point local = point + _subview.Origin;
+			Point local = point + _subview.origin;
 			NP_ENGINE_ASSERT(_subview.Contains(local), "our subview needs to contain given point");
 			_image.Set(local, color);
 		}
 
 		Color Get(const Point& point) const
 		{
-			Point local = point + _subview.Origin;
+			Point local = point + _subview.origin;
 			NP_ENGINE_ASSERT(_subview.Contains(local), "our subview needs to contain given point");
 			return _image.Get(local);
 		}

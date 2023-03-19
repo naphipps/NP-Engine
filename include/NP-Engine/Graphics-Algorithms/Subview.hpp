@@ -14,12 +14,12 @@ namespace np::gfxalg
 	struct Subview
 	{
 		using Point = gfx::Image::Point;
-		Point Origin = {0, 0};
-		Point Boundary = {0, 0};
+		Point origin = {0, 0};
+		Point boundary = {0, 0};
 
 		bl Contains(const Point& point) const
 		{
-			return point.x >= Origin.x && point.x <= Boundary.x - 1 && point.y >= Origin.y && point.y <= Boundary.y - 1;
+			return point.x >= origin.x && point.x < boundary.x - 1 && point.y >= origin.y && point.y < boundary.y - 1;
 		}
 	};
 } // namespace np::gfxalg
