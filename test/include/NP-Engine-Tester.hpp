@@ -184,10 +184,10 @@ namespace np::app
 			window_properties.title = "My Game Window >:D";
 
 			_window = _window_layer.CreateWindow(win::WindowDetailType::Glfw, window_properties);
-			_window->SetKeyCallback(caller, nput::InputListener::SubmitKeyCodeState);
-			_window->SetMouseCallback(caller, nput::InputListener::SubmitMouseCodeState);
+			_window->SetKeyCallback(caller, nput::InputListener::SubmitKeyState);
+			_window->SetMouseCallback(caller, nput::InputListener::SubmitMouseState);
 			_window->SetMousePositionCallback(caller, nput::InputListener::SubmitMousePosition);
-			_window->SetControllerCallback(caller, nput::InputListener::SubmitControllerCodeState);
+			_window->SetControllerCallback(caller, nput::InputListener::SubmitControllerState);
 
 			_renderer = _graphics_layer.CreateRenderer(*_window);
 			_scene = _graphics_layer.CreateScene(*_renderer);

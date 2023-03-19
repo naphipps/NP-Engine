@@ -17,12 +17,12 @@ namespace np::nput
 	class InputListener
 	{
 	public:
-		static void SubmitKeyCodeState(void* caller, const KeyCodeState& key_code_state)
+		static void SubmitKeyState(void* caller, const KeyCodeState& key_code_state)
 		{
 			((InputListener*)caller)->Submit(key_code_state);
 		}
 
-		static void SubmitMouseCodeState(void* caller, const MouseCodeState& mouse_code_state)
+		static void SubmitMouseState(void* caller, const MouseCodeState& mouse_code_state)
 		{
 			((InputListener*)caller)->Submit(mouse_code_state);
 		}
@@ -32,7 +32,7 @@ namespace np::nput
 			((InputListener*)caller)->Submit(mouse_position);
 		}
 
-		static void SubmitControllerCodeState(void* caller, const ControllerCodeState& controller_code_state)
+		static void SubmitControllerState(void* caller, const ControllerCodeState& controller_code_state)
 		{
 			((InputListener*)caller)->Submit(controller_code_state);
 		}
