@@ -114,9 +114,8 @@ namespace np::mat
 		i = 0x5f3759df - (i >> 1);
 		flt half_n = n * 0.5f;
 
-		do
+		while (newton_iteration_count-- > 0)
 			f *= 1.5f - (half_n * f * f);
-		while (--newton_iteration_count > 0);
 
 		return f;
 	}
