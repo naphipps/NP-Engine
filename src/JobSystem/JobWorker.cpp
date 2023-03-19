@@ -154,9 +154,8 @@ namespace np::jsys
 						const tim::DblMilliseconds duration((dbl)NP_ENGINE_APPLICATION_LOOP_DURATION / 2.0);
 						const tim::SteadyTimestamp start = tim::SteadyClock::now();
 
-						do
+						while (tim::SteadyClock::now() - start < duration)
 							thr::ThisThread::yield();
-						while (tim::SteadyClock::now() - start < duration);
 
 						sleep_count++;
 					}
