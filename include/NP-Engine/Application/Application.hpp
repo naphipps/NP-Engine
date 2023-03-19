@@ -104,6 +104,7 @@ namespace np::app
 			_graphics_layer(services),
 			_running(false)
 		{
+			NP_ENGINE_PROFILE_FUNCTION();
 			sys::SetTerminateHandler(__detail::HandleTerminate);
 			sys::SetSignalHandler(__detail::HandleSignal);
 

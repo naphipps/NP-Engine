@@ -25,11 +25,14 @@ i32 main(i32 argc, chr** argv)
 		::np::sys::Init();
 		::np::mem::AccumulatingAllocator<::np::mem::RedBlackTreeAllocator> allocator;
 		::np::mem::TraitAllocator::Register(allocator);
-		::np::mem::sptr<::np::srvc::Services> services = ::np::mem::CreateSptr<::np::srvc::Services>(allocator);
-		::np::mem::sptr<::np::app::Application> application = ::np::app::CreateApplication(*services);
-		application->Run(argc, argv);
-		application.reset();
-		services.reset();
+		{
+			NP_ENGINE_PROFILE_SCOPE("application lifespan");
+			::np::mem::sptr<::np::srvc::Services> services = ::np::mem::CreateSptr<::np::srvc::Services>(allocator);
+			::np::mem::sptr<::np::app::Application> application = ::np::app::CreateApplication(*services);
+			application->Run(argc, argv);
+			application.reset(); //TODO: when services is treated as sptr, then we can remove these resets
+			services.reset();
+		}
 		NP_ENGINE_PROFILE_SAVE();
 		NP_ENGINE_PROFILE_RESET();
 		::np::mem::TraitAllocator::ResetRegistration();

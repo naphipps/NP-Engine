@@ -167,6 +167,7 @@ namespace np::app
 
 		void PrepareForRun()
 		{
+			NP_ENGINE_PROFILE_FUNCTION();
 			// TODO: I think CreateWindowScene should be replaced with WindowLayer.CreateWindow and GraphicsLayer.CreateScene
 			// TODO: ^ this should be like the following:
 			/*
@@ -214,11 +215,13 @@ namespace np::app
 			Application(Application::Properties{"My Game App"}, services),
 			_game_layer(services, _window_layer, _graphics_layer)
 		{
+			NP_ENGINE_PROFILE_FUNCTION();
 			PushLayer(mem::AddressOf(_game_layer));
 		}
 
 		void Run(i32 argc, chr** argv) override
 		{
+			NP_ENGINE_PROFILE_FUNCTION();
 			NP_ENGINE_LOG_INFO("Hello world from my game app! My title is '" + GetTitle() + "'");
 			_game_layer.PrepareForRun();
 			Application::Run(argc, argv);
