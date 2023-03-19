@@ -152,6 +152,7 @@ namespace np::gfx
 			if (x < _width && y < _height)
 			{
 				const ui8* pixel_data = mem::AddressOf(_pixels[(siz)x + (siz)y * (siz)_width * sizeof(Color)]);
+				//TODO: ^ I feel like there are cleaner way of doing this
 				pixel = *((ui32*)pixel_data);
 			}
 
@@ -168,6 +169,7 @@ namespace np::gfx
 			if (x < _width && y < _height)
 			{
 				ui8* pixel_data = mem::AddressOf(_pixels[(siz)x + (siz)y * (siz)_width * sizeof(Color)]);
+				//TODO: ^ I feel like there are cleaner way of doing this
 				*((ui32*)pixel_data) = color;
 			}
 		}
