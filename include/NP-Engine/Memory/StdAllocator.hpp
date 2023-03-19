@@ -31,7 +31,7 @@ namespace np::mem
 		template <class U>
 		struct rebind
 		{
-			typedef StdAllocator<U> other;
+			using other = StdAllocator<U>;
 		};
 
 		inline explicit StdAllocator()

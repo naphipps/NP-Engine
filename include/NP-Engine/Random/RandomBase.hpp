@@ -66,8 +66,8 @@ namespace np::rng
 		}
 	};
 
-	typedef RandomBase<Random32> Random32Base;
-	typedef RandomBase<Random64> Random64Base;
+	using Random32Base = RandomBase<Random32>;
+	using Random64Base = RandomBase<Random64>;
 } // namespace np::rng
 
 #endif /* NP_ENGINE_RANDOM_BASE_HPP */

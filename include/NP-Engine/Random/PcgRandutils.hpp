@@ -18,11 +18,11 @@
 
 namespace randutils
 {
-	typedef randutils::seed_seq_fe<2, ui32> seed_seq_fe64;
-	typedef randutils::auto_seeded<seed_seq_fe64> auto_seed_64;
+	using seed_seq_fe64 = randutils::seed_seq_fe<2, ui32>;
+	using auto_seed_64 = randutils::auto_seeded<seed_seq_fe64>;
 } // namespace randutils
 
-typedef randutils::random_generator<pcg32, randutils::auto_seed_64> pcg32_fe;
-typedef randutils::random_generator<pcg64, randutils::auto_seed_128> pcg64_fe;
+using pcg32_fe = randutils::random_generator<pcg32, randutils::auto_seed_64>;
+using pcg64_fe = randutils::random_generator<pcg64, randutils::auto_seed_128>;
 
 #endif /* NP_ENGINE_PCG_RANDUTILS_HPP */
