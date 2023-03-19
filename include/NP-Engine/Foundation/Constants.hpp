@@ -11,6 +11,9 @@
 	#error constants settings hpp has not been included before this file
 #endif
 
+#define NP_ENGINE_CONCATENATE_DIRECT(A, B) A##B
+#define NP_ENGINE_CONCATENATE(A, B) NP_ENGINE_CONCATENATE_DIRECT(A, B)
+
 #define NP_ENGINE_MACRO_TO_STR(X) #X
 #define NP_ENGINE_MACRO_VAL_TO_STR(X) NP_ENGINE_MACRO_TO_STR(X)
 #define NP_ENGINE_FILE_AND_LINE __FILE__ ":" NP_ENGINE_MACRO_VAL_TO_STR(__LINE__)

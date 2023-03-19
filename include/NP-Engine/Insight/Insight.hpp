@@ -20,7 +20,7 @@
 #endif
 
 #if NP_ENGINE_PROFILE_ENABLE
-	#define NP_ENGINE_PROFILE_SCOPE(name) ::np::nsit::InstrumentorTimer timer##__LINE__(name)
+	#define NP_ENGINE_PROFILE_SCOPE(name) ::np::nsit::InstrumentorTimer NP_ENGINE_CONCATENATE(timer, __LINE__)(name)
 	#define NP_ENGINE_PROFILE_FUNCTION() NP_ENGINE_PROFILE_SCOPE(NP_ENGINE_FUNCTION)
 	#define NP_ENGINE_PROFILE_SAVE() ::np::nsit::Instrumentor::Save()
 	#define NP_ENGINE_PROFILE_RESET() ::np::nsit::Instrumentor::Reset()
