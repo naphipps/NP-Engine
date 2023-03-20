@@ -32,7 +32,7 @@ namespace np::mat
 		return hash;
 	}
 
-	static inline ui64 HashFnv1aUi64(void* src, siz byte_count, ui64 hash = (ui64)0xcbf29ce484222325ULL)
+	static inline ui64 HashFnv1aUi64(const void* src, siz byte_count, ui64 hash = (ui64)0xcbf29ce484222325ULL)
 	{
 		const ui64 prime = 0x100000001b3ULL;
 		ui8* it = (ui8*)src;
