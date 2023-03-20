@@ -5,7 +5,7 @@
 # //##===----------------------------------------------------------------------===##//
 
 cmake_minimum_required(VERSION 3.21.4 FATAL_ERROR)
-project(NP-Engine VERSION 0.0.0.1 LANGUAGES CXX C)
+project(NP-Engine VERSION 0.0.0.0 LANGUAGES CXX C)
 
 set(BOX2D_BUILD_EXAMPLES false CACHE BOOL "" FORCE)
 set(BOX2D_BUILD_UNITTESTS false CACHE BOOL "" FORCE)
