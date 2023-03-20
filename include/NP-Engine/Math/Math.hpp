@@ -16,6 +16,7 @@
 #include "owen.hpp"
 #include "StatisticImpl.hpp"
 #include "EaseImpl.hpp"
+#include "Fnv.hpp"
 
 // TODO: add Polygon and PolygonUtility - these might should go to alg
 
