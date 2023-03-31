@@ -19,9 +19,6 @@ namespace np::mem
 		return ::std::addressof(t);
 	}
 
-	template <class T>
-	constexpr T* AddressOf(const T&&) = delete;
-
 	constexpr void CopyBytes(void* dst, const void* src, siz byte_count)
 	{
 		ui8* dst_it = (ui8*)dst;
