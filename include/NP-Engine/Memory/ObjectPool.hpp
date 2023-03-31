@@ -58,7 +58,7 @@ namespace np::mem
 			return _allocator;
 		}
 
-		bl Contains(sptr<T>& object) const
+		bl Contains(sptr<T> object) const
 		{
 			return _allocator.Contains(object.get());
 		}
