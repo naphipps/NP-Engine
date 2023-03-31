@@ -19,34 +19,26 @@ namespace np::mem
 		constructs the given type using the given args inside given block
 	*/
 	template <typename T, typename... Args>
-	constexpr bl Construct(const Block& block, Args&&... args)
+	constexpr T* Construct(Block block, Args&&... args)
 	{
-		bl constructed = false;
-
+		T* object = nullptr;
 		if (block.IsValid() && block.size >= sizeof(T))
-		{
-			new (block.ptr) T(::std::forward<Args>(args)...);
-			constructed = true;
-		}
+			object = new (block.ptr) T(::std::forward<Args>(args)...);
 
-		return constructed;
+		return object;
 	}
 
 	/*
 		constructs the given type using the given args inside given block
 	*/
 	template <typename T>
-	constexpr bl ConstructArray(const Block& block, siz size)
+	constexpr T* ConstructArray(Block block, siz size)
 	{
-		bl constructed = false;
+		T* array = nullptr;
+		if (block.IsValid() && block.size >= (sizeof(T) * size))
+			array = new (block.ptr) T[size];
 
-		if (block.IsValid() && block.size >= sizeof(T))
-		{
-			new (block.ptr) T[size];
-			constructed = true;
-		}
-
-		return constructed;
+		return array;
 	}
 
 	/*
@@ -77,9 +69,8 @@ namespace np::mem
 		if (t != nullptr)
 		{
 			for (siz i = 0; i < size; i++)
-			{
 				t[i].~T();
-			}
+
 			destructed = true;
 		}
 
@@ -121,15 +112,15 @@ namespace np::mem
 	T* Create(Allocator& allocator, Args&&... args)
 	{
 		Block block = allocator.Allocate(sizeof(T));
-		bl constructed = Construct<T>(block, ::std::forward<Args>(args)...);
-		NP_ENGINE_ASSERT(constructed, "We require object of T to be constructed.");
-		return (T*)block.ptr;
+		T* object = mem::Construct<T>(block, ::std::forward<Args>(args)...);
+		NP_ENGINE_ASSERT(object, "We require object of T to be constructed.");
+		return object;
 	}
 
 	template <typename T>
 	void Destroy(Allocator& allocator, T* ptr)
 	{
-		bl destructed = Destruct<T>(ptr);
+		bl destructed = mem::Destruct<T>(ptr);
 		bl deallocated = allocator.Deallocate((void*)ptr);
 		NP_ENGINE_ASSERT(destructed && deallocated, "We required object of T to be destructed and deallocated.");
 	}

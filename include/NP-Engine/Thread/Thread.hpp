@@ -72,8 +72,7 @@ namespace np::thr
 		void Run(Args&&... args)
 		{
 			Clear();
-			mem::Block block = GetThreadBlock();
-			mem::Construct<::std::thread>(block, ::std::forward<Args>(args)...);
+			mem::Construct<::std::thread>(GetThreadBlock(), ::std::forward<Args>(args)...);
 		}
 
 		void Clear()

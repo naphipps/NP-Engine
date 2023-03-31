@@ -72,8 +72,7 @@ namespace np::mem
 				Block block = _c_allocator.Allocate(block_size);
 				Block allocator_block{block.ptr, ALLOCATOR_TYPE_SIZE};
 				Block allocator_given_block{allocator_block.End(), block.size - allocator_block.size};
-				Construct<AllocatorType>(allocator_block, allocator_given_block);
-				_allocators.emplace_back((AllocatorType*)allocator_block.ptr);
+				_allocators.emplace_back(mem::Construct<AllocatorType>(allocator_block, allocator_given_block));
 
 				b = _allocators.back()->Allocate(size);
 			}

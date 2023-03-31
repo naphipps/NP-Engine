@@ -34,11 +34,11 @@ namespace np::mem
 			for (siz i = 0; i < ChunkCount() - 1; i++)
 			{
 				block.ptr = &static_cast<ui8*>(_block.ptr)[i * CHUNK_SIZE];
-				Construct<void*>(block, &static_cast<ui8*>(_block.ptr)[(i + 1) * CHUNK_SIZE]);
+				mem::Construct<void*>(block, &static_cast<ui8*>(_block.ptr)[(i + 1) * CHUNK_SIZE]);
 			}
 
 			block.ptr = &static_cast<ui8*>(_block.ptr)[(ChunkCount() - 1) * CHUNK_SIZE];
-			Construct<void*>(block, nullptr);
+			mem::Construct<void*>(block, nullptr);
 
 			_allocation.store(_block.ptr, mo_release);
 		}
@@ -116,7 +116,7 @@ namespace np::mem
 			bl deallocated = false;
 			if (IsChunkPtr(block.ptr) && block.size == CHUNK_SIZE)
 			{
-				Construct<void*>(block, _allocation.load(mo_acquire));
+				mem::Construct<void*>(block, _allocation.load(mo_acquire));
 
 				while (!_allocation.compare_exchange_weak(*(void**)(&static_cast<ui8*>(block.ptr)[0]), block.ptr, mo_release,
 														  mo_relaxed))

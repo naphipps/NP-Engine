@@ -37,11 +37,11 @@ namespace np::mem
 			for (siz i = 0; i < ChunkCount() - 1; i++)
 			{
 				block.ptr = &static_cast<ui8*>(_block.ptr)[i * CHUNK_SIZE];
-				Construct<void*>(block, &static_cast<ui8*>(_block.ptr)[(i + 1) * CHUNK_SIZE]);
+				mem::Construct<void*>(block, &static_cast<ui8*>(_block.ptr)[(i + 1) * CHUNK_SIZE]);
 			}
 
 			block.ptr = &static_cast<ui8*>(_block.ptr)[(ChunkCount() - 1) * CHUNK_SIZE];
-			Construct<void*>(block, nullptr);
+			mem::Construct<void*>(block, nullptr);
 
 			_alloc_iterator = _block.ptr;
 		}
@@ -143,7 +143,7 @@ namespace np::mem
 					deallocation_address = &_alloc_iterator;
 				}
 
-				Construct<void*>(block, *deallocation_address);
+				mem::Construct<void*>(block, *deallocation_address);
 				*deallocation_address = block.ptr;
 				block.Invalidate();
 				deallocated = true;

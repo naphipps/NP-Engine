@@ -31,7 +31,7 @@ namespace np::mem
 		{
 			NP_ENGINE_ASSERT(sizeof(T) <= CACHE_LINE_SIZE, "given T must be <= CACHE_LINE_SIZE");
 			Block block{ (void*)_padding, CACHE_LINE_SIZE };
-			return Construct<T>(block, ::std::forward<Args>(args)...);
+			return mem::Construct<T>(block, ::std::forward<Args>(args)...);
 		}
 
 		template <typename T>

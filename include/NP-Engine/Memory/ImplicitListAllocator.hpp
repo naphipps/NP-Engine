@@ -37,10 +37,8 @@ namespace np::mem
 			{
 				Block header_block{block.Begin(), MARGIN_SIZE};
 				Block footer_block{(ui8*)block.End() - MARGIN_SIZE, MARGIN_SIZE};
-				Construct<Margin>(header_block);
-				Construct<Margin>(footer_block);
-				Margin* header = static_cast<Margin*>(header_block.ptr);
-				Margin* footer = static_cast<Margin*>(footer_block.ptr);
+				Margin* header = mem::Construct<Margin>(header_block);
+				Margin* footer = mem::Construct<Margin>(footer_block);
 				header->SetSize(block.size);
 				*footer = *header;
 				initialized = true;

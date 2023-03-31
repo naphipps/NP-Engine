@@ -69,8 +69,7 @@ namespace np::mem
 				Block block = _c_allocator.Allocate(size);
 				Block pool_block{block.ptr, POOL_TYPE_SIZE};
 				Block pool_given_block{pool_block.End(), block.size - pool_block.size};
-				Construct<PoolType>(pool_block, pool_given_block);
-				_pools.emplace_back((PoolType*)pool_block.ptr);
+				_pools.emplace_back(mem::Construct<PoolType>(pool_block, pool_given_block));
 
 				object = _pools.back()->CreateObject(::std::forward<Args>(args)...);
 			}
