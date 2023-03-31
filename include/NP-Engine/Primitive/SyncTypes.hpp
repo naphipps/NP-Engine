@@ -27,6 +27,7 @@ using atm_i8 = ::std::atomic_int8_t;
 using atm_i16 = ::std::atomic_int16_t;
 using atm_i32 = ::std::atomic_int32_t;
 using atm_i64 = ::std::atomic_int64_t;
+using atm_siz = ::std::atomic_size_t;
 
 using atm_flt = ::std::atomic<flt>;
 using atm_dbl = ::std::atomic<dbl>;
