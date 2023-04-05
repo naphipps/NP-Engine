@@ -48,7 +48,7 @@ namespace np::app
 
 			// our closing job must be submitted here
 			job_system.SubmitJob(jsys::JobPriority::Normal, closing_data.job);
-			closing_data.job.reset();
+			closing_data.job.Reset();
 			e.SetHandled();
 		}
 

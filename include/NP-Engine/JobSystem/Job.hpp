@@ -94,7 +94,7 @@ namespace np::jsys
 
 				for (auto it = _dependents.begin(); it != _dependents.end(); it++)
 				{
-					mem::sptr<Job> dependent = it->lock();
+					mem::sptr<Job> dependent = it->GetSptr();
 					if (dependent)
 						dependent->_antecedent_count--;
 				}
@@ -122,8 +122,8 @@ namespace np::jsys
 				con::vector<mem::wptr<Job>>& dependents = b->_dependents;
 				for (auto it = dependents.begin(); it != dependents.end() && !found; it++)
 				{
-					mem::sptr<Job> dependent = it->lock();
-					found = dependent && dependent.get() == a.get();
+					mem::sptr<Job> dependent = it->GetSptr();
+					found = dependent && dependent == a;
 				}
 
 				if (!found)
@@ -144,10 +144,10 @@ namespace np::jsys
 				con::vector<mem::wptr<Job>>& dependents = b->_dependents;
 				for (auto it = dependents.begin(); it != dependents.end(); it++)
 				{
-					mem::sptr<Job> dependent = it->lock();
-					if (dependent.get() == a.get())
+					mem::sptr<Job> dependent = it->GetSptr();
+					if (dependent == a)
 					{
-						dependent.reset();
+						dependent.Reset();
 						dependents.erase(it);
 						a->_antecedent_count--;
 						break;

@@ -30,7 +30,7 @@ namespace np::jsys
 		void Invalidate()
 		{
 			priority = JobPriority::Normal;
-			job.reset();
+			job.Reset();
 		}
 	};
 } // namespace np::jsys

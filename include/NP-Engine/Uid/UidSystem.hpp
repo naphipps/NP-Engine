@@ -19,35 +19,41 @@
 #include "UidGenerator.hpp"
 #include "UidHandle.hpp"
 
-//TODO: should we setup some kind of sptr<UidHandle> so our handles return to us automatically just like pools?
-
 namespace np::uid
 {
 	class UidSystem
 	{
 	public:
-		class SptrDeleter : public ::std::default_delete<UidHandle>
+		
+		class SmartPtrDestroyer : public mem::SmartContiguousDestroyer<UidHandle>
 		{
+		public:
+			using base = mem::SmartContiguousDestroyer<UidHandle>;
+
 		private:
 			UidSystem& _uid_system;
 
 		public:
-			SptrDeleter(UidSystem& uid_system) : _uid_system(uid_system) {}
+			SmartPtrDestroyer(UidSystem& uid_system, mem::Allocator& allocator) : base(allocator), _uid_system(uid_system) {}
 
-			SptrDeleter(const SptrDeleter& other) : _uid_system(other._uid_system) {}
+			SmartPtrDestroyer(const SmartPtrDestroyer& other) : base(other), _uid_system(other._uid_system) {}
 
-			SptrDeleter(SptrDeleter&& other) noexcept : _uid_system(other._uid_system) {}
+			SmartPtrDestroyer(SmartPtrDestroyer&& other) noexcept : base(other), _uid_system(other._uid_system) {}
 
-			void operator()(UidHandle* hndl_ptr) const noexcept
+			void DestructObject(UidHandle* ptr) override
 			{
-				_uid_system.DestroyUidHandle(hndl_ptr);
+				_uid_system.ReleaseHandle(ptr);
+				base::DestructObject(ptr);
 			}
 		};
+
+		using SmartPtrResource = mem::SmartPtrResource<UidHandle, SmartPtrDestroyer>;
+		using SmartPtrContiguousBlock = mem::SmartPtrContiguousBlock<UidHandle, SmartPtrResource>;
 
 	private:
 		struct UidRecord
 		{
-			mem::sptr<Uid> UidPtr = nullptr;
+			mem::sptr<Uid> UidPtr = nullptr; //TODO: camelCase these fields
 			UidHandle::GenerationType Generation = NP_ENGINE_UID_HANDLE_INVALID_GENERATION;
 
 			bl IsValid() const
@@ -62,16 +68,16 @@ namespace np::uid
 
 			void Invalidate()
 			{
-				UidPtr.reset();
+				UidPtr.Reset();
 				Generation = NP_ENGINE_UID_HANDLE_INVALID_GENERATION;
 			}
 		};
 
 		constexpr static siz UID_SIZE = mem::CalcAlignedSize(sizeof(Uid));
 
-		Mutex _m; // TODO: don't know if an atomic lock would be faster??
+		Mutex _m;
 		mem::TraitAllocator _allocator;
-		SptrDeleter _uid_handle_deleter;
+		SmartPtrDestroyer _uid_handle_destroyer;
 		UidGenerator _uid_gen;
 		UidPool _uid_pool;
 		UidHandle _next_handle;
@@ -107,7 +113,7 @@ namespace np::uid
 			return _next_handle.Generation;
 		}
 
-		void DestroyUidHandle(UidHandle* hndl_ptr)
+		void ReleaseHandle(UidHandle* hndl_ptr)
 		{
 			if (hndl_ptr)
 			{
@@ -129,13 +135,11 @@ namespace np::uid
 						}
 					}
 				}
-
-				mem::Destroy<UidHandle>(_allocator, hndl_ptr);
 			}
 		}
 
 	public:
-		UidSystem() : _uid_handle_deleter(*this) {}
+		UidSystem() : _uid_handle_destroyer(*this, _allocator) {}
 
 		~UidSystem()
 		{
@@ -165,7 +169,10 @@ namespace np::uid
 				while (_uid_master_set.count(*id));
 				_uid_master_set.emplace(*id);
 
-				hndl = mem::sptr<UidHandle>(mem::Create<UidHandle>(_allocator, UidHandle{GetNextKey(), GetNextGeneration()}), _uid_handle_deleter);
+				SmartPtrContiguousBlock* contiguous_block = mem::Create<SmartPtrContiguousBlock>(_allocator);
+				UidHandle* object = mem::Construct<UidHandle>(contiguous_block->objectBlock, UidHandle{ GetNextKey(), GetNextGeneration() });
+				hndl = mem::sptr<UidHandle>(mem::Construct<SmartPtrResource>(contiguous_block->resourceBlock, _uid_handle_destroyer, object));
+
 				_key_to_record.emplace(hndl->Key, UidRecord{ id, hndl->Generation });
 			}
 

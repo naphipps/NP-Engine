@@ -30,8 +30,8 @@ i32 main(i32 argc, chr** argv)
 			::np::mem::sptr<::np::srvc::Services> services = ::np::mem::CreateSptr<::np::srvc::Services>(allocator);
 			::np::mem::sptr<::np::app::Application> application = ::np::app::CreateApplication(*services);
 			application->Run(argc, argv);
-			application.reset(); //TODO: when services is treated as sptr, then we can remove these resets
-			services.reset();
+			application.Reset(); //TODO: when services is treated as sptr in application, then we can remove these resets
+			services.Reset();
 		}
 		NP_ENGINE_PROFILE_SAVE();
 		NP_ENGINE_PROFILE_RESET();

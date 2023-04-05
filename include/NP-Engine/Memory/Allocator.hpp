@@ -111,18 +111,14 @@ namespace np::mem
 	template <typename T, typename... Args>
 	T* Create(Allocator& allocator, Args&&... args)
 	{
-		Block block = allocator.Allocate(sizeof(T));
-		T* object = mem::Construct<T>(block, ::std::forward<Args>(args)...);
-		NP_ENGINE_ASSERT(object, "We require object of T to be constructed.");
-		return object;
+		return mem::Construct<T>(allocator.Allocate(sizeof(T)), ::std::forward<Args>(args)...);;
 	}
 
 	template <typename T>
 	void Destroy(Allocator& allocator, T* ptr)
 	{
-		bl destructed = mem::Destruct<T>(ptr);
-		bl deallocated = allocator.Deallocate((void*)ptr);
-		NP_ENGINE_ASSERT(destructed && deallocated, "We required object of T to be destructed and deallocated.");
+		mem::Destruct<T>(ptr);
+		allocator.Deallocate((void*)ptr);
 	}
 } // namespace np::mem
 

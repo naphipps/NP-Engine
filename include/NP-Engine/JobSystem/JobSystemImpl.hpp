@@ -60,7 +60,7 @@ namespace np::jsys
 			}
 
 			_job_workers.clear();
-			_thread_pool.reset();
+			_thread_pool.Reset();
 			_job_pool.Clear();
 		}
 

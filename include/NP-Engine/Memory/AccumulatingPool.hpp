@@ -21,7 +21,7 @@
 
 namespace np::mem
 {
-	template <typename T, typename A = PoolAllocator<T>>
+	template <typename T, typename A = PoolAllocator<ObjectPool<T>::ChunkType>>
 	class AccumulatingPool
 	{
 	private:
@@ -80,7 +80,7 @@ namespace np::mem
 		void Clear()
 		{
 			for (PoolType* pool : _pools)
-				Destroy<PoolType>(_c_allocator, pool);
+				mem::Destroy<PoolType>(_c_allocator, pool);
 
 			_pools.clear();
 		}

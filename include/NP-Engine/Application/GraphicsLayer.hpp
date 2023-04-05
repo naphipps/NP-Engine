@@ -271,7 +271,7 @@ namespace np::app
 				while (_rendering_job->IsEnabled() && !_rendering_job->IsComplete())
 					_keep_rendering.store(false, mo_release);
 
-				_rendering_job.reset();
+				_rendering_job.Reset();
 			}
 		}
 	};

@@ -42,7 +42,7 @@ namespace np::app
 			// TODO: handle all references that use this windowId
 
 			if (_window->GetUid() == windowId)
-				_window.reset();
+				_window.Reset();
 
 			d.DestructData<uid::Uid>();
 		}

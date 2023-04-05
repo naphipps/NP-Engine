@@ -18,11 +18,20 @@
 
 namespace np::mem
 {
-	template <typename T, typename A = PoolAllocator<T>>
+	template <typename T>
+	using ObjectPoolChunkType = SmartPtrContiguousBlock<T, SmartPtrResource<T, SmartContiguousDestroyer<T>>>;
+
+	template <typename T, typename A = PoolAllocator<ObjectPoolChunkType<T>>>
 	class ObjectPool
 	{
+	public:
+		using ChunkType = ObjectPoolChunkType<T>;
+
 	private:
-		NP_ENGINE_STATIC_ASSERT((::std::is_base_of_v<PoolAllocator<T>, A> || ::std::is_base_of_v<LockingPoolAllocator<T>, A>),
+		using DefaultBase = PoolAllocator<ChunkType>;
+		using DefaultLockingBase = LockingPoolAllocator<ChunkType>;
+
+		NP_ENGINE_STATIC_ASSERT((::std::is_base_of_v<DefaultBase, A> || ::std::is_base_of_v<DefaultLockingBase, A>),
 								"our given allocator must be our PoolAllocator or LockingPoolAllocator");
 
 	protected:
@@ -60,18 +69,18 @@ namespace np::mem
 
 		bl Contains(sptr<T> object) const
 		{
-			return _allocator.Contains(object.get());
+			return _allocator.Contains(AddressOf(*object));
 		}
 
 		template <typename... Args>
 		sptr<T> CreateObject(Args&&... args)
 		{
-			return CreateSptr<T>(_allocator, ::std::forward<Args>(args)...);
+			return mem::CreateSptr<T>(_allocator, ::std::forward<Args>(args)...);
 		}
 	};
 
 	template <typename T>
-	using LockingObjectPool = ObjectPool<T, LockingPoolAllocator<T>>;
+	using LockingObjectPool = ObjectPool<T, LockingPoolAllocator<ObjectPoolChunkType<T>>>;
 } // namespace np::mem
 
 #endif /* NP_ENGINE_OBJECT_POOL_HPP */
