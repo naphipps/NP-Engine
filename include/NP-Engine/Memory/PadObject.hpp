@@ -26,7 +26,7 @@ namespace np::mem
 
 	public:
 		template <typename T, typename... Args>
-		bl ConstructData(Args&&... args)
+		T* ConstructData(Args&&... args)
 		{
 			NP_ENGINE_ASSERT(sizeof(T) <= CacheLinePadding::SIZE, "given T must be <= CacheLinePadding::SIZE");
 			return mem::Construct<T>(_padding, ::std::forward<Args>(args)...);
