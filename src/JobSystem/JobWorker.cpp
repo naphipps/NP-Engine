@@ -49,7 +49,7 @@ namespace np::jsys
 				if (!immediate->IsComplete())
 					SubmitImmediateJob(immediate);
 
-				immediate.Reset(); //done with job
+				immediate.reset(); //done with job
 			}
 		}
 
@@ -94,7 +94,7 @@ namespace np::jsys
 				if (!stolen->IsComplete())
 					SubmitImmediateJob(stolen);
 
-				stolen.Reset(); //done with job
+				stolen.reset(); //done with job
 			}
 			else
 			{

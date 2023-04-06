@@ -25,10 +25,10 @@ namespace np::uid
 	{
 	public:
 		
-		class SmartPtrDestroyer : public mem::SmartContiguousDestroyer<UidHandle>
+		class SmartPtrDestroyer : public mem::smart_contiguous_destroyer<UidHandle>
 		{
 		public:
-			using base = mem::SmartContiguousDestroyer<UidHandle>;
+			using base = mem::smart_contiguous_destroyer<UidHandle>;
 
 		private:
 			UidSystem& _uid_system;
@@ -40,15 +40,15 @@ namespace np::uid
 
 			SmartPtrDestroyer(SmartPtrDestroyer&& other) noexcept : base(other), _uid_system(other._uid_system) {}
 
-			void DestructObject(UidHandle* ptr) override
+			void destruct_object(UidHandle* ptr) override
 			{
 				_uid_system.ReleaseHandle(ptr);
-				base::DestructObject(ptr);
+				base::destruct_object(ptr);
 			}
 		};
 
-		using SmartPtrResource = mem::SmartPtrResource<UidHandle, SmartPtrDestroyer>;
-		using SmartPtrContiguousBlock = mem::SmartPtrContiguousBlock<UidHandle, SmartPtrResource>;
+		using SmartPtrResource = mem::smart_ptr_resource<UidHandle, SmartPtrDestroyer>;
+		using SmartPtrContiguousBlock = mem::smart_ptr_contiguous_block<UidHandle, SmartPtrResource>;
 
 	private:
 		struct UidRecord
@@ -68,7 +68,7 @@ namespace np::uid
 
 			void Invalidate()
 			{
-				UidPtr.Reset();
+				UidPtr.reset();
 				Generation = NP_ENGINE_UID_HANDLE_INVALID_GENERATION;
 			}
 		};
@@ -170,8 +170,8 @@ namespace np::uid
 				_uid_master_set.emplace(*id);
 
 				SmartPtrContiguousBlock* contiguous_block = mem::Create<SmartPtrContiguousBlock>(_allocator);
-				UidHandle* object = mem::Construct<UidHandle>(contiguous_block->objectBlock, UidHandle{ GetNextKey(), GetNextGeneration() });
-				hndl = mem::sptr<UidHandle>(mem::Construct<SmartPtrResource>(contiguous_block->resourceBlock, _uid_handle_destroyer, object));
+				UidHandle* object = mem::Construct<UidHandle>(contiguous_block->object_block, UidHandle{ GetNextKey(), GetNextGeneration() });
+				hndl = mem::sptr<UidHandle>(mem::Construct<SmartPtrResource>(contiguous_block->resource_block, _uid_handle_destroyer, object));
 
 				_key_to_record.emplace(hndl->Key, UidRecord{ id, hndl->Generation });
 			}

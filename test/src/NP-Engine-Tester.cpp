@@ -15,6 +15,6 @@ namespace np::app
 	{
 		NP_ENGINE_PROFILE_FUNCTION();
 		NP_ENGINE_LOG_INFO("Hello world from game create application.");
-		return mem::CreateSptr<GameApp>(services.GetAllocator(), services);
+		return mem::create_sptr<GameApp>(services.GetAllocator(), services);
 	}
 } // namespace np::app

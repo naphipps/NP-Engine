@@ -16,125 +16,123 @@
 #include "TraitAllocator.hpp"
 #include "MemoryFunctions.hpp"
 
-//TODO: sptr and wptr can inherit from SmartPtr that has the _resource, common methods, etc
-
 namespace np::mem
 {
-	struct SmartPtrResourceBase
+	struct smart_ptr_resource_base
 	{
-		atm_siz referenceCounter = 0;
-		atm_siz weakCounter = 0;
+		atm_siz reference_counter = 0;
+		atm_siz weak_counter = 0;
 
-		virtual ~SmartPtrResourceBase() = default;
+		virtual ~smart_ptr_resource_base() = default;
 
-		virtual void DestroyObject() = 0;
-		virtual void DestroySelf() = 0;
-		virtual void* GetObjectPtr() const = 0;
+		virtual void destroy_object() = 0;
+		virtual void destroy_self() = 0;
+		virtual void* get_object_ptr() const = 0;
 	};
 
 	template <typename T>
-	struct SmartPtrDestroyer
+	struct smart_ptr_destroyer
 	{
-		virtual void DestructObject(T* ptr)
+		virtual void destruct_object(T* ptr)
 		{
 			mem::Destruct<T>(ptr);
 		}
 
-		virtual void DeallocateObject(T* ptr)
+		virtual void deallocate_object(T* ptr)
 		{
 			TraitAllocator allocator;
 			allocator.Deallocate(ptr);
 		}
 
-		virtual void DestructResource(SmartPtrResourceBase* ptr)
+		virtual void destruct_resource(smart_ptr_resource_base* ptr)
 		{
-			mem::Destruct<SmartPtrResourceBase>(ptr);
+			mem::Destruct<smart_ptr_resource_base>(ptr);
 		}
 
-		virtual void DeallocateResource(SmartPtrResourceBase* ptr)
+		virtual void deallocate_resource(smart_ptr_resource_base* ptr)
 		{
 			TraitAllocator allocator;
 			allocator.Deallocate(ptr);
 		}
 	};
 
-	template <typename T, typename D = SmartPtrDestroyer<T>>
-	class SmartPtrResource : public SmartPtrResourceBase
+	template <typename T, typename D = smart_ptr_destroyer<T>>
+	class smart_ptr_resource : public smart_ptr_resource_base
 	{
 	private:
 		NP_ENGINE_STATIC_ASSERT(::std::is_copy_constructible_v<D>, "(D)estroyer must be copy constructible");
 		NP_ENGINE_STATIC_ASSERT(::std::is_move_constructible_v<D>, "(D)estroyer must be move constructible");
-		NP_ENGINE_STATIC_ASSERT((::std::is_base_of_v<SmartPtrDestroyer<T>, D>), "(D)estroyer must derive from SmartPtrDestroyer<T>");
+		NP_ENGINE_STATIC_ASSERT((::std::is_base_of_v<smart_ptr_destroyer<T>, D>), "(D)estroyer must derive from smart_ptr_destroyer<T>");
 
 	public:
-		using Destroyer = D;
+		using destroyer_type = D;
 
 	protected:
-		Destroyer _destroyer;
+		destroyer_type _destroyer;
 		T* _object;
 
 	public:
-		SmartPtrResource(Destroyer destroyer, T* object) : _destroyer(destroyer), _object(object) {}
+		smart_ptr_resource(destroyer_type destroyer_type, T* object) : _destroyer(destroyer_type), _object(object) {}
 
-		virtual void DestroyObject() override
+		virtual void destroy_object() override
 		{
-			_destroyer.DestructObject(_object);
-			_destroyer.DeallocateObject(_object);
+			_destroyer.destruct_object(_object);
+			_destroyer.deallocate_object(_object);
 			_object = nullptr;
 		}
 
-		virtual void DestroySelf() override
+		virtual void destroy_self() override
 		{
-			_destroyer.DestructResource(this);
-			_destroyer.DeallocateResource(this);
+			_destroyer.destruct_resource(this);
+			_destroyer.deallocate_resource(this);
 		}
 
-		void* GetObjectPtr() const override
+		void* get_object_ptr() const override
 		{
 			return _object;
 		}
 	};
 
 	template <typename T>
-	class SmartAllocatorDestroyer : public SmartPtrDestroyer<T>
+	class smart_allocator_destroyer : public smart_ptr_destroyer<T>
 	{
 	protected:
 		Allocator& _allocator;
 
 	public:
-		SmartAllocatorDestroyer(Allocator& allocator) : _allocator(allocator) {}
+		smart_allocator_destroyer(Allocator& allocator) : _allocator(allocator) {}
 
-		SmartAllocatorDestroyer(const SmartAllocatorDestroyer& other) : _allocator(other._allocator) {}
+		smart_allocator_destroyer(const smart_allocator_destroyer& other) : _allocator(other._allocator) {}
 
-		SmartAllocatorDestroyer(SmartAllocatorDestroyer&& other) noexcept : _allocator(other._allocator) {}
+		smart_allocator_destroyer(smart_allocator_destroyer&& other) noexcept : _allocator(other._allocator) {}
 
-		virtual void DeallocateObject(T* ptr) override
+		virtual void deallocate_object(T* ptr) override
 		{
 			_allocator.Deallocate(ptr);
 		}
 
-		virtual void DeallocateResource(SmartPtrResourceBase* ptr) override
+		virtual void deallocate_resource(smart_ptr_resource_base* ptr) override
 		{
 			_allocator.Deallocate(ptr);
 		}
 	};
 
 	template <typename T>
-	class SmartContiguousDestroyer : public SmartAllocatorDestroyer<T>
+	class smart_contiguous_destroyer : public smart_allocator_destroyer<T>
 	{
 	private:
-		using base = SmartAllocatorDestroyer<T>;
+		using base = smart_allocator_destroyer<T>;
 
 	public:
-		SmartContiguousDestroyer(Allocator& allocator) : base(allocator) {}
+		smart_contiguous_destroyer(Allocator& allocator) : base(allocator) {}
 
-		SmartContiguousDestroyer(const SmartContiguousDestroyer& other) : base(other._allocator) {}
+		smart_contiguous_destroyer(const smart_contiguous_destroyer& other) : base(other._allocator) {}
 
-		SmartContiguousDestroyer(SmartContiguousDestroyer&& other) noexcept : base(other._allocator) {}
+		smart_contiguous_destroyer(smart_contiguous_destroyer&& other) noexcept : base(other._allocator) {}
 
-		virtual void DeallocateObject(T* ptr) override {}
+		virtual void deallocate_object(T* ptr) override {}
 
-		virtual void DeallocateResource(SmartPtrResourceBase* ptr) override
+		virtual void deallocate_resource(smart_ptr_resource_base* ptr) override
 		{
 			_allocator.Deallocate(ptr);
 		}
@@ -144,11 +142,11 @@ namespace np::mem
 	class uptr
 	{
 	public:
-		using Destroyer = SmartPtrDestroyer<T>;
+		using destroyer_type = smart_ptr_destroyer<T>;
 
 	private:
 		T* _object;
-		Destroyer _destroyer;
+		destroyer_type _destroyer;
 
 	public:
 
@@ -157,29 +155,29 @@ namespace np::mem
 		uptr(nptr): uptr() {}
 
 		template <typename... Args>
-		uptr(Destroyer destroyer, T* object): _object(object), _destroyer(destroyer) {}
+		uptr(destroyer_type destroyer_type, T* object): _object(object), _destroyer(destroyer_type) {}
 
 		uptr(uptr<T>&& other) noexcept : _object(::std::move(other._object)), _destroyer(::std::move(other._destroyer)) {}
 		
 		~uptr()
 		{
-			Reset();
+			reset();
 		}
 
 		uptr<T>& operator=(uptr<T>&& other) noexcept
 		{
-			Reset();
+			reset();
 			_object = ::std::move(other._object);
 			other._object = nullptr;
 			return *this;
 		}
 
-		void Reset()
+		void reset()
 		{
 			if (_object)
 			{
-				_destroyer.DestructObject(_object);
-				_destroyer.DeallocateObject(_object);
+				_destroyer.destruct_object(_object);
+				_destroyer.deallocate_object(_object);
 				_object = nullptr;
 			}
 		}
@@ -206,159 +204,43 @@ namespace np::mem
 	};
 
 	template <typename T>
-	class wptr;
-
-	template <typename T>
-	class sptr
+	class smart_ptr
 	{
 	private:
-		template <typename T2>
-		friend class wptr;
+		template <typename U>
+		friend class smart_ptr;
 
-		template <typename T2>
-		friend class sptr;
-
-		SmartPtrResourceBase* _resource;
-		
-		atm_siz* GetReferenceCounterPtr() const
-		{
-			return _resource ? mem::AddressOf(_resource->referenceCounter) : nullptr;
-		}
-
-		atm_siz* GetWeakCounterPtr() const
-		{
-			return _resource ? mem::AddressOf(_resource->weakCounter) : nullptr;
-		}
-
-		T* GetObjectPtr() const
-		{
-			return _resource ? (T*)_resource->GetObjectPtr() : nullptr;
-		}
-
-	public:
-
-		sptr(): _resource(nullptr) {}
+	protected:
 			
-		sptr(nptr): sptr() {}
+		smart_ptr_resource_base* _resource;
 
-		template <typename... Args>
-		sptr(SmartPtrResourceBase* resource) : _resource(resource)
+		atm_siz* get_reference_counter_ptr() const
 		{
-			if (_resource)
-			{
-				(*GetReferenceCounterPtr())++;
-				(*GetWeakCounterPtr())++;
-			}
+			return _resource ? mem::AddressOf(_resource->reference_counter) : nullptr;
 		}
 
-		sptr(const sptr<T>& other) : _resource(other._resource)
+		atm_siz* get_weak_counter_ptr() const
 		{
-			if (_resource)
-			{
-				(*GetReferenceCounterPtr())++;
-				(*GetWeakCounterPtr())++;
-			}
+			return _resource ? mem::AddressOf(_resource->weak_counter) : nullptr;
 		}
 
-		sptr(sptr<T>&& other) noexcept : _resource(::std::move(other._resource))
+		virtual void increment_reference_counter()
 		{
-			other._resource = nullptr;
+			atm_siz* reference_counter_ptr = get_reference_counter_ptr();
+			if (reference_counter_ptr)
+				(*reference_counter_ptr)++;
 		}
 
-		template <typename T2, ::std::enable_if_t<::std::is_convertible_v<T2*, T*>, bl> = true>
-		sptr(const sptr<T2>& other): _resource(other._resource)
+		virtual void increment_weak_counter()
 		{
-			if (_resource)
-			{
-				(*GetReferenceCounterPtr())++;
-				(*GetWeakCounterPtr())++;
-			}
+			atm_siz* weak_counter_ptr = get_weak_counter_ptr();
+			if (weak_counter_ptr)
+				(*weak_counter_ptr)++;
 		}
 
-		template <typename T2, ::std::enable_if_t<::std::is_convertible_v<T2*, T*>, bl> = true>
-		sptr(sptr<T2>&& other) noexcept : _resource(::std::move(other._resource))
+		virtual void decrement_reference_counter()
 		{
-			other._resource = nullptr;
-		}
-
-		~sptr()
-		{
-			Reset();
-		}
-
-		sptr<T>& operator=(const sptr<T>& other)
-		{
-			Reset();
-			_resource = other._resource;
-			if (_resource)
-			{
-				(*GetReferenceCounterPtr())++;
-				(*GetWeakCounterPtr())++;
-			}
-
-			return *this;
-		}
-
-		sptr<T>& operator=(sptr<T>&& other) noexcept
-		{
-			Reset();
-			_resource = ::std::move(other._resource);
-			other._resource = nullptr;
-			return *this;
-		}
-
-		template <typename T2, ::std::enable_if_t<::std::is_convertible_v<T2*, T*>, bl> = true>
-		sptr<T>& operator=(const sptr<T2>& other)
-		{
-			Reset();
-			_resource = other._resource;
-			if (_resource)
-			{
-				(*GetReferenceCounterPtr())++;
-				(*GetWeakCounterPtr())++;
-			}
-
-			return *this;
-		}
-
-		template <typename T2, ::std::enable_if_t<::std::is_convertible_v<T2*, T*>, bl> = true>
-		sptr<T>& operator=(sptr<T2>&& other) noexcept
-		{
-			Reset();
-			_resource = ::std::move(other._resource);
-			other._resource = nullptr;
-			return *this;
-		}
-
-		sptr<T>& operator=(nptr)
-		{
-			Reset();
-			return *this;
-		}
-
-		T& operator*() const
-		{
-			return *GetObjectPtr();
-		}
-
-		T* operator->() const
-		{
-			return GetObjectPtr();
-		}
-
-		bl operator==(const sptr<T>& other) const
-		{
-			return GetObjectPtr() == other.GetObjectPtr();
-		}
-
-		operator bl() const
-		{
-			return GetObjectPtr();
-		}
-
-		void Reset()
-		{
-			atm_siz* reference_counter_ptr = GetReferenceCounterPtr();
+			atm_siz* reference_counter_ptr = get_reference_counter_ptr();
 			if (reference_counter_ptr)
 			{
 				siz prev_reference_count = reference_counter_ptr->load(mo_acquire);
@@ -366,10 +248,13 @@ namespace np::mem
 				{}
 
 				if (prev_reference_count == 1)
-					_resource->DestroyObject();
+					_resource->destroy_object();
 			}
+		}
 
-			atm_siz* weak_counter_ptr = GetWeakCounterPtr();
+		virtual void decrement_weak_counter()
+		{
+			atm_siz* weak_counter_ptr = get_weak_counter_ptr();
 			if (weak_counter_ptr)
 			{
 				siz prev_weak_counter = weak_counter_ptr->load(mo_acquire);
@@ -377,143 +262,271 @@ namespace np::mem
 				{}
 
 				if (prev_weak_counter == 1)
-					_resource->DestroySelf();
+					_resource->destroy_self();
 			}
-
-			_resource = nullptr;
-		}
-
-		siz GetReferenceCount() const
-		{
-			atm_siz* reference_counter = GetReferenceCounterPtr();
-			return reference_counter ? reference_counter->load(mo_acquire) : 0;
-		}
-
-		siz GetWeakCount() const
-		{
-			atm_siz* weak_counter = GetWeakCounterPtr();
-			return weak_counter ? weak_counter->load(mo_acquire) : 0;
-		}
-	};
-
-	template <typename T>
-	class wptr
-	{
-	private:
-		SmartPtrResourceBase* _resource;
-
-		atm_siz* GetReferenceCounterPtr() const
-		{
-			return _resource ? mem::AddressOf(_resource->referenceCounter) : nullptr;
-		}
-
-		atm_siz* GetWeakCounterPtr() const
-		{
-			return _resource ? mem::AddressOf(_resource->weakCounter) : nullptr;
 		}
 
 	public:
 
-		wptr() :_resource(nullptr) {}
+		smart_ptr() : _resource(nullptr) {}
 
-		wptr(nptr) : wptr() {}
+		smart_ptr(nptr) : smart_ptr() {}
 
-		wptr(const sptr<T>& other): _resource(other._resource)
-		{
-			if (_resource)
-				(*GetWeakCounterPtr())++;
-		}
+		smart_ptr(smart_ptr_resource_base* resource) : _resource(resource) {}
 
-		wptr(const wptr<T>& other) : _resource(other._resource)
-		{
-			if (_resource)
-				(*GetWeakCounterPtr())++;
-		}
+		smart_ptr(const smart_ptr<T>& other) : _resource(other._resource) {}
 
-		wptr(wptr<T>&& other) noexcept : _resource(::std::move(other._resource))
+		smart_ptr(smart_ptr<T>&& other) noexcept : _resource(::std::move(other._resource))
 		{
 			other._resource = nullptr;
 		}
 
-		template <typename T2, ::std::enable_if_t<::std::is_convertible_v<T2*, T*>, bl> = true>
-		wptr(const sptr<T2>& other) : _resource(other._resource)
-		{
-			if (_resource)
-				(*GetWeakCounterPtr())++;
-		}
+		template <typename U, ::std::enable_if_t<::std::is_convertible_v<U*, T*>, bl> = true>
+		smart_ptr(const smart_ptr<U>& other) : smart_ptr(other._resource) {}
 
-		template <typename T2, ::std::enable_if_t<::std::is_convertible_v<T2*, T*>, bl> = true>
-		wptr(const wptr<T2>& other) : _resource(other._resource)
-		{
-			if (_resource)
-				(*GetWeakCounterPtr())++;
-		}
-
-		template <typename T2, ::std::enable_if_t<::std::is_convertible_v<T2*, T*>, bl> = true>
-		wptr(wptr<T2>&& other) noexcept : _resource(::std::move(other._resource))
+		template <typename U, ::std::enable_if_t<::std::is_convertible_v<U*, T*>, bl> = true>
+		smart_ptr(smart_ptr<U>&& other) noexcept : smart_ptr(::std::move(other._resource))
 		{
 			other._resource = nullptr;
 		}
 
-		~wptr()
+		virtual ~smart_ptr() {}
+
+		virtual void reset() = 0;
+
+		siz get_reference_count() const
 		{
-			Reset();
+			atm_siz* reference_counter_ptr = get_reference_counter_ptr();
+			return reference_counter_ptr ? reference_counter_ptr->load(mo_acquire) : 0;
 		}
 
-		wptr<T>& operator=(const sptr<T>& other)
+		siz get_weak_count() const
 		{
-			Reset();
-			_resource = other._resource;
-			if (_resource)
-				(*GetWeakCounterPtr())++;
+			atm_siz* weak_counter_ptr = get_weak_counter_ptr();
+			return weak_counter_ptr ? weak_counter_ptr->load(mo_acquire) : 0;
+		}
+	};
 
+	template <typename T>
+	class sptr : public smart_ptr<T>
+	{
+	private:
+		template <typename U>
+		friend class wptr;
+
+		template <typename U>
+		friend class sptr;
+
+		using base = smart_ptr<T>;
+
+		T* get_object_ptr() const
+		{
+			return _resource ? (T*)_resource->get_object_ptr() : nullptr;
+		}
+
+	public:
+
+		sptr() : base() {}
+			
+		sptr(nptr): base() {}
+
+		sptr(smart_ptr_resource_base* resource) : base(resource)
+		{
+			increment_reference_counter();
+			increment_weak_counter();
+		}
+
+		sptr(const sptr<T>& other) : base(other)
+		{
+			increment_reference_counter();
+			increment_weak_counter();
+		}
+
+		sptr(sptr<T>&& other) noexcept : base(::std::move(other)) {}
+
+		template <typename U, ::std::enable_if_t<::std::is_convertible_v<U*, T*>, bl> = true>
+		sptr(const sptr<U>& other): base(other)
+		{
+			increment_reference_counter();
+			increment_weak_counter();
+		}
+
+		template <typename U, ::std::enable_if_t<::std::is_convertible_v<U*, T*>, bl> = true>
+		sptr(sptr<U>&& other) noexcept : base(::std::move(other)) {}
+
+		virtual ~sptr()
+		{
+			reset();
+		}
+
+		sptr<T>& operator=(const sptr<T>& other)
+		{
+			reset();
+			_resource = other._resource;
+			increment_reference_counter();
+			increment_weak_counter();
 			return *this;
 		}
 
-		wptr<T>& operator=(const wptr<T>& other)
+		sptr<T>& operator=(sptr<T>&& other) noexcept
 		{
-			Reset();
-			_resource = other._resource;
-			if (_resource)
-				(*GetWeakCounterPtr())++;
-
-			return *this;
-		}
-
-		wptr<T>& operator=(wptr<T>&& other) noexcept
-		{
-			Reset();
+			reset();
 			_resource = ::std::move(other._resource);
 			other._resource = nullptr;
 			return *this;
 		}
 
-		template <typename T2, ::std::enable_if_t<::std::is_convertible_v<T2*, T*>, bl> = true>
-		wptr<T>& operator=(const sptr<T2>& other)
+		template <typename U, ::std::enable_if_t<::std::is_convertible_v<U*, T*>, bl> = true>
+		sptr<T>& operator=(const sptr<U>& other)
 		{
-			Reset();
+			reset();
 			_resource = other._resource;
-			if (_resource)
-				(*GetWeakCounterPtr())++;
-
+			increment_reference_counter();
+			increment_weak_counter();
 			return *this;
 		}
 
-		template <typename T2, ::std::enable_if_t<::std::is_convertible_v<T2*, T*>, bl> = true>
-		wptr<T>& operator=(const wptr<T2>& other)
+		template <typename U, ::std::enable_if_t<::std::is_convertible_v<U*, T*>, bl> = true>
+		sptr<T>& operator=(sptr<U>&& other) noexcept
 		{
-			Reset();
-			_resource = other._resource;
-			if (_resource)
-				(*GetWeakCounterPtr())++;
-
+			reset();
+			_resource = ::std::move(other._resource);
+			other._resource = nullptr;
 			return *this;
 		}
 
-		template <typename T2, ::std::enable_if_t<::std::is_convertible_v<T2*, T*>, bl> = true>
-		wptr<T>& operator=(wptr<T2>&& other) noexcept
+		sptr<T>& operator=(nptr)
 		{
-			Reset();
+			reset();
+			return *this;
+		}
+
+		T& operator*() const
+		{
+			return *get_object_ptr();
+		}
+
+		T* operator->() const
+		{
+			return get_object_ptr();
+		}
+
+		bl operator==(const sptr<T>& other) const
+		{
+			return get_object_ptr() == other.get_object_ptr();
+		}
+
+		operator bl() const
+		{
+			return get_object_ptr();
+		}
+
+		void reset() override
+		{
+			decrement_reference_counter();
+			decrement_weak_counter();
+			_resource = nullptr;
+		}
+	};
+
+	template <typename T>
+	class wptr : public smart_ptr<T>
+	{
+	private:
+		template <typename U>
+		friend class wptr;
+
+		using base = smart_ptr<T>;
+
+	protected:
+		virtual void increment_reference_counter() override {}
+
+		virtual void decrement_reference_counter() override {}
+
+	public:
+
+		wptr() :base(nullptr) {}
+
+		wptr(nptr) : base() {}
+
+		wptr(const sptr<T>& other): base(other)
+		{
+			increment_weak_counter();
+		}
+
+		wptr(const wptr<T>& other) : base(other)
+		{
+			increment_weak_counter();
+		}
+
+		wptr(wptr<T>&& other) noexcept : base(::std::move(other)) {}
+
+		template <typename U, ::std::enable_if_t<::std::is_convertible_v<U*, T*>, bl> = true>
+		wptr(const sptr<U>& other) : base(other)
+		{
+			increment_weak_counter();
+		}
+
+		template <typename U, ::std::enable_if_t<::std::is_convertible_v<U*, T*>, bl> = true>
+		wptr(const wptr<U>& other) : base(other)
+		{
+			increment_weak_counter();
+		}
+
+		template <typename U, ::std::enable_if_t<::std::is_convertible_v<U*, T*>, bl> = true>
+		wptr(wptr<U>&& other) noexcept : base(::std::move(other)) {}
+
+		virtual ~wptr()
+		{
+			reset();
+		}
+
+		wptr<T>& operator=(const sptr<T>& other)
+		{
+			reset();
+			_resource = other._resource;
+			increment_weak_counter();
+			return *this;
+		}
+
+		wptr<T>& operator=(const wptr<T>& other)
+		{
+			reset();
+			_resource = other._resource;
+			increment_weak_counter();
+			return *this;
+		}
+
+		wptr<T>& operator=(wptr<T>&& other) noexcept
+		{
+			reset();
+			_resource = ::std::move(other._resource);
+			other._resource = nullptr;
+			return *this;
+		}
+
+		template <typename U, ::std::enable_if_t<::std::is_convertible_v<U*, T*>, bl> = true>
+		wptr<T>& operator=(const sptr<U>& other)
+		{
+			reset();
+			_resource = other._resource;
+			increment_weak_counter();
+			return *this;
+		}
+
+		template <typename U, ::std::enable_if_t<::std::is_convertible_v<U*, T*>, bl> = true>
+		wptr<T>& operator=(const wptr<U>& other)
+		{
+			reset();
+			_resource = other._resource;
+			increment_weak_counter();
+			return *this;
+		}
+
+		template <typename U, ::std::enable_if_t<::std::is_convertible_v<U*, T*>, bl> = true>
+		wptr<T>& operator=(wptr<U>&& other) noexcept
+		{
+			reset();
 			_resource = ::std::move(other._resource);
 			other._resource = nullptr;
 			return *this;
@@ -521,61 +534,29 @@ namespace np::mem
 
 		wptr<T>& operator=(nptr)
 		{
-			Reset();
+			reset();
 			return *this;
 		}
 
-		void Reset()
+		void reset() override
 		{
-			atm_siz* weak_counter_ptr = GetWeakCounterPtr();
-			if (weak_counter_ptr)
-			{
-				siz prev_weak_counter = weak_counter_ptr->load(mo_acquire);
-				while (prev_weak_counter > 0 && !weak_counter_ptr->compare_exchange_weak(prev_weak_counter, prev_weak_counter - 1, mo_release, mo_relaxed))
-				{}
-
-				if (prev_weak_counter == 1)
-					_resource->DestroySelf();
-			}
-
+			decrement_weak_counter();
 			_resource = nullptr;
 		}
 
-		bl IsExpired() const
+		bl is_expired() const
 		{
-			return GetReferenceCount() == 0;
+			return get_reference_count() == 0;
 		}
 
-		siz GetReferenceCount() const
+		sptr<T> get_sptr() const
 		{
-			atm_siz* reference_counter = GetReferenceCounterPtr();
-			return reference_counter ? reference_counter->load(mo_acquire) : 0;
-		}
-
-		siz GetWeakCount() const
-		{
-			atm_siz* weak_counter = GetWeakCounterPtr();
-			return weak_counter ? weak_counter->load(mo_acquire) : 0;
-		}
-
-		sptr<T> GetSptr() const
-		{
-			sptr<T> ptr;
-
-			if (_resource)
-			{
-				(*GetReferenceCounterPtr())++;
-				(*GetWeakCounterPtr())++;
-
-				ptr._resource = _resource;
-			}
-
-			return ptr;
+			return sptr<T>(_resource);
 		}
 	};
 	
 	template <typename T>
-	struct SmartPtrBlock
+	struct smart_ptr_block
 	{
 		constexpr static siz SIZE = CalcAlignedSize(sizeof(T));
 
@@ -588,38 +569,38 @@ namespace np::mem
 	};
 
 	template <typename T, typename R>
-	struct SmartPtrContiguousBlock
+	struct smart_ptr_contiguous_block
 	{
-		NP_ENGINE_STATIC_ASSERT((::std::is_base_of_v<SmartPtrResourceBase, R>), "(D)estroyer must derive from SmartPtrResourceBase");
+		NP_ENGINE_STATIC_ASSERT((::std::is_base_of_v<smart_ptr_resource_base, R>), "(D)estroyer must derive from smart_ptr_resource_base");
 
-		using ResourceBlockType = SmartPtrBlock<R>;
-		using ObjectBlockType = SmartPtrBlock<T>;
+		using resource_block_type = smart_ptr_block<R>;
+		using object_block_type = smart_ptr_block<T>;
 
-		ResourceBlockType resourceBlock;
-		ObjectBlockType objectBlock;
+		resource_block_type resource_block;
+		object_block_type object_block;
 	};
 
 	template <typename T, typename... Args>
-	constexpr uptr<T> CreateUptr(Args&&... args)
+	constexpr uptr<T> create_uptr(Args&&... args)
 	{
-		using DestroyerType = typename uptr<T>::Destroyer;
+		using destroyer_type = typename uptr<T>::destroyer_type;
 		TraitAllocator allocator;
-		return uptr<T>(DestroyerType{}, mem::Create<T>(allocator, ::std::forward<Args>(args)...));
+		return uptr<T>(destroyer_type{}, mem::Create<T>(allocator, ::std::forward<Args>(args)...));
 	}
 
 	template <typename T, typename... Args>
-	constexpr sptr<T> CreateSptr(Allocator& allocator, Args&&... args)
+	constexpr sptr<T> create_sptr(Allocator& allocator, Args&&... args)
 	{
-		using DestroyerType = SmartContiguousDestroyer<T>;
-		using ResourceType = SmartPtrResource<T, DestroyerType>;
-		using ContiguousBlockType = SmartPtrContiguousBlock<T, ResourceType>;
+		using destroyer_type = smart_contiguous_destroyer<T>;
+		using resource_type = smart_ptr_resource<T, destroyer_type>;
+		using contiguous_block_type = smart_ptr_contiguous_block<T, resource_type>;
 		
-		ResourceType* resource = nullptr;
-		ContiguousBlockType* contiguous_block = mem::Create<ContiguousBlockType>(allocator);
+		resource_type* resource = nullptr;
+		contiguous_block_type* contiguous_block = mem::Create<contiguous_block_type>(allocator);
 		if (contiguous_block)
 		{
-			T* object = mem::Construct<T>(contiguous_block->objectBlock, ::std::forward<Args>(args)...);
-			resource = mem::Construct<ResourceType>(contiguous_block->resourceBlock, DestroyerType(allocator), object);
+			T* object = mem::Construct<T>(contiguous_block->object_block, ::std::forward<Args>(args)...);
+			resource = mem::Construct<resource_type>(contiguous_block->resource_block, destroyer_type(allocator), object);
 		}
 		return sptr<T>(resource);
 	}

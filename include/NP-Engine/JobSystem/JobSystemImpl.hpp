@@ -60,7 +60,7 @@ namespace np::jsys
 			}
 
 			_job_workers.clear();
-			_thread_pool.Reset();
+			_thread_pool.reset();
 			_job_pool.Clear();
 		}
 
@@ -76,7 +76,7 @@ namespace np::jsys
 		void SetJobWorkerCount(siz count)
 		{
 			Dispose();
-			_thread_pool = mem::CreateUptr<thr::ThreadPool>(count);
+			_thread_pool = mem::create_uptr<thr::ThreadPool>(count);
 
 			while (_job_workers.size() < count)
 				_job_workers.emplace_back(*this);

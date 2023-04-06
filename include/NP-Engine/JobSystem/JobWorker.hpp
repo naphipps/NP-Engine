@@ -62,7 +62,7 @@ namespace np::jsys
 			if (_immediate_job_queue.try_dequeue(job) && (!job->CanExecute() || (stealing && !job->CanBeStolen())))
 			{
 				SubmitImmediateJob(job);
-				job.Reset();
+				job.reset();
 			}
 			return job;
 		}
@@ -178,7 +178,7 @@ namespace np::jsys
 			while (!_work_procedure_complete.load(mo_acquire))
 				thr::ThisThread::yield();
 
-			_thread.Reset();
+			_thread.reset();
 		}
 	};
 } // namespace np::jsys

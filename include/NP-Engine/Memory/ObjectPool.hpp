@@ -19,7 +19,7 @@
 namespace np::mem
 {
 	template <typename T>
-	using ObjectPoolChunkType = SmartPtrContiguousBlock<T, SmartPtrResource<T, SmartContiguousDestroyer<T>>>;
+	using ObjectPoolChunkType = smart_ptr_contiguous_block<T, smart_ptr_resource<T, smart_contiguous_destroyer<T>>>;
 
 	template <typename T, typename A = PoolAllocator<ObjectPoolChunkType<T>>>
 	class ObjectPool
@@ -75,7 +75,7 @@ namespace np::mem
 		template <typename... Args>
 		sptr<T> CreateObject(Args&&... args)
 		{
-			return mem::CreateSptr<T>(_allocator, ::std::forward<Args>(args)...);
+			return mem::create_sptr<T>(_allocator, ::std::forward<Args>(args)...);
 		}
 	};
 

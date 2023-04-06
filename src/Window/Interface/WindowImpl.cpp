@@ -73,7 +73,7 @@ namespace np::win
 		switch (detail_type)
 		{
 		case WindowDetailType::Glfw:
-			window = mem::CreateSptr<__detail::GlfwWindow>(services.GetAllocator(), properties, services);
+			window = mem::create_sptr<__detail::GlfwWindow>(services.GetAllocator(), properties, services);
 			break;
 
 		default:
