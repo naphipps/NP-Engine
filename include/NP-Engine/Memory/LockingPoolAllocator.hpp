@@ -33,7 +33,7 @@ namespace np::mem
 
 		void Init()
 		{
-			Block block{.size = CHUNK_SIZE};
+			Block block{nullptr, CHUNK_SIZE};
 			for (siz i = 0; i < ChunkCount() - 1; i++)
 			{
 				block.ptr = &static_cast<ui8*>(_block.ptr)[i * CHUNK_SIZE];
