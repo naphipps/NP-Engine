@@ -22,9 +22,6 @@ namespace np::jsys
 	class JobSystem
 	{
 	private:
-		constexpr static siz JOB_SIZE = mem::CalcAlignedSize(sizeof(Job));
-		constexpr static siz THREAD_SIZE = mem::CalcAlignedSize(sizeof(thr::Thread));
-
 		atm_bl _running;
 		con::vector<JobWorker> _job_workers;
 		mem::uptr<thr::ThreadPool> _thread_pool;
