@@ -29,32 +29,26 @@ namespace np::thr
 		}
 
 	private:
-		constexpr static siz THREAD_SIZE = mem::CalcAlignedSize(sizeof(::std::thread));
-		ui8 _thread_allocation[THREAD_SIZE];
+		using StdThreadBlock = mem::SizedBlock<sizeof(::std::thread)>;
+		StdThreadBlock _thread_block;
 
 		void ZeroizeThreadBlock()
 		{
-			mem::Block block = GetThreadBlock();
-			block.Zeroize();
+			((mem::Block)_thread_block).Zeroize();
 		}
 
 		bl HasThread() const
 		{
 			bl has_thread = false;
-			for (siz i = 0; i < THREAD_SIZE && !has_thread; i++)
-				has_thread = _thread_allocation[i] != 0;
+			for (siz i = 0; i < StdThreadBlock::SIZE && !has_thread; i++)
+				has_thread = _thread_block.allocation[i] != 0;
 
 			return has_thread;
 		}
 
 		::std::thread* GetThread() const
 		{
-			return HasThread() ? (::std::thread*)_thread_allocation : nullptr;
-		}
-
-		mem::Block GetThreadBlock() const
-		{
-			return { (void*)_thread_allocation, THREAD_SIZE };
+			return HasThread() ? (::std::thread*)_thread_block.allocation : nullptr;
 		}
 
 	public:
@@ -72,7 +66,7 @@ namespace np::thr
 		void Run(Args&&... args)
 		{
 			Clear();
-			mem::Construct<::std::thread>(GetThreadBlock(), ::std::forward<Args>(args)...);
+			mem::Construct<::std::thread>(_thread_block, ::std::forward<Args>(args)...);
 		}
 
 		void Clear()

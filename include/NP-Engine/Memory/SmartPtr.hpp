@@ -555,26 +555,13 @@ namespace np::mem
 		}
 	};
 	
-	template <typename T>
-	struct smart_ptr_block
-	{
-		constexpr static siz SIZE = CalcAlignedSize(sizeof(T));
-
-		ui8 allocation[SIZE];
-
-		operator Block() const
-		{
-			return { (void*)allocation, SIZE };
-		}
-	};
-
 	template <typename T, typename R>
 	struct smart_ptr_contiguous_block
 	{
 		NP_ENGINE_STATIC_ASSERT((::std::is_base_of_v<smart_ptr_resource_base, R>), "(D)estroyer must derive from smart_ptr_resource_base");
 
-		using resource_block_type = smart_ptr_block<R>;
-		using object_block_type = smart_ptr_block<T>;
+		using resource_block_type = SizedBlock<sizeof(R)>;
+		using object_block_type = SizedBlock<sizeof(T)>;
 
 		resource_block_type resource_block;
 		object_block_type object_block;

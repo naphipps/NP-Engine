@@ -9,6 +9,8 @@
 
 #include "NP-Engine/Primitive/Primitive.hpp"
 
+#include "MemoryFunctions.hpp"
+
 namespace np::mem
 {
 	/*
@@ -64,6 +66,21 @@ namespace np::mem
 			loops = size % stride; // now we'll zeroize the remaining bytes to finish
 			for (siz i = 0; i < loops; i++, it++)
 				*it = 0;
+		}
+	};
+
+	template <siz S>
+	struct SizedBlock
+	{
+		NP_ENGINE_STATIC_ASSERT(S > 0, "(S)ize must be greater than zero.");
+
+		constexpr static siz SIZE = CalcAlignedSize(S);
+
+		ui8 allocation[SIZE];
+
+		operator Block() const
+		{
+			return { (void*)allocation, SIZE };
 		}
 	};
 } // namespace np::mem

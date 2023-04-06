@@ -17,10 +17,9 @@
 
 namespace np::mem
 {
-	constexpr static siz CACHE_LINE_SIZE = 64;
-	using CacheLinePadding = ui8[CACHE_LINE_SIZE];
+	using CacheLinePadding = SizedBlock<64>;
 
-	class PadObject
+	class PadObject //TODO: I'm still not a fan of how this object constructs, destructs, and gets data... I feel like there's a better solution
 	{
 	private:
 		CacheLinePadding _padding;
@@ -29,27 +28,28 @@ namespace np::mem
 		template <typename T, typename... Args>
 		bl ConstructData(Args&&... args)
 		{
-			NP_ENGINE_ASSERT(sizeof(T) <= CACHE_LINE_SIZE, "given T must be <= CACHE_LINE_SIZE");
-			Block block{ (void*)_padding, CACHE_LINE_SIZE };
-			return mem::Construct<T>(block, ::std::forward<Args>(args)...);
+			NP_ENGINE_ASSERT(sizeof(T) <= CacheLinePadding::SIZE, "given T must be <= CacheLinePadding::SIZE");
+			return mem::Construct<T>(_padding, ::std::forward<Args>(args)...);
 		}
 
 		template <typename T>
 		bl DestructData()
 		{
-			return Destruct<T>((T*)_padding);
+			bl destructed = mem::Destruct<T>((T*)_padding.allocation);
+			((Block)_padding).Zeroize();
+			return destructed;
 		}
 
 		template <typename T>
 		T& GetData()
 		{
-			return *((T*)_padding);
+			return *((T*)_padding.allocation);
 		}
 
 		template <typename T>
 		const T& GetData() const
 		{
-			return *((T*)_padding);
+			return *((T*)_padding.allocation);
 		}
 	};
 } // namespace np::mem
