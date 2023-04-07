@@ -19,7 +19,7 @@
 namespace np::mem
 {
 	template <typename T>
-	using ObjectPoolChunkType = smart_ptr_contiguous_block<T, smart_ptr_resource<T, smart_contiguous_destroyer<T>>>;
+	using ObjectPoolChunkType = smart_ptr_contiguous_block<T, smart_ptr_resource<T, smart_ptr_contiguous_destroyer<T>>>;
 
 	template <typename T, typename A = PoolAllocator<ObjectPoolChunkType<T>>>
 	class ObjectPool

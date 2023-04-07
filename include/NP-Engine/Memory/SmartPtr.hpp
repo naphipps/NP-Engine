@@ -38,30 +38,66 @@ namespace np::mem
 			mem::Destruct<T>(ptr);
 		}
 
-		virtual void deallocate_object(T* ptr)
-		{
-			TraitAllocator allocator;
-			allocator.Deallocate(ptr);
-		}
-
 		virtual void destruct_resource(smart_ptr_resource_base* ptr)
 		{
 			mem::Destruct<smart_ptr_resource_base>(ptr);
 		}
 
-		virtual void deallocate_resource(smart_ptr_resource_base* ptr)
+		virtual void deallocate_object(T* ptr) = 0;
+
+		virtual void deallocate_resource(smart_ptr_resource_base* ptr) = 0;
+	};
+
+	template <typename T>
+	class smart_ptr_allocator_destroyer : public smart_ptr_destroyer<T>
+	{
+	protected:
+		Allocator& _allocator;
+
+	public:
+		smart_ptr_allocator_destroyer(Allocator& allocator) : _allocator(allocator) {}
+
+		smart_ptr_allocator_destroyer(const smart_ptr_allocator_destroyer& other) : _allocator(other._allocator) {}
+
+		smart_ptr_allocator_destroyer(smart_ptr_allocator_destroyer&& other) noexcept : _allocator(other._allocator) {}
+
+		virtual void deallocate_object(T* ptr) override
 		{
-			TraitAllocator allocator;
-			allocator.Deallocate(ptr);
+			_allocator.Deallocate(ptr);
+		}
+
+		virtual void deallocate_resource(smart_ptr_resource_base* ptr) override
+		{
+			_allocator.Deallocate(ptr);
 		}
 	};
 
-	template <typename T, typename D = smart_ptr_destroyer<T>>
+	template <typename T>
+	class smart_ptr_contiguous_destroyer : public smart_ptr_allocator_destroyer<T>
+	{
+	private:
+		using base = smart_ptr_allocator_destroyer<T>;
+
+	public:
+		smart_ptr_contiguous_destroyer(Allocator& allocator) : base(allocator) {}
+
+		smart_ptr_contiguous_destroyer(const smart_ptr_contiguous_destroyer& other) : base(other._allocator) {}
+
+		smart_ptr_contiguous_destroyer(smart_ptr_contiguous_destroyer&& other) noexcept : base(other._allocator) {}
+
+		virtual void deallocate_object(T* ptr) override {}
+
+		virtual void deallocate_resource(smart_ptr_resource_base* ptr) override
+		{
+			_allocator.Deallocate(ptr);
+		}
+	};
+
+	template <typename T, typename D = smart_ptr_allocator_destroyer<T>>
 	class smart_ptr_resource : public smart_ptr_resource_base
 	{
 	private:
-		NP_ENGINE_STATIC_ASSERT(::std::is_copy_constructible_v<D>, "(D)estroyer must be copy constructible");
-		NP_ENGINE_STATIC_ASSERT(::std::is_move_constructible_v<D>, "(D)estroyer must be move constructible");
+		NP_ENGINE_STATIC_ASSERT((::std::is_copy_constructible_v<D> || ::std::is_move_constructible_v<D>), "(D)estroyer must be copy constructible or move constructible");
 		NP_ENGINE_STATIC_ASSERT((::std::is_base_of_v<smart_ptr_destroyer<T>, D>), "(D)estroyer must derive from smart_ptr_destroyer<T>");
 
 	public:
@@ -93,114 +129,16 @@ namespace np::mem
 		}
 	};
 
-	template <typename T>
-	class smart_allocator_destroyer : public smart_ptr_destroyer<T>
+	template <typename T, typename R>
+	struct smart_ptr_contiguous_block
 	{
-	protected:
-		Allocator& _allocator;
+		NP_ENGINE_STATIC_ASSERT((::std::is_base_of_v<smart_ptr_resource_base, R>), "(R)esource must derive from smart_ptr_resource_base");
 
-	public:
-		smart_allocator_destroyer(Allocator& allocator) : _allocator(allocator) {}
+		using resource_block_type = SizedBlock<sizeof(R)>;
+		using object_block_type = SizedBlock<sizeof(T)>;
 
-		smart_allocator_destroyer(const smart_allocator_destroyer& other) : _allocator(other._allocator) {}
-
-		smart_allocator_destroyer(smart_allocator_destroyer&& other) noexcept : _allocator(other._allocator) {}
-
-		virtual void deallocate_object(T* ptr) override
-		{
-			_allocator.Deallocate(ptr);
-		}
-
-		virtual void deallocate_resource(smart_ptr_resource_base* ptr) override
-		{
-			_allocator.Deallocate(ptr);
-		}
-	};
-
-	template <typename T>
-	class smart_contiguous_destroyer : public smart_allocator_destroyer<T>
-	{
-	private:
-		using base = smart_allocator_destroyer<T>;
-
-	public:
-		smart_contiguous_destroyer(Allocator& allocator) : base(allocator) {}
-
-		smart_contiguous_destroyer(const smart_contiguous_destroyer& other) : base(other._allocator) {}
-
-		smart_contiguous_destroyer(smart_contiguous_destroyer&& other) noexcept : base(other._allocator) {}
-
-		virtual void deallocate_object(T* ptr) override {}
-
-		virtual void deallocate_resource(smart_ptr_resource_base* ptr) override
-		{
-			_allocator.Deallocate(ptr);
-		}
-	};
-
-	template <typename T>
-	class uptr
-	{
-	public:
-		using destroyer_type = smart_ptr_destroyer<T>;
-
-	private:
-		T* _object;
-		destroyer_type _destroyer;
-
-	public:
-
-		uptr() : _object(nullptr), _destroyer() {}
-
-		uptr(nptr): uptr() {}
-
-		template <typename... Args>
-		uptr(destroyer_type destroyer_type, T* object): _object(object), _destroyer(destroyer_type) {}
-
-		uptr(uptr<T>&& other) noexcept : _object(::std::move(other._object)), _destroyer(::std::move(other._destroyer)) {}
-		
-		~uptr()
-		{
-			reset();
-		}
-
-		uptr<T>& operator=(uptr<T>&& other) noexcept
-		{
-			reset();
-			_object = ::std::move(other._object);
-			other._object = nullptr;
-			return *this;
-		}
-
-		void reset()
-		{
-			if (_object)
-			{
-				_destroyer.destruct_object(_object);
-				_destroyer.deallocate_object(_object);
-				_object = nullptr;
-			}
-		}
-
-		T& operator*() const
-		{
-			return *_object;
-		}
-
-		T* operator->() const
-		{
-			return _object;
-		}
-
-		bl operator==(const uptr<T>& other) const
-		{
-			return _object == other._object;
-		}
-
-		operator bl() const
-		{
-			return _object;
-		}
+		resource_block_type resource_block;
+		object_block_type object_block;
 	};
 
 	template <typename T>
@@ -307,10 +245,13 @@ namespace np::mem
 		}
 	};
 
+	/*
+		Strong Ptr (sptr) ensures the existance of the object
+	*/
 	template <typename T>
 	class sptr : public smart_ptr<T>
 	{
-	private:
+	protected:
 		template <typename U>
 		friend class wptr;
 
@@ -429,16 +370,18 @@ namespace np::mem
 		}
 	};
 
+	/*
+		Weak Ptr (wptr) does not ensure existance of the object, but can indicate if it is expired
+	*/
 	template <typename T>
 	class wptr : public smart_ptr<T>
 	{
-	private:
+	protected:
 		template <typename U>
 		friend class wptr;
 
 		using base = smart_ptr<T>;
 
-	protected:
 		virtual void increment_reference_counter() override {}
 
 		virtual void decrement_reference_counter() override {}
@@ -555,30 +498,10 @@ namespace np::mem
 		}
 	};
 	
-	template <typename T, typename R>
-	struct smart_ptr_contiguous_block
-	{
-		NP_ENGINE_STATIC_ASSERT((::std::is_base_of_v<smart_ptr_resource_base, R>), "(D)estroyer must derive from smart_ptr_resource_base");
-
-		using resource_block_type = SizedBlock<sizeof(R)>;
-		using object_block_type = SizedBlock<sizeof(T)>;
-
-		resource_block_type resource_block;
-		object_block_type object_block;
-	};
-
-	template <typename T, typename... Args>
-	constexpr uptr<T> create_uptr(Args&&... args)
-	{
-		using destroyer_type = typename uptr<T>::destroyer_type;
-		TraitAllocator allocator;
-		return uptr<T>(destroyer_type{}, mem::Create<T>(allocator, ::std::forward<Args>(args)...));
-	}
-
 	template <typename T, typename... Args>
 	constexpr sptr<T> create_sptr(Allocator& allocator, Args&&... args)
 	{
-		using destroyer_type = smart_contiguous_destroyer<T>;
+		using destroyer_type = smart_ptr_contiguous_destroyer<T>;
 		using resource_type = smart_ptr_resource<T, destroyer_type>;
 		using contiguous_block_type = smart_ptr_contiguous_block<T, resource_type>;
 		

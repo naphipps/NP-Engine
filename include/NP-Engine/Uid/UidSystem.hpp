@@ -25,10 +25,10 @@ namespace np::uid
 	{
 	public:
 		
-		class SmartPtrDestroyer : public mem::smart_contiguous_destroyer<UidHandle>
+		class SmartPtrDestroyer : public mem::smart_ptr_contiguous_destroyer<UidHandle>
 		{
 		public:
-			using base = mem::smart_contiguous_destroyer<UidHandle>;
+			using base = mem::smart_ptr_contiguous_destroyer<UidHandle>;
 
 		private:
 			UidSystem& _uid_system;

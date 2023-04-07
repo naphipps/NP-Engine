@@ -24,7 +24,8 @@ namespace np::jsys
 	private:
 		atm_bl _running;
 		con::vector<JobWorker> _job_workers;
-		mem::uptr<thr::ThreadPool> _thread_pool;
+		mem::TraitAllocator _thread_pool_allocator;
+		mem::sptr<thr::ThreadPool> _thread_pool;
 		JobPool _job_pool;
 
 		// TODO: use tokens with mpmc_queue
@@ -73,7 +74,7 @@ namespace np::jsys
 		void SetJobWorkerCount(siz count)
 		{
 			Dispose();
-			_thread_pool = mem::create_uptr<thr::ThreadPool>(count);
+			_thread_pool = mem::create_sptr<thr::ThreadPool>(_thread_pool_allocator, count);
 
 			while (_job_workers.size() < count)
 				_job_workers.emplace_back(*this);
