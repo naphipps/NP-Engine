@@ -20,7 +20,7 @@ namespace np::mem
 {
 	struct smart_ptr_resource_base
 	{
-		atm_siz reference_counter = 0;
+		atm_siz strong_counter = 0;
 		atm_siz weak_counter = 0;
 
 		virtual ~smart_ptr_resource_base() = default;
@@ -152,9 +152,9 @@ namespace np::mem
 			
 		smart_ptr_resource_base* _resource;
 
-		atm_siz* get_reference_counter_ptr() const
+		atm_siz* get_strong_counter_ptr() const
 		{
-			return _resource ? mem::AddressOf(_resource->reference_counter) : nullptr;
+			return _resource ? mem::AddressOf(_resource->strong_counter) : nullptr;
 		}
 
 		atm_siz* get_weak_counter_ptr() const
@@ -162,30 +162,27 @@ namespace np::mem
 			return _resource ? mem::AddressOf(_resource->weak_counter) : nullptr;
 		}
 
-		virtual void increment_reference_counter()
+		virtual void increment_strong_counter()
 		{
-			atm_siz* reference_counter_ptr = get_reference_counter_ptr();
-			if (reference_counter_ptr)
-				(*reference_counter_ptr)++;
+			atm_siz* strong_counter_ptr = get_strong_counter_ptr();
+			if (strong_counter_ptr)
+				strong_counter_ptr->fetch_add(1, mo_release);
 		}
 
 		virtual void increment_weak_counter()
 		{
 			atm_siz* weak_counter_ptr = get_weak_counter_ptr();
 			if (weak_counter_ptr)
-				(*weak_counter_ptr)++;
+				weak_counter_ptr->fetch_add(1, mo_release);
 		}
 
-		virtual void decrement_reference_counter()
+		virtual void decrement_strong_counter()
 		{
-			atm_siz* reference_counter_ptr = get_reference_counter_ptr();
-			if (reference_counter_ptr)
+			atm_siz* strong_counter_ptr = get_strong_counter_ptr();
+			if (strong_counter_ptr)
 			{
-				siz prev_reference_count = reference_counter_ptr->load(mo_acquire);
-				while (prev_reference_count > 0 && !reference_counter_ptr->compare_exchange_weak(prev_reference_count, prev_reference_count - 1, mo_release, mo_relaxed))
-				{}
-
-				if (prev_reference_count == 1)
+				siz prev_strong_count = strong_counter_ptr->fetch_sub(1, mo_release);
+				if (prev_strong_count == 1)
 					_resource->destroy_object();
 			}
 		}
@@ -195,10 +192,7 @@ namespace np::mem
 			atm_siz* weak_counter_ptr = get_weak_counter_ptr();
 			if (weak_counter_ptr)
 			{
-				siz prev_weak_counter = weak_counter_ptr->load(mo_acquire);
-				while (prev_weak_counter > 0 && !weak_counter_ptr->compare_exchange_weak(prev_weak_counter, prev_weak_counter - 1, mo_release, mo_relaxed))
-				{}
-
+				siz prev_weak_counter = weak_counter_ptr->fetch_sub(1, mo_release);
 				if (prev_weak_counter == 1)
 					_resource->destroy_self();
 			}
@@ -232,10 +226,10 @@ namespace np::mem
 
 		virtual void reset() = 0;
 
-		siz get_reference_count() const
+		siz get_strong_count() const
 		{
-			atm_siz* reference_counter_ptr = get_reference_counter_ptr();
-			return reference_counter_ptr ? reference_counter_ptr->load(mo_acquire) : 0;
+			atm_siz* strong_counter_ptr = get_strong_counter_ptr();
+			return strong_counter_ptr ? strong_counter_ptr->load(mo_acquire) : 0;
 		}
 
 		siz get_weak_count() const
@@ -273,13 +267,13 @@ namespace np::mem
 
 		sptr(smart_ptr_resource_base* resource) : base(resource)
 		{
-			increment_reference_counter();
+			increment_strong_counter();
 			increment_weak_counter();
 		}
 
 		sptr(const sptr<T>& other) : base(other)
 		{
-			increment_reference_counter();
+			increment_strong_counter();
 			increment_weak_counter();
 		}
 
@@ -288,7 +282,7 @@ namespace np::mem
 		template <typename U, ::std::enable_if_t<::std::is_convertible_v<U*, T*>, bl> = true>
 		sptr(const sptr<U>& other): base(other)
 		{
-			increment_reference_counter();
+			increment_strong_counter();
 			increment_weak_counter();
 		}
 
@@ -304,7 +298,7 @@ namespace np::mem
 		{
 			reset();
 			_resource = other._resource;
-			increment_reference_counter();
+			increment_strong_counter();
 			increment_weak_counter();
 			return *this;
 		}
@@ -322,7 +316,7 @@ namespace np::mem
 		{
 			reset();
 			_resource = other._resource;
-			increment_reference_counter();
+			increment_strong_counter();
 			increment_weak_counter();
 			return *this;
 		}
@@ -364,7 +358,7 @@ namespace np::mem
 
 		void reset() override
 		{
-			decrement_reference_counter();
+			decrement_strong_counter();
 			decrement_weak_counter();
 			_resource = nullptr;
 		}
@@ -382,9 +376,9 @@ namespace np::mem
 
 		using base = smart_ptr<T>;
 
-		virtual void increment_reference_counter() override {}
+		virtual void increment_strong_counter() override {}
 
-		virtual void decrement_reference_counter() override {}
+		virtual void decrement_strong_counter() override {}
 
 	public:
 
@@ -489,7 +483,7 @@ namespace np::mem
 
 		bl is_expired() const
 		{
-			return get_reference_count() == 0;
+			return get_strong_count() == 0;
 		}
 
 		sptr<T> get_sptr() const
