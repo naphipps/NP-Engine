@@ -47,9 +47,9 @@ namespace np::app
 			d.DestructData<uid::Uid>();
 		}
 
-		virtual void AdjustForWindowClosing(evnt::Event& e)
+		virtual void AdjustForWindowClosing(mem::sptr<evnt::Event> e)
 		{
-			win::WindowClosingEvent& closing_event = (win::WindowClosingEvent&)e;
+			win::WindowClosingEvent& closing_event = (win::WindowClosingEvent&)(*e);
 			win::WindowClosingEvent::DataType& closing_data = closing_event.GetData();
 
 			mem::sptr<jsys::Job> adjust_job = _services.GetJobSystem().CreateJob();
@@ -59,9 +59,9 @@ namespace np::app
 			_services.GetJobSystem().SubmitJob(jsys::JobPriority::Higher, adjust_job);
 		}
 
-		virtual void HandleEvent(evnt::Event& e) override
+		virtual void HandleEvent(mem::sptr<evnt::Event> e) override
 		{
-			switch (e.GetType())
+			switch (e->GetType())
 			{
 			case evnt::EventType::WindowClosing:
 				AdjustForWindowClosing(e);

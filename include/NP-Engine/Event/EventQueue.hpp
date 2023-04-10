@@ -21,11 +21,13 @@ namespace np::evnt
 	class EventQueue
 	{
 	protected:
+		using EventBufferType = con::mpmc_queue<mem::sptr<Event>>;
+
 		atm_bl _flag;
 		mem::TraitAllocator _allocator;
-		con::array<con::mpmc_queue<Event*>, 2> _buffers;
+		con::array<EventBufferType, 2> _buffers;
 
-		con::mpmc_queue<Event*>& GetBuffer(bl flag)
+		EventBufferType& GetBuffer(bl flag)
 		{
 			return flag ? _buffers.front() : _buffers.back();
 		}
@@ -39,44 +41,24 @@ namespace np::evnt
 			while (!_flag.compare_exchange_weak(flag, !flag, mo_release, mo_relaxed)) {}
 		}
 
-		template <typename T, typename... Args>
-		bl Emplace(Args&&... args)
+		void Push(mem::sptr<Event> e)
 		{
-			NP_ENGINE_STATIC_ASSERT((::std::is_base_of_v<Event, T>), "T is requried to be a base of event:Event");
-			T* e = mem::Create<T>(_allocator, ::std::forward<Args>(args)...);
-
-			if (e)
-				if (!Emplace(e))
-				{
-					mem::Destroy<T>(_allocator, e);
-					e = nullptr;
-				}
-
-			return e;
+			GetBuffer(_flag.load(mo_acquire)).enqueue(e);
 		}
 
-		bl Emplace(Event* e)
+		mem::sptr<Event> Pop()
 		{
-			return GetBuffer(_flag.load(mo_acquire)).enqueue(e);
-		}
-
-		Event* Pop()
-		{
-			Event* e = nullptr;
+			mem::sptr<Event> e = nullptr;
 			return GetBuffer(!_flag.load(mo_acquire)).try_dequeue(e) ? e : nullptr;
-		}
-
-		void DestroyEvent(Event* e)
-		{
-			mem::Destroy<Event>(_allocator, e);
 		}
 
 		void Clear()
 		{
-			Event* e = nullptr;
+			mem::sptr<Event> e = nullptr;
 			for (auto it = _buffers.begin(); it != _buffers.end(); it++)
-				while (it->try_dequeue(e))
-					DestroyEvent(e);
+				while (it->try_dequeue(e)) {}
+
+			e.reset();
 		}
 	};
 } // namespace np::evnt

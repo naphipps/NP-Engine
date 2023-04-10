@@ -15,12 +15,12 @@ namespace np::evnt
 	class EventHandler
 	{
 	protected:
-		virtual void HandleEvent(Event& e) = 0;
+		virtual void HandleEvent(mem::sptr<Event> e) = 0;
 
 	public:
-		virtual void OnEvent(Event& e)
+		virtual void OnEvent(mem::sptr<Event> e)
 		{
-			if (EventCategoryContains(GetHandledCategories(), e.GetCategory()))
+			if (EventCategoryContains(GetHandledCategories(), e->GetCategory()))
 				HandleEvent(e);
 		}
 

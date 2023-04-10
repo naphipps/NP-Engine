@@ -113,23 +113,23 @@ namespace np::app
 			_layers.emplace_back(mem::AddressOf(_graphics_layer));
 		}
 
-		void HandlePopup(evnt::Event& e)
+		void HandlePopup(mem::sptr<evnt::Event> e)
 		{
-			ApplicationPopupEvent::DataType& data = e.GetData<ApplicationPopupEvent::DataType>();
+			ApplicationPopupEvent::DataType& data = e->GetData<ApplicationPopupEvent::DataType>();
 			data.select = Popup::Show(GetTitle(), data.message, data.style, data.buttons);
-			e();
-			e.SetHandled();
+			(*e)();
+			e->SetHandled();
 		}
 
-		void HandleApplicationClose(evnt::Event& e)
+		void HandleApplicationClose(mem::sptr<evnt::Event> e)
 		{
 			StopRunning();
-			e.SetHandled();
+			e->SetHandled();
 		}
 
-		void HandleEvent(evnt::Event& e) override
+		void HandleEvent(mem::sptr<evnt::Event> e) override
 		{
-			switch (e.GetType())
+			switch (e->GetType())
 			{
 			case evnt::EventType::ApplicationClose:
 				HandleApplicationClose(e);
@@ -213,7 +213,7 @@ namespace np::app
 			tim::SteadyTimestamp update_prev = next;
 			tim::DblMilliseconds update_delta(0);
 
-			evnt::Event* e = nullptr;
+			mem::sptr<evnt::Event> e = nullptr;
 			i64 i = 0;
 
 			CustomizeJobSystem();
@@ -229,16 +229,15 @@ namespace np::app
 					e->SetCanBeHandled(false);
 
 					for (i = _overlays.size() - 1; !e->IsHandled() && i >= 0; i--)
-						_overlays[i]->OnEvent(*e);
+						_overlays[i]->OnEvent(e);
 
 					for (i = _layers.size() - 1; !e->IsHandled() && i >= 0; i--)
-						_layers[i]->OnEvent(*e);
+						_layers[i]->OnEvent(e);
 
-					if (!e->CanBeHandled())
-						event_queue.DestroyEvent(e);
-					else if (!event_queue.Emplace(e))
-						NP_ENGINE_ASSERT(false, "all events must emplace successfully here");
+					if (e->CanBeHandled())
+						event_queue.Push(e);
 				}
+				e.reset(); //TODO: I don't think this is ever needed
 				event_queue.SwapBuffers();
 
 				if (!_running.load(mo_acquire))

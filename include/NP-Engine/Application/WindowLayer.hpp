@@ -31,9 +31,9 @@ namespace np::app
 #endif
 
 	protected:
-		virtual void HandleWindowClosing(evnt::Event& e)
+		virtual void HandleWindowClosing(mem::sptr<evnt::Event> e)
 		{
-			win::WindowClosingEvent& closing_event = (win::WindowClosingEvent&)e;
+			win::WindowClosingEvent& closing_event = (win::WindowClosingEvent&)(*e);
 			win::WindowClosingEvent::DataType& closing_data = closing_event.GetData();
 			jsys::JobSystem& job_system = _services.GetJobSystem();
 
@@ -49,7 +49,7 @@ namespace np::app
 			// our closing job must be submitted here
 			job_system.SubmitJob(jsys::JobPriority::Normal, closing_data.job);
 			closing_data.job.reset();
-			e.SetHandled();
+			e->SetHandled();
 		}
 
 		static void HandleWindowClosedCallback(void* caller, mem::Delegate& d)
@@ -70,12 +70,12 @@ namespace np::app
 			d.DestructData<mem::sptr<win::Window>>(); //TODO: window seems to not close immediately
 
 			if (_windows.size() == 0)
-				_services.GetEventSubmitter().Emplace<ApplicationCloseEvent>();
+				_services.GetEventSubmitter().Submit(mem::create_sptr<ApplicationCloseEvent>(_services.GetAllocator()));
 		}
 
-		virtual void HandleWindowClosed(evnt::Event& e)
+		virtual void HandleWindowClosed(mem::sptr<evnt::Event> e)
 		{
-			win::WindowClosedEvent& closed_event = (win::WindowClosedEvent&)e;
+			win::WindowClosedEvent& closed_event = (win::WindowClosedEvent&)(*e);
 			win::WindowClosedEvent::DataType& closed_data = closed_event.GetData();
 			jsys::JobSystem& job_system = _services.GetJobSystem();
 
@@ -85,12 +85,12 @@ namespace np::app
 			handle_job->GetDelegate().SetCallback(this, HandleWindowClosedCallback);
 			job_system.SubmitJob(jsys::JobPriority::Higher, handle_job);
 
-			e.SetHandled();
+			e->SetHandled();
 		}
 
-		virtual void HandleEvent(evnt::Event& e) override
+		virtual void HandleEvent(mem::sptr<evnt::Event> e) override
 		{
-			switch (e.GetType())
+			switch (e->GetType())
 			{
 			case evnt::EventType::WindowClosing:
 				HandleWindowClosing(e);

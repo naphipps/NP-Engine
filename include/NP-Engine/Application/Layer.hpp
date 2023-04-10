@@ -22,7 +22,7 @@ namespace np::app
 	protected:
 		srvc::Services& _services;
 
-		virtual void HandleEvent(evnt::Event& e) {}
+		virtual void HandleEvent(mem::sptr<evnt::Event> e) override {}
 
 	public:
 		Layer(srvc::Services& services): _services(services) {}
@@ -35,7 +35,7 @@ namespace np::app
 
 		virtual void Cleanup() {}
 
-		virtual evnt::EventCategory GetHandledCategories() const
+		virtual evnt::EventCategory GetHandledCategories() const override
 		{
 			return evnt::EventCategory::None;
 		}

@@ -24,15 +24,9 @@ namespace np::evnt
 	public:
 		EventSubmitter(EventQueue& queue): _queue(queue) {}
 
-		template <typename T, typename... Args>
-		bl Emplace(Args&&... args)
+		void Submit(mem::sptr<Event> e)
 		{
-			return _queue.Emplace<T>(::std::forward<Args>(args)...);
-		}
-
-		bl Emplace(Event* e)
-		{
-			return _queue.Emplace(e);
+			_queue.Push(e);
 		}
 	};
 } // namespace np::evnt
