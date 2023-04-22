@@ -25,6 +25,8 @@
 #include "Layer.hpp"
 #include "WindowLayer.hpp"
 #include "GraphicsLayer.hpp"
+#include "NetworkLayer.hpp"
+#include "AudioLayer.hpp"
 #include "Popup.hpp"
 
 #ifndef NP_ENGINE_APPLICATION_LOOP_DURATION
@@ -93,6 +95,8 @@ namespace np::app
 		Properties _properties;
 		WindowLayer _window_layer;
 		GraphicsLayer _graphics_layer;
+		NetworkLayer _network_layer;
+		AudioLayer _audio_layer;
 		con::vector<Layer*> _layers;
 		con::vector<Layer*> _overlays;
 		atm_bl _running;
@@ -102,6 +106,8 @@ namespace np::app
 			_properties(app_properties),
 			_window_layer(services),
 			_graphics_layer(services),
+			_network_layer(services),
+			_audio_layer(services),
 			_running(false)
 		{
 			NP_ENGINE_PROFILE_FUNCTION();

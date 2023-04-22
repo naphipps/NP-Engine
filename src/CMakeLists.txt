@@ -22,6 +22,8 @@ set(NP_ENGINE_APPLICATION_HPP
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Application/Layer.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Application/WindowLayer.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Application/GraphicsLayer.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Application/NetworkLayer.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Application/AudioLayer.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Application/Popup.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Application/ApplicationPopupEvent.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Application/ApplicationEvents.hpp
