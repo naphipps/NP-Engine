@@ -486,7 +486,7 @@ namespace np::mem
 
 		sptr<T> get_sptr() const
 		{
-			return sptr<T>(base::_resource);
+			return mem::sptr<T>(is_expired() ? nullptr : base::_resource);
 		}
 	};
 	
