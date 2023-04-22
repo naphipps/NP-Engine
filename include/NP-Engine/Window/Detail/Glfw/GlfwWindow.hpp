@@ -889,8 +889,8 @@ namespace np::win::__detail
 		{
 			Window::ClosingProcedure(d);
 
-			GLFWwindow* glfw_window = nullptr;
-			if (_glfw_window.compare_exchange_strong(glfw_window, nullptr, mo_release, mo_relaxed))
+			GLFWwindow* glfw_window = _glfw_window.load(mo_acquire);
+			while (glfw_window && !_glfw_window.compare_exchange_weak(glfw_window, nullptr, mo_release, mo_relaxed))
 				DestroyGlfwWindow(glfw_window);
 		}
 
@@ -1005,7 +1005,7 @@ namespace np::win::__detail
 		virtual ~GlfwWindow()
 		{
 			GLFWwindow* glfw_window = _glfw_window.load(mo_acquire);
-			while (!_glfw_window.compare_exchange_weak(glfw_window, nullptr, mo_release, mo_relaxed))
+			while (glfw_window && !_glfw_window.compare_exchange_weak(glfw_window, nullptr, mo_release, mo_relaxed))
 				DestroyGlfwWindow(glfw_window);
 		}
 
