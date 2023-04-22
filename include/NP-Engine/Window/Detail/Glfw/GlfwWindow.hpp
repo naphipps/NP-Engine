@@ -892,6 +892,7 @@ namespace np::win::__detail
 			GLFWwindow* glfw_window = _glfw_window.load(mo_acquire);
 			while (glfw_window && !_glfw_window.compare_exchange_weak(glfw_window, nullptr, mo_release, mo_relaxed))
 				DestroyGlfwWindow(glfw_window);
+			DestroyGlfwWindow(glfw_window);
 		}
 
 		GLFWwindow* CreateGlfwWindow()
@@ -1007,6 +1008,7 @@ namespace np::win::__detail
 			GLFWwindow* glfw_window = _glfw_window.load(mo_acquire);
 			while (glfw_window && !_glfw_window.compare_exchange_weak(glfw_window, nullptr, mo_release, mo_relaxed))
 				DestroyGlfwWindow(glfw_window);
+			DestroyGlfwWindow(glfw_window);
 		}
 
 		virtual void Update(tim::DblMilliseconds milliseconds) override
@@ -1151,6 +1153,7 @@ namespace np::win::__detail
 				GLFWwindow* expected = nullptr;
 				while (!_glfw_window.compare_exchange_weak(expected, glfw_window, mo_release, mo_relaxed))
 					DestroyGlfwWindow(expected);
+				DestroyGlfwWindow(expected);
 
 				Window::Show();
 			}
