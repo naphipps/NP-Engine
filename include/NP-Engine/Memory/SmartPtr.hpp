@@ -164,14 +164,14 @@ namespace np::mem
 		{
 			atm_siz* strong_counter_ptr = get_strong_counter_ptr();
 			if (strong_counter_ptr)
-				strong_counter_ptr->fetch_add(1, mo_relaxed);
+				strong_counter_ptr->fetch_add(1, mo_release);
 		}
 
 		virtual void increment_weak_counter()
 		{
 			atm_siz* weak_counter_ptr = get_weak_counter_ptr();
 			if (weak_counter_ptr)
-				weak_counter_ptr->fetch_add(1, mo_relaxed);
+				weak_counter_ptr->fetch_add(1, mo_release);
 		}
 
 		virtual void decrement_strong_counter()
@@ -179,7 +179,7 @@ namespace np::mem
 			atm_siz* strong_counter_ptr = get_strong_counter_ptr();
 			if (strong_counter_ptr)
 			{
-				siz prev_strong_count = strong_counter_ptr->fetch_add(-1, mo_relaxed);
+				siz prev_strong_count = strong_counter_ptr->fetch_sub(1, mo_release);
 				if (prev_strong_count == 1)
 					_resource->destroy_object();
 			}
@@ -190,7 +190,7 @@ namespace np::mem
 			atm_siz* weak_counter_ptr = get_weak_counter_ptr();
 			if (weak_counter_ptr)
 			{
-				siz prev_weak_counter = weak_counter_ptr->fetch_add(-1, mo_relaxed);
+				siz prev_weak_counter = weak_counter_ptr->fetch_sub(1, mo_release);
 				if (prev_weak_counter == 1)
 					_resource->destroy_self();
 			}
