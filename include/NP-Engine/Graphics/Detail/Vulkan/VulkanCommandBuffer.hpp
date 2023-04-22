@@ -9,13 +9,15 @@
 
 #include <utility>
 
+#include "NP-Engine/Graphics/Interface/Interface.hpp"
+
 #include "NP-Engine/Vendor/VulkanInclude.hpp"
 
-#include "VulkanCommand.hpp"
+#include "VulkanCommands.hpp"
 
 namespace np::gfx::__detail
 {
-	class VulkanCommandBuffer
+	class VulkanCommandBuffer : public CommandBuffer
 	{
 	private:
 		VkCommandBuffer _command_buffer;
@@ -57,32 +59,34 @@ namespace np::gfx::__detail
 			return _command_buffer;
 		}
 
-		bl IsValid() const
+
+		bl IsValid() const override
 		{
 			return _command_buffer != nullptr;
 		}
 
-		void Invalidate()
+		void Invalidate() override
 		{
 			_command_buffer = nullptr;
 		}
 
-		VkResult Begin(VkCommandBufferBeginInfo& command_buffer_begin_info)
+		void Add(Command& command) override
+		{
+			NP_ENGINE_ASSERT(IsValid() && command.GetDetailType() == GraphicsDetailType::Vulkan,
+				"VulkanCommandBuffer must be valid and given command must be a vulkan command before Add is called.");
+			((VulkanCommand&)command).ApplyTo(_command_buffer);
+		}
+
+		VkResult Begin(VkCommandBufferBeginInfo& command_buffer_begin_info) //TODO: should this be in Device??
 		{
 			NP_ENGINE_ASSERT(IsValid(), "VulkanCommandBuffer must be valid before Begin is called.");
 			return vkBeginCommandBuffer(_command_buffer, &command_buffer_begin_info);
 		}
 
-		VkResult End()
+		VkResult End()//TODO: should this be in Device??
 		{
 			NP_ENGINE_ASSERT(IsValid(), "VulkanCommandBuffer must be valid before End is called.");
 			return vkEndCommandBuffer(_command_buffer);
-		}
-
-		void Add(VulkanCommand& command)
-		{
-			NP_ENGINE_ASSERT(IsValid(), "VulkanCommandBuffer must be valid before Add is called.");
-			command.ApplyTo(_command_buffer);
 		}
 	};
 } // namespace np::gfx::__detail

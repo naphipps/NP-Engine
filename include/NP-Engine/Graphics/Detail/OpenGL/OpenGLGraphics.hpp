@@ -7,6 +7,6 @@
 #ifndef NP_ENGINE_OPENGL_GRAPHICS_HPP
 #define NP_ENGINE_OPENGL_GRAPHICS_HPP
 
-#include "OpenGLRenderer.hpp"
+//#include OpenGL stuffs
 
 #endif /* NP_ENGINE_OPENGL_GRAPHICS_HPP */

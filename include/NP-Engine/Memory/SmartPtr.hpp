@@ -16,6 +16,11 @@
 #include "TraitAllocator.hpp"
 #include "MemoryFunctions.hpp"
 
+/*
+	<https://www.quora.com/Are-the-classic-pointers-still-used-in-modern-C-or-are-they-being-replaced-more-and-more-by-the-smart-pointers>
+	<https://www.quora.com/When-should-RAII-smart-pointers-and-raw-pointers-be-used-in-C-When-should-we-not-use-RAII-in-modern-C/answer/Drew-Eckhardt>
+*/
+
 namespace np::mem
 {
 	struct smart_ptr_resource_base
@@ -166,14 +171,14 @@ namespace np::mem
 		{
 			atm_siz* strong_counter_ptr = get_strong_counter_ptr();
 			if (strong_counter_ptr)
-				strong_counter_ptr->fetch_add(1, mo_release);
+				strong_counter_ptr->fetch_add(1, mo_relaxed);
 		}
 
 		virtual void increment_weak_counter()
 		{
 			atm_siz* weak_counter_ptr = get_weak_counter_ptr();
 			if (weak_counter_ptr)
-				weak_counter_ptr->fetch_add(1, mo_release);
+				weak_counter_ptr->fetch_add(1, mo_relaxed);
 		}
 
 		virtual void decrement_strong_counter()
@@ -181,7 +186,7 @@ namespace np::mem
 			atm_siz* strong_counter_ptr = get_strong_counter_ptr();
 			if (strong_counter_ptr)
 			{
-				siz prev_strong_count = strong_counter_ptr->fetch_sub(1, mo_release);
+				siz prev_strong_count = strong_counter_ptr->fetch_add(-1, mo_relaxed);
 				if (prev_strong_count == 1)
 					_resource->destroy_object();
 			}
@@ -192,13 +197,11 @@ namespace np::mem
 			atm_siz* weak_counter_ptr = get_weak_counter_ptr();
 			if (weak_counter_ptr)
 			{
-				siz prev_weak_counter = weak_counter_ptr->fetch_sub(1, mo_release);
+				siz prev_weak_counter = weak_counter_ptr->fetch_add(-1, mo_relaxed);
 				if (prev_weak_counter == 1)
 					_resource->destroy_self();
 			}
 		}
-
-	public:
 
 		smart_ptr() : _resource(nullptr) {}
 
@@ -221,6 +224,8 @@ namespace np::mem
 		{
 			other._resource = nullptr;
 		}
+
+	public:
 
 		virtual ~smart_ptr() {}
 
@@ -509,5 +514,17 @@ namespace np::mem
 		return sptr<T>(resource);
 	}
 } // namespace np::mem
+
+namespace std
+{
+	template <typename T>
+	struct hash<::np::mem::sptr<T>>
+	{
+		siz operator()(::np::mem::sptr<T> ptr) const noexcept
+		{
+			return ptr ? (siz)(::np::mem::AddressOf(*ptr)) : 0;
+		}
+	};
+} // namespace std
 
 #endif /* NP_ENGINE_SMART_PTR_HPP */

@@ -20,12 +20,12 @@ namespace np::app
 	class Layer : public evnt::EventHandler
 	{
 	protected:
-		srvc::Services& _services;
+		mem::sptr<srvc::Services> _services;
 
 		virtual void HandleEvent(mem::sptr<evnt::Event> e) override {}
 
 	public:
-		Layer(srvc::Services& services): _services(services) {}
+		Layer(mem::sptr<srvc::Services> services): _services(services) {}
 
 		virtual void BeforeUdpate() {} // TODO: I think we'll decide if we like this idea if it works with imgui
 

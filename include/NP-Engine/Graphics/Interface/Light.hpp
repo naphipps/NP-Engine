@@ -29,6 +29,7 @@ namespace np::gfx
 		flt _radius;
 		Color _color;
 		::glm::vec3 _position;
+		::glm::mat4 _transform;
 
 	public:
 		// TODO: put fields representing lights

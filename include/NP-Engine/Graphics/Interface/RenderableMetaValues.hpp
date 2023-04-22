@@ -16,18 +16,27 @@ namespace np::gfx
 {
 	struct RenderableMetaValues
 	{
+		ui8 _padding[128];
+		//TODO: I think our renderables need to define a struct output-like object
+		//	^ and then the implementation/detail can just grab the largest for the pipeline's layout (max of 128? what is vulkan's max??)
+		//	^ - we will have to make sure that our shaders align
+
+	};
+
+	struct RenderableMetaValues_old
+	{
+		::glm::mat4 transform;
+
 		union {
 			struct
 			{
-				::glm::mat4 Model;
-				::glm::mat4 Normal;
+				::glm::mat4 normal; //TODO: ?
 			} object;
 
 			struct
 			{
-				::glm::vec4 Color;
-				::glm::vec3 Position;
-				flt Radius;
+				::glm::vec4 color;
+				flt radius;
 			} light;
 		};
 	};

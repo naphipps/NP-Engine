@@ -18,17 +18,8 @@
 
 #include "NP-Engine/Window/Interface/WindowEvents.hpp"
 
-#include "NP-Engine/Graphics/Detail/Vulkan/VulkanGraphics.hpp"
-
-#if NP_ENGINE_PLATFORM_IS_LINUX || NP_ENGINE_PLATFORM_IS_WINDOWS
-	#include "NP-Engine/Graphics/Detail/OpenGL/OpenGLGraphics.hpp"
-#endif
-
 #include "Layer.hpp"
 #include "Popup.hpp"
-
-// TODO: looks like our big-picture is going to expand to support a Task Graph Architecture of some sort...
-// TODO: ^ Halcyon's RenderGraph idea is pretty nice, but it is inspired by Frostbite's FrameGraph [O'Donnell 2017]
 
 #ifndef NP_ENGINE_RENDERING_LOOP_DURATION
 	#define NP_ENGINE_RENDERING_LOOP_DURATION 0 // milliseconds
@@ -36,121 +27,14 @@
 
 namespace np::app
 {
-	class GraphicsLayer : public Layer
+	class GraphicsLayer : public Layer //TODO: I'm tempted to refactor all "Graphics" things into "GPU" with namespace "gpu" since we use the gpu for so much more than graphics
 	{
 	protected:
-		con::vector<gfx::Renderer*> _renderers;
-		con::vector<gfx::Scene*> _scenes;
-
+		Mutex _scenes_mutex;
+		con::vector<mem::wptr<gfx::Scene>> _scenes;
 		siz _job_worker_index;
 		mem::sptr<jsys::Job> _rendering_job;
 		atm_bl _keep_rendering;
-
-		static void AdjustForWindowClosingCallback(void* caller, mem::Delegate& d)
-		{
-			((GraphicsLayer*)caller)->AdjustForWindowClosingProcedure(d);
-		}
-
-		void AdjustForWindowClosingProcedure(mem::Delegate& d)
-		{
-			uid::Uid windowId = d.GetData<uid::Uid>();
-
-			for (auto it = _scenes.begin(); it != _scenes.end(); it++)
-				if ((*it)->GetRenderer().IsAttachedToWindow(windowId))
-				{
-					mem::Destroy<gfx::Scene>(_services.GetAllocator(), *it);
-					_scenes.erase(it);
-					break;
-				}
-
-			for (auto it = _renderers.begin(); it != _renderers.end(); it++)
-				if ((*it)->IsAttachedToWindow(windowId))
-				{
-					(*it)->DetachFromWindow(windowId);
-					mem::Destroy<gfx::Renderer>(_services.GetAllocator(), *it);
-					_renderers.erase(it);
-					break;
-				}
-
-			d.DestructData<uid::Uid>();
-		}
-
-		virtual void AdjustForWindowClosing(mem::sptr<evnt::Event> e)
-		{
-			win::WindowClosingEvent::DataType& closing_data = e->GetData<win::WindowClosingEvent::DataType>();
-
-			mem::sptr<jsys::Job> adjust_job = _services.GetJobSystem().CreateJob();
-			adjust_job->GetDelegate().ConstructData<uid::Uid>(closing_data.windowId);
-			adjust_job->GetDelegate().SetCallback(this, AdjustForWindowClosingCallback);
-
-			jsys::Job::AddDependency(closing_data.job, adjust_job);
-			_services.GetJobSystem().SubmitJob(jsys::JobPriority::Higher, adjust_job);
-		}
-
-		virtual void HandleEvent(mem::sptr<evnt::Event> e) override
-		{
-			switch (e->GetType())
-			{
-			case evnt::EventType::WindowClosing:
-				AdjustForWindowClosing(e);
-				break;
-			default:
-				break;
-			}
-		}
-
-		void ChooseGraphicsDetailType()
-		{
-			gfx::__detail::RegisteredGraphicsDetailType.store(gfx::GraphicsDetailType::Vulkan);
-
-			// TODO: we need to redo how we choose our detail... look at Renderer.IsValid methods or something similar??
-			// TODO: we might ought to interact with a config file and the user (popups) to determine??
-		}
-
-		class FramePacket
-		{
-		private:
-			Mutex _mutex;
-			ecs::Registry _registry;
-			con::uset<ecs::Entity> _entities_to_add;
-			con::uset<ecs::Entity> _entities_to_remove;
-
-		public:
-			void RemoveEntities()
-			{
-				Lock lock(_mutex);
-			}
-
-			void AddEntities()
-			{
-				Lock lock(_mutex);
-			}
-
-			void SetEntityToRemove(ecs::Entity e)
-			{
-				Lock lock(_mutex);
-			}
-
-			void SetEntityToAdd(ecs::Entity e)
-			{
-				Lock lock(_mutex);
-			}
-		};
-
-		atm<FramePacket*> _staged_for_producing;
-		atm<FramePacket*> _producing;
-		atm<FramePacket*> _staged_for_consuming;
-		atm<FramePacket*> _consuming;
-
-		FramePacket* GetNextFramePacket()
-		{
-			FramePacket* packet = nullptr;
-
-			packet = _staged_for_consuming.load(mo_acquire);
-			_staged_for_consuming.store(nullptr);
-
-			return packet;
-		}
 
 		static void RenderingCallback(void* caller, mem::Delegate& d)
 		{
@@ -166,39 +50,22 @@ namespace np::app
 			tim::SteadyTimestamp prev = next;
 			const tim::DblMilliseconds min_duration(NP_ENGINE_RENDERING_LOOP_DURATION);
 
-			FramePacket* prev_packet;
-			FramePacket* packet = nullptr;
-
 			while (_keep_rendering.load(mo_acquire))
 			{
-				// NP_ENGINE_PROFILE_SCOPE("rendering loop");
-
-				prev_packet = packet;
-				packet = GetNextFramePacket();
-
-				if (packet)
-				{
-					NP_ENGINE_PROFILE_SCOPE("frame packet:" + to_str((siz)packet));
-
-					if (packet == prev_packet)
-					{
-						NP_ENGINE_PROFILE_SCOPE("consider velocity");
-					}
-					else
-					{
-						NP_ENGINE_PROFILE_SCOPE("ignore velocity");
-					}
-				}
-				else
-				{
-					NP_ENGINE_PROFILE_SCOPE("no frame packet");
-				}
+				NP_ENGINE_PROFILE_SCOPE("rendering loop");
 
 				/*
-				for (auto it = _scenes.begin(); it != _scenes.end(); it++)
-					(*it)->Render();
+				{
+					Lock l(_scenes_mutex);
+					for (auto it = _scenes.begin(); it != _scenes.end(); it++)
+					{
+						mem::sptr<gfx::Scene> scene = it->get_sptr();
+						if (scene)
+							scene->Render();
+					}
+				}
 				//*/
-
+				
 				for (next = tim::SteadyClock::now(); next - prev < min_duration; next = tim::SteadyClock::now())
 					thr::ThisThread::yield();
 				prev = next;
@@ -206,42 +73,30 @@ namespace np::app
 		}
 
 	public:
-		GraphicsLayer(srvc::Services& services):
-			Layer(services),
+		GraphicsLayer(mem::sptr<srvc::Services> services): 
+			Layer(services), 
 			_job_worker_index(0),
-			_rendering_job(nullptr),
+			_rendering_job(nullptr), 
 			_keep_rendering(false)
-		{
-			ChooseGraphicsDetailType();
-		}
+		{}
 
 		virtual ~GraphicsLayer()
 		{
 			StopRenderingJob();
-
-			for (auto it = _scenes.begin(); it != _scenes.end(); it++)
-				mem::Destroy<gfx::Scene>(_services.GetAllocator(), *it);
-
-			for (auto it = _renderers.begin(); it != _renderers.end(); it++)
-				mem::Destroy<gfx::Renderer>(_services.GetAllocator(), *it);
 		}
 
-		gfx::Renderer* CreateRenderer(win::Window& window)
+		virtual void Cleanup() override
 		{
-			gfx::Renderer* renderer = gfx::Renderer::Create(_services);
-			renderer->AttachToWindow(window);
-			return _renderers.emplace_back(renderer);
+			Lock l(_scenes_mutex);
+			for (siz i = _scenes.size() - 1; i < _scenes.size(); i--)
+				if (_scenes[i].is_expired())
+					_scenes.erase(_scenes.begin() + i);
 		}
 
-		gfx::Scene* CreateScene(gfx::Renderer& renderer)
+		void RegisterScene(mem::sptr<gfx::Scene> scene)
 		{
-			gfx::Scene* scene = gfx::Scene::Create(_services, renderer);
-			return _scenes.emplace_back(scene);
-		}
-
-		virtual evnt::EventCategory GetHandledCategories() const override
-		{
-			return (evnt::EventCategory)((ui64)evnt::EventCategory::Graphics | (ui64)evnt::EventCategory::Window);
+			Lock l(_scenes_mutex);
+			_scenes.emplace_back(scene);
 		}
 
 		void SetJobWorkerIndex(siz index)
@@ -253,10 +108,10 @@ namespace np::app
 		{
 			if (!_rendering_job)
 			{
-				_rendering_job = _services.GetJobSystem().CreateJob();
+				_rendering_job = _services->GetJobSystem().CreateJob();
 				_rendering_job->GetDelegate().SetCallback(this, RenderingCallback);
 				_rendering_job->SetCanBeStolen(false);
-				_services.GetJobSystem().GetJobWorkers()[_job_worker_index].SubmitImmediateJob(_rendering_job);
+				_services->GetJobSystem().GetJobWorkers()[_job_worker_index].SubmitImmediateJob(_rendering_job);
 			}
 			else
 			{

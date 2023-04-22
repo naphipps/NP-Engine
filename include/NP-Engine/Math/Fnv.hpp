@@ -9,6 +9,11 @@
 
 #include "NP-Engine/Primitive/Primitive.hpp"
 
+/*
+	Hashing is a pretty big problem, and I think hash_append is the answer... But its too much work for now :P
+	<https://github.com/HowardHinnant/hash_append>
+*/
+
 namespace np::mat
 {
 	/*

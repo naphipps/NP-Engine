@@ -19,6 +19,8 @@
 #include "Texture.hpp"
 #include "Vertex.hpp"
 
+//TODO: I feel like we need to load the skeleton somewhere around here, and them base it off our root bone
+
 namespace np::gfx
 {
 	class Model
@@ -39,6 +41,7 @@ namespace np::gfx
 		con::vector<::tinyobj::material_t> _materials;
 		con::vector<Vertex> _vertices;
 		con::vector<ui32> _indices;
+		::glm::mat4 _transform;
 
 	public:
 		Model(str model_filename, str model_texture_filename, bl hot_reloadable = false):
@@ -119,6 +122,8 @@ namespace np::gfx
 				{
 					for (const ::tinyobj::index_t& index : shape.mesh.indices)
 					{
+						//TODO: extract Obb and Aabb here
+
 						Vertex vertex;
 
 						vertex.Position = {_attributes.vertices[VERTEX_STRIDE * (siz)index.vertex_index + 0],
@@ -131,7 +136,7 @@ namespace np::gfx
 
 						vertex.Color = {1.0f, 1.0f, 1.0f};
 
-						if (vertexIndexMap.count(vertex) == 0)
+						if (vertexIndexMap.find(vertex) == vertexIndexMap.end())
 						{
 							vertexIndexMap[vertex] = (ui32)_vertices.size(); // get the index of the vertex we add next line
 							_vertices.emplace_back(vertex);

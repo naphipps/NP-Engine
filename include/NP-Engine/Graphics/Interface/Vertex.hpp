@@ -8,6 +8,7 @@
 #define NP_ENGINE_GRAPHICS_INTERFACE_VERTEX_HPP
 
 #include "NP-Engine/Primitive/Primitive.hpp"
+#include "NP-Engine/Math/Math.hpp"
 
 #include "NP-Engine/Vendor/GlmInclude.hpp"
 
@@ -15,6 +16,8 @@ namespace np::gfx
 {
 	struct Vertex
 	{
+		//TODO: camelCase here
+
 		::glm::vec3 Position;
 		::glm::vec3 Color; // TODO: added alpha channel support
 		::glm::vec2 TextureCoordinate;
@@ -33,8 +36,8 @@ namespace std
 	{
 		siz operator()(const ::np::gfx::Vertex& vertex) const noexcept
 		{
-			return (hash<::glm::vec3>()(vertex.Position) ^ (hash<::glm::vec3>()(vertex.Color) << 1) >> 1) ^
-				(hash<::glm::vec2>()(vertex.TextureCoordinate) << 1);
+			//treat the vertex like a buffer and hash the whole thing
+			return ::np::mat::HashFnv1aUi64(::np::mem::AddressOf(vertex), sizeof(::np::gfx::Vertex));
 		}
 	};
 } // namespace std

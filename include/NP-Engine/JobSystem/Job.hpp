@@ -17,6 +17,8 @@
 
 #include "JobPriority.hpp"
 
+// TODO: how do we build a job (and set dependencies) from concurrent jobs - locks and condition variables maybe? Or not at all??
+
 namespace np::jsys
 {
 	class Job

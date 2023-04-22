@@ -7,6 +7,8 @@
 #ifndef NP_ENGINE_TESTER_HPP
 #define NP_ENGINE_TESTER_HPP
 
+//#define NP_ENGINE_ACCUMULATING_ALLOCATOR_BLOCK_SIZE (GIGABYTE_SIZE * 2) //TODO: test
+
 #include <iostream>
 
 #include <NP-Engine/NP-Engine.hpp>
@@ -19,14 +21,12 @@ namespace np::app
 		WindowLayer& _window_layer;
 		GraphicsLayer& _graphics_layer;
 		mem::sptr<win::Window> _window;
-		gfx::Renderer* _renderer;
-		gfx::Scene* _scene;
+		mem::sptr<gfx::Scene> _scene;
 		gfx::Camera _camera;
 		str _model_filename;
 		str _model_texture_filename;
-		gfx::Model _model;
-		gfx::RenderableModel* _renderable_model;
-		ecs::Entity _model_entity;
+		mem::sptr<gfx::Model> _model;
+		mem::sptr<uid::UidHandle> _model_handle;
 		tim::SteadyTimestamp _start_timestamp;
 		flt _rate = 1.f;
 
@@ -39,7 +39,10 @@ namespace np::app
 		{
 			uid::Uid windowId = d.GetData<uid::Uid>();
 
-			// TODO: handle all references that use this windowId
+			//NP_ENGINE_LOG_INFO("reseting scene");
+
+			if (_scene->GetRenderTarget()->GetWindow()->GetUid() == windowId)
+				_scene.reset();
 
 			if (_window->GetUid() == windowId)
 				_window.reset();
@@ -52,11 +55,18 @@ namespace np::app
 			win::WindowClosingEvent& closing_event = (win::WindowClosingEvent&)(*e);
 			win::WindowClosingEvent::DataType& closing_data = closing_event.GetData();
 
-			mem::sptr<jsys::Job> adjust_job = _services.GetJobSystem().CreateJob();
+			if (_window->GetUid() == closing_data.windowId)
+			{
+				// window ownership has gone to the closing job
+				mem::sptr<win::Window>& closing_job_window = closing_data.job->GetDelegate().GetData<mem::sptr<win::Window>>();
+				closing_job_window = _window;
+			}
+
+			mem::sptr<jsys::Job> adjust_job = _services->GetJobSystem().CreateJob();
 			adjust_job->GetDelegate().ConstructData<uid::Uid>(closing_data.windowId);
 			adjust_job->GetDelegate().SetCallback(this, AdjustForWindowClosingCallback);
 			jsys::Job::AddDependency(closing_data.job, adjust_job);
-			_services.GetJobSystem().SubmitJob(jsys::JobPriority::Higher, adjust_job);
+			_services->GetJobSystem().SubmitJob(jsys::JobPriority::Higher, adjust_job);
 		}
 
 		virtual void HandleEvent(mem::sptr<evnt::Event> e) override
@@ -79,7 +89,7 @@ namespace np::app
 
 		void SceneOnDraw(mem::Delegate& d)
 		{
-			nput::InputQueue& input = _services.GetInputQueue();
+			nput::InputQueue& input = _services->GetInputQueue();
 			const nput::KeyCodeStates& key_states = input.GetKeyCodeStates();
 
 			if (key_states[nput::KeyCode::A].IsActive())
@@ -123,6 +133,7 @@ namespace np::app
 
 		void UpdateMetaValuesOnFrame(mem::Delegate& d)
 		{
+			/*
 			gfx::RenderableMetaValues& meta_values = _renderable_model->GetMetaValues();
 			flt scale = _camera.GetProjectionType() == gfx::Camera::ProjectionType::Perspective ? 10.f : 100.f;
 
@@ -130,74 +141,171 @@ namespace np::app
 			meta_values.object.Model = ::glm::scale(meta_values.object.Model, ::glm::vec3(scale, scale, scale));
 			// meta_values.object.Model = ::glm::translate(meta_values.object.Model, ::glm::vec3(-10, -10, -10));
 			meta_values.object.Model = ::glm::rotate(meta_values.object.Model, 90.f, _camera.Up);
+			//*/
 		}
 
 	public:
-		GameLayer(srvc::Services& services, WindowLayer& window_layer, GraphicsLayer& graphics_layer):
+		GameLayer(mem::sptr<srvc::Services> services, WindowLayer& window_layer, GraphicsLayer& graphics_layer):
 			Layer(services),
 			_window_layer(window_layer),
 			_graphics_layer(graphics_layer),
 			_window(nullptr),
-			_renderer(nullptr),
 			_scene(nullptr),
 			_model_filename(
 				fsys::Append(fsys::Append(fsys::Append(NP_ENGINE_WORKING_DIR, "test"), "assets"), "viking_room.obj")),
 			_model_texture_filename(
 				fsys::Append(fsys::Append(fsys::Append(NP_ENGINE_WORKING_DIR, "test"), "assets"), "viking_room.png")),
-			_model(_model_filename, _model_texture_filename, true),
-			_renderable_model(gfx::RenderableModel::Create(_services, _model)),
-			_model_entity(_services.GetEcsRegistry()),
+			_model(mem::create_sptr<gfx::Model>(_services->GetAllocator(), _model_filename, _model_texture_filename, true)),
+			_model_handle(_services->GetUidSystem().CreateUidHandle()),
 			_start_timestamp(tim::SteadyClock::now())
 		{
-			_model.GetTexture().SetHotReloadable();
-			_renderable_model->GetUpdateMetaValuesOnFrameDelegate().SetCallback(this, UpdateMetaValuesOnFrameCallback);
+			_model->GetTexture().SetHotReloadable();
+			//_renderable_model->GetUpdateMetaValuesOnFrameDelegate().SetCallback(this, UpdateMetaValuesOnFrameCallback);
 
-			_model_entity.add<gfx::RenderableObject*>(_renderable_model);
-
-			_camera.Eye = {30.f, 30.f, 30.f};
+			_camera.Eye = { 30.f, 30.f, 30.f };
 			_camera.Fovy = 70.f;
 			_camera.NearPlane = 0.01f;
 			_camera.FarPlane = 1000.0f;
+
+			//-----------------------------------------------------------
+
+			win::Window::Properties window_properties;
+			_window = win::Window::Create(win::WindowDetailType::Glfw, _services, window_properties);
+			_window_layer.RegisterWindow(_window);
+
+			mem::sptr<gfx::DetailInstance> detail_instance = gfx::DetailInstance::Create(gfx::GraphicsDetailType::Vulkan, _services);
+			mem::sptr<gfx::RenderTarget> render_target = gfx::RenderTarget::Create(detail_instance, _window); //TODO: make sure we handle when window is closing
+			mem::sptr<gfx::RenderDevice> render_device = gfx::RenderDevice::Create(render_target);
+			mem::sptr<gfx::RenderContext> render_context = gfx::RenderContext::Create(render_device);
+			mem::sptr<gfx::RenderPass> render_pass = gfx::RenderPass::Create(render_context);
+			mem::sptr<gfx::Framebuffers> framebuffers = gfx::Framebuffers::Create(render_pass);
+
+			gfx::Shader::Properties vertex_shader_properties;
+			vertex_shader_properties.type = gfx::Shader::Type::Vertex;
+			vertex_shader_properties.entrypoint = "main";
+			vertex_shader_properties.filename = fsys::Append(fsys::Append("Vulkan", "shaders"), "object_vertex.glsl");
+			mem::sptr<gfx::RenderShader> vertex_shader = gfx::RenderShader::Create(render_device, vertex_shader_properties);
+
+			gfx::Shader::Properties fragment_shader_properties;
+			fragment_shader_properties.type = gfx::Shader::Type::Fragment;
+			fragment_shader_properties.entrypoint = "main";
+			fragment_shader_properties.filename = fsys::Append(fsys::Append("Vulkan", "shaders"), "object_fragment.glsl");
+			mem::sptr<gfx::RenderShader> fragment_shader = gfx::RenderShader::Create(render_device, fragment_shader_properties);
+
+			gfx::RenderPipeline::Properties render_pipeline_properties{framebuffers, vertex_shader, fragment_shader};
+			mem::sptr<gfx::RenderPipeline> render_pipeline = gfx::RenderPipeline::Create(render_pipeline_properties);
+
+			gfx::Scene::Properties scene_properties{ render_pipeline, _camera };
+			_scene = gfx::Scene::Create(scene_properties);
+			_graphics_layer.RegisterScene(_scene);
+
+			uid::Uid model_id = _services->GetUidSystem().GetUid(_model_handle);
+			mem::sptr<gfx::VisibleObject> model_visible = mem::create_sptr<gfx::VisibleObject>(_services->GetAllocator());
+
+			_scene->Register(model_id, model_visible, _model);
+			_scene->GetOnRenderDelegate().SetCallback(this, SceneOnDrawCallback);
+
+			mem::sptr<gfx::Resource> resource = _scene->GetRenderDevice()->GetResource(model_id);
+			if (resource && resource->GetType() == gfx::ResourceType::RenderableModel)
+			{
+				gfx::RenderableModel& renderable_model = (gfx::RenderableModel&)(*resource);
+				mem::sptr<gfx::Model> model = renderable_model.GetModel();
+				NP_ENGINE_ASSERT(model == _model, "these models should be the same!");
+			}
 		}
 
-		~GameLayer()
+		static void LogSubmitKeyState(void*, const nput::KeyCodeState&)
 		{
-			mem::Destroy<gfx::RenderableModel>(_services.GetAllocator(), _renderable_model);
+			NP_ENGINE_LOG_INFO("key code callback");
+		}
+
+		static void LogSubmitMouseState(void*, const nput::MouseCodeState&)
+		{
+			NP_ENGINE_LOG_INFO("mouse code callback");
+		}
+
+		static void LogSubmitMousePosition(void*, const nput::MousePosition&)
+		{
+			NP_ENGINE_LOG_INFO("mouse position callback");
+		}
+
+		static void LogSubmitControllerState(void*, const nput::ControllerCodeState&)
+		{
+			NP_ENGINE_LOG_INFO("controller code callback");
+		}
+
+		static void LogFocus(void*, bl)
+		{
+			NP_ENGINE_LOG_INFO("focus callback");
+		}
+
+		static void LogMaximize(void*, bl)
+		{
+			NP_ENGINE_LOG_INFO("maximize callback");
+		}
+		static void LogMinimize(void*, bl)
+		{
+			NP_ENGINE_LOG_INFO("minimize callback");
+		}
+
+		static void LogFramebuffer(void*, ui32, ui32)
+		{
+			NP_ENGINE_LOG_INFO("framebuffer callback");
+		}
+
+		static void LogPosition(void*, i32, i32)
+		{
+			NP_ENGINE_LOG_INFO("position callback");
+		}
+
+		static void LogResize(void*, ui32, ui32)
+		{
+			NP_ENGINE_LOG_INFO("resize callback");
 		}
 
 		void PrepareForRun()
 		{
 			NP_ENGINE_PROFILE_FUNCTION();
-			// TODO: I think CreateWindowScene should be replaced with WindowLayer.CreateWindow and GraphicsLayer.CreateScene
-			// TODO: ^ this should be like the following:
-			/*
 
-				win::Window* window = _window_layer.CreateWindow(properties);
-				gfx::Renderer* renderer = _graphics_layer.CreateRenderer(*window);
-				gfx::Scene* scene = _graphics_layer.CreateScene(*renderer);
-				//set our viewport shapes for each scene so we can have minimaps, etc
-
-			*/
-
-			void* caller = mem::AddressOf(_services.GetInputQueue());
+			void* input_queue = mem::AddressOf(_services->GetInputQueue());
 			win::Window::Properties window_properties;
 			window_properties.title = "My Game Window >:D";
 
-			_window = _window_layer.CreateWindow(win::WindowDetailType::Glfw, window_properties);
-			_window->SetKeyCallback(caller, nput::InputListener::SubmitKeyState);
-			_window->SetMouseCallback(caller, nput::InputListener::SubmitMouseState);
-			_window->SetMousePositionCallback(caller, nput::InputListener::SubmitMousePosition);
-			_window->SetControllerCallback(caller, nput::InputListener::SubmitControllerState);
+			_window->SetKeyCallback(input_queue, nput::InputListener::SubmitKeyState);
+			_window->SetMouseCallback(input_queue, nput::InputListener::SubmitMouseState);
+			_window->SetMousePositionCallback(input_queue, nput::InputListener::SubmitMousePosition);
+			_window->SetControllerCallback(input_queue, nput::InputListener::SubmitControllerState);
 
-			_renderer = _graphics_layer.CreateRenderer(*_window);
-			_scene = _graphics_layer.CreateScene(*_renderer);
+			/*
+			_window->SetKeyCallback(this, LogSubmitKeyState);
+			_window->SetMouseCallback(this, LogSubmitMouseState);
+			_window->SetMousePositionCallback(this, LogSubmitMousePosition);
+			_window->SetControllerCallback(this, LogSubmitControllerState);
+			_window->SetFocusCallback(this, LogFocus);
+			_window->SetFramebufferCallback(this, LogFramebuffer);
+			_window->SetMaximizeCallback(this, LogMaximize);
+			_window->SetMinimizeCallback(this, LogMinimize);
+			_window->SetPositionCallback(this, LogPosition);
+			_window->SetResizeCallback(this, LogResize);
+			//*/
+			
+			//TODO: create scene??
 
 			// TODO: init scene, and destroy content for last scene??
-			_scene->GetOnDrawDelegate().SetCallback(this, SceneOnDrawCallback); // TODO: do we need this?? I don't think so
-			_scene->Prepare();
+			//_scene->GetOnDrawDelegate().SetCallback(this, SceneOnDrawCallback); // TODO: do we need this?? I don't think so
+			//_scene->Prepare();
 		}
 
-		void Update(tim::DblMilliseconds time_delta) override {}
+		void Update(tim::DblMilliseconds time_delta) override 
+		{
+			//TODO: render scene for now -- later to render job
+			//NP_ENGINE_LOG_INFO("checking scene");
+			if (_scene)
+			{
+				//NP_ENGINE_LOG_INFO("rendering scene");
+				_scene->Render();
+			}
+		}
 
 		virtual evnt::EventCategory GetHandledCategories() const override
 		{
@@ -211,7 +319,7 @@ namespace np::app
 		GameLayer _game_layer;
 
 	public:
-		GameApp(srvc::Services& services):
+		GameApp(mem::sptr<srvc::Services> services):
 			Application(Application::Properties{"My Game App"}, services),
 			_game_layer(services, _window_layer, _graphics_layer)
 		{

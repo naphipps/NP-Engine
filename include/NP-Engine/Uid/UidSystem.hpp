@@ -53,12 +53,12 @@ namespace np::uid
 	private:
 		struct UidRecord
 		{
-			mem::sptr<Uid> UidPtr = nullptr; //TODO: camelCase these fields
-			UidHandle::GenerationType Generation = NP_ENGINE_UID_HANDLE_INVALID_GENERATION;
+			mem::sptr<Uid> uidSptr = nullptr;
+			UidHandle::GenerationType generation = NP_ENGINE_UID_HANDLE_INVALID_GENERATION;
 
 			bl IsValid() const
 			{
-				return UidPtr && Generation != NP_ENGINE_UID_HANDLE_INVALID_GENERATION;
+				return uidSptr && generation != NP_ENGINE_UID_HANDLE_INVALID_GENERATION;
 			}
 
 			operator bl() const
@@ -68,14 +68,12 @@ namespace np::uid
 
 			void Invalidate()
 			{
-				UidPtr.reset();
-				Generation = NP_ENGINE_UID_HANDLE_INVALID_GENERATION;
+				uidSptr.reset();
+				generation = NP_ENGINE_UID_HANDLE_INVALID_GENERATION;
 			}
 		};
 
-		constexpr static siz UID_SIZE = mem::CalcAlignedSize(sizeof(Uid));
-
-		Mutex _m;
+		Mutex _uid_mutex;
 		mem::TraitAllocator _allocator;
 		SmartPtrDestroyer _uid_handle_destroyer;
 		UidGenerator _uid_gen;
@@ -97,9 +95,9 @@ namespace np::uid
 			else
 			{
 				do
-					++_next_handle.Key;
-				while (_next_handle.Key == NP_ENGINE_UID_HANDLE_INVALID_KEY);
-				k = _next_handle.Key;
+					++_next_handle.key;
+				while (_next_handle.key == NP_ENGINE_UID_HANDLE_INVALID_KEY);
+				k = _next_handle.key;
 			}
 
 			return k;
@@ -108,29 +106,30 @@ namespace np::uid
 		UidHandle::GenerationType GetNextGeneration()
 		{
 			do
-				++_next_handle.Generation;
-			while (_next_handle.Generation == NP_ENGINE_UID_HANDLE_INVALID_GENERATION);
-			return _next_handle.Generation;
+				++_next_handle.generation;
+			while (_next_handle.generation == NP_ENGINE_UID_HANDLE_INVALID_GENERATION);
+			return _next_handle.generation;
 		}
 
 		void ReleaseHandle(UidHandle* hndl_ptr)
 		{
 			if (hndl_ptr)
 			{
-				Lock lock(_m);
+				Lock l(_uid_mutex);
 
 				UidHandle& hndl = *hndl_ptr;
 				if (hndl.IsValid())
 				{
-					auto it = _key_to_record.find(hndl.Key);
+					auto it = _key_to_record.find(hndl.key);
 					if (it != _key_to_record.end())
 					{
 						UidRecord record = it->second;
-						if (hndl.Generation == record.Generation && _uid_pool.Contains(record.UidPtr))
+						if (hndl.generation == record.generation && _uid_pool.Contains(record.uidSptr))
 						{
-							record.Invalidate();
 							_key_to_record.erase(it);
-							_released_keys.emplace(hndl.Key);
+							_released_keys.emplace(hndl.key);
+							_uid_master_set.erase(*record.uidSptr);
+							record.Invalidate();
 							hndl.Invalidate();
 						}
 					}
@@ -148,7 +147,7 @@ namespace np::uid
 
 		void Dispose()
 		{
-			Lock lock(_m);
+			Lock l(_uid_mutex);
 			_uid_pool.Clear();
 			_next_handle = UidHandle{};
 			_released_keys.clear();
@@ -158,7 +157,7 @@ namespace np::uid
 
 		mem::sptr<UidHandle> CreateUidHandle()
 		{
-			Lock lock(_m);
+			Lock l(_uid_mutex);
 			mem::sptr<UidHandle> hndl = nullptr;
 			mem::sptr<Uid> id = _uid_pool.CreateObject();
 
@@ -173,7 +172,7 @@ namespace np::uid
 				UidHandle* object = mem::Construct<UidHandle>(contiguous_block->object_block, UidHandle{ GetNextKey(), GetNextGeneration() });
 				hndl = mem::sptr<UidHandle>(mem::Construct<SmartPtrResource>(contiguous_block->resource_block, _uid_handle_destroyer, object));
 
-				_key_to_record.emplace(hndl->Key, UidRecord{ id, hndl->Generation });
+				_key_to_record.emplace(hndl->key, UidRecord{ id, hndl->generation });
 			}
 
 			return hndl;
@@ -181,17 +180,23 @@ namespace np::uid
 
 		Uid GetUid(mem::sptr<UidHandle> hndl)
 		{
-			Lock lock(_m);
+			Lock l(_uid_mutex);
 			mem::sptr<Uid> id = nullptr;
 
 			if (hndl->IsValid())
 			{
-				auto it = _key_to_record.find(hndl->Key);
-				if (it != _key_to_record.end() && hndl->Generation == it->second.Generation)
-					id = it->second.UidPtr;
+				auto it = _key_to_record.find(hndl->key);
+				if (it != _key_to_record.end() && hndl->generation == it->second.generation)
+					id = it->second.uidSptr;
 			}
 
 			return id ? *id : Uid{};
+		}
+
+		bl Has(uid::Uid id)
+		{
+			Lock l(_uid_mutex);
+			return _uid_master_set.find(id) != _uid_master_set.end();
 		}
 	};
 } // namespace np::uid

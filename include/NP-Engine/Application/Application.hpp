@@ -20,6 +20,7 @@
 #include "NP-Engine/Time/Time.hpp"
 #include "NP-Engine/Window/Window.hpp"
 #include "NP-Engine/Services/Services.hpp"
+#include "NP-Engine/System/System.hpp"
 
 #include "ApplicationEvents.hpp"
 #include "Layer.hpp"
@@ -101,7 +102,7 @@ namespace np::app
 		con::vector<Layer*> _overlays;
 		atm_bl _running;
 
-		Application(const Application::Properties& app_properties, srvc::Services& services):
+		Application(const Application::Properties& app_properties, mem::sptr<srvc::Services> services):
 			Layer(services),
 			_properties(app_properties),
 			_window_layer(services),
@@ -160,7 +161,7 @@ namespace np::app
 
 		virtual void CustomizeJobSystem()
 		{
-			jsys::JobSystem& job_system = _services.GetJobSystem();
+			jsys::JobSystem& job_system = _services->GetJobSystem();
 			con::vector<jsys::JobWorker>& job_workers = job_system.GetJobWorkers();
 
 			NP_ENGINE_ASSERT(thr::Thread::HardwareConcurrency() >= 4, "NP Engine requires at least four cores");
@@ -208,9 +209,9 @@ namespace np::app
 			// app::Popup::Show("Application Start Of Run", "We're about to run");
 
 			_running.store(true, mo_release);
-			evnt::EventQueue& event_queue = _services.GetEventQueue();
-			jsys::JobSystem& job_system = _services.GetJobSystem();
-			nput::InputQueue& input_queue = _services.GetInputQueue();
+			evnt::EventQueue& event_queue = _services->GetEventQueue();
+			jsys::JobSystem& job_system = _services->GetJobSystem();
+			nput::InputQueue& input_queue = _services->GetInputQueue();
 
 			tim::SteadyTimestamp next = tim::SteadyClock::now();
 			tim::SteadyTimestamp prev = next;
@@ -222,8 +223,8 @@ namespace np::app
 			mem::sptr<evnt::Event> e = nullptr;
 			i64 i = 0;
 
-			CustomizeJobSystem();
-			_graphics_layer.SubmitRenderingJob();
+			CustomizeJobSystem();//TODO: move this to test proj
+			_graphics_layer.SubmitRenderingJob(); //TODO: move this to test proj
 			job_system.Start();
 
 			while (_running.load(mo_acquire))
@@ -312,7 +313,7 @@ namespace np::app
 		}
 	};
 
-	extern mem::sptr<Application> CreateApplication(srvc::Services& services);
+	extern mem::sptr<Application> CreateApplication(mem::sptr<srvc::Services> services);
 } // namespace np::app
 
 #endif /* NP_ENGINE_APPLICATION_HPP */

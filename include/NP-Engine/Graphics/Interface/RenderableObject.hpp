@@ -9,23 +9,23 @@
 
 #include "NP-Engine/Primitive/Primitive.hpp"
 
-#include "Frame.hpp"
+#include "CommandStaging.hpp"
 #include "Pipeline.hpp"
-#include "RenderableType.hpp"
+#include "Resource.hpp"
 
 namespace np::gfx
 {
-	struct RenderableObject
+	struct RenderableObject : public Resource
 	{
 		// TODO: does this need a virtual destructor?
 
-		virtual RenderableType GetType() const = 0;
+		virtual ResourceType GetType() const override = 0;
 
-		virtual void RenderToFrame(Frame& frame, Pipeline& pipline) = 0;
+		virtual void Stage(mem::sptr<CommandStaging> command_staging, mem::sptr<Pipeline> pipline) = 0;
 
-		virtual void PrepareForPipeline(Pipeline& pipeline) = 0;
+		virtual void PrepareForPipeline(mem::sptr<Pipeline> pipeline) = 0;
 
-		virtual void DisposeForPipeline(Pipeline& pipeline) = 0;
+		virtual void DisposeForPipeline(mem::sptr<Pipeline> pipeline) = 0;
 
 		virtual bl IsOutOfDate() const = 0;
 

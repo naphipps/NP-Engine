@@ -15,8 +15,14 @@ namespace np::gfx
 {
 	struct VisibleObject
 	{
-		geom::FltAabb3D AABB;
-		RenderableObject* Renderable = nullptr;
+		geom::FltAabb3D aabb;
+		glm::mat4 transform;
+		
+		//TODO: add data for the resource
+
+		//AnimationData animationData;
+
+		//TODO: should we add a transform for the Model/Image/Light? some way to update RenderableMetaValues
 	};
 } // namespace np::gfx
 

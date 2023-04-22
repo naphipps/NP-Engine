@@ -7,34 +7,33 @@
 #ifndef NP_ENGINE_VULKAN_SAMPLER_HPP
 #define NP_ENGINE_VULKAN_SAMPLER_HPP
 
+#include "NP-Engine/Services/Services.hpp"
+
 #include "NP-Engine/Vendor/VulkanInclude.hpp"
 
-#include "VulkanDevice.hpp"
+#include "VulkanLogicalDevice.hpp"
 
 namespace np::gfx::__detail
 {
 	class VulkanSampler
 	{
 	private:
-		VulkanDevice& _device;
+		mem::sptr<VulkanLogicalDevice> _device;
 		VkSampler _sampler;
 
-		VkSampler CreateSampler(VkSamplerCreateInfo& info)
+		static VkSampler CreateSampler(mem::sptr<VulkanLogicalDevice> device, VkSamplerCreateInfo& info)
 		{
 			VkPhysicalDeviceProperties device_properties;
 			VkPhysicalDeviceFeatures device_features;
-			vkGetPhysicalDeviceProperties(GetDevice().GetPhysicalDevice(), &device_properties);
-			vkGetPhysicalDeviceFeatures(GetDevice().GetPhysicalDevice(), &device_features);
+			vkGetPhysicalDeviceProperties(device->GetPhysicalDevice(), &device_properties);
+			vkGetPhysicalDeviceFeatures(device->GetPhysicalDevice(), &device_features);
 
 			info.anisotropyEnable = device_features.samplerAnisotropy;
 			info.maxAnisotropy = info.anisotropyEnable == VK_FALSE ? 1.0f : device_properties.limits.maxSamplerAnisotropy;
 
 			VkSampler sampler = nullptr;
-
-			if (vkCreateSampler(GetDevice(), &info, nullptr, &sampler) != VK_SUCCESS)
-			{
+			if (vkCreateSampler(*device, &info, nullptr, &sampler) != VK_SUCCESS)
 				sampler = nullptr;
-			}
 
 			return sampler;
 		}
@@ -61,16 +60,16 @@ namespace np::gfx::__detail
 			return info;
 		}
 
-		VulkanSampler(VulkanDevice& device, VkSamplerCreateInfo sampler_create_info):
+		VulkanSampler(mem::sptr<VulkanLogicalDevice> device, VkSamplerCreateInfo sampler_create_info):
 			_device(device),
-			_sampler(CreateSampler(sampler_create_info))
+			_sampler(CreateSampler(_device, sampler_create_info))
 		{}
 
 		~VulkanSampler()
 		{
 			if (_sampler)
 			{
-				vkDestroySampler(GetDevice(), _sampler, nullptr);
+				vkDestroySampler(*_device, _sampler, nullptr);
 				_sampler = nullptr;
 			}
 		}
@@ -80,7 +79,7 @@ namespace np::gfx::__detail
 			return _sampler;
 		}
 
-		VulkanDevice& GetDevice() const
+		mem::sptr<VulkanLogicalDevice> GetDevice() const
 		{
 			return _device;
 		}

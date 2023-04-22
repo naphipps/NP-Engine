@@ -48,7 +48,7 @@ namespace np::win
 
 	protected:
 		Properties _properties;
-		srvc::Services& _services;
+		mem::sptr<srvc::Services> _services;
 		mem::sptr<uid::UidHandle> _uid_handle;
 		thr::Thread _thread;
 		atm_bl _show_procedure_is_complete;
@@ -92,10 +92,10 @@ namespace np::win
 
 		virtual void DetailCloseProcedure() = 0;
 
-		Window(Window::Properties& properties, srvc::Services& services):
+		Window(Window::Properties& properties, mem::sptr<srvc::Services> services):
 			_properties(properties),
 			_services(services),
-			_uid_handle(_services.GetUidSystem().CreateUidHandle()),
+			_uid_handle(_services->GetUidSystem().CreateUidHandle()),
 			_show_procedure_is_complete(true)
 		{}
 
@@ -108,7 +108,7 @@ namespace np::win
 
 		static con::vector<str> GetRequiredGfxExtentions(WindowDetailType detail_type);
 
-		static mem::sptr<Window> Create(WindowDetailType detail_type, srvc::Services& services, Properties& properties);
+		static mem::sptr<Window> Create(WindowDetailType detail_type, mem::sptr<srvc::Services> services, Properties properties);
 
 		virtual ~Window()
 		{
@@ -136,7 +136,7 @@ namespace np::win
 
 		uid::Uid GetUid() const
 		{
-			return _services.GetUidSystem().GetUid(_uid_handle);
+			return _services->GetUidSystem().GetUid(_uid_handle);
 		}
 
 		virtual bl IsRunning() const

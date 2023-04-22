@@ -13,7 +13,7 @@
 
 #if DEBUG
 	#ifndef NP_ENGINE_PROFILE_ENABLE
-		#define NP_ENGINE_PROFILE_ENABLE true
+		#define NP_ENGINE_PROFILE_ENABLE false
 	#endif
 	#ifndef NP_ENGINE_LOG_ENABLE
 		#define NP_ENGINE_LOG_ENABLE true

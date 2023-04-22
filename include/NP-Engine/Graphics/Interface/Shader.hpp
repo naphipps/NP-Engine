@@ -12,48 +12,55 @@
 #include "NP-Engine/Primitive/Primitive.hpp"
 #include "NP-Engine/String/String.hpp"
 
+#include "GraphicsDetailType.hpp"
+
 namespace np::gfx
 {
-	class Shader
+	class Shader //TODO: we need to break this up to RenderShader, ComputeShader, etc, so that we can put the correct device with the correct shader
 	{
 	public:
 		enum class Type // TODO: refactor to Pascal case
 		{
-			VERTEX,
-			FRAGMENT,
-			TESSELATION_CONTROL,
-			TESSELATION_EVALUATION,
-			GEOMETRY,
-			COMPUTE
+			Vertex,
+			Fragment,
+			Compute,
+			TesselationControl,
+			TesselationEvaluation,
+			Geometry
+		};
+
+		struct Properties
+		{
+			Type type;
+			str filename;
+			str entrypoint; //TODO: default to "main"?
 		};
 
 	protected:
-		Type _type;
-		str _filename;
-		str _entrypoint;
+		Properties _properties;
 
 		str GetShaderStage() const
 		{
 			str stage = "UNKNOWN";
 
-			switch (_type)
+			switch (_properties.type)
 			{
-			case Type::VERTEX:
+			case Type::Vertex:
 				stage = "vertex";
 				break;
-			case Type::FRAGMENT:
+			case Type::Fragment:
 				stage = "fragment";
 				break;
-			case Type::TESSELATION_CONTROL:
+			case Type::TesselationControl:
 				stage = "tesscontrol";
 				break;
-			case Type::TESSELATION_EVALUATION:
+			case Type::TesselationEvaluation:
 				stage = "tesseval";
 				break;
-			case Type::GEOMETRY:
+			case Type::Geometry:
 				stage = "geometry";
 				break;
-			case Type::COMPUTE:
+			case Type::Compute:
 				stage = "compute";
 				break;
 			}
@@ -61,9 +68,12 @@ namespace np::gfx
 			return stage;
 		}
 
-	public:
-		Shader(str filename, Type type, str entrypoint): _filename(filename), _type(type), _entrypoint(entrypoint) {}
+		Shader(Properties& properties) : _properties(properties) {}
 
+	public:
+
+		virtual GraphicsDetailType GetDetailType() const = 0;
+		
 		virtual siz Size() const = 0;
 
 		virtual void* Bytes() const = 0;
@@ -72,37 +82,42 @@ namespace np::gfx
 
 		virtual void Reload()
 		{
-			Load(_filename);
+			Load(_properties.filename);
 		}
 
-		const str& GetFilename() const
+		str GetFilename() const
 		{
-			return _filename;
+			return _properties.filename;
 		}
 
-		str& GetFilename()
+		str GetEntrypoint() const
 		{
-			return _filename;
+			return _properties.entrypoint;
 		}
 
-		const str& GetEntrypoint() const
+		const chr* GetEntrypointCStr() const
 		{
-			return _entrypoint;
-		}
-
-		str& GetEntrypoint()
-		{
-			return _entrypoint;
+			return _properties.entrypoint.c_str();
 		}
 
 		void SetEntrypoint(str entrypoint)
 		{
-			_entrypoint = entrypoint;
+			_properties.entrypoint = entrypoint;
 		}
 
 		Type GetType() const
 		{
-			return _type;
+			return _properties.type;
+		}
+
+		Properties& GetProperties()
+		{
+			return _properties;
+		}
+
+		const Properties& GetProperties() const
+		{
+			return _properties;
 		}
 	};
 } // namespace np::gfx

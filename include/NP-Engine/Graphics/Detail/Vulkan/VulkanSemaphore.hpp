@@ -9,12 +9,14 @@
 
 #include "NP-Engine/Vendor/VulkanInclude.hpp"
 
+#include "VulkanLogicalDevice.hpp"
+
 namespace np::gfx::__detail
 {
 	class VulkanSemaphore
 	{
 	private:
-		VkDevice _device;
+		mem::sptr<VulkanLogicalDevice> _device;
 		VkSemaphore _semaphore;
 
 		VkSemaphore CreateSemaphore()
@@ -24,19 +26,19 @@ namespace np::gfx::__detail
 			VkSemaphoreCreateInfo info{};
 			info.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
 
-			if (vkCreateSemaphore(_device, &info, nullptr, &semaphore) != VK_SUCCESS)
+			if (vkCreateSemaphore(*_device, &info, nullptr, &semaphore) != VK_SUCCESS)
 				semaphore = nullptr;
 			return semaphore;
 		}
 
 	public:
-		VulkanSemaphore(VkDevice device): _device(device), _semaphore(CreateSemaphore()) {}
+		VulkanSemaphore(mem::sptr<VulkanLogicalDevice> device): _device(device), _semaphore(CreateSemaphore()) {}
 
 		~VulkanSemaphore()
 		{
 			if (_semaphore)
 			{
-				vkDestroySemaphore(_device, _semaphore, nullptr);
+				vkDestroySemaphore(*_device, _semaphore, nullptr);
 				_semaphore = nullptr;
 			}
 		}

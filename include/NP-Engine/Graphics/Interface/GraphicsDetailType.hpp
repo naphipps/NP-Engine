@@ -19,16 +19,6 @@ namespace np::gfx
 		DirectX,
 		Metal
 	};
-
-	namespace __detail
-	{
-		extern atm<GraphicsDetailType> RegisteredGraphicsDetailType;
-	} // namespace __detail
-
-	static GraphicsDetailType GetRegisteredGraphicsDetailType()
-	{
-		return __detail::RegisteredGraphicsDetailType.load(mo_acquire);
-	}
 } // namespace np::gfx
 
 #endif /* NP_ENGINE_GRAPHICS_DETAIL_TYPE_HPP */

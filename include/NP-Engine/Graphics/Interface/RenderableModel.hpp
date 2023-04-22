@@ -14,7 +14,6 @@
 
 #include "GraphicsDetailType.hpp"
 #include "RenderableObject.hpp"
-#include "RenderableType.hpp"
 #include "RenderableMetaValues.hpp"
 #include "Model.hpp"
 
@@ -23,31 +22,25 @@ namespace np::gfx
 	class RenderableModel : public RenderableObject
 	{
 	protected:
-		srvc::Services& _services;
-		Model& _model;
+		mem::sptr<srvc::Services> _services;
+		mem::sptr<Model> _model;
 		RenderableMetaValues _meta_values;
-		mem::Delegate _update_meta_values_on_frame;
+		mem::Delegate _update_meta_values_on_frame; //TODO: I do not think we need this...
 
 		// TODO: add struct that represents all the needed information to render our _model
 
-		RenderableModel(srvc::Services& services, Model& model): _services(services), _model(model), _meta_values() {}
+		RenderableModel(mem::sptr<srvc::Services> services, mem::sptr<Model> model): _services(services), _model(model), _meta_values() {}
 
 	public:
-		static RenderableModel* Create(srvc::Services& services, Model& model);
 
 		virtual ~RenderableModel() {}
 
-		virtual RenderableType GetType() const override
+		virtual ResourceType GetType() const override
 		{
-			return RenderableType::Model;
+			return ResourceType::RenderableModel;
 		}
 
-		Model& GetModel()
-		{
-			return _model;
-		}
-
-		const Model& GetModel() const
+		mem::sptr<Model> GetModel() const
 		{
 			return _model;
 		}

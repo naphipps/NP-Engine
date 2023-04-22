@@ -9,9 +9,8 @@
 
 #include "NP-Engine/Primitive/Primitive.hpp"
 
-#include "Frame.hpp"
+#include "CommandStaging.hpp"
 #include "Pipeline.hpp"
-#include "RenderableType.hpp"
 #include "RenderableObject.hpp"
 
 namespace np::gfx
@@ -19,10 +18,10 @@ namespace np::gfx
 	class RenderableLightObject : public RenderableObject
 	{
 	private:
-		virtual void RenderToFrame(Frame& frame, Pipeline& pipline) override {} // lights do not need this
+		virtual void Stage(mem::sptr<CommandStaging> command_staging, mem::sptr<Pipeline> pipline) override {} //lights do not need this
 
 	public:
-		virtual void RenderToFrame(Frame& frame, Pipeline& pipline, RenderableObject& object) = 0;
+		virtual void Stage(mem::sptr<CommandStaging> command_staging, mem::sptr<Pipeline> pipline, mem::sptr<Resource> resource) = 0;
 	};
 } // namespace np::gfx
 

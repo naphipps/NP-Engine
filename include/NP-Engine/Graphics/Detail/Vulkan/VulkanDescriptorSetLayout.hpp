@@ -12,33 +12,33 @@
 
 #include "NP-Engine/Vendor/VulkanInclude.hpp"
 
-#include "VulkanDevice.hpp"
+#include "VulkanLogicalDevice.hpp"
 
 namespace np::gfx::__detail
 {
 	class VulkanDescriptorSetLayout
 	{
 	private:
-		VulkanDevice& _device;
+		mem::sptr<VulkanLogicalDevice> _device;
 		const con::vector<VkDescriptorSetLayoutBinding> _layout_bindings;
 		VkDescriptorSetLayout _layout;
 
-		VkDescriptorSetLayout CreateLayout() const
+		static VkDescriptorSetLayout CreateLayout(mem::sptr<VulkanLogicalDevice> device, const con::vector<VkDescriptorSetLayoutBinding>& layout_bindings)
 		{
 			VkDescriptorSetLayout layout = nullptr;
 			VkDescriptorSetLayoutCreateInfo info{};
 			info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-			info.bindingCount = (ui32)_layout_bindings.size();
-			info.pBindings = _layout_bindings.data();
+			info.bindingCount = (ui32)layout_bindings.size();
+			info.pBindings = layout_bindings.data();
 
-			if (vkCreateDescriptorSetLayout(GetDevice(), &info, nullptr, &layout) != VK_SUCCESS)
+			if (vkCreateDescriptorSetLayout(*device, &info, nullptr, &layout) != VK_SUCCESS)
 				layout = nullptr;
 
 			return layout;
 		}
 
 	public:
-		VulkanDescriptorSetLayout(VulkanDevice& device):
+		VulkanDescriptorSetLayout(mem::sptr<VulkanLogicalDevice> device):
 			_device(device),
 			_layout_bindings(
 				{/*
@@ -53,14 +53,14 @@ namespace np::gfx::__detail
 				 */
 				 {0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, nullptr},
 				 {1, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1, VK_SHADER_STAGE_FRAGMENT_BIT, nullptr}}),
-			_layout(CreateLayout())
+			_layout(CreateLayout(_device, _layout_bindings))
 		{}
 
 		~VulkanDescriptorSetLayout()
 		{
 			if (_layout)
 			{
-				vkDestroyDescriptorSetLayout(GetDevice(), _layout, nullptr);
+				vkDestroyDescriptorSetLayout(*_device, _layout, nullptr);
 				_layout = nullptr;
 			}
 		}
@@ -70,17 +70,12 @@ namespace np::gfx::__detail
 			return _layout;
 		}
 
-		VulkanDevice& GetDevice()
+		mem::sptr<VulkanLogicalDevice> GetLogicalDevice() const
 		{
 			return _device;
 		}
 
-		const VulkanDevice& GetDevice() const
-		{
-			return _device;
-		}
-
-		bl GetBindingForDescriptorType(VkDescriptorType descriptor_type, ui32& out_binding) const
+		bl GetBindingForDescriptorType(VkDescriptorType descriptor_type, ui32& out_binding) const //TODO: not a huge fan of this method signature
 		{
 			bl found = false;
 			for (const VkDescriptorSetLayoutBinding& layout_binding : _layout_bindings)

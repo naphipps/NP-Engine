@@ -13,22 +13,22 @@
 #include "NP-Engine/Vendor/VulkanInclude.hpp"
 
 #include "VulkanCommandBuffer.hpp"
+#include "VulkanLogicalDevice.hpp"
 
 namespace np::gfx::__detail
 {
 	class VulkanCommandPool
 	{
 	private:
-		VkDevice _device;
+		mem::sptr<VulkanLogicalDevice> _device;
 		VkCommandPool _command_pool;
 
-		VkCommandPool CreateCommandPool(VkCommandPoolCreateInfo& info) const
+		static VkCommandPool CreateCommandPool(mem::sptr<VulkanLogicalDevice> device, VkCommandPoolCreateInfo& info)
 		{
 			VkCommandPool command_pool = nullptr;
-			if (vkCreateCommandPool(_device, &info, nullptr, &command_pool) != VK_SUCCESS)
-			{
+			if (vkCreateCommandPool(*device, &info, nullptr, &command_pool) != VK_SUCCESS)
 				command_pool = nullptr;
-			}
+
 			return command_pool;
 		}
 
@@ -40,10 +40,18 @@ namespace np::gfx::__detail
 			return info;
 		}
 
-		VulkanCommandPool(VkDevice device, VkCommandPoolCreateInfo command_pool_create_info):
+		VulkanCommandPool(mem::sptr<VulkanLogicalDevice> device, VkCommandPoolCreateInfo command_pool_create_info) :
 			_device(device),
-			_command_pool(CreateCommandPool(command_pool_create_info))
+			_command_pool(CreateCommandPool(_device, command_pool_create_info))
 		{}
+
+		VulkanCommandPool(VulkanCommandPool&& other) noexcept :
+			_device(::std::move(other._device)),
+			_command_pool(::std::move(other._command_pool))
+		{
+			other._device = nullptr;
+			other._command_pool = nullptr;
+		}
 
 		~VulkanCommandPool()
 		{
@@ -54,7 +62,7 @@ namespace np::gfx::__detail
 		{
 			if (_command_pool)
 			{
-				vkDestroyCommandPool(_device, _command_pool, nullptr);
+				vkDestroyCommandPool(*_device, _command_pool, nullptr);
 				_command_pool = nullptr;
 			}
 		}
@@ -62,6 +70,16 @@ namespace np::gfx::__detail
 		operator VkCommandPool() const
 		{
 			return _command_pool;
+		}
+
+		mem::sptr<VulkanLogicalDevice> GetLogicalDevice() const
+		{
+			return _device;
+		}
+
+		mem::sptr<srvc::Services> GetServices() const
+		{
+			return _device->GetServices();
 		}
 
 		VkCommandBufferAllocateInfo CreateCommandBufferAllocateInfo() const
@@ -73,22 +91,52 @@ namespace np::gfx::__detail
 			return info;
 		}
 
-		con::vector<VulkanCommandBuffer> AllocateCommandBuffers(const VkCommandBufferAllocateInfo& command_buffer_allocate_info)
+		con::vector<mem::sptr<VulkanCommandBuffer>> AllocateCommandBuffers(siz count)
 		{
-			con::vector<VkCommandBuffer> buffers(command_buffer_allocate_info.commandBufferCount);
-
-			if (vkAllocateCommandBuffers(_device, &command_buffer_allocate_info, buffers.data()) != VK_SUCCESS)
-			{
-				buffers.clear();
-			}
-
-			return con::vector<VulkanCommandBuffer>(buffers.begin(), buffers.end());
+			VkCommandBufferAllocateInfo command_buffer_allocate_info = CreateCommandBufferAllocateInfo();
+			command_buffer_allocate_info.commandBufferCount = count;
+			return AllocateCommandBuffers(command_buffer_allocate_info);
 		}
 
-		void FreeCommandBuffers(const con::vector<VulkanCommandBuffer>& command_buffers)
+		con::vector<mem::sptr<VulkanCommandBuffer>> AllocateCommandBuffers(const VkCommandBufferAllocateInfo& command_buffer_allocate_info)
 		{
-			con::vector<VkCommandBuffer> buffers(command_buffers.begin(), command_buffers.end());
-			vkFreeCommandBuffers(_device, _command_pool, (ui32)buffers.size(), buffers.data());
+			con::vector<VkCommandBuffer> buffers(command_buffer_allocate_info.commandBufferCount);
+			if (vkAllocateCommandBuffers(*_device, &command_buffer_allocate_info, buffers.data()) != VK_SUCCESS)
+				buffers.clear();
+
+			con::vector<mem::sptr<VulkanCommandBuffer>> vulkan_command_buffers(buffers.size());
+			for (siz i = 0; i < buffers.size(); i++)
+				vulkan_command_buffers[i] = mem::create_sptr<VulkanCommandBuffer>(GetServices()->GetAllocator(), buffers[i]);
+
+			return vulkan_command_buffers;
+		}
+
+		void FreeCommandBuffers(const con::vector<mem::sptr<VulkanCommandBuffer>>& command_buffers)
+		{
+			con::vector<VkCommandBuffer> buffers(command_buffers.size());
+			for (siz i = 0; i < buffers.size(); i++)
+				buffers[i] = *command_buffers[i];
+
+			vkFreeCommandBuffers(*_device, _command_pool, (ui32)buffers.size(), buffers.data());
+		}
+
+		static void BeginCommandBuffers(con::vector<mem::sptr<VulkanCommandBuffer>>& command_buffers, VkCommandBufferBeginInfo& begin_info)
+		{
+			for (mem::sptr<VulkanCommandBuffer>& command_buffer : command_buffers)
+				command_buffer->Begin(begin_info);
+		}
+
+		static void BeginCommandBuffers(con::vector<mem::sptr<VulkanCommandBuffer>>& command_buffers, con::vector<VkCommandBufferBeginInfo>& begin_infos)
+		{
+			NP_ENGINE_ASSERT(command_buffers.size() == begin_infos.size(), "command_buffers size must equal begin_infos size");
+			for (siz i = 0; i < command_buffers.size(); i++)
+				command_buffers[i]->Begin(begin_infos[i]);
+		}
+
+		static void EndCommandBuffers(con::vector<mem::sptr<VulkanCommandBuffer>>& command_buffers)
+		{
+			for (mem::sptr<VulkanCommandBuffer>& command_buffer : command_buffers)
+				command_buffer->End();
 		}
 	};
 } // namespace np::gfx::__detail

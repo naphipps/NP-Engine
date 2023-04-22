@@ -6,6 +6,9 @@
 
 // TODO: bring back xcode support - apparently our "fake" targets in cmake are bad for xcode
 // TODO: all "::Create" functions need to return a sptr
+// TODO: move main and as much as we can into test proj
+
+//TODO: commit 33806c960e2dc89aa524c84663dd75c37a2f6077(33806c9) has a working renderer - use it as reference
 
 #include <exception>
 
@@ -24,11 +27,11 @@ i32 main(i32 argc, chr** argv)
 	{
 		::np::sys::Init();
 		::np::mem::AccumulatingAllocator<::np::mem::RedBlackTreeAllocator> allocator;
-		::np::mem::TraitAllocator::Register(allocator);
+		//::np::mem::TraitAllocator::Register(allocator);
 		{
 			NP_ENGINE_PROFILE_SCOPE("application lifespan");
 			::np::mem::sptr<::np::srvc::Services> services = ::np::mem::create_sptr<::np::srvc::Services>(allocator);
-			::np::mem::sptr<::np::app::Application> application = ::np::app::CreateApplication(*services);
+			::np::mem::sptr<::np::app::Application> application = ::np::app::CreateApplication(services);
 			application->Run(argc, argv);
 			application.reset(); //TODO: when services is treated as sptr in application, then we can remove these resets
 			services.reset();

@@ -13,12 +13,15 @@
 #include "NP-Engine/Container/Container.hpp"
 #include "NP-Engine/String/String.hpp"
 #include "NP-Engine/Platform/Platform.hpp"
+#include "NP-Engine/Services/Services.hpp"
+
+#include "NP-Engine/Graphics/Interface/Interface.hpp"
 
 #include "NP-Engine/Vendor/VulkanInclude.hpp"
 
 namespace np::gfx::__detail
 {
-	class VulkanInstance
+	class VulkanInstance : public DetailInstance
 	{
 	private:
 		constexpr static ui32 REQUIRED_VERSION = VK_MAKE_API_VERSION(0, 1, 2, 189);
@@ -33,6 +36,7 @@ namespace np::gfx::__detail
 		{
 			// TODO: feel like we should pipe this stuff through our logger
 			// TODO: should we have a macro to enable this? NP_ENGINE_ENABLE_VULKAN_DEBUG_CALLBACK?
+			// TODO: do we still have these known messages?
 
 			con::vector<str> known_msgs{
 				R"(loader_scanned_icd_add: Driver C:\Windows\System32\DriverStore\FileRepository\u0377495.inf_amd64_58cc395c0bf03a26\B377432\.\amdvlk64.dll says it supports interface version 6 but still exports core entrypoints (Policy #LDP_DRIVER_6))" // vulkansdk 1.3.211
@@ -55,7 +59,6 @@ namespace np::gfx::__detail
 					msg += to_str(callback_data->pMessage);
 
 					NP_ENGINE_LOG_ERROR(msg);
-
 					// NP_ENGINE_ASSERT(false, msg); // here in case for issues that cause a gpu crash
 				}
 			}
@@ -124,6 +127,9 @@ namespace np::gfx::__detail
 #endif
 
 			con::vector<str> window_required = win::Window::GetRequiredGfxExtentions(win::WindowDetailType::Glfw);
+			
+			//TODO: ^ figure out how to allow the caller to decide WindowDetailType above or if we even use it - feel like we need to give DetailInstance vector of required extensions??
+
 			for (const str& extension : window_required)
 				extension_set.emplace(extension);
 
@@ -248,7 +254,7 @@ namespace np::gfx::__detail
 		}
 
 	public:
-		VulkanInstance(): _instance(CreateInstance()), _debug_messenger(CreateDebugMessenger()) {}
+		VulkanInstance(mem::sptr<srvc::Services> services): DetailInstance(services), _instance(CreateInstance()), _debug_messenger(CreateDebugMessenger()) {}
 
 		~VulkanInstance()
 		{
@@ -274,6 +280,11 @@ namespace np::gfx::__detail
 		operator VkInstance() const
 		{
 			return _instance;
+		}
+
+		GraphicsDetailType GetDetailType() const override
+		{
+			return GraphicsDetailType::Vulkan;
 		}
 	};
 } // namespace np::gfx::__detail

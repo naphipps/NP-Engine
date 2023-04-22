@@ -14,7 +14,6 @@
 
 #include "GraphicsDetailType.hpp"
 #include "RenderableObject.hpp"
-#include "RenderableType.hpp"
 #include "Image.hpp"
 
 namespace np::gfx
@@ -22,27 +21,22 @@ namespace np::gfx
 	class RenderableImage : public RenderableObject
 	{
 	protected:
-		srvc::Services& _services;
-		Image& _image;
+		mem::sptr<srvc::Services> _services;
+		mem::sptr<Image> _image;
 
-		RenderableImage(srvc::Services& services, Image& image): _services(services), _image(image) {}
+		RenderableImage(mem::sptr<srvc::Services> services, mem::sptr<Image> image): _services(services), _image(image) {}
 
 	public:
 		static RenderableImage* Create(srvc::Services& services, Image& image);
 
 		virtual ~RenderableImage() {}
 
-		virtual RenderableType GetType() const override
+		virtual ResourceType GetType() const override
 		{
-			return RenderableType::Image;
+			return ResourceType::RenderableImage;
 		}
 
-		Image& GetImage()
-		{
-			return _image;
-		}
-
-		const Image& GetImage() const
+		mem::sptr<Image> GetImage() const
 		{
 			return _image;
 		}

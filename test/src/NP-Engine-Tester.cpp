@@ -11,10 +11,10 @@
 
 namespace np::app
 {
-	mem::sptr<Application> CreateApplication(::np::srvc::Services& services)
+	mem::sptr<Application> CreateApplication(::np::mem::sptr<::np::srvc::Services> services)
 	{
 		NP_ENGINE_PROFILE_FUNCTION();
 		NP_ENGINE_LOG_INFO("Hello world from game create application.");
-		return mem::create_sptr<GameApp>(services.GetAllocator(), services);
+		return mem::create_sptr<GameApp>(services->GetAllocator(), services);
 	}
 } // namespace np::app

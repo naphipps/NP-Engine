@@ -16,35 +16,56 @@
 #include "Layer.hpp"
 #include "ApplicationCloseEvent.hpp"
 
-// TODO: I think we should get rid of all glfw calls here
-
 namespace np::app
 {
 	class WindowLayer : public Layer
 	{
 	private:
-		// TODO: should this be a set?? I think vector is good for Cleanup(), but we could use a map for fast index lookup
-		con::vector<mem::sptr<win::Window>> _windows;
+		Mutex _windows_mutex;
+		con::vector<mem::wptr<win::Window>> _windows;
 
 #if NP_ENGINE_PLATFORM_IS_APPLE
 		con::mpmc_queue<mem::sptr<win::Window>> _windows_to_destroy;
 #endif
 
 	protected:
+		static void AdjustForWindowClosingCallback(void* caller, mem::Delegate& d)
+		{
+			((WindowLayer*)caller)->AdjustForWindowClosingProcedure(d);
+		}
+
+		void AdjustForWindowClosingProcedure(mem::Delegate& d)
+		{
+			uid::Uid windowId = d.GetData<uid::Uid>();
+			mem::sptr<win::Window> window = nullptr;
+			for (auto it = _windows.begin(); it != _windows.end(); it++)
+			{
+				window = it->get_sptr();
+				if (window && window->GetUid() == windowId)
+				{
+					_windows.erase(it);
+					break;
+				}
+			}
+			window.reset();
+
+			d.DestructData<uid::Uid>();
+		}
+
 		virtual void HandleWindowClosing(mem::sptr<evnt::Event> e)
 		{
 			win::WindowClosingEvent& closing_event = (win::WindowClosingEvent&)(*e);
 			win::WindowClosingEvent::DataType& closing_data = closing_event.GetData();
-			jsys::JobSystem& job_system = _services.GetJobSystem();
 
-			for (auto it = _windows.begin(); it != _windows.end(); it++)
-				if ((*it)->GetUid() == closing_data.windowId)
-				{
-					// window ownership has gone to the closing job
-					closing_data.job->GetDelegate().ConstructData<mem::sptr<win::Window>>(*it);
-					_windows.erase(it);
-					break;
-				}
+			NP_ENGINE_ASSERT(closing_data.job->GetDelegate().GetData<mem::sptr<win::Window>>(), 
+				"Owner of the window should have submitted it to the closing job");
+			
+			jsys::JobSystem& job_system = _services->GetJobSystem();
+			mem::sptr<jsys::Job> adjust_job = job_system.CreateJob();
+			adjust_job->GetDelegate().ConstructData<uid::Uid>(closing_data.windowId);
+			adjust_job->GetDelegate().SetCallback(this, AdjustForWindowClosingCallback);
+			jsys::Job::AddDependency(closing_data.job, adjust_job);
+			job_system.SubmitJob(jsys::JobPriority::Higher, adjust_job);
 
 			// our closing job must be submitted here
 			job_system.SubmitJob(jsys::JobPriority::Normal, closing_data.job);
@@ -67,17 +88,17 @@ namespace np::app
 #endif
 			// ownership of window is now resolved in this job procedure by destroying it here
 			//^ like a normal person unlike apple above
-			d.DestructData<mem::sptr<win::Window>>(); //TODO: window seems to not close immediately
+			d.DestructData<mem::sptr<win::Window>>();
 
-			if (_windows.size() == 0)
-				_services.GetEventSubmitter().Submit(mem::create_sptr<ApplicationCloseEvent>(_services.GetAllocator()));
+			if (_windows.size() == 0) //this relies on the window closing adjust job
+				_services->GetEventSubmitter().Submit(mem::create_sptr<ApplicationCloseEvent>(_services->GetAllocator()));
 		}
 
 		virtual void HandleWindowClosed(mem::sptr<evnt::Event> e)
 		{
 			win::WindowClosedEvent& closed_event = (win::WindowClosedEvent&)(*e);
 			win::WindowClosedEvent::DataType& closed_data = closed_event.GetData();
-			jsys::JobSystem& job_system = _services.GetJobSystem();
+			jsys::JobSystem& job_system = _services->GetJobSystem();
 
 			mem::sptr<jsys::Job> handle_job = job_system.CreateJob();
 			// ownership of window is moving from the event to our job procedure
@@ -106,7 +127,7 @@ namespace np::app
 		}
 
 	public:
-		WindowLayer(srvc::Services& services): Layer(services)
+		WindowLayer(mem::sptr<srvc::Services> services): Layer(services)
 		{
 			win::Window::Init(win::WindowDetailType::Glfw);
 			win::Window::Init(win::WindowDetailType::Sdl);
@@ -122,9 +143,10 @@ namespace np::app
 			win::Window::Terminate(win::WindowDetailType::Sdl);
 		}
 
-		virtual mem::sptr<win::Window> CreateWindow(win::WindowDetailType detail_type, win::Window::Properties& properties)
+		virtual void RegisterWindow(mem::sptr<win::Window> window)
 		{
-			return _windows.emplace_back(win::Window::Create(detail_type, _services, properties));
+			Lock l(_windows_mutex);
+			_windows.emplace_back(window);
 		}
 
 		virtual void Update(tim::DblMilliseconds time_delta) override
@@ -132,17 +154,27 @@ namespace np::app
 			win::Window::Update(win::WindowDetailType::Glfw);
 			win::Window::Update(win::WindowDetailType::Sdl);
 
+			mem::sptr<win::Window> window = nullptr;
 			for (auto it = _windows.begin(); it != _windows.end(); it++)
-				(*it)->Update(time_delta);
+			{
+				window = it->get_sptr();
+				if (window)
+					window->Update(time_delta);
+			}
+			window.reset();
 		}
 
 		virtual void Cleanup() override
 		{
 #if NP_ENGINE_PLATFORM_IS_APPLE
 			mem::sptr<win::Window> window = nullptr;
-			while (_windows_to_destroy.try_dequeue(window))
-				window.reset();
+			while (_windows_to_destroy.try_dequeue(window)) {}
+			window.reset();
 #endif
+
+			for (siz i = _windows.size() - 1; i < _windows.size(); i--)
+				if (_windows[i].is_expired())
+					_windows.erase(_windows.begin() + i);
 		}
 
 		virtual evnt::EventCategory GetHandledCategories() const override

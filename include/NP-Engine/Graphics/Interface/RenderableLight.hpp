@@ -14,7 +14,6 @@
 
 #include "GraphicsDetailType.hpp"
 #include "RenderableLightObject.hpp"
-#include "RenderableType.hpp"
 #include "Light.hpp"
 
 namespace np::gfx
@@ -22,27 +21,22 @@ namespace np::gfx
 	class RenderableLight : public RenderableLightObject
 	{
 	protected:
-		srvc::Services& _services;
-		Light& _light;
+		mem::sptr<srvc::Services> _services;
+		mem::sptr<Light> _light;
 
-		RenderableLight(srvc::Services& services, Light& light): _services(services), _light(light) {}
+		RenderableLight(mem::sptr<srvc::Services> services, mem::sptr<Light> light): _services(services), _light(light) {}
 
 	public:
-		static RenderableLight* Create(srvc::Services& services, Light& light);
+		static RenderableLight* Create(mem::sptr<srvc::Services> services, mem::sptr<Light> light);
 
 		virtual ~RenderableLight() {}
 
-		virtual RenderableType GetType() const override
+		virtual ResourceType GetType() const override
 		{
-			return RenderableType::Light;
+			return ResourceType::RenderableLight;
 		}
 
-		Light& GetLight()
-		{
-			return _light;
-		}
-
-		const Light& GetLight() const
+		mem::sptr<Light> GetLight() const
 		{
 			return _light;
 		}

@@ -31,6 +31,7 @@ namespace np::gfx
 		ui32 _height;
 		con::vector<ui8> _pixels;
 		str _filename;
+		::glm::mat4 _transform;
 
 	public:
 		Image(str filename)

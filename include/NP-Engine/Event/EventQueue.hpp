@@ -22,6 +22,7 @@ namespace np::evnt
 	{
 	protected:
 		using EventBufferType = con::mpmc_queue<mem::sptr<Event>>;
+		//TODO: ^ we've had some issues where it takes too long for something to be pop after it has been pushed - maybe locking queue would be faster
 
 		atm_bl _flag;
 		mem::TraitAllocator _allocator;

@@ -12,19 +12,20 @@
 #include "NP-Engine/Vendor/VulkanInclude.hpp"
 
 #include "VulkanCommandBuffer.hpp"
+#include "VulkanLogicalDevice.hpp"
 
 namespace np::gfx::__detail
 {
 	class VulkanQueue
 	{
 	private:
-		VkDevice _device;
+		mem::sptr<VulkanLogicalDevice> _device;
 		VkQueue _queue;
 
-		VkQueue RetrieveQueue(ui32 queue_family_index, ui32 queue_index)
+		static VkQueue RetrieveQueue(mem::sptr<VulkanLogicalDevice> device, ui32 queue_family_index, ui32 queue_index)
 		{
 			VkQueue queue = nullptr;
-			vkGetDeviceQueue(_device, queue_family_index, queue_index, &queue);
+			vkGetDeviceQueue(*device, queue_family_index, queue_index, &queue);
 			return queue;
 		}
 
@@ -34,9 +35,9 @@ namespace np::gfx::__detail
 			return {VK_STRUCTURE_TYPE_SUBMIT_INFO};
 		}
 
-		VulkanQueue(VkDevice device, ui32 queue_family_index, ui32 queue_index):
+		VulkanQueue(mem::sptr<VulkanLogicalDevice> device, ui32 queue_family_index, ui32 queue_index):
 			_device(device),
-			_queue(RetrieveQueue(queue_family_index, queue_index))
+			_queue(RetrieveQueue(_device, queue_family_index, queue_index))
 		{}
 
 		operator VkQueue() const
@@ -49,9 +50,12 @@ namespace np::gfx::__detail
 			return vkQueueSubmit(_queue, (ui32)submit_infos.size(), submit_infos.data(), fence);
 		}
 
-		VkResult Submit(con::vector<VulkanCommandBuffer>& command_buffers, VkSubmitInfo submit_info, VkFence fence = nullptr)
+		VkResult Submit(con::vector<mem::sptr<VulkanCommandBuffer>>& command_buffers, VkSubmitInfo submit_info, VkFence fence = nullptr)
 		{
-			con::vector<VkCommandBuffer> buffers(command_buffers.begin(), command_buffers.end());
+			con::vector<VkCommandBuffer> buffers(command_buffers.size());
+			for (siz i = 0; i < buffers.size(); i++)
+				buffers[i] = *command_buffers[i];
+
 			submit_info.commandBufferCount = (ui32)buffers.size();
 			submit_info.pCommandBuffers = buffers.data();
 			return vkQueueSubmit(_queue, 1, &submit_info, fence);

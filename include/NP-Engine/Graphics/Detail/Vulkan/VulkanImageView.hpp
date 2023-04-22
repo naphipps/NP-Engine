@@ -11,24 +11,21 @@
 
 #include "NP-Engine/Vendor/VulkanInclude.hpp"
 
-#include "VulkanDevice.hpp"
+#include "VulkanRenderDevice.hpp"
 
 namespace np::gfx::__detail
 {
 	class VulkanImageView
 	{
 	private:
-		VulkanDevice& _device;
+		mem::sptr<VulkanLogicalDevice> _device; //TODO: I think a few of these just need a command pool instead of this...
 		VkImageView _image_view;
 
-		VkImageView CreateImageView(VkImageViewCreateInfo& info)
+		static VkImageView CreateImageView(mem::sptr<VulkanLogicalDevice> device, VkImageViewCreateInfo& info)
 		{
 			VkImageView image_view = nullptr;
-
-			if (vkCreateImageView(GetDevice(), &info, nullptr, &image_view) != VK_SUCCESS)
-			{
+			if (vkCreateImageView(*device, &info, nullptr, &image_view) != VK_SUCCESS)
 				image_view = nullptr;
-			}
 
 			return image_view;
 		}
@@ -52,15 +49,16 @@ namespace np::gfx::__detail
 			return info;
 		}
 
-		VulkanImageView(VulkanDevice& device, VkImageViewCreateInfo& image_view_create_info):
+		VulkanImageView(mem::sptr<VulkanLogicalDevice> device, VkImageViewCreateInfo& image_view_create_info):
 			_device(device),
-			_image_view(CreateImageView(image_view_create_info))
+			_image_view(CreateImageView(_device, image_view_create_info))
 		{}
 
-		VulkanImageView(const VulkanImageView&) = delete;
-
-		VulkanImageView(VulkanImageView&& other) noexcept: _device(other._device), _image_view(::std::move(other._image_view))
+		//TODO: we have a lot of move constructors that need to consider _device, etc
+		//TODO: also, with smart ptrs, I think we can support default constructors for many of our types since after a move, the other would be default anyways
+		VulkanImageView(VulkanImageView&& other) noexcept: _device(::std::move(other._device)), _image_view(::std::move(other._image_view))
 		{
+			other._device = nullptr;
 			other._image_view = nullptr;
 		}
 
@@ -68,7 +66,7 @@ namespace np::gfx::__detail
 		{
 			if (_image_view)
 			{
-				vkDestroyImageView(GetDevice(), _image_view, nullptr);
+				vkDestroyImageView(*_device, _image_view, nullptr);
 				_image_view = nullptr;
 			}
 		}
@@ -78,7 +76,7 @@ namespace np::gfx::__detail
 			return _image_view;
 		}
 
-		VulkanDevice& GetDevice() const
+		mem::sptr<VulkanLogicalDevice> GetDevice() const
 		{
 			return _device;
 		}

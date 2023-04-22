@@ -14,15 +14,16 @@
 
 namespace np::gfx
 {
-	Scene* Scene::Create(srvc::Services& services, Renderer& renderer)
+	mem::sptr<Scene> Scene::Create(Properties properties)
 	{
-		Scene* scene = nullptr;
+		mem::sptr<Scene> scene = nullptr;
 
-		switch (__detail::RegisteredGraphicsDetailType.load(mo_acquire))
+		switch (properties.renderPipeline->GetDetailType())
 		{
 		case GraphicsDetailType::Vulkan:
-			scene = mem::Create<__detail::VulkanScene>(services.GetAllocator(), services, renderer);
+			scene = mem::create_sptr<__detail::VulkanScene>(properties.renderPipeline->GetServices()->GetAllocator(), properties);
 			break;
+
 		default:
 			break;
 		}

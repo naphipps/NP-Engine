@@ -989,7 +989,7 @@ namespace np::win::__detail
 			return extensions;
 		}
 
-		GlfwWindow(Window::Properties& properties, srvc::Services& services):
+		GlfwWindow(Window::Properties& properties, mem::sptr<srvc::Services> services):
 			Window(properties, services),
 			_glfw_window(nullptr),
 			_apply_system_theme_timestamp(tim::SteadyClock::now())

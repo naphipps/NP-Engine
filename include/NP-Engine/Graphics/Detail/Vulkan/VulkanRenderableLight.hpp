@@ -23,39 +23,44 @@ namespace np::gfx::__detail
 	class VulkanRenderableLight : public RenderableLight
 	{
 	private:
-		void RenderToFrame(VulkanFrame& frame, VulkanPipeline& pipeline, VulkanRenderableImage& image) {}
+		void Stage(mem::sptr<CommandStaging> staging, mem::sptr<Pipeline> pipeline, VulkanRenderableImage& image) {}
 
-		void RenderToFrame(VulkanFrame& frame, VulkanPipeline& pipeline, VulkanRenderableModel& model) {}
+		void Stage(mem::sptr<CommandStaging> staging, mem::sptr<Pipeline> pipeline, VulkanRenderableModel& model) {}
 
-		void Dispose() {}
+		void Dispose()
+		{
+			//TODO: implement
+		}
 
 	public:
-		VulkanRenderableLight(srvc::Services& services, Light& light): RenderableLight(services, light) {}
+		VulkanRenderableLight(mem::sptr<srvc::Services> services, mem::sptr<Light> light): RenderableLight(services, light) {}
 
 		~VulkanRenderableLight()
 		{
 			Dispose();
 		}
 
-		void RenderToFrame(Frame& frame, Pipeline& pipeline, RenderableObject& object) override
+		void Stage(mem::sptr<CommandStaging> staging, mem::sptr<Pipeline> pipeline, mem::sptr<Resource> resource) override
 		{
 			// TODO: implement this
-			switch (object.GetType())
+			switch (resource->GetType())
 			{
-			case RenderableType::Image:
-				RenderToFrame((VulkanFrame&)frame, (VulkanPipeline&)pipeline, (VulkanRenderableImage&)object);
+			case ResourceType::RenderableImage:
+				Stage(staging, pipeline, (VulkanRenderableImage&)(*resource));
 				break;
-			case RenderableType::Model:
-				RenderToFrame((VulkanFrame&)frame, (VulkanPipeline&)pipeline, (VulkanRenderableModel&)object);
+
+			case ResourceType::RenderableModel:
+				Stage(staging, pipeline, (VulkanRenderableModel&)(*resource));
 				break;
+
 			default:
 				break;
 			}
 		}
 
-		void PrepareForPipeline(Pipeline& pipeline) override {}
+		void PrepareForPipeline(mem::sptr<Pipeline> pipeline) override {}
 
-		void DisposeForPipeline(Pipeline& pipeline) override
+		void DisposeForPipeline(mem::sptr<Pipeline> pipeline) override
 		{
 			// TODO: implement
 			Dispose();

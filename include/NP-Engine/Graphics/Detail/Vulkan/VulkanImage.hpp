@@ -13,7 +13,7 @@
 
 #include "NP-Engine/Vendor/VulkanInclude.hpp"
 
-#include "VulkanDevice.hpp"
+#include "VulkanLogicalDevice.hpp"
 #include "VulkanBuffer.hpp"
 
 namespace np::gfx::__detail
@@ -21,45 +21,37 @@ namespace np::gfx::__detail
 	class VulkanImage
 	{
 	private:
-		VulkanDevice& _device;
+		mem::sptr<VulkanCommandPool> _command_pool;
 		VkImage _image;
 		VkDeviceMemory _device_memory;
 
-		VkImage CreateImage(VkImageCreateInfo& info)
+		static VkImage CreateImage(mem::sptr<VulkanLogicalDevice> device, VkImageCreateInfo& info)
 		{
 			VkImage image = nullptr;
-
-			if (vkCreateImage(GetDevice(), &info, nullptr, &image) != VK_SUCCESS)
-			{
+			if (vkCreateImage(*device, &info, nullptr, &image) != VK_SUCCESS)
 				image = nullptr;
-			}
 
 			return image;
 		}
 
-		VkDeviceMemory CreateDeviceMemory(VkMemoryPropertyFlags memory_property_flags)
+		static VkDeviceMemory CreateDeviceMemory(mem::sptr<VulkanLogicalDevice> device, VkImage image, VkMemoryPropertyFlags memory_property_flags)
 		{
 			VkDeviceMemory device_memory = nullptr;
 
-			if (_image)
+			if (image)
 			{
 				VkMemoryRequirements requirements;
-				vkGetImageMemoryRequirements(GetDevice(), _image, &requirements);
+				vkGetImageMemoryRequirements(*device, image, &requirements);
 
 				VkMemoryAllocateInfo allocate_info{};
 				allocate_info.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
 				allocate_info.allocationSize = requirements.size;
-				allocate_info.memoryTypeIndex =
-					GetDevice().GetMemoryTypeIndex(requirements.memoryTypeBits, memory_property_flags);
+				allocate_info.memoryTypeIndex = device->GetMemoryTypeIndex(requirements.memoryTypeBits, memory_property_flags).value();
 
-				if (vkAllocateMemory(GetDevice(), &allocate_info, nullptr, &device_memory) != VK_SUCCESS)
-				{
+				if (vkAllocateMemory(*device, &allocate_info, nullptr, &device_memory) != VK_SUCCESS)
 					device_memory = nullptr;
-				}
-				else if (vkBindImageMemory(GetDevice(), _image, device_memory, 0) != VK_SUCCESS)
-				{
+				else if (vkBindImageMemory(*device, image, device_memory, 0) != VK_SUCCESS)
 					device_memory = nullptr;
-				}
 			}
 
 			return device_memory;
@@ -82,19 +74,18 @@ namespace np::gfx::__detail
 			return info;
 		}
 
-		VulkanImage(VulkanDevice& device, VkImageCreateInfo& image_create_info, VkMemoryPropertyFlags memory_property_flags):
-			_device(device),
-			_image(CreateImage(image_create_info)),
-			_device_memory(CreateDeviceMemory(memory_property_flags))
+		VulkanImage(mem::sptr<VulkanCommandPool> command_pool, VkImageCreateInfo& image_create_info, VkMemoryPropertyFlags memory_property_flags):
+			_command_pool(command_pool),
+			_image(CreateImage(GetLogicalDevice(), image_create_info)),
+			_device_memory(CreateDeviceMemory(GetLogicalDevice(), _image, memory_property_flags))
 		{}
 
-		VulkanImage(const VulkanImage&) = delete;
-
 		VulkanImage(VulkanImage&& other) noexcept:
-			_device(other._device),
+			_command_pool(::std::move(other._command_pool)),
 			_image(::std::move(other._image)),
 			_device_memory(::std::move(other._device_memory))
 		{
+			other._command_pool = nullptr;
 			other._image = nullptr;
 			other._device_memory = nullptr;
 		}
@@ -103,13 +94,13 @@ namespace np::gfx::__detail
 		{
 			if (_device_memory)
 			{
-				vkFreeMemory(GetDevice(), _device_memory, nullptr);
+				vkFreeMemory(*GetLogicalDevice(), _device_memory, nullptr);
 				_device_memory = nullptr;
 			}
 
 			if (_image)
 			{
-				vkDestroyImage(GetDevice(), _image, nullptr);
+				vkDestroyImage(*GetLogicalDevice(), _image, nullptr);
 				_image = nullptr;
 			}
 		}
@@ -120,29 +111,28 @@ namespace np::gfx::__detail
 		}
 
 		VkResult AsyncAssign(VulkanBuffer& buffer, VkBufferImageCopy buffer_image_copy, VkSubmitInfo& submit_info,
-							 con::vector<VulkanCommandBuffer>& command_buffers, VkFence fence = nullptr)
+							 con::vector<mem::sptr<VulkanCommandBuffer>>& command_buffers, mem::sptr<VulkanQueue> queue, VkFence fence = nullptr)
 		{
-			VulkanCommandCopyBufferToImage copy_buffer_to_image(buffer, _image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1,
-																&buffer_image_copy);
+			VulkanCommandCopyBufferToImage copy_buffer_to_image(buffer, _image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &buffer_image_copy);
 
-			con::vector<VulkanCommandBuffer> buffers = GetDevice().AllocateCommandBuffers(1);
+			con::vector<mem::sptr<VulkanCommandBuffer>> buffers = _command_pool->AllocateCommandBuffers(1);
 			VkCommandBufferBeginInfo begin_info = VulkanCommandBuffer::CreateBeginInfo();
 			begin_info.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
-			GetDevice().BeginCommandBuffers(buffers, begin_info);
-			buffers.front().Add(copy_buffer_to_image);
-			GetDevice().EndCommandBuffers(buffers);
+			VulkanCommandPool::BeginCommandBuffers(buffers, begin_info);
+			buffers.front()->Add(copy_buffer_to_image);
+			VulkanCommandPool::EndCommandBuffers(buffers);
 			for (auto it = buffers.begin(); it != buffers.end(); it++)
 				command_buffers.emplace_back(*it);
-			return GetDevice().GetGraphicsQueue().Submit(buffers, submit_info, fence);
+			return queue->Submit(buffers, submit_info, fence);
 		}
 
-		VkResult SyncAssign(VulkanBuffer& buffer, VkBufferImageCopy buffer_image_copy, VkSubmitInfo& submit_info)
+		VkResult SyncAssign(VulkanBuffer& buffer, VkBufferImageCopy buffer_image_copy, mem::sptr<VulkanQueue> queue, VkSubmitInfo& submit_info)
 		{
-			con::vector<VulkanCommandBuffer> command_buffers;
-			VulkanFence fence(GetDevice());
-			VkResult result = AsyncAssign(buffer, buffer_image_copy, submit_info, command_buffers, fence);
+			con::vector<mem::sptr<VulkanCommandBuffer>> command_buffers;
+			VulkanFence fence(GetLogicalDevice());
+			VkResult result = AsyncAssign(buffer, buffer_image_copy, submit_info, command_buffers, queue, fence);
 			fence.Wait();
-			GetDevice().FreeCommandBuffers(command_buffers);
+			_command_pool->FreeCommandBuffers(command_buffers);
 			return result;
 		}
 
@@ -151,14 +141,19 @@ namespace np::gfx::__detail
 			return _device_memory;
 		}
 
-		VulkanDevice& GetDevice() const
+		mem::sptr<VulkanCommandPool> GetCommandPool() const
 		{
-			return _device;
+			return _command_pool;
+		}
+
+		mem::sptr<VulkanLogicalDevice> GetLogicalDevice() const
+		{
+			return _command_pool->GetLogicalDevice();
 		}
 
 		VkResult AsyncTransitionLayout(VkFormat format, VkImageLayout old_image_layout, VkImageLayout new_image_layout,
-									   VkSubmitInfo& submit_info, con::vector<VulkanCommandBuffer>& command_buffers,
-									   VkFence fence = nullptr)
+									   VkSubmitInfo& submit_info, con::vector<mem::sptr<VulkanCommandBuffer>>& command_buffers,
+									   mem::sptr<VulkanQueue> queue, VkFence fence = nullptr)
 		{
 			// TODO: figure out a way to include fence/semaphore parameters/returns/etc
 
@@ -220,27 +215,27 @@ namespace np::gfx::__detail
 			VulkanCommandPipelineBarrier pipeline_barrier(src_pipeline_stage_flags, dst_pipeline_stage_flags, 0, 0, nullptr, 0,
 														  nullptr, 1, &image_memory_barrier);
 
-			con::vector<VulkanCommandBuffer> buffers = GetDevice().AllocateCommandBuffers(1);
+			con::vector<mem::sptr<VulkanCommandBuffer>> buffers = _command_pool->AllocateCommandBuffers(1);
 			VkCommandBufferBeginInfo begin_info = VulkanCommandBuffer::CreateBeginInfo();
 			begin_info.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
-			GetDevice().BeginCommandBuffers(buffers, begin_info);
-			buffers.front().Add(pipeline_barrier);
-			GetDevice().EndCommandBuffers(buffers);
-			using I = con::vector<VulkanCommandBuffer>::iterator;
-			for (I it = buffers.begin(); it != buffers.end(); it++)
+			VulkanCommandPool::BeginCommandBuffers(buffers, begin_info);
+			buffers.front()->Add(pipeline_barrier);
+			VulkanCommandPool::EndCommandBuffers(buffers);
+			for (auto it = buffers.begin(); it != buffers.end(); it++)
 				command_buffers.emplace_back(*it);
-			return GetDevice().GetGraphicsQueue().Submit(buffers, submit_info, fence);
+			return queue->Submit(buffers, submit_info, fence);
 		}
 
+		//TODO: we have a few method with params like this -- we need to make them consistent
 		VkResult SyncTransitionLayout(VkFormat format, VkImageLayout old_image_layout, VkImageLayout new_image_layout,
-									  VkSubmitInfo& submit_info)
+									  VkSubmitInfo& submit_info, mem::sptr<VulkanQueue> queue)
 		{
-			con::vector<VulkanCommandBuffer> command_buffers;
-			VulkanFence fence(GetDevice());
+			con::vector<mem::sptr<VulkanCommandBuffer>> command_buffers;
+			VulkanFence fence(GetLogicalDevice());
 			VkResult result =
-				AsyncTransitionLayout(format, old_image_layout, new_image_layout, submit_info, command_buffers, fence);
+				AsyncTransitionLayout(format, old_image_layout, new_image_layout, submit_info, command_buffers, queue, fence);
 			fence.Wait();
-			GetDevice().FreeCommandBuffers(command_buffers);
+			_command_pool->FreeCommandBuffers(command_buffers);
 			return result;
 		}
 	};

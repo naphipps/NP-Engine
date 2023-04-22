@@ -11,46 +11,48 @@
 
 #include "NP-Engine/Vendor/VulkanInclude.hpp"
 
+#include "NP-Engine/Graphics/Interface/Interface.hpp"
+
 #include "VulkanRenderPass.hpp"
-#include "VulkanSwapchain.hpp"
 
 namespace np::gfx::__detail
 {
-	class VulkanFramebuffers
+	class VulkanFramebuffers : public Framebuffers
 	{
 	private:
-		VulkanSwapchain& _swapchain;
-		VulkanRenderPass& _render_pass;
 		con::vector<VkFramebuffer> _framebuffers;
 
-		VkFramebufferCreateInfo CreateFramebufferInfo()
+		static VkFramebufferCreateInfo CreateFramebufferInfo(mem::sptr<RenderContext> context)
 		{
+			VulkanRenderContext& render_context = (VulkanRenderContext&)(*context);
 			VkFramebufferCreateInfo info{};
 			info.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-			info.width = GetSwapchain().GetExtent().width;
-			info.height = GetSwapchain().GetExtent().height;
+			info.width = render_context.GetExtent().width;
+			info.height = render_context.GetExtent().height;
 			info.layers = 1;
 			return info;
 		}
 
-		con::vector<VkFramebuffer> CreateFramebuffers()
+		static con::vector<VkFramebuffer> CreateFramebuffers(mem::sptr<RenderPass> pass)
 		{
-			con::vector<VkFramebuffer> framebuffers(NP_ENGINE_VULKAN_MAX_FRAME_COUNT);
+			VulkanRenderPass& render_pass = (VulkanRenderPass&)(*pass);
+			VulkanRenderContext& render_context = (VulkanRenderContext&)(*pass->GetRenderContext());
+			VulkanRenderDevice& render_device = (VulkanRenderDevice&)(*pass->GetRenderContext()->GetRenderDevice());
+
+			con::vector<VkFramebuffer> framebuffers(render_context.GetFramesInFlightCount());
 
 			for (siz i = 0; i < framebuffers.size(); i++)
 			{
-				con::vector<VkImageView> image_views{GetSwapchain().GetImageViews()[i],
-													 GetRenderPass().GetDepthTexture().GetImageView()};
+				con::vector<VkImageView> image_views{ render_context.GetImageViews()[i],
+													 render_pass.GetDepthTexture()->GetImageView()};
 
-				VkFramebufferCreateInfo framebuffer_info = CreateFramebufferInfo();
-				framebuffer_info.renderPass = GetRenderPass();
+				VkFramebufferCreateInfo framebuffer_info = CreateFramebufferInfo(pass->GetRenderContext());
+				framebuffer_info.renderPass = render_pass;
 				framebuffer_info.attachmentCount = (ui32)image_views.size();
 				framebuffer_info.pAttachments = image_views.data();
 
-				if (vkCreateFramebuffer(GetDevice(), &framebuffer_info, nullptr, &framebuffers[i]) != VK_SUCCESS)
-				{
+				if (vkCreateFramebuffer(render_device, &framebuffer_info, nullptr, &framebuffers[i]) != VK_SUCCESS)
 					framebuffers[i] = nullptr;
-				}
 			}
 
 			return framebuffers;
@@ -58,17 +60,17 @@ namespace np::gfx::__detail
 
 		void Dispose()
 		{
+			VulkanRenderDevice& render_device = (VulkanRenderDevice&)(*GetRenderPass()->GetRenderContext()->GetRenderDevice());
+
 			for (VkFramebuffer framebuffer : _framebuffers)
-				vkDestroyFramebuffer(GetDevice(), framebuffer, nullptr);
+				vkDestroyFramebuffer(render_device, framebuffer, nullptr);
 
 			_framebuffers.clear();
 		}
 
 	public:
-		VulkanFramebuffers(VulkanSwapchain& swapchain, VulkanRenderPass& render_pass):
-			_swapchain(swapchain),
-			_render_pass(render_pass),
-			_framebuffers(CreateFramebuffers())
+		VulkanFramebuffers(mem::sptr<RenderPass> pass): Framebuffers(pass),
+			_framebuffers(CreateFramebuffers(pass))
 		{}
 
 		~VulkanFramebuffers()
@@ -86,60 +88,10 @@ namespace np::gfx::__detail
 			return _framebuffers[index];
 		}
 
-		VulkanInstance& GetInstance()
-		{
-			return GetRenderPass().GetInstance();
-		}
-
-		const VulkanInstance& GetInstance() const
-		{
-			return GetRenderPass().GetInstance();
-		}
-
-		VulkanSurface& GetSurface()
-		{
-			return GetRenderPass().GetSurface();
-		}
-
-		const VulkanSurface& GetSurface() const
-		{
-			return GetRenderPass().GetSurface();
-		}
-
-		VulkanDevice& GetDevice()
-		{
-			return GetRenderPass().GetDevice();
-		}
-
-		const VulkanDevice& GetDevice() const
-		{
-			return GetRenderPass().GetDevice();
-		}
-
-		VulkanRenderPass& GetRenderPass()
-		{
-			return _render_pass;
-		}
-
-		const VulkanRenderPass& GetRenderPass() const
-		{
-			return _render_pass;
-		}
-
-		VulkanSwapchain& GetSwapchain()
-		{
-			return _swapchain;
-		}
-
-		const VulkanSwapchain& GetSwapchain() const
-		{
-			return _swapchain;
-		}
-
 		void Rebuild()
 		{
 			Dispose();
-			_framebuffers = CreateFramebuffers();
+			_framebuffers = CreateFramebuffers(GetRenderPass());
 		}
 	};
 } // namespace np::gfx::__detail

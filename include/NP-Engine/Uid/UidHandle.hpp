@@ -25,12 +25,12 @@ namespace np::uid
 		using KeyType = ui32;
 		using GenerationType = ui32;
 
-		KeyType Key = NP_ENGINE_UID_HANDLE_INVALID_KEY;
-		GenerationType Generation = NP_ENGINE_UID_HANDLE_INVALID_GENERATION;
+		KeyType key = NP_ENGINE_UID_HANDLE_INVALID_KEY;
+		GenerationType generation = NP_ENGINE_UID_HANDLE_INVALID_GENERATION;
 
 		bl IsValid() const
 		{
-			return Key != NP_ENGINE_UID_HANDLE_INVALID_KEY && Generation != NP_ENGINE_UID_HANDLE_INVALID_GENERATION;
+			return key != NP_ENGINE_UID_HANDLE_INVALID_KEY && generation != NP_ENGINE_UID_HANDLE_INVALID_GENERATION;
 		}
 
 		operator bl() const
@@ -40,8 +40,8 @@ namespace np::uid
 
 		void Invalidate()
 		{
-			Key = NP_ENGINE_UID_HANDLE_INVALID_KEY;
-			Generation = NP_ENGINE_UID_HANDLE_INVALID_GENERATION;
+			key = NP_ENGINE_UID_HANDLE_INVALID_KEY;
+			generation = NP_ENGINE_UID_HANDLE_INVALID_GENERATION;
 		}
 	};
 } // namespace np::uid

@@ -23,7 +23,7 @@ namespace np::gfx::__detail
 		void Dispose() {}
 
 	public:
-		VulkanRenderableImage(srvc::Services& services, Image& image): RenderableImage(services, image) {}
+		VulkanRenderableImage(mem::sptr<srvc::Services> services, mem::sptr<Image> image): RenderableImage(services, image) {}
 
 		~VulkanRenderableImage()
 		{
@@ -32,17 +32,17 @@ namespace np::gfx::__detail
 
 		// TODO: add copy/move stuff??
 
-		void RenderToFrame(Frame& frame, Pipeline& pipeline) override
+		void Stage(mem::sptr<CommandStaging> frame, mem::sptr<Pipeline> pipeline) override
 		{
 			// TODO: implement this
 		}
 
-		void PrepareForPipeline(Pipeline& pipeline) override
+		void PrepareForPipeline(mem::sptr<Pipeline> pipeline) override
 		{
 			// TODO: implement this
 		}
 
-		void DisposeForPipeline(Pipeline& pipeline) override
+		void DisposeForPipeline(mem::sptr<Pipeline> pipeline) override
 		{
 			// TODO: implement
 			Dispose();

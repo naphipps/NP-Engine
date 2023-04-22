@@ -12,28 +12,27 @@
 
 #include "NP-Engine/Vendor/VulkanInclude.hpp"
 
+#include "NP-Engine/Graphics/Interface/Interface.hpp"
+
 #include "VulkanCommands.hpp"
 #include "VulkanCommandBuffer.hpp"
-#include "VulkanSwapchain.hpp"
 #include "VulkanTexture.hpp"
-#include "VulkanFrame.hpp"
 
 namespace np::gfx::__detail
 {
-	class VulkanRenderPass
+	class VulkanRenderPass : public RenderPass
 	{
 	private:
-		mem::TraitAllocator _allocator;
-		VulkanSwapchain& _swapchain;
 		VkRenderPass _render_pass;
-		VulkanTexture* _depth_texture;
-		VulkanCommandBeginRenderPass* _begin_render_pass;
-		VulkanCommandEndRenderPass _end_render_pass;
+		mem::sptr<VulkanTexture> _depth_texture;
+		mem::sptr<VulkanCommandBeginRenderPass> _begin_render_pass;
+		mem::sptr<VulkanCommandEndRenderPass> _end_render_pass;
 
-		VkAttachmentDescription CreateColorAttachmentDescription() const
+		static VkAttachmentDescription CreateColorAttachmentDescription(mem::sptr<RenderDevice> device)
 		{
+			VulkanRenderDevice& render_device = (VulkanRenderDevice&)(*device);
 			VkAttachmentDescription desc{};
-			desc.format = GetDevice().GetSurfaceFormat().format;
+			desc.format = render_device.GetSurfaceFormat().format;
 			desc.samples = VK_SAMPLE_COUNT_1_BIT;
 			desc.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
 			desc.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
@@ -44,10 +43,10 @@ namespace np::gfx::__detail
 			return desc;
 		}
 
-		VkAttachmentDescription CreateDepthAttachmentDescription() const
+		static VkAttachmentDescription CreateDepthAttachmentDescription(VkFormat depth_format)
 		{
 			VkAttachmentDescription desc{};
-			desc.format = GetDepthFormat();
+			desc.format = depth_format;
 			desc.samples = VK_SAMPLE_COUNT_1_BIT;
 			desc.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
 			desc.storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
@@ -58,7 +57,7 @@ namespace np::gfx::__detail
 			return desc;
 		}
 
-		VkAttachmentReference CreateColorAttachmentReference() const
+		static VkAttachmentReference CreateColorAttachmentReference()
 		{
 			VkAttachmentReference ref{};
 			ref.attachment = 0;
@@ -66,7 +65,7 @@ namespace np::gfx::__detail
 			return ref;
 		}
 
-		VkAttachmentReference CreateDepthAttachmentReference() const
+		static VkAttachmentReference CreateDepthAttachmentReference()
 		{
 			VkAttachmentReference ref{};
 			ref.attachment = 1;
@@ -74,14 +73,14 @@ namespace np::gfx::__detail
 			return ref;
 		}
 
-		VkSubpassDescription CreateSubpassDescription() const
+		static VkSubpassDescription CreateSubpassDescription()
 		{
 			VkSubpassDescription desc{};
 			desc.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
 			return desc;
 		}
 
-		con::vector<VkSubpassDependency> CreateSubpassDependencies() const
+		static con::vector<VkSubpassDependency> CreateSubpassDependencies()
 		{
 			con::vector<VkSubpassDependency> dependencies{};
 
@@ -100,15 +99,16 @@ namespace np::gfx::__detail
 			return dependencies;
 		}
 
-		VkRenderPassCreateInfo CreateRenderPassInfo() const
+		static VkRenderPassCreateInfo CreateRenderPassInfo()
 		{
 			VkRenderPassCreateInfo info{};
 			info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
 			return info;
 		}
 
-		VkRenderPass CreateRenderPass() const
+		static VkRenderPass CreateRenderPass(mem::sptr<RenderDevice> device)
 		{
+			VulkanRenderDevice& render_device = (VulkanRenderDevice&)(*device);
 			VkRenderPass render_pass = nullptr;
 
 			VkAttachmentReference color_attachment_reference = CreateColorAttachmentReference();
@@ -121,8 +121,8 @@ namespace np::gfx::__detail
 
 			con::vector<VkSubpassDescription> subpass_descriptions = {subpass_description};
 
-			con::vector<VkAttachmentDescription> attachment_descriptions = {CreateColorAttachmentDescription(),
-																			CreateDepthAttachmentDescription()};
+			con::vector<VkAttachmentDescription> attachment_descriptions = { CreateColorAttachmentDescription(device),
+																			CreateDepthAttachmentDescription(GetDepthFormat(device)) };
 
 			con::vector<VkSubpassDependency> subpass_dependencies = CreateSubpassDependencies();
 
@@ -134,27 +134,29 @@ namespace np::gfx::__detail
 			render_pass_info.dependencyCount = (ui32)subpass_dependencies.size();
 			render_pass_info.pDependencies = subpass_dependencies.data();
 
-			if (vkCreateRenderPass(GetDevice(), &render_pass_info, nullptr, &render_pass) != VK_SUCCESS)
-			{
+			if (vkCreateRenderPass(render_device, &render_pass_info, nullptr, &render_pass) != VK_SUCCESS)
 				render_pass = nullptr;
-			}
 
 			return render_pass;
 		}
 
-		VkFormat GetDepthFormat() const
+		static VkFormat GetDepthFormat(mem::sptr<RenderDevice> device)
 		{
-			return GetDevice().GetSupportedFormat(
+			VulkanRenderDevice& render_device = (VulkanRenderDevice&)(*device);
+			return render_device.GetLogicalDevice()->GetSupportedFormat(
 				{VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT}, VK_IMAGE_TILING_OPTIMAL,
 				VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT);
 		}
 
-		VulkanTexture* CreateDepthTexture()
+		static mem::sptr<VulkanTexture> CreateDepthTexture(mem::sptr<RenderContext> context)
 		{
+			VulkanRenderContext& render_context = (VulkanRenderContext&)(*context);
+			VulkanRenderDevice& render_device = (VulkanRenderDevice&)(*context->GetRenderDevice());
+
 			VkImageCreateInfo depth_image_create_info = VulkanImage::CreateInfo();
-			depth_image_create_info.extent.width = GetSwapchain().GetExtent().width;
-			depth_image_create_info.extent.height = GetSwapchain().GetExtent().height;
-			depth_image_create_info.format = GetDepthFormat();
+			depth_image_create_info.extent.width = render_context.GetExtent().width;
+			depth_image_create_info.extent.height = render_context.GetExtent().height;
+			depth_image_create_info.format = GetDepthFormat(context->GetRenderDevice());
 			depth_image_create_info.tiling = VK_IMAGE_TILING_OPTIMAL;
 			depth_image_create_info.usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
 			VkMemoryPropertyFlags depth_memory_property_flags = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
@@ -162,9 +164,9 @@ namespace np::gfx::__detail
 			depth_image_view_create_info.format = depth_image_create_info.format;
 			depth_image_view_create_info.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
 
-			return mem::Create<VulkanTexture>(_allocator, GetDevice(), depth_image_create_info, depth_memory_property_flags,
-											  depth_image_view_create_info);
-
+			return mem::create_sptr<VulkanTexture>(context->GetServices()->GetAllocator(), 
+				render_device.GetCommandPool(), depth_image_create_info, depth_memory_property_flags,
+				depth_image_view_create_info);
 			/*
 			the following transition is covered in the render pass, but here it is for reference
 
@@ -176,14 +178,12 @@ namespace np::gfx::__detail
 		void Dispose()
 		{
 			if (_depth_texture)
-			{
-				mem::Destroy<VulkanTexture>(_allocator, _depth_texture);
-				_depth_texture = nullptr;
-			}
+				_depth_texture.reset();
 
 			if (_render_pass)
 			{
-				vkDestroyRenderPass(GetDevice(), _render_pass, nullptr);
+				VulkanRenderDevice& render_device = (VulkanRenderDevice&)(*GetRenderContext()->GetRenderDevice());
+				vkDestroyRenderPass(render_device, _render_pass, nullptr);
 				_render_pass = nullptr;
 			}
 		}
@@ -213,11 +213,17 @@ namespace np::gfx::__detail
 			return info;
 		}
 
-		VulkanRenderPass(VulkanSwapchain& swapchain):
-			_swapchain(swapchain),
-			_render_pass(CreateRenderPass()),
-			_depth_texture(CreateDepthTexture()),
-			_begin_render_pass(nullptr)
+		static mem::sptr<VulkanCommandEndRenderPass> CreateEndRenderPassCommand(mem::sptr<srvc::Services> services)
+		{
+			return mem::create_sptr<VulkanCommandEndRenderPass>(services->GetAllocator());
+		}
+
+		VulkanRenderPass(mem::sptr<RenderContext> context):
+			RenderPass(context),
+			_render_pass(CreateRenderPass(context->GetRenderDevice())),
+			_depth_texture(CreateDepthTexture(context)),
+			_begin_render_pass(nullptr),
+			_end_render_pass(CreateEndRenderPassCommand(GetServices()))
 		{}
 
 		~VulkanRenderPass()
@@ -225,54 +231,9 @@ namespace np::gfx::__detail
 			Dispose();
 		}
 
-		VulkanInstance& GetInstance()
+		mem::sptr<VulkanTexture> GetDepthTexture() const
 		{
-			return GetSwapchain().GetInstance();
-		}
-
-		const VulkanInstance& GetInstance() const
-		{
-			return GetSwapchain().GetInstance();
-		}
-
-		VulkanSurface& GetSurface()
-		{
-			return GetSwapchain().GetSurface();
-		}
-
-		const VulkanSurface& GetSurface() const
-		{
-			return GetSwapchain().GetSurface();
-		}
-
-		VulkanDevice& GetDevice()
-		{
-			return GetSwapchain().GetDevice();
-		}
-
-		const VulkanDevice& GetDevice() const
-		{
-			return GetSwapchain().GetDevice();
-		}
-
-		VulkanSwapchain& GetSwapchain()
-		{
-			return _swapchain;
-		}
-
-		const VulkanSwapchain& GetSwapchain() const
-		{
-			return _swapchain;
-		}
-
-		VulkanTexture& GetDepthTexture()
-		{
-			return *_depth_texture;
-		}
-
-		const VulkanTexture& GetDepthTexture() const
-		{
-			return *_depth_texture;
+			return _depth_texture;
 		}
 
 		operator VkRenderPass() const
@@ -282,27 +243,24 @@ namespace np::gfx::__detail
 
 		void Rebuild()
 		{
-			mem::Destroy<VulkanTexture>(_allocator, _depth_texture);
-			_depth_texture = CreateDepthTexture();
+			_depth_texture = CreateDepthTexture(GetRenderContext());
 		}
 
-		void Begin(VkRenderPassBeginInfo& render_pass_begin_info, VulkanFrame& frame)
+		void Begin(VkRenderPassBeginInfo& render_pass_begin_info, mem::sptr<CommandStaging> staging)
 		{
+			NP_ENGINE_ASSERT(staging, "Vulkan requires CommandStaging to be valid");
+
+			VulkanRenderContext& render_context = (VulkanRenderContext&)(*GetRenderContext());
 			render_pass_begin_info.renderPass = _render_pass;
-			render_pass_begin_info.renderArea.extent = GetSwapchain().GetExtent();
-
-			if (_begin_render_pass)
-				mem::Destroy<VulkanCommandBeginRenderPass>(_allocator, _begin_render_pass);
-
-			_begin_render_pass =
-				mem::Create<VulkanCommandBeginRenderPass>(_allocator, render_pass_begin_info, VK_SUBPASS_CONTENTS_INLINE);
-
-			frame.StageCommand(*_begin_render_pass);
+			render_pass_begin_info.renderArea.extent = render_context.GetExtent();
+			_begin_render_pass = mem::create_sptr<VulkanCommandBeginRenderPass>(GetServices()->GetAllocator(), render_pass_begin_info, VK_SUBPASS_CONTENTS_INLINE);
+			staging->Stage(_begin_render_pass);
 		}
 
-		void End(VulkanFrame& frame)
+		void End(mem::sptr<CommandStaging> staging)
 		{
-			frame.StageCommand(_end_render_pass);
+			NP_ENGINE_ASSERT(staging, "Vulkan requires CommandStaging to be valid");
+			staging->Stage(_end_render_pass);
 		}
 	};
 } // namespace np::gfx::__detail
