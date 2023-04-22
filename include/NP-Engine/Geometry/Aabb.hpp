@@ -21,8 +21,8 @@ namespace np::geom
 	{
 		using Point = typename Shape<2, T>::Point;
 
-		Point Center = {0};
-		Point HalfLengths = {0};
+		Point Center{0};
+		Point HalfLengths{0};
 
 		virtual bl Contains(const Point& point) const
 		{
@@ -36,8 +36,8 @@ namespace np::geom
 	{
 		using Point = typename Shape<3, T>::Point;
 
-		Point Center = {0};
-		Point HalfLengths = {0};
+		Point Center{0};
+		Point HalfLengths{0};
 
 		virtual bl Contains(const Point& point) const
 		{
