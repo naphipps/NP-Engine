@@ -21,7 +21,7 @@
 
 namespace np::mem
 {
-	template <typename T, typename A = PoolAllocator<ObjectPool<T>::ChunkType>>
+	template <typename T, typename A = PoolAllocator<typename ObjectPool<T>::ChunkType>>
 	class AccumulatingPool
 	{
 	private:

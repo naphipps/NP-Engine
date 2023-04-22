@@ -13,8 +13,7 @@
 #include "NP-Engine/Foundation/Foundation.hpp"
 #include "NP-Engine/Primitive/Primitive.hpp"
 
-#include "TraitAllocator.hpp"
-#include "MemoryFunctions.hpp"
+#include "Allocator.hpp"
 
 /*
 	<https://www.quora.com/Are-the-classic-pointers-still-used-in-modern-C-or-are-they-being-replaced-more-and-more-by-the-smart-pointers>
@@ -91,11 +90,6 @@ namespace np::mem
 		smart_ptr_contiguous_destroyer(smart_ptr_contiguous_destroyer&& other) noexcept : base(other._allocator) {}
 
 		virtual void deallocate_object(T* ptr) override {}
-
-		virtual void deallocate_resource(smart_ptr_resource_base* ptr) override
-		{
-			_allocator.Deallocate(ptr);
-		}
 	};
 
 	template <typename T, typename D = smart_ptr_allocator_destroyer<T>>
@@ -154,7 +148,6 @@ namespace np::mem
 		friend class smart_ptr;
 
 	protected:
-			
 		smart_ptr_resource_base* _resource;
 
 		atm_siz* get_strong_counter_ptr() const
@@ -261,7 +254,7 @@ namespace np::mem
 
 		T* get_object_ptr() const
 		{
-			return _resource ? (T*)_resource->get_object_ptr() : nullptr;
+			return base::_resource ? (T*)base::_resource->get_object_ptr() : nullptr;
 		}
 
 	public:
@@ -272,14 +265,14 @@ namespace np::mem
 
 		sptr(smart_ptr_resource_base* resource) : base(resource)
 		{
-			increment_strong_counter();
-			increment_weak_counter();
+			base::increment_strong_counter();
+			base::increment_weak_counter();
 		}
 
 		sptr(const sptr<T>& other) : base(other)
 		{
-			increment_strong_counter();
-			increment_weak_counter();
+			base::increment_strong_counter();
+			base::increment_weak_counter();
 		}
 
 		sptr(sptr<T>&& other) noexcept : base(::std::move(other)) {}
@@ -287,8 +280,8 @@ namespace np::mem
 		template <typename U, ::std::enable_if_t<::std::is_convertible_v<U*, T*>, bl> = true>
 		sptr(const sptr<U>& other): base(other)
 		{
-			increment_strong_counter();
-			increment_weak_counter();
+			base::increment_strong_counter();
+			base::increment_weak_counter();
 		}
 
 		template <typename U, ::std::enable_if_t<::std::is_convertible_v<U*, T*>, bl> = true>
@@ -302,16 +295,16 @@ namespace np::mem
 		sptr<T>& operator=(const sptr<T>& other)
 		{
 			reset();
-			_resource = other._resource;
-			increment_strong_counter();
-			increment_weak_counter();
+			base::_resource = other._resource;
+			base::increment_strong_counter();
+			base::increment_weak_counter();
 			return *this;
 		}
 
 		sptr<T>& operator=(sptr<T>&& other) noexcept
 		{
 			reset();
-			_resource = ::std::move(other._resource);
+			base::_resource = ::std::move(other._resource);
 			other._resource = nullptr;
 			return *this;
 		}
@@ -320,9 +313,9 @@ namespace np::mem
 		sptr<T>& operator=(const sptr<U>& other)
 		{
 			reset();
-			_resource = other._resource;
-			increment_strong_counter();
-			increment_weak_counter();
+			base::_resource = other._resource;
+			base::increment_strong_counter();
+			base::increment_weak_counter();
 			return *this;
 		}
 
@@ -330,7 +323,7 @@ namespace np::mem
 		sptr<T>& operator=(sptr<U>&& other) noexcept
 		{
 			reset();
-			_resource = ::std::move(other._resource);
+			base::_resource = ::std::move(other._resource);
 			other._resource = nullptr;
 			return *this;
 		}
@@ -363,9 +356,9 @@ namespace np::mem
 
 		void reset() override
 		{
-			decrement_strong_counter();
-			decrement_weak_counter();
-			_resource = nullptr;
+			base::decrement_strong_counter();
+			base::decrement_weak_counter();
+			base::_resource = nullptr;
 		}
 	};
 
@@ -393,12 +386,12 @@ namespace np::mem
 
 		wptr(const sptr<T>& other): base(other)
 		{
-			increment_weak_counter();
+			base::increment_weak_counter();
 		}
 
 		wptr(const wptr<T>& other) : base(other)
 		{
-			increment_weak_counter();
+			base::increment_weak_counter();
 		}
 
 		wptr(wptr<T>&& other) noexcept : base(::std::move(other)) {}
@@ -406,13 +399,13 @@ namespace np::mem
 		template <typename U, ::std::enable_if_t<::std::is_convertible_v<U*, T*>, bl> = true>
 		wptr(const sptr<U>& other) : base(other)
 		{
-			increment_weak_counter();
+			base::increment_weak_counter();
 		}
 
 		template <typename U, ::std::enable_if_t<::std::is_convertible_v<U*, T*>, bl> = true>
 		wptr(const wptr<U>& other) : base(other)
 		{
-			increment_weak_counter();
+			base::increment_weak_counter();
 		}
 
 		template <typename U, ::std::enable_if_t<::std::is_convertible_v<U*, T*>, bl> = true>
@@ -426,23 +419,23 @@ namespace np::mem
 		wptr<T>& operator=(const sptr<T>& other)
 		{
 			reset();
-			_resource = other._resource;
-			increment_weak_counter();
+			base::_resource = other._resource;
+			base::increment_weak_counter();
 			return *this;
 		}
 
 		wptr<T>& operator=(const wptr<T>& other)
 		{
 			reset();
-			_resource = other._resource;
-			increment_weak_counter();
+			base::_resource = other._resource;
+			base::increment_weak_counter();
 			return *this;
 		}
 
 		wptr<T>& operator=(wptr<T>&& other) noexcept
 		{
 			reset();
-			_resource = ::std::move(other._resource);
+			base::_resource = ::std::move(other._resource);
 			other._resource = nullptr;
 			return *this;
 		}
@@ -451,8 +444,8 @@ namespace np::mem
 		wptr<T>& operator=(const sptr<U>& other)
 		{
 			reset();
-			_resource = other._resource;
-			increment_weak_counter();
+			base::_resource = other._resource;
+			base::increment_weak_counter();
 			return *this;
 		}
 
@@ -460,8 +453,8 @@ namespace np::mem
 		wptr<T>& operator=(const wptr<U>& other)
 		{
 			reset();
-			_resource = other._resource;
-			increment_weak_counter();
+			base::_resource = other._resource;
+			base::increment_weak_counter();
 			return *this;
 		}
 
@@ -469,7 +462,7 @@ namespace np::mem
 		wptr<T>& operator=(wptr<U>&& other) noexcept
 		{
 			reset();
-			_resource = ::std::move(other._resource);
+			base::_resource = ::std::move(other._resource);
 			other._resource = nullptr;
 			return *this;
 		}
@@ -482,18 +475,18 @@ namespace np::mem
 
 		void reset() override
 		{
-			decrement_weak_counter();
-			_resource = nullptr;
+			base::decrement_weak_counter();
+			base::_resource = nullptr;
 		}
 
 		bl is_expired() const
 		{
-			return get_strong_count() == 0;
+			return base::get_strong_count() == 0;
 		}
 
 		sptr<T> get_sptr() const
 		{
-			return sptr<T>(_resource);
+			return sptr<T>(base::_resource);
 		}
 	};
 	
