@@ -38,13 +38,16 @@ namespace np::app
 		{
 			uid::Uid windowId = d.GetData<uid::Uid>();
 			mem::sptr<win::Window> window = nullptr;
-			for (auto it = _windows.begin(); it != _windows.end(); it++)
 			{
-				window = it->get_sptr();
-				if (window && window->GetUid() == windowId)
+				Lock l(_windows_mutex);
+				for (auto it = _windows.begin(); it != _windows.end(); it++)
 				{
-					_windows.erase(it);
-					break;
+					window = it->get_sptr();
+					if (window && window->GetUid() == windowId)
+					{
+						_windows.erase(it);
+						break;
+					}
 				}
 			}
 			window.reset();
@@ -89,9 +92,12 @@ namespace np::app
 			// ownership of window is now resolved in this job procedure by destroying it here
 			//^ like a normal person unlike apple above
 			d.DestructData<mem::sptr<win::Window>>();
-
-			if (_windows.size() == 0) //this relies on the window closing adjust job
-				_services->GetEventSubmitter().Submit(mem::create_sptr<ApplicationCloseEvent>(_services->GetAllocator()));
+			
+			{
+				Lock l(_windows_mutex);
+				if (_windows.empty()) //this relies on the window closing adjust job
+					_services->GetEventSubmitter().Submit(mem::create_sptr<ApplicationCloseEvent>(_services->GetAllocator()));
+			}
 		}
 
 		virtual void HandleWindowClosed(mem::sptr<evnt::Event> e)
@@ -135,7 +141,10 @@ namespace np::app
 
 		virtual ~WindowLayer()
 		{
-			_windows.clear();
+			{
+				Lock l(_windows_mutex);
+				_windows.clear();
+			}
 
 			Cleanup();
 
@@ -155,11 +164,14 @@ namespace np::app
 			win::Window::Update(win::WindowDetailType::Sdl);
 
 			mem::sptr<win::Window> window = nullptr;
-			for (auto it = _windows.begin(); it != _windows.end(); it++)
 			{
-				window = it->get_sptr();
-				if (window)
-					window->Update(time_delta);
+				Lock l(_windows_mutex);
+				for (auto it = _windows.begin(); it != _windows.end(); it++)
+				{
+					window = it->get_sptr();
+					if (window)
+						window->Update(time_delta);
+				}
 			}
 			window.reset();
 		}
@@ -171,10 +183,12 @@ namespace np::app
 			while (_windows_to_destroy.try_dequeue(window)) {}
 			window.reset();
 #endif
-
-			for (siz i = _windows.size() - 1; i < _windows.size(); i--)
-				if (_windows[i].is_expired())
-					_windows.erase(_windows.begin() + i);
+			{
+				Lock l(_windows_mutex);
+				for (siz i = _windows.size() - 1; i < _windows.size(); i--)
+					if (_windows[i].is_expired())
+						_windows.erase(_windows.begin() + i);
+			}
 		}
 
 		virtual evnt::EventCategory GetHandledCategories() const override
