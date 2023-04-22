@@ -296,16 +296,7 @@ namespace np::app
 			//_scene->Prepare();
 		}
 
-		void Update(tim::DblMilliseconds time_delta) override 
-		{
-			//TODO: render scene for now -- later to render job
-			//NP_ENGINE_LOG_INFO("checking scene");
-			if (_scene)
-			{
-				//NP_ENGINE_LOG_INFO("rendering scene");
-				_scene->Render();
-			}
-		}
+		void Update(tim::DblMilliseconds time_delta) override {}
 
 		virtual evnt::EventCategory GetHandledCategories() const override
 		{

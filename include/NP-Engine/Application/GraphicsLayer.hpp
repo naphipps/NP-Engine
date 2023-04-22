@@ -54,7 +54,7 @@ namespace np::app
 			{
 				NP_ENGINE_PROFILE_SCOPE("rendering loop");
 
-				/*
+				//*
 				{
 					Lock l(_scenes_mutex);
 					for (auto it = _scenes.begin(); it != _scenes.end(); it++)
