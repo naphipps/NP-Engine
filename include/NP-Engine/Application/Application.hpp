@@ -312,8 +312,6 @@ namespace np::app
 			return _running.load(mo_acquire);
 		}
 	};
-
-	extern mem::sptr<Application> CreateApplication(mem::sptr<srvc::Services> services);
 } // namespace np::app
 
 #endif /* NP_ENGINE_APPLICATION_HPP */
