@@ -26,15 +26,15 @@ using i64 = int64_t;
 using siz = size_t;
 using dif = ptrdiff_t;
 
-using flt = float;
-using dbl = double;
-using ldbl = long double;
+using flt = float; //TODO: f32?
+using dbl = double; //TODO: f64?
+using ldbl = long double; //TODO: f??
 
 using chr = char;
 using uchr = unsigned char;
 using wchr = wchar_t;
-using u16chr = char16_t;
-using u32chr = char32_t;
+using u16chr = char16_t; //TODO: chr16?
+using u32chr = char32_t; //TODO: chr32?
 
 using bl = bool;
 
