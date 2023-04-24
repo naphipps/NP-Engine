@@ -888,11 +888,6 @@ namespace np::win::__detail
 		void ClosingProcedure(mem::Delegate& d) override
 		{
 			Window::ClosingProcedure(d);
-
-			GLFWwindow* glfw_window = _glfw_window.load(mo_acquire);
-			while (glfw_window && !_glfw_window.compare_exchange_weak(glfw_window, nullptr, mo_release, mo_relaxed))
-				DestroyGlfwWindow(glfw_window);
-			DestroyGlfwWindow(glfw_window);
 		}
 
 		GLFWwindow* CreateGlfwWindow()
@@ -935,8 +930,9 @@ namespace np::win::__detail
 			}
 		}
 
-		void DestroyGlfwWindow(GLFWwindow* glfw_window)
+		void DestroyGlfwWindow()
 		{
+			GLFWwindow* glfw_window = _glfw_window.exchange(nullptr, mo_release);
 			if (glfw_window)
 			{
 				UnsetGlfwCallbacks(glfw_window);
@@ -1000,15 +996,13 @@ namespace np::win::__detail
 			_hit_flags(HitNone)
 #endif
 		{
-			Show();
+			_glfw_window.store(CreateGlfwWindow(), mo_release);
+			Window::Show();
 		}
 
 		virtual ~GlfwWindow()
 		{
-			GLFWwindow* glfw_window = _glfw_window.load(mo_acquire);
-			while (glfw_window && !_glfw_window.compare_exchange_weak(glfw_window, nullptr, mo_release, mo_relaxed))
-				DestroyGlfwWindow(glfw_window);
-			DestroyGlfwWindow(glfw_window);
+			DestroyGlfwWindow();
 		}
 
 		virtual void Update(tim::DblMilliseconds milliseconds) override
@@ -1146,21 +1140,9 @@ namespace np::win::__detail
 
 		virtual void Show() override
 		{
-			GLFWwindow* glfw_window = _glfw_window.load(mo_acquire);
-			if (!glfw_window)
-			{
-				GLFWwindow* glfw_window = CreateGlfwWindow();
-				GLFWwindow* expected = nullptr;
-				while (!_glfw_window.compare_exchange_weak(expected, glfw_window, mo_release, mo_relaxed))
-					DestroyGlfwWindow(expected);
-				DestroyGlfwWindow(expected);
-
-				Window::Show();
-			}
-			else
-			{
+			Window::Show();
+			if (_glfw_window.load(mo_acquire))
 				Focus();
-			}
 		}
 
 		virtual void SetTitle(str title) override

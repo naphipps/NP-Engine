@@ -23,10 +23,7 @@ namespace np::app
 	private:
 		Mutex _windows_mutex;
 		con::vector<mem::wptr<win::Window>> _windows;
-
-#if NP_ENGINE_PLATFORM_IS_APPLE
 		con::mpmc_queue<mem::sptr<win::Window>> _windows_to_destroy;
-#endif
 
 	protected:
 		static void AdjustForWindowClosingCallback(void* caller, mem::Delegate& d)
@@ -83,14 +80,8 @@ namespace np::app
 
 		void HandleWindowClosedProcedure(mem::Delegate& d)
 		{
-#if NP_ENGINE_PLATFORM_IS_APPLE
-			// ownership of window is now resolved in this job procedure by giving it to the window layer for cleanup on the
-			// main thread -- because apple is lame and windows MUST be handled on the main thread
+			// ownership of window is now resolved by giving it to the window layer for cleanup on main thread
 			_windows_to_destroy.enqueue(d.GetData<mem::sptr<win::Window>>());
-
-#endif
-			// ownership of window is now resolved in this job procedure by destroying it here
-			//^ like a normal person unlike apple above
 			d.DestructData<mem::sptr<win::Window>>();
 			
 			{
@@ -178,11 +169,10 @@ namespace np::app
 
 		virtual void Cleanup() override
 		{
-#if NP_ENGINE_PLATFORM_IS_APPLE
 			mem::sptr<win::Window> window = nullptr;
 			while (_windows_to_destroy.try_dequeue(window)) {}
 			window.reset();
-#endif
+
 			{
 				Lock l(_windows_mutex);
 				for (siz i = _windows.size() - 1; i < _windows.size(); i--)

@@ -124,8 +124,11 @@ namespace np::win
 
 		virtual void Show()
 		{
-			_show_procedure_is_complete.store(false, mo_release);
-			_thread.Run(&Window::ShowProcedure, this);
+			if (!_thread.IsRunning())
+			{
+				_show_procedure_is_complete.store(false, mo_release);
+				_thread.Run(&Window::ShowProcedure, this);
+			}
 		}
 
 		virtual void Close()
