@@ -144,8 +144,6 @@ namespace np::gfx::__detail
 			vkUnmapMemory(*GetLogicalDevice(), GetDeviceMemory());
 		}
 
-		// TODO: the following methods should be added to every Vulkan class possible
-
 		mem::sptr<VulkanCommandPool> GetCommandPool() const
 		{
 			return _command_pool;

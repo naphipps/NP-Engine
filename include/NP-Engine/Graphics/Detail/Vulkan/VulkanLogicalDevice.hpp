@@ -203,12 +203,9 @@ namespace np::gfx::__detail
 		::std::optional<ui32> GetMemoryTypeIndex(ui32 type_filter, VkMemoryPropertyFlags flags) const
 		{
 			VkPhysicalDeviceMemoryProperties properties;
-			//TODO: ^ does this change? if not, it could be a member
 			vkGetPhysicalDeviceMemoryProperties(_physical_device, &properties);
 
 			::std::optional<ui32> index;
-			index.reset(); //ensure it is reset
-
 			for (ui32 i = 0; i < properties.memoryTypeCount; i++)
 				if ((type_filter & (1 << i)) && (properties.memoryTypes[i].propertyFlags & flags) == flags)
 					index = i;

@@ -18,7 +18,7 @@ namespace np::gfx::__detail
 	class VulkanImageView
 	{
 	private:
-		mem::sptr<VulkanLogicalDevice> _device; //TODO: I think a few of these just need a command pool instead of this...
+		mem::sptr<VulkanLogicalDevice> _device;
 		VkImageView _image_view;
 
 		static VkImageView CreateImageView(mem::sptr<VulkanLogicalDevice> device, VkImageViewCreateInfo& info)

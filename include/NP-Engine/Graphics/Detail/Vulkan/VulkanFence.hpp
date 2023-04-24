@@ -14,7 +14,7 @@ namespace np::gfx::__detail
 	class VulkanFence
 	{
 	private:
-		mem::sptr<VulkanLogicalDevice> _device; //TODO: should this be VulkanLogicalDevice??
+		mem::sptr<VulkanLogicalDevice> _device;
 		VkFence _fence;
 
 		static VkFence CreateFence(mem::sptr<VulkanLogicalDevice> device)

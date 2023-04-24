@@ -351,14 +351,15 @@ namespace np::gfx::__detail
 			}
 
 			VulkanRenderPipeline& vulkan_render_pipeline = (VulkanRenderPipeline&)(*pipeline);
+			VulkanRenderContext& vulkan_render_context = (VulkanRenderContext&)(*vulkan_render_pipeline.GetProperties().framebuffers->GetRenderPass()->GetRenderContext());
+
 			_push_constants->PipelineLayout = vulkan_render_pipeline.GetLayout();
 
 			if (!_sampler)
 				SetSampler(vulkan_render_pipeline.GetDefaultSampler());
 
 			_descriptor_info.imageView = _texture ? (VkImageView)_texture->GetImageView() : nullptr;
-
-			vulkan_render_pipeline.GetDescriptorSets()->SubmitWriter(_descriptor_writer);
+			vulkan_render_pipeline.GetDescriptorSets()->SubmitWriter(_descriptor_writer, vulkan_render_context.GetCurrentImageIndex());
 		}
 
 		void DisposeForPipeline(mem::sptr<Pipeline> pipeline) override

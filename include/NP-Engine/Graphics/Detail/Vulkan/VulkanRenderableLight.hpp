@@ -7,8 +7,6 @@
 #ifndef NP_ENGINE_VULKAN_RENDERABLE_LIGHT_HPP
 #define NP_ENGINE_VULKAN_RENDERABLE_LIGHT_HPP
 
-#include <iostream> //TODO: remove
-
 #include "NP-Engine/Primitive/Primitive.hpp"
 #include "NP-Engine/Services/Services.hpp"
 

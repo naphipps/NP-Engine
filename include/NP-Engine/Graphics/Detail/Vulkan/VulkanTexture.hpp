@@ -25,14 +25,6 @@ namespace np::gfx::__detail
 {
 	class VulkanTexture
 	{
-	public:
-		struct CreateInfoType // TODO: can we remove this??
-		{
-			VkImageCreateInfo ImageCreateInfo{};
-			VkMemoryPropertyFlags ImageMemoryPropertyFlags = 0;
-			VkImageViewCreateInfo ImageViewCreateInfo{};
-		};
-
 	private:
 		mem::sptr<VulkanCommandPool> _command_pool;
 		VulkanImage _image;
@@ -61,7 +53,6 @@ namespace np::gfx::__detail
 			_height(image_create_info.extent.height)
 		{}
 
-		//*
 		VulkanTexture(VulkanTexture&& other) noexcept:
 			_command_pool(::std::move(other._command_pool)),
 			_image(::std::move(other._image)),
@@ -70,9 +61,6 @@ namespace np::gfx::__detail
 			_width(::std::move(other._width)),
 			_height(::std::move(other._height))
 		{}
-		//*/
-
-		// TODO: can we add move operator?? I think we can
 
 		mem::sptr<VulkanCommandPool> GetCommandPool() const
 		{

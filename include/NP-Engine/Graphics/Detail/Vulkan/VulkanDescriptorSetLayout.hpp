@@ -75,19 +75,17 @@ namespace np::gfx::__detail
 			return _device;
 		}
 
-		bl GetBindingForDescriptorType(VkDescriptorType descriptor_type, ui32& out_binding) const //TODO: not a huge fan of this method signature
+		::std::optional<ui32> GetBindingForDescriptorType(VkDescriptorType descriptor_type) const
 		{
-			bl found = false;
+			::std::optional<ui32> binding;
 			for (const VkDescriptorSetLayoutBinding& layout_binding : _layout_bindings)
-			{
 				if (layout_binding.descriptorType == descriptor_type)
 				{
-					found = true;
-					out_binding = layout_binding.binding;
+					binding = layout_binding.binding;
 					break;
 				}
-			}
-			return found;
+
+			return binding;
 		}
 
 		const con::vector<VkDescriptorSetLayoutBinding>& GetBindings() const

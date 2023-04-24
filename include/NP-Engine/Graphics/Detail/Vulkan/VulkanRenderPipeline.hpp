@@ -29,7 +29,7 @@ namespace np::gfx::__detail
 		con::vector<VkDescriptorBufferInfo> _meta_value_descriptor_infos;
 		con::vector<VkWriteDescriptorSet> _meta_value_descriptor_writers;
 
-		mem::sptr<VulkanSampler> _sampler; // TODO: we might should put this in the Renderer
+		mem::sptr<VulkanSampler> _sampler; // TODO: our RenderPipeline::Properties could store this
 		VkPipelineLayout _pipeline_layout;
 		VkPipeline _pipeline;
 		mem::sptr<VulkanCommandBindPipeline> _bind_pipeline;
@@ -43,10 +43,13 @@ namespace np::gfx::__detail
 		}
 
 		static mem::sptr<VulkanDescriptorSets> CreateDescriptorSets(mem::sptr<srvc::Services> services, 
-			mem::sptr<RenderContext> render_context, 
+			mem::sptr<RenderContext> context, 
 			mem::sptr<VulkanDescriptorSetLayout> descriptor_set_layout)
 		{
-			return mem::create_sptr<VulkanDescriptorSets>(services->GetAllocator(), render_context, descriptor_set_layout);
+			VulkanRenderContext& render_context = (VulkanRenderContext&)(*context);
+			VulkanRenderDevice& render_device = (VulkanRenderDevice&)(*render_context.GetRenderDevice());
+
+			return mem::create_sptr<VulkanDescriptorSets>(services->GetAllocator(), render_device.GetLogicalDevice(), render_context.GetFramesInFlightCount(), descriptor_set_layout);
 		}
 
 		static mem::sptr<VulkanBuffer> CreateBuffer(mem::sptr<srvc::Services> services,
@@ -236,7 +239,6 @@ namespace np::gfx::__detail
 			info.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
 
 			/*
-			//TODO:
 			If depthClampEnable is set to VK_TRUE, then fragments that are beyond the near and far planes
 			are clamped to them as opposed to discarding them. This is useful in some special cases like
 			shadow maps. Using this requires enabling a GPU feature.
@@ -245,7 +247,7 @@ namespace np::gfx::__detail
 
 			info.rasterizerDiscardEnable = VK_FALSE;
 			info.polygonMode = VK_POLYGON_MODE_FILL; // or VK_POLYGON_MODE_LINE or VK_POLYGON_MODE_POINT
-			info.lineWidth = 1.0f; // TODO: any larger value required enabling wideLines GPU feature
+			info.lineWidth = 1.0f; // any larger value required enabling wideLines GPU feature
 			info.cullMode = VK_CULL_MODE_BACK_BIT;
 			info.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
 
@@ -289,20 +291,20 @@ namespace np::gfx::__detail
 			return state;
 
 			/*
-			//TODO:
-			The most common way to use color blending is to implement alpha blending, where we want
-			the new color to be blended with the old color based on its opacity
+				TODO:
+					The most common way to use color blending is to implement alpha blending, where we want
+					the new color to be blended with the old color based on its opacity
 
-			finalColor.rgb = newAlpha * newColor + (1 - newAlpha) * oldColor;
-			finalColor.a = newAlpha.a;
+					finalColor.rgb = newAlpha * newColor + (1 - newAlpha) * oldColor;
+					finalColor.a = newAlpha.a;
 
-			colorBlendAttachment.blendEnable = VK_TRUE;
-			colorBlendAttachment.srcColorBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA;
-			colorBlendAttachment.dstColorBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
-			colorBlendAttachment.colorBlendOp = VK_BLEND_OP_ADD;
-			colorBlendAttachment.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
-			colorBlendAttachment.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
-			colorBlendAttachment.alphaBlendOp = VK_BLEND_OP_ADD;
+					colorBlendAttachment.blendEnable = VK_TRUE;
+					colorBlendAttachment.srcColorBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA;
+					colorBlendAttachment.dstColorBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
+					colorBlendAttachment.colorBlendOp = VK_BLEND_OP_ADD;
+					colorBlendAttachment.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
+					colorBlendAttachment.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
+					colorBlendAttachment.alphaBlendOp = VK_BLEND_OP_ADD;
 			*/
 		}
 
@@ -483,7 +485,7 @@ namespace np::gfx::__detail
 		{
 			VulkanRenderContext& vulkan_render_context = (VulkanRenderContext&)(*GetRenderContext());
 			ui32 current_image_index = vulkan_render_context.GetCurrentImageIndex();
-			GetDescriptorSets()->SubmitWriter(_meta_value_descriptor_writers[current_image_index]);
+			GetDescriptorSets()->SubmitWriter(_meta_value_descriptor_writers[current_image_index], current_image_index);
 			_bound_descriptor_sets = { (*_descriptor_sets)[current_image_index] };
 
 			_bind_descriptor_sets = mem::create_sptr<VulkanCommandBindDescriptorSets>(GetServices()->GetAllocator(),
@@ -511,14 +513,15 @@ namespace np::gfx::__detail
 
 		void Rebuild()
 		{
-			_descriptor_sets->Rebuild();
+			mem::sptr<RenderContext> render_context = GetRenderContext();
+			VulkanRenderContext& vulkan_render_context = (VulkanRenderContext&)(*render_context);
+
+			_descriptor_sets->Rebuild(vulkan_render_context.GetFramesInFlightCount());
 
 			// TODO: pretty sure we only need to rebuild ubo stuff?? Nah I think everything needs to be rebuilt....??
 
 			Dispose();
 
-			mem::sptr<RenderContext> render_context = GetRenderContext();
-			VulkanRenderContext& vulkan_render_context = (VulkanRenderContext&)(*render_context);
 			_meta_values.resize(vulkan_render_context.GetFramesInFlightCount());
 			_meta_value_buffers = CreateMetaValueBuffers(GetServices(), render_context);
 			_meta_value_descriptor_infos = CreateMetaValueDescriptorInfos(render_context, _meta_value_buffers);
