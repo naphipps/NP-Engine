@@ -10,10 +10,7 @@
 
 //TODO: I think our test app should change working dir
 //TODO: I think our test app should contain all assets, including shaders
-
-// TODO: bring back xcode support - apparently our "fake" targets in cmake are bad for xcode
-// TODO: all "::Create" functions need to return a sptr
-// TODO: move main and as much as we can into test proj
+// TODO: move as much as we can into test proj
 
 i32 main(i32 argc, chr** argv)
 {
