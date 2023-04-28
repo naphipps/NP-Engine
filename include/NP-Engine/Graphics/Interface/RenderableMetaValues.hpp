@@ -14,23 +14,36 @@
 
 namespace np::gfx
 {
-	struct RenderableMetaValues
+	struct RenderableMetaValues //TODO: this is old - try new technique
 	{
-		ui8 _padding[128];
+		union {
+			struct
+			{
+				::glm::mat4 Model;
+				::glm::mat4 Normal;
+			} object;
+
+			struct
+			{
+				::glm::vec4 Color;
+				::glm::vec3 Position;
+				flt Radius;
+			} light;
+		};
+	};
+
+	struct RenderableMetaValues_new2
+	{
 		//TODO: I think our renderables need to define a struct output-like object
 		//	^ and then the implementation/detail can just grab the largest for the pipeline's layout (max of 128? what is vulkan's max??)
 		//	^ - we will have to make sure that our shaders align
 
-	};
-
-	struct RenderableMetaValues_old
-	{
 		::glm::mat4 transform;
 
 		union {
 			struct
 			{
-				::glm::mat4 normal; //TODO: ?
+				::glm::mat4 normal; //TODO: ? I have TODO here without a comment, so I'm wondering why...
 			} object;
 
 			struct

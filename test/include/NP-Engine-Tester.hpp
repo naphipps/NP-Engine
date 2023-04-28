@@ -28,7 +28,7 @@ namespace np::app
 		mem::sptr<gfx::Model> _model;
 		mem::sptr<uid::UidHandle> _model_handle;
 		tim::SteadyTimestamp _start_timestamp;
-		flt _rate = 1.f;
+		flt _rate = 10.f;
 
 		static void AdjustForWindowClosingCallback(void* caller, mem::Delegate& d)
 		{
@@ -89,59 +89,8 @@ namespace np::app
 
 		void SceneOnDraw(mem::Delegate& d)
 		{
-			nput::InputQueue& input = _services->GetInputQueue();
-			const nput::KeyCodeStates& key_states = input.GetKeyCodeStates();
-
-			if (key_states[nput::KeyCode::A].IsActive())
-				_camera.Position.x -= _rate;
-
-			if (key_states[nput::KeyCode::D].IsActive())
-				_camera.Position.x += _rate;
-
-			if (key_states[nput::KeyCode::W].IsActive())
-				_camera.Position.y += _rate;
-
-			if (key_states[nput::KeyCode::S].IsActive())
-				_camera.Position.y -= _rate;
-
-			if (key_states[nput::KeyCode::Q].IsActive())
-				_camera.Position.z += _rate;
-
-			if (key_states[nput::KeyCode::E].IsActive())
-				_camera.Position.z -= _rate;
-
-			if (key_states[nput::KeyCode::R].IsActive() && _rate < DBL_MAX)
-				_rate += 0.1;
-
-			if (key_states[nput::KeyCode::T].IsActive() && _rate > 0)
-				_rate -= 0.1;
-
-			if (key_states[nput::KeyCode::O].IsActive())
-				_camera.SetProjectionType(gfx::Camera::ProjectionType::Orthographic);
-
-			if (key_states[nput::KeyCode::P].IsActive())
-				_camera.SetProjectionType(gfx::Camera::ProjectionType::Perspective);
-
 			if (_scene)
 				_scene->SetCamera(_camera);
-		}
-
-		static void UpdateMetaValuesOnFrameCallback(void* caller, mem::Delegate& d)
-		{
-			((GameLayer*)caller)->UpdateMetaValuesOnFrame(d);
-		}
-
-		void UpdateMetaValuesOnFrame(mem::Delegate& d)
-		{
-			/*
-			gfx::RenderableMetaValues& meta_values = _renderable_model->GetMetaValues();
-			flt scale = _camera.GetProjectionType() == gfx::Camera::ProjectionType::Perspective ? 10.f : 100.f;
-
-			meta_values.object.Model = glm::mat4(1.0f);
-			meta_values.object.Model = ::glm::scale(meta_values.object.Model, ::glm::vec3(scale, scale, scale));
-			// meta_values.object.Model = ::glm::translate(meta_values.object.Model, ::glm::vec3(-10, -10, -10));
-			meta_values.object.Model = ::glm::rotate(meta_values.object.Model, 90.f, _camera.Up);
-			//*/
 		}
 
 	public:
@@ -156,16 +105,17 @@ namespace np::app
 			_model_texture_filename(
 				fsys::Append(fsys::Append(fsys::Append(NP_ENGINE_WORKING_DIR, "test"), "assets"), "viking_room.png")),
 			_model(mem::create_sptr<gfx::Model>(_services->GetAllocator(), _model_filename, _model_texture_filename, true)),
-			_model_handle(_services->GetUidSystem().CreateUidHandle()),
+			_model_handle(nullptr),
 			_start_timestamp(tim::SteadyClock::now())
 		{
-			_model->GetTexture().SetHotReloadable();
+			//_model->GetTexture().SetHotReloadable();
 			//_renderable_model->GetUpdateMetaValuesOnFrameDelegate().SetCallback(this, UpdateMetaValuesOnFrameCallback);
 
 			_camera.Eye = { 30.f, 30.f, 30.f };
 			_camera.Fovy = 70.f;
 			_camera.NearPlane = 0.01f;
 			_camera.FarPlane = 1000.0f;
+			_camera.LookAt = { 0, 0, 0 };
 
 			//-----------------------------------------------------------
 
@@ -199,19 +149,31 @@ namespace np::app
 			_scene = gfx::Scene::Create(scene_properties);
 			_graphics_layer.RegisterScene(_scene);
 
+			_model_handle = _services->GetUidSystem().CreateUidHandle();
 			uid::Uid model_id = _services->GetUidSystem().GetUid(_model_handle);
 			mem::sptr<gfx::VisibleObject> model_visible = mem::create_sptr<gfx::VisibleObject>(_services->GetAllocator());
 
 			_scene->Register(model_id, model_visible, _model);
 			_scene->GetOnRenderDelegate().SetCallback(this, SceneOnDrawCallback);
 
-			mem::sptr<gfx::Resource> resource = _scene->GetRenderDevice()->GetResource(model_id);
+			mem::sptr<gfx::Resource> resource = _scene->GetResource(model_id);
 			if (resource && resource->GetType() == gfx::ResourceType::RenderableModel)
 			{
 				gfx::RenderableModel& renderable_model = (gfx::RenderableModel&)(*resource);
 				mem::sptr<gfx::Model> model = renderable_model.GetModel();
 				NP_ENGINE_ASSERT(model == _model, "these models should be the same!");
+
+				//TODO: improve meta values
+				gfx::RenderableMetaValues& meta_values = renderable_model.GetMetaValues();
+				flt scale = _camera.GetProjectionType() == gfx::Camera::ProjectionType::Perspective ? 10.f : 100.f;
+
+				meta_values.object.Model = glm::mat4(1.0f);
+				meta_values.object.Model = ::glm::scale(meta_values.object.Model, ::glm::vec3(scale, scale, scale));
+				// meta_values.object.Model = ::glm::translate(meta_values.object.Model, ::glm::vec3(-10, -10, -10));
+				meta_values.object.Model = ::glm::rotate(meta_values.object.Model, 90.f, _camera.Up);
 			}
+
+			geom::FltAabb3D model_aabb = _model->GetAabb();
 		}
 
 		static void LogSubmitKeyState(void*, const nput::KeyCodeState&)
@@ -276,7 +238,7 @@ namespace np::app
 			_window->SetMousePositionCallback(input_queue, nput::InputListener::SubmitMousePosition);
 			_window->SetControllerCallback(input_queue, nput::InputListener::SubmitControllerState);
 
-			/*
+			//*
 			_window->SetKeyCallback(this, LogSubmitKeyState);
 			_window->SetMouseCallback(this, LogSubmitMouseState);
 			_window->SetMousePositionCallback(this, LogSubmitMousePosition);
@@ -296,7 +258,46 @@ namespace np::app
 			//_scene->Prepare();
 		}
 
-		void Update(tim::DblMilliseconds time_delta) override {}
+		void Update(tim::DblMilliseconds time_delta) override
+		{
+			nput::InputQueue& input = _services->GetInputQueue();
+			const nput::KeyCodeStates& key_states = input.GetKeyCodeStates();
+
+			//rate = unit / second
+
+			tim::DblSeconds seconds = time_delta;
+			dbl s = seconds.count();
+
+			if (key_states[nput::KeyCode::A].IsActive())
+				_camera.Position.x -= _rate * s;
+
+			if (key_states[nput::KeyCode::D].IsActive())
+				_camera.Position.x += _rate * s;
+
+			if (key_states[nput::KeyCode::W].IsActive())
+				_camera.Position.y += _rate * s;
+
+			if (key_states[nput::KeyCode::S].IsActive())
+				_camera.Position.y -= _rate * s;
+
+			if (key_states[nput::KeyCode::Q].IsActive())
+				_camera.Position.z += _rate * s;
+
+			if (key_states[nput::KeyCode::E].IsActive())
+				_camera.Position.z -= _rate * s;
+
+			if (key_states[nput::KeyCode::R].IsActive() && _rate < DBL_MAX)
+				_rate += 0.1;
+
+			if (key_states[nput::KeyCode::T].IsActive() && _rate > 0)
+				_rate -= 0.1;
+
+			if (key_states[nput::KeyCode::O].IsActive())
+				_camera.SetProjectionType(gfx::Camera::ProjectionType::Orthographic);
+
+			if (key_states[nput::KeyCode::P].IsActive())
+				_camera.SetProjectionType(gfx::Camera::ProjectionType::Perspective);
+		}
 
 		virtual evnt::EventCategory GetHandledCategories() const override
 		{
