@@ -53,8 +53,6 @@ namespace np::app
 			while (_keep_rendering.load(mo_acquire))
 			{
 				NP_ENGINE_PROFILE_SCOPE("rendering loop");
-
-				//*
 				{
 					Lock l(_scenes_mutex);
 					for (auto it = _scenes.begin(); it != _scenes.end(); it++)
@@ -64,7 +62,6 @@ namespace np::app
 							scene->Render();
 					}
 				}
-				//*/
 				
 				for (next = tim::SteadyClock::now(); next - prev < min_duration; next = tim::SteadyClock::now())
 					thr::ThisThread::yield();
