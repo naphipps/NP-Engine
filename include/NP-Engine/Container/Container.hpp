@@ -7,6 +7,8 @@
 #ifndef NP_ENGINE_CONTAINER_HPP
 #define NP_ENGINE_CONTAINER_HPP
 
+//TODO: add ecs here - it is a container
+
 #include <utility> //pair
 
 #include <array>

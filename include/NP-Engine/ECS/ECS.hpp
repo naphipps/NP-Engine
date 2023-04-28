@@ -17,6 +17,8 @@
 
 namespace np::ecs
 {
+	//TODO: snake case api
+
 	using Registry = ::entt::registry;
 	using EntityHandle = ::entt::entity;
 
