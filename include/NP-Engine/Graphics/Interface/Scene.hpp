@@ -110,7 +110,12 @@ namespace np::gfx
 	public:
 		static mem::sptr<Scene> Create(Properties properties);
 
-		virtual ~Scene() {}
+		virtual ~Scene()
+		{
+			Lock l(_visibles_mutex);
+			for (auto it = _visibles.begin(); it != _visibles.end(); it++)
+				UnregisterResource(it->first);
+		}
 
 		virtual GraphicsDetailType GetDetailType() const
 		{
@@ -201,6 +206,16 @@ namespace np::gfx
 		virtual void UnregisterResource(uid::Uid id)
 		{
 			GetRenderDevice()->Unregister(id);
+		}
+
+		virtual mem::sptr<Resource> GetResource(uid::Uid id)
+		{
+			return GetRenderDevice()->GetResource(id);
+		}
+
+		virtual bl HasResource(uid::Uid id)
+		{
+			return GetRenderDevice()->HasResource(id);
 		}
 
 		virtual void CleanupVisibles()
