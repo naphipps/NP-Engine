@@ -30,8 +30,10 @@ namespace np::app
 	class GraphicsLayer : public Layer //TODO: I'm tempted to refactor all "Graphics" things into "GPU" with namespace "gpu" since we use the gpu for so much more than graphics
 	{
 	protected:
-		Mutex _scenes_mutex;
-		con::vector<mem::wptr<gfx::Scene>> _scenes;
+		using ScenesWrapper = mem::LockingWrapper<con::vector<mem::wptr<gfx::Scene>>>;
+		using ScenesAccess = typename ScenesWrapper::Access;
+		ScenesWrapper _scenes;
+
 		siz _job_worker_index;
 		mem::sptr<jsys::Job> _rendering_job;
 		atm_bl _keep_rendering;
@@ -48,14 +50,20 @@ namespace np::app
 			_keep_rendering.store(true, mo_release);
 			tim::SteadyTimestamp next = tim::SteadyClock::now();
 			tim::SteadyTimestamp prev = next;
-			const tim::DblMilliseconds min_duration(NP_ENGINE_RENDERING_LOOP_DURATION);
+			const tim::DblMilliseconds min_duration(NP_ENGINE_RENDERING_LOOP_DURATION); //TODO: just use application loop duration like window procedure
+
+			tim::SteadyTimestamp frame_next = next;
+			tim::SteadyTimestamp frame_prev = next;
+			const tim::DblMilliseconds one_second(1000);
+			siz frame_count = 0;
+			siz fps = 0;
 
 			while (_keep_rendering.load(mo_acquire))
 			{
 				NP_ENGINE_PROFILE_SCOPE("rendering loop");
 				{
-					Lock l(_scenes_mutex);
-					for (auto it = _scenes.begin(); it != _scenes.end(); it++)
+					ScenesAccess scenes = _scenes.GetAccess(_services->GetAllocator());
+					for (auto it = scenes->begin(); it != scenes->end(); it++)
 					{
 						mem::sptr<gfx::Scene> scene = it->get_sptr();
 						if (scene)
@@ -63,9 +71,33 @@ namespace np::app
 					}
 				}
 				
+				frame_count++;
+				frame_next = tim::SteadyClock::now();
+				if (frame_next - frame_prev >= one_second)
+				{
+					fps = frame_count;
+					frame_count = 0;
+					frame_prev = frame_next;
+
+					NP_ENGINE_LOG_INFO("FPS: " + to_str(fps));
+
+					if (false)
+					{
+						ScenesAccess scenes = _scenes.GetAccess(_services->GetAllocator());
+						for (auto it = scenes->begin(); it != scenes->end(); it++)
+						{
+							mem::sptr<gfx::Scene> scene = it->get_sptr();
+							if (scene)
+								scene->GetRenderTarget()->GetWindow()->SetTitle("FPS: " + to_str(fps)); //245-250 so far
+						}
+					}
+				}
+
 				for (next = tim::SteadyClock::now(); next - prev < min_duration; next = tim::SteadyClock::now())
 					thr::ThisThread::yield();
 				prev = next;
+
+				thr::ThisThread::yield();
 			}
 		}
 
@@ -84,16 +116,15 @@ namespace np::app
 
 		virtual void Cleanup() override
 		{
-			Lock l(_scenes_mutex);
-			for (siz i = _scenes.size() - 1; i < _scenes.size(); i--)
-				if (_scenes[i].is_expired())
-					_scenes.erase(_scenes.begin() + i);
+			ScenesAccess scenes = _scenes.GetAccess(_services->GetAllocator());
+			for (siz i = scenes->size() - 1; i < scenes->size(); i--)
+				if ((*scenes)[i].is_expired())
+					scenes->erase(scenes->begin() + i);
 		}
 
 		void RegisterScene(mem::sptr<gfx::Scene> scene)
 		{
-			Lock l(_scenes_mutex);
-			_scenes.emplace_back(scene);
+			_scenes.GetAccess(_services->GetAllocator())->emplace_back(scene);
 		}
 
 		void SetJobWorkerIndex(siz index)

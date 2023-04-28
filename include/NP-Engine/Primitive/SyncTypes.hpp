@@ -13,7 +13,7 @@
 #include "PrimitiveTypes.hpp"
 
 using Mutex = ::std::mutex;
-using Lock = ::std::lock_guard<::std::mutex>;
+using Lock = ::std::scoped_lock<::std::mutex>;
 
 template <typename T>
 using atm = ::std::atomic<T>;

@@ -17,13 +17,20 @@ namespace np::evnt
 		None,
 
 		WindowClosing,
-		WindowClosed,
 		WindowResize,
 		WindowFocus,
 		WindowPosition,
 		WindowFramebuffer,
 		WindowMinimize,
 		WindowMaximize,
+
+		WindowClose,
+		WindowSetTitle,
+		WindowSetSize,
+		WindowSetFocus,
+		WindowSetPosition,
+		WindowSetMinimize,
+		WindowSetMaximize,
 
 		ApplicationClose,
 		ApplicationPopup,

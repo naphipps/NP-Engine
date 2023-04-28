@@ -21,87 +21,78 @@ namespace np::app
 	class WindowLayer : public Layer
 	{
 	private:
-		Mutex _windows_mutex;
-		con::vector<mem::wptr<win::Window>> _windows;
-		con::mpmc_queue<mem::sptr<win::Window>> _windows_to_destroy;
+		//TODO: move window ownership to window layer - set everything with events, and either use getters or events to get values
+		using WindowsWrapper = mem::LockingWrapper<con::vector<mem::sptr<win::Window>>>;
+		using WindowsAccess = typename WindowsWrapper::Access;
+		WindowsWrapper _windows;
+
+		using WindowsToDestroyWrapper = mem::LockingWrapper<con::queue<uid::Uid>>;
+		using WindowsToDestroyAccess = typename WindowsToDestroyWrapper::Access;
+		WindowsToDestroyWrapper _windows_to_destroy;
 
 	protected:
-		static void AdjustForWindowClosingCallback(void* caller, mem::Delegate& d)
+		static void WindowClosedCallback(void* caller, mem::Delegate& d)
 		{
-			((WindowLayer*)caller)->AdjustForWindowClosingProcedure(d);
+			((WindowLayer*)caller)->WindowClosedProcedure(d);
 		}
 
-		void AdjustForWindowClosingProcedure(mem::Delegate& d)
+		void WindowClosedProcedure(mem::Delegate& d)
 		{
-			uid::Uid windowId = d.GetData<uid::Uid>();
-			mem::sptr<win::Window> window = nullptr;
 			{
-				Lock l(_windows_mutex);
-				for (auto it = _windows.begin(); it != _windows.end(); it++)
-				{
-					window = it->get_sptr();
-					if (window && window->GetUid() == windowId)
-					{
-						_windows.erase(it);
-						break;
-					}
-				}
+				_windows_to_destroy.GetAccess(_services->GetAllocator())->emplace(d.GetData<uid::Uid>());
 			}
-			window.reset();
-
 			d.DestructData<uid::Uid>();
 		}
 
 		virtual void HandleWindowClosing(mem::sptr<evnt::Event> e)
 		{
 			win::WindowClosingEvent& closing_event = (win::WindowClosingEvent&)(*e);
-			win::WindowClosingEvent::DataType& closing_data = closing_event.GetData();
-
-			NP_ENGINE_ASSERT(closing_data.job->GetDelegate().GetData<mem::sptr<win::Window>>(), 
-				"Owner of the window should have submitted it to the closing job");
-			
+			win::WindowClosingEventData& closing_data = closing_event.GetData();
 			jsys::JobSystem& job_system = _services->GetJobSystem();
-			mem::sptr<jsys::Job> adjust_job = job_system.CreateJob();
-			adjust_job->GetDelegate().ConstructData<uid::Uid>(closing_data.windowId);
-			adjust_job->GetDelegate().SetCallback(this, AdjustForWindowClosingCallback);
-			jsys::Job::AddDependency(closing_data.job, adjust_job);
-			job_system.SubmitJob(jsys::JobPriority::Higher, adjust_job);
 
-			// our closing job must be submitted here
-			job_system.SubmitJob(jsys::JobPriority::Normal, closing_data.job);
-			closing_data.job.reset();
+			mem::sptr<jsys::Job> closed_job = job_system.CreateJob();
+			closed_job->GetDelegate().ConstructData<uid::Uid>(closing_data.windowId);
+			closed_job->GetDelegate().SetCallback(this, WindowClosedCallback);
+			jsys::Job::AddDependency(closed_job, closing_data.job);
+
+			job_system.SubmitJob(jsys::JobPriority::Higher, closing_data.job);
+			job_system.SubmitJob(jsys::JobPriority::Normal, closed_job);
+
 			e->SetHandled();
 		}
 
-		static void HandleWindowClosedCallback(void* caller, mem::Delegate& d)
+		virtual void HandleWindowSetTitle(mem::sptr<evnt::Event> e)
 		{
-			((WindowLayer*)caller)->HandleWindowClosedProcedure(d);
-		}
+			win::WindowSetTitleEvent& title_event = (win::WindowSetTitleEvent&)(*e);
+			win::WindowTitleEventData& title_data = title_event.GetData();
 
-		void HandleWindowClosedProcedure(mem::Delegate& d)
-		{
-			// ownership of window is now resolved by giving it to the window layer for cleanup on main thread
-			_windows_to_destroy.enqueue(d.GetData<mem::sptr<win::Window>>());
-			d.DestructData<mem::sptr<win::Window>>();
-			
 			{
-				Lock l(_windows_mutex);
-				if (_windows.empty()) //this relies on the window closing adjust job
-					_services->GetEventSubmitter().Submit(mem::create_sptr<ApplicationCloseEvent>(_services->GetAllocator()));
+				WindowsAccess windows = _windows.GetAccess(_services->GetAllocator());
+				for (auto it = windows->begin(); it != windows->end(); it++)
+					if (*it && (*it)->GetUid() == title_data.windowId)
+					{
+						(*it)->SetTitle(title_data.title);
+						break;
+					}
 			}
+
+			e->SetHandled();
 		}
 
-		virtual void HandleWindowClosed(mem::sptr<evnt::Event> e)
+		virtual void HandleWindowClose(mem::sptr<evnt::Event> e)
 		{
-			win::WindowClosedEvent& closed_event = (win::WindowClosedEvent&)(*e);
-			win::WindowClosedEvent::DataType& closed_data = closed_event.GetData();
-			jsys::JobSystem& job_system = _services->GetJobSystem();
+			win::WindowCloseEvent& close_event = (win::WindowCloseEvent&)(*e);
+			win::WindowCloseEventData& close_data = close_event.GetData();
 
-			mem::sptr<jsys::Job> handle_job = job_system.CreateJob();
-			// ownership of window is moving from the event to our job procedure
-			handle_job->GetDelegate().ConstructData<mem::sptr<win::Window>>(closed_data.window);
-			handle_job->GetDelegate().SetCallback(this, HandleWindowClosedCallback);
-			job_system.SubmitJob(jsys::JobPriority::Higher, handle_job);
+			{
+				WindowsAccess windows = _windows.GetAccess(_services->GetAllocator());
+				for (auto it = windows->begin(); it != windows->end(); it++)
+					if (*it && (*it)->GetUid() == close_data.windowId)
+					{
+						(*it)->Close();
+						break;
+					}
+			}
 
 			e->SetHandled();
 		}
@@ -114,9 +105,21 @@ namespace np::app
 				HandleWindowClosing(e);
 				break;
 
-			case evnt::EventType::WindowClosed:
-				HandleWindowClosed(e);
+			case evnt::EventType::WindowSetTitle:
+				HandleWindowSetTitle(e);
 				break;
+
+			case evnt::EventType::WindowClose:
+				HandleWindowClose(e);
+				break;
+
+			case evnt::EventType::WindowSetFocus:
+			case evnt::EventType::WindowSetMaximize:
+			case evnt::EventType::WindowSetMinimize:
+			case evnt::EventType::WindowSetPosition:
+			case evnt::EventType::WindowSetSize:
+
+			
 
 			default:
 				break;
@@ -133,8 +136,7 @@ namespace np::app
 		virtual ~WindowLayer()
 		{
 			{
-				Lock l(_windows_mutex);
-				_windows.clear();
+				_windows.GetAccess(_services->GetAllocator())->clear();
 			}
 
 			Cleanup();
@@ -145,8 +147,7 @@ namespace np::app
 
 		virtual void RegisterWindow(mem::sptr<win::Window> window)
 		{
-			Lock l(_windows_mutex);
-			_windows.emplace_back(window);
+			_windows.GetAccess(_services->GetAllocator())->emplace_back(window);
 		}
 
 		virtual void Update(tim::DblMilliseconds time_delta) override
@@ -154,31 +155,47 @@ namespace np::app
 			win::Window::Update(win::WindowDetailType::Glfw);
 			win::Window::Update(win::WindowDetailType::Sdl);
 
-			mem::sptr<win::Window> window = nullptr;
 			{
-				Lock l(_windows_mutex);
-				for (auto it = _windows.begin(); it != _windows.end(); it++)
-				{
-					window = it->get_sptr();
-					if (window)
-						window->Update(time_delta);
-				}
+				WindowsAccess windows = _windows.GetAccess(_services->GetAllocator());
+				for (auto it = windows->begin(); it != windows->end(); it++)
+					if (*it)
+						(*it)->Update(time_delta);
 			}
-			window.reset();
 		}
 
 		virtual void Cleanup() override
 		{
-			mem::sptr<win::Window> window = nullptr;
-			while (_windows_to_destroy.try_dequeue(window)) {}
-			window.reset();
-
+			//cleanup all windows to destroy
 			{
-				Lock l(_windows_mutex);
-				for (siz i = _windows.size() - 1; i < _windows.size(); i--)
-					if (_windows[i].is_expired())
-						_windows.erase(_windows.begin() + i);
+				WindowsToDestroyAccess to_destroy = _windows_to_destroy.GetAccess(_services->GetAllocator());
+				for (;!to_destroy->empty(); to_destroy->pop())
+				{
+					uid::Uid id = to_destroy->front();
+					{
+						WindowsAccess windows = _windows.GetAccess(_services->GetAllocator());
+						for (auto it = windows->begin(); it != windows->end(); it++)
+							if (*it && (*it)->GetUid() == id)
+								it->reset();
+					}
+				}
 			}
+
+			bl submit_application_close = false;
+
+			//cleanup all empty window sptr
+			{
+				WindowsAccess windows = _windows.GetAccess(_services->GetAllocator());
+				submit_application_close |= !windows->empty();
+
+				for (siz i = windows->size() - 1; i < windows->size(); i--)
+					if (!(*windows)[i])
+						windows->erase(windows->begin() + i);
+
+				submit_application_close &= windows->empty();
+			}
+
+			if (submit_application_close)
+				_services->GetEventSubmitter().Submit(mem::create_sptr<ApplicationCloseEvent>(_services->GetAllocator()));
 		}
 
 		virtual evnt::EventCategory GetHandledCategories() const override

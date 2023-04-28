@@ -885,11 +885,6 @@ namespace np::win::__detail
 				glfwSetWindowShouldClose(glfw_window, GLFW_TRUE);
 		}
 
-		void ClosingProcedure(mem::Delegate& d) override
-		{
-			Window::ClosingProcedure(d);
-		}
-
 		GLFWwindow* CreateGlfwWindow()
 		{
 			glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
@@ -1147,59 +1142,77 @@ namespace np::win::__detail
 
 		virtual void SetTitle(str title) override
 		{
-			GLFWwindow* glfw_window = _glfw_window.load(mo_acquire);
-			if (glfw_window)
-				glfwSetWindowTitle(glfw_window, title.c_str());
+			if (_owning_thread_id == thr::ThisThread::get_id())
+			{
+				GLFWwindow* glfw_window = _glfw_window.load(mo_acquire);
+				if (glfw_window)
+					glfwSetWindowTitle(glfw_window, title.c_str());
+			}
 
 			Window::SetTitle(title);
 		}
 
 		virtual void Resize(ui32 width, ui32 height) override
 		{
-			GLFWwindow* glfw_window = _glfw_window.load(mo_acquire);
-			if (glfw_window)
-				glfwSetWindowSize(glfw_window, (i32)width, (i32)height);
+			if (_owning_thread_id == thr::ThisThread::get_id())
+			{
+				GLFWwindow* glfw_window = _glfw_window.load(mo_acquire);
+				if (glfw_window)
+					glfwSetWindowSize(glfw_window, (i32)width, (i32)height);
+			}
 
 			Window::Resize(width, height);
 		}
 
 		virtual void Minimize() override
 		{
-			GLFWwindow* glfw_window = _glfw_window.load(mo_acquire);
-			if (glfw_window && !glfwGetWindowAttrib(glfw_window, GLFW_ICONIFIED))
-				glfwIconifyWindow(glfw_window);
+			if (_owning_thread_id == thr::ThisThread::get_id())
+			{
+				GLFWwindow* glfw_window = _glfw_window.load(mo_acquire);
+				if (glfw_window && !glfwGetWindowAttrib(glfw_window, GLFW_ICONIFIED))
+					glfwIconifyWindow(glfw_window);
+			}
 
 			Window::Minimize();
 		}
 
 		virtual void RestoreFromMinimize() override
 		{
-			GLFWwindow* glfw_window = _glfw_window.load(mo_acquire);
-			if (glfw_window && glfwGetWindowAttrib(glfw_window, GLFW_ICONIFIED))
-				glfwRestoreWindow(glfw_window);
+			if (_owning_thread_id == thr::ThisThread::get_id())
+			{
+				GLFWwindow* glfw_window = _glfw_window.load(mo_acquire);
+				if (glfw_window && glfwGetWindowAttrib(glfw_window, GLFW_ICONIFIED))
+					glfwRestoreWindow(glfw_window);
+			}
 
 			Window::RestoreFromMinimize();
 		}
 
 		virtual void Maximize() override
 		{
-			GLFWwindow* glfw_window = _glfw_window.load(mo_acquire);
+			if (_owning_thread_id == thr::ThisThread::get_id())
+			{
+				GLFWwindow* glfw_window = _glfw_window.load(mo_acquire);
 
 #if NP_ENGINE_PLATFORM_IS_WINDOWS
-			GetWindowPlacement((HWND)GetNativeFromGlfw(glfw_window), &_prev_window_placement);
+				GetWindowPlacement((HWND)GetNativeFromGlfw(glfw_window), &_prev_window_placement);
 #endif
 
-			if (glfw_window && !glfwGetWindowAttrib(glfw_window, GLFW_MAXIMIZED))
-				glfwMaximizeWindow(glfw_window);
+				if (glfw_window && !glfwGetWindowAttrib(glfw_window, GLFW_MAXIMIZED))
+					glfwMaximizeWindow(glfw_window);
+			}
 
 			Window::Maximize();
 		}
 
 		virtual void RestoreFromMaximize() override
 		{
-			GLFWwindow* glfw_window = _glfw_window.load(mo_acquire);
-			if (glfw_window && glfwGetWindowAttrib(glfw_window, GLFW_MAXIMIZED))
-				glfwRestoreWindow(glfw_window);
+			if (_owning_thread_id == thr::ThisThread::get_id())
+			{
+				GLFWwindow* glfw_window = _glfw_window.load(mo_acquire);
+				if (glfw_window && glfwGetWindowAttrib(glfw_window, GLFW_MAXIMIZED))
+					glfwRestoreWindow(glfw_window);
+			}
 
 			Window::RestoreFromMaximize();
 		}
@@ -1218,9 +1231,12 @@ namespace np::win::__detail
 
 		virtual void Focus() override
 		{
-			GLFWwindow* glfw_window = _glfw_window.load(mo_acquire);
-			if (glfw_window && !glfwGetWindowAttrib(glfw_window, GLFW_FOCUSED))
-				glfwFocusWindow(glfw_window);
+			if (_owning_thread_id == thr::ThisThread::get_id())
+			{
+				GLFWwindow* glfw_window = _glfw_window.load(mo_acquire);
+				if (glfw_window && !glfwGetWindowAttrib(glfw_window, GLFW_FOCUSED))
+					glfwFocusWindow(glfw_window);
+			}
 
 			Window::Focus();
 		}

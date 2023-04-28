@@ -39,8 +39,6 @@ namespace np::app
 		{
 			uid::Uid windowId = d.GetData<uid::Uid>();
 
-			//NP_ENGINE_LOG_INFO("reseting scene");
-
 			if (_scene->GetRenderTarget()->GetWindow()->GetUid() == windowId)
 				_scene.reset();
 
@@ -53,14 +51,7 @@ namespace np::app
 		virtual void AdjustForWindowClosing(mem::sptr<evnt::Event> e)
 		{
 			win::WindowClosingEvent& closing_event = (win::WindowClosingEvent&)(*e);
-			win::WindowClosingEvent::DataType& closing_data = closing_event.GetData();
-
-			if (_window->GetUid() == closing_data.windowId)
-			{
-				// window ownership has gone to the closing job
-				mem::sptr<win::Window>& closing_job_window = closing_data.job->GetDelegate().GetData<mem::sptr<win::Window>>();
-				closing_job_window = _window;
-			}
+			win::WindowClosingEventData& closing_data = closing_event.GetData();
 
 			mem::sptr<jsys::Job> adjust_job = _services->GetJobSystem().CreateJob();
 			adjust_job->GetDelegate().ConstructData<uid::Uid>(closing_data.windowId);

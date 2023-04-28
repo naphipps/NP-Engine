@@ -173,22 +173,24 @@ namespace np::win
 		}
 	}
 
+	void Window::Show()
+	{
+		if (!_thread.IsRunning())
+		{
+			_show_procedure_is_complete.store(false, mo_release);
+			_thread.Run(&Window::ShowProcedure, this);
+		}
+	}
+
+	void Window::Close()
+	{
+		if (!_show_procedure_is_complete.load(mo_acquire))
+			DetailCloseProcedure();
+	}
+
 	void Window::ClosingProcedure(mem::Delegate& d)
 	{
-		//just in case _show_procedure_is_complete is still false
-		while (!_show_procedure_is_complete.load(mo_acquire))
-		{
-			Close();
-			thr::ThisThread::yield();
-		}
-
 		_thread.Clear();
-
-		// window layer should have constructed a mem::sptr<Window> in d.GetData
-		// ownership of window is now moving from this job procedure to the closed event
-		mem::sptr<evnt::Event> e = mem::create_sptr<WindowClosedEvent>(_services->GetAllocator(), d.GetData<mem::sptr<Window>>());
-		_services->GetEventSubmitter().Submit(e);
-		d.DestructData<mem::sptr<Window>>();
 	}
 
 	void Window::ShowProcedure()
@@ -196,7 +198,6 @@ namespace np::win
 		DetailShowProcedure();
 
 		mem::sptr<jsys::Job> closing_job = _services->GetJobSystem().CreateJob();
-		closing_job->GetDelegate().ConstructData<mem::sptr<Window>>();
 		closing_job->GetDelegate().SetCallback(this, ClosingCallback);
 		mem::sptr<evnt::Event> e = mem::create_sptr<WindowClosingEvent>(_services->GetAllocator(), GetUid(), closing_job);
 		_services->GetEventSubmitter().Submit(e);
@@ -204,58 +205,119 @@ namespace np::win
 		_show_procedure_is_complete.store(true, mo_release);
 	}
 
+	void Window::SetTitle(str title)
+	{
+		if (_owning_thread_id == thr::ThisThread::get_id())
+		{
+			_properties.title = title;
+		}
+		else
+		{
+			mem::sptr<evnt::Event> e = mem::create_sptr<WindowSetTitleEvent>(_services->GetAllocator(), GetUid(), title);
+			_services->GetEventSubmitter().Submit(e);
+		}
+	}
+
 	void Window::Resize(ui32 width, ui32 height)
 	{
-		if (IsRunning())
+		if (_owning_thread_id == thr::ThisThread::get_id())
 		{
-			_properties.width = width;
-			_properties.height = height;
-			mem::sptr<evnt::Event> e = mem::create_sptr<WindowResizeEvent>(_services->GetAllocator(), GetUid(), width, height);
+			if (IsRunning())
+			{
+				_properties.width = width;
+				_properties.height = height;
+				mem::sptr<evnt::Event> e = mem::create_sptr<WindowResizeEvent>(_services->GetAllocator(), GetUid(), width, height);
+				_services->GetEventSubmitter().Submit(e);
+			}
+		}
+		else
+		{
+			mem::sptr<evnt::Event> e = mem::create_sptr<WindowSetSizeEvent>(_services->GetAllocator(), GetUid(), width, height);
 			_services->GetEventSubmitter().Submit(e);
 		}
 	}
 
 	void Window::Minimize()
 	{
-		if (IsRunning())
+		if (_owning_thread_id == thr::ThisThread::get_id())
 		{
-			mem::sptr<evnt::Event> e = mem::create_sptr<WindowMinimizeEvent>(_services->GetAllocator(), GetUid(), true);
+			if (IsRunning())
+			{
+				mem::sptr<evnt::Event> e = mem::create_sptr<WindowMinimizeEvent>(_services->GetAllocator(), GetUid(), true);
+				_services->GetEventSubmitter().Submit(e);
+			}
+		}
+		else
+		{
+			mem::sptr<evnt::Event> e = mem::create_sptr<WindowSetMinimizeEvent>(_services->GetAllocator(), GetUid(), true);
 			_services->GetEventSubmitter().Submit(e);
 		}
 	}
 
 	void Window::RestoreFromMinimize()
 	{
-		if (IsRunning())
+		if (_owning_thread_id == thr::ThisThread::get_id())
 		{
-			mem::sptr<evnt::Event> e = mem::create_sptr<WindowMinimizeEvent>(_services->GetAllocator(), GetUid(), false);
+			if (IsRunning())
+			{
+				mem::sptr<evnt::Event> e = mem::create_sptr<WindowMinimizeEvent>(_services->GetAllocator(), GetUid(), false);
+				_services->GetEventSubmitter().Submit(e);
+			}
+		}
+		else
+		{
+			mem::sptr<evnt::Event> e = mem::create_sptr<WindowSetMinimizeEvent>(_services->GetAllocator(), GetUid(), false);
 			_services->GetEventSubmitter().Submit(e);
 		}
 	}
 
 	void Window::Maximize()
 	{
-		if (IsRunning())
+		if (_owning_thread_id == thr::ThisThread::get_id())
 		{
-			mem::sptr<evnt::Event> e = mem::create_sptr<WindowMaximizeEvent>(_services->GetAllocator(), GetUid(), true);
+			if (IsRunning())
+			{
+				mem::sptr<evnt::Event> e = mem::create_sptr<WindowMaximizeEvent>(_services->GetAllocator(), GetUid(), true);
+				_services->GetEventSubmitter().Submit(e);
+			}
+		}
+		else
+		{
+			mem::sptr<evnt::Event> e = mem::create_sptr<WindowSetMaximizeEvent>(_services->GetAllocator(), GetUid(), true);
 			_services->GetEventSubmitter().Submit(e);
 		}
 	}
 
 	void Window::RestoreFromMaximize()
 	{
-		if (IsRunning())
+		if (_owning_thread_id == thr::ThisThread::get_id())
 		{
-			mem::sptr<evnt::Event> e = mem::create_sptr<WindowMaximizeEvent>(_services->GetAllocator(), GetUid(), false);
+			if (IsRunning())
+			{
+				mem::sptr<evnt::Event> e = mem::create_sptr<WindowMaximizeEvent>(_services->GetAllocator(), GetUid(), false);
+				_services->GetEventSubmitter().Submit(e);
+			}
+		}
+		else
+		{
+			mem::sptr<evnt::Event> e = mem::create_sptr<WindowSetMaximizeEvent>(_services->GetAllocator(), GetUid(), false);
 			_services->GetEventSubmitter().Submit(e);
 		}
 	}
 
 	void Window::Focus()
 	{
-		if (IsRunning())
+		if (_owning_thread_id == thr::ThisThread::get_id())
 		{
-			mem::sptr<evnt::Event> e = mem::create_sptr<WindowFocusEvent>(_services->GetAllocator(), GetUid(), true);
+			if (IsRunning())
+			{
+				mem::sptr<evnt::Event> e = mem::create_sptr<WindowFocusEvent>(_services->GetAllocator(), GetUid(), true);
+				_services->GetEventSubmitter().Submit(e);
+			}
+		}
+		else
+		{
+			mem::sptr<evnt::Event> e = mem::create_sptr<WindowSetFocusEvent>(_services->GetAllocator(), GetUid(), true);
 			_services->GetEventSubmitter().Submit(e);
 		}
 	}

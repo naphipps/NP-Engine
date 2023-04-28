@@ -240,6 +240,7 @@ set(NP_ENGINE_MEMORY_HPP
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Memory/AccumulatingAllocator.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Memory/AccumulatingPool.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Memory/BookkeepingAllocator.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Memory/LockingWrapper.hpp
 )
 
 set(NP_ENGINE_NOISE_HPP
@@ -336,16 +337,8 @@ set(NP_ENGINE_WINDOW_HPP
 set(NP_ENGINE_WINDOW_INTERFACE_HPP
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Window/Interface/WindowDetailType.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Window/Interface/WindowImpl.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Window/Interface/WindowClosedEvent.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Window/Interface/WindowClosingEvent.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Window/Interface/WindowEvents.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Window/Interface/WindowResizeEvent.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Window/Interface/WindowInterface.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Window/Interface/WindowPositionEvent.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Window/Interface/WindowFramebufferEvent.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Window/Interface/WindowMinimizeEvent.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Window/Interface/WindowMaximizeEvent.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Window/Interface/WindowFocusEvent.hpp
 )
 
 set(NP_ENGINE_WINDOW_GLFW_HPP

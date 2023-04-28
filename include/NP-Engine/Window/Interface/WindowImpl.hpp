@@ -47,6 +47,7 @@ namespace np::win
 		using FocusCallback = void (*)(void* caller, bl focused);
 
 	protected:
+		const thr::Thread::Id _owning_thread_id;
 		Properties _properties;
 		mem::sptr<srvc::Services> _services;
 		mem::sptr<uid::UidHandle> _uid_handle;
@@ -93,6 +94,7 @@ namespace np::win
 		virtual void DetailCloseProcedure() = 0;
 
 		Window(Window::Properties& properties, mem::sptr<srvc::Services> services):
+			_owning_thread_id(thr::ThisThread::get_id()),
 			_properties(properties),
 			_services(services),
 			_uid_handle(_services->GetUidSystem().CreateUidHandle()),
@@ -122,20 +124,9 @@ namespace np::win
 
 		virtual void Update(tim::DblMilliseconds milliseconds) {}
 
-		virtual void Show()
-		{
-			if (!_thread.IsRunning())
-			{
-				_show_procedure_is_complete.store(false, mo_release);
-				_thread.Run(&Window::ShowProcedure, this);
-			}
-		}
+		virtual void Show();
 
-		virtual void Close()
-		{
-			if (!_show_procedure_is_complete.load(mo_acquire))
-				DetailCloseProcedure();
-		}
+		virtual void Close();
 
 		uid::Uid GetUid() const
 		{
@@ -167,10 +158,7 @@ namespace np::win
 			return _properties;
 		}
 
-		virtual void SetTitle(str title)
-		{
-			_properties.title = title;
-		}
+		virtual void SetTitle(str title);
 
 		virtual void Resize(ui32 width, ui32 height);
 
