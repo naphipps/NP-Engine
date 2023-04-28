@@ -1149,7 +1149,7 @@ namespace np::win::__detail
 		{
 			GLFWwindow* glfw_window = _glfw_window.load(mo_acquire);
 			if (glfw_window)
-				glfwSetWindowTitle(glfw_window, _properties.title.c_str());
+				glfwSetWindowTitle(glfw_window, title.c_str());
 
 			Window::SetTitle(title);
 		}
