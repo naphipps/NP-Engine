@@ -22,11 +22,11 @@ namespace np::app
 	{
 	private:
 		//TODO: move window ownership to window layer - set everything with events, and either use getters or events to get values
-		using WindowsWrapper = mem::LockingWrapper<con::vector<mem::sptr<win::Window>>>;
+		using WindowsWrapper = mem::MutexedWrapper<con::vector<mem::sptr<win::Window>>>;
 		using WindowsAccess = typename WindowsWrapper::Access;
 		WindowsWrapper _windows;
 
-		using WindowsToDestroyWrapper = mem::LockingWrapper<con::uset<uid::Uid>>;
+		using WindowsToDestroyWrapper = mem::MutexedWrapper<con::uset<uid::Uid>>;
 		using WindowsToDestroyAccess = typename WindowsToDestroyWrapper::Access;
 		WindowsToDestroyWrapper _windows_to_destroy;
 
@@ -39,7 +39,7 @@ namespace np::app
 		void WindowClosedProcedure(mem::Delegate& d)
 		{
 			{
-				_windows_to_destroy.GetAccess(_services->GetAllocator())->emplace(d.GetData<uid::Uid>());
+				_windows_to_destroy.GetAccess()->emplace(d.GetData<uid::Uid>());
 			}
 			d.DestructData<uid::Uid>();
 		}
@@ -67,7 +67,7 @@ namespace np::app
 			win::WindowTitleEventData& title_data = title_event.GetData();
 
 			{
-				WindowsAccess windows = _windows.GetAccess(_services->GetAllocator());
+				WindowsAccess windows = _windows.GetAccess();
 				for (auto it = windows->begin(); it != windows->end(); it++)
 					if (*it && (*it)->GetUid() == title_data.windowId)
 					{
@@ -85,7 +85,7 @@ namespace np::app
 			win::WindowCloseEventData& close_data = close_event.GetData();
 
 			{
-				WindowsAccess windows = _windows.GetAccess(_services->GetAllocator());
+				WindowsAccess windows = _windows.GetAccess();
 				for (auto it = windows->begin(); it != windows->end(); it++)
 					if (*it && (*it)->GetUid() == close_data.windowId)
 					{
@@ -135,8 +135,8 @@ namespace np::app
 
 		virtual ~WindowLayer()
 		{
-            _windows.GetAccess(_services->GetAllocator())->clear();
-            _windows_to_destroy.GetAccess(_services->GetAllocator())->clear();
+            _windows.GetAccess()->clear();
+            _windows_to_destroy.GetAccess()->clear();
 
 			win::Window::Terminate(win::WindowDetailType::Glfw);
 			win::Window::Terminate(win::WindowDetailType::Sdl);
@@ -144,7 +144,7 @@ namespace np::app
 
 		virtual void RegisterWindow(mem::sptr<win::Window> window)
 		{
-			_windows.GetAccess(_services->GetAllocator())->emplace_back(window);
+			_windows.GetAccess()->emplace_back(window);
 		}
 
 		virtual void Update(tim::DblMilliseconds time_delta) override
@@ -153,7 +153,7 @@ namespace np::app
 			win::Window::Update(win::WindowDetailType::Sdl);
 
 			{
-				WindowsAccess windows = _windows.GetAccess(_services->GetAllocator());
+				WindowsAccess windows = _windows.GetAccess();
 				for (auto it = windows->begin(); it != windows->end(); it++)
 					if (*it)
 						(*it)->Update(time_delta);
@@ -164,7 +164,7 @@ namespace np::app
 		{
             bl submit_application_close = false;
             {
-                WindowsAccess windows = _windows.GetAccess(_services->GetAllocator());
+                WindowsAccess windows = _windows.GetAccess();
                 submit_application_close |= !windows->empty();
                 
                 for (auto wit = windows->begin(); wit != windows->end();)
@@ -176,7 +176,7 @@ namespace np::app
                     }
                     else if (*wit && wit->get_strong_count() == 1)
                     {
-                        WindowsToDestroyAccess to_destroy = _windows_to_destroy.GetAccess(_services->GetAllocator());
+                        WindowsToDestroyAccess to_destroy = _windows_to_destroy.GetAccess();
                         auto dit = to_destroy->find((*wit)->GetUid());
                         if (dit != to_destroy->end())
                         {

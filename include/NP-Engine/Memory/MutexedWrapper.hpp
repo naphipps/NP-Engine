@@ -4,8 +4,10 @@
 //
 //##===----------------------------------------------------------------------===##//
 
-#ifndef NP_ENGINE_LOCKING_WRAPPER_HPP
-#define NP_ENGINE_LOCKING_WRAPPER_HPP
+#ifndef NP_ENGINE_MUTEXED_WRAPPER_HPP
+#define NP_ENGINE_MUTEXED_WRAPPER_HPP
+
+#include <utility>
 
 #include "NP-Engine/Primitive/Primitive.hpp"
 
@@ -14,19 +16,21 @@
 namespace np::mem
 {
 	template <typename T>
-	class LockingWrapper
+	class MutexedWrapper
 	{
+	protected:
+		Mutex _m;
+		T _object;
+		
 	public:
 		class Access
 		{
 		protected:
-			mem::sptr<Lock> _lock;
+			Lock _l;
 			T& _reference;
 
 		public:
-			Access(mem::sptr<Lock> lock, T& reference) : _lock(lock), _reference(reference) {}
-
-			Access(const Access& other) : _lock(other._lock), _reference(other._reference) {}
+			Access(Mutex& m, T& reference) : _l(m), _reference(reference) {}
 
 			T& operator*() const
 			{
@@ -39,16 +43,14 @@ namespace np::mem
 			}
 		};
 		
-	protected:
-		Mutex _m;
-		T _object;
+		template <typename... Args>
+		MutexedWrapper(Args&&... args) : _object(::std::forward<Args>(args)...) {}
 
-	public:
-		Access GetAccess(Allocator& allocator)
+		Access GetAccess()
 		{
-			return Access(mem::create_sptr<Lock>(allocator, _m), _object);
+			return { _m, _object };
 		}
 	};
 }
 
-#endif /* NP_ENGINE_LOCKING_WRAPPER_HPP */
+#endif /* NP_ENGINE_MUTEXED_WRAPPER_HPP */
