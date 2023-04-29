@@ -26,7 +26,7 @@ namespace np::app
 		using WindowsAccess = typename WindowsWrapper::Access;
 		WindowsWrapper _windows;
 
-		using WindowsToDestroyWrapper = mem::LockingWrapper<con::queue<uid::Uid>>;
+		using WindowsToDestroyWrapper = mem::LockingWrapper<con::uset<uid::Uid>>;
 		using WindowsToDestroyAccess = typename WindowsToDestroyWrapper::Access;
 		WindowsToDestroyWrapper _windows_to_destroy;
 
@@ -135,11 +135,8 @@ namespace np::app
 
 		virtual ~WindowLayer()
 		{
-			{
-				_windows.GetAccess(_services->GetAllocator())->clear();
-			}
-
-			Cleanup();
+            _windows.GetAccess(_services->GetAllocator())->clear();
+            _windows_to_destroy.GetAccess(_services->GetAllocator())->clear();
 
 			win::Window::Terminate(win::WindowDetailType::Glfw);
 			win::Window::Terminate(win::WindowDetailType::Sdl);
@@ -165,35 +162,35 @@ namespace np::app
 
 		virtual void Cleanup() override
 		{
-			//cleanup all windows to destroy
-			{
-				WindowsToDestroyAccess to_destroy = _windows_to_destroy.GetAccess(_services->GetAllocator());
-				for (;!to_destroy->empty(); to_destroy->pop())
-				{
-					uid::Uid id = to_destroy->front();
-					{
-						WindowsAccess windows = _windows.GetAccess(_services->GetAllocator());
-						for (auto it = windows->begin(); it != windows->end(); it++)
-							if (*it && (*it)->GetUid() == id)
-								it->reset();
-					}
-				}
-			}
-
-			bl submit_application_close = false;
-
-			//cleanup all empty window sptr
-			{
-				WindowsAccess windows = _windows.GetAccess(_services->GetAllocator());
-				submit_application_close |= !windows->empty();
-
-				for (siz i = windows->size() - 1; i < windows->size(); i--)
-					if (!(*windows)[i])
-						windows->erase(windows->begin() + i);
-
-				submit_application_close &= windows->empty();
-			}
-
+            bl submit_application_close = false;
+            {
+                WindowsAccess windows = _windows.GetAccess(_services->GetAllocator());
+                submit_application_close |= !windows->empty();
+                
+                for (auto wit = windows->begin(); wit != windows->end();)
+                {
+                    if (!*wit)
+                    {
+                        wit = windows->erase(wit);
+                        continue;
+                    }
+                    else if (*wit && wit->get_strong_count() == 1)
+                    {
+                        WindowsToDestroyAccess to_destroy = _windows_to_destroy.GetAccess(_services->GetAllocator());
+                        auto dit = to_destroy->find((*wit)->GetUid());
+                        if (dit != to_destroy->end())
+                        {
+                            wit = windows->erase(wit);
+                            to_destroy->erase(dit);
+                            continue;
+                        }
+                    }
+                    
+                    wit++;
+                }
+                
+                submit_application_close &= windows->empty();
+            }
 			if (submit_application_close)
 				_services->GetEventSubmitter().Submit(mem::create_sptr<ApplicationCloseEvent>(_services->GetAllocator()));
 		}
