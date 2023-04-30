@@ -8,7 +8,7 @@
 
 namespace np::nsit
 {
-	Mutex Instrumentor::_mutex;
+	mutex Instrumentor::_m;
 	atm_bl Instrumentor::_initialized;
 	::std::shared_ptr<::rapidjson::Document> Instrumentor::_report;
 	::std::string Instrumentor::_filepath;

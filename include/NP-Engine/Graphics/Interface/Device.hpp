@@ -105,29 +105,29 @@ namespace np::gfx
 	class Device
 	{
 	protected:
-		Mutex _resource_mutex;
-		con::umap<uid::Uid, mem::sptr<Resource>> _resources; //TODO: is umap the best here? what about vector?
+		using ResourcesWrapper = mutexed_wrapper<con::umap<uid::Uid, mem::sptr<Resource>>>;//TODO: is umap the best here? what about vector?
+		using ResourcesAccess = ResourcesWrapper::access;
+		ResourcesWrapper _resources;
 
 	public:
 		virtual void Register(uid::Uid id, mem::sptr<Resource> resource)
 		{
-			_resources[id] = resource;
+			(*_resources.get_access())[id] = resource;
 		}
 
 		virtual void Unregister(uid::Uid id)
 		{
-			Lock l(_resource_mutex);
-			_resources.erase(id);
+			_resources.get_access()->erase(id);
 		}
 
 		virtual void CleanupResources()
 		{
-			Lock l(_resource_mutex);
 			uid::UidSystem& uid_system = GetServices()->GetUidSystem();
-			for (auto it = _resources.begin(); it != _resources.end();)
+			ResourcesAccess resources = _resources.get_access();
+			for (auto it = resources->begin(); it != resources->end();)
 			{
 				if (!uid_system.Has(it->first))
-					it = _resources.erase(it);
+					it = resources->erase(it);
 				else
 					it++;
 			}
@@ -135,15 +135,15 @@ namespace np::gfx
 
 		virtual mem::sptr<Resource> GetResource(uid::Uid id)
 		{
-			Lock l(_resource_mutex);
-			auto it = _resources.find(id);
-			return it != _resources.end() ? it->second : nullptr;
+			ResourcesAccess resources = _resources.get_access();
+			auto it = resources->find(id);
+			return it != resources->end() ? it->second : nullptr;
 		}
 
 		virtual bl HasResource(uid::Uid id)
 		{
-			Lock l(_resource_mutex);
-			return _resources.find(id) != _resources.end();
+			ResourcesAccess resources = _resources.get_access();
+			return resources->find(id) != resources->end();
 		}
 
 		virtual mem::sptr<DetailInstance> GetInstance() const = 0;

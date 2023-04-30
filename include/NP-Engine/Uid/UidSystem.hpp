@@ -73,7 +73,7 @@ namespace np::uid
 			}
 		};
 
-		Mutex _uid_mutex;
+		mutex _m;
 		mem::TraitAllocator _allocator;
 		SmartPtrDestroyer _uid_handle_destroyer;
 		UidGenerator _uid_gen;
@@ -115,7 +115,7 @@ namespace np::uid
 		{
 			if (hndl_ptr)
 			{
-				Lock l(_uid_mutex);
+				lock l(_m);
 
 				UidHandle& hndl = *hndl_ptr;
 				if (hndl.IsValid())
@@ -147,7 +147,7 @@ namespace np::uid
 
 		void Dispose()
 		{
-			Lock l(_uid_mutex);
+			lock l(_m);
 			_uid_pool.Clear();
 			_next_handle = UidHandle{};
 			_released_keys.clear();
@@ -157,7 +157,7 @@ namespace np::uid
 
 		mem::sptr<UidHandle> CreateUidHandle()
 		{
-			Lock l(_uid_mutex);
+			lock l(_m);
 			mem::sptr<UidHandle> hndl = nullptr;
 			mem::sptr<Uid> id = _uid_pool.CreateObject();
 
@@ -180,7 +180,7 @@ namespace np::uid
 
 		Uid GetUid(mem::sptr<UidHandle> hndl)
 		{
-			Lock l(_uid_mutex);
+			lock l(_m);
 			mem::sptr<Uid> id = nullptr;
 
 			if (hndl->IsValid())
@@ -195,7 +195,7 @@ namespace np::uid
 
 		bl Has(uid::Uid id)
 		{
-			Lock l(_uid_mutex);
+			lock l(_m);
 			return _uid_master_set.find(id) != _uid_master_set.end();
 		}
 	};

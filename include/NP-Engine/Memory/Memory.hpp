@@ -33,6 +33,5 @@
 #include "StdAllocator.hpp"
 #include "TraitAllocator.hpp"
 #include "AccumulatingPool.hpp"
-#include "MutexedWrapper.hpp"
 
 #endif /* NP_ENGINE_MEMORY_HPP */

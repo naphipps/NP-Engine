@@ -22,12 +22,12 @@ namespace np::app
 	{
 	private:
 		//TODO: move window ownership to window layer - set everything with events, and either use getters or events to get values
-		using WindowsWrapper = mem::MutexedWrapper<con::vector<mem::sptr<win::Window>>>;
-		using WindowsAccess = typename WindowsWrapper::Access;
+		using WindowsWrapper = mutexed_wrapper<con::vector<mem::sptr<win::Window>>>;
+		using WindowsAccess = typename WindowsWrapper::access;
 		WindowsWrapper _windows;
 
-		using WindowsToDestroyWrapper = mem::MutexedWrapper<con::uset<uid::Uid>>;
-		using WindowsToDestroyAccess = typename WindowsToDestroyWrapper::Access;
+		using WindowsToDestroyWrapper = mutexed_wrapper<con::uset<uid::Uid>>;
+		using WindowsToDestroyAccess = typename WindowsToDestroyWrapper::access;
 		WindowsToDestroyWrapper _windows_to_destroy;
 
 	protected:
@@ -38,9 +38,7 @@ namespace np::app
 
 		void WindowClosedProcedure(mem::Delegate& d)
 		{
-			{
-				_windows_to_destroy.GetAccess()->emplace(d.GetData<uid::Uid>());
-			}
+			_windows_to_destroy.get_access()->emplace(d.GetData<uid::Uid>());
 			d.DestructData<uid::Uid>();
 		}
 
@@ -66,15 +64,13 @@ namespace np::app
 			win::WindowSetTitleEvent& title_event = (win::WindowSetTitleEvent&)(*e);
 			win::WindowTitleEventData& title_data = title_event.GetData();
 
-			{
-				WindowsAccess windows = _windows.GetAccess();
-				for (auto it = windows->begin(); it != windows->end(); it++)
-					if (*it && (*it)->GetUid() == title_data.windowId)
-					{
-						(*it)->SetTitle(title_data.title);
-						break;
-					}
-			}
+			WindowsAccess windows = _windows.get_access();
+			for (auto it = windows->begin(); it != windows->end(); it++)
+				if (*it && (*it)->GetUid() == title_data.windowId)
+				{
+					(*it)->SetTitle(title_data.title);
+					break;
+				}
 
 			e->SetHandled();
 		}
@@ -84,15 +80,13 @@ namespace np::app
 			win::WindowCloseEvent& close_event = (win::WindowCloseEvent&)(*e);
 			win::WindowCloseEventData& close_data = close_event.GetData();
 
-			{
-				WindowsAccess windows = _windows.GetAccess();
-				for (auto it = windows->begin(); it != windows->end(); it++)
-					if (*it && (*it)->GetUid() == close_data.windowId)
-					{
-						(*it)->Close();
-						break;
-					}
-			}
+			WindowsAccess windows = _windows.get_access();
+			for (auto it = windows->begin(); it != windows->end(); it++)
+				if (*it && (*it)->GetUid() == close_data.windowId)
+				{
+					(*it)->Close();
+					break;
+				}
 
 			e->SetHandled();
 		}
@@ -135,8 +129,8 @@ namespace np::app
 
 		virtual ~WindowLayer()
 		{
-            _windows.GetAccess()->clear();
-            _windows_to_destroy.GetAccess()->clear();
+            _windows.get_access()->clear();
+            _windows_to_destroy.get_access()->clear();
 
 			win::Window::Terminate(win::WindowDetailType::Glfw);
 			win::Window::Terminate(win::WindowDetailType::Sdl);
@@ -144,7 +138,7 @@ namespace np::app
 
 		virtual void RegisterWindow(mem::sptr<win::Window> window)
 		{
-			_windows.GetAccess()->emplace_back(window);
+			_windows.get_access()->emplace_back(window);
 		}
 
 		virtual void Update(tim::DblMilliseconds time_delta) override
@@ -152,19 +146,17 @@ namespace np::app
 			win::Window::Update(win::WindowDetailType::Glfw);
 			win::Window::Update(win::WindowDetailType::Sdl);
 
-			{
-				WindowsAccess windows = _windows.GetAccess();
-				for (auto it = windows->begin(); it != windows->end(); it++)
-					if (*it)
-						(*it)->Update(time_delta);
-			}
+			WindowsAccess windows = _windows.get_access();
+			for (auto it = windows->begin(); it != windows->end(); it++)
+				if (*it)
+					(*it)->Update(time_delta);
 		}
 
 		virtual void Cleanup() override
 		{
             bl submit_application_close = false;
             {
-                WindowsAccess windows = _windows.GetAccess();
+                WindowsAccess windows = _windows.get_access();
                 submit_application_close |= !windows->empty();
                 
                 for (auto wit = windows->begin(); wit != windows->end();)
@@ -176,7 +168,7 @@ namespace np::app
                     }
                     else if (*wit && wit->get_strong_count() == 1)
                     {
-                        WindowsToDestroyAccess to_destroy = _windows_to_destroy.GetAccess();
+                        WindowsToDestroyAccess to_destroy = _windows_to_destroy.get_access();
                         auto dit = to_destroy->find((*wit)->GetUid());
                         if (dit != to_destroy->end())
                         {

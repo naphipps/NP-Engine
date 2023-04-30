@@ -18,7 +18,7 @@
 
 namespace randutils
 {
-	using seed_seq_fe64 = randutils::seed_seq_fe<2, ui32>;
+	using seed_seq_fe64 = randutils::seed_seq_fe<2, ::np::ui32>;
 	using auto_seed_64 = randutils::auto_seeded<seed_seq_fe64>;
 } // namespace randutils
 

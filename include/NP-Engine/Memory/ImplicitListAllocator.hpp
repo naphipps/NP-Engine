@@ -28,7 +28,7 @@ namespace np::mem
 		constexpr static siz OVERHEAD_SIZE = BOOKKEEPING_SIZE;
 
 	private:
-		Mutex _mutex;
+		mutex _mutex;
 
 		bl InitFreeBlock(Block& block)
 		{
@@ -178,13 +178,13 @@ namespace np::mem
 
 		Block AllocateFirst(siz size)
 		{
-			Lock lock(_mutex);
+			lock l(_mutex);
 			return InternalAllocate(size, false);
 		}
 
 		Block AllocateBest(siz size)
 		{
-			Lock lock(_mutex);
+			lock l(_mutex);
 			return InternalAllocate(size, true);
 		}
 
@@ -259,13 +259,13 @@ namespace np::mem
 
 		bl Deallocate(void* ptr) override
 		{
-			Lock lock(_mutex);
+			lock l(_mutex);
 			return InternalDeallocate(ptr);
 		}
 
 		bl DeallocateAll() override
 		{
-			Lock lock(_mutex);
+			lock l(_mutex);
 			Init();
 			return true;
 		}

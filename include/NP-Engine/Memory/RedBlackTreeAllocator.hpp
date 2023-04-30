@@ -639,7 +639,7 @@ namespace np::mem
 		constexpr static siz OVERHEAD_SIZE = BOOKKEEPING_SIZE + NODE_SIZE;
 
 	private:
-		Mutex _mutex;
+		mutex _mutex;
 		Tree _tree;
 
 		bl InitFreeBlock(Block& block)
@@ -678,7 +678,7 @@ namespace np::mem
 
 		Block InternalAllocate(siz size, bl true_best_false_first)
 		{
-			Lock lock(_mutex);
+			lock l(_mutex);
 
 			Block block{}, split{};
 			size = CalcAlignedSize(size) + BOOKKEEPING_SIZE;
@@ -721,7 +721,7 @@ namespace np::mem
 
 		bl InternalDeallocate(void* ptr)
 		{
-			Lock lock(_mutex);
+			lock l(_mutex);
 			bl deallocated = false;
 
 			if (Contains(ptr))
@@ -779,7 +779,7 @@ namespace np::mem
 
 		void Init()
 		{
-			Lock lock(_mutex);
+			lock l(_mutex);
 			_tree.Clear();
 
 			if (InitFreeBlock(_block))

@@ -127,13 +127,8 @@ namespace np::gfx::__detail
 		{
 			mem::sptr<CommandStaging> command_staging;
 
-			bl has_visibles = false;
-			{
-				Lock l(_visibles_mutex);
-				has_visibles = !_visibles.empty();
-			}
-
-			if (has_visibles || true) {
+			bl has_visibles = !_visibles.get_access()->empty();
+			if (has_visibles || true) { //TODO: cleanup this
 				VulkanRenderTarget& vulkan_render_target = (VulkanRenderTarget&)(*GetRenderTarget());
 				VkExtent2D framebuffer_extent = vulkan_render_target.GetFramebufferExtent();
 
@@ -207,9 +202,9 @@ namespace np::gfx::__detail
 				render_pipeline.BindPipeline(command_staging);
 				render_pipeline.PrepareToBindDescriptorSets(command_staging);
 				{
-					Lock l(_visibles_mutex);
 					uid::UidSystem& uid_system = GetServices()->GetUidSystem();
-					for (auto it = _visibles.begin(); it != _visibles.end(); it++)
+					VisiblesAccess visibles = _visibles.get_access();
+					for (auto it = visibles->begin(); it != visibles->end(); it++)
 					{
 						uid::Uid id = it->first;
 						if (uid_system.Has(id))

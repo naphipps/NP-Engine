@@ -240,7 +240,6 @@ set(NP_ENGINE_MEMORY_HPP
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Memory/AccumulatingAllocator.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Memory/AccumulatingPool.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Memory/BookkeepingAllocator.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Memory/MutexedWrapper.hpp
 )
 
 set(NP_ENGINE_NOISE_HPP

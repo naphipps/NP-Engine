@@ -513,9 +513,9 @@ namespace std
 	template <typename T>
 	struct hash<::np::mem::sptr<T>>
 	{
-		siz operator()(::np::mem::sptr<T> ptr) const noexcept
+		::np::siz operator()(::np::mem::sptr<T> ptr) const noexcept
 		{
-			return ptr ? (siz)(::np::mem::AddressOf(*ptr)) : 0;
+			return ptr ? (::np::siz)(::np::mem::AddressOf(*ptr)) : 0;
 		}
 	};
 } // namespace std

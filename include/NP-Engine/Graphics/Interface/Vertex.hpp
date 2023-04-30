@@ -34,7 +34,7 @@ namespace std
 	template <>
 	struct hash<::np::gfx::Vertex>
 	{
-		siz operator()(const ::np::gfx::Vertex& vertex) const noexcept
+		::np::siz operator()(const ::np::gfx::Vertex& vertex) const noexcept
 		{
 			//treat the vertex like a buffer and hash the whole thing
 			return ::np::mat::HashFnv1aUi64(::np::mem::AddressOf(vertex), sizeof(::np::gfx::Vertex));

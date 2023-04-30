@@ -22,25 +22,25 @@
 namespace glm
 {
 	template <typename T, qualifier Q = qualifier::defaultp>
-	constexpr static bl operator<(const vec<2, T, Q>& a, const vec<2, T, Q>& b)
+	constexpr static ::np::bl operator<(const vec<2, T, Q>& a, const vec<2, T, Q>& b)
 	{
 		return a.x != b.x ? a.x < b.x : a.y < b.y;
 	}
 
 	template <typename T, qualifier Q = qualifier::defaultp>
-	constexpr static bl operator<=(const vec<2, T, Q>& a, const vec<2, T, Q>& b)
+	constexpr static ::np::bl operator<=(const vec<2, T, Q>& a, const vec<2, T, Q>& b)
 	{
 		return a == b || a < b;
 	}
 
 	template <typename T, qualifier Q = qualifier::defaultp>
-	constexpr static bl operator>(const vec<2, T, Q>& a, const vec<2, T, Q>& b)
+	constexpr static ::np::bl operator>(const vec<2, T, Q>& a, const vec<2, T, Q>& b)
 	{
 		return !(a <= b);
 	}
 
 	template <typename T, qualifier Q = qualifier::defaultp>
-	constexpr static bl operator>=(const vec<2, T, Q>& a, const vec<2, T, Q>& b)
+	constexpr static ::np::bl operator>=(const vec<2, T, Q>& a, const vec<2, T, Q>& b)
 	{
 		return !(a < b);
 	}

@@ -22,7 +22,7 @@ namespace np::mem
 		constexpr static siz CHUNK_SIZE = CalcAlignedSize(sizeof(T));
 
 	private:
-		Mutex _mutex;
+		mutex _mutex;
 		void* _alloc_iterator;
 		bl _deallocation_true_sort_false_constant;
 
@@ -84,14 +84,14 @@ namespace np::mem
 
 		void Zeroize() override
 		{
-			Lock lock(_mutex);
+			lock l(_mutex);
 			BlockedAllocator::Zeroize();
 			Init();
 		}
 
 		Block Allocate(siz size) override
 		{
-			Lock lock(_mutex);
+			lock l(_mutex);
 			Block block;
 
 			if (size <= CHUNK_SIZE && _alloc_iterator != nullptr)
@@ -119,7 +119,7 @@ namespace np::mem
 
 		bl Deallocate(Block& block, bl true_sort_false_constant)
 		{
-			Lock lock(_mutex);
+			lock l(_mutex);
 			bl deallocated = false;
 
 			if (IsChunkPtr(block.ptr) && block.size == CHUNK_SIZE)
@@ -171,7 +171,7 @@ namespace np::mem
 
 		bl DeallocateAll() override
 		{
-			Lock lock(_mutex);
+			lock l(_mutex);
 			Init();
 			return true;
 		}

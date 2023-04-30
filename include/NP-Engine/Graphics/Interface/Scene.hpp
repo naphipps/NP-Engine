@@ -30,9 +30,11 @@ namespace np::gfx
 		};
 
 	protected:
+		using VisiblesWrapper = mutexed_wrapper<con::umap<uid::Uid, mem::sptr<VisibleObject>>>;
+		using VisiblesAccess = VisiblesWrapper::access;
+
 		Properties _properties;
-		Mutex _visibles_mutex;
-		con::umap<uid::Uid, mem::sptr<VisibleObject>> _visibles;
+		VisiblesWrapper _visibles;
 		mem::Delegate _on_render_delegate;
 
 		/*
@@ -112,8 +114,8 @@ namespace np::gfx
 
 		virtual ~Scene()
 		{
-			Lock l(_visibles_mutex);
-			for (auto it = _visibles.begin(); it != _visibles.end(); it++)
+			VisiblesAccess visibles = _visibles.get_access();
+			for (auto it = visibles->begin(); it != visibles->end(); it++)
 				UnregisterResource(it->first);
 		}
 
@@ -182,8 +184,7 @@ namespace np::gfx
 
 		virtual void Register(uid::Uid id, mem::sptr<VisibleObject> visible)
 		{
-			Lock l(_visibles_mutex);
-			_visibles[id] = visible;
+			(*_visibles.get_access())[id] = visible;
 		}
 
 		virtual void Register(uid::Uid id, mem::sptr<Model> model) //TODO: for image and light too
@@ -199,8 +200,7 @@ namespace np::gfx
 
 		virtual void UnregisterVisible(uid::Uid id)
 		{
-			Lock l(_visibles_mutex);
-			_visibles.erase(id);
+			_visibles.get_access()->erase(id);
 		}
 
 		virtual void UnregisterResource(uid::Uid id)
@@ -220,12 +220,12 @@ namespace np::gfx
 
 		virtual void CleanupVisibles()
 		{
-			Lock l(_visibles_mutex);
 			uid::UidSystem& uid_system = GetServices()->GetUidSystem();
-			for (auto it = _visibles.begin(); it != _visibles.end();)
+			VisiblesAccess visibles = _visibles.get_access();
+			for (auto it = visibles->begin(); it != visibles->end();)
 			{
 				if (!uid_system.Has(it->first))
-					it = _visibles.erase(it);
+					it = visibles->erase(it);
 				else
 					it++;
 			}

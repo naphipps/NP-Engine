@@ -52,19 +52,19 @@ namespace std
 	template <>
 	struct hash<::np::gfxalg::DmsLineSegment>
 	{
-		siz operator()(const ::np::gfxalg::DmsLineSegment& line) const noexcept
+		::np::siz operator()(const ::np::gfxalg::DmsLineSegment& line) const noexcept
 		{
 			union {
-				siz h;
+				::np::siz h;
 
 				struct
 				{
-					flt x;
-					flt y;
+					::np::flt x;
+					::np::flt y;
 				} p;
 			};
 
-			p = { (flt)line.Midpoint().x, (flt)line.Midpoint().y };
+			p = { (::np::flt)line.Midpoint().x, (::np::flt)line.Midpoint().y };
 			//TODO: I'd rather combine the hashes from line.Begin() and line.End()
 			return h;
 		}

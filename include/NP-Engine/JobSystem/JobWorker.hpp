@@ -40,6 +40,8 @@ namespace np::jsys
 		};
 
 		using FetchOrderArray = con::array<Fetch, 3>;
+		using FetchOrderWrapper = mutexed_wrapper<FetchOrderArray>;
+		using FetchOrderAccess = FetchOrderWrapper::access;
 
 	private:
 		atm_bl _keep_working;
@@ -50,8 +52,7 @@ namespace np::jsys
 		rng::Random64 _random_engine;
 		con::vector<JobWorker*> _coworkers;
 		siz _coworker_index;
-		Mutex _fetch_order_mutex;
-		FetchOrderArray _fetch_order;
+		FetchOrderWrapper _fetch_order;
 
 		/*
 			returns a valid && CanExecute() job, or invalid job
@@ -91,9 +92,10 @@ namespace np::jsys
 			_work_procedure_complete(true),
 			_thread(nullptr),
 			_job_system(job_system),
-			_coworker_index(0),
-			_fetch_order({Fetch::Immediate, Fetch::PriorityBased, Fetch::Steal})
-		{}
+			_coworker_index(0)
+		{
+			SetFetchOrder({ Fetch::Immediate, Fetch::PriorityBased, Fetch::Steal });
+		}
 
 		JobWorker(const JobWorker& other) = delete;
 
@@ -105,9 +107,10 @@ namespace np::jsys
 			_immediate_job_queue(::std::move(other._immediate_job_queue)),
 			_random_engine(::std::move(other._random_engine)),
 			_coworkers(::std::move(other._coworkers)),
-			_coworker_index(::std::move(other._coworker_index)),
-			_fetch_order(::std::move(other._fetch_order))
-		{}
+			_coworker_index(::std::move(other._coworker_index))
+		{
+			SetFetchOrder(other.GetFetchOrder());
+		}
 
 		virtual ~JobWorker()
 		{
@@ -149,14 +152,12 @@ namespace np::jsys
 
 		FetchOrderArray GetFetchOrder()
 		{
-			Lock lock(_fetch_order_mutex);
-			return _fetch_order;
+			return *_fetch_order.get_access();
 		}
 
 		void SetFetchOrder(const FetchOrderArray& fetch_order)
 		{
-			Lock lock(_fetch_order_mutex);
-			_fetch_order = fetch_order;
+			*_fetch_order.get_access() = fetch_order;
 		}
 
 		void StartWork(thr::ThreadPool& thread_pool, siz thread_affinity)

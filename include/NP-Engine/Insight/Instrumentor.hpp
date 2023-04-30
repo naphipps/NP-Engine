@@ -30,7 +30,7 @@ namespace np::nsit
 	class Instrumentor
 	{
 	private:
-		static Mutex _mutex;
+		static mutex _m;
 		static atm_bl _initialized;
 		static ::std::shared_ptr<::rapidjson::Document> _report;
 		static ::std::string _filepath;
@@ -86,7 +86,7 @@ namespace np::nsit
 	public:
 		static void Reset()
 		{
-			Lock lock(_mutex);
+			lock l(_m);
 			Init();
 			_report.reset();
 			_initialized.store(false, mo_release);
@@ -94,7 +94,7 @@ namespace np::nsit
 
 		static void Save(const ::std::string filepath = "")
 		{
-			Lock lock(_mutex);
+			lock l(_m);
 			Init();
 
 			if (filepath.size() > 0)
@@ -105,7 +105,7 @@ namespace np::nsit
 
 		static void SetFilepath(const ::std::string filepath)
 		{
-			Lock lock(_mutex);
+			lock l(_m);
 			Init();
 			_filepath = filepath;
 		}
@@ -117,21 +117,21 @@ namespace np::nsit
 
 		static void EnableSaveOnTrace(bl enable = true)
 		{
-			Lock lock(_mutex);
+			lock l(_m);
 			Init();
 			_save_on_trace = enable;
 		}
 
 		static void EnableTraceAdd(bl enable = true)
 		{
-			Lock lock(_mutex);
+			lock l(_m);
 			Init();
 			_enable_trace = enable;
 		}
 
 		static void AddTraceEvent(TraceEvent& te)
 		{
-			Lock lock(_mutex);
+			lock l(_m);
 			Init();
 
 			if (_enable_trace)

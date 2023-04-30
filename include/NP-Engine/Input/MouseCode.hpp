@@ -12,48 +12,51 @@
 
 #include "InputState.hpp"
 
-namespace np::nput
+namespace np
 {
-	enum class MouseCode : ui32
+	namespace nput
 	{
-		Unkown = 0,
-		LeftButton,
-		MiddleButton,
-		RightButton,
-		Max
-	};
+		enum class MouseCode : ui32
+		{
+			Unkown = 0,
+			LeftButton,
+			MiddleButton,
+			RightButton,
+			Max
+		};
 
-	using MouseCodeState = InputState<MouseCode>;
-	using MouseCodeStates = InputStates<MouseCode, (siz)MouseCode::Max>;
-	using MouseCallback = void (*)(void* caller, const nput::MouseCodeState& mouse_code_state);
-} // namespace np::nput
-
-static str to_str(::np::nput::MouseCode code)
-{
-	str name;
-
-	switch (code)
-	{
-	case ::np::nput::MouseCode::LeftButton:
-		name = "LeftButton";
-		break;
-
-	case ::np::nput::MouseCode::MiddleButton:
-		name = "MiddleButton";
-		break;
-
-	case ::np::nput::MouseCode::RightButton:
-		name = "RightButton";
-		break;
-
-	case ::np::nput::MouseCode::Max:
-	case ::np::nput::MouseCode::Unkown:
-	default:
-		name = "Unkown";
-		break;
+		using MouseCodeState = InputState<MouseCode>;
+		using MouseCodeStates = InputStates<MouseCode, (siz)MouseCode::Max>;
+		using MouseCallback = void (*)(void* caller, const nput::MouseCodeState& mouse_code_state);
 	}
 
-	return name;
+	static str to_str(nput::MouseCode code)
+	{
+		str name;
+
+		switch (code)
+		{
+		case nput::MouseCode::LeftButton:
+			name = "LeftButton";
+			break;
+
+		case nput::MouseCode::MiddleButton:
+			name = "MiddleButton";
+			break;
+
+		case nput::MouseCode::RightButton:
+			name = "RightButton";
+			break;
+
+		case nput::MouseCode::Max:
+		case nput::MouseCode::Unkown:
+		default:
+			name = "Unkown";
+			break;
+		}
+
+		return name;
+	}
 }
 
 #endif /* NP_ENGINE_MOUSE_CODE_HPP */

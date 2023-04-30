@@ -11,33 +11,6 @@
 #include <cstdint>
 #include <cfloat>
 
-using nptr = ::std::nullptr_t;
-
-using ui8 = uint8_t;
-using ui16 = uint16_t;
-using ui32 = uint32_t;
-using ui64 = uint64_t;
-
-using i8 = int8_t;
-using i16 = int16_t;
-using i32 = int32_t;
-using i64 = int64_t;
-
-using siz = size_t;
-using dif = ptrdiff_t;
-
-using flt = float; //TODO: f32?
-using dbl = double; //TODO: f64?
-using ldbl = long double; //TODO: f??
-
-using chr = char;
-using uchr = unsigned char;
-using wchr = wchar_t;
-using u16chr = char16_t; //TODO: chr16?
-using u32chr = char32_t; //TODO: chr32?
-
-using bl = bool;
-
 #define UI8_MIN 0
 #define UI8_MAX UINT8_MAX
 #define UI16_MIN 0
@@ -55,5 +28,35 @@ using bl = bool;
 #define I32_MAX INT32_MAX
 #define I64_MIN INT64_MIN
 #define I64_MAX INT64_MAX
+
+namespace np
+{
+	using nptr = ::std::nullptr_t;
+
+	using ui8 = uint8_t;
+	using ui16 = uint16_t;
+	using ui32 = uint32_t;
+	using ui64 = uint64_t;
+
+	using i8 = int8_t;
+	using i16 = int16_t;
+	using i32 = int32_t;
+	using i64 = int64_t;
+
+	using siz = size_t;
+	using dif = ptrdiff_t;
+
+	using flt = float; //TODO: f32?
+	using dbl = double; //TODO: f64?
+	using ldbl = long double; //TODO: f??
+
+	using chr = char;
+	using uchr = unsigned char;
+	using wchr = wchar_t;
+	using u16chr = char16_t; //TODO: chr16?
+	using u32chr = char32_t; //TODO: chr32?
+
+	using bl = bool;
+}
 
 #endif /* NP_ENGINE_PRIMITIVE_TYPES_HPP */
