@@ -42,7 +42,7 @@ namespace np::app
 			d.DestructData<uid::Uid>();
 		}
 
-		virtual void HandleWindowClosing(mem::sptr<evnt::Event> e)
+		void HandleWindowClosing(mem::sptr<evnt::Event> e)
 		{
 			win::WindowClosingEvent& closing_event = (win::WindowClosingEvent&)(*e);
 			win::WindowClosingEventData& closing_data = closing_event.GetData();
@@ -59,7 +59,7 @@ namespace np::app
 			e->SetHandled();
 		}
 
-		virtual void HandleWindowSetTitle(mem::sptr<evnt::Event> e)
+		void HandleWindowSetTitle(mem::sptr<evnt::Event> e)
 		{
 			win::WindowSetTitleEvent& title_event = (win::WindowSetTitleEvent&)(*e);
 			win::WindowTitleEventData& title_data = title_event.GetData();
@@ -75,7 +75,7 @@ namespace np::app
 			e->SetHandled();
 		}
 
-		virtual void HandleWindowClose(mem::sptr<evnt::Event> e)
+		void HandleWindowClose(mem::sptr<evnt::Event> e)
 		{
 			win::WindowCloseEvent& close_event = (win::WindowCloseEvent&)(*e);
 			win::WindowCloseEventData& close_data = close_event.GetData();
@@ -91,7 +91,90 @@ namespace np::app
 			e->SetHandled();
 		}
 
-		virtual void HandleEvent(mem::sptr<evnt::Event> e) override
+		void HandleWindowSetFocus(mem::sptr<evnt::Event> e) //TODO: I don't think we need all these virtuals
+		{
+			win::WindowSetFocusEvent& focus_event = (win::WindowSetFocusEvent&)(*e);
+			win::WindowFocusEventData& focus_data = focus_event.GetData();
+
+			if (focus_data.isFocused)
+			{
+				WindowsAccess windows = _windows.get_access();
+				for (auto it = windows->begin(); it != windows->end(); it++)
+					if (*it && (*it)->GetUid() == focus_data.windowId)
+					{
+						(*it)->Focus();
+						break;
+					}
+			}
+
+			e->SetHandled();
+		}
+
+		void HandleWindowSetMaximize(mem::sptr<evnt::Event> e)
+		{
+			win::WindowSetMaximizeEvent& max_event = (win::WindowSetMaximizeEvent&)(*e);
+			win::WindowMaximizeEventData& max_data = max_event.GetData();
+
+			WindowsAccess windows = _windows.get_access();
+			for (auto it = windows->begin(); it != windows->end(); it++)
+				if (*it && (*it)->GetUid() == max_data.windowId)
+				{
+					max_data.isMaximized ? (*it)->Maximize() : (*it)->RestoreFromMaximize();
+					break;
+				}
+
+			e->SetHandled();
+		}
+
+		void HandleWindowSetMinimize(mem::sptr<evnt::Event> e)
+		{
+			win::WindowSetMinimizeEvent& min_event = (win::WindowSetMinimizeEvent&)(*e);
+			win::WindowMinimizeEventData& min_data = min_event.GetData();
+
+			WindowsAccess windows = _windows.get_access();
+			for (auto it = windows->begin(); it != windows->end(); it++)
+				if (*it && (*it)->GetUid() == min_data.windowId)
+				{
+					min_data.isMinimized ? (*it)->Minimize() : (*it)->RestoreFromMinimize();
+					break;
+				}
+
+			e->SetHandled();
+		}
+
+		void HandleWindowSetPosition(mem::sptr<evnt::Event> e)
+		{
+			win::WindowSetPositionEvent& position_event = (win::WindowSetPositionEvent&)(*e);
+			win::WindowPositionEventData& position_data = position_event.GetData();
+
+			WindowsAccess windows = _windows.get_access();
+			for (auto it = windows->begin(); it != windows->end(); it++)
+				if (*it && (*it)->GetUid() == position_data.windowId)
+				{
+					(*it)->SetPosition(position_data.x, position_data.y);
+					break;
+				}
+
+			e->SetHandled();
+		}
+
+		void HandleWindowSetSize(mem::sptr<evnt::Event> e)
+		{
+			win::WindowSetSizeEvent& size_event = (win::WindowSetSizeEvent&)(*e);
+			win::WindowSizeEventData& size_data = size_event.GetData();
+
+			WindowsAccess windows = _windows.get_access();
+			for (auto it = windows->begin(); it != windows->end(); it++)
+				if (*it && (*it)->GetUid() == size_data.windowId)
+				{
+					(*it)->Resize(size_data.width, size_data.height);
+					break;
+				}
+
+			e->SetHandled();
+		}
+
+		void HandleEvent(mem::sptr<evnt::Event> e) override
 		{
 			switch (e->GetType())
 			{
@@ -108,13 +191,25 @@ namespace np::app
 				break;
 
 			case evnt::EventType::WindowSetFocus:
+				HandleWindowSetFocus(e);
+				break;
+
 			case evnt::EventType::WindowSetMaximize:
+				HandleWindowSetMaximize(e);
+				break;
+
 			case evnt::EventType::WindowSetMinimize:
+				HandleWindowSetMinimize(e);
+				break;
+
 			case evnt::EventType::WindowSetPosition:
+				HandleWindowSetPosition(e);
+				break;
+
 			case evnt::EventType::WindowSetSize:
-
+				HandleWindowSetSize(e);
+				break;
 			
-
 			default:
 				break;
 			}
@@ -136,12 +231,12 @@ namespace np::app
 			win::Window::Terminate(win::WindowDetailType::Sdl);
 		}
 
-		virtual void RegisterWindow(mem::sptr<win::Window> window)
+		void RegisterWindow(mem::sptr<win::Window> window)
 		{
 			_windows.get_access()->emplace_back(window);
 		}
 
-		virtual void Update(tim::DblMilliseconds time_delta) override
+		void Update(tim::DblMilliseconds time_delta) override
 		{
 			win::Window::Update(win::WindowDetailType::Glfw);
 			win::Window::Update(win::WindowDetailType::Sdl);
@@ -152,7 +247,7 @@ namespace np::app
 					(*it)->Update(time_delta);
 		}
 
-		virtual void Cleanup() override
+		void Cleanup() override
 		{
             bl submit_application_close = false;
             {
@@ -187,7 +282,7 @@ namespace np::app
 				_services->GetEventSubmitter().Submit(mem::create_sptr<ApplicationCloseEvent>(_services->GetAllocator()));
 		}
 
-		virtual evnt::EventCategory GetHandledCategories() const override
+		evnt::EventCategory GetHandledCategories() const override
 		{
 			return evnt::EventCategory::Window;
 		}

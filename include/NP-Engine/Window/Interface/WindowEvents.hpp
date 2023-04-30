@@ -49,7 +49,7 @@ namespace np::win
 	struct WindowFocusEventData
 	{
 		uid::Uid windowId;
-		bl focused; //TODO: refactor "isFocused"
+		bl isFocused;
 	};
 
 	class WindowFocusEvent : public WindowEvent<WindowFocusEventData>
@@ -122,7 +122,7 @@ namespace np::win
 	struct WindowMinimizeEventData
 	{
 		uid::Uid windowId;
-		bl maximized; //TODO: refactor isMinimized
+		bl isMinimized;
 	};
 
 	class WindowMinimizeEvent : public WindowEvent<WindowMinimizeEventData>
@@ -157,7 +157,7 @@ namespace np::win
 	struct WindowMaximizeEventData
 	{
 		uid::Uid windowId;
-		bl maximized; //TODO: refactor isMaximized
+		bl isMaximized;
 	};
 
 	class WindowMaximizeEvent : public WindowEvent<WindowMaximizeEventData>
@@ -192,8 +192,8 @@ namespace np::win
 	struct WindowPositionEventData
 	{
 		uid::Uid windowId;
-		i64 x;
-		i64 y;
+		i32 x;
+		i32 y;
 	};
 
 	class WindowPositionEvent : public WindowEvent<WindowPositionEventData>

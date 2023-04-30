@@ -1164,6 +1164,28 @@ namespace np::win::__detail
 			Window::Resize(width, height);
 		}
 
+		void SetPosition(i32 x, i32 y) override
+		{
+			if (_owning_thread_id == thr::ThisThread::get_id())
+			{
+				GLFWwindow* glfw_window = _glfw_window.load(mo_acquire);
+				if (glfw_window)
+					glfwSetWindowPos(glfw_window, x, y);
+			}
+
+			Window::SetPosition(x, y);
+		}
+
+		::glm::ivec2 GetPosition() const override
+		{
+			::glm::ivec2 position{ 0 };
+			GLFWwindow* glfw_window = _glfw_window.load(mo_acquire);
+			if (glfw_window)
+				glfwGetWindowPos(glfw_window, &position.x, &position.y);
+
+			return position;
+		}
+
 		virtual void Minimize() override
 		{
 			if (_owning_thread_id == thr::ThisThread::get_id())

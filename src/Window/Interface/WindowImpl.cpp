@@ -237,6 +237,23 @@ namespace np::win
 		}
 	}
 
+	void Window::SetPosition(i32 x, i32 y)
+	{
+		if (_owning_thread_id == thr::ThisThread::get_id())
+		{
+			if (IsRunning())
+			{
+				mem::sptr<evnt::Event> e = mem::create_sptr<WindowPositionEvent>(_services->GetAllocator(), GetUid(), x, y);
+				_services->GetEventSubmitter().Submit(e);
+			}
+		}
+		else
+		{
+			mem::sptr<evnt::Event> e = mem::create_sptr<WindowSetPositionEvent>(_services->GetAllocator(), GetUid(), x, y);
+			_services->GetEventSubmitter().Submit(e);
+		}
+	}
+
 	void Window::Minimize()
 	{
 		if (_owning_thread_id == thr::ThisThread::get_id())

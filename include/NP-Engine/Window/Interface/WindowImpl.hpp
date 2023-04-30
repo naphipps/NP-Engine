@@ -162,6 +162,10 @@ namespace np::win
 
 		virtual void Resize(ui32 width, ui32 height);
 
+		virtual void SetPosition(i32 x, i32 y);
+
+		virtual ::glm::ivec2 GetPosition() const = 0;
+
 		virtual void Minimize();
 
 		virtual void RestoreFromMinimize();
