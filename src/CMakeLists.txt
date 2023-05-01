@@ -307,10 +307,6 @@ set(NP_ENGINE_TIME_HPP
 
 set(NP_ENGINE_UID_HPP
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Uid/Uid.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Uid/UidImpl.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Uid/UidGenerator.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Uid/UidHandle.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Uid/UidSystem.hpp
 )
 
 set(NP_ENGINE_VENDOR_HPP
