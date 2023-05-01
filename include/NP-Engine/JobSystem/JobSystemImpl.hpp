@@ -16,6 +16,7 @@
 
 #include "JobWorker.hpp"
 #include "JobPool.hpp"
+#include "JobQueue.hpp"
 
 namespace np::jsys
 {
@@ -27,13 +28,7 @@ namespace np::jsys
 		mem::TraitAllocator _thread_pool_allocator;
 		mem::sptr<thr::ThreadPool> _thread_pool;
 		JobPool _job_pool;
-
-		// TODO: use tokens with mpmc_queue
-		con::mpmc_queue<JobRecord> _highest_job_queue;
-		con::mpmc_queue<JobRecord> _higher_job_queue;
-		con::mpmc_queue<JobRecord> _normal_job_queue;
-		con::mpmc_queue<JobRecord> _lower_job_queue;
-		con::mpmc_queue<JobRecord> _lowest_job_queue;
+		JobQueue _job_queue;
 
 	public:
 		JobSystem(): _running(false), _thread_pool(nullptr)
@@ -50,13 +45,7 @@ namespace np::jsys
 		{
 			Stop();
 			
-			JobRecord record{};
-			for (auto priority_it = JobPrioritiesHighToLow.begin(); priority_it != JobPrioritiesHighToLow.end(); priority_it++)
-			{
-				con::mpmc_queue<JobRecord>& queue = GetQueueForPriority(*priority_it);
-				while (queue.try_dequeue(record)) {}
-			}
-
+			_job_queue.Clear();
 			_job_workers.clear();
 			_thread_pool.reset();
 			_job_pool.Clear();
@@ -69,7 +58,7 @@ namespace np::jsys
 		}
 
 		/*
-			This method also calls Dispose, so setup jobs after calling this
+			This method also calls Dispose, so setup jobs after calling this //TODO: I don't think we need this restriction
 		*/
 		void SetJobWorkerCount(siz count)
 		{
@@ -77,7 +66,7 @@ namespace np::jsys
 			_thread_pool = mem::create_sptr<thr::ThreadPool>(_thread_pool_allocator, count);
 
 			while (_job_workers.size() < count)
-				_job_workers.emplace_back(*this);
+				_job_workers.emplace_back(_job_queue);
 
 			while (_job_workers.size() > count)
 				_job_workers.pop_back();
@@ -121,61 +110,14 @@ namespace np::jsys
 			return _running.load(mo_acquire);
 		}
 
-		con::mpmc_queue<JobRecord>& GetQueueForPriority(JobPriority priority)
-		{
-			con::mpmc_queue<JobRecord>* deque = nullptr;
-
-			switch (priority)
-			{
-			case JobPriority::Highest:
-				deque = &_highest_job_queue;
-				break;
-
-			case JobPriority::Higher:
-				deque = &_higher_job_queue;
-				break;
-
-			case JobPriority::Normal:
-				deque = &_normal_job_queue;
-				break;
-
-			case JobPriority::Lower:
-				deque = &_lower_job_queue;
-				break;
-
-			case JobPriority::Lowest:
-				deque = &_lowest_job_queue;
-				break;
-
-			default:
-				NP_ENGINE_ASSERT(false, "requested incorrect priority");
-				break;
-			}
-
-			return *deque;
-		}
-
-		JobRecord SubmitJob(JobPriority priority, mem::sptr<Job> job)
-		{
-			return SubmitJob({priority, job});
-		}
-
-		JobRecord SubmitJob(JobRecord record)
-		{
-			NP_ENGINE_ASSERT(record.IsValid(), "attempted to add an invalid Job -- do not do that my guy");
-			NP_ENGINE_ASSERT(record.job->IsEnabled(), "the dude not enabled bro - why it do");
-
-			JobRecord return_record;
-
-			if (GetQueueForPriority(record.priority).enqueue(record))
-				return_record = record;
-
-			return return_record;
-		}
-
 		mem::sptr<Job> CreateJob()
 		{
 			return _job_pool.CreateObject();
+		}
+
+		void SubmitJob(JobPriority priority, mem::sptr<Job> job)
+		{
+			_job_queue.Emplace(priority, job);
 		}
 
 		con::vector<JobWorker>& GetJobWorkers()

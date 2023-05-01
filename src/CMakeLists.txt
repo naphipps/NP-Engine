@@ -200,6 +200,7 @@ set(NP_ENGINE_JOBSYSTEM_HPP
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/JobSystem/JobSystem.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/JobSystem/JobSystemImpl.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/JobSystem/JobWorker.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/JobSystem/JobQueue.hpp
 )
 
 set(NP_ENGINE_MATH_HPP
@@ -439,10 +440,6 @@ set(NP_ENGINE_INSIGHT_CPP
 	Insight/Log.cpp
 )
 
-set(NP_ENGINE_JOBSYSTEM_CPP
-	JobSystem/JobWorker.cpp
-)
-
 set(NP_ENGINE_MATH_CPP
 	# Math/PolygonUtility.cpp
 	# Math/Polygon.cpp
@@ -475,7 +472,6 @@ set(NP_ENGINE_WINDOW_INTERFACE_CPP
 set(NP_ENGINE_SOURCE_FILES
 	${NP_ENGINE_THREAD_CPP}
 	${NP_ENGINE_INSIGHT_CPP}
-	${NP_ENGINE_JOBSYSTEM_CPP}
 	${NP_ENGINE_MATH_CPP}
 	${NP_ENGINE_MEMORY_CPP}
 	${NP_ENGINE_PHYSICS_CPP}
@@ -615,7 +611,7 @@ source_group(Graphics/Detail/Vulkan/shaders FILES ${NP_ENGINE_GRAPHICS_VULKAN_SH
 source_group(Graphics-Algorithms FILES ${NP_ENGINE_GRAPHICS_ALGORITHMS_HPP})
 source_group(Input FILES ${NP_ENGINE_INPUT_HPP})
 source_group(Insight FILES ${NP_ENGINE_INSIGHT_HPP} ${NP_ENGINE_INSIGHT_CPP})
-source_group(JobSystem FILES ${NP_ENGINE_JOBSYSTEM_HPP} ${NP_ENGINE_JOBSYSTEM_CPP})
+source_group(JobSystem FILES ${NP_ENGINE_JOBSYSTEM_HPP})
 source_group(Math FILES ${NP_ENGINE_MATH_HPP} ${NP_ENGINE_MATH_CPP})
 source_group(Memory FILES ${NP_ENGINE_MEMORY_HPP} ${NP_ENGINE_MEMORY_CPP})
 source_group(Noise FILES ${NP_ENGINE_NOISE_HPP})
