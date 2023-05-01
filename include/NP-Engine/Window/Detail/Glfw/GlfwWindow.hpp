@@ -1147,7 +1147,7 @@ namespace np::win::__detail
 				if (*glfw_window)
 				{
 					glfwSetWindowSize(*glfw_window, (i32)width, (i32)height);
-					mem::sptr<evnt::Event> e = mem::create_sptr<WindowResizeEvent>(_services->GetAllocator(), GetUid(), width, height);
+					mem::sptr<evnt::Event> e = mem::create_sptr<WindowSizeEvent>(_services->GetAllocator(), GetUid(), width, height);
 					_services->GetEventSubmitter().Submit(e);
 				}
 			}

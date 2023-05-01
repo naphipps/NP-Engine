@@ -77,7 +77,7 @@ namespace np::app
 
 		void HandleWindowClose(mem::sptr<evnt::Event> e)
 		{
-			win::WindowCloseEvent& close_event = (win::WindowCloseEvent&)(*e);
+			win::WindowSetCloseEvent& close_event = (win::WindowSetCloseEvent&)(*e);
 			win::WindowCloseEventData& close_data = close_event.GetData();
 
 			WindowsAccess windows = _windows.get_access();
@@ -186,7 +186,7 @@ namespace np::app
 				HandleWindowSetTitle(e);
 				break;
 
-			case evnt::EventType::WindowClose:
+			case evnt::EventType::WindowSetClose:
 				HandleWindowClose(e);
 				break;
 

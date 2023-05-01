@@ -20,50 +20,88 @@ namespace np::nput
 	class InputSource
 	{
 	protected:
-		con::uset<KeyCallback> _key_callbacks;
-		con::uset<MouseCallback> _mouse_callbacks;
-		con::uset<MousePositionCallback> _mouse_position_callbacks;
-		con::uset<ControllerCallback> _controller_callbacks;
+		using KeyCallbacksWrapper = mutexed_wrapper<con::uset<KeyCallback>>;
+		using KeyCallbacksAccess = KeyCallbacksWrapper::access;
+		using MouseCallbacksWrapper = mutexed_wrapper<con::uset<MouseCallback>>;
+		using MouseCallbacksAccess = MouseCallbacksWrapper::access;
+		using MousePositionCallbacksWrapper = mutexed_wrapper<con::uset<MousePositionCallback>>;
+		using MousePositionCallbacksAccess = MousePositionCallbacksWrapper::access;
+		using ControllerCallbacksWrapper = mutexed_wrapper<con::uset<ControllerCallback>>;
+		using ControllerCallbacksAccess = ControllerCallbacksWrapper::access;
 
-		con::umap<void*, KeyCallback> _key_caller_callbacks;
-		con::umap<void*, MouseCallback> _mouse_caller_callbacks;
-		con::umap<void*, MousePositionCallback> _mouse_position_caller_callbacks;
-		con::umap<void*, ControllerCallback> _controller_caller_callbacks;
+		KeyCallbacksWrapper _key_callbacks;
+		MouseCallbacksWrapper _mouse_callbacks;
+		MousePositionCallbacksWrapper _mouse_position_callbacks;
+		ControllerCallbacksWrapper _controller_callbacks;
+
+		using KeyCallerCallbacksWrapper = mutexed_wrapper<con::umap<void*, KeyCallback>>;
+		using KeyCallerCallbacksAccess = KeyCallerCallbacksWrapper::access;
+		using MouseCallerCallbacksWrapper = mutexed_wrapper<con::umap<void*, MouseCallback>>;
+		using MouseCallerCallbacksAccess = MouseCallerCallbacksWrapper::access;
+		using MousePositionCallerCallbacksWrapper = mutexed_wrapper<con::umap<void*, MousePositionCallback>>;
+		using MousePositionCallerCallbacksAccess = MousePositionCallerCallbacksWrapper::access;
+		using ControllerCallerCallbacksWrapper = mutexed_wrapper<con::umap<void*, ControllerCallback>>;
+		using ControllerCallerCallbacksAccess = ControllerCallerCallbacksWrapper::access;
+
+		KeyCallerCallbacksWrapper _key_caller_callbacks;
+		MouseCallerCallbacksWrapper _mouse_caller_callbacks;
+		MousePositionCallerCallbacksWrapper _mouse_position_caller_callbacks;
+		ControllerCallerCallbacksWrapper _controller_caller_callbacks;
 
 		virtual void InvokeKeyCallbacks(const KeyCodeState& state)
 		{
-			for (auto it = _key_callbacks.begin(); it != _key_callbacks.end(); it++)
-				(*it)(nullptr, state);
-
-			for (auto it = _key_caller_callbacks.begin(); it != _key_caller_callbacks.end(); it++)
-				it->second(it->first, state);
+			{
+				KeyCallbacksAccess callbacks = _key_callbacks.get_access();
+				for (auto it = callbacks->begin(); it != callbacks->end(); it++)
+					(*it)(nullptr, state);
+			}
+			{
+				KeyCallerCallbacksAccess callbacks = _key_caller_callbacks.get_access();
+				for (auto it = callbacks->begin(); it != callbacks->end(); it++)
+					it->second(it->first, state);
+			}
 		}
 
 		virtual void InvokeMouseCallbacks(const MouseCodeState& state)
 		{
-			for (auto it = _mouse_callbacks.begin(); it != _mouse_callbacks.end(); it++)
-				(*it)(nullptr, state);
-
-			for (auto it = _mouse_caller_callbacks.begin(); it != _mouse_caller_callbacks.end(); it++)
-				it->second(it->first, state);
+			{
+				MouseCallbacksAccess callbacks = _mouse_callbacks.get_access();
+				for (auto it = callbacks->begin(); it != callbacks->end(); it++)
+					(*it)(nullptr, state);
+			}
+			{
+				MouseCallerCallbacksAccess callbacks = _mouse_caller_callbacks.get_access();
+				for (auto it = callbacks->begin(); it != callbacks->end(); it++)
+					it->second(it->first, state);
+			}
 		}
 
 		virtual void InvokeMousePositionCallbacks(const MousePosition& position)
 		{
-			for (auto it = _mouse_position_callbacks.begin(); it != _mouse_position_callbacks.end(); it++)
-				(*it)(nullptr, position);
-
-			for (auto it = _mouse_position_caller_callbacks.begin(); it != _mouse_position_caller_callbacks.end(); it++)
-				it->second(it->first, position);
+			{
+				MousePositionCallbacksAccess callbacks = _mouse_position_callbacks.get_access();
+				for (auto it = callbacks->begin(); it != callbacks->end(); it++)
+					(*it)(nullptr, position);
+			}
+			{
+				MousePositionCallerCallbacksAccess callbacks = _mouse_position_caller_callbacks.get_access();
+				for (auto it = callbacks->begin(); it != callbacks->end(); it++)
+					it->second(it->first, position);
+			}
 		}
 
 		virtual void InvokeControllerCallbacks(const ControllerCodeState& state)
 		{
-			for (auto it = _controller_callbacks.begin(); it != _controller_callbacks.end(); it++)
-				(*it)(nullptr, state);
-
-			for (auto it = _controller_caller_callbacks.begin(); it != _controller_caller_callbacks.end(); it++)
-				it->second(it->first, state);
+			{
+				ControllerCallbacksAccess callbacks = _controller_callbacks.get_access();
+				for (auto it = callbacks->begin(); it != callbacks->end(); it++)
+					(*it)(nullptr, state);
+			}
+			{
+				ControllerCallerCallbacksAccess callbacks = _controller_caller_callbacks.get_access();
+				for (auto it = callbacks->begin(); it != callbacks->end(); it++)
+					it->second(it->first, state);
+			}
 		}
 
 	public:
@@ -91,14 +129,15 @@ namespace np::nput
 		{
 			if (caller)
 			{
+				KeyCallerCallbacksAccess key_caller_callbacks = _key_caller_callbacks.get_access();
 				if (callback)
-					_key_caller_callbacks[caller] = callback;
+					(*key_caller_callbacks)[caller] = callback;
 				else
-					_key_caller_callbacks.erase(caller);
+					key_caller_callbacks->erase(caller);
 			}
 			else if (callback)
 			{
-				_key_callbacks.insert(callback);
+				_key_callbacks.get_access()->insert(callback);
 			}
 		}
 
@@ -106,14 +145,15 @@ namespace np::nput
 		{
 			if (caller)
 			{
+				MouseCallerCallbacksAccess mouse_caller_callbacks = _mouse_caller_callbacks.get_access();
 				if (callback)
-					_mouse_caller_callbacks[caller] = callback;
+					(*mouse_caller_callbacks)[caller] = callback;
 				else
-					_mouse_caller_callbacks.erase(caller);
+					mouse_caller_callbacks->erase(caller);
 			}
 			else if (callback)
 			{
-				_mouse_callbacks.insert(callback);
+				_mouse_callbacks.get_access()->insert(callback);
 			}
 		}
 
@@ -121,14 +161,15 @@ namespace np::nput
 		{
 			if (caller)
 			{
+				MousePositionCallerCallbacksAccess mouse_position_caller_callbacks = _mouse_position_caller_callbacks.get_access();
 				if (callback)
-					_mouse_position_caller_callbacks[caller] = callback;
+					(*mouse_position_caller_callbacks)[caller] = callback;
 				else
-					_mouse_position_caller_callbacks.erase(caller);
+					mouse_position_caller_callbacks->erase(caller);
 			}
 			else if (callback)
 			{
-				_mouse_position_callbacks.insert(callback);
+				_mouse_position_callbacks.get_access()->insert(callback);
 			}
 		}
 
@@ -136,21 +177,22 @@ namespace np::nput
 		{
 			if (caller)
 			{
+				ControllerCallerCallbacksAccess controller_caller_callbacks = _controller_caller_callbacks.get_access();
 				if (callback)
-					_controller_caller_callbacks[caller] = callback;
+					(*controller_caller_callbacks)[caller] = callback;
 				else
-					_controller_caller_callbacks.erase(caller);
+					controller_caller_callbacks->erase(caller);
 			}
 			else if (callback)
 			{
-				_controller_callbacks.insert(callback);
+				_controller_callbacks.get_access()->insert(callback);
 			}
 		}
 
 		virtual void UnsetKeyCallback(KeyCallback callback)
 		{
 			if (callback)
-				_key_callbacks.erase(callback);
+				_key_callbacks.get_access()->erase(callback);
 		}
 
 		virtual void UnsetKeyCallback(void* caller)
@@ -161,7 +203,7 @@ namespace np::nput
 		virtual void UnsetMouseCallback(MouseCallback callback)
 		{
 			if (callback)
-				_mouse_callbacks.erase(callback);
+				_mouse_callbacks.get_access()->erase(callback);
 		}
 
 		virtual void UnsetMouseCallback(void* caller)
@@ -172,7 +214,7 @@ namespace np::nput
 		virtual void UnsetMousePositionCallback(MousePositionCallback callback)
 		{
 			if (callback)
-				_mouse_position_callbacks.erase(callback);
+				_mouse_position_callbacks.get_access()->erase(callback);
 		}
 
 		virtual void UnsetMousePositionCallback(void* caller)
@@ -183,7 +225,7 @@ namespace np::nput
 		virtual void UnsetControllerCallback(ControllerCallback callback)
 		{
 			if (callback)
-				_controller_callbacks.erase(callback);
+				_controller_callbacks.get_access()->erase(callback);
 		}
 
 		virtual void UnsetControllerCallback(void* caller)
@@ -193,14 +235,14 @@ namespace np::nput
 
 		virtual void UnsetAllCallbacks()
 		{
-			_key_callbacks.clear();
-			_key_caller_callbacks.clear();
-			_mouse_callbacks.clear();
-			_mouse_caller_callbacks.clear();
-			_mouse_position_callbacks.clear();
-			_mouse_position_caller_callbacks.clear();
-			_controller_callbacks.clear();
-			_controller_caller_callbacks.clear();
+			_key_callbacks.get_access()->clear();
+			_key_caller_callbacks.get_access()->clear();
+			_mouse_callbacks.get_access()->clear();
+			_mouse_caller_callbacks.get_access()->clear();
+			_mouse_position_callbacks.get_access()->clear();
+			_mouse_position_caller_callbacks.get_access()->clear();
+			_controller_callbacks.get_access()->clear();
+			_controller_caller_callbacks.get_access()->clear();
 		}
 
 		virtual void UnsetAllCallbacks(void* caller)

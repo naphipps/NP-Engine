@@ -211,9 +211,9 @@ namespace np::app
 			NP_ENGINE_LOG_INFO("position callback");
 		}
 
-		static void LogResize(void*, ui32, ui32)
+		static void LogSize(void*, ui32, ui32)
 		{
-			NP_ENGINE_LOG_INFO("resize callback");
+			NP_ENGINE_LOG_INFO("size callback");
 		}
 
 		void PrepareForRun()
@@ -236,7 +236,7 @@ namespace np::app
 			_window->SetMaximizeCallback(this, LogMaximize);
 			_window->SetMinimizeCallback(this, LogMinimize);
 			_window->SetPositionCallback(this, LogPosition);
-			_window->SetResizeCallback(this, LogResize);
+			_window->SetSizeCallback(this, LogSize);
 			//*/
 			
 			//TODO: create scene??
