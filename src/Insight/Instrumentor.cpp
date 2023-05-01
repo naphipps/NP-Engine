@@ -8,10 +8,5 @@
 
 namespace np::nsit
 {
-	mutex Instrumentor::_m;
-	atm_bl Instrumentor::_initialized;
-	::std::shared_ptr<::rapidjson::Document> Instrumentor::_report;
-	::std::string Instrumentor::_filepath;
-	atm_bl Instrumentor::_save_on_trace;
-	atm_bl Instrumentor::_enable_trace;
+	mutexed_wrapper<Instrumentor::Properties> Instrumentor::_properties;
 } // namespace np::nsit
