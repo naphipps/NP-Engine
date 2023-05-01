@@ -116,7 +116,7 @@ namespace np::jsys
 
 		void SubmitJob(JobPriority priority, mem::sptr<Job> job)
 		{
-			_job_queue.Emplace(priority, job);
+			_job_queue.Push(priority, job);
 		}
 
 		con::vector<JobWorker>& GetJobWorkers()

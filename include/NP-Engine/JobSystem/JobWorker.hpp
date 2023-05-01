@@ -84,7 +84,7 @@ namespace np::jsys
 					{
 						if (!next_job.job->CanExecute())
 						{
-							_job_queue.Emplace(NormalizePriority(next_job.priority), next_job.job);
+							_job_queue.Push(NormalizePriority(next_job.priority), next_job.job);
 							next_job.Invalidate(); //done with record
 						}
 					}
@@ -197,7 +197,7 @@ namespace np::jsys
 					(*record.job)();
 
 					if (!record.job->IsComplete())
-						_job_queue.Emplace(NormalizePriority(record.priority), record.job);
+						_job_queue.Push(NormalizePriority(record.priority), record.job);
 
 					record.Invalidate(); //done with record
 				}

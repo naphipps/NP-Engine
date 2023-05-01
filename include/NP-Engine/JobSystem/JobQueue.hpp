@@ -55,12 +55,12 @@ namespace np::jsys
 		}
 
 	public:
-		void Emplace(JobPriority priority, mem::sptr<Job> job)
+		void Push(JobPriority priority, mem::sptr<Job> job)
 		{
-			Emplace({ priority, job });
+			Push({ priority, job });
 		}
 
-		void Emplace(JobRecord record)
+		void Push(JobRecord record)
 		{
 			NP_ENGINE_ASSERT(record.IsValid(), "attempted to add an invalid Job -- do not do that my guy");
 			NP_ENGINE_ASSERT(record.job->IsEnabled(), "the dude not enabled bro - why it do");
