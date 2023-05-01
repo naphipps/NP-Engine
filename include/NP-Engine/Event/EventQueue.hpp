@@ -21,22 +21,19 @@ namespace np::evnt
 	class EventQueue
 	{
 	protected:
-		using EventBufferType = con::mpmc_queue<mem::sptr<Event>>;
-		//TODO: ^ we've had some issues where it takes too long for something to be pop after it has been pushed - maybe locking queue would be faster
-
+		using EventsQueue = mutexed_wrapper<con::queue<mem::sptr<Event>>>;
 		atm_bl _flag;
-		mem::TraitAllocator _allocator;
-		con::array<EventBufferType, 2> _buffers;
+		con::array<EventsQueue, 2> _events_queues;
 
-		EventBufferType& GetBuffer(bl flag)
+		EventsQueue& GetQueue(bl flag)
 		{
-			return flag ? _buffers.front() : _buffers.back();
+			return flag ? _events_queues.front() : _events_queues.back();
 		}
 
 	public:
 		EventQueue(): _flag(true) {}
 
-		void SwapBuffers()
+		void SwapBuffers() //TODO: I don't like this naming - refactor to something better
 		{
 			bl flag = _flag.load(mo_acquire);
 			while (!_flag.compare_exchange_weak(flag, !flag, mo_release, mo_relaxed)) {}
@@ -44,22 +41,29 @@ namespace np::evnt
 
 		void Push(mem::sptr<Event> e)
 		{
-			GetBuffer(_flag.load(mo_acquire)).enqueue(e);
+			GetQueue(_flag.load(mo_acquire)).get_access()->emplace(e);
 		}
 
 		mem::sptr<Event> Pop()
 		{
 			mem::sptr<Event> e = nullptr;
-			return GetBuffer(!_flag.load(mo_acquire)).try_dequeue(e) ? e : nullptr;
+			auto queue = GetQueue(!_flag.load(mo_acquire)).get_access();
+			if (!queue->empty())
+			{
+				e = queue->front();
+				queue->pop();
+			}
+			return e;
 		}
 
 		void Clear()
 		{
-			mem::sptr<Event> e = nullptr;
-			for (auto it = _buffers.begin(); it != _buffers.end(); it++)
-				while (it->try_dequeue(e)) {}
-
-			e.reset();
+			for (auto it = _events_queues.begin(); it != _events_queues.end(); it++)
+			{
+				auto queue = it->get_access();
+				while (!queue->empty())
+					queue->pop();
+			}
 		}
 	};
 } // namespace np::evnt
