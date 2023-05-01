@@ -19,7 +19,6 @@
 #include "NP-Engine/String/String.hpp"
 
 #include "JobRecord.hpp"
-#include "JobPool.hpp"
 #include "JobQueue.hpp"
 
 namespace np::jsys

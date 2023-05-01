@@ -194,7 +194,6 @@ set(NP_ENGINE_INSIGHT_HPP
 
 set(NP_ENGINE_JOBSYSTEM_HPP
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/JobSystem/Job.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/JobSystem/JobPool.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/JobSystem/JobPriority.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/JobSystem/JobRecord.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/JobSystem/JobSystem.hpp

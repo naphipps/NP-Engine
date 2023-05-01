@@ -15,7 +15,6 @@
 #include "NP-Engine/Memory/Memory.hpp"
 
 #include "JobWorker.hpp"
-#include "JobPool.hpp"
 #include "JobQueue.hpp"
 
 namespace np::jsys
@@ -27,7 +26,7 @@ namespace np::jsys
 		con::vector<JobWorker> _job_workers;
 		mem::TraitAllocator _thread_pool_allocator;
 		mem::sptr<thr::ThreadPool> _thread_pool;
-		JobPool _job_pool;
+		mem::AccumulatingPool<Job> _job_pool;
 		JobQueue _job_queue;
 
 	public:

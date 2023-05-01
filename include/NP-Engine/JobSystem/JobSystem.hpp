@@ -9,7 +9,6 @@
 
 #include "NP-Engine/Foundation/Foundation.hpp"
 
-#include "JobPool.hpp"
 #include "JobPriority.hpp"
 #include "JobRecord.hpp"
 #include "JobSystemImpl.hpp"
