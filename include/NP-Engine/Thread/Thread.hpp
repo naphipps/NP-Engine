@@ -30,66 +30,66 @@ namespace np::thr
 
 	private:
 		using StdThreadBlock = mem::SizedBlock<sizeof(::std::thread)>;
-		StdThreadBlock _thread_block;
+		using StdThreadBlockWrapper = mutexed_wrapper<StdThreadBlock>;
+		using StdThreadBlockAccess = StdThreadBlockWrapper::access;
+		StdThreadBlockWrapper _thread_block;
 
-		void ZeroizeThreadBlock()
+
+		void Zeroize(StdThreadBlock& thread_block)
 		{
-			((mem::Block)_thread_block).Zeroize();
+			((mem::Block)thread_block).Zeroize();
 		}
 
-		bl HasThread() const
+		bl HasThread(StdThreadBlock& thread_block) const
 		{
 			bl has_thread = false;
 			for (siz i = 0; i < StdThreadBlock::SIZE && !has_thread; i++)
-				has_thread = _thread_block.allocation[i] != 0;
-
+				has_thread = thread_block.allocation[i] != 0;
 			return has_thread;
 		}
 
-		::std::thread* GetThread() const
+		::std::thread* GetThread(StdThreadBlock& thread_block) const
 		{
-			return HasThread() ? (::std::thread*)_thread_block.allocation : nullptr;
+			return HasThread(thread_block) ? (::std::thread*)thread_block.allocation : nullptr;
 		}
 
 	public:
 		Thread()
 		{
-			ZeroizeThreadBlock();
+			Zeroize(*_thread_block.get_access());
 		}
 
 		~Thread()
 		{
-			Clear();
+			Join();
 		}
 
 		template <typename... Args>
 		void Run(Args&&... args)
 		{
-			Clear();
-			mem::Construct<::std::thread>(_thread_block, ::std::forward<Args>(args)...);
+			Join();
+			StdThreadBlockAccess thread_access = _thread_block.get_access();
+			mem::Construct<::std::thread>(*thread_access, ::std::forward<Args>(args)...);
 		}
 
-		void Clear()
+		void Join()
 		{
-			::std::thread* thread = GetThread();
+			StdThreadBlockAccess thread_access = _thread_block.get_access();
+			::std::thread* thread = GetThread(*thread_access);
 			if (thread)
 			{
 				thread->join();
 				mem::Destruct<::std::thread>(thread);
-				ZeroizeThreadBlock();
+				Zeroize(*thread_access);
 			}
 		}
 
 		bl SetAffinity(siz core_number);
 
-		bl IsRunning() const
+		Id GetId()
 		{
-			return HasThread();
-		}
-
-		Id GetId() const
-		{
-			::std::thread* thread = GetThread();
+			StdThreadBlockAccess thread_access = _thread_block.get_access();
+			::std::thread* thread = GetThread(*thread_access);
 			return thread ? thread->get_id() : Id();
 		}
 	};

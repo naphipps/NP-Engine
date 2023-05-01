@@ -20,6 +20,8 @@ namespace np::thr
 {
 	bl Thread::SetAffinity(siz core_number)
 	{
+		StdThreadBlockAccess thread_access = _thread_block.get_access();
+
 		bl set = false;
 		
 #if NP_ENGINE_PLATFORM_IS_APPLE
@@ -27,7 +29,7 @@ namespace np::thr
 
 #elif NP_ENGINE_PLATFORM_IS_LINUX
 		core_number = core_number % Thread::HardwareConcurrency();
-		::std::thread* thread = GetThread();
+		::std::thread* thread = GetThread(*thread_access);
 		if (thread)
 		{
 			cpu_set_t cpuset;
@@ -38,7 +40,7 @@ namespace np::thr
 
 #elif NP_ENGINE_PLATFORM_IS_WINDOWS
 		core_number = core_number % Thread::HardwareConcurrency();
-		::std::thread* thread = GetThread();
+		::std::thread* thread = GetThread(*thread_access);
 		if (thread)
 		{
 			SetThreadIdealProcessor((HANDLE)thread->native_handle(), (DWORD)core_number);
