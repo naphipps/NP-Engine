@@ -110,8 +110,8 @@ namespace np::app
 
 			//-----------------------------------------------------------
 
-			win::Window::Properties window_properties;
-			_window = win::Window::Create(win::WindowDetailType::Glfw, _services, window_properties);
+			_window = win::Window::Create(win::WindowDetailType::Glfw, _services);
+			_window->SetTitle("My Game Window >:D");
 			_window_layer.RegisterWindow(_window);
 
 			mem::sptr<gfx::DetailInstance> detail_instance = gfx::DetailInstance::Create(gfx::GraphicsDetailType::Vulkan, _services);
@@ -221,9 +221,6 @@ namespace np::app
 			NP_ENGINE_PROFILE_FUNCTION();
 
 			void* input_queue = mem::AddressOf(_services->GetInputQueue());
-			win::Window::Properties window_properties;
-			window_properties.title = "My Game Window >:D";
-
 			_window->SetKeyCallback(input_queue, nput::InputListener::SubmitKeyState);
 			_window->SetMouseCallback(input_queue, nput::InputListener::SubmitMouseState);
 			_window->SetMousePositionCallback(input_queue, nput::InputListener::SubmitMousePosition);

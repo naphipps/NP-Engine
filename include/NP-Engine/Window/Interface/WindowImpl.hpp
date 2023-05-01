@@ -7,12 +7,8 @@
 #ifndef NP_ENGINE_WINDOW_IMPL_HPP
 #define NP_ENGINE_WINDOW_IMPL_HPP
 
-#include <utility>
-
 #include "NP-Engine/Primitive/Primitive.hpp"
 #include "NP-Engine/Memory/Memory.hpp"
-#include "NP-Engine/String/String.hpp"
-#include "NP-Engine/Thread/Thread.hpp"
 #include "NP-Engine/Container/Container.hpp"
 #include "NP-Engine/Services/Services.hpp"
 
@@ -29,16 +25,6 @@ namespace np::win
 	class Window : public nput::InputSource
 	{
 	public:
-		constexpr static ui32 DEFAULT_WIDTH = 800;
-		constexpr static ui32 DEFAULT_HEIGHT = 600;
-
-		struct Properties
-		{
-			str title = "NP Window";
-			ui32 width = DEFAULT_WIDTH;
-			ui32 height = DEFAULT_HEIGHT;
-		};
-
 		using ResizeCallback = void (*)(void* caller, ui32 width, ui32 height);
 		using PositionCallback = void (*)(void* caller, i32 x, i32 y);
 		using FramebufferCallback = void (*)(void* caller, ui32 width, ui32 height);
@@ -48,12 +34,9 @@ namespace np::win
 
 	protected:
 		const thr::Thread::Id _owning_thread_id;
-		Properties _properties;
 		mem::sptr<srvc::Services> _services;
 		mem::sptr<uid::UidHandle> _uid_handle;
-		thr::Thread _thread;
-		atm_bl _show_procedure_is_complete;
-
+		
 		con::uset<ResizeCallback> _resize_callbacks;
 		con::uset<PositionCallback> _position_callbacks;
 		con::uset<FramebufferCallback> _framebuffer_callbacks;
@@ -80,25 +63,15 @@ namespace np::win
 
 		void InvokeFocusCallbacks(bl focused);
 
-		virtual void ShowProcedure();
-
-		static void ClosingCallback(void* caller, mem::Delegate& d)
+		virtual bl IsOwningThread() const
 		{
-			((Window*)caller)->ClosingProcedure(d);
+			return _owning_thread_id == thr::ThisThread::get_id();
 		}
 
-		virtual void ClosingProcedure(mem::Delegate& d);
-
-		virtual void DetailShowProcedure() = 0;
-
-		virtual void DetailCloseProcedure() = 0;
-
-		Window(Window::Properties& properties, mem::sptr<srvc::Services> services):
+		Window(mem::sptr<srvc::Services> services):
 			_owning_thread_id(thr::ThisThread::get_id()),
-			_properties(properties),
 			_services(services),
-			_uid_handle(_services->GetUidSystem().CreateUidHandle()),
-			_show_procedure_is_complete(true)
+			_uid_handle(_services->GetUidSystem().CreateUidHandle())
 		{}
 
 	public:
@@ -110,12 +83,9 @@ namespace np::win
 
 		static con::vector<str> GetRequiredGfxExtentions(WindowDetailType detail_type);
 
-		static mem::sptr<Window> Create(WindowDetailType detail_type, mem::sptr<srvc::Services> services, Properties properties);
+		static mem::sptr<Window> Create(WindowDetailType detail_type, mem::sptr<srvc::Services> services);
 
-		virtual ~Window()
-		{
-			_thread.Clear();
-		}
+		virtual ~Window() = default;
 
 		bl operator==(const Window& other) const
 		{
@@ -124,71 +94,54 @@ namespace np::win
 
 		virtual void Update(tim::DblMilliseconds milliseconds) {}
 
-		virtual void Show();
-
-		virtual void Close();
+		virtual void Close() = 0;
 
 		uid::Uid GetUid() const
 		{
 			return _services->GetUidSystem().GetUid(_uid_handle);
 		}
 
-		virtual bl IsRunning() const
-		{
-			return !_show_procedure_is_complete.load(mo_acquire) || _thread.IsRunning();
-		}
+		virtual void SetTitle(str title) = 0;
 
-		virtual ui32 GetWidth() const
-		{
-			return _properties.width;
-		}
+		virtual str GetTitle() = 0;
 
-		virtual ui32 GetHeight() const
-		{
-			return _properties.height;
-		}
+		virtual void SetSize(ui32 width, ui32 height) = 0;
 
-		virtual str GetTitle() const
-		{
-			return _properties.title;
-		}
+		virtual ::glm::uvec2 GetSize() = 0;
 
-		virtual Properties GetProperties() const
-		{
-			return _properties;
-		}
+		virtual void SetPosition(i32 x, i32 y) = 0;
 
-		virtual void SetTitle(str title);
+		virtual ::glm::ivec2 GetPosition() = 0;
 
-		virtual void Resize(ui32 width, ui32 height);
+		virtual void Minimize() = 0;
 
-		virtual void SetPosition(i32 x, i32 y);
+		virtual void RestoreFromMinimize() = 0;
 
-		virtual ::glm::ivec2 GetPosition() const = 0;
+		virtual void Maximize() = 0;
 
-		virtual void Minimize();
+		virtual void RestoreFromMaximize() = 0;
 
-		virtual void RestoreFromMinimize();
+		virtual bl IsMinimized() = 0;
 
-		virtual void Maximize();
+		virtual bl IsMaximized() = 0;
 
-		virtual void RestoreFromMaximize();
+		virtual void Focus() = 0;
 
-		virtual bl IsMinimized() const = 0;
-
-		virtual bl IsMaximized() const = 0;
-
-		virtual void Focus();
-
-		virtual bl IsFocused() const = 0;
+		virtual bl IsFocused() = 0;
 
 		virtual ::glm::uvec2 GetFramebufferSize() = 0;
 
 		virtual WindowDetailType GetDetailType() const = 0;
 
-		virtual void* GetDetailWindow() const = 0;
+		/*
+			WARNING: DO NOT USE THIS UNLESS YOU KNOW WHAT YOU ARE DOING
+		*/
+		virtual void* GetDetailWindow() = 0;
 
-		virtual void* GetNativeWindow() const = 0;
+		/*
+			WARNING: DO NOT USE THIS UNLESS YOU KNOW WHAT YOU ARE DOING
+		*/
+		virtual void* GetNativeWindow() = 0;
 
 		virtual void SetResizeCallback(ResizeCallback callback)
 		{

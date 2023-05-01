@@ -22,20 +22,20 @@
 #include "NP-Engine/Window/Interface/WindowInterface.hpp"
 
 // TODO: resizing window smaller than min siz results with mouse offset to be incorrect
-// TODO: something about dragging the window and then quickly closing it causes race condition
-//	^ between dragging logic and closing logic
+// TODO: dragging window to window edges does not trigger snapping effects (windows - maybe linux too?)
 
 namespace np::win::__detail
 {
 	class GlfwWindow : public Window
 	{
 	protected:
-		atm<GLFWwindow*> _glfw_window;
+		using GlfwWindowWrapper = mutexed_wrapper<GLFWwindow*>;
+		using GlfwWindowAccess = GlfwWindowWrapper::access;
+		GlfwWindowWrapper _glfw_window;
+		str _title;
 		nput::MousePosition _mouse_position;
-		tim::SteadyTimestamp _apply_system_theme_timestamp;
 
 #if NP_ENGINE_PLATFORM_IS_WINDOWS
-
 		using HitFlags = ui32;
 		constexpr static HitFlags HitNone = 0;
 		constexpr static HitFlags HitCaption = BIT(0);
@@ -779,6 +779,58 @@ namespace np::win::__detail
 			// window->InvokeControllerCallbacks(state);
 		}
 
+		static void ApplySystemThemeOnGlfw(GLFWwindow* glfw_window)
+		{
+			if (glfw_window)
+			{
+#if NP_ENGINE_PLATFORM_IS_WINDOWS
+				LPCSTR subkey = "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize";
+				LPCSTR value = "SystemUsesLightTheme";
+				DWORD word = 0;
+				DWORD size = sizeof(DWORD);
+				LSTATUS status = RegGetValueA(HKEY_CURRENT_USER, subkey, value, RRF_RT_DWORD, nullptr, &word, &size);
+				HWND native_window = (HWND)GetNativeFromGlfw(glfw_window);
+				BOOL dark_mode_value = status == ERROR_SUCCESS && word == 0;
+				BOOL prev_dark_mode_value = false;
+				DWORD DARK_MODE_ATTRIBUTE = 20;
+
+				DwmGetWindowAttribute(native_window, DARK_MODE_ATTRIBUTE, &prev_dark_mode_value, sizeof(BOOL));
+
+				if (prev_dark_mode_value != dark_mode_value)
+				{
+					DwmSetWindowAttribute(native_window, DARK_MODE_ATTRIBUTE, &dark_mode_value, sizeof(BOOL));
+
+					bl is_active = native_window == GetActiveWindow();
+					GlfwWindowProcedure(native_window, WM_NCACTIVATE, !is_active, 0);
+					GlfwWindowProcedure(native_window, WM_NCACTIVATE, is_active, 0);
+				}
+#endif
+			}
+		}
+
+		static bl IsMaximized(GLFWwindow* glfw_window)
+		{
+			return glfw_window && glfwGetWindowAttrib(glfw_window, GLFW_MAXIMIZED);
+		}
+
+		static void* GetNativeFromGlfw(GLFWwindow* glfw_window)
+		{
+			void* native_window = nullptr;
+
+#if NP_ENGINE_PLATFORM_IS_APPLE
+				// TODO: GetNativeWindow for apple
+
+#elif NP_ENGINE_PLATFORM_IS_LINUX
+				// TODO: GetNativeWindow for linux
+
+#elif NP_ENGINE_PLATFORM_IS_WINDOWS
+			if (glfw_window)
+				native_window = glfwGetWin32Window(glfw_window);
+
+#endif
+			return native_window;
+		}
+
 		void SetGlfwCallbacks(GLFWwindow* glfw_window)
 		{
 			if (glfw_window)
@@ -870,89 +922,6 @@ namespace np::win::__detail
 			}
 		}
 
-		void DetailShowProcedure() override
-		{
-			GLFWwindow* glfw_window = _glfw_window.load(mo_acquire);
-			const tim::Ui64Milliseconds duration(NP_ENGINE_WINDOW_LOOP_DURATION);
-			while (!glfwWindowShouldClose(glfw_window))
-				thr::ThisThread::sleep_for(duration);
-		}
-
-		void DetailCloseProcedure() override
-		{
-			GLFWwindow* glfw_window = _glfw_window.load(mo_acquire);
-			if (glfw_window && glfwWindowShouldClose(glfw_window) == GLFW_FALSE)
-				glfwSetWindowShouldClose(glfw_window, GLFW_TRUE);
-		}
-
-		GLFWwindow* CreateGlfwWindow()
-		{
-			glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-			glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
-			GLFWwindow* glfw_window = glfwCreateWindow(GetWidth(), GetHeight(), GetTitle().c_str(), nullptr, nullptr);
-			SetGlfwCallbacks(glfw_window);
-			ApplySystemThemeOnGlfw(glfw_window);
-			return glfw_window;
-		}
-
-		void ApplySystemThemeOnGlfw(GLFWwindow* glfw_window) // TODO: maybe add "void ApplySystemThemeOnGlfw()" to Window??
-		{
-			if (glfw_window)
-			{
-#if NP_ENGINE_PLATFORM_IS_WINDOWS
-				LPCSTR subkey = "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize";
-				LPCSTR value = "SystemUsesLightTheme";
-				DWORD word = 0;
-				DWORD size = sizeof(DWORD);
-				LSTATUS status = RegGetValueA(HKEY_CURRENT_USER, subkey, value, RRF_RT_DWORD, nullptr, &word, &size);
-				HWND native_window = (HWND)GetNativeFromGlfw(glfw_window);
-				BOOL dark_mode_value = status == ERROR_SUCCESS && word == 0;
-				BOOL prev_dark_mode_value = false;
-				DWORD DARK_MODE_ATTRIBUTE = 20;
-
-				DwmGetWindowAttribute(native_window, DARK_MODE_ATTRIBUTE, &prev_dark_mode_value, sizeof(BOOL));
-
-				if (prev_dark_mode_value != dark_mode_value)
-				{
-					DwmSetWindowAttribute(native_window, DARK_MODE_ATTRIBUTE, &dark_mode_value, sizeof(BOOL));
-
-					// TODO: test this
-					bl is_active = native_window == GetActiveWindow();
-					GlfwWindowProcedure(native_window, WM_NCACTIVATE, !is_active, 0);
-					GlfwWindowProcedure(native_window, WM_NCACTIVATE, is_active, 0);
-				}
-#endif
-			}
-		}
-
-		void DestroyGlfwWindow()
-		{
-			GLFWwindow* glfw_window = _glfw_window.exchange(nullptr, mo_release);
-			if (glfw_window)
-			{
-				UnsetGlfwCallbacks(glfw_window);
-				glfwDestroyWindow(glfw_window);
-			}
-		}
-
-		void* GetNativeFromGlfw(GLFWwindow* glfw_window) const
-		{
-			void* native_window = nullptr;
-
-#if NP_ENGINE_PLATFORM_IS_APPLE
-				// TODO: GetNativeWindow for apple
-
-#elif NP_ENGINE_PLATFORM_IS_LINUX
-				// TODO: GetNativeWindow for linux
-
-#elif NP_ENGINE_PLATFORM_IS_WINDOWS
-			if (glfw_window)
-				native_window = glfwGetWin32Window(glfw_window);
-
-#endif
-			return native_window;
-		}
-
 	public:
 		static void Init()
 		{
@@ -981,32 +950,46 @@ namespace np::win::__detail
 			return extensions;
 		}
 
-		GlfwWindow(Window::Properties& properties, mem::sptr<srvc::Services> services):
-			Window(properties, services),
-			_glfw_window(nullptr),
-			_apply_system_theme_timestamp(tim::SteadyClock::now())
+		GlfwWindow(mem::sptr<srvc::Services> services):
+			Window(services)
 #if NP_ENGINE_PLATFORM_IS_WINDOWS
 			,
 			_prev_window_procedure(nullptr),
-			_hit_flags(HitNone)
+			_hit_flags(HitNone),
+			_prev_mouse_position(),
+			_prev_window_placement()
 #endif
 		{
-			_glfw_window.store(CreateGlfwWindow(), mo_release);
-			Window::Show();
+			GlfwWindowAccess glfw_window = _glfw_window.get_access();
+			if (!*glfw_window)
+			{
+				glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+				glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
+				//TODO: get default window size and title from config service
+				*glfw_window = glfwCreateWindow(800, 600, _title.c_str(), nullptr, nullptr);
+				SetGlfwCallbacks(*glfw_window);
+				ApplySystemThemeOnGlfw(*glfw_window);
+			}
 		}
 
 		virtual ~GlfwWindow()
 		{
-			DestroyGlfwWindow();
+			GlfwWindowAccess glfw_window = _glfw_window.get_access();
+			if (*glfw_window)
+			{
+				UnsetGlfwCallbacks(*glfw_window);
+				glfwDestroyWindow(*glfw_window);
+				*glfw_window = nullptr;
+			}
 		}
 
-		virtual void Update(tim::DblMilliseconds milliseconds) override
+		void Update(tim::DblMilliseconds milliseconds) override
 		{
-			GLFWwindow* glfw_window = _glfw_window.load(mo_acquire);
-			if (glfw_window)
+			GlfwWindowAccess glfw_window = _glfw_window.get_access();
+			if (*glfw_window)
 			{
 #if NP_ENGINE_PLATFORM_IS_WINDOWS
-				HWND native_window = (HWND)GetNativeWindow();
+				HWND native_window = (HWND)GetNativeFromGlfw(*glfw_window);
 				POINT point;
 				WINDOWINFO info{};
 				UINT flags = 0;
@@ -1019,7 +1002,7 @@ namespace np::win::__detail
 				switch (_hit_flags)
 				{
 				case HitCaption:
-					if (IsMaximized())
+					if (IsMaximized(*glfw_window))
 					{
 						if (offset.x != 0 || offset.y != 0)
 						{
@@ -1117,180 +1100,246 @@ namespace np::win::__detail
 
 				_prev_mouse_position = point;
 #endif
-
-				tim::SteadyTimestamp timestamp = tim::SteadyClock::now();
-				if (timestamp - _apply_system_theme_timestamp >= tim::DblSeconds(2)) // TODO: we might want this pushed to
-																					 // Window
-				{
-					ApplySystemThemeOnGlfw(glfw_window);
-					_apply_system_theme_timestamp = timestamp;
-				}
+				ApplySystemThemeOnGlfw(*glfw_window);
 			}
 		}
 
-		virtual WindowDetailType GetDetailType() const override
+		WindowDetailType GetDetailType() const override
 		{
 			return WindowDetailType::Glfw;
 		}
 
-		virtual void Show() override
+		void Close()
 		{
-			Window::Show();
-			if (_glfw_window.load(mo_acquire))
-				Focus();
+			mem::sptr<jsys::Job> closing_job = _services->GetJobSystem().CreateJob();
+			mem::sptr<evnt::Event> e = mem::create_sptr<WindowClosingEvent>(_services->GetAllocator(), GetUid(), closing_job);
+			_services->GetEventSubmitter().Submit(e);
 		}
 
-		virtual void SetTitle(str title) override
+		void SetTitle(str title) override
 		{
-			if (_owning_thread_id == thr::ThisThread::get_id())
+			if (IsOwningThread())
 			{
-				GLFWwindow* glfw_window = _glfw_window.load(mo_acquire);
-				if (glfw_window)
-					glfwSetWindowTitle(glfw_window, title.c_str());
+				GlfwWindowAccess glfw_window = _glfw_window.get_access();
+				if (*glfw_window)
+				{
+					_title = title;
+					glfwSetWindowTitle(*glfw_window, _title.c_str());
+				}
 			}
-
-			Window::SetTitle(title);
+			else
+			{
+				mem::sptr<evnt::Event> e = mem::create_sptr<WindowSetTitleEvent>(_services->GetAllocator(), GetUid(), title);
+				_services->GetEventSubmitter().Submit(e);
+			}
 		}
 
-		virtual void Resize(ui32 width, ui32 height) override
+		str GetTitle() override
 		{
-			if (_owning_thread_id == thr::ThisThread::get_id())
+			return _title;
+		}
+
+		void SetSize(ui32 width, ui32 height) override
+		{
+			if (IsOwningThread())
 			{
-				GLFWwindow* glfw_window = _glfw_window.load(mo_acquire);
-				if (glfw_window)
-					glfwSetWindowSize(glfw_window, (i32)width, (i32)height);
+				GlfwWindowAccess glfw_window = _glfw_window.get_access();
+				if (*glfw_window)
+				{
+					glfwSetWindowSize(*glfw_window, (i32)width, (i32)height);
+					mem::sptr<evnt::Event> e = mem::create_sptr<WindowResizeEvent>(_services->GetAllocator(), GetUid(), width, height);
+					_services->GetEventSubmitter().Submit(e);
+				}
+			}
+			else
+			{
+				mem::sptr<evnt::Event> e = mem::create_sptr<WindowSetSizeEvent>(_services->GetAllocator(), GetUid(), width, height);
+				_services->GetEventSubmitter().Submit(e);
+			}
+		}
+
+		::glm::uvec2 GetSize() override
+		{
+			::glm::uvec2 size{ 0 };
+			GlfwWindowAccess glfw_window = _glfw_window.get_access();
+			if (*glfw_window)
+			{
+				i32 x, y = 0;
+				glfwGetWindowSize(*glfw_window, &x, &y);
+				size = { x, y };
 			}
 
-			Window::Resize(width, height);
+			return size;
 		}
 
 		void SetPosition(i32 x, i32 y) override
 		{
-			if (_owning_thread_id == thr::ThisThread::get_id())
+			if (IsOwningThread())
 			{
-				GLFWwindow* glfw_window = _glfw_window.load(mo_acquire);
-				if (glfw_window)
-					glfwSetWindowPos(glfw_window, x, y);
+				GlfwWindowAccess glfw_window = _glfw_window.get_access();
+				if (*glfw_window)
+				{
+					glfwSetWindowPos(*glfw_window, x, y);
+					mem::sptr<evnt::Event> e = mem::create_sptr<WindowPositionEvent>(_services->GetAllocator(), GetUid(), x, y);
+					_services->GetEventSubmitter().Submit(e);
+				}
 			}
-
-			Window::SetPosition(x, y);
+			else
+			{
+				mem::sptr<evnt::Event> e = mem::create_sptr<WindowSetPositionEvent>(_services->GetAllocator(), GetUid(), x, y);
+				_services->GetEventSubmitter().Submit(e);
+			}
 		}
 
-		::glm::ivec2 GetPosition() const override
+		::glm::ivec2 GetPosition() override
 		{
 			::glm::ivec2 position{ 0 };
-			GLFWwindow* glfw_window = _glfw_window.load(mo_acquire);
-			if (glfw_window)
-				glfwGetWindowPos(glfw_window, &position.x, &position.y);
+			GlfwWindowAccess glfw_window = _glfw_window.get_access();
+			if (*glfw_window)
+				glfwGetWindowPos(*glfw_window, &position.x, &position.y);
 
 			return position;
 		}
 
-		virtual void Minimize() override
+		void Minimize() override
 		{
-			if (_owning_thread_id == thr::ThisThread::get_id())
+			if (IsOwningThread())
 			{
-				GLFWwindow* glfw_window = _glfw_window.load(mo_acquire);
-				if (glfw_window && !glfwGetWindowAttrib(glfw_window, GLFW_ICONIFIED))
-					glfwIconifyWindow(glfw_window);
+				GlfwWindowAccess glfw_window = _glfw_window.get_access();
+				if (*glfw_window && !glfwGetWindowAttrib(*glfw_window, GLFW_ICONIFIED))
+				{
+					glfwIconifyWindow(*glfw_window);
+					mem::sptr<evnt::Event> e = mem::create_sptr<WindowMinimizeEvent>(_services->GetAllocator(), GetUid(), true);
+					_services->GetEventSubmitter().Submit(e);
+				}
 			}
-
-			Window::Minimize();
+			else
+			{
+				mem::sptr<evnt::Event> e = mem::create_sptr<WindowSetMinimizeEvent>(_services->GetAllocator(), GetUid(), true);
+				_services->GetEventSubmitter().Submit(e);
+			}
 		}
 
-		virtual void RestoreFromMinimize() override
+		void RestoreFromMinimize() override
 		{
-			if (_owning_thread_id == thr::ThisThread::get_id())
+			if (IsOwningThread())
 			{
-				GLFWwindow* glfw_window = _glfw_window.load(mo_acquire);
-				if (glfw_window && glfwGetWindowAttrib(glfw_window, GLFW_ICONIFIED))
-					glfwRestoreWindow(glfw_window);
+				GlfwWindowAccess glfw_window = _glfw_window.get_access();
+				if (*glfw_window && glfwGetWindowAttrib(*glfw_window, GLFW_ICONIFIED))
+				{
+					glfwRestoreWindow(*glfw_window);
+					mem::sptr<evnt::Event> e = mem::create_sptr<WindowMinimizeEvent>(_services->GetAllocator(), GetUid(), false);
+					_services->GetEventSubmitter().Submit(e);
+				}
 			}
-
-			Window::RestoreFromMinimize();
+			else
+			{
+				mem::sptr<evnt::Event> e = mem::create_sptr<WindowSetMinimizeEvent>(_services->GetAllocator(), GetUid(), false);
+				_services->GetEventSubmitter().Submit(e);
+			}
 		}
 
-		virtual void Maximize() override
+		void Maximize() override
 		{
-			if (_owning_thread_id == thr::ThisThread::get_id())
+			if (IsOwningThread())
 			{
-				GLFWwindow* glfw_window = _glfw_window.load(mo_acquire);
-
+				GlfwWindowAccess glfw_window = _glfw_window.get_access();
+				if (*glfw_window && !glfwGetWindowAttrib(*glfw_window, GLFW_MAXIMIZED))
+				{
 #if NP_ENGINE_PLATFORM_IS_WINDOWS
-				GetWindowPlacement((HWND)GetNativeFromGlfw(glfw_window), &_prev_window_placement);
+					GetWindowPlacement((HWND)GetNativeFromGlfw(*glfw_window), &_prev_window_placement);
 #endif
-
-				if (glfw_window && !glfwGetWindowAttrib(glfw_window, GLFW_MAXIMIZED))
-					glfwMaximizeWindow(glfw_window);
+					glfwMaximizeWindow(*glfw_window);
+					mem::sptr<evnt::Event> e = mem::create_sptr<WindowMaximizeEvent>(_services->GetAllocator(), GetUid(), true);
+					_services->GetEventSubmitter().Submit(e);
+				}
 			}
-
-			Window::Maximize();
-		}
-
-		virtual void RestoreFromMaximize() override
-		{
-			if (_owning_thread_id == thr::ThisThread::get_id())
+			else
 			{
-				GLFWwindow* glfw_window = _glfw_window.load(mo_acquire);
-				if (glfw_window && glfwGetWindowAttrib(glfw_window, GLFW_MAXIMIZED))
-					glfwRestoreWindow(glfw_window);
+				mem::sptr<evnt::Event> e = mem::create_sptr<WindowSetMaximizeEvent>(_services->GetAllocator(), GetUid(), true);
+				_services->GetEventSubmitter().Submit(e);
 			}
-
-			Window::RestoreFromMaximize();
 		}
 
-		virtual bl IsMinimized() const override
+		void RestoreFromMaximize() override
 		{
-			GLFWwindow* glfw_window = _glfw_window.load(mo_acquire);
-			return glfw_window && glfwGetWindowAttrib(glfw_window, GLFW_ICONIFIED);
-		}
-
-		virtual bl IsMaximized() const override
-		{
-			GLFWwindow* glfw_window = _glfw_window.load(mo_acquire);
-			return glfw_window && glfwGetWindowAttrib(glfw_window, GLFW_MAXIMIZED);
-		}
-
-		virtual void Focus() override
-		{
-			if (_owning_thread_id == thr::ThisThread::get_id())
+			if (IsOwningThread())
 			{
-				GLFWwindow* glfw_window = _glfw_window.load(mo_acquire);
-				if (glfw_window && !glfwGetWindowAttrib(glfw_window, GLFW_FOCUSED))
-					glfwFocusWindow(glfw_window);
+				GlfwWindowAccess glfw_window = _glfw_window.get_access();
+				if (*glfw_window && glfwGetWindowAttrib(*glfw_window, GLFW_MAXIMIZED))
+				{
+					glfwRestoreWindow(*glfw_window);
+					mem::sptr<evnt::Event> e = mem::create_sptr<WindowMaximizeEvent>(_services->GetAllocator(), GetUid(), false);
+					_services->GetEventSubmitter().Submit(e);
+				}
+			}
+			else
+			{
+				mem::sptr<evnt::Event> e = mem::create_sptr<WindowSetMaximizeEvent>(_services->GetAllocator(), GetUid(), false);
+				_services->GetEventSubmitter().Submit(e);
+			}
+		}
+
+		bl IsMinimized() override
+		{
+			GlfwWindowAccess glfw_window = _glfw_window.get_access();
+			return *glfw_window && glfwGetWindowAttrib(*glfw_window, GLFW_ICONIFIED);
+		}
+
+		bl IsMaximized() override
+		{
+			GlfwWindowAccess glfw_window = _glfw_window.get_access();
+			return IsMaximized(*glfw_window);
+		}
+
+		void Focus() override
+		{
+			if (IsOwningThread())
+			{
+				GlfwWindowAccess glfw_window = _glfw_window.get_access();
+				if (*glfw_window && !glfwGetWindowAttrib(*glfw_window, GLFW_FOCUSED))
+				{
+					glfwFocusWindow(*glfw_window);
+					mem::sptr<evnt::Event> e = mem::create_sptr<WindowFocusEvent>(_services->GetAllocator(), GetUid(), true);
+					_services->GetEventSubmitter().Submit(e);
+				}
+			}
+			else
+			{
+				mem::sptr<evnt::Event> e = mem::create_sptr<WindowSetFocusEvent>(_services->GetAllocator(), GetUid(), true);
+				_services->GetEventSubmitter().Submit(e);
+			}
+		}
+
+		bl IsFocused() override
+		{
+			GlfwWindowAccess glfw_window = _glfw_window.get_access();
+			return *glfw_window && glfwGetWindowAttrib(*glfw_window, GLFW_FOCUSED);
+		}
+
+		::glm::uvec2 GetFramebufferSize() override
+		{
+			::glm::uvec2 size{ 0 };
+			GlfwWindowAccess glfw_window = _glfw_window.get_access();
+			if (*glfw_window)
+			{
+				i32 width = 0, height = 0;
+				glfwGetFramebufferSize(*glfw_window, &width, &height);
+				size = { width, height };
 			}
 
-			Window::Focus();
-		}
-
-		virtual bl IsFocused() const override
-		{
-			GLFWwindow* glfw_window = _glfw_window.load(mo_acquire);
-			return glfw_window && glfwGetWindowAttrib(glfw_window, GLFW_FOCUSED);
-		}
-
-		virtual ::glm::uvec2 GetFramebufferSize() override
-		{
-			::glm::uvec2 size{};
-			i32 width = 0, height = 0;
-
-			GLFWwindow* glfw_window = _glfw_window.load(mo_acquire);
-			if (glfw_window)
-				glfwGetFramebufferSize(glfw_window, &width, &height);
-
-			size.x = width;
-			size.y = height;
 			return size;
 		}
 
-		virtual void* GetDetailWindow() const override
+		void* GetDetailWindow() override
 		{
-			return _glfw_window.load(mo_acquire);
+			return *_glfw_window.get_access();
 		}
 
-		virtual void* GetNativeWindow() const override
+		void* GetNativeWindow() override
 		{
-			return GetNativeFromGlfw(_glfw_window.load(mo_acquire));
+			GlfwWindowAccess glfw_window = _glfw_window.get_access();
+			return GetNativeFromGlfw(*glfw_window);
 		}
 	};
 } // namespace np::win::__detail

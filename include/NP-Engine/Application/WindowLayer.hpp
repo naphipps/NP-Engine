@@ -167,7 +167,7 @@ namespace np::app
 			for (auto it = windows->begin(); it != windows->end(); it++)
 				if (*it && (*it)->GetUid() == size_data.windowId)
 				{
-					(*it)->Resize(size_data.width, size_data.height);
+					(*it)->SetSize(size_data.width, size_data.height);
 					break;
 				}
 
