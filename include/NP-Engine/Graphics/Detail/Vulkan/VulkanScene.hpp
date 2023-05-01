@@ -203,7 +203,7 @@ namespace np::gfx::__detail
 				render_pipeline.PrepareToBindDescriptorSets(command_staging);
 				{
 					uid::UidSystem& uid_system = GetServices()->GetUidSystem();
-					VisiblesAccess visibles = _visibles.get_access();
+					auto visibles = _visibles.get_access();
 					for (auto it = visibles->begin(); it != visibles->end(); it++)
 					{
 						uid::Uid id = it->first;

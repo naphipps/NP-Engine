@@ -30,9 +30,7 @@ namespace np::thr
 
 	private:
 		using StdThreadBlock = mem::SizedBlock<sizeof(::std::thread)>;
-		using StdThreadBlockWrapper = mutexed_wrapper<StdThreadBlock>;
-		using StdThreadBlockAccess = StdThreadBlockWrapper::access;
-		StdThreadBlockWrapper _thread_block;
+		mutexed_wrapper<StdThreadBlock> _thread_block;
 
 
 		void Zeroize(StdThreadBlock& thread_block)
@@ -68,13 +66,13 @@ namespace np::thr
 		void Run(Args&&... args)
 		{
 			Join();
-			StdThreadBlockAccess thread_access = _thread_block.get_access();
+			auto thread_access = _thread_block.get_access();
 			mem::Construct<::std::thread>(*thread_access, ::std::forward<Args>(args)...);
 		}
 
 		void Join()
 		{
-			StdThreadBlockAccess thread_access = _thread_block.get_access();
+			auto thread_access = _thread_block.get_access();
 			::std::thread* thread = GetThread(*thread_access);
 			if (thread)
 			{
@@ -88,7 +86,7 @@ namespace np::thr
 
 		Id GetId()
 		{
-			StdThreadBlockAccess thread_access = _thread_block.get_access();
+			auto thread_access = _thread_block.get_access();
 			::std::thread* thread = GetThread(*thread_access);
 			return thread ? thread->get_id() : Id();
 		}

@@ -20,7 +20,7 @@ namespace np::thr
 {
 	bl Thread::SetAffinity(siz core_number)
 	{
-		StdThreadBlockAccess thread_access = _thread_block.get_access();
+		auto thread_access = _thread_block.get_access();
 
 		bl set = false;
 		

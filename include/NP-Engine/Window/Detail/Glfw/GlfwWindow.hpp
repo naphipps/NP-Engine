@@ -29,9 +29,7 @@ namespace np::win::__detail
 	class GlfwWindow : public Window
 	{
 	protected:
-		using GlfwWindowWrapper = mutexed_wrapper<GLFWwindow*>;
-		using GlfwWindowAccess = GlfwWindowWrapper::access;
-		GlfwWindowWrapper _glfw_window;
+		mutexed_wrapper<GLFWwindow*> _glfw_window;
 		str _title;
 		nput::MousePosition _mouse_position;
 
@@ -960,7 +958,7 @@ namespace np::win::__detail
 			_prev_window_placement()
 #endif
 		{
-			GlfwWindowAccess glfw_window = _glfw_window.get_access();
+			auto glfw_window = _glfw_window.get_access();
 			if (!*glfw_window)
 			{
 				glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
@@ -974,7 +972,7 @@ namespace np::win::__detail
 
 		virtual ~GlfwWindow()
 		{
-			GlfwWindowAccess glfw_window = _glfw_window.get_access();
+			auto glfw_window = _glfw_window.get_access();
 			if (*glfw_window)
 			{
 				UnsetGlfwCallbacks(*glfw_window);
@@ -985,7 +983,7 @@ namespace np::win::__detail
 
 		void Update(tim::DblMilliseconds milliseconds) override
 		{
-			GlfwWindowAccess glfw_window = _glfw_window.get_access();
+			auto glfw_window = _glfw_window.get_access();
 			if (*glfw_window)
 			{
 #if NP_ENGINE_PLATFORM_IS_WINDOWS
@@ -1120,7 +1118,7 @@ namespace np::win::__detail
 		{
 			if (IsOwningThread())
 			{
-				GlfwWindowAccess glfw_window = _glfw_window.get_access();
+				auto glfw_window = _glfw_window.get_access();
 				if (*glfw_window)
 				{
 					_title = title;
@@ -1143,7 +1141,7 @@ namespace np::win::__detail
 		{
 			if (IsOwningThread())
 			{
-				GlfwWindowAccess glfw_window = _glfw_window.get_access();
+				auto glfw_window = _glfw_window.get_access();
 				if (*glfw_window)
 				{
 					glfwSetWindowSize(*glfw_window, (i32)width, (i32)height);
@@ -1161,7 +1159,7 @@ namespace np::win::__detail
 		::glm::uvec2 GetSize() override
 		{
 			::glm::uvec2 size{ 0 };
-			GlfwWindowAccess glfw_window = _glfw_window.get_access();
+			auto glfw_window = _glfw_window.get_access();
 			if (*glfw_window)
 			{
 				i32 x, y = 0;
@@ -1176,7 +1174,7 @@ namespace np::win::__detail
 		{
 			if (IsOwningThread())
 			{
-				GlfwWindowAccess glfw_window = _glfw_window.get_access();
+				auto glfw_window = _glfw_window.get_access();
 				if (*glfw_window)
 				{
 					glfwSetWindowPos(*glfw_window, x, y);
@@ -1194,7 +1192,7 @@ namespace np::win::__detail
 		::glm::ivec2 GetPosition() override
 		{
 			::glm::ivec2 position{ 0 };
-			GlfwWindowAccess glfw_window = _glfw_window.get_access();
+			auto glfw_window = _glfw_window.get_access();
 			if (*glfw_window)
 				glfwGetWindowPos(*glfw_window, &position.x, &position.y);
 
@@ -1205,7 +1203,7 @@ namespace np::win::__detail
 		{
 			if (IsOwningThread())
 			{
-				GlfwWindowAccess glfw_window = _glfw_window.get_access();
+				auto glfw_window = _glfw_window.get_access();
 				if (*glfw_window && !glfwGetWindowAttrib(*glfw_window, GLFW_ICONIFIED))
 				{
 					glfwIconifyWindow(*glfw_window);
@@ -1224,7 +1222,7 @@ namespace np::win::__detail
 		{
 			if (IsOwningThread())
 			{
-				GlfwWindowAccess glfw_window = _glfw_window.get_access();
+				auto glfw_window = _glfw_window.get_access();
 				if (*glfw_window && glfwGetWindowAttrib(*glfw_window, GLFW_ICONIFIED))
 				{
 					glfwRestoreWindow(*glfw_window);
@@ -1243,7 +1241,7 @@ namespace np::win::__detail
 		{
 			if (IsOwningThread())
 			{
-				GlfwWindowAccess glfw_window = _glfw_window.get_access();
+				auto glfw_window = _glfw_window.get_access();
 				if (*glfw_window && !glfwGetWindowAttrib(*glfw_window, GLFW_MAXIMIZED))
 				{
 #if NP_ENGINE_PLATFORM_IS_WINDOWS
@@ -1265,7 +1263,7 @@ namespace np::win::__detail
 		{
 			if (IsOwningThread())
 			{
-				GlfwWindowAccess glfw_window = _glfw_window.get_access();
+				auto glfw_window = _glfw_window.get_access();
 				if (*glfw_window && glfwGetWindowAttrib(*glfw_window, GLFW_MAXIMIZED))
 				{
 					glfwRestoreWindow(*glfw_window);
@@ -1282,13 +1280,13 @@ namespace np::win::__detail
 
 		bl IsMinimized() override
 		{
-			GlfwWindowAccess glfw_window = _glfw_window.get_access();
+			auto glfw_window = _glfw_window.get_access();
 			return *glfw_window && glfwGetWindowAttrib(*glfw_window, GLFW_ICONIFIED);
 		}
 
 		bl IsMaximized() override
 		{
-			GlfwWindowAccess glfw_window = _glfw_window.get_access();
+			auto glfw_window = _glfw_window.get_access();
 			return IsMaximized(*glfw_window);
 		}
 
@@ -1296,7 +1294,7 @@ namespace np::win::__detail
 		{
 			if (IsOwningThread())
 			{
-				GlfwWindowAccess glfw_window = _glfw_window.get_access();
+				auto glfw_window = _glfw_window.get_access();
 				if (*glfw_window && !glfwGetWindowAttrib(*glfw_window, GLFW_FOCUSED))
 				{
 					glfwFocusWindow(*glfw_window);
@@ -1313,14 +1311,14 @@ namespace np::win::__detail
 
 		bl IsFocused() override
 		{
-			GlfwWindowAccess glfw_window = _glfw_window.get_access();
+			auto glfw_window = _glfw_window.get_access();
 			return *glfw_window && glfwGetWindowAttrib(*glfw_window, GLFW_FOCUSED);
 		}
 
 		::glm::uvec2 GetFramebufferSize() override
 		{
 			::glm::uvec2 size{ 0 };
-			GlfwWindowAccess glfw_window = _glfw_window.get_access();
+			auto glfw_window = _glfw_window.get_access();
 			if (*glfw_window)
 			{
 				i32 width = 0, height = 0;
@@ -1338,7 +1336,7 @@ namespace np::win::__detail
 
 		void* GetNativeWindow() override
 		{
-			GlfwWindowAccess glfw_window = _glfw_window.get_access();
+			auto glfw_window = _glfw_window.get_access();
 			return GetNativeFromGlfw(*glfw_window);
 		}
 	};

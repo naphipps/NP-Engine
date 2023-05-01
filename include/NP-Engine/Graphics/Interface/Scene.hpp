@@ -30,11 +30,8 @@ namespace np::gfx
 		};
 
 	protected:
-		using VisiblesWrapper = mutexed_wrapper<con::umap<uid::Uid, mem::sptr<VisibleObject>>>;
-		using VisiblesAccess = VisiblesWrapper::access;
-
 		Properties _properties;
-		VisiblesWrapper _visibles;
+		mutexed_wrapper<con::umap<uid::Uid, mem::sptr<VisibleObject>>> _visibles;
 		mem::Delegate _on_render_delegate;
 
 		/*
@@ -114,7 +111,7 @@ namespace np::gfx
 
 		virtual ~Scene()
 		{
-			VisiblesAccess visibles = _visibles.get_access();
+			auto visibles = _visibles.get_access();
 			for (auto it = visibles->begin(); it != visibles->end(); it++)
 				UnregisterResource(it->first);
 		}
@@ -221,7 +218,7 @@ namespace np::gfx
 		virtual void CleanupVisibles()
 		{
 			uid::UidSystem& uid_system = GetServices()->GetUidSystem();
-			VisiblesAccess visibles = _visibles.get_access();
+			auto visibles = _visibles.get_access();
 			for (auto it = visibles->begin(); it != visibles->end();)
 			{
 				if (!uid_system.Has(it->first))

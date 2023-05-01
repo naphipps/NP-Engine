@@ -22,13 +22,8 @@ namespace np::app
 	{
 	private:
 		//TODO: move window ownership to window layer - set everything with events, and either use getters or events to get values
-		using WindowsWrapper = mutexed_wrapper<con::vector<mem::sptr<win::Window>>>;
-		using WindowsAccess = typename WindowsWrapper::access;
-		WindowsWrapper _windows;
-
-		using WindowsToDestroyWrapper = mutexed_wrapper<con::uset<uid::Uid>>;
-		using WindowsToDestroyAccess = typename WindowsToDestroyWrapper::access;
-		WindowsToDestroyWrapper _windows_to_destroy;
+		mutexed_wrapper<con::vector<mem::sptr<win::Window>>> _windows;
+		mutexed_wrapper<con::uset<uid::Uid>> _windows_to_destroy;
 
 	protected:
 		static void WindowClosedCallback(void* caller, mem::Delegate& d)
@@ -64,7 +59,7 @@ namespace np::app
 			win::WindowSetTitleEvent& title_event = (win::WindowSetTitleEvent&)(*e);
 			win::WindowTitleEventData& title_data = title_event.GetData();
 
-			WindowsAccess windows = _windows.get_access();
+			auto windows = _windows.get_access();
 			for (auto it = windows->begin(); it != windows->end(); it++)
 				if (*it && (*it)->GetUid() == title_data.windowId)
 				{
@@ -80,7 +75,7 @@ namespace np::app
 			win::WindowSetCloseEvent& close_event = (win::WindowSetCloseEvent&)(*e);
 			win::WindowCloseEventData& close_data = close_event.GetData();
 
-			WindowsAccess windows = _windows.get_access();
+			auto windows = _windows.get_access();
 			for (auto it = windows->begin(); it != windows->end(); it++)
 				if (*it && (*it)->GetUid() == close_data.windowId)
 				{
@@ -98,7 +93,7 @@ namespace np::app
 
 			if (focus_data.isFocused)
 			{
-				WindowsAccess windows = _windows.get_access();
+				auto windows = _windows.get_access();
 				for (auto it = windows->begin(); it != windows->end(); it++)
 					if (*it && (*it)->GetUid() == focus_data.windowId)
 					{
@@ -115,7 +110,7 @@ namespace np::app
 			win::WindowSetMaximizeEvent& max_event = (win::WindowSetMaximizeEvent&)(*e);
 			win::WindowMaximizeEventData& max_data = max_event.GetData();
 
-			WindowsAccess windows = _windows.get_access();
+			auto windows = _windows.get_access();
 			for (auto it = windows->begin(); it != windows->end(); it++)
 				if (*it && (*it)->GetUid() == max_data.windowId)
 				{
@@ -131,7 +126,7 @@ namespace np::app
 			win::WindowSetMinimizeEvent& min_event = (win::WindowSetMinimizeEvent&)(*e);
 			win::WindowMinimizeEventData& min_data = min_event.GetData();
 
-			WindowsAccess windows = _windows.get_access();
+			auto windows = _windows.get_access();
 			for (auto it = windows->begin(); it != windows->end(); it++)
 				if (*it && (*it)->GetUid() == min_data.windowId)
 				{
@@ -147,7 +142,7 @@ namespace np::app
 			win::WindowSetPositionEvent& position_event = (win::WindowSetPositionEvent&)(*e);
 			win::WindowPositionEventData& position_data = position_event.GetData();
 
-			WindowsAccess windows = _windows.get_access();
+			auto windows = _windows.get_access();
 			for (auto it = windows->begin(); it != windows->end(); it++)
 				if (*it && (*it)->GetUid() == position_data.windowId)
 				{
@@ -163,7 +158,7 @@ namespace np::app
 			win::WindowSetSizeEvent& size_event = (win::WindowSetSizeEvent&)(*e);
 			win::WindowSizeEventData& size_data = size_event.GetData();
 
-			WindowsAccess windows = _windows.get_access();
+			auto windows = _windows.get_access();
 			for (auto it = windows->begin(); it != windows->end(); it++)
 				if (*it && (*it)->GetUid() == size_data.windowId)
 				{
@@ -241,7 +236,7 @@ namespace np::app
 			win::Window::Update(win::WindowDetailType::Glfw);
 			win::Window::Update(win::WindowDetailType::Sdl);
 
-			WindowsAccess windows = _windows.get_access();
+			auto windows = _windows.get_access();
 			for (auto it = windows->begin(); it != windows->end(); it++)
 				if (*it)
 					(*it)->Update(time_delta);
@@ -251,7 +246,7 @@ namespace np::app
 		{
             bl submit_application_close = false;
             {
-                WindowsAccess windows = _windows.get_access();
+				auto windows = _windows.get_access();
                 submit_application_close |= !windows->empty();
                 
                 for (auto wit = windows->begin(); wit != windows->end();)
@@ -263,7 +258,7 @@ namespace np::app
                     }
                     else if (*wit && wit->get_strong_count() == 1)
                     {
-                        WindowsToDestroyAccess to_destroy = _windows_to_destroy.get_access();
+						auto to_destroy = _windows_to_destroy.get_access();
                         auto dit = to_destroy->find((*wit)->GetUid());
                         if (dit != to_destroy->end())
                         {

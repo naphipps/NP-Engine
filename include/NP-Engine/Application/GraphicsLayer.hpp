@@ -30,10 +30,7 @@ namespace np::app
 	class GraphicsLayer : public Layer //TODO: I'm tempted to refactor all "Graphics" things into "GPU" with namespace "gpu" since we use the gpu for so much more than graphics
 	{
 	protected:
-		using ScenesWrapper = mutexed_wrapper<con::vector<mem::wptr<gfx::Scene>>>;
-		using ScenesAccess = typename ScenesWrapper::access;
-		ScenesWrapper _scenes;
-
+		mutexed_wrapper<con::vector<mem::wptr<gfx::Scene>>> _scenes;
 		siz _job_worker_index;
 		mem::sptr<jsys::Job> _rendering_job;
 		atm_bl _keep_rendering;
@@ -62,7 +59,7 @@ namespace np::app
 			{
 				NP_ENGINE_PROFILE_SCOPE("rendering loop");
 				{
-					ScenesAccess scenes = _scenes.get_access();
+					auto scenes = _scenes.get_access();
 					for (auto it = scenes->begin(); it != scenes->end(); it++)
 					{
 						mem::sptr<gfx::Scene> scene = it->get_sptr();
@@ -83,7 +80,7 @@ namespace np::app
 
 					if (false)
 					{
-						ScenesAccess scenes = _scenes.get_access();
+						auto scenes = _scenes.get_access();
 						for (auto it = scenes->begin(); it != scenes->end(); it++)
 						{
 							mem::sptr<gfx::Scene> scene = it->get_sptr();
@@ -116,7 +113,7 @@ namespace np::app
 
 		virtual void Cleanup() override
 		{
-			ScenesAccess scenes = _scenes.get_access();
+			auto scenes = _scenes.get_access();
 			for (siz i = scenes->size() - 1; i < scenes->size(); i--)
 				if ((*scenes)[i].is_expired())
 					scenes->erase(scenes->begin() + i);

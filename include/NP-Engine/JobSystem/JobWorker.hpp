@@ -40,8 +40,6 @@ namespace np::jsys
 		};
 
 		using FetchOrderArray = con::array<Fetch, 3>;
-		using FetchOrderWrapper = mutexed_wrapper<FetchOrderArray>;
-		using FetchOrderAccess = FetchOrderWrapper::access;
 
 	private:
 		atm_bl _keep_working;
@@ -52,7 +50,7 @@ namespace np::jsys
 		rng::Random64 _random_engine;
 		con::vector<JobWorker*> _coworkers;
 		siz _coworker_index;
-		FetchOrderWrapper _fetch_order;
+		mutexed_wrapper<FetchOrderArray> _fetch_order;
 
 		/*
 			returns a valid && CanExecute() job, or invalid job

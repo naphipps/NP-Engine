@@ -89,12 +89,12 @@ namespace np::win
 		_services->GetEventSubmitter().Submit(e);
 
 		{
-			SizeCallbacksAccess callbacks = _size_callbacks.get_access();
+			auto callbacks = _size_callbacks.get_access();
 			for (auto it = callbacks->begin(); it != callbacks->end(); it++)
 				(*it)(nullptr, width, height);
 		}
 		{
-			SizeCallerCallbacksAccess callbacks = _size_caller_callbacks.get_access();
+			auto callbacks = _size_caller_callbacks.get_access();
 			for (auto it = callbacks->begin(); it != callbacks->end(); it++)
 				it->second(it->first, width, height);
 		}
@@ -106,12 +106,12 @@ namespace np::win
 		_services->GetEventSubmitter().Submit(e);
 
 		{
-			PositionCallbacksAccess callbacks = _position_callbacks.get_access();
+			auto callbacks = _position_callbacks.get_access();
 			for (auto it = callbacks->begin(); it != callbacks->end(); it++)
 				(*it)(nullptr, x, y);
 		}
 		{
-			PositionCallerCallbacksAccess callbacks = _position_caller_callbacks.get_access();
+			auto callbacks = _position_caller_callbacks.get_access();
 			for (auto it = callbacks->begin(); it != callbacks->end(); it++)
 				it->second(it->first, x, y);
 		}
@@ -123,12 +123,12 @@ namespace np::win
 		_services->GetEventSubmitter().Submit(e);
 
 		{
-			FramebufferCallbacksAccess callbacks = _framebuffer_callbacks.get_access();
+			auto callbacks = _framebuffer_callbacks.get_access();
 			for (auto it = callbacks->begin(); it != callbacks->end(); it++)
 				(*it)(nullptr, width, height);
 		}
 		{
-			FramebufferCallerCallbacksAccess callbacks = _framebuffer_caller_callbacks.get_access();
+			auto callbacks = _framebuffer_caller_callbacks.get_access();
 			for (auto it = callbacks->begin(); it != callbacks->end(); it++)
 				it->second(it->first, width, height);
 		}
@@ -140,12 +140,12 @@ namespace np::win
 		_services->GetEventSubmitter().Submit(e);
 
 		{
-			MinimizeCallbacksAccess callbacks = _minimize_callbacks.get_access();
+			auto callbacks = _minimize_callbacks.get_access();
 			for (auto it = callbacks->begin(); it != callbacks->end(); it++)
 				(*it)(nullptr, minimized);
 		}
 		{
-			MinimizeCallerCallbacksAccess callbacks = _minimize_caller_callbacks.get_access();
+			auto callbacks = _minimize_caller_callbacks.get_access();
 			for (auto it = callbacks->begin(); it != callbacks->end(); it++)
 				it->second(it->first, minimized);
 		}
@@ -157,12 +157,12 @@ namespace np::win
 		_services->GetEventSubmitter().Submit(e);
 
 		{
-			MaximizeCallbacksAccess callbacks = _maximize_callbacks.get_access();
+			auto callbacks = _maximize_callbacks.get_access();
 			for (auto it = callbacks->begin(); it != callbacks->end(); it++)
 				(*it)(nullptr, maximized);
 		}
 		{
-			MaximizeCallerCallbacksAccess callbacks = _maximize_caller_callbacks.get_access();
+			auto callbacks = _maximize_caller_callbacks.get_access();
 			for (auto it = callbacks->begin(); it != callbacks->end(); it++)
 				it->second(it->first, maximized);
 		}
@@ -174,12 +174,12 @@ namespace np::win
 		_services->GetEventSubmitter().Submit(e);
 
 		{
-			FocusCallbacksAccess callbacks = _focus_callbacks.get_access();
+			auto callbacks = _focus_callbacks.get_access();
 			for (auto it = callbacks->begin(); it != callbacks->end(); it++)
 				(*it)(nullptr, focused);
 		}
 		{
-			FocusCallerCallbacksAccess callbacks = _focus_caller_callbacks.get_access();
+			auto callbacks = _focus_caller_callbacks.get_access();
 			for (auto it = callbacks->begin(); it != callbacks->end(); it++)
 				it->second(it->first, focused);
 		}

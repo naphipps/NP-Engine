@@ -20,43 +20,25 @@ namespace np::nput
 	class InputSource
 	{
 	protected:
-		using KeyCallbacksWrapper = mutexed_wrapper<con::uset<KeyCallback>>;
-		using KeyCallbacksAccess = KeyCallbacksWrapper::access;
-		using MouseCallbacksWrapper = mutexed_wrapper<con::uset<MouseCallback>>;
-		using MouseCallbacksAccess = MouseCallbacksWrapper::access;
-		using MousePositionCallbacksWrapper = mutexed_wrapper<con::uset<MousePositionCallback>>;
-		using MousePositionCallbacksAccess = MousePositionCallbacksWrapper::access;
-		using ControllerCallbacksWrapper = mutexed_wrapper<con::uset<ControllerCallback>>;
-		using ControllerCallbacksAccess = ControllerCallbacksWrapper::access;
+		mutexed_wrapper<con::uset<KeyCallback>> _key_callbacks;
+		mutexed_wrapper<con::uset<MouseCallback>> _mouse_callbacks;
+		mutexed_wrapper<con::uset<MousePositionCallback>> _mouse_position_callbacks;
+		mutexed_wrapper<con::uset<ControllerCallback>> _controller_callbacks;
 
-		KeyCallbacksWrapper _key_callbacks;
-		MouseCallbacksWrapper _mouse_callbacks;
-		MousePositionCallbacksWrapper _mouse_position_callbacks;
-		ControllerCallbacksWrapper _controller_callbacks;
-
-		using KeyCallerCallbacksWrapper = mutexed_wrapper<con::umap<void*, KeyCallback>>;
-		using KeyCallerCallbacksAccess = KeyCallerCallbacksWrapper::access;
-		using MouseCallerCallbacksWrapper = mutexed_wrapper<con::umap<void*, MouseCallback>>;
-		using MouseCallerCallbacksAccess = MouseCallerCallbacksWrapper::access;
-		using MousePositionCallerCallbacksWrapper = mutexed_wrapper<con::umap<void*, MousePositionCallback>>;
-		using MousePositionCallerCallbacksAccess = MousePositionCallerCallbacksWrapper::access;
-		using ControllerCallerCallbacksWrapper = mutexed_wrapper<con::umap<void*, ControllerCallback>>;
-		using ControllerCallerCallbacksAccess = ControllerCallerCallbacksWrapper::access;
-
-		KeyCallerCallbacksWrapper _key_caller_callbacks;
-		MouseCallerCallbacksWrapper _mouse_caller_callbacks;
-		MousePositionCallerCallbacksWrapper _mouse_position_caller_callbacks;
-		ControllerCallerCallbacksWrapper _controller_caller_callbacks;
+		mutexed_wrapper<con::umap<void*, KeyCallback>> _key_caller_callbacks;
+		mutexed_wrapper<con::umap<void*, MouseCallback>> _mouse_caller_callbacks;
+		mutexed_wrapper<con::umap<void*, MousePositionCallback>> _mouse_position_caller_callbacks;
+		mutexed_wrapper<con::umap<void*, ControllerCallback>> _controller_caller_callbacks;
 
 		virtual void InvokeKeyCallbacks(const KeyCodeState& state)
 		{
 			{
-				KeyCallbacksAccess callbacks = _key_callbacks.get_access();
+				auto callbacks = _key_callbacks.get_access();
 				for (auto it = callbacks->begin(); it != callbacks->end(); it++)
 					(*it)(nullptr, state);
 			}
 			{
-				KeyCallerCallbacksAccess callbacks = _key_caller_callbacks.get_access();
+				auto callbacks = _key_caller_callbacks.get_access();
 				for (auto it = callbacks->begin(); it != callbacks->end(); it++)
 					it->second(it->first, state);
 			}
@@ -65,12 +47,12 @@ namespace np::nput
 		virtual void InvokeMouseCallbacks(const MouseCodeState& state)
 		{
 			{
-				MouseCallbacksAccess callbacks = _mouse_callbacks.get_access();
+				auto callbacks = _mouse_callbacks.get_access();
 				for (auto it = callbacks->begin(); it != callbacks->end(); it++)
 					(*it)(nullptr, state);
 			}
 			{
-				MouseCallerCallbacksAccess callbacks = _mouse_caller_callbacks.get_access();
+				auto callbacks = _mouse_caller_callbacks.get_access();
 				for (auto it = callbacks->begin(); it != callbacks->end(); it++)
 					it->second(it->first, state);
 			}
@@ -79,12 +61,12 @@ namespace np::nput
 		virtual void InvokeMousePositionCallbacks(const MousePosition& position)
 		{
 			{
-				MousePositionCallbacksAccess callbacks = _mouse_position_callbacks.get_access();
+				auto callbacks = _mouse_position_callbacks.get_access();
 				for (auto it = callbacks->begin(); it != callbacks->end(); it++)
 					(*it)(nullptr, position);
 			}
 			{
-				MousePositionCallerCallbacksAccess callbacks = _mouse_position_caller_callbacks.get_access();
+				auto callbacks = _mouse_position_caller_callbacks.get_access();
 				for (auto it = callbacks->begin(); it != callbacks->end(); it++)
 					it->second(it->first, position);
 			}
@@ -93,12 +75,12 @@ namespace np::nput
 		virtual void InvokeControllerCallbacks(const ControllerCodeState& state)
 		{
 			{
-				ControllerCallbacksAccess callbacks = _controller_callbacks.get_access();
+				auto callbacks = _controller_callbacks.get_access();
 				for (auto it = callbacks->begin(); it != callbacks->end(); it++)
 					(*it)(nullptr, state);
 			}
 			{
-				ControllerCallerCallbacksAccess callbacks = _controller_caller_callbacks.get_access();
+				auto callbacks = _controller_caller_callbacks.get_access();
 				for (auto it = callbacks->begin(); it != callbacks->end(); it++)
 					it->second(it->first, state);
 			}
@@ -129,7 +111,7 @@ namespace np::nput
 		{
 			if (caller)
 			{
-				KeyCallerCallbacksAccess key_caller_callbacks = _key_caller_callbacks.get_access();
+				auto key_caller_callbacks = _key_caller_callbacks.get_access();
 				if (callback)
 					(*key_caller_callbacks)[caller] = callback;
 				else
@@ -145,7 +127,7 @@ namespace np::nput
 		{
 			if (caller)
 			{
-				MouseCallerCallbacksAccess mouse_caller_callbacks = _mouse_caller_callbacks.get_access();
+				auto mouse_caller_callbacks = _mouse_caller_callbacks.get_access();
 				if (callback)
 					(*mouse_caller_callbacks)[caller] = callback;
 				else
@@ -161,7 +143,7 @@ namespace np::nput
 		{
 			if (caller)
 			{
-				MousePositionCallerCallbacksAccess mouse_position_caller_callbacks = _mouse_position_caller_callbacks.get_access();
+				auto mouse_position_caller_callbacks = _mouse_position_caller_callbacks.get_access();
 				if (callback)
 					(*mouse_position_caller_callbacks)[caller] = callback;
 				else
@@ -177,7 +159,7 @@ namespace np::nput
 		{
 			if (caller)
 			{
-				ControllerCallerCallbacksAccess controller_caller_callbacks = _controller_caller_callbacks.get_access();
+				auto controller_caller_callbacks = _controller_caller_callbacks.get_access();
 				if (callback)
 					(*controller_caller_callbacks)[caller] = callback;
 				else

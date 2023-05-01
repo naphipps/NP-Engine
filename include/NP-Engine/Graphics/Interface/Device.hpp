@@ -105,9 +105,7 @@ namespace np::gfx
 	class Device
 	{
 	protected:
-		using ResourcesWrapper = mutexed_wrapper<con::umap<uid::Uid, mem::sptr<Resource>>>;//TODO: is umap the best here? what about vector?
-		using ResourcesAccess = ResourcesWrapper::access;
-		ResourcesWrapper _resources;
+		mutexed_wrapper<con::umap<uid::Uid, mem::sptr<Resource>>> _resources; //TODO: is umap the best here? what about vector?
 
 	public:
 		virtual void Register(uid::Uid id, mem::sptr<Resource> resource)
@@ -123,7 +121,7 @@ namespace np::gfx
 		virtual void CleanupResources()
 		{
 			uid::UidSystem& uid_system = GetServices()->GetUidSystem();
-			ResourcesAccess resources = _resources.get_access();
+			auto resources = _resources.get_access();
 			for (auto it = resources->begin(); it != resources->end();)
 			{
 				if (!uid_system.Has(it->first))
@@ -135,14 +133,14 @@ namespace np::gfx
 
 		virtual mem::sptr<Resource> GetResource(uid::Uid id)
 		{
-			ResourcesAccess resources = _resources.get_access();
+			auto resources = _resources.get_access();
 			auto it = resources->find(id);
 			return it != resources->end() ? it->second : nullptr;
 		}
 
 		virtual bl HasResource(uid::Uid id)
 		{
-			ResourcesAccess resources = _resources.get_access();
+			auto resources = _resources.get_access();
 			return resources->find(id) != resources->end();
 		}
 
