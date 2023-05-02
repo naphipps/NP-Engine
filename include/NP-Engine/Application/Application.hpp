@@ -245,7 +245,7 @@ namespace np::app
 						event_queue.Push(e);
 				}
 				e.reset(); //TODO: I don't think this is ever needed
-				event_queue.SwapBuffers();
+				event_queue.ToggleState();
 
 				if (!_running.load(mo_acquire))
 					break;

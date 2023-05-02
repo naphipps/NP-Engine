@@ -33,7 +33,7 @@ namespace np::evnt
 	public:
 		EventQueue(): _flag(true) {}
 
-		void SwapBuffers() //TODO: I don't like this naming - refactor to something better
+		void ToggleState()
 		{
 			bl flag = _flag.load(mo_acquire);
 			while (!_flag.compare_exchange_weak(flag, !flag, mo_release, mo_relaxed)) {}
