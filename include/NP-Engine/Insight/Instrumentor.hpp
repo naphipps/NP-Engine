@@ -33,8 +33,8 @@ namespace np::nsit
 		struct Properties
 		{
 			bl isInitialized;
-			::std::shared_ptr<::rapidjson::Document> report; //TODO: can we get this to be in our memory??
-			::std::string filepath; //TODO: can we get this to be in our memory??
+			::std::shared_ptr<::rapidjson::Document> report;
+			::std::string filepath;
 			bl enableSaveOfTrace;
 			bl enableTrace;
 		};
