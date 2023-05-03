@@ -7,17 +7,10 @@
 #ifndef NP_ENGINE_ACCUMULATING_POOL_HPP
 #define NP_ENGINE_ACCUMULATING_POOL_HPP
 
-#ifndef NP_ENGINE_ACCUMULATING_POOL_OBJECT_COUNT
-	#define NP_ENGINE_ACCUMULATING_POOL_OBJECT_COUNT 100
-#endif
-
 #include <vector>
 
 #include "Allocator.hpp"
 #include "ObjectPool.hpp"
-
-// TODO: AccumulatingPool has not been tested
-// TODO: add AccumulatingPool.Reserve(count) to reserve "count" objects in advance
 
 namespace np::mem
 {
@@ -26,11 +19,20 @@ namespace np::mem
 	{
 	private:
 		using PoolType = ObjectPool<T, A>;
-
 		constexpr static siz POOL_TYPE_SIZE = CalcAlignedSize(sizeof(PoolType));
+		mutexed_wrapper<::std::vector<PoolType*>> _pools;
 
-		CAllocator _c_allocator;
-		::std::vector<PoolType*> _pools;
+		static void AddPool(::std::vector<PoolType*>& pools)
+		{
+			CAllocator _c_allocator;
+			const siz object_count = pools.empty() ? 4 : pools.back()->ObjectCount() * 2;
+			const siz chunk_size = A::CHUNK_SIZE;
+			const siz size = POOL_TYPE_SIZE + (chunk_size * object_count);
+			const Block block = _c_allocator.Allocate(size);
+			const Block object_block{ block.ptr, POOL_TYPE_SIZE };
+			const Block allocate_block{ object_block.End(), block.size - object_block.size };
+			pools.emplace_back(mem::Construct<PoolType>(object_block, allocate_block));
+		}
 
 	public:
 		siz ObjectSize() const
@@ -43,12 +45,35 @@ namespace np::mem
 			return A::CHUNK_SIZE;
 		}
 
-		bl Contains(sptr<T>& object) const
+		siz ObjectCount() //TODO: I think we can Prefix "Get" on a lot of methods here in Memory
+		{
+			siz capacity = 0;
+			auto pools = _pools.get_access();
+			for (PoolType* pool : *pools)
+				capacity += pool->ObjectCount();
+			return capacity;
+		}
+
+		void Reserve(siz count)
+		{
+			siz capacity = 0;
+			auto pools = _pools.get_access();
+			for (PoolType* pool : *pools)
+				capacity += pool->ObjectCount();
+
+			while (count > capacity)
+			{
+				AddPool(*pools);
+				capacity += pools->back()->ObjectCount();
+			}
+		}
+
+		bl Contains(sptr<T>& object)
 		{
 			bl contains = false;
-			for (siz i = 0; i < _pools.size() && !contains; i++)
-				contains = _pools[i]->Contains(object);
-
+			auto pools = _pools.get_access();
+			for (siz i = 0; i < pools->size() && !contains; i++)
+				contains = (*pools)[i]->Contains(object);
 			return contains;
 		}
 
@@ -56,22 +81,14 @@ namespace np::mem
 		sptr<T> CreateObject(Args&&... args)
 		{
 			sptr<T> object = nullptr;
-
-			for (siz i = 0; i < _pools.size() && !object; i++)
-				object = _pools[i]->CreateObject(::std::forward<Args>(args)...);
+			auto pools = _pools.get_access();
+			for (auto it = pools->rbegin(); !object && it != pools->rend(); it++)
+				object = (*it)->CreateObject(::std::forward<Args>(args)...);
 
 			if (!object)
 			{
-				//TODO: can we simplify a pool's construction?? I don't think so
-				//TODO: put this "AddPool" behavior in a method
-				siz size = POOL_TYPE_SIZE + (A::CHUNK_SIZE * NP_ENGINE_ACCUMULATING_POOL_OBJECT_COUNT);
-				//TODO: size should be POOL_TYPE_SIZE + <twice the size of the last pool OR CHUNK_SIZE * POOL_OBJECT_COUNT>
-				Block block = _c_allocator.Allocate(size);
-				Block pool_block{block.ptr, POOL_TYPE_SIZE};
-				Block pool_given_block{pool_block.End(), block.size - pool_block.size};
-				_pools.emplace_back(mem::Construct<PoolType>(pool_block, pool_given_block));
-
-				object = _pools.back()->CreateObject(::std::forward<Args>(args)...);
+				AddPool(*pools);
+				object = pools->back()->CreateObject(::std::forward<Args>(args)...);
 			}
 
 			return object;
@@ -79,10 +96,11 @@ namespace np::mem
 
 		void Clear()
 		{
-			for (PoolType* pool : _pools)
+			CAllocator _c_allocator;
+			auto pools = _pools.get_access();
+			for (PoolType* pool : *pools)
 				mem::Destroy<PoolType>(_c_allocator, pool);
-
-			_pools.clear();
+			pools->clear();
 		}
 	};
 } // namespace np::mem
