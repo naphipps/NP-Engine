@@ -134,7 +134,7 @@ namespace std
 
 namespace np
 {
-	using wstr = tstr<wchr, ::std::wstring>;
+	using wstr = tstr<wchr, ::std::wstring>; //TODO: this is 16bit on windows, 32bit elsewhere... our wstr should be 32bit
 
 	static wstr to_wstr(const wchr* c)
 	{
@@ -151,6 +151,44 @@ namespace np
 	{
 		return ::std::to_wstring(t);
 	}
+
+	/*
+	using str16 = tstr<chr16>;
+
+	static str16 to_str16(const chr* c)
+	{
+		return str16(c);
+	}
+
+	static str16 to_str16(chr* c)
+	{
+		return str16(c);
+	}
+
+	template <class T>
+	static str16 to_str16(T t)
+	{
+		return ::std::to_wstring(t);
+	}
+
+	using str32 = tstr<chr32>;
+
+	static str32 to_str32(const chr* c)
+	{
+		return str32(c);
+	}
+
+	static str32 to_str32(chr* c)
+	{
+		return str32(c);
+	}
+
+	template <class T>
+	static str32 to_str32(T t)
+	{
+		return ::std::to_wstring(t);
+	}
+	//*/
 }
 
 namespace std
@@ -164,35 +202,5 @@ namespace std
 		}
 	};
 } // namespace std
-
-// TODO: I'm not quite sure how I want to support u16str and u32str... they may replace wstr since wstr is 16bit on Windows and
-// 32bit elsewhere....
-/*
-using u16str = tstr<u16chr>;
-
-static u16str to_u16str(const chr* c)
-{
-	return u16str(c);
-}
-
-template <class T>
-static u16str to_u16str(T t)
-{
-	return ::std::to_string(t);
-}
-
-using u32str = tstr<u32chr>;
-
-static u32str to_u32str(const chr* c)
-{
-	return u32str(c);
-}
-
-template <class T>
-static u32str to_u32str(T t)
-{
-	return ::std::to_string(t);
-}
-*/
 
 #endif /* NP_ENGINE_STRING_HPP */

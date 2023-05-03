@@ -267,8 +267,6 @@ namespace np::win
 		}
 	};
 	
-	//TODO: pretty sure we do not need a WindowSetFramebufferEvent...
-
 	//Window Closed Events
 	struct WindowCloseEventData
 	{

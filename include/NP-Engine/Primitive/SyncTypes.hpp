@@ -66,7 +66,7 @@ namespace np
 		template <typename... Args>
 		mutexed_wrapper(Args&&... args) : _object(::std::forward<Args>(args)...) {}
 
-		access get_access() //TODO: add param for a timeout - this means _renderence will need to be a ptr and we'll need to add a bl operator to access
+		access get_access()
 		{
 			return { &_object, _m };
 		}
