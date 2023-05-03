@@ -19,7 +19,7 @@ namespace np::mem
 {
 	using CacheLinePadding = SizedBlock<64>;
 
-	class PadObject //TODO: I'm still not a fan of how this object constructs, destructs, and gets data... I feel like there's a better solution
+	class PadObject
 	{
 	private:
 		CacheLinePadding _padding;

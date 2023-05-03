@@ -80,7 +80,7 @@ namespace np::mem
 	class Allocator
 	{
 	public:
-		constexpr static siz OVERHEAD_SIZE = 0; // TODO: a lot of allocators are not implementing this...
+		constexpr static siz OVERHEAD_SIZE = 0;
 
 		virtual bl Contains(const Block& block) = 0;
 

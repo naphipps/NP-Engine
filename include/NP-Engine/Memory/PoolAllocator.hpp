@@ -83,7 +83,6 @@ namespace np::mem
 			{
 				void* allocated = _allocation.load(mo_acquire);
 
-				//TODO: can we use better casting than "*(void**)(&static_cast<ui8*>(allocated)[0])"??
 				while (allocated &&
 					   !_allocation.compare_exchange_weak(allocated, *(void**)(&static_cast<ui8*>(allocated)[0]), mo_release,
 														  mo_relaxed))
@@ -119,7 +118,6 @@ namespace np::mem
 			{
 				mem::Construct<void*>(block, _allocation.load(mo_acquire));
 
-				//TODO: can we use better casting than "*(void**)(&static_cast<ui8*>(block.ptr)[0])"??
 				while (!_allocation.compare_exchange_weak(*(void**)(&static_cast<ui8*>(block.ptr)[0]), block.ptr, mo_release,
 														  mo_relaxed))
 				{}
