@@ -10,7 +10,7 @@
 #include "NP-Engine/Graphics/Detail/OpenGL/OpenGLGraphics.hpp"
 #endif
 
-#include "NP-Engine/Graphics/Detail/Vulkan/VulkanGraphics.hpp"
+#include "NP-Engine/Graphics/Detail/Vulkan/VulkanRenderTarget.hpp"
 
 namespace np::gfx
 {
