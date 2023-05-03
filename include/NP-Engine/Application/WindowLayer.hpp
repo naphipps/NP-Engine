@@ -226,7 +226,7 @@ namespace np::app
 			win::Window::Terminate(win::WindowDetailType::Sdl);
 		}
 
-		void RegisterWindow(mem::sptr<win::Window> window)
+		void Acquire(mem::sptr<win::Window> window)
 		{
 			_windows.get_access()->emplace_back(window);
 		}

@@ -9,6 +9,8 @@
 
 #include <mutex>
 #include <atomic>
+#include <chrono>
+#include <thread>
 
 #include "PrimitiveTypes.hpp"
 
@@ -21,36 +23,58 @@ namespace np
 	class mutexed_wrapper
 	{
 	protected:
-		mutex _m;
+		::std::mutex _m;
 		T _object;
 
 	public:
 		class access
 		{
 		protected:
-			lock _l;
-			T& _reference;
+			::std::unique_lock<::std::mutex> _l;
+			T* _object;
 
 		public:
-			access(mutex& m, T& reference) : _l(m), _reference(reference) {}
+			access(T* object, ::std::mutex& m) : _l(m), _object(object) {}
+
+			template<class R, class P>
+			access(T* object, ::std::mutex& m, const ::std::chrono::duration<R, P> duration) : _l(m, ::std::defer_lock), _object(nullptr)
+			{
+				auto start = ::std::chrono::steady_clock::now();
+				while ((::std::chrono::steady_clock::now() - start) < duration && !_l.try_lock())
+					::std::this_thread::yield();
+
+				if (_l)
+					_object = object;
+			}
+
+			operator bl() const
+			{
+				return _object;
+			}
 
 			T& operator*() const
 			{
-				return _reference;
+				return *_object;
 			}
 
 			T* operator->() const
 			{
-				return &_reference;
+				return _object;
 			}
 		};
 
 		template <typename... Args>
 		mutexed_wrapper(Args&&... args) : _object(::std::forward<Args>(args)...) {}
 
-		access get_access()
+		access get_access() //TODO: add param for a timeout - this means _renderence will need to be a ptr and we'll need to add a bl operator to access
 		{
-			return { _m, _object };
+			return { &_object, _m };
+		}
+
+		template<class R, class P>
+		access try_get_access_for(const ::std::chrono::duration<R, P> duration)
+		{
+			return { &_object, _m, duration };
 		}
 	};
 

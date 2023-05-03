@@ -113,15 +113,35 @@ namespace np::app
 
 		virtual void Cleanup() override
 		{
-			auto scenes = _scenes.get_access();
-			for (siz i = scenes->size() - 1; i < scenes->size(); i--)
-				if ((*scenes)[i].is_expired())
-					scenes->erase(scenes->begin() + i);
+			auto scenes = _scenes.try_get_access_for(tim::DblMilliseconds(0.5));
+			if (scenes)
+				for (siz i = scenes->size() - 1; i < scenes->size(); i--)
+					if ((*scenes)[i].is_expired())
+						scenes->erase(scenes->begin() + i);
 		}
 
-		void RegisterScene(mem::sptr<gfx::Scene> scene)
+		void Register(mem::sptr<gfx::Scene> scene)
 		{
-			_scenes.get_access()->emplace_back(scene);
+			bl found = false;
+			auto scenes = _scenes.get_access();
+			for (auto it = scenes->begin(); !found && it != scenes->end(); it++)
+				found = it->get_sptr() == scene;
+
+			if (!found)
+				scenes->emplace_back(scene);
+		}
+
+		void Unregister(mem::sptr<gfx::Scene> scene)
+		{
+			auto scenes = _scenes.get_access();
+			for (auto it = scenes->begin(); it != scenes->end(); it++)
+			{
+				if (it->get_sptr() == scene)
+				{
+					scenes->erase(it);
+					break;
+				}
+			}
 		}
 
 		void SetJobWorkerIndex(siz index)

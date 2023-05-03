@@ -30,6 +30,23 @@ namespace np::app
 		tim::SteadyTimestamp _start_timestamp;
 		flt _rate = 10.f;
 
+		static void DestroySceneCallback(void* caller, mem::Delegate& d)
+		{
+			((GameLayer*)caller)->DestroySceneProcedure(d);
+		}
+
+		void DestroySceneProcedure(mem::Delegate& d)
+		{
+			const tim::DblMilliseconds duration((dbl)NP_ENGINE_APPLICATION_LOOP_DURATION / 2.0);
+			while (_scene.get_strong_count() > 1)
+			{
+				tim::SteadyTimestamp start = tim::SteadyClock::now();
+				while (tim::SteadyClock::now() - start < duration)
+					thr::ThisThread::yield();
+			}
+			_scene.reset();
+		}
+
 		static void AdjustForWindowClosingCallback(void* caller, mem::Delegate& d)
 		{
 			((GameLayer*)caller)->AdjustForWindowClosingProcedure(d);
@@ -39,11 +56,17 @@ namespace np::app
 		{
 			uid::Uid windowId = d.GetData<uid::Uid>();
 
-			if (_scene->GetRenderTarget()->GetWindow()->GetUid() == windowId)
-				_scene.reset();
-
 			if (_window->GetUid() == windowId)
 				_window.reset();
+
+			if (_scene->GetRenderTarget()->GetWindow()->GetUid() == windowId)
+			{
+				_graphics_layer.Unregister(_scene);
+				jsys::JobSystem& job_system = _services->GetJobSystem();
+				mem::sptr<jsys::Job> destroy_scene_job = job_system.CreateJob();
+				destroy_scene_job->GetDelegate().SetCallback(this, DestroySceneCallback);
+				job_system.SubmitJob(jsys::JobPriority::Higher, destroy_scene_job);
+			}
 
 			d.DestructData<uid::Uid>();
 		}
@@ -112,7 +135,7 @@ namespace np::app
 
 			_window = win::Window::Create(win::WindowDetailType::Glfw, _services);
 			_window->SetTitle("My Game Window >:D");
-			_window_layer.RegisterWindow(_window);
+			_window_layer.Acquire(_window);
 
 			mem::sptr<gfx::DetailInstance> detail_instance = gfx::DetailInstance::Create(gfx::GraphicsDetailType::Vulkan, _services);
 			mem::sptr<gfx::RenderTarget> render_target = gfx::RenderTarget::Create(detail_instance, _window); //TODO: make sure we handle when window is closing
@@ -138,7 +161,7 @@ namespace np::app
 
 			gfx::Scene::Properties scene_properties{ render_pipeline, _camera };
 			_scene = gfx::Scene::Create(scene_properties);
-			_graphics_layer.RegisterScene(_scene);
+			_graphics_layer.Register(_scene);
 
 			_model_handle = _services->GetUidSystem().CreateUidHandle();
 			uid::Uid model_id = _services->GetUidSystem().GetUid(_model_handle);
