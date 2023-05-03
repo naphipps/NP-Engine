@@ -13,7 +13,7 @@
 
 #include "CMathInclude.hpp"
 #include "MathImpl.hpp"
-#include "owen.hpp"
+#include "Owen.hpp"
 #include "StatisticImpl.hpp"
 #include "EaseImpl.hpp"
 #include "Fnv.hpp"

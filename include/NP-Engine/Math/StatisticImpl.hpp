@@ -12,7 +12,7 @@
 
 #include "CMathInclude.hpp"
 #include "MathImpl.hpp"
-#include "owen.hpp"
+#include "Owen.hpp"
 
 namespace np::mat
 {

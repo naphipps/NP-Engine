@@ -4,8 +4,6 @@
 //
 //##===----------------------------------------------------------------------===##//
 
-//TODO: Pascal case this file's name
-
 #ifndef NP_ENGINE_OWEN_HPP
 #define NP_ENGINE_OWEN_HPP
 
