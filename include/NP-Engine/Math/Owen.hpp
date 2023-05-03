@@ -21,8 +21,6 @@ namespace np::mat
 			Changes include formatting and refactoring.
 		*/
 
-		// TODO: I think we can cleanup a lot of this? We might even be able to optimize this? SIMD??
-
 		/*
 			ZNORM1 evaluates the normal CDF from 0 to Z.
 
