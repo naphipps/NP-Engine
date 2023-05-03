@@ -93,12 +93,6 @@ namespace np::mat
 		return (n < i) ? (i - 1) : (i);
 	}
 
-	template <typename T>
-	static inline T Clamp(const T& n, const T& min, const T& max) // TODO: ::std::clamp already exists - what is this for??
-	{
-		return n > max ? max : (n < min ? min : n);
-	}
-
 	/*
 		returns the inverse sqrt of n using Quake III's q_rsqrt algorithm
 	*/

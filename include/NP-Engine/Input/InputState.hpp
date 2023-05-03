@@ -39,7 +39,7 @@ namespace np::nput
 
 		void SetActivityLevel(flt activity_level)
 		{
-			_activity_level = mat::Clamp(activity_level, 0.f, 1.f);
+			_activity_level = ::std::clamp(activity_level, 0.f, 1.f);
 			_is_active = _activity_level != 0.f;
 		}
 
