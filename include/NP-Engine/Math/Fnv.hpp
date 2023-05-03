@@ -31,7 +31,7 @@ namespace np::mat
 		for (; it != end; it++)
 		{
 			hash ^= (ui32)(*it);
-			hash *= prime; //TODO: there are GCC optimizations available
+			hash *= prime;
 		}
 
 		return hash;
@@ -46,7 +46,7 @@ namespace np::mat
 		for (; it != end; it++)
 		{
 			hash ^= (ui64)(*it);
-			hash *= prime; //TODO: there are GCC optimizations available
+			hash *= prime;
 		}
 
 		return hash;
