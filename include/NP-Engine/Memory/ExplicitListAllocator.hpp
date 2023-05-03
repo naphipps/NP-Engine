@@ -277,7 +277,7 @@ namespace np::mem
 			return InternalAllocate(size, false);
 		}
 
-		Block ExtractBlock(void* block_ptr) const override
+		Block ExtractBlock(void* block_ptr) override
 		{
 			Block block;
 			if (Contains(block_ptr))

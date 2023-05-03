@@ -32,36 +32,34 @@ namespace np::mem
 		constexpr static siz ALLOCATOR_TYPE_SIZE = CalcAlignedSize(sizeof(AllocatorType));
 
 		CAllocator _c_allocator;
-		::std::vector<AllocatorType*> _allocators;
+		mutexed_wrapper<::std::vector<AllocatorType*>> _allocators;
 
 	public:
 		~AccumulatingAllocator()
 		{
-			for (AllocatorType*& allocator : _allocators)
-				Destroy(_c_allocator, allocator);
-
-			_allocators.clear();
+			DeallocateAll();
 		}
 
-		bl Contains(const Block& block) const override
+		bl Contains(const Block& block) override
 		{
 			return Contains(block.ptr);
 		}
 
-		bl Contains(const void* ptr) const override
+		bl Contains(const void* ptr) override
 		{
 			bl contains = false;
-			for (siz i = 0; i < _allocators.size() && !contains; i++)
-				contains = _allocators[i]->Contains(ptr);
-
+			auto allocators = _allocators.get_access();
+			for (siz i = 0; i < allocators->size() && !contains; i++)
+				contains = (*allocators)[i]->Contains(ptr);
 			return contains;
 		}
 
 		Block Allocate(siz size) override
 		{
 			Block b{};
-			for (siz i = 0; i < _allocators.size() && !b.IsValid(); i++)
-				b = _allocators[i]->Allocate(size);
+			auto allocators = _allocators.get_access();
+			for (siz i = 0; i < allocators->size() && !b.IsValid(); i++)
+				b = (*allocators)[i]->Allocate(size);
 
 			if (!b.IsValid())
 			{
@@ -70,22 +68,21 @@ namespace np::mem
 					block_size *= 2;
 
 				Block block = _c_allocator.Allocate(block_size);
-				Block allocator_block{block.ptr, ALLOCATOR_TYPE_SIZE};
-				Block allocator_given_block{allocator_block.End(), block.size - allocator_block.size};
-				_allocators.emplace_back(mem::Construct<AllocatorType>(allocator_block, allocator_given_block));
-
-				b = _allocators.back()->Allocate(size);
+				Block object_block{block.ptr, ALLOCATOR_TYPE_SIZE};
+				Block allocate_block{ object_block.End(), block.size - object_block.size};
+				allocators->emplace_back(mem::Construct<AllocatorType>(object_block, allocate_block));
+				b = allocators->back()->Allocate(size);
 			}
 
 			return b;
 		}
 
-		Block ExtractBlock(void* block_ptr) const
+		Block ExtractBlock(void* block_ptr)
 		{
 			Block block{};
-			for (siz i = 0; i < _allocators.size() && !block.IsValid(); i++)
-				block = _allocators[i]->ExtractBlock(block_ptr);
-
+			auto allocators = _allocators.get_access();
+			for (siz i = 0; i < allocators->size() && !block.IsValid(); i++)
+				block = (*allocators)[i]->ExtractBlock(block_ptr);
 			return block;
 		}
 
@@ -120,19 +117,19 @@ namespace np::mem
 		bl Deallocate(void* ptr) override
 		{
 			bl deallocated = false;
-			for (siz i = 0; i < _allocators.size() && !deallocated; i++)
-				if (_allocators[i]->Contains(ptr))
-					deallocated = _allocators[i]->Deallocate(ptr);
-
+			auto allocators = _allocators.get_access();
+			for (siz i = 0; i < allocators->size() && !deallocated; i++)
+				if ((*allocators)[i]->Contains(ptr))
+					deallocated = (*allocators)[i]->Deallocate(ptr);
 			return deallocated;
 		}
 
 		bl DeallocateAll()
 		{
-			for (AllocatorType* allocator : _allocators)
+			auto allocators = _allocators.get_access();
+			for (AllocatorType* allocator : *allocators)
 				Destroy<AllocatorType>(_c_allocator, allocator);
-
-			_allocators.clear();
+			allocators->clear();
 			return true;
 		}
 	};

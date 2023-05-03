@@ -31,12 +31,12 @@ namespace np::mem
 				CAllocator::Deallocate(_block);
 		}
 
-		virtual bl Contains(const Block& block) const override
+		virtual bl Contains(const Block& block) override
 		{
 			return _block.Contains(block);
 		}
 
-		virtual bl Contains(const void* ptr) const override
+		virtual bl Contains(const void* ptr) override
 		{
 			return _block.Contains(ptr);
 		}

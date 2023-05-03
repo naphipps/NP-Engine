@@ -23,7 +23,7 @@ namespace np::mem
 	private:
 		atm<void*> _allocation;
 
-		bl IsChunkPtr(void* ptr) const
+		bl IsChunkPtr(void* ptr)
 		{
 			return Contains(ptr) && ((ui8*)ptr - (ui8*)_block.Begin()) % CHUNK_SIZE == 0;
 		}

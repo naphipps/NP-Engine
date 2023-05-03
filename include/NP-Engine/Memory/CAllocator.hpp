@@ -20,12 +20,12 @@ namespace np::mem
 	class CAllocator : public Allocator
 	{
 	public:
-		virtual bl Contains(const Block& block) const override
+		virtual bl Contains(const Block& block) override
 		{
 			return true;
 		}
 
-		virtual bl Contains(const void* ptr) const override
+		virtual bl Contains(const void* ptr) override
 		{
 			return true;
 		}

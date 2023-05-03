@@ -26,7 +26,7 @@ namespace np::mem
 		void* _alloc_iterator;
 		bl _deallocation_true_sort_false_constant;
 
-		bl IsChunkPtr(void* ptr) const
+		bl IsChunkPtr(void* ptr)
 		{
 			return Contains(ptr) && ((ui8*)ptr - (ui8*)_block.Begin()) % CHUNK_SIZE == 0;
 		}

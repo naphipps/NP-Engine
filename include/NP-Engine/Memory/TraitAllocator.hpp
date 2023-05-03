@@ -30,12 +30,12 @@ namespace np::mem
 		}
 
 	public:
-		bl Contains(const Block& block) const override
+		bl Contains(const Block& block) override
 		{
 			return Contains(block.ptr);
 		}
 
-		bl Contains(const void* ptr) const override
+		bl Contains(const void* ptr) override
 		{
 			EnsureRegistration();
 			return _registered_allocator.load(mo_acquire)->Contains(ptr);

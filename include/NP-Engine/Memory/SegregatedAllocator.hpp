@@ -63,12 +63,12 @@ namespace np::mem
 			return *_fallback;
 		}
 
-		virtual bl Contains(const Block& block) const override
+		virtual bl Contains(const Block& block) override
 		{
 			return _primary->Contains(block) || _fallback->Contains(block);
 		}
 
-		virtual bl Contains(const void* ptr) const override
+		virtual bl Contains(const void* ptr) override
 		{
 			return _primary->Contains(ptr) || _fallback->Contains(ptr);
 		}

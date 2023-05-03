@@ -25,7 +25,7 @@ namespace np::mem
 
 		virtual Block Allocate(siz size) override = 0;
 
-		virtual Block ExtractBlock(void* ptr) const = 0;
+		virtual Block ExtractBlock(void* ptr) = 0;
 
 		virtual Block Reallocate(Block& old_block, siz new_size) override = 0;
 

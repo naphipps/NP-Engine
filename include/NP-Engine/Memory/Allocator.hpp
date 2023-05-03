@@ -82,9 +82,9 @@ namespace np::mem
 	public:
 		constexpr static siz OVERHEAD_SIZE = 0; // TODO: a lot of allocators are not implementing this...
 
-		virtual bl Contains(const Block& block) const = 0;
+		virtual bl Contains(const Block& block) = 0;
 
-		virtual bl Contains(const void* ptr) const = 0;
+		virtual bl Contains(const void* ptr) = 0;
 
 		virtual Block Allocate(siz size) = 0;
 
