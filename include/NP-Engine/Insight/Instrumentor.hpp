@@ -93,6 +93,7 @@ namespace np::nsit
 		{
 			auto properties = _properties.get_access();
 			Init(*properties);
+			properties->report.reset();
 			properties->isInitialized = false;
 		}
 
