@@ -678,7 +678,7 @@ namespace np::mem
 
 		Block InternalAllocate(siz size, bl true_best_false_first)
 		{
-			lock l(_mutex);
+			scoped_lock l(_mutex);
 
 			Block block{}, split{};
 			size = CalcAlignedSize(size) + BOOKKEEPING_SIZE;
@@ -721,7 +721,7 @@ namespace np::mem
 
 		bl InternalDeallocate(void* ptr)
 		{
-			lock l(_mutex);
+			scoped_lock l(_mutex);
 			bl deallocated = false;
 
 			if (Contains(ptr))
@@ -779,7 +779,7 @@ namespace np::mem
 
 		void Init()
 		{
-			lock l(_mutex);
+			scoped_lock l(_mutex);
 			_tree.Clear();
 
 			if (InitFreeBlock(_block))

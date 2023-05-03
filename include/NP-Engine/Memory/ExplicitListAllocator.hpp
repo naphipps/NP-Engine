@@ -267,13 +267,13 @@ namespace np::mem
 
 		Block AllocateBest(siz size)
 		{
-			lock l(_mutex);
+			scoped_lock l(_mutex);
 			return InternalAllocate(size, true);
 		}
 
 		Block AllocateFirst(siz size)
 		{
-			lock l(_mutex);
+			scoped_lock l(_mutex);
 			return InternalAllocate(size, false);
 		}
 
@@ -348,13 +348,13 @@ namespace np::mem
 
 		bl Deallocate(void* ptr) override
 		{
-			lock l(_mutex);
+			scoped_lock l(_mutex);
 			return InternalDeallocate(ptr);
 		}
 
 		bl DeallocateAll() override
 		{
-			lock l(_mutex);
+			scoped_lock l(_mutex);
 			Init();
 			return true;
 		}

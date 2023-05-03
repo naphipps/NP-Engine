@@ -16,32 +16,38 @@
 
 namespace np
 {
-	using mutex = ::std::mutex; //TODO: remove this
-	using lock = ::std::scoped_lock<::std::mutex>; //TODO: remove this
+	using mutex = ::std::mutex;
+	using scoped_lock = ::std::scoped_lock<mutex>;
+	using general_lock = ::std::unique_lock<mutex>;
+
+	inline constexpr ::std::try_to_lock_t try_lock = ::std::try_to_lock;
+	inline constexpr ::std::defer_lock_t defer_lock = ::std::defer_lock;
+	inline constexpr ::std::adopt_lock_t adopt_lock = ::std::adopt_lock;
 
 	template <typename T>
 	class mutexed_wrapper
 	{
 	protected:
-		::std::mutex _m;
+		mutex _m;
 		T _object;
 
 	public:
 		class access
 		{
 		protected:
-			::std::unique_lock<::std::mutex> _l;
+			general_lock _l;
 			T* _object;
 
 		public:
-			access(T* object, ::std::mutex& m) : _l(m), _object(object) {}
+			access(T* object, mutex& m) : _l(m), _object(object) {}
 
 			template<class R, class P>
-			access(T* object, ::std::mutex& m, const ::std::chrono::duration<R, P> duration) : _l(m, ::std::defer_lock), _object(nullptr)
+			access(T* object, mutex& m, const ::std::chrono::duration<R, P> duration) : _l(m, try_lock), _object(nullptr)
 			{
 				auto start = ::std::chrono::steady_clock::now();
-				while ((::std::chrono::steady_clock::now() - start) < duration && !_l.try_lock())
-					::std::this_thread::yield();
+				while (!_l && (::std::chrono::steady_clock::now() - start) < duration)
+					if (!_l.try_lock())
+						::std::this_thread::yield();
 
 				if (_l)
 					_object = object;
