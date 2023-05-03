@@ -158,7 +158,7 @@ namespace np::uid
 
 		void ReleaseHandle(UidHandle& hndl)
 		{
-			if (hndl.IsValid()) //TODO: is it possible for hndl to not be valid here??
+			if (hndl.IsValid())
 			{
 				auto bookkeeping = _bookkeeping.get_access();
 				auto it = bookkeeping->keyToRecord.find(hndl.key);
