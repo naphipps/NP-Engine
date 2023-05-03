@@ -241,8 +241,6 @@ namespace np::app
 
 		void PrepareForRun()
 		{
-			NP_ENGINE_PROFILE_FUNCTION();
-
 			void* input_queue = mem::AddressOf(_services->GetInputQueue());
 			_window->SetKeyCallback(input_queue, nput::InputListener::SubmitKeyState);
 			_window->SetMouseCallback(input_queue, nput::InputListener::SubmitMouseState);
@@ -326,7 +324,6 @@ namespace np::app
 			Application(Application::Properties{"My Game App"}, services),
 			_game_layer(services, _window_layer, _graphics_layer)
 		{
-			NP_ENGINE_PROFILE_FUNCTION();
 			PushLayer(mem::AddressOf(_game_layer));
 		}
 
