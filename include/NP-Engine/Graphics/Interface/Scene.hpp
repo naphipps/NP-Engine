@@ -8,7 +8,7 @@
 #define NP_ENGINE_GRAPHICS_INTERFACE_SCENE_HPP
 
 #include "NP-Engine/Primitive/Primitive.hpp"
-#include "NP-Engine/ECS/ECS.hpp"
+#include "NP-Engine/Container/Container.hpp"
 #include "NP-Engine/Memory/Memory.hpp"
 #include "NP-Engine/Insight/Insight.hpp"
 #include "NP-Engine/Platform/Platform.hpp"

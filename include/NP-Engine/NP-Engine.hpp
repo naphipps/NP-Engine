@@ -12,7 +12,6 @@
 #include "Algorithms/Algorithms.hpp"
 #include "Application/Application.hpp"
 #include "Container/Container.hpp"
-#include "ECS/ECS.hpp"
 #include "Event/Event.hpp"
 #include "FileSystem/FileSystem.hpp"
 #include "Graphics-Algorithms/Graphics-Algorithms.hpp"

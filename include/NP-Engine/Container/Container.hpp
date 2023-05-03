@@ -29,6 +29,8 @@
 
 #include "NP-Engine/Vendor/ConcurrentqueueInclude.hpp"
 
+#include "Entity.hpp"
+
 // TODO: do we want to add to np::con?? BinarySearchTree, TwoFourTree, RedBlackTree, SoftHeap, etc
 
 namespace np::con
