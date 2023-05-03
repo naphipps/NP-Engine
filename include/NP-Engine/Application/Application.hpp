@@ -282,7 +282,7 @@ namespace np::app
 
 			_graphics_layer.StopRenderingJob();
 			job_system.Stop();
-			job_system.Dispose();
+			job_system.Clear();
 			event_queue.Clear();
 		}
 

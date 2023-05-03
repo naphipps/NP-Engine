@@ -37,16 +37,15 @@ namespace np::jsys
 
 		~JobSystem()
 		{
-			Dispose();
+			Clear();
 		}
 
-		void Dispose()
+		void Clear()
 		{
 			Stop();
-			
-			_job_queue.Clear();
 			_job_workers.clear();
 			_thread_pool.reset();
+			_job_queue.Clear();
 			_job_pool.Clear();
 		}
 
@@ -56,12 +55,10 @@ namespace np::jsys
 			SetJobWorkerCount(thr::Thread::HardwareConcurrency() - 1);
 		}
 
-		/*
-			This method also calls Dispose, so setup jobs after calling this //TODO: I don't think we need this restriction
-		*/
 		void SetJobWorkerCount(siz count)
 		{
-			Dispose();
+			Stop();
+			_job_workers.clear();
 			_thread_pool = mem::create_sptr<thr::ThreadPool>(_thread_pool_allocator, count);
 
 			while (_job_workers.size() < count)

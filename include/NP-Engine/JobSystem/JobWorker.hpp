@@ -8,6 +8,7 @@
 #define NP_ENGINE_JOB_WORKER_HPP
 
 #include <utility>
+#include <optional>
 
 #include "NP-Engine/Foundation/Foundation.hpp"
 #include "NP-Engine/Container/Container.hpp"
@@ -41,14 +42,14 @@ namespace np::jsys
 
 	private:
 		atm_bl _keep_working;
-		atm_bl _work_procedure_complete;
 		mem::sptr<thr::Thread> _thread;
 		JobQueue& _job_queue;
-		con::mpmc_queue<mem::sptr<Job>> _immediate_job_queue;
-		rng::Random64 _random_engine;
-		con::vector<JobWorker*> _coworkers;
+		mutexed_wrapper<con::queue<mem::sptr<Job>>> _immediate_jobs;
+		rng::Random64 _rng;
+		mutexed_wrapper<con::vector<JobWorker*>> _coworkers;
 		siz _coworker_index;
 		mutexed_wrapper<FetchOrderArray> _fetch_order;
+		atm<::std::optional<ui32>> _deep_sleep_threshold;
 
 		/*
 			returns a valid && CanExecute() job, or invalid job
@@ -56,17 +57,32 @@ namespace np::jsys
 		mem::sptr<Job> GetImmediateJob(bl stealing = false)
 		{
 			mem::sptr<Job> job = nullptr;
-			if (_immediate_job_queue.try_dequeue(job) && (!job->CanExecute() || (stealing && !job->CanBeStolen())))
+			auto immediate_jobs = _immediate_jobs.get_access();
+			if (!immediate_jobs->empty())
 			{
-				SubmitImmediateJob(job);
-				job.reset();
+				job = immediate_jobs->front();
+				if (!job->CanExecute())
+				{
+					immediate_jobs->pop();
+					immediate_jobs->emplace(job);
+					job.reset();
+				}
+				else if (stealing && !job->CanBeStolen())
+				{
+					job.reset();
+				}
+				else
+				{
+					immediate_jobs->pop();
+				}
 			}
 			return job;
 		}
 
 		mem::sptr<Job> GetStolenJob()
 		{
-			return _coworkers.empty() ? nullptr : _coworkers[_coworker_index]->GetImmediateJob(true);
+			auto coworkers = _coworkers.get_access();
+			return coworkers->empty() ? nullptr : (*coworkers)[_coworker_index]->GetImmediateJob(true);
 		}
 
 		/*
@@ -101,7 +117,6 @@ namespace np::jsys
 		{
 			NP_ENGINE_PROFILE_SCOPE("WorkerThreadProcedure: " + to_str((ui64)this));
 
-			ui32 deep_sleep_threshold = _coworkers.size() * 3;
 			ui32 sleep_count = 0;
 			FetchOrderArray fetch_order;
 			bl success = false;
@@ -140,11 +155,14 @@ namespace np::jsys
 					}
 					else
 					{
-						if (sleep_count < deep_sleep_threshold)
+						::std::optional<ui32> deep_sleep_threshold = _deep_sleep_threshold.load(mo_acquire);
+						if (!deep_sleep_threshold.has_value())
+							deep_sleep_threshold = (ui32)(_coworkers.get_access()->size() * 3);
+
+						if (sleep_count < deep_sleep_threshold.value())
 						{
 							const tim::DblMilliseconds duration((dbl)NP_ENGINE_APPLICATION_LOOP_DURATION / 2.0);
 							const tim::SteadyTimestamp start = tim::SteadyClock::now();
-
 							while (tim::SteadyClock::now() - start < duration)
 								thr::ThisThread::yield();
 
@@ -157,8 +175,6 @@ namespace np::jsys
 					}
 				}
 			}
-
-			_work_procedure_complete.store(true, mo_release);
 		}
 
 		bl TryImmediateJob()
@@ -226,7 +242,7 @@ namespace np::jsys
 				else
 				{
 					// we did not steal a good job thus we want to steal from someone else
-					_coworker_index = (_coworker_index + 1) % _coworkers.size();
+					_coworker_index = (_coworker_index + 1) % _coworkers.get_access()->size();
 				}
 			}
 
@@ -236,7 +252,6 @@ namespace np::jsys
 	public:
 		JobWorker(JobQueue& job_queue):
 			_keep_working(false),
-			_work_procedure_complete(true),
 			_thread(nullptr),
 			_job_queue(job_queue),
 			_coworker_index(0)
@@ -244,19 +259,16 @@ namespace np::jsys
 			SetFetchOrder({ Fetch::Immediate, Fetch::PriorityBased, Fetch::Steal });
 		}
 
-		JobWorker(const JobWorker& other) = delete;
-
-		JobWorker(JobWorker&& other) noexcept:
+		JobWorker(JobWorker&& other) noexcept :
 			_keep_working(::std::move(other._keep_working.load(mo_acquire))),
-			_work_procedure_complete(::std::move(other._work_procedure_complete.load(mo_acquire))),
 			_thread(::std::move(other._thread)),
 			_job_queue(other._job_queue),
-			_immediate_job_queue(::std::move(other._immediate_job_queue)),
-			_random_engine(::std::move(other._random_engine)),
-			_coworkers(::std::move(other._coworkers)),
+			_rng(::std::move(other._rng)),
 			_coworker_index(::std::move(other._coworker_index))
 		{
-			SetFetchOrder(other.GetFetchOrder());
+			_coworkers.get_access()->swap(*other._coworkers.get_access());
+			_immediate_jobs.get_access()->swap(*other._immediate_jobs.get_access());
+			_fetch_order.get_access()->swap(*other._fetch_order.get_access());
 		}
 
 		virtual ~JobWorker()
@@ -264,37 +276,52 @@ namespace np::jsys
 			StopWork();
 		}
 
-		JobWorker& operator=(const JobWorker& other) = delete;
-
-		JobWorker& operator=(JobWorker&& other) noexcept = delete;
-
 		void AddCoworker(JobWorker& coworker)
 		{
 			// intentionally not checking if we have this coworker already
 			//	^ allows us to support uneven distribution when stealing jobs
-			JobWorker* coworker_ptr = mem::AddressOf(coworker);
-			if (coworker_ptr != this)
-				_coworkers.emplace_back(coworker_ptr);
+			_coworkers.get_access()->emplace_back(mem::AddressOf(coworker));
 		}
 
 		void RemoveCoworker(JobWorker& coworker)
 		{
-			// because of potential uneven distrubutions for stealing jobs, we have to iterate through all _coworkers
-			for (auto it = _coworkers.begin(); it != _coworkers.end(); it++)
+			// because of potential uneven distrubutions for stealing jobs
+			//	^ we have to iterate through all _coworkers
+			auto coworkers = _coworkers.get_access();
+			for (auto it = coworkers->begin(); it != coworkers->end();)
+			{
 				if (mem::AddressOf(coworker) == *it)
-					_coworkers.erase(it);
+					it = coworkers->erase(it);
+				else
+					it++;
+			}
 		}
 
 		void ClearCoworkers()
 		{
-			_coworkers.clear();
+			_coworkers.get_access()->clear();
 		}
 
-		bl SubmitImmediateJob(mem::sptr<Job> job)
+		void SetDeepSleepThreshold(ui32 threshold)
+		{
+			_deep_sleep_threshold.store(threshold, mo_release);
+		}
+
+		void ResetDeepSleepThreshold()
+		{
+			_deep_sleep_threshold.store(::std::optional<ui32>(), mo_release);
+		}
+
+		void DisableDeepSleep()
+		{
+			_deep_sleep_threshold.store(UI32_MAX, mo_release);
+		}
+
+		void SubmitImmediateJob(mem::sptr<Job> job)
 		{
 			NP_ENGINE_ASSERT((bl)job, "attempted to add an invalid Job -- do not do that my guy");
 			NP_ENGINE_ASSERT(job->IsEnabled(), "the dude not enabled bro - why it do");
-			return _immediate_job_queue.enqueue(job);
+			_immediate_jobs.get_access()->push(job);
 		}
 
 		FetchOrderArray GetFetchOrder()
@@ -311,8 +338,7 @@ namespace np::jsys
 		{
 			NP_ENGINE_PROFILE_FUNCTION();
 			_keep_working.store(true, mo_release);
-			_work_procedure_complete.store(false, mo_release);
-			_coworker_index = _random_engine.GetLemireWithinRange(_coworkers.size());
+			_coworker_index = _rng.GetLemireWithinRange(_coworkers.get_access()->size());
 			_thread = thread_pool.CreateObject();
 			_thread->Run(&JobWorker::WorkerThreadProcedure, this);
 			_thread->SetAffinity(thread_affinity);
@@ -322,10 +348,6 @@ namespace np::jsys
 		{
 			NP_ENGINE_PROFILE_FUNCTION();
 			_keep_working.store(false, mo_release);
-
-			while (!_work_procedure_complete.load(mo_acquire))
-				thr::ThisThread::yield();
-
 			_thread.reset();
 		}
 	};
