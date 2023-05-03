@@ -866,9 +866,8 @@ namespace np::win::__detail
 
 #if NP_ENGINE_PLATFORM_IS_WINDOWS
 				HWND native_window = (HWND)GetNativeFromGlfw(glfw_window);
-				LONG_PTR prev_window_procedure = SetWindowLongPtrA(native_window, GWLP_WNDPROC, (LONG_PTR)&GlfwWindowProcedure);
 				SetWindowLongPtrA(native_window, GWLP_USERDATA, (LONG_PTR)this);
-				_prev_window_procedure = (WNDPROC)prev_window_procedure;
+				_prev_window_procedure = (WNDPROC)SetWindowLongPtrA(native_window, GWLP_WNDPROC, (LONG_PTR)&GlfwWindowProcedure);
 #endif
 			}
 		}
