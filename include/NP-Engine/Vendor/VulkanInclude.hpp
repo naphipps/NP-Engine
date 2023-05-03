@@ -12,11 +12,6 @@
 
 #include <vulkan/vulkan.hpp>
 
-//#ifndef NP_ENGINE_VULKAN_MAX_FRAME_COUNT
-	//#define NP_ENGINE_VULKAN_MAX_FRAME_COUNT 3
-	// TODO: ^ get to the point where we can just change this arbitarily .. I think we can do that?
-//#endif
-
 // TODO: add a bunch of helper functions like CreateSubmitInfo that sets "our default" SubmitInfo values
 namespace np::gfx::__detail
 {
