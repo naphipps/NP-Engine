@@ -17,6 +17,7 @@
 #include "VulkanCommands.hpp"
 #include "VulkanCommandBuffer.hpp"
 #include "VulkanTexture.hpp"
+#include "VulkanRenderContext.hpp"
 
 namespace np::gfx::__detail
 {
