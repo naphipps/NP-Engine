@@ -53,7 +53,7 @@ namespace np::gfx::__detail
 			other._command_pool = nullptr;
 		}
 
-		~VulkanCommandPool()
+		~VulkanCommandPool() //TODO: all these need virtual
 		{
 			Dispose();
 		}
