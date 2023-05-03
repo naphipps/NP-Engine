@@ -85,7 +85,7 @@ namespace np::jsys
 			_running.store(true, mo_release);
 
 			for (siz i = 0; i < _job_workers.size(); i++)
-				_job_workers[i].StartWork(*_thread_pool, (i + 1) % _thread_pool->ObjectCount());
+				_job_workers[i].StartWork(*_thread_pool, (i + 1) % _thread_pool->GetObjectCount());
 		}
 
 		void Stop()

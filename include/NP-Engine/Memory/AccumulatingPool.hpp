@@ -25,7 +25,7 @@ namespace np::mem
 		static void AddPool(::std::vector<PoolType*>& pools)
 		{
 			CAllocator _c_allocator;
-			const siz object_count = pools.empty() ? 4 : pools.back()->ObjectCount() * 2;
+			const siz object_count = pools.empty() ? 4 : pools.back()->GetObjectCount() * 2;
 			const siz chunk_size = A::CHUNK_SIZE;
 			const siz size = POOL_TYPE_SIZE + (chunk_size * object_count);
 			const Block block = _c_allocator.Allocate(size);
@@ -35,22 +35,22 @@ namespace np::mem
 		}
 
 	public:
-		siz ObjectSize() const
+		siz GetObjectSize() const
 		{
 			return sizeof(T);
 		}
 
-		siz ChunkSize() const
+		siz GetChunkSize() const
 		{
 			return A::CHUNK_SIZE;
 		}
 
-		siz ObjectCount() //TODO: I think we can Prefix "Get" on a lot of methods here in Memory
+		siz GetObjectCount()
 		{
 			siz capacity = 0;
 			auto pools = _pools.get_access();
 			for (PoolType* pool : *pools)
-				capacity += pool->ObjectCount();
+				capacity += pool->GetObjectCount();
 			return capacity;
 		}
 
@@ -59,12 +59,12 @@ namespace np::mem
 			siz capacity = 0;
 			auto pools = _pools.get_access();
 			for (PoolType* pool : *pools)
-				capacity += pool->ObjectCount();
+				capacity += pool->GetObjectCount();
 
 			while (count > capacity)
 			{
 				AddPool(*pools);
-				capacity += pools->back()->ObjectCount();
+				capacity += pools->back()->GetObjectCount();
 			}
 		}
 

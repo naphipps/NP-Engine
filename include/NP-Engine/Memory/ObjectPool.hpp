@@ -42,19 +42,19 @@ namespace np::mem
 
 		ObjectPool(siz object_count): _allocator(object_count * A::CHUNK_SIZE) {}
 
-		siz ObjectCount() const
+		siz GetObjectCount() const
 		{
-			return _allocator.ChunkCount();
+			return _allocator.GetChunkCount();
 		}
 
-		siz ObjectSize() const
+		siz GetObjectSize() const
 		{
 			return sizeof(T);
 		}
 
-		siz ChunkSize() const
+		siz GetChunkSize() const
 		{
-			return _allocator.ChunkSize();
+			return _allocator.GetChunkSize();
 		}
 
 		A& GetAllocator()

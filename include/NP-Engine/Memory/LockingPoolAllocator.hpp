@@ -62,12 +62,12 @@ namespace np::mem
 			Init();
 		}
 
-		siz ChunkCount() const
+		siz GetChunkCount() const
 		{
 			return _block.size / CHUNK_SIZE;
 		}
 
-		siz ChunkSize() const
+		siz GetChunkSize() const
 		{
 			return CHUNK_SIZE;
 		}
