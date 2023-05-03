@@ -17,40 +17,41 @@ namespace np::nput
 	class InputQueue : public InputListener
 	{
 	protected:
-		using KeyCodeStateBuffer = con::mpmc_queue<KeyCodeState>;
-		using MouseCodeStateBuffer = con::mpmc_queue<MouseCodeState>;
-		using ControllerCodeStateBuffer = con::mpmc_queue<ControllerCodeState>;
+		using KeyCodeStateSubmissions = mutexed_wrapper<con::queue<KeyCodeState>>;
+		using MouseCodeStateSubmissions = mutexed_wrapper<con::queue<MouseCodeState>>;
+		using MousePositionSubmissions = mutexed_wrapper<MousePosition>;
+		using ControllerCodeStateSubmissions = mutexed_wrapper<con::queue<ControllerCodeState>>;
 
 		atm_bl _flag;
 
 		KeyCodeStates _key_states;
 		MouseCodeStates _mouse_states;
-		ControllerCodeStates _controller_states;
 		MousePosition _mouse_position;
+		ControllerCodeStates _controller_states;
+		
+		con::array<KeyCodeStateSubmissions, 2> _key_submissions;
+		con::array<MouseCodeStateSubmissions, 2> _mouse_submissions;
+		con::array<MousePositionSubmissions, 2> _mouse_position_submissions;
+		con::array<ControllerCodeStateSubmissions, 2> _controller_submissions;
 
-		con::array<KeyCodeStateBuffer, 2> _key_buffers;
-		con::array<MouseCodeStateBuffer, 2> _mouse_buffers;
-		con::array<MousePosition, 2> _mouse_position_buffer;
-		con::array<ControllerCodeStateBuffer, 2> _controller_buffers;
-
-		KeyCodeStateBuffer& GetKeyCodeBuffer(bl flag)
+		KeyCodeStateSubmissions& GetKeyCodeSubmissions(bl flag)
 		{
-			return flag ? _key_buffers.front() : _key_buffers.back();
+			return flag ? _key_submissions.front() : _key_submissions.back();
 		}
 
-		MouseCodeStateBuffer& GetMouseCodeBuffer(bl flag)
+		MouseCodeStateSubmissions& GetMouseCodeSubmissions(bl flag)
 		{
-			return flag ? _mouse_buffers.front() : _mouse_buffers.back();
+			return flag ? _mouse_submissions.front() : _mouse_submissions.back();
 		}
 
-		MousePosition& GetMousePositionBuffer(bl flag)
+		MousePositionSubmissions& GetMousePositionSubmissions(bl flag)
 		{
-			return flag ? _mouse_position_buffer.front() : _mouse_position_buffer.back();
+			return flag ? _mouse_position_submissions.front() : _mouse_position_submissions.back();
 		}
 
-		ControllerCodeStateBuffer& GetControllerCodeBuffer(bl flag)
+		ControllerCodeStateSubmissions& GetControllerCodeSubmissions(bl flag)
 		{
-			return flag ? _controller_buffers.front() : _controller_buffers.back();
+			return flag ? _controller_submissions.front() : _controller_submissions.back();
 		}
 
 	public:
@@ -70,45 +71,63 @@ namespace np::nput
 		{
 			bl flag = _flag.load(mo_acquire);
 			while (!_flag.compare_exchange_weak(flag, !flag, mo_release, mo_relaxed)) {}
-
-			KeyCodeStateBuffer& key_other_buffer = GetKeyCodeBuffer(flag);
-			MouseCodeStateBuffer& mouse_other_buffer = GetMouseCodeBuffer(flag);
-			ControllerCodeStateBuffer& controller_other_buffer = GetControllerCodeBuffer(flag);
-
-			KeyCodeState key_state;
-			while (key_other_buffer.try_dequeue(key_state))
-				_key_states[key_state.GetCode()] = key_state;
-
-			MouseCodeState mouse_state;
-			while (mouse_other_buffer.try_dequeue(mouse_state))
-				_mouse_states[mouse_state.GetCode()] = mouse_state;
-
-			ControllerCodeState controller_state;
-			while (controller_other_buffer.try_dequeue(controller_state))
-				_controller_states[controller_state.GetCode()] = controller_state;
-
-			_mouse_position = GetMousePositionBuffer(flag);
-			GetMousePositionBuffer(!flag) = _mouse_position;
+			
+			{
+				KeyCodeState state;
+				auto submissions = GetKeyCodeSubmissions(flag).get_access();
+				while (!submissions->empty())
+				{
+					state = submissions->front();
+					submissions->pop();
+					_key_states[state.GetCode()] = state;
+				}
+			}
+			{
+				MouseCodeState state;
+				auto submissions = GetMouseCodeSubmissions(flag).get_access();
+				while (!submissions->empty())
+				{
+					state = submissions->front();
+					submissions->pop();
+					_mouse_states[state.GetCode()] = state;
+				}
+			}
+			{
+				MousePosition position;
+				auto submission = GetMousePositionSubmissions(flag).get_access();
+				_mouse_position = *submission;
+				*GetMousePositionSubmissions(!flag).get_access() = _mouse_position;
+			}
+			{
+				ControllerCodeState state;
+				auto submissions = GetControllerCodeSubmissions(flag).get_access();
+				while (!submissions->empty())
+				{
+					state = submissions->front();
+					submissions->pop();
+					_controller_states[state.GetCode()] = state;
+				}
+			}
 		}
 
 		void Submit(const KeyCodeState& key_code_state) override
 		{
-			GetKeyCodeBuffer(_flag.load(mo_acquire)).enqueue(key_code_state);
+			GetKeyCodeSubmissions(_flag.load(mo_acquire)).get_access()->emplace(key_code_state);
 		}
 
 		void Submit(const MouseCodeState& mouse_code_state) override
 		{
-			GetMouseCodeBuffer(_flag.load(mo_acquire)).enqueue(mouse_code_state);
+			GetMouseCodeSubmissions(_flag.load(mo_acquire)).get_access()->emplace(mouse_code_state);
 		}
 
 		void Submit(const MousePosition& mouse_position) override
 		{
-			GetMousePositionBuffer(_flag.load(mo_acquire)) = mouse_position;
+			*GetMousePositionSubmissions(_flag.load(mo_acquire)).get_access() = mouse_position;
 		}
 
 		void Submit(const ControllerCodeState& controller_code_state) override
 		{
-			GetControllerCodeBuffer(_flag.load(mo_acquire)).enqueue(controller_code_state);
+			GetControllerCodeSubmissions(_flag.load(mo_acquire)).get_access()->emplace(controller_code_state);
 		}
 
 		const KeyCodeStates& GetKeyCodeStates() const
