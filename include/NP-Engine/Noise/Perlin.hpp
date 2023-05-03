@@ -13,7 +13,6 @@
 #include "NP-Engine/Random/Random.hpp"
 #include "NP-Engine/Math/Math.hpp"
 
-// TODO: use Random64
 // TODO: add SIMD
 
 namespace np::noiz
@@ -83,7 +82,7 @@ namespace np::noiz
 			Noise
 				- return [-amplitude, amplitude]
 
-			PureNoise
+			CalculateNoiseValue
 				- return [-1, 1]
 
 			Fractal
@@ -123,7 +122,7 @@ namespace np::noiz
 				- same noise as fractional but warps it through itself based on warp related fields
 	*/
 
-	class Perlin : public rng::Random32Base
+	class Perlin : public rng::Random64Base
 	{
 	public:
 		constexpr static flt DEFAULT_FREQUENCY = 1.f;
@@ -177,14 +176,14 @@ namespace np::noiz
 		}
 
 	public:
-		Perlin(const rng::Random32& engine = rng::Random32()): rng::Random32Base(engine)
+		Perlin(const rng::Random64& engine = rng::Random64()): rng::Random64Base(engine)
 		{
 			Init();
 		}
 
 		inline void Init() override
 		{
-			rng::Random32Base::Init();
+			rng::Random64Base::Init();
 
 			_frequency = DEFAULT_FREQUENCY;
 			_amplitude = DEFAULT_AMPLITUDE;
@@ -334,15 +333,15 @@ namespace np::noiz
 			return _warp_octave_displacement;
 		}
 
-		inline flt Noise(flt x, flt y, flt z) const // TODO: this could be an operator()
+		inline flt operator()(flt x, flt y, flt z) const
 		{
-			return GetAmplitude() * PureNoise(GetFrequency() * x, GetFrequency() * y, GetFrequency() * z);
+			return GetAmplitude() * CalculateNoiseValue(GetFrequency() * x, GetFrequency() * y, GetFrequency() * z);
 		}
 
 		/*
 			calculates noise value based directly on params and not affected by internal properties
 		*/
-		inline flt PureNoise(flt x, flt y, flt z) const // TODO: consider refactoring to CalculateNoiseValue
+		inline flt CalculateNoiseValue(flt x, flt y, flt z) const
 		{
 			// Find the unit cube that contains the point
 			i32 X = mat::FastFloor(x);
@@ -394,7 +393,7 @@ namespace np::noiz
 
 			for (ui8 i = 0; i < _octave_count; i++)
 			{
-				output += amplitude * PureNoise(x * frequency, y * frequency, z * frequency);
+				output += amplitude * CalculateNoiseValue(x * frequency, y * frequency, z * frequency);
 				denom += amplitude;
 				frequency *= _lacunarity;
 				amplitude *= _persistence;
@@ -413,7 +412,7 @@ namespace np::noiz
 
 			for (ui8 i = 0; i < _octave_count; i++)
 			{
-				output += amplitude * PureNoise(x * frequency, y * frequency, i * fractionalIncrement * frequency);
+				output += amplitude * CalculateNoiseValue(x * frequency, y * frequency, i * fractionalIncrement * frequency);
 				denom += amplitude;
 				frequency *= _lacunarity;
 				amplitude *= _persistence;
@@ -431,7 +430,7 @@ namespace np::noiz
 
 			for (ui8 i = 0; i < _octave_count; i++)
 			{
-				output += amplitude * ::std::abs(PureNoise(x * frequency, y * frequency, z * frequency));
+				output += amplitude * ::std::abs(CalculateNoiseValue(x * frequency, y * frequency, z * frequency));
 				denom += amplitude;
 				frequency *= _lacunarity;
 				amplitude *= _persistence;
@@ -487,7 +486,7 @@ namespace np::noiz
 			for (ui8 i = 0; i < _octave_count; i++)
 			{
 				output +=
-					amplitude * ::std::abs(PureNoise(x * frequency, y * frequency, i * _fractional_increment * frequency));
+					amplitude * ::std::abs(CalculateNoiseValue(x * frequency, y * frequency, i * _fractional_increment * frequency));
 				denom += amplitude;
 				frequency *= _lacunarity;
 				amplitude *= _persistence;

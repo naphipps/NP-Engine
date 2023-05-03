@@ -170,7 +170,7 @@ namespace np::rng
 
 		SeedType CreateSeed()
 		{
-			StateType shift_amount = 0;
+			ui8 shift_amount = 0;
 
 			if constexpr (::std::is_same_v<T, ::pcg32>)
 				shift_amount = 32;
