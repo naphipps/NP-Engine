@@ -206,7 +206,7 @@ set(NP_ENGINE_MATH_HPP
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Math/EaseImpl.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Math/Math.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Math/MathImpl.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Math/owen.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Math/Owen.hpp
 	# ${PROJECT_SOURCE_DIR}/include/NP-Engine/Math/Polygon.hpp
 	# ${PROJECT_SOURCE_DIR}/include/NP-Engine/Math/PolygonUtility.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Math/StatisticImpl.hpp
