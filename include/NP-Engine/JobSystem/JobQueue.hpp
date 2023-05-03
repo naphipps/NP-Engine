@@ -18,7 +18,6 @@ namespace np::jsys
 	class JobQueue
 	{
 	private:
-		//TODO: test if this mutex wrapper is faster than moodycamel's concurrent queue
 		using JobsQueue = mutexed_wrapper<con::queue<JobRecord>>;
 		con::array<JobsQueue, 5> _jobs_queues;
 
