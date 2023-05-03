@@ -41,7 +41,7 @@ namespace np::mat
 
 	static inline flt StandardCdfSkewed(const flt x, const flt scale, const flt location, const flt skew = 0.f)
 	{
-		return StandardCdf((x - location) / scale) - 2.f * owen_t((x - location) / scale, skew);
+		return StandardCdf((x - location) / scale) - 2.f * OwenT((x - location) / scale, skew);
 	}
 
 	static inline flt CalcSkewDenom(const flt scale, const flt location, const flt mean = 0.f)
@@ -87,7 +87,7 @@ namespace np::mat
 
 	static inline dbl StandardCdfSkewed(const dbl x, const dbl scale, const dbl location, const dbl skew = 0.0)
 	{
-		return StandardCdf((x - location) / scale) - 2.0 * owen_t((x - location) / scale, skew);
+		return StandardCdf((x - location) / scale) - 2.0 * OwenT((x - location) / scale, skew);
 	}
 
 	static inline dbl CalcSkewDenom(const dbl scale, const dbl location, const dbl mean = 0.0)

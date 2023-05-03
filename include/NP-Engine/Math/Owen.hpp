@@ -132,24 +132,20 @@ namespace np::mat
 			ihint = 15;
 
 			for (i = 1; i <= 14; i++)
-			{
 				if (h <= hrange[i - 1])
 				{
 					ihint = i;
 					break;
 				}
-			}
 
 			iaint = 8;
 
 			for (i = 1; i <= 7; i++)
-			{
 				if (a <= arange[i - 1])
 				{
 					iaint = i;
 					break;
 				}
-			}
 
 			icode = select[ihint - 1 + (iaint - 1) * 15];
 			m = ord[icode - 1];
@@ -175,9 +171,8 @@ namespace np::mat
 					value = value + dj * aj / (dbl)(jj);
 
 					if (m <= j)
-					{
 						return value;
-					}
+
 					j = j + 1;
 					jj = jj + 2;
 					aj = aj * as;
@@ -265,9 +260,8 @@ namespace np::mat
 					value = value + ai * yi;
 
 					if (maxii <= ii)
-					{
 						return value;
-					}
+
 					ii = ii + 2;
 					yi = (1.0 - hs * yi) / (dbl)(ii);
 					ai = ai * as;
@@ -300,9 +294,7 @@ namespace np::mat
 				r = ::std::atan(y / (1.0 + a));
 
 				if (r != 0.0)
-				{
 					value = value - rtwopi * r * ::std::exp(-0.5 * y * h * h / r);
-				}
 			}
 			return value;
 		}
@@ -316,7 +308,7 @@ namespace np::mat
 
 		Output, dbl T, the value of Owen's T function.
 	*/
-	static inline dbl owen_t(dbl h, dbl a)
+	static inline dbl OwenT(dbl h, dbl a)
 	{
 		dbl absa;
 		dbl absh;
@@ -346,9 +338,7 @@ namespace np::mat
 		}
 
 		if (a < 0.0)
-		{
 			value = -value;
-		}
 
 		return value;
 	}
