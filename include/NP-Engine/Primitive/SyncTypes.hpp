@@ -105,6 +105,7 @@ namespace np
 	using atm_uchr = ::std::atomic_uchar;
 
 	using atm_bl = ::std::atomic_bool;
+	using atm_flag = ::std::atomic_flag;
 
 	inline constexpr ::std::memory_order mo_relaxed = ::std::memory_order_relaxed;
 	inline constexpr ::std::memory_order mo_consume = ::std::memory_order_consume;
