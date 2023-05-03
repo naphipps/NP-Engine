@@ -7,9 +7,6 @@
 [submodule "vendor/naphipps_liquidfun"]
 	path = vendor/naphipps_liquidfun
 	url = git@github.com:naphipps/liquidfun.git
-[submodule "vendor/naphipps_concurrentqueue"]
-	path = vendor/naphipps_concurrentqueue
-	url = git@github.com:naphipps/concurrentqueue.git
 [submodule "vendor/naphipps_pcg-cpp"]
 	path = vendor/naphipps_pcg-cpp
 	url = git@github.com:naphipps/pcg-cpp.git

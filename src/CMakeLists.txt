@@ -307,7 +307,6 @@ set(NP_ENGINE_UID_HPP
 
 set(NP_ENGINE_VENDOR_HPP
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Vendor/Box2dInclude.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Vendor/ConcurrentqueueInclude.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Vendor/EnttInclude.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Vendor/GlfwInclude.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Vendor/GlmInclude.hpp
@@ -494,7 +493,6 @@ endif()
 target_link_libraries(
 	${PROJECT_NAME} PUBLIC
 	spdlog::spdlog
-	concurrentqueue
 	Box2D
 	pcg-cpp
 	randutils

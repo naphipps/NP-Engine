@@ -21,7 +21,6 @@ set(RAPIDJSON_BUILD_CXX11 false CACHE BOOL "" FORCE)
 set(RAPIDJSON_BUILD_CXX17 true CACHE BOOL "" FORCE)
 set(RAPIDJSON_ENABLE_INSTRUMENTATION_OPT false CACHE BOOL "" FORCE)
 
-add_subdirectory(vendor/naphipps_concurrentqueue)
 add_subdirectory(vendor/naphipps_liquidfun/liquidfun/Box2D)
 add_subdirectory(vendor/naphipps_randutils)
 add_subdirectory(vendor/naphipps_pcg-cpp)
