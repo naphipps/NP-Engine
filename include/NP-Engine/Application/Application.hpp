@@ -231,6 +231,7 @@ namespace np::app
 			{
 				NP_ENGINE_PROFILE_SCOPE("loop");
 
+				event_queue.ToggleState();
 				for (e = event_queue.Pop(); e; e = event_queue.Pop())
 				{
 					e->SetCanBeHandled(false);
@@ -244,8 +245,6 @@ namespace np::app
 					if (e->CanBeHandled())
 						event_queue.Push(e);
 				}
-				e.reset(); //TODO: I don't think this is ever needed
-				event_queue.ToggleState();
 
 				if (!_running.load(mo_acquire))
 					break;
