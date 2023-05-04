@@ -21,7 +21,6 @@ namespace np::app
 	class WindowLayer : public Layer
 	{
 	private:
-		//TODO: move window ownership to window layer - set everything with events, and either use getters or events to get values
 		mutexed_wrapper<con::vector<mem::sptr<win::Window>>> _windows;
 		mutexed_wrapper<con::uset<uid::Uid>> _windows_to_destroy;
 
@@ -86,7 +85,7 @@ namespace np::app
 			e->SetHandled();
 		}
 
-		void HandleWindowSetFocus(mem::sptr<evnt::Event> e) //TODO: I don't think we need all these virtuals
+		void HandleWindowSetFocus(mem::sptr<evnt::Event> e)
 		{
 			win::WindowSetFocusEvent& focus_event = (win::WindowSetFocusEvent&)(*e);
 			win::WindowFocusEventData& focus_data = focus_event.GetData();
