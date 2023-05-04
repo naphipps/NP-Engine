@@ -38,5 +38,11 @@
 #include "DetailInstance.hpp"
 #include "RenderShader.hpp"
 #include "ComputeShader.hpp"
+#include "DmsImage.hpp"
+#include "DmsLineSegment.hpp"
+#include "DrawableImage.hpp"
+#include "ImageSubview.hpp"
+#include "Subview.hpp"
+#include "FloodFillImage.hpp"
 
 #endif /* NP_ENGINE_GPU_INTERFACE_HPP */

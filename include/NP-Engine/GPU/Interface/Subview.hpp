@@ -7,9 +7,9 @@
 #ifndef NP_ENGINE_SUBVIEW_HPP
 #define NP_ENGINE_SUBVIEW_HPP
 
-#include "NP-Engine/GPU/GPU.hpp"
+#include "Image.hpp"
 
-namespace np::gpualg
+namespace np::alg
 {
 	struct Subview
 	{
@@ -22,6 +22,6 @@ namespace np::gpualg
 			return point.x >= origin.x && point.x < boundary.x - 1 && point.y >= origin.y && point.y < boundary.y - 1;
 		}
 	};
-} // namespace np::gpualg
+} // namespace np::alg
 
 #endif /* NP_ENGINE_SUBVIEW_HPP */

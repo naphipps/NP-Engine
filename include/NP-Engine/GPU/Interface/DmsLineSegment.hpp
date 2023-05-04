@@ -10,7 +10,7 @@
 #include "NP-Engine/Primitive/Primitive.hpp"
 #include "NP-Engine/Math/Math.hpp"
 
-namespace np::gpualg
+namespace np::alg
 {
 	class DmsLineSegment
 	{
@@ -45,14 +45,14 @@ namespace np::gpualg
 			return Begin() == other.Begin() && End() == other.End() && Midpoint() == other.Midpoint();
 		}
 	};
-} // namespace np::gpualg
+} // namespace np::alg
 
 namespace std
 {
 	template <>
-	struct hash<::np::gpualg::DmsLineSegment>
+	struct hash<::np::alg::DmsLineSegment>
 	{
-		::np::siz operator()(const ::np::gpualg::DmsLineSegment& line) const noexcept
+		::np::siz operator()(const ::np::alg::DmsLineSegment& line) const noexcept
 		{
 			union {
 				::np::siz h;

@@ -14,14 +14,15 @@
 #include "NP-Engine/Container/Container.hpp"
 #include "NP-Engine/Math/Math.hpp"
 #include "NP-Engine/Geometry/Geometry.hpp"
-#include "NP-Engine/GPU/GPU.hpp"
 
+#include "Color.hpp"
+#include "Image.hpp"
 #include "ImageSubview.hpp"
 #include "FloodFillImage.hpp"
 
 // TODO: support drawing shapes that have specific colors at their points
 
-namespace np::gpualg
+namespace np::alg
 {
 	class DrawableImage
 	{
@@ -201,6 +202,6 @@ namespace np::gpualg
 			return edge_points;
 		}
 	};
-} // namespace np::gpualg
+} // namespace np::alg
 
 #endif /* NP_ENGINE_DRAWABLE_IMAGE_HPP */

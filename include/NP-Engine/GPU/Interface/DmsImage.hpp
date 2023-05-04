@@ -12,12 +12,14 @@
 #include "NP-Engine/Math/Math.hpp"
 #include "NP-Engine/Algorithms/Algorithms.hpp"
 #include "NP-Engine/Geometry/Geometry.hpp"
-#include "NP-Engine/GPU/GPU.hpp"
 
+#include "Color.hpp"
+#include "Image.hpp"
 #include "ImageSubview.hpp"
 #include "DmsLineSegment.hpp"
+#include "FloodFillImage.hpp"
 
-namespace np::gpualg
+namespace np::alg //TODO: I think we should just use namespace alg
 {
 	class DmsImage
 	{
@@ -467,6 +469,6 @@ namespace np::gpualg
 			return {}; // TODO: I figure we can make this an addition step?
 		}
 	};
-} // namespace np::gpualg
+} // namespace np::alg
 
 #endif /* NP_ENGINE_DMS_IMAGE_HPP */

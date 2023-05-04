@@ -12,7 +12,7 @@
 
 #include "ImageSubview.hpp"
 
-namespace np::gpualg
+namespace np::alg
 {
 	class FloodFillImage
 	{
@@ -238,6 +238,6 @@ namespace np::gpualg
 			payload.imageSubview = prev_image_subview;
 		}
 	};
-} // namespace np::gpualg
+} // namespace np::alg
 
 #endif /* NP_ENGINE_FLOOD_FILL_IMAGE_HPP */

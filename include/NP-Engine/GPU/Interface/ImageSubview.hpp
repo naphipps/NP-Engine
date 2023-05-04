@@ -10,11 +10,11 @@
 #include "NP-Engine/Foundation/Foundation.hpp"
 #include "NP-Engine/Primitive/Primitive.hpp"
 #include "NP-Engine/Geometry/Geometry.hpp"
-#include "NP-Engine/GPU/GPU.hpp"
 
+#include "Image.hpp"
 #include "Subview.hpp"
 
-namespace np::gpualg
+namespace np::alg
 {
 	class ImageSubview
 	{
@@ -78,6 +78,6 @@ namespace np::gpualg
 			return _image.Get(local);
 		}
 	};
-} // namespace np::gpualg
+} // namespace np::alg
 
 #endif /* NP_ENGINE_IMAGE_SUBVIEW_HPP */
