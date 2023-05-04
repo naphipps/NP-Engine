@@ -17,7 +17,7 @@
 #include "ImageSubview.hpp"
 #include "DmsLineSegment.hpp"
 
-namespace np::gfxalg
+namespace np::gpualg
 {
 	class DmsImage
 	{
@@ -467,6 +467,6 @@ namespace np::gfxalg
 			return {}; // TODO: I figure we can make this an addition step?
 		}
 	};
-} // namespace np::gfxalg
+} // namespace np::gpualg
 
 #endif /* NP_ENGINE_DMS_IMAGE_HPP */

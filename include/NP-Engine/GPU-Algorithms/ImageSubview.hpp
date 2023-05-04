@@ -14,7 +14,7 @@
 
 #include "Subview.hpp"
 
-namespace np::gfxalg
+namespace np::gpualg
 {
 	class ImageSubview
 	{
@@ -78,6 +78,6 @@ namespace np::gfxalg
 			return _image.Get(local);
 		}
 	};
-} // namespace np::gfxalg
+} // namespace np::gpualg
 
 #endif /* NP_ENGINE_IMAGE_SUBVIEW_HPP */

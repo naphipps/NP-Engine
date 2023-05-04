@@ -9,7 +9,7 @@
 
 #include "NP-Engine/GPU/GPU.hpp"
 
-namespace np::gfxalg
+namespace np::gpualg
 {
 	struct Subview
 	{
@@ -22,6 +22,6 @@ namespace np::gfxalg
 			return point.x >= origin.x && point.x < boundary.x - 1 && point.y >= origin.y && point.y < boundary.y - 1;
 		}
 	};
-} // namespace np::gfxalg
+} // namespace np::gpualg
 
 #endif /* NP_ENGINE_SUBVIEW_HPP */

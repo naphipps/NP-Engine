@@ -21,7 +21,7 @@
 
 // TODO: support drawing shapes that have specific colors at their points
 
-namespace np::gfxalg
+namespace np::gpualg
 {
 	class DrawableImage
 	{
@@ -201,6 +201,6 @@ namespace np::gfxalg
 			return edge_points;
 		}
 	};
-} // namespace np::gfxalg
+} // namespace np::gpualg
 
 #endif /* NP_ENGINE_DRAWABLE_IMAGE_HPP */
