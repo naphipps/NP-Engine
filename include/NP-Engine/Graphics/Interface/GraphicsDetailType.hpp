@@ -11,7 +11,7 @@
 
 namespace np::gpu
 {
-	enum class GraphicsDetailType : ui32
+	enum class GraphicsDetailType : ui32 //TODO: refactor this to DetailType
 	{
 		None,
 		Vulkan,
