@@ -9,7 +9,7 @@
 
 #include "NP-Engine/Foundation/Foundation.hpp"
 
-#include "WindowDetailType.hpp"
+#include "DetailType.hpp"
 #include "WindowImpl.hpp"
 #include "WindowEvents.hpp"
 

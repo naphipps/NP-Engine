@@ -14,7 +14,7 @@
 
 #include "NP-Engine/Vendor/GlmInclude.hpp"
 
-#include "WindowDetailType.hpp"
+#include "DetailType.hpp"
 
 namespace np::win
 {
@@ -71,15 +71,15 @@ namespace np::win
 		{}
 
 	public:
-		static void Init(WindowDetailType detail_type);
+		static void Init(DetailType detail_type);
 
-		static void Terminate(WindowDetailType detail_type);
+		static void Terminate(DetailType detail_type);
 
-		static void Update(WindowDetailType detail_type);
+		static void Update(DetailType detail_type);
 
-		static con::vector<str> GetRequiredGfxExtentions(WindowDetailType detail_type);
+		static con::vector<str> GetRequiredGpuExtentions(DetailType detail_type);
 
-		static mem::sptr<Window> Create(WindowDetailType detail_type, mem::sptr<srvc::Services> services);
+		static mem::sptr<Window> Create(DetailType detail_type, mem::sptr<srvc::Services> services);
 
 		virtual ~Window() = default;
 
@@ -127,7 +127,7 @@ namespace np::win
 
 		virtual ::glm::uvec2 GetFramebufferSize() = 0;
 
-		virtual WindowDetailType GetDetailType() const = 0;
+		virtual DetailType GetDetailType() const = 0;
 
 		/*
 			WARNING: DO NOT USE THIS UNLESS YOU KNOW WHAT YOU ARE DOING

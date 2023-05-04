@@ -133,7 +133,7 @@ namespace np::app
 
 			//-----------------------------------------------------------
 
-			_window = win::Window::Create(win::WindowDetailType::Glfw, _services);
+			_window = win::Window::Create(win::DetailType::Glfw, _services);
 			_window->SetTitle("My Game Window >:D");
 			_window_layer.Acquire(_window);
 

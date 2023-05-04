@@ -33,7 +33,7 @@ namespace np::gpu::__detail
 
 			switch (_window->GetDetailType())
 			{
-			case win::WindowDetailType::Glfw:
+			case win::DetailType::Glfw:
 				if (glfwCreateWindowSurface(instance, (GLFWwindow*)_window->GetDetailWindow(), nullptr, &surface) != VK_SUCCESS)
 					surface = nullptr;
 				break;

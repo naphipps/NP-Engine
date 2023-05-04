@@ -212,8 +212,8 @@ namespace np::app
 	public:
 		WindowLayer(mem::sptr<srvc::Services> services): Layer(services)
 		{
-			win::Window::Init(win::WindowDetailType::Glfw);
-			win::Window::Init(win::WindowDetailType::Sdl);
+			win::Window::Init(win::DetailType::Glfw);
+			win::Window::Init(win::DetailType::Sdl);
 		}
 
 		virtual ~WindowLayer()
@@ -221,8 +221,8 @@ namespace np::app
             _windows.get_access()->clear();
             _windows_to_destroy.get_access()->clear();
 
-			win::Window::Terminate(win::WindowDetailType::Glfw);
-			win::Window::Terminate(win::WindowDetailType::Sdl);
+			win::Window::Terminate(win::DetailType::Glfw);
+			win::Window::Terminate(win::DetailType::Sdl);
 		}
 
 		void Acquire(mem::sptr<win::Window> window)
@@ -232,8 +232,8 @@ namespace np::app
 
 		void Update(tim::DblMilliseconds time_delta) override
 		{
-			win::Window::Update(win::WindowDetailType::Glfw);
-			win::Window::Update(win::WindowDetailType::Sdl);
+			win::Window::Update(win::DetailType::Glfw);
+			win::Window::Update(win::DetailType::Sdl);
 
 			auto windows = _windows.get_access();
 			for (auto it = windows->begin(); it != windows->end(); it++)

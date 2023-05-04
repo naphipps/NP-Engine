@@ -321,7 +321,7 @@ set(NP_ENGINE_WINDOW_HPP
 )
 
 set(NP_ENGINE_WINDOW_INTERFACE_HPP
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Window/Interface/WindowDetailType.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Window/Interface/DetailType.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Window/Interface/WindowImpl.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Window/Interface/WindowEvents.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Window/Interface/WindowInterface.hpp

@@ -10,11 +10,11 @@
 
 namespace np::win
 {
-	void Window::Init(WindowDetailType detail_type)
+	void Window::Init(DetailType detail_type)
 	{
 		switch (detail_type)
 		{
-		case WindowDetailType::Glfw:
+		case DetailType::Glfw:
 			__detail::GlfwWindow::Init();
 			break;
 
@@ -23,11 +23,11 @@ namespace np::win
 		}
 	}
 
-	void Window::Terminate(WindowDetailType detail_type)
+	void Window::Terminate(DetailType detail_type)
 	{
 		switch (detail_type)
 		{
-		case WindowDetailType::Glfw:
+		case DetailType::Glfw:
 			__detail::GlfwWindow::Terminate();
 			break;
 
@@ -36,11 +36,11 @@ namespace np::win
 		}
 	}
 
-	void Window::Update(WindowDetailType detail_type)
+	void Window::Update(DetailType detail_type)
 	{
 		switch (detail_type)
 		{
-		case WindowDetailType::Glfw:
+		case DetailType::Glfw:
 			__detail::GlfwWindow::Update();
 			break;
 
@@ -49,14 +49,14 @@ namespace np::win
 		}
 	}
 
-	con::vector<str> Window::GetRequiredGfxExtentions(WindowDetailType detail_type)
+	con::vector<str> Window::GetRequiredGpuExtentions(DetailType detail_type)
 	{
 		con::vector<str> extensions;
 
 		switch (detail_type)
 		{
-		case WindowDetailType::Glfw:
-			extensions = __detail::GlfwWindow::GetRequiredGfxExtentions();
+		case DetailType::Glfw:
+			extensions = __detail::GlfwWindow::GetRequiredGpuExtentions();
 			break;
 
 		default:
@@ -66,13 +66,13 @@ namespace np::win
 		return extensions;
 	}
 
-	mem::sptr<Window> Window::Create(WindowDetailType detail_type, mem::sptr<srvc::Services> services)
+	mem::sptr<Window> Window::Create(DetailType detail_type, mem::sptr<srvc::Services> services)
 	{
 		mem::sptr<Window> window = nullptr;
 
 		switch (detail_type)
 		{
-		case WindowDetailType::Glfw:
+		case DetailType::Glfw:
 			window = mem::create_sptr<__detail::GlfwWindow>(services->GetAllocator(), services);
 			break;
 

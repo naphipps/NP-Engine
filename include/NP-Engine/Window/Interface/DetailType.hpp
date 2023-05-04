@@ -11,7 +11,7 @@
 
 namespace np::win
 {
-	enum class WindowDetailType : ui32 //TODO: refactor this to DetailType
+	enum class DetailType : ui32
 	{
 		None,
 		Glfw,

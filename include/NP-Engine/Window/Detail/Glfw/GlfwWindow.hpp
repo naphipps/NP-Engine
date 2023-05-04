@@ -936,7 +936,7 @@ namespace np::win::__detail
 			glfwPollEvents();
 		}
 
-		static con::vector<str> GetRequiredGfxExtentions()
+		static con::vector<str> GetRequiredGpuExtentions()
 		{
 			con::vector<str> extensions;
 			ui32 count = 0;
@@ -1104,9 +1104,9 @@ namespace np::win::__detail
 			}
 		}
 
-		WindowDetailType GetDetailType() const override
+		DetailType GetDetailType() const override
 		{
-			return WindowDetailType::Glfw;
+			return DetailType::Glfw;
 		}
 
 		void Close()

@@ -126,10 +126,8 @@ namespace np::gpu::__detail
 			extension_set.emplace(VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME);
 #endif
 
-			con::vector<str> window_required = win::Window::GetRequiredGfxExtentions(win::WindowDetailType::Glfw);
+			con::vector<str> window_required = win::Window::GetRequiredGpuExtentions(win::DetailType::Glfw);
 			
-			//TODO: ^ figure out how to allow the caller to decide WindowDetailType above or if we even use it - feel like we need to give DetailInstance vector of required extensions??
-
 			for (const str& extension : window_required)
 				extension_set.emplace(extension);
 
