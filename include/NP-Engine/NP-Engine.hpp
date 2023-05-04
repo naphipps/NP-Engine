@@ -15,7 +15,7 @@
 #include "Event/Event.hpp"
 #include "FileSystem/FileSystem.hpp"
 #include "Graphics-Algorithms/Graphics-Algorithms.hpp"
-#include "Graphics/Graphics.hpp"
+#include "GPU/GPU.hpp"
 #include "Input/Input.hpp"
 #include "Insight/Insight.hpp"
 #include "JobSystem/JobSystem.hpp"

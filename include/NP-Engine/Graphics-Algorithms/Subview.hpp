@@ -7,7 +7,7 @@
 #ifndef NP_ENGINE_SUBVIEW_HPP
 #define NP_ENGINE_SUBVIEW_HPP
 
-#include "NP-Engine/Graphics/Graphics.hpp"
+#include "NP-Engine/GPU/GPU.hpp"
 
 namespace np::gfxalg
 {

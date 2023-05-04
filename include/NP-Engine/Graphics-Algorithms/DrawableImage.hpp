@@ -14,7 +14,7 @@
 #include "NP-Engine/Container/Container.hpp"
 #include "NP-Engine/Math/Math.hpp"
 #include "NP-Engine/Geometry/Geometry.hpp"
-#include "NP-Engine/Graphics/Graphics.hpp"
+#include "NP-Engine/GPU/GPU.hpp"
 
 #include "ImageSubview.hpp"
 #include "FloodFillImage.hpp"
