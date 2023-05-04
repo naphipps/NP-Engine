@@ -27,7 +27,7 @@ namespace np::app
 	public:
 		Layer(mem::sptr<srvc::Services> services): _services(services) {}
 
-		virtual void BeforeUdpate() {} // TODO: I think we'll decide if we like this idea if it works with imgui
+		virtual void BeforeUdpate() {}
 
 		virtual void Update(tim::DblMilliseconds time_delta) {}
 
