@@ -138,7 +138,7 @@ namespace np::app
 			_window_layer.Acquire(_window);
 
 			mem::sptr<gpu::DetailInstance> detail_instance = gpu::DetailInstance::Create(gpu::DetailType::Vulkan, _services);
-			mem::sptr<gpu::RenderTarget> render_target = gpu::RenderTarget::Create(detail_instance, _window); //TODO: make sure we handle when window is closing
+			mem::sptr<gpu::RenderTarget> render_target = gpu::RenderTarget::Create(detail_instance, _window);
 			mem::sptr<gpu::RenderDevice> render_device = gpu::RenderDevice::Create(render_target);
 			mem::sptr<gpu::RenderContext> render_context = gpu::RenderContext::Create(render_device);
 			mem::sptr<gpu::RenderPass> render_pass = gpu::RenderPass::Create(render_context);
