@@ -4,8 +4,8 @@
 //
 //##===----------------------------------------------------------------------===##//
 
-#ifndef NP_ENGINE_GRAPHICS_INTERFACE_RENDER_DEVICE_HPP
-#define NP_ENGINE_GRAPHICS_INTERFACE_RENDER_DEVICE_HPP
+#ifndef NP_ENGINE_GPU_INTERFACE_RENDER_DEVICE_HPP
+#define NP_ENGINE_GPU_INTERFACE_RENDER_DEVICE_HPP
 
 #include "RenderTarget.hpp"
 #include "Device.hpp"
@@ -28,7 +28,7 @@ namespace np::gpu
 			return _target->GetInstance();
 		}
 
-		virtual GraphicsDetailType GetDetailType() const
+		virtual DetailType GetDetailType() const
 		{
 			return _target->GetDetailType();
 		}
@@ -45,4 +45,4 @@ namespace np::gpu
 	};
 }
 
-#endif /* NP_ENGINE_GRAPHICS_INTERFACE_RENDER_DEVICE_HPP */
+#endif /* NP_ENGINE_GPU_INTERFACE_RENDER_DEVICE_HPP */

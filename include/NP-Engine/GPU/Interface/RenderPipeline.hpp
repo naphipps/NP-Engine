@@ -4,15 +4,15 @@
 //
 //##===----------------------------------------------------------------------===##//
 
-#ifndef NP_ENGINE_GRAPHICS_INTERFACE_RENDER_PIPELINE_HPP
-#define NP_ENGINE_GRAPHICS_INTERFACE_RENDER_PIPELINE_HPP
+#ifndef NP_ENGINE_GPU_INTERFACE_RENDER_PIPELINE_HPP
+#define NP_ENGINE_GPU_INTERFACE_RENDER_PIPELINE_HPP
 
 #include "NP-Engine/Services/Services.hpp"
 
 #include "Pipeline.hpp"
 #include "Framebuffers.hpp"
 #include "RenderShader.hpp"
-#include "GraphicsDetailType.hpp"
+#include "DetailType.hpp"
 
 namespace np::gpu
 {
@@ -37,7 +37,7 @@ namespace np::gpu
 	public:
 		static mem::sptr<RenderPipeline> Create(Properties properties);
 
-		virtual GraphicsDetailType GetDetailType() const
+		virtual DetailType GetDetailType() const
 		{
 			return _properties.framebuffers->GetDetailType();
 		}
@@ -54,4 +54,4 @@ namespace np::gpu
 	};
 }
 
-#endif /* NP_ENGINE_GRAPHICS_INTERFACE_RENDER_PIPELINE_HPP */
+#endif /* NP_ENGINE_GPU_INTERFACE_RENDER_PIPELINE_HPP */

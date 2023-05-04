@@ -4,8 +4,8 @@
 //
 //##===----------------------------------------------------------------------===##//
 
-#ifndef NP_ENGINE_GRAPHICS_INTERFACE_COMMAND_STAGING_HPP
-#define NP_ENGINE_GRAPHICS_INTERFACE_COMMAND_STAGING_HPP
+#ifndef NP_ENGINE_GPU_INTERFACE_COMMAND_STAGING_HPP
+#define NP_ENGINE_GPU_INTERFACE_COMMAND_STAGING_HPP
 
 #include "NP-Engine/Primitive/Primitive.hpp"
 
@@ -87,4 +87,4 @@ namespace np::gpu
 	};
 } // namespace np::gpu
 
-#endif /* NP_ENGINE_GRAPHICS_INTERFACE_COMMAND_STAGING_HPP */
+#endif /* NP_ENGINE_GPU_INTERFACE_COMMAND_STAGING_HPP */

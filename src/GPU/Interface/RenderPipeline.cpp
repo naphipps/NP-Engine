@@ -20,7 +20,7 @@ namespace np::gpu
 
 		switch (properties.framebuffers->GetDetailType())
 		{
-		case GraphicsDetailType::Vulkan:
+		case DetailType::Vulkan:
 			pipeline = mem::create_sptr<__detail::VulkanRenderPipeline>(properties.framebuffers->GetServices()->GetAllocator(), properties);
 
 		default:

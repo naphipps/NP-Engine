@@ -4,12 +4,12 @@
 //
 //##===----------------------------------------------------------------------===##//
 
-#ifndef NP_ENGINE_GRAPHICS_INTERFACE_FRAMEBUFFERS_HPP
-#define NP_ENGINE_GRAPHICS_INTERFACE_FRAMEBUFFERS_HPP
+#ifndef NP_ENGINE_GPU_INTERFACE_FRAMEBUFFERS_HPP
+#define NP_ENGINE_GPU_INTERFACE_FRAMEBUFFERS_HPP
 
 #include "NP-Engine/Memory/Memory.hpp"
 
-#include "GraphicsDetailType.hpp"
+#include "DetailType.hpp"
 #include "RenderPass.hpp"
 
 namespace np::gpu
@@ -25,7 +25,7 @@ namespace np::gpu
 	public:
 		static mem::sptr<Framebuffers> Create(mem::sptr<RenderPass> render_pass);
 
-		virtual GraphicsDetailType GetDetailType() const
+		virtual DetailType GetDetailType() const
 		{
 			return _render_pass->GetDetailType();
 		}
@@ -42,4 +42,4 @@ namespace np::gpu
 	};
 }
 
-#endif /* NP_ENGINE_GRAPHICS_INTERFACE_FRAMEBUFFERS_HPP */
+#endif /* NP_ENGINE_GPU_INTERFACE_FRAMEBUFFERS_HPP */

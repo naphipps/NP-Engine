@@ -4,17 +4,17 @@
 //
 //##===----------------------------------------------------------------------===##//
 
-#ifndef NP_ENGINE_GRAPHICS_INTERFACE_COMMAND_HPP
-#define NP_ENGINE_GRAPHICS_INTERFACE_COMMAND_HPP
+#ifndef NP_ENGINE_GPU_INTERFACE_COMMAND_HPP
+#define NP_ENGINE_GPU_INTERFACE_COMMAND_HPP
 
-#include "GraphicsDetailType.hpp"
+#include "DetailType.hpp"
 
 namespace np::gpu
 {
 	struct Command
 	{
-		virtual GraphicsDetailType GetDetailType() const = 0;
+		virtual DetailType GetDetailType() const = 0;
 	};
 } // namespace np::gpu
 
-#endif /* NP_ENGINE_GRAPHICS_INTERFACE_COMMAND_HPP */
+#endif /* NP_ENGINE_GPU_INTERFACE_COMMAND_HPP */

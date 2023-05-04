@@ -4,15 +4,15 @@
 //
 //##===----------------------------------------------------------------------===##//
 
-#ifndef NP_ENGINE_GRAPHICS_INTERFACE_RENDERABLE_IMAGE_HPP
-#define NP_ENGINE_GRAPHICS_INTERFACE_RENDERABLE_IMAGE_HPP
+#ifndef NP_ENGINE_GPU_INTERFACE_RENDERABLE_IMAGE_HPP
+#define NP_ENGINE_GPU_INTERFACE_RENDERABLE_IMAGE_HPP
 
 #include "NP-Engine/Foundation/Foundation.hpp"
 #include "NP-Engine/Platform/Platform.hpp"
 #include "NP-Engine/Memory/Memory.hpp"
 #include "NP-Engine/Services/Services.hpp"
 
-#include "GraphicsDetailType.hpp"
+#include "DetailType.hpp"
 #include "RenderableObject.hpp"
 #include "Image.hpp"
 
@@ -43,4 +43,4 @@ namespace np::gpu
 	};
 } // namespace np::gpu
 
-#endif /* NP_ENGINE_GRAPHICS_INTERFACE_RENDERABLE_IMAGE_HPP */
+#endif /* NP_ENGINE_GPU_INTERFACE_RENDERABLE_IMAGE_HPP */

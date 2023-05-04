@@ -4,8 +4,8 @@
 //
 //##===----------------------------------------------------------------------===##//
 
-#ifndef NP_ENGINE_GRAPHICS_INTERFACE_VISIBLE_OBJECT_HPP
-#define NP_ENGINE_GRAPHICS_INTERFACE_VISIBLE_OBJECT_HPP
+#ifndef NP_ENGINE_GPU_INTERFACE_VISIBLE_OBJECT_HPP
+#define NP_ENGINE_GPU_INTERFACE_VISIBLE_OBJECT_HPP
 
 #include "NP-Engine/Geometry/Geometry.hpp"
 
@@ -26,4 +26,4 @@ namespace np::gpu
 	};
 } // namespace np::gpu
 
-#endif /* NP_ENGINE_GRAPHICS_INTERFACE_VISIBLE_OBJECT_HPP */
+#endif /* NP_ENGINE_GPU_INTERFACE_VISIBLE_OBJECT_HPP */

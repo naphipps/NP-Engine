@@ -15,9 +15,9 @@ namespace np::gpu::__detail
 {
 	struct VulkanCommand : public Command
 	{
-		GraphicsDetailType GetDetailType() const override
+		DetailType GetDetailType() const override
 		{
-			return GraphicsDetailType::Vulkan;
+			return DetailType::Vulkan;
 		}
 
 		virtual void ApplyTo(VkCommandBuffer command_buffer) = 0;

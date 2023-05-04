@@ -4,14 +4,14 @@
 //
 //##===----------------------------------------------------------------------===##//
 
-#ifndef NP_ENGINE_GRAPHICS_INTERFACE_RENDER_SHADER_HPP
-#define NP_ENGINE_GRAPHICS_INTERFACE_RENDER_SHADER_HPP
+#ifndef NP_ENGINE_GPU_INTERFACE_RENDER_SHADER_HPP
+#define NP_ENGINE_GPU_INTERFACE_RENDER_SHADER_HPP
 
 #include "NP-Engine/Services/Services.hpp"
 
 #include "RenderDevice.hpp"
 #include "Shader.hpp"
-#include "GraphicsDetailType.hpp"
+#include "DetailType.hpp"
 
 namespace np::gpu
 {
@@ -26,7 +26,7 @@ namespace np::gpu
 	public:
 		static mem::sptr<RenderShader> Create(mem::sptr<RenderDevice> device, Shader::Properties properties);
 
-		virtual GraphicsDetailType GetDetailType() const
+		virtual DetailType GetDetailType() const
 		{
 			return _device->GetDetailType();
 		}
@@ -43,4 +43,4 @@ namespace np::gpu
 	};
 }
 
-#endif /* NP_ENGINE_GRAPHICS_INTERFACE_RENDER_SHADER_HPP */
+#endif /* NP_ENGINE_GPU_INTERFACE_RENDER_SHADER_HPP */

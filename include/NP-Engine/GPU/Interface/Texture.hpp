@@ -4,8 +4,8 @@
 //
 //##===----------------------------------------------------------------------===##//
 
-#ifndef NP_ENGINE_GRAPHICS_INTERFACE_TEXTURE_HPP
-#define NP_ENGINE_GRAPHICS_INTERFACE_TEXTURE_HPP
+#ifndef NP_ENGINE_GPU_INTERFACE_TEXTURE_HPP
+#define NP_ENGINE_GPU_INTERFACE_TEXTURE_HPP
 
 #include <utility>
 
@@ -66,4 +66,4 @@ namespace np::gpu
 	};
 } // namespace np::gpu
 
-#endif /* NP_ENGINE_GRAPHICS_INTERFACE_TEXTURE_HPP */
+#endif /* NP_ENGINE_GPU_INTERFACE_TEXTURE_HPP */

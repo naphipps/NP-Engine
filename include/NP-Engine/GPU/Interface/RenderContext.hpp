@@ -4,8 +4,8 @@
 //
 //##===----------------------------------------------------------------------===##//
 
-#ifndef NP_ENGINE_GRAPHICS_INTERFACE_RENDER_CONTEXT_HPP
-#define NP_ENGINE_GRAPHICS_INTERFACE_RENDER_CONTEXT_HPP
+#ifndef NP_ENGINE_GPU_INTERFACE_RENDER_CONTEXT_HPP
+#define NP_ENGINE_GPU_INTERFACE_RENDER_CONTEXT_HPP
 
 #include "RenderDevice.hpp"
 #include "Context.hpp"
@@ -22,7 +22,7 @@ namespace np::gpu
 	public:
 		static mem::sptr<RenderContext> Create(mem::sptr<RenderDevice> device);
 
-		virtual GraphicsDetailType GetDetailType() const override
+		virtual DetailType GetDetailType() const override
 		{
 			return _device->GetDetailType();
 		}
@@ -64,4 +64,4 @@ namespace np::gpu
 	};
 }
 
-#endif /* NP_ENGINE_GRAPHICS_INTERFACE_RENDER_CONTEXT_HPP */
+#endif /* NP_ENGINE_GPU_INTERFACE_RENDER_CONTEXT_HPP */

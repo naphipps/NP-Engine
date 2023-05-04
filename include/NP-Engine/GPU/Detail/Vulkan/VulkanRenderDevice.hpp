@@ -338,8 +338,8 @@ namespace np::gpu::__detail
 			_graphics_queue(CreateQueue(GetServices(), _device, _graphics_family_index, 0)),
 			_present_queue(CreateQueue(GetServices(), _device, _present_family_index, 0))
 		{
-			NP_ENGINE_ASSERT(GetDetailType() == GraphicsDetailType::Vulkan,
-				"VulkanRenderDevice required given RenderTarget to be gpu::GraphicsDetailType::Vulkan");
+			NP_ENGINE_ASSERT(GetDetailType() == DetailType::Vulkan,
+				"VulkanRenderDevice required given RenderTarget to be gpu::DetailType::Vulkan");
 		}
 
 		operator VkDevice() const

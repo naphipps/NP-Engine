@@ -4,8 +4,8 @@
 //
 //##===----------------------------------------------------------------------===##//
 
-#ifndef NP_ENGINE_GRAPHICS_INTERFACE_COLOR_HPP
-#define NP_ENGINE_GRAPHICS_INTERFACE_COLOR_HPP
+#ifndef NP_ENGINE_GPU_INTERFACE_COLOR_HPP
+#define NP_ENGINE_GPU_INTERFACE_COLOR_HPP
 
 #include "NP-Engine/Foundation/Foundation.hpp"
 #include "NP-Engine/Primitive/Primitive.hpp"
@@ -107,4 +107,4 @@ namespace np::gpu
 	NP_ENGINE_STATIC_ASSERT(sizeof(Color) == 4, "Color must have size of 4.");
 } // namespace np::gpu
 
-#endif /* NP_ENGINE_GRAPHICS_INTERFACE_COLOR_HPP */
+#endif /* NP_ENGINE_GPU_INTERFACE_COLOR_HPP */

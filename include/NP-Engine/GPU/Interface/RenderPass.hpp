@@ -4,12 +4,12 @@
 //
 //##===----------------------------------------------------------------------===##//
 
-#ifndef NP_ENGINE_GRAPHICS_INTERFACE_RENDER_PASS_HPP
-#define NP_ENGINE_GRAPHICS_INTERFACE_RENDER_PASS_HPP
+#ifndef NP_ENGINE_GPU_INTERFACE_RENDER_PASS_HPP
+#define NP_ENGINE_GPU_INTERFACE_RENDER_PASS_HPP
 
 #include "NP-Engine/Memory/Memory.hpp"
 
-#include "GraphicsDetailType.hpp"
+#include "DetailType.hpp"
 #include "Pass.hpp"
 #include "RenderContext.hpp"
 
@@ -26,7 +26,7 @@ namespace np::gpu
 	public:
 		static mem::sptr<RenderPass> Create(mem::sptr<RenderContext> context);
 
-		virtual GraphicsDetailType GetDetailType() const
+		virtual DetailType GetDetailType() const
 		{
 			return _context->GetDetailType();
 		}
@@ -43,4 +43,4 @@ namespace np::gpu
 	};
 }
 
-#endif /* NP_ENGINE_GRAPHICS_INTERFACE_RENDER_PASS_HPP */
+#endif /* NP_ENGINE_GPU_INTERFACE_RENDER_PASS_HPP */

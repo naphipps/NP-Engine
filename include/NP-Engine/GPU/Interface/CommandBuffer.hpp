@@ -4,8 +4,8 @@
 //
 //##===----------------------------------------------------------------------===##//
 
-#ifndef NP_ENGINE_GRAPHICS_INTERFACE_COMMAND_BUFFER_HPP
-#define NP_ENGINE_GRAPHICS_INTERFACE_COMMAND_BUFFER_HPP
+#ifndef NP_ENGINE_GPU_INTERFACE_COMMAND_BUFFER_HPP
+#define NP_ENGINE_GPU_INTERFACE_COMMAND_BUFFER_HPP
 
 #include "Command.hpp"
 
@@ -23,4 +23,4 @@ namespace np::gpu
 	};
 }
 
-#endif /* NP_ENGINE_GRAPHICS_INTERFACE_COMMAND_BUFFER_HPP */
+#endif /* NP_ENGINE_GPU_INTERFACE_COMMAND_BUFFER_HPP */

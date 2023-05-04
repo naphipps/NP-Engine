@@ -4,8 +4,8 @@
 //
 //##===----------------------------------------------------------------------===##//
 
-#ifndef NP_ENGINE_GRAPHICS_INTERFACE_VERTEX_HPP
-#define NP_ENGINE_GRAPHICS_INTERFACE_VERTEX_HPP
+#ifndef NP_ENGINE_GPU_INTERFACE_VERTEX_HPP
+#define NP_ENGINE_GPU_INTERFACE_VERTEX_HPP
 
 #include "NP-Engine/Primitive/Primitive.hpp"
 #include "NP-Engine/Math/Math.hpp"
@@ -42,4 +42,4 @@ namespace std
 	};
 } // namespace std
 
-#endif /* NP_ENGINE_GRAPHICS_INTERFACE_VERTEX_HPP */
+#endif /* NP_ENGINE_GPU_INTERFACE_VERTEX_HPP */

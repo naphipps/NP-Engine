@@ -19,7 +19,7 @@ namespace np::app
 	{
 	private:
 		WindowLayer& _window_layer;
-		GraphicsLayer& _graphics_layer;
+		GpuLayer& _gpu_layer;
 		mem::sptr<win::Window> _window;
 		mem::sptr<gpu::Scene> _scene;
 		gpu::Camera _camera;
@@ -61,7 +61,7 @@ namespace np::app
 
 			if (_scene->GetRenderTarget()->GetWindow()->GetUid() == windowId)
 			{
-				_graphics_layer.Unregister(_scene);
+				_gpu_layer.Unregister(_scene);
 				jsys::JobSystem& job_system = _services->GetJobSystem();
 				mem::sptr<jsys::Job> destroy_scene_job = job_system.CreateJob();
 				destroy_scene_job->GetDelegate().SetCallback(this, DestroySceneCallback);
@@ -108,10 +108,10 @@ namespace np::app
 		}
 
 	public:
-		GameLayer(mem::sptr<srvc::Services> services, WindowLayer& window_layer, GraphicsLayer& graphics_layer):
+		GameLayer(mem::sptr<srvc::Services> services, WindowLayer& window_layer, GpuLayer& graphics_layer):
 			Layer(services),
 			_window_layer(window_layer),
-			_graphics_layer(graphics_layer),
+			_gpu_layer(graphics_layer),
 			_window(nullptr),
 			_scene(nullptr),
 			_model_filename(
@@ -137,7 +137,7 @@ namespace np::app
 			_window->SetTitle("My Game Window >:D");
 			_window_layer.Acquire(_window);
 
-			mem::sptr<gpu::DetailInstance> detail_instance = gpu::DetailInstance::Create(gpu::GraphicsDetailType::Vulkan, _services);
+			mem::sptr<gpu::DetailInstance> detail_instance = gpu::DetailInstance::Create(gpu::DetailType::Vulkan, _services);
 			mem::sptr<gpu::RenderTarget> render_target = gpu::RenderTarget::Create(detail_instance, _window); //TODO: make sure we handle when window is closing
 			mem::sptr<gpu::RenderDevice> render_device = gpu::RenderDevice::Create(render_target);
 			mem::sptr<gpu::RenderContext> render_context = gpu::RenderContext::Create(render_device);
@@ -161,7 +161,7 @@ namespace np::app
 
 			gpu::Scene::Properties scene_properties{ render_pipeline, _camera };
 			_scene = gpu::Scene::Create(scene_properties);
-			_graphics_layer.Register(_scene);
+			_gpu_layer.Register(_scene);
 
 			_model_handle = _services->GetUidSystem().CreateUidHandle();
 			uid::Uid model_id = _services->GetUidSystem().GetUid(_model_handle);
@@ -322,7 +322,7 @@ namespace np::app
 	public:
 		GameApp(mem::sptr<srvc::Services> services):
 			Application(Application::Properties{"My Game App"}, services),
-			_game_layer(services, _window_layer, _graphics_layer)
+			_game_layer(services, _window_layer, _gpu_layer)
 		{
 			PushLayer(mem::AddressOf(_game_layer));
 		}

@@ -50,7 +50,7 @@ namespace np::evnt
 		None = 0,
 		Application = BIT(0),
 		Window = BIT(1),
-		Graphics = BIT(2), //TODO: after we refactor our gfx namespace to gpu, refactor this to "Gpu"
+		Gpu = BIT(2),
 		All = ~((ui64)0)
 	};
 

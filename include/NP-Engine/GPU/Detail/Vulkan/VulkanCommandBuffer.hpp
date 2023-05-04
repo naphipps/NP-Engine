@@ -72,7 +72,7 @@ namespace np::gpu::__detail
 
 		void Add(Command& command) override
 		{
-			NP_ENGINE_ASSERT(IsValid() && command.GetDetailType() == GraphicsDetailType::Vulkan,
+			NP_ENGINE_ASSERT(IsValid() && command.GetDetailType() == DetailType::Vulkan,
 				"VulkanCommandBuffer must be valid and given command must be a vulkan command before Add is called.");
 			((VulkanCommand&)command).ApplyTo(_command_buffer);
 		}

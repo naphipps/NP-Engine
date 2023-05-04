@@ -282,9 +282,9 @@ namespace np::gpu::__detail
 			return _instance;
 		}
 
-		GraphicsDetailType GetDetailType() const override
+		DetailType GetDetailType() const override
 		{
-			return GraphicsDetailType::Vulkan;
+			return DetailType::Vulkan;
 		}
 	};
 } // namespace np::gpu::__detail

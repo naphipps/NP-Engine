@@ -4,8 +4,8 @@
 //
 //##===----------------------------------------------------------------------===##//
 
-#ifndef NP_ENGINE_GRAPHICS_INTERFACE_PASS_HPP
-#define NP_ENGINE_GRAPHICS_INTERFACE_PASS_HPP
+#ifndef NP_ENGINE_GPU_INTERFACE_PASS_HPP
+#define NP_ENGINE_GPU_INTERFACE_PASS_HPP
 
 namespace np::gpu
 {
@@ -22,4 +22,4 @@ namespace np::gpu
 	};
 }
 
-#endif /* NP_ENGINE_GRAPHICS_INTERFACE_PASS_HPP */
+#endif /* NP_ENGINE_GPU_INTERFACE_PASS_HPP */

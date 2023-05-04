@@ -4,8 +4,8 @@
 //
 //##===----------------------------------------------------------------------===##//
 
-#ifndef NP_ENGINE_GRAPHICS_INTERFACE_SCENE_HPP
-#define NP_ENGINE_GRAPHICS_INTERFACE_SCENE_HPP
+#ifndef NP_ENGINE_GPU_INTERFACE_SCENE_HPP
+#define NP_ENGINE_GPU_INTERFACE_SCENE_HPP
 
 #include "NP-Engine/Primitive/Primitive.hpp"
 #include "NP-Engine/Container/Container.hpp"
@@ -14,7 +14,7 @@
 #include "NP-Engine/Platform/Platform.hpp"
 #include "NP-Engine/Services/Services.hpp"
 
-#include "GraphicsDetailType.hpp"
+#include "DetailType.hpp"
 #include "RenderPipeline.hpp"
 #include "Camera.hpp"
 
@@ -116,7 +116,7 @@ namespace np::gpu
 				UnregisterResource(it->first);
 		}
 
-		virtual GraphicsDetailType GetDetailType() const
+		virtual DetailType GetDetailType() const
 		{
 			return GetRenderPipeline()->GetDetailType();
 		}
@@ -292,4 +292,4 @@ namespace np::gpu
 	};
 } // namespace np::gpu
 
-#endif /* NP_ENGINE_GRAPHICS_INTERFACE_SCENE_HPP */
+#endif /* NP_ENGINE_GPU_INTERFACE_SCENE_HPP */

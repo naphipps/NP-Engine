@@ -81,7 +81,7 @@ set(NP_ENGINE_GPU_INTERFACE_HPP
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Interface/Scene.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Interface/Shader.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Interface/Texture.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Interface/GraphicsDetailType.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Interface/DetailType.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Interface/Vertex.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Interface/Color.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Interface/Image.hpp
@@ -390,11 +390,6 @@ else()
 	)
 endif()
 
-# TODO: we can remove these
-set(NP_ENGINE_GPU_CPP
-	#Graphics/Graphics.cpp
-)
-
 set(NP_ENGINE_GPU_INTERFACE_CPP
 	GPU/Interface/Scene.cpp
 	GPU/Interface/RenderTarget.cpp
@@ -407,15 +402,9 @@ set(NP_ENGINE_GPU_INTERFACE_CPP
 	GPU/Interface/RenderPipeline.cpp
 )
 
-# TODO: we can remove these
-set(NP_ENGINE_GPU_OPENGL_CPP
-	#Graphics/Detail/OpenGL/OpenGLRenderer.cpp
-)
+set(NP_ENGINE_GPU_OPENGL_CPP) # placeholder - may not be needed
 
-# TODO: we can remove these
-set(NP_ENGINE_GPU_VULKAN_CPP
-	# Graphics/Detail/Vulkan/VulkanRenderDevice.cpp
-)
+set(NP_ENGINE_GPU_VULKAN_CPP) # placeholder - may not be needed
 
 set(NP_ENGINE_GPU_VULKAN_SHADERS_GLSL
 	${PROJECT_SOURCE_DIR}/src/GPU/Detail/Vulkan/shaders/object_vertex.glsl
@@ -469,7 +458,6 @@ set(NP_ENGINE_SOURCE_FILES
 	${NP_ENGINE_GPU_OPENGL_CPP}
 	${NP_ENGINE_GPU_VULKAN_CPP}
 	${NP_ENGINE_GPU_VULKAN_SHADERS_GLSL}
-	${NP_ENGINE_GPU_CPP}
 	${NP_ENGINE_APPPLICATION_CPP}
 	${NP_ENGINE_SYSTEM_CPP}
 )
@@ -590,7 +578,7 @@ source_group(Event FILES ${NP_ENGINE_EVENT_HPP})
 source_group(FileSystem FILES ${NP_ENGINE_FILESYSTEM_HPP})
 source_group(Foundation FILES ${NP_ENGINE_FOUNDATION_HPP})
 source_group(Geometry FILES ${NP_ENGINE_GEOMETRY_HPP})
-source_group(GPU FILES ${NP_ENGINE_GPU_HPP} ${NP_ENGINE_GPU_CPP})
+source_group(GPU FILES ${NP_ENGINE_GPU_HPP})
 source_group(GPU/Interface FILES ${NP_ENGINE_GPU_INTERFACE_HPP} ${NP_ENGINE_GPU_INTERFACE_CPP})
 source_group(GPU/Detail/OpenGL FILES ${NP_ENGINE_GPU_OPENGL_HPP} ${NP_ENGINE_GPU_OPENGL_CPP})
 source_group(GPU/Detail/Vulkan FILES ${NP_ENGINE_GPU_VULKAN_HPP} ${NP_ENGINE_GPU_VULKAN_CPP})

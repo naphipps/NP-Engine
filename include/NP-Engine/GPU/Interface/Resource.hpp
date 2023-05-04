@@ -4,8 +4,8 @@
 //
 //##===----------------------------------------------------------------------===##//
 
-#ifndef NP_ENGINE_GRAPHICS_INTERFACE_RESOURCE_HPP
-#define NP_ENGINE_GRAPHICS_INTERFACE_RESOURCE_HPP
+#ifndef NP_ENGINE_GPU_INTERFACE_RESOURCE_HPP
+#define NP_ENGINE_GPU_INTERFACE_RESOURCE_HPP
 
 #include "ResourceType.hpp"
 
@@ -17,4 +17,4 @@ namespace np::gpu
 	};
 }
 
-#endif /* NP_ENGINE_GRAPHICS_INTERFACE_RESOURCE_HPP */
+#endif /* NP_ENGINE_GPU_INTERFACE_RESOURCE_HPP */

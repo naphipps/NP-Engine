@@ -95,7 +95,7 @@ namespace np::app
 	protected:
 		Properties _properties;
 		WindowLayer _window_layer;
-		GraphicsLayer _graphics_layer;
+		GpuLayer _gpu_layer;
 		NetworkLayer _network_layer;
 		AudioLayer _audio_layer;
 		con::vector<Layer*> _layers;
@@ -106,7 +106,7 @@ namespace np::app
 			Layer(services),
 			_properties(app_properties),
 			_window_layer(services),
-			_graphics_layer(services),
+			_gpu_layer(services),
 			_network_layer(services),
 			_audio_layer(services),
 			_running(false)
@@ -117,7 +117,7 @@ namespace np::app
 
 			_layers.emplace_back(this);
 			_layers.emplace_back(mem::AddressOf(_window_layer));
-			_layers.emplace_back(mem::AddressOf(_graphics_layer));
+			_layers.emplace_back(mem::AddressOf(_gpu_layer));
 		}
 
 		void HandlePopup(mem::sptr<evnt::Event> e)
@@ -179,7 +179,7 @@ namespace np::app
 
 			// rendering loop
 			job_workers[0].SetFetchOrder({Fetch::Immediate, Fetch::None, Fetch::None});
-			_graphics_layer.SetJobWorkerIndex(0);
+			_gpu_layer.SetJobWorkerIndex(0);
 
 			// all other workers
 			for (siz i = 1; i < job_workers.size(); i++)
@@ -224,7 +224,7 @@ namespace np::app
 			i64 i = 0;
 
 			CustomizeJobSystem();//TODO: move this to test proj
-			_graphics_layer.SubmitRenderingJob(); //TODO: move this to test proj
+			_gpu_layer.SubmitRenderingJob(); //TODO: move this to test proj
 			job_system.Start();
 
 			while (_running.load(mo_acquire))
@@ -280,7 +280,7 @@ namespace np::app
 				prev = next;
 			}
 
-			_graphics_layer.StopRenderingJob();
+			_gpu_layer.StopRenderingJob();
 			job_system.Stop();
 			job_system.Clear();
 			event_queue.Clear();

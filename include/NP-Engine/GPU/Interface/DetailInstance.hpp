@@ -4,12 +4,12 @@
 //
 //##===----------------------------------------------------------------------===##//
 
-#ifndef NP_ENGINE_GRAPHICS_INTERFACE_DETAIL_INSTANCE_HPP
-#define NP_ENGINE_GRAPHICS_INTERFACE_DETAIL_INSTANCE_HPP
+#ifndef NP_ENGINE_GPU_INTERFACE_DETAIL_INSTANCE_HPP
+#define NP_ENGINE_GPU_INTERFACE_DETAIL_INSTANCE_HPP
 
 #include "NP-Engine/Services/Services.hpp"
 
-#include "GraphicsDetailType.hpp"
+#include "DetailType.hpp"
 
 namespace np::gpu
 {
@@ -21,11 +21,11 @@ namespace np::gpu
 		DetailInstance(mem::sptr<srvc::Services> services): _services(services) {}
 
 	public:
-		static mem::sptr<DetailInstance> Create(GraphicsDetailType detail_type, mem::sptr<srvc::Services> services);
+		static mem::sptr<DetailInstance> Create(DetailType detail_type, mem::sptr<srvc::Services> services);
 
-		virtual GraphicsDetailType GetDetailType() const
+		virtual DetailType GetDetailType() const
 		{
-			return GraphicsDetailType::None;
+			return DetailType::None;
 		}
 
 		virtual mem::sptr<srvc::Services> GetServices() const
@@ -35,4 +35,4 @@ namespace np::gpu
 	};
 }
 
-#endif /* NP_ENGINE_GRAPHICS_INTERFACE_DETAIL_INSTANCE_HPP */
+#endif /* NP_ENGINE_GPU_INTERFACE_DETAIL_INSTANCE_HPP */

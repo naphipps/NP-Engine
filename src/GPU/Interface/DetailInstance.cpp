@@ -14,13 +14,13 @@
 
 namespace np::gpu
 {
-	mem::sptr<DetailInstance> DetailInstance::Create(GraphicsDetailType detail_type, mem::sptr<srvc::Services> services)
+	mem::sptr<DetailInstance> DetailInstance::Create(DetailType detail_type, mem::sptr<srvc::Services> services)
 	{
 		mem::sptr<DetailInstance> instance = nullptr;
 
 		switch (detail_type)
 		{
-		case GraphicsDetailType::Vulkan:
+		case DetailType::Vulkan:
 			instance = mem::create_sptr<__detail::VulkanInstance>(services->GetAllocator(), services);
 			break;
 

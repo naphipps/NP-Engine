@@ -4,8 +4,8 @@
 //
 //##===----------------------------------------------------------------------===##//
 
-#ifndef NP_ENGINE_GRAPHICS_INTERFACE_HPP
-#define NP_ENGINE_GRAPHICS_INTERFACE_HPP
+#ifndef NP_ENGINE_GPU_INTERFACE_HPP
+#define NP_ENGINE_GPU_INTERFACE_HPP
 
 #include "Buffer.hpp"
 #include "Camera.hpp"
@@ -23,7 +23,7 @@
 #include "RenderableMetaValues.hpp"
 #include "RenderableModel.hpp"
 #include "RenderableObject.hpp"
-#include "GraphicsDetailType.hpp"
+#include "DetailType.hpp"
 #include "Scene.hpp"
 #include "Shader.hpp"
 #include "Texture.hpp"
@@ -39,4 +39,4 @@
 #include "RenderShader.hpp"
 #include "ComputeShader.hpp"
 
-#endif /* NP_ENGINE_GRAPHICS_INTERFACE_HPP */
+#endif /* NP_ENGINE_GPU_INTERFACE_HPP */

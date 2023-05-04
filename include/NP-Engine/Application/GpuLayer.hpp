@@ -4,8 +4,8 @@
 //
 //##===----------------------------------------------------------------------===##//
 
-#ifndef NP_ENGINE_GRAPHICS_LAYER_HPP
-#define NP_ENGINE_GRAPHICS_LAYER_HPP
+#ifndef NP_ENGINE_GPU_LAYER_HPP
+#define NP_ENGINE_GPU_LAYER_HPP
 
 #include <utility>
 
@@ -27,7 +27,7 @@
 
 namespace np::app
 {
-	class GraphicsLayer : public Layer //TODO: I'm tempted to refactor all "Graphics" things into "GPU" with namespace "gpu" since we use the gpu for so much more than graphics
+	class GpuLayer : public Layer
 	{
 	protected:
 		mutexed_wrapper<con::vector<mem::wptr<gpu::Scene>>> _scenes;
@@ -37,7 +37,7 @@ namespace np::app
 
 		static void RenderingCallback(void* caller, mem::Delegate& d)
 		{
-			((GraphicsLayer*)caller)->RenderingProcedure(d);
+			((GpuLayer*)caller)->RenderingProcedure(d);
 		}
 
 		void RenderingProcedure(mem::Delegate& d)
@@ -99,14 +99,14 @@ namespace np::app
 		}
 
 	public:
-		GraphicsLayer(mem::sptr<srvc::Services> services): 
+		GpuLayer(mem::sptr<srvc::Services> services): 
 			Layer(services), 
 			_job_worker_index(0),
 			_rendering_job(nullptr), 
 			_keep_rendering(false)
 		{}
 
-		virtual ~GraphicsLayer()
+		virtual ~GpuLayer()
 		{
 			StopRenderingJob();
 		}
@@ -177,4 +177,4 @@ namespace np::app
 	};
 } // namespace np::app
 
-#endif /* NP_ENGINE_GRAPHICS_LAYER_HPP */
+#endif /* NP_ENGINE_GPU_LAYER_HPP */

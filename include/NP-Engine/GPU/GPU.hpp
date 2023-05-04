@@ -4,11 +4,11 @@
 //
 //##===----------------------------------------------------------------------===##//
 
-#ifndef NP_ENGINE_GRAPHICS_HPP
-#define NP_ENGINE_GRAPHICS_HPP
+#ifndef NP_ENGINE_GPU_HPP
+#define NP_ENGINE_GPU_HPP
 
 #include "NP-Engine/Foundation/Foundation.hpp"
 
 #include "Interface/Interface.hpp"
 
-#endif /* NP_ENGINE_GRAPHICS_HPP */
+#endif /* NP_ENGINE_GPU_HPP */

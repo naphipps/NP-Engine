@@ -4,8 +4,8 @@
 //
 //##===----------------------------------------------------------------------===##//
 
-#ifndef NP_ENGINE_GRAPHICS_INTERFACE_PIPELINE_HPP
-#define NP_ENGINE_GRAPHICS_INTERFACE_PIPELINE_HPP
+#ifndef NP_ENGINE_GPU_INTERFACE_PIPELINE_HPP
+#define NP_ENGINE_GPU_INTERFACE_PIPELINE_HPP
 
 #include "NP-Engine/Container/Container.hpp"
 
@@ -24,4 +24,4 @@ namespace np::gpu
 	};
 } // namespace np::gpu
 
-#endif /* NP_ENGINE_GRAPHICS_INTERFACE_PIPELINE_HPP */
+#endif /* NP_ENGINE_GPU_INTERFACE_PIPELINE_HPP */

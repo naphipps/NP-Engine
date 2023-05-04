@@ -20,7 +20,7 @@ namespace np::gpu
 
 		switch (render_pass->GetDetailType())
 		{
-		case GraphicsDetailType::Vulkan:
+		case DetailType::Vulkan:
 			framebuffers = mem::create_sptr<__detail::VulkanFramebuffers>(render_pass->GetServices()->GetAllocator(), render_pass);
 			break;
 

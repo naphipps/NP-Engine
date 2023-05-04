@@ -4,12 +4,12 @@
 //
 //##===----------------------------------------------------------------------===##//
 
-#ifndef NP_ENGINE_GRAPHICS_INTERFACE_RENDER_TARGET_HPP
-#define NP_ENGINE_GRAPHICS_INTERFACE_RENDER_TARGET_HPP
+#ifndef NP_ENGINE_GPU_INTERFACE_RENDER_TARGET_HPP
+#define NP_ENGINE_GPU_INTERFACE_RENDER_TARGET_HPP
 
 #include "NP-Engine/Window/Window.hpp"
 
-#include "GraphicsDetailType.hpp"
+#include "DetailType.hpp"
 #include "DetailInstance.hpp"
 
 //TODO: add ability to render to just half the window/surface, etc -- will be helpful adding DX12/etc support
@@ -27,7 +27,7 @@ namespace np::gpu
 	public:
 		static mem::sptr<RenderTarget> Create(mem::sptr<DetailInstance> instance, mem::sptr<win::Window> window);
 
-		virtual GraphicsDetailType GetDetailType() const
+		virtual DetailType GetDetailType() const
 		{
 			return _instance->GetDetailType();
 		}
@@ -49,4 +49,4 @@ namespace np::gpu
 	};
 }
 
-#endif /* NP_ENGINE_GRAPHICS_INTERFACE_RENDER_TARGET_HPP */
+#endif /* NP_ENGINE_GPU_INTERFACE_RENDER_TARGET_HPP */

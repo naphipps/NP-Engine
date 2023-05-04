@@ -20,7 +20,7 @@ namespace np::gpu
 
 		switch (target->GetDetailType())
 		{
-		case GraphicsDetailType::Vulkan:
+		case DetailType::Vulkan:
 			device = mem::create_sptr<__detail::VulkanRenderDevice>(target->GetServices()->GetAllocator(), target);
 			break;
 

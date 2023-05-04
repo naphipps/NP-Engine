@@ -4,14 +4,14 @@
 //
 //##===----------------------------------------------------------------------===##//
 
-#ifndef NP_ENGINE_GRAPHICS_DETAIL_TYPE_HPP
-#define NP_ENGINE_GRAPHICS_DETAIL_TYPE_HPP
+#ifndef NP_ENGINE_GPU_DETAIL_TYPE_HPP
+#define NP_ENGINE_GPU_DETAIL_TYPE_HPP
 
 #include "NP-Engine/Primitive/Primitive.hpp"
 
 namespace np::gpu
 {
-	enum class GraphicsDetailType : ui32 //TODO: refactor this to DetailType
+	enum class DetailType : ui32
 	{
 		None,
 		Vulkan,
@@ -21,4 +21,4 @@ namespace np::gpu
 	};
 } // namespace np::gpu
 
-#endif /* NP_ENGINE_GRAPHICS_DETAIL_TYPE_HPP */
+#endif /* NP_ENGINE_GPU_DETAIL_TYPE_HPP */
