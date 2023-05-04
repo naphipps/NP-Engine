@@ -14,7 +14,7 @@
 #include "Container/Container.hpp"
 #include "Event/Event.hpp"
 #include "FileSystem/FileSystem.hpp"
-#include "Graphics-Algorithms/Graphics-Algorithms.hpp"
+#include "GPU-Algorithms/GPU-Algorithms.hpp"
 #include "GPU/GPU.hpp"
 #include "Input/Input.hpp"
 #include "Insight/Insight.hpp"

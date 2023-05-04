@@ -157,13 +157,13 @@ set(NP_ENGINE_GPU_VULKAN_HPP
 )
 
 set(NP_ENGINE_GPU_ALGORITHMS_HPP
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics-Algorithms/Graphics-Algorithms.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics-Algorithms/DmsImage.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics-Algorithms/DmsLineSegment.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics-Algorithms/DrawableImage.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics-Algorithms/ImageSubview.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics-Algorithms/Subview.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Graphics-Algorithms/FloodFillImage.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU-Algorithms/GPU-Algorithms.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU-Algorithms/DmsImage.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU-Algorithms/DmsLineSegment.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU-Algorithms/DrawableImage.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU-Algorithms/ImageSubview.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU-Algorithms/Subview.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU-Algorithms/FloodFillImage.hpp
 )
 
 set(NP_ENGINE_INPUT_HPP
@@ -583,7 +583,7 @@ source_group(GPU/Interface FILES ${NP_ENGINE_GPU_INTERFACE_HPP} ${NP_ENGINE_GPU_
 source_group(GPU/Detail/OpenGL FILES ${NP_ENGINE_GPU_OPENGL_HPP} ${NP_ENGINE_GPU_OPENGL_CPP})
 source_group(GPU/Detail/Vulkan FILES ${NP_ENGINE_GPU_VULKAN_HPP} ${NP_ENGINE_GPU_VULKAN_CPP})
 source_group(GPU/Detail/Vulkan/shaders FILES ${NP_ENGINE_GPU_VULKAN_SHADERS_GLSL})
-source_group(Graphics-Algorithms FILES ${NP_ENGINE_GPU_ALGORITHMS_HPP})
+source_group(GPU-Algorithms FILES ${NP_ENGINE_GPU_ALGORITHMS_HPP})
 source_group(Input FILES ${NP_ENGINE_INPUT_HPP})
 source_group(Insight FILES ${NP_ENGINE_INSIGHT_HPP} ${NP_ENGINE_INSIGHT_CPP})
 source_group(JobSystem FILES ${NP_ENGINE_JOBSYSTEM_HPP})
