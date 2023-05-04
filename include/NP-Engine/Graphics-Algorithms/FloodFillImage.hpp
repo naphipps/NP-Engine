@@ -56,9 +56,9 @@ namespace np::gfxalg
 
 		FloodFillImage(ImageSubview&& image_subview): _image_subview(::std::move(image_subview)) {}
 
-		FloodFillImage(gfx::Image& image): _image_subview(image) {}
+		FloodFillImage(gpu::Image& image): _image_subview(image) {}
 
-		FloodFillImage(gfx::Image& image, Subview subview): _image_subview(image, subview) {}
+		FloodFillImage(gpu::Image& image, Subview subview): _image_subview(image, subview) {}
 
 		mem::BlDelegate& GetIsApprovedDelegate()
 		{

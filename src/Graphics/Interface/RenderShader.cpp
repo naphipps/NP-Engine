@@ -12,7 +12,7 @@
 
 #include "NP-Engine/Graphics/Detail/Vulkan/VulkanRenderShader.hpp"
 
-namespace np::gfx
+namespace np::gpu
 {
 	mem::sptr<RenderShader> RenderShader::Create(mem::sptr<RenderDevice> device, Shader::Properties properties)
 	{

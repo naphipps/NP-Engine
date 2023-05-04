@@ -15,7 +15,7 @@
 
 #include "VulkanCommands.hpp"
 
-namespace np::gfx::__detail
+namespace np::gpu::__detail
 {
 	class VulkanCommandBuffer : public CommandBuffer
 	{
@@ -89,6 +89,6 @@ namespace np::gfx::__detail
 			return vkEndCommandBuffer(_command_buffer);
 		}
 	};
-} // namespace np::gfx::__detail
+} // namespace np::gpu::__detail
 
 #endif /* NP_ENGINE_VULKAN_COMMAND_BUFFER_HPP */

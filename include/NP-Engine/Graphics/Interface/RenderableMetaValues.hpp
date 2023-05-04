@@ -12,7 +12,7 @@
 
 #include "NP-Engine/Vendor/GlmInclude.hpp"
 
-namespace np::gfx
+namespace np::gpu
 {
 	struct RenderableMetaValues //TODO: this is old - try new technique
 	{
@@ -55,6 +55,6 @@ namespace np::gfx
 	};
 
 	NP_ENGINE_STATIC_ASSERT(sizeof(RenderableMetaValues) <= 128, "RenderableMetaValues should never exceed 128 bytes.");
-} // namespace np::gfx
+} // namespace np::gpu
 
 #endif /* NP_ENGINE_GRAPHICS_INTERFACE_RENDERABLE_META_VALUES_HPP */

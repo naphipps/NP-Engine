@@ -15,7 +15,7 @@
 
 #include "VulkanRenderPass.hpp"
 
-namespace np::gfx::__detail
+namespace np::gpu::__detail
 {
 	class VulkanFramebuffers : public Framebuffers
 	{
@@ -94,6 +94,6 @@ namespace np::gfx::__detail
 			_framebuffers = CreateFramebuffers(GetRenderPass());
 		}
 	};
-} // namespace np::gfx::__detail
+} // namespace np::gpu::__detail
 
 #endif /* NP_ENGINE_VULKAN_FRAMEBUFFERS_HPP */

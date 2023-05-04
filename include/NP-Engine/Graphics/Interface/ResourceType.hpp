@@ -9,7 +9,7 @@
 
 #include "NP-Engine/Primitive/Primitive.hpp"
 
-namespace np::gfx
+namespace np::gpu
 {
 	enum class ResourceType : ui32
 	{

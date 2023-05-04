@@ -9,7 +9,7 @@
 
 #include "NP-Engine/Primitive/Primitive.hpp"
 
-namespace np::gfx
+namespace np::gpu
 {
 	enum class GraphicsDetailType : ui32
 	{
@@ -19,6 +19,6 @@ namespace np::gfx
 		DirectX,
 		Metal
 	};
-} // namespace np::gfx
+} // namespace np::gpu
 
 #endif /* NP_ENGINE_GRAPHICS_DETAIL_TYPE_HPP */

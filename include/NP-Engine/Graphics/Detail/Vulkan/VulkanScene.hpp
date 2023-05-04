@@ -20,7 +20,7 @@
 #include "VulkanRenderableModel.hpp"
 #include "VulkanRenderPipeline.hpp"
 
-namespace np::gfx::__detail
+namespace np::gpu::__detail
 {
 	class VulkanScene : public Scene
 	{
@@ -301,6 +301,6 @@ namespace np::gfx::__detail
 			NP_ENGINE_LOG_INFO("scene adjusting for window resize?");
 		}
 	};
-} // namespace np::gfx::__detail
+} // namespace np::gpu::__detail
 
 #endif /* NP_ENGINE_VULKAN_SCENE_HPP */

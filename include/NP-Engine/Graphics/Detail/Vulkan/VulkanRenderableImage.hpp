@@ -13,7 +13,7 @@
 
 #include "NP-Engine/Graphics/Interface/Interface.hpp"
 
-namespace np::gfx::__detail
+namespace np::gpu::__detail
 {
 	class VulkanRenderableImage : public RenderableImage
 	{
@@ -53,6 +53,6 @@ namespace np::gfx::__detail
 
 		void SetOutOfDate(bl is_out_of_date = true) override {}
 	};
-} // namespace np::gfx::__detail
+} // namespace np::gpu::__detail
 
 #endif /* NP_ENGINE_VULKAN_RENDERABLE_IMAGE_HPP */

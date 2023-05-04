@@ -15,7 +15,7 @@
 
 #include "../../Interface/Interface.hpp"
 
-namespace np::gfx::__detail
+namespace np::gpu::__detail
 {
 	struct VulkanVertex : public Vertex
 	{
@@ -69,6 +69,6 @@ namespace np::gfx::__detail
 			return descs;
 		}
 	};
-} // namespace np::gfx::__detail
+} // namespace np::gpu::__detail
 
 #endif /* NP_ENGINE_VULKAN_VERTEX_HPP */

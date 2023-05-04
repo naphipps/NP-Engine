@@ -14,7 +14,7 @@
 #include "VulkanCommandBuffer.hpp"
 #include "VulkanLogicalDevice.hpp"
 
-namespace np::gfx::__detail
+namespace np::gpu::__detail
 {
 	class VulkanQueue
 	{
@@ -61,6 +61,6 @@ namespace np::gfx::__detail
 			return vkQueueSubmit(_queue, 1, &submit_info, fence);
 		}
 	};
-} // namespace np::gfx::__detail
+} // namespace np::gpu::__detail
 
 #endif /* NP_ENGINE_VULKAN_QUEUE_HPP */

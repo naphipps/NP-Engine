@@ -19,8 +19,8 @@ namespace np::gfxalg
 	class ImageSubview
 	{
 	public:
-		using Color = gfx::Color;
-		using Image = gfx::Image;
+		using Color = gpu::Color;
+		using Image = gpu::Image;
 		using Point = Image::Point;
 		using OutsidePoint = ::glm::vec<2, i64>;
 		using Line = geom::Line2D<Point::value_type>;

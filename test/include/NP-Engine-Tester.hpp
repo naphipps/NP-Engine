@@ -21,11 +21,11 @@ namespace np::app
 		WindowLayer& _window_layer;
 		GraphicsLayer& _graphics_layer;
 		mem::sptr<win::Window> _window;
-		mem::sptr<gfx::Scene> _scene;
-		gfx::Camera _camera;
+		mem::sptr<gpu::Scene> _scene;
+		gpu::Camera _camera;
 		str _model_filename;
 		str _model_texture_filename;
-		mem::sptr<gfx::Model> _model;
+		mem::sptr<gpu::Model> _model;
 		mem::sptr<uid::UidHandle> _model_handle;
 		tim::SteadyTimestamp _start_timestamp;
 		flt _rate = 10.f;
@@ -118,7 +118,7 @@ namespace np::app
 				fsys::Append(fsys::Append(fsys::Append(NP_ENGINE_WORKING_DIR, "test"), "assets"), "viking_room.obj")),
 			_model_texture_filename(
 				fsys::Append(fsys::Append(fsys::Append(NP_ENGINE_WORKING_DIR, "test"), "assets"), "viking_room.png")),
-			_model(mem::create_sptr<gfx::Model>(_services->GetAllocator(), _model_filename, _model_texture_filename, true)),
+			_model(mem::create_sptr<gpu::Model>(_services->GetAllocator(), _model_filename, _model_texture_filename, true)),
 			_model_handle(nullptr),
 			_start_timestamp(tim::SteadyClock::now())
 		{
@@ -137,49 +137,49 @@ namespace np::app
 			_window->SetTitle("My Game Window >:D");
 			_window_layer.Acquire(_window);
 
-			mem::sptr<gfx::DetailInstance> detail_instance = gfx::DetailInstance::Create(gfx::GraphicsDetailType::Vulkan, _services);
-			mem::sptr<gfx::RenderTarget> render_target = gfx::RenderTarget::Create(detail_instance, _window); //TODO: make sure we handle when window is closing
-			mem::sptr<gfx::RenderDevice> render_device = gfx::RenderDevice::Create(render_target);
-			mem::sptr<gfx::RenderContext> render_context = gfx::RenderContext::Create(render_device);
-			mem::sptr<gfx::RenderPass> render_pass = gfx::RenderPass::Create(render_context);
-			mem::sptr<gfx::Framebuffers> framebuffers = gfx::Framebuffers::Create(render_pass);
+			mem::sptr<gpu::DetailInstance> detail_instance = gpu::DetailInstance::Create(gpu::GraphicsDetailType::Vulkan, _services);
+			mem::sptr<gpu::RenderTarget> render_target = gpu::RenderTarget::Create(detail_instance, _window); //TODO: make sure we handle when window is closing
+			mem::sptr<gpu::RenderDevice> render_device = gpu::RenderDevice::Create(render_target);
+			mem::sptr<gpu::RenderContext> render_context = gpu::RenderContext::Create(render_device);
+			mem::sptr<gpu::RenderPass> render_pass = gpu::RenderPass::Create(render_context);
+			mem::sptr<gpu::Framebuffers> framebuffers = gpu::Framebuffers::Create(render_pass);
 
-			gfx::Shader::Properties vertex_shader_properties;
-			vertex_shader_properties.type = gfx::Shader::Type::Vertex;
+			gpu::Shader::Properties vertex_shader_properties;
+			vertex_shader_properties.type = gpu::Shader::Type::Vertex;
 			vertex_shader_properties.entrypoint = "main";
 			vertex_shader_properties.filename = fsys::Append(fsys::Append("Vulkan", "shaders"), "object_vertex.glsl");
-			mem::sptr<gfx::RenderShader> vertex_shader = gfx::RenderShader::Create(render_device, vertex_shader_properties);
+			mem::sptr<gpu::RenderShader> vertex_shader = gpu::RenderShader::Create(render_device, vertex_shader_properties);
 
-			gfx::Shader::Properties fragment_shader_properties;
-			fragment_shader_properties.type = gfx::Shader::Type::Fragment;
+			gpu::Shader::Properties fragment_shader_properties;
+			fragment_shader_properties.type = gpu::Shader::Type::Fragment;
 			fragment_shader_properties.entrypoint = "main";
 			fragment_shader_properties.filename = fsys::Append(fsys::Append("Vulkan", "shaders"), "object_fragment.glsl");
-			mem::sptr<gfx::RenderShader> fragment_shader = gfx::RenderShader::Create(render_device, fragment_shader_properties);
+			mem::sptr<gpu::RenderShader> fragment_shader = gpu::RenderShader::Create(render_device, fragment_shader_properties);
 
-			gfx::RenderPipeline::Properties render_pipeline_properties{framebuffers, vertex_shader, fragment_shader};
-			mem::sptr<gfx::RenderPipeline> render_pipeline = gfx::RenderPipeline::Create(render_pipeline_properties);
+			gpu::RenderPipeline::Properties render_pipeline_properties{framebuffers, vertex_shader, fragment_shader};
+			mem::sptr<gpu::RenderPipeline> render_pipeline = gpu::RenderPipeline::Create(render_pipeline_properties);
 
-			gfx::Scene::Properties scene_properties{ render_pipeline, _camera };
-			_scene = gfx::Scene::Create(scene_properties);
+			gpu::Scene::Properties scene_properties{ render_pipeline, _camera };
+			_scene = gpu::Scene::Create(scene_properties);
 			_graphics_layer.Register(_scene);
 
 			_model_handle = _services->GetUidSystem().CreateUidHandle();
 			uid::Uid model_id = _services->GetUidSystem().GetUid(_model_handle);
-			mem::sptr<gfx::VisibleObject> model_visible = mem::create_sptr<gfx::VisibleObject>(_services->GetAllocator());
+			mem::sptr<gpu::VisibleObject> model_visible = mem::create_sptr<gpu::VisibleObject>(_services->GetAllocator());
 
 			_scene->Register(model_id, model_visible, _model);
 			_scene->GetOnRenderDelegate().SetCallback(this, SceneOnDrawCallback);
 
-			mem::sptr<gfx::Resource> resource = _scene->GetResource(model_id);
-			if (resource && resource->GetType() == gfx::ResourceType::RenderableModel)
+			mem::sptr<gpu::Resource> resource = _scene->GetResource(model_id);
+			if (resource && resource->GetType() == gpu::ResourceType::RenderableModel)
 			{
-				gfx::RenderableModel& renderable_model = (gfx::RenderableModel&)(*resource);
-				mem::sptr<gfx::Model> model = renderable_model.GetModel();
+				gpu::RenderableModel& renderable_model = (gpu::RenderableModel&)(*resource);
+				mem::sptr<gpu::Model> model = renderable_model.GetModel();
 				NP_ENGINE_ASSERT(model == _model, "these models should be the same!");
 
 				//TODO: improve meta values
-				gfx::RenderableMetaValues& meta_values = renderable_model.GetMetaValues();
-				flt scale = _camera.GetProjectionType() == gfx::Camera::ProjectionType::Perspective ? 10.f : 100.f;
+				gpu::RenderableMetaValues& meta_values = renderable_model.GetMetaValues();
+				flt scale = _camera.GetProjectionType() == gpu::Camera::ProjectionType::Perspective ? 10.f : 100.f;
 
 				meta_values.object.Model = glm::mat4(1.0f);
 				meta_values.object.Model = ::glm::scale(meta_values.object.Model, ::glm::vec3(scale, scale, scale));
@@ -302,10 +302,10 @@ namespace np::app
 				_rate -= 0.1;
 
 			if (key_states[nput::KeyCode::O].IsActive())
-				_camera.SetProjectionType(gfx::Camera::ProjectionType::Orthographic);
+				_camera.SetProjectionType(gpu::Camera::ProjectionType::Orthographic);
 
 			if (key_states[nput::KeyCode::P].IsActive())
-				_camera.SetProjectionType(gfx::Camera::ProjectionType::Perspective);
+				_camera.SetProjectionType(gpu::Camera::ProjectionType::Perspective);
 		}
 
 		virtual evnt::EventCategory GetHandledCategories() const override

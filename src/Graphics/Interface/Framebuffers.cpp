@@ -12,7 +12,7 @@
 
 #include "NP-Engine/Graphics/Detail/Vulkan/VulkanFramebuffers.hpp"
 
-namespace np::gfx
+namespace np::gpu
 {
 	mem::sptr<Framebuffers> Framebuffers::Create(mem::sptr<RenderPass> render_pass)
 	{

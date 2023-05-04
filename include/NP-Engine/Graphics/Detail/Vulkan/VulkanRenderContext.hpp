@@ -19,7 +19,7 @@
 #include "VulkanSemaphore.hpp"
 #include "VulkanFence.hpp"
 
-namespace np::gfx::__detail
+namespace np::gpu::__detail
 {
 	class VulkanRenderContext : public RenderContext
 	{

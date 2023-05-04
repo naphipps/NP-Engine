@@ -13,7 +13,7 @@ namespace np::gfxalg
 {
 	struct Subview
 	{
-		using Point = gfx::Image::Point;
+		using Point = gpu::Image::Point;
 		Point origin = {0, 0};
 		Point boundary = {0, 0};
 

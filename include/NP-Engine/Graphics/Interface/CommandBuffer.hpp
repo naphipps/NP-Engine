@@ -9,7 +9,7 @@
 
 #include "Command.hpp"
 
-namespace np::gfx
+namespace np::gpu
 {
 	class CommandBuffer
 	{

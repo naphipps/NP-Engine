@@ -9,7 +9,7 @@
 
 #include "ResourceType.hpp"
 
-namespace np::gfx
+namespace np::gpu
 {
 	struct Resource
 	{

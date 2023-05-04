@@ -9,13 +9,13 @@
 
 #include "NP-Engine/Vendor/GlmInclude.hpp"
 
-namespace np::gfx
+namespace np::gpu
 {
 	struct PipelineMetaValues
 	{
 		glm::mat4 View;
 		glm::mat4 Projection;
 	};
-} // namespace np::gfx
+} // namespace np::gpu
 
 #endif /* NP_ENGINE_GRAPHICS_INTERFACE_PIPELINE_META_VALUES_HPP */

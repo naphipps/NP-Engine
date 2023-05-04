@@ -19,7 +19,7 @@
 #include "VulkanCommandPool.hpp"
 #include "VulkanQueue.hpp"
 
-namespace np::gfx::__detail
+namespace np::gpu::__detail
 {
 	class VulkanRenderDevice : public RenderDevice
 	{
@@ -339,7 +339,7 @@ namespace np::gfx::__detail
 			_present_queue(CreateQueue(GetServices(), _device, _present_family_index, 0))
 		{
 			NP_ENGINE_ASSERT(GetDetailType() == GraphicsDetailType::Vulkan,
-				"VulkanRenderDevice required given RenderTarget to be gfx::GraphicsDetailType::Vulkan");
+				"VulkanRenderDevice required given RenderTarget to be gpu::GraphicsDetailType::Vulkan");
 		}
 
 		operator VkDevice() const

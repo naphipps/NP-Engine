@@ -25,7 +25,7 @@
 #include "VulkanSemaphore.hpp"
 #include "VulkanRenderPipeline.hpp"
 
-namespace np::gfx::__detail
+namespace np::gpu::__detail
 {
 	class VulkanRenderableModel : public RenderableModel
 	{
@@ -383,6 +383,6 @@ namespace np::gfx::__detail
 			_descriptor_info.sampler = *_sampler;
 		}
 	};
-} // namespace np::gfx::__detail
+} // namespace np::gpu::__detail
 
 #endif /* NP_ENGINE_VULKAN_RENDERABLE_MODEL_HPP */

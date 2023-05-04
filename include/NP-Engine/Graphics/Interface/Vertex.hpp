@@ -12,7 +12,7 @@
 
 #include "NP-Engine/Vendor/GlmInclude.hpp"
 
-namespace np::gfx
+namespace np::gpu
 {
 	struct Vertex
 	{
@@ -27,17 +27,17 @@ namespace np::gfx
 			return Position == other.Position && Color == other.Color && TextureCoordinate == other.TextureCoordinate;
 		}
 	};
-} // namespace np::gfx
+} // namespace np::gpu
 
 namespace std
 {
 	template <>
-	struct hash<::np::gfx::Vertex>
+	struct hash<::np::gpu::Vertex>
 	{
-		::np::siz operator()(const ::np::gfx::Vertex& vertex) const noexcept
+		::np::siz operator()(const ::np::gpu::Vertex& vertex) const noexcept
 		{
 			//treat the vertex like a buffer and hash the whole thing
-			return ::np::mat::HashFnv1aUi64(::np::mem::AddressOf(vertex), sizeof(::np::gfx::Vertex));
+			return ::np::mat::HashFnv1aUi64(::np::mem::AddressOf(vertex), sizeof(::np::gpu::Vertex));
 		}
 	};
 } // namespace std

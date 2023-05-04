@@ -13,7 +13,7 @@
 
 #include "VulkanInstance.hpp"
 
-namespace np::gfx::__detail
+namespace np::gpu::__detail
 {
 	class VulkanRenderTarget : public RenderTarget
 	{

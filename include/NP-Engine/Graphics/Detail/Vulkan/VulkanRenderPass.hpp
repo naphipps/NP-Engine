@@ -19,7 +19,7 @@
 #include "VulkanTexture.hpp"
 #include "VulkanRenderContext.hpp"
 
-namespace np::gfx::__detail
+namespace np::gpu::__detail
 {
 	class VulkanRenderPass : public RenderPass
 	{
@@ -264,6 +264,6 @@ namespace np::gfx::__detail
 			staging->Stage(_end_render_pass);
 		}
 	};
-} // namespace np::gfx::__detail
+} // namespace np::gpu::__detail
 
 #endif /* NP_ENGINE_VULKAN_RENDER_PASS_HPP */

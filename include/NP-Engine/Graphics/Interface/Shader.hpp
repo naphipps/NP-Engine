@@ -14,7 +14,7 @@
 
 #include "GraphicsDetailType.hpp"
 
-namespace np::gfx
+namespace np::gpu
 {
 	class Shader //TODO: we need to break this up to RenderShader, ComputeShader, etc, so that we can put the correct device with the correct shader
 	{
@@ -120,6 +120,6 @@ namespace np::gfx
 			return _properties;
 		}
 	};
-} // namespace np::gfx
+} // namespace np::gpu
 
 #endif /* NP_ENGINE_GRAPHICS_INTERFACE_SHADER_HPP */

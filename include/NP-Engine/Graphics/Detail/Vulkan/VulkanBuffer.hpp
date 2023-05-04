@@ -19,7 +19,7 @@
 #include "VulkanQueue.hpp"
 #include "VulkanFence.hpp"
 
-namespace np::gfx::__detail
+namespace np::gpu::__detail
 {
 	class VulkanBuffer : public Buffer
 	{
@@ -164,6 +164,6 @@ namespace np::gfx::__detail
 			return _size;
 		}
 	};
-} // namespace np::gfx::__detail
+} // namespace np::gpu::__detail
 
 #endif /* NP_ENGINE_VULKAN_BUFFER_HPP */

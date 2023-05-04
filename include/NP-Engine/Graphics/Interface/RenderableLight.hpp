@@ -16,7 +16,7 @@
 #include "RenderableLightObject.hpp"
 #include "Light.hpp"
 
-namespace np::gfx
+namespace np::gpu
 {
 	class RenderableLight : public RenderableLightObject
 	{
@@ -41,6 +41,6 @@ namespace np::gfx
 			return _light;
 		}
 	};
-} // namespace np::gfx
+} // namespace np::gpu
 
 #endif /* NP_ENGINE_GRAPHICS_INTERFACE_RENDERABLE_LIGHT_HPP */

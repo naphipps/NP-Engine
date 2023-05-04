@@ -12,7 +12,7 @@
 #include "GraphicsDetailType.hpp"
 #include "RenderPass.hpp"
 
-namespace np::gfx
+namespace np::gpu
 {
 	class Framebuffers
 	{

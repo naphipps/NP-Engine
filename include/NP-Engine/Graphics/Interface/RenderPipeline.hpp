@@ -14,7 +14,7 @@
 #include "RenderShader.hpp"
 #include "GraphicsDetailType.hpp"
 
-namespace np::gfx
+namespace np::gpu
 {
 	class RenderPipeline : public Pipeline
 	{

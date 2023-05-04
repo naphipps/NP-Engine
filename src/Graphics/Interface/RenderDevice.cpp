@@ -12,7 +12,7 @@
 
 #include "NP-Engine/Graphics/Detail/Vulkan/VulkanRenderDevice.hpp"
 
-namespace np::gfx
+namespace np::gpu
 {
 	mem::sptr<RenderDevice> RenderDevice::Create(mem::sptr<RenderTarget> target)
 	{

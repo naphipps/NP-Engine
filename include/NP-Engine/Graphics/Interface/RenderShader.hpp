@@ -13,7 +13,7 @@
 #include "Shader.hpp"
 #include "GraphicsDetailType.hpp"
 
-namespace np::gfx
+namespace np::gpu
 {
 	class RenderShader : public Shader
 	{

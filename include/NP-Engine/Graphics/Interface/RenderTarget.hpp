@@ -14,7 +14,7 @@
 
 //TODO: add ability to render to just half the window/surface, etc -- will be helpful adding DX12/etc support
 
-namespace np::gfx
+namespace np::gpu
 {
 	class RenderTarget
 	{

@@ -30,7 +30,7 @@ namespace np::app
 	class GraphicsLayer : public Layer //TODO: I'm tempted to refactor all "Graphics" things into "GPU" with namespace "gpu" since we use the gpu for so much more than graphics
 	{
 	protected:
-		mutexed_wrapper<con::vector<mem::wptr<gfx::Scene>>> _scenes;
+		mutexed_wrapper<con::vector<mem::wptr<gpu::Scene>>> _scenes;
 		siz _job_worker_index;
 		mem::sptr<jsys::Job> _rendering_job;
 		atm_bl _keep_rendering;
@@ -62,7 +62,7 @@ namespace np::app
 					auto scenes = _scenes.get_access();
 					for (auto it = scenes->begin(); it != scenes->end(); it++)
 					{
-						mem::sptr<gfx::Scene> scene = it->get_sptr();
+						mem::sptr<gpu::Scene> scene = it->get_sptr();
 						if (scene)
 							scene->Render();
 					}
@@ -83,7 +83,7 @@ namespace np::app
 						auto scenes = _scenes.get_access();
 						for (auto it = scenes->begin(); it != scenes->end(); it++)
 						{
-							mem::sptr<gfx::Scene> scene = it->get_sptr();
+							mem::sptr<gpu::Scene> scene = it->get_sptr();
 							if (scene)
 								scene->GetRenderTarget()->GetWindow()->SetTitle("FPS: " + to_str(fps)); //245-250 so far
 						}
@@ -120,7 +120,7 @@ namespace np::app
 						scenes->erase(scenes->begin() + i);
 		}
 
-		void Register(mem::sptr<gfx::Scene> scene)
+		void Register(mem::sptr<gpu::Scene> scene)
 		{
 			bl found = false;
 			auto scenes = _scenes.get_access();
@@ -131,7 +131,7 @@ namespace np::app
 				scenes->emplace_back(scene);
 		}
 
-		void Unregister(mem::sptr<gfx::Scene> scene)
+		void Unregister(mem::sptr<gpu::Scene> scene)
 		{
 			auto scenes = _scenes.get_access();
 			for (auto it = scenes->begin(); it != scenes->end(); it++)

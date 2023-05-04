@@ -13,7 +13,7 @@
 
 #include "Color.hpp"
 
-namespace np::gfx
+namespace np::gpu
 {
 	class Light
 	{
@@ -41,6 +41,6 @@ namespace np::gfx
 			return _type;
 		}
 	};
-} // namespace np::gfx
+} // namespace np::gpu
 
 #endif /* NP_ENGINE_GRAPHICS_INTERFACE_LIGHT_HPP */

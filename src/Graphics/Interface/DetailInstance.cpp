@@ -12,7 +12,7 @@
 
 #include "NP-Engine/Graphics/Detail/Vulkan/VulkanInstance.hpp"
 
-namespace np::gfx
+namespace np::gpu
 {
 	mem::sptr<DetailInstance> DetailInstance::Create(GraphicsDetailType detail_type, mem::sptr<srvc::Services> services)
 	{

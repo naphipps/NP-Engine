@@ -21,7 +21,7 @@
 #include "VulkanImageView.hpp"
 #include "VulkanSampler.hpp"
 
-namespace np::gfx::__detail
+namespace np::gpu::__detail
 {
 	class VulkanTexture
 	{
@@ -112,6 +112,6 @@ namespace np::gfx::__detail
 			return _height;
 		}
 	};
-} // namespace np::gfx::__detail
+} // namespace np::gpu::__detail
 
 #endif /* NP_ENGINE_VULKAN_TEXTURE_HPP */

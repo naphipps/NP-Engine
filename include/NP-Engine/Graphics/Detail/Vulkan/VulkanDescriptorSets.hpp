@@ -12,7 +12,7 @@
 #include "VulkanDescriptorSetLayout.hpp"
 #include "VulkanRenderContext.hpp"
 
-namespace np::gfx::__detail
+namespace np::gpu::__detail
 {
 	class VulkanDescriptorSets
 	{
@@ -122,6 +122,6 @@ namespace np::gfx::__detail
 			vkUpdateDescriptorSets(*_device, (ui32)writers.size(), writers.data(), 0, nullptr);
 		}
 	};
-} // namespace np::gfx::__detail
+} // namespace np::gpu::__detail
 
 #endif /* NP_ENGINE_VULKAN_DESCRIPTOR_SETS_HPP */

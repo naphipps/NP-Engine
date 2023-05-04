@@ -18,7 +18,7 @@
 #include "VulkanVertex.hpp"
 #include "VulkanFramebuffers.hpp"
 
-namespace np::gfx::__detail
+namespace np::gpu::__detail
 {
 	class VulkanRenderPipeline : public RenderPipeline
 	{

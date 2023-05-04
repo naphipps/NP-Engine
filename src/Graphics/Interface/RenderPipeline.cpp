@@ -12,7 +12,7 @@
 
 #include "NP-Engine/Graphics/Detail/Vulkan/VulkanRenderPipeline.hpp"
 
-namespace np::gfx
+namespace np::gpu
 {
 	mem::sptr<RenderPipeline> RenderPipeline::Create(Properties properties)
 	{

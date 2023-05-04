@@ -15,7 +15,7 @@
 #include "VulkanRenderableImage.hpp"
 #include "VulkanRenderableModel.hpp"
 
-namespace np::gfx::__detail
+namespace np::gpu::__detail
 {
 	// TODO: implement this
 	class VulkanRenderableLight : public RenderableLight
@@ -71,6 +71,6 @@ namespace np::gfx::__detail
 
 		void SetOutOfDate(bl is_out_of_date = true) override {}
 	};
-} // namespace np::gfx::__detail
+} // namespace np::gpu::__detail
 
 #endif /* NP_ENGINE_VULKAN_RENDERABLE_LIGHT_HPP */

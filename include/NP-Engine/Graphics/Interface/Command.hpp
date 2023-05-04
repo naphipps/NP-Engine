@@ -9,12 +9,12 @@
 
 #include "GraphicsDetailType.hpp"
 
-namespace np::gfx
+namespace np::gpu
 {
 	struct Command
 	{
 		virtual GraphicsDetailType GetDetailType() const = 0;
 	};
-} // namespace np::gfx
+} // namespace np::gpu
 
 #endif /* NP_ENGINE_GRAPHICS_INTERFACE_COMMAND_HPP */

@@ -18,7 +18,7 @@
 #include "RenderPipeline.hpp"
 #include "Camera.hpp"
 
-namespace np::gfx
+namespace np::gpu
 {
 	class Scene
 	{
@@ -290,6 +290,6 @@ namespace np::gfx
 			//*/
 		}
 	};
-} // namespace np::gfx
+} // namespace np::gpu
 
 #endif /* NP_ENGINE_GRAPHICS_INTERFACE_SCENE_HPP */

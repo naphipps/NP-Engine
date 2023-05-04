@@ -19,7 +19,7 @@
 
 #include "NP-Engine/Vendor/VulkanInclude.hpp"
 
-namespace np::gfx::__detail
+namespace np::gpu::__detail
 {
 	class VulkanInstance : public DetailInstance
 	{
@@ -287,6 +287,6 @@ namespace np::gfx::__detail
 			return GraphicsDetailType::Vulkan;
 		}
 	};
-} // namespace np::gfx::__detail
+} // namespace np::gpu::__detail
 
 #endif /* NP_ENGINE_VULKAN_INSTANCE_HPP */

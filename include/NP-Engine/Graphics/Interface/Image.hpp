@@ -19,7 +19,7 @@
 
 #include "Color.hpp"
 
-namespace np::gfx
+namespace np::gpu
 {
 	class Image
 	{
@@ -175,6 +175,6 @@ namespace np::gfx
 			}
 		}
 	};
-} // namespace np::gfx
+} // namespace np::gpu
 
 #endif /* NP_ENGINE_GRAPHICS_INTERFACE_IMAGE_HPP */

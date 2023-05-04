@@ -11,7 +11,7 @@
 
 #include "VulkanLogicalDevice.hpp"
 
-namespace np::gfx::__detail
+namespace np::gpu::__detail
 {
 	class VulkanSemaphore
 	{
@@ -48,6 +48,6 @@ namespace np::gfx::__detail
 			return _semaphore;
 		}
 	};
-} // namespace np::gfx::__detail
+} // namespace np::gpu::__detail
 
 #endif /* NP_ENGINE_VULKAN_SEMAPHORE_HPP */

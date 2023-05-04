@@ -22,7 +22,7 @@
 
 #include "VulkanRenderDevice.hpp"
 
-namespace np::gfx::__detail
+namespace np::gpu::__detail
 {
 	class VulkanRenderShader : public RenderShader
 	{
@@ -147,6 +147,6 @@ namespace np::gfx::__detail
 			return _shader_module;
 		}
 	};
-} // namespace np::gfx::__detail
+} // namespace np::gpu::__detail
 
 #endif /* NP_ENGINE_VULKAN_RENDER_SHADER_HPP */

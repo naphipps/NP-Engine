@@ -12,7 +12,7 @@
 
 #include "NP-Engine/Graphics/Detail/Vulkan/VulkanScene.hpp"
 
-namespace np::gfx
+namespace np::gpu
 {
 	mem::sptr<Scene> Scene::Create(Properties properties)
 	{
@@ -30,4 +30,4 @@ namespace np::gfx
 
 		return scene;
 	}
-} // namespace np::gfx
+} // namespace np::gpu

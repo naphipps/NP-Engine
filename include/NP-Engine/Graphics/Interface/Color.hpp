@@ -14,7 +14,7 @@
 
 // TODO: I think we could use some static colors
 
-namespace np::gfx
+namespace np::gpu
 {
 	enum class ColorChannel : ui32
 	{
@@ -105,6 +105,6 @@ namespace np::gfx
 	};
 
 	NP_ENGINE_STATIC_ASSERT(sizeof(Color) == 4, "Color must have size of 4.");
-} // namespace np::gfx
+} // namespace np::gpu
 
 #endif /* NP_ENGINE_GRAPHICS_INTERFACE_COLOR_HPP */

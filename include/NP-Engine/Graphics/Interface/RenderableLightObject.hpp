@@ -13,7 +13,7 @@
 #include "Pipeline.hpp"
 #include "RenderableObject.hpp"
 
-namespace np::gfx
+namespace np::gpu
 {
 	class RenderableLightObject : public RenderableObject
 	{
@@ -23,6 +23,6 @@ namespace np::gfx
 	public:
 		virtual void Stage(mem::sptr<CommandStaging> command_staging, mem::sptr<Pipeline> pipline, mem::sptr<Resource> resource) = 0;
 	};
-} // namespace np::gfx
+} // namespace np::gpu
 
 #endif /* NP_ENGINE_GRAPHICS_INTERFACE_RENDERABLE_LIGHT_OBJECT_HPP */

@@ -34,8 +34,8 @@ namespace np::gfxalg
 
 		struct Payload : public FloodFillImage::Payload
 		{
-			gfx::Color oldColor;
-			gfx::Color newColor;
+			gpu::Color oldColor;
+			gpu::Color newColor;
 			con::uset<OutsidePoint>* outsideEdgePoints = nullptr;
 			con::uset<Point>* edgePoints = nullptr;
 		};
@@ -96,9 +96,9 @@ namespace np::gfxalg
 
 		DrawableImage(ImageSubview&& image_subview): _image_subview(::std::move(image_subview)) {}
 
-		DrawableImage(gfx::Image& image): _image_subview(image) {}
+		DrawableImage(gpu::Image& image): _image_subview(image) {}
 
-		DrawableImage(gfx::Image& image, Subview subview): _image_subview(image, subview) {}
+		DrawableImage(gpu::Image& image, Subview subview): _image_subview(image, subview) {}
 
 		ImageSubview& GetImageSubview()
 		{
@@ -110,14 +110,14 @@ namespace np::gfxalg
 			return _image_subview;
 		}
 
-		void Draw(const Line& line, gfx::Color color)
+		void Draw(const Line& line, gpu::Color color)
 		{
 			con::vector<Point> points = ::np::alg::GetBresenhamLinePoints<Point::value_type>(line.Begin, line.End);
 			for (Point& point : points)
 				_image_subview.Set(point, color);
 		}
 
-		void Draw(const Polygon& polygon, gfx::Color color)
+		void Draw(const Polygon& polygon, gpu::Color color)
 		{
 			con::vector<Point> line;
 
@@ -136,7 +136,7 @@ namespace np::gfxalg
 				_image_subview.Set(point, color);
 		}
 
-		void Draw(const Circle& circle, gfx::Color color)
+		void Draw(const Circle& circle, gpu::Color color)
 		{
 			con::vector<Point> points = ::np::alg::GetMidpointCirclePoints<Point::value_type>(circle.Radius);
 
@@ -144,7 +144,7 @@ namespace np::gfxalg
 				_image_subview.Set(point + circle.Center, color);
 		}
 
-		void FloodFill(const Point& point, gfx::Color old_color, gfx::Color new_color, bl enable_diagonal = false)
+		void FloodFill(const Point& point, gpu::Color old_color, gpu::Color new_color, bl enable_diagonal = false)
 		{
 			Payload payload{};
 			payload.oldColor = old_color;
@@ -159,7 +159,7 @@ namespace np::gfxalg
 			flood.Fill(payload);
 		}
 
-		con::uset<OutsidePoint> FloodFillGetOutsideEdgePoints(const Point& point, gfx::Color old_color, gfx::Color new_color,
+		con::uset<OutsidePoint> FloodFillGetOutsideEdgePoints(const Point& point, gpu::Color old_color, gpu::Color new_color,
 															  bl enable_diagonal = false)
 		{
 			con::uset<OutsidePoint> outside_edge_points;
@@ -180,7 +180,7 @@ namespace np::gfxalg
 			return outside_edge_points;
 		}
 
-		con::uset<Point> FloodFillGetEdgePoints(const Point& point, gfx::Color old_color, gfx::Color new_color,
+		con::uset<Point> FloodFillGetEdgePoints(const Point& point, gpu::Color old_color, gpu::Color new_color,
 												bl enable_diagonal = false)
 		{
 			con::uset<Point> edge_points;

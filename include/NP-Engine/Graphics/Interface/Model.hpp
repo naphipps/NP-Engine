@@ -21,7 +21,7 @@
 
 //TODO: I feel like we need to load the skeleton somewhere around here, and them base it off our root bone
 
-namespace np::gfx
+namespace np::gpu
 {
 	class Model
 	{
@@ -232,6 +232,6 @@ namespace np::gfx
 			return _indices;
 		}
 	};
-} // namespace np::gfx
+} // namespace np::gpu
 
 #endif /* NP_ENGINE_GRAPHICS_INTERFACE_MODEL_HPP */

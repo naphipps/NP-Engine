@@ -13,7 +13,7 @@
 
 #include "VisibleObject.hpp"
 
-namespace np::gfx
+namespace np::gpu
 {
 	class Camera
 	{
@@ -100,6 +100,6 @@ namespace np::gfx
 			return false;
 		}
 	};
-} // namespace np::gfx
+} // namespace np::gpu
 
 #endif /* NP_ENGINE_GRAPHICS_INTERFACE_CAMERA_HPP */

@@ -13,7 +13,7 @@
 
 // TODO: do we want a timestamp and timestamp diff from last timestamp? I think so...?
 
-namespace np::gfx
+namespace np::gpu
 {
 	class CommandStaging
 	{
@@ -85,6 +85,6 @@ namespace np::gfx
 					_command_buffer->Add(*command);
 		}
 	};
-} // namespace np::gfx
+} // namespace np::gpu
 
 #endif /* NP_ENGINE_GRAPHICS_INTERFACE_COMMAND_STAGING_HPP */

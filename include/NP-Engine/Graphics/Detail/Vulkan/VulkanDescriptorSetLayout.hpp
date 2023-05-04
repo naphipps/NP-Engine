@@ -14,7 +14,7 @@
 
 #include "VulkanLogicalDevice.hpp"
 
-namespace np::gfx::__detail
+namespace np::gpu::__detail
 {
 	class VulkanDescriptorSetLayout
 	{
@@ -93,6 +93,6 @@ namespace np::gfx::__detail
 			return _layout_bindings;
 		}
 	};
-} // namespace np::gfx::__detail
+} // namespace np::gpu::__detail
 
 #endif /* NP_ENGINE_VULKAN_DESCRIPTOR_SET_LAYOUT_HPP */

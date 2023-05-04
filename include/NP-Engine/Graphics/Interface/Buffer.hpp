@@ -9,7 +9,7 @@
 
 #include "Resource.hpp"
 
-namespace np::gfx
+namespace np::gpu
 {
 	struct Buffer : public Resource
 	{
@@ -18,6 +18,6 @@ namespace np::gfx
 			return ResourceType::Buffer;
 		}
 	};
-} // namespace np::gfx
+} // namespace np::gpu
 
 #endif /* NP_ENGINE_GRAPHICS_INTERFACE_BUFFER_HPP */

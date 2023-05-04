@@ -15,7 +15,7 @@
 #include "VulkanCommandBuffer.hpp"
 #include "VulkanLogicalDevice.hpp"
 
-namespace np::gfx::__detail
+namespace np::gpu::__detail
 {
 	class VulkanCommandPool
 	{
@@ -139,6 +139,6 @@ namespace np::gfx::__detail
 				command_buffer->End();
 		}
 	};
-} // namespace np::gfx::__detail
+} // namespace np::gpu::__detail
 
 #endif /* NP_ENGINE_VULKAN_COMMAND_POOL_HPP */

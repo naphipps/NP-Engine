@@ -11,7 +11,7 @@
 #include "Device.hpp"
 #include "Model.hpp"
 
-namespace np::gfx
+namespace np::gpu
 {
 	class RenderDevice : public Device
 	{

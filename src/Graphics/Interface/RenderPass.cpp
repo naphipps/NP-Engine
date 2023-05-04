@@ -12,7 +12,7 @@
 
 #include "NP-Engine/Graphics/Detail/Vulkan/VulkanRenderPass.hpp"
 
-namespace np::gfx
+namespace np::gpu
 {
 	mem::sptr<RenderPass> RenderPass::Create(mem::sptr<RenderContext> context)
 	{

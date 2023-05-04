@@ -72,7 +72,7 @@ minimap_scene.render() //every id will submitted to a job for visible-calculatio
 		- <https://www.khronos.org/opengl/wiki/Primitive> their vertex convetions are nice
 */
 
-namespace np::gfx
+namespace np::gpu
 {
 	enum ShapeType : ui32
 	{
@@ -100,7 +100,7 @@ namespace np::gfx
 		- although I do like the idea of giving more control to the interface...
 */
 
-namespace np::gfx
+namespace np::gpu
 {
 	class Device
 	{

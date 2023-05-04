@@ -18,7 +18,7 @@
 
 #include "VulkanInstance.hpp"
 
-namespace np::gfx::__detail
+namespace np::gpu::__detail
 {
 	class VulkanLogicalDevice
 	{
@@ -239,6 +239,6 @@ namespace np::gfx::__detail
 			return format;
 		}
 	};
-} // namespace np::gfx::__detail
+} // namespace np::gpu::__detail
 
 #endif /* NP_ENGINE_VULKAN_DEVICE_HPP */

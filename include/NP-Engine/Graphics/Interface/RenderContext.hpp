@@ -10,7 +10,7 @@
 #include "RenderDevice.hpp"
 #include "Context.hpp"
 
-namespace np::gfx
+namespace np::gpu
 {
 	class RenderContext : public Context
 	{

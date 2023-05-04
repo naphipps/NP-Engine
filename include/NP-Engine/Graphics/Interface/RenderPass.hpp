@@ -13,7 +13,7 @@
 #include "Pass.hpp"
 #include "RenderContext.hpp"
 
-namespace np::gfx
+namespace np::gpu
 {
 	class RenderPass : public Pass
 	{

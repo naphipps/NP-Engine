@@ -11,7 +11,7 @@
 
 #include "Resource.hpp"
 
-namespace np::gfx
+namespace np::gpu
 {
 	using DeviceResourcePool = mem::AccumulatingPool<Resource>; //TODO: could this be an accumulating pool??
 }

@@ -11,7 +11,7 @@
 
 #include "RenderableObject.hpp"
 
-namespace np::gfx
+namespace np::gpu
 {
 	struct VisibleObject
 	{
@@ -24,6 +24,6 @@ namespace np::gfx
 
 		//TODO: should we add a transform for the Model/Image/Light? some way to update RenderableMetaValues
 	};
-} // namespace np::gfx
+} // namespace np::gpu
 
 #endif /* NP_ENGINE_GRAPHICS_INTERFACE_VISIBLE_OBJECT_HPP */

@@ -13,7 +13,7 @@
 
 #include "VulkanLogicalDevice.hpp"
 
-namespace np::gfx::__detail
+namespace np::gpu::__detail
 {
 	class VulkanSampler
 	{
@@ -84,6 +84,6 @@ namespace np::gfx::__detail
 			return _device;
 		}
 	};
-} // namespace np::gfx::__detail
+} // namespace np::gpu::__detail
 
 #endif /* NP_ENGINE_VULKAN_SAMPLER_HPP */

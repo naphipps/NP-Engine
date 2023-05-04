@@ -7,7 +7,7 @@
 #ifndef NP_ENGINE_GRAPHICS_INTERFACE_PASS_HPP
 #define NP_ENGINE_GRAPHICS_INTERFACE_PASS_HPP
 
-namespace np::gfx
+namespace np::gpu
 {
 	class Pass
 	{

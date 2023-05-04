@@ -12,7 +12,7 @@
 
 #include "NP-Engine/Graphics/Detail/Vulkan/VulkanRenderTarget.hpp"
 
-namespace np::gfx
+namespace np::gpu
 {
 	mem::sptr<RenderTarget> RenderTarget::Create(mem::sptr<DetailInstance> instance, mem::sptr<win::Window> window)
 	{

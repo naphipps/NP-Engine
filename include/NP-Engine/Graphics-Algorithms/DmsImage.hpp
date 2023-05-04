@@ -32,7 +32,7 @@ namespace np::gfxalg
 		struct Payload : public FloodFillImage::Payload
 		{
 			dbl isothreshold = 0.5;
-			gfx::ColorChannel channel = gfx::ColorChannel::Alpha;
+			gpu::ColorChannel channel = gpu::ColorChannel::Alpha;
 			con::uset<DmsPoint>* edgePoints = nullptr;
 			con::uset<DmsPoint>* visited = nullptr;
 		};
@@ -76,7 +76,7 @@ namespace np::gfxalg
 			- isovalue: fraction of maximum value
 				- example: 128 / 255 = 0.501960784313725 isovalue
 		*/
-		static dbl GetIsovalue(const ImageSubview& image_subview, const Point& point, gfx::ColorChannel channel)
+		static dbl GetIsovalue(const ImageSubview& image_subview, const Point& point, gpu::ColorChannel channel)
 		{
 			return ((dbl)image_subview.Get(point).GetChannelValue(channel)) / ((dbl)UINT8_MAX);
 		}
@@ -92,7 +92,7 @@ namespace np::gfxalg
 			3 p 4
 			5 6 7
 		*/
-		void GetLineSegments(con::uset<DmsLineSegment>& segments, dbl isothreshold, gfx::ColorChannel channel,
+		void GetLineSegments(con::uset<DmsLineSegment>& segments, dbl isothreshold, gpu::ColorChannel channel,
 							 const DmsPoint& p)
 		{
 			bl has_upper = p.y < _image_subview.GetHeight() - 1;
@@ -151,7 +151,7 @@ namespace np::gfxalg
 			a b
 			d c
 		*/
-		void GetLineSegments(con::uset<DmsLineSegment>& segments, dbl isothreshold, gfx::ColorChannel channel,
+		void GetLineSegments(con::uset<DmsLineSegment>& segments, dbl isothreshold, gpu::ColorChannel channel,
 							 const DmsPoint& a, const DmsPoint& b, const DmsPoint& c, const DmsPoint& d)
 		{
 			dbl a_iso = GetIsovalue(a, channel);
@@ -249,11 +249,11 @@ namespace np::gfxalg
 
 		DmsImage(ImageSubview&& image_subview): _image_subview(::std::move(image_subview)) {}
 
-		DmsImage(gfx::Image& image): _image_subview(image) {}
+		DmsImage(gpu::Image& image): _image_subview(image) {}
 
-		DmsImage(gfx::Image& image, Subview subview): _image_subview(image, subview) {}
+		DmsImage(gpu::Image& image, Subview subview): _image_subview(image, subview) {}
 
-		dbl GetIsovalue(const Point& point, gfx::ColorChannel channel) const
+		dbl GetIsovalue(const Point& point, gpu::ColorChannel channel) const
 		{
 			return GetIsovalue(_image_subview, point, channel);
 		}
@@ -262,10 +262,10 @@ namespace np::gfxalg
 			performs the dual marching squares algorithm
 			return object is a vector of shapes with holes
 		*/
-		Extraction GetExtraction(dbl isothreshold, gfx::ColorChannel channel)
+		Extraction GetExtraction(dbl isothreshold, gpu::ColorChannel channel)
 		{
 			NP_ENGINE_ASSERT(isothreshold >= 0.0 && isothreshold <= 1.0, "isothreshold must be on range [0, 1]");
-			NP_ENGINE_ASSERT(gfx::IsOnlyOneColorChannel(channel), "GetExtraction requires use of only one color channel");
+			NP_ENGINE_ASSERT(gpu::IsOnlyOneColorChannel(channel), "GetExtraction requires use of only one color channel");
 
 			Extraction extraction;
 			ui32 width = _image_subview.GetWidth();
@@ -387,10 +387,10 @@ namespace np::gfxalg
 			return extraction;
 		}
 
-		con::uset<DmsLineSegment> MarchCubesStride2(dbl isothreshold, gfx::ColorChannel channel)
+		con::uset<DmsLineSegment> MarchCubesStride2(dbl isothreshold, gpu::ColorChannel channel)
 		{
 			NP_ENGINE_ASSERT(isothreshold >= 0.0 && isothreshold <= 1.0, "isothreshold must be on range [0, 1]");
-			NP_ENGINE_ASSERT(gfx::IsOnlyOneColorChannel(channel), "GetExtraction requires use of only one color channel");
+			NP_ENGINE_ASSERT(gpu::IsOnlyOneColorChannel(channel), "GetExtraction requires use of only one color channel");
 
 			ui32 width = _image_subview.GetWidth();
 			ui32 height = _image_subview.GetHeight();
@@ -416,10 +416,10 @@ namespace np::gfxalg
 			return segments;
 		}
 
-		con::uset<DmsLineSegment> MarchCubesFlood(dbl isothreshold, gfx::ColorChannel channel)
+		con::uset<DmsLineSegment> MarchCubesFlood(dbl isothreshold, gpu::ColorChannel channel)
 		{
 			NP_ENGINE_ASSERT(isothreshold >= 0.0 && isothreshold <= 1.0, "isothreshold must be on range [0, 1]");
-			NP_ENGINE_ASSERT(gfx::IsOnlyOneColorChannel(channel), "GetExtraction requires use of only one color channel");
+			NP_ENGINE_ASSERT(gpu::IsOnlyOneColorChannel(channel), "GetExtraction requires use of only one color channel");
 
 			con::uset<DmsPoint> visited;
 			con::uset<DmsPoint> edge_points;

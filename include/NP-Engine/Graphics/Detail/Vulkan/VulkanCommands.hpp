@@ -11,7 +11,7 @@
 
 #include "NP-Engine/Graphics/Interface/Interface.hpp"
 
-namespace np::gfx::__detail
+namespace np::gpu::__detail
 {
 	struct VulkanCommand : public Command
 	{
@@ -280,6 +280,6 @@ namespace np::gfx::__detail
 			vkCmdPushConstants(command_buffer, PipelineLayout, ShaderStageFlags, Offset, Size, Values);
 		}
 	};
-} // namespace np::gfx::__detail
+} // namespace np::gpu::__detail
 
 #endif /* NP_ENGINE_VULKAN_COMMANDS_HPP */
