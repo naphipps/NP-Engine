@@ -108,10 +108,10 @@ namespace np::app
 		}
 
 	public:
-		GameLayer(mem::sptr<srvc::Services> services, WindowLayer& window_layer, GpuLayer& graphics_layer):
+		GameLayer(mem::sptr<srvc::Services> services, WindowLayer& window_layer, GpuLayer& gpu_layer):
 			Layer(services),
 			_window_layer(window_layer),
-			_gpu_layer(graphics_layer),
+			_gpu_layer(gpu_layer),
 			_window(nullptr),
 			_scene(nullptr),
 			_model_filename(

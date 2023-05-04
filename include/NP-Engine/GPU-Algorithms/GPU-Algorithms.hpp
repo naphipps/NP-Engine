@@ -4,8 +4,8 @@
 //
 //##===----------------------------------------------------------------------===##//
 
-#ifndef NP_ENGINE_GRAPHICS_ALGORITHMS_HPP
-#define NP_ENGINE_GRAPHICS_ALGORITHMS_HPP
+#ifndef NP_ENGINE_GPU_ALGORITHMS_HPP
+#define NP_ENGINE_GPU_ALGORITHMS_HPP
 
 #include "Subview.hpp"
 #include "ImageSubview.hpp"
@@ -14,4 +14,4 @@
 #include "DmsImage.hpp"
 #include "DmsLineSegment.hpp"
 
-#endif /* NP_ENGINE_GRAPHICS_ALGORITHMS_HPP */
+#endif /* NP_ENGINE_GPU_ALGORITHMS_HPP */
