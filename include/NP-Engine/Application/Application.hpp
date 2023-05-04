@@ -191,12 +191,9 @@ namespace np::app
 		}
 
 		/*
-			inspired by the following:
+			TODO: game loop reference:
 				- http://www.gameprogrammingpatterns.com/game-loop.html
 				- https://gafferongames.com/post/fix_your_timestep/
-
-			//TODO: turn our loop and rendering into a fixed step loop
-			//TODO: ^ so we can set it to 60fps or something with 0 being infinite
 		*/
 		virtual void Run(i32 argc, chr** argv)
 		{
