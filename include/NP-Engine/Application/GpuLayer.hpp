@@ -21,10 +21,6 @@
 #include "Layer.hpp"
 #include "Popup.hpp"
 
-#ifndef NP_ENGINE_RENDERING_LOOP_DURATION
-	#define NP_ENGINE_RENDERING_LOOP_DURATION 0 // milliseconds
-#endif
-
 namespace np::app
 {
 	class GpuLayer : public Layer
@@ -47,7 +43,7 @@ namespace np::app
 			_keep_rendering.store(true, mo_release);
 			tim::SteadyTimestamp next = tim::SteadyClock::now();
 			tim::SteadyTimestamp prev = next;
-			const tim::DblMilliseconds min_duration(NP_ENGINE_RENDERING_LOOP_DURATION); //TODO: just use application loop duration like window procedure
+			const tim::DblMilliseconds min_duration(2); //1.66666667 -> 600fps, 2 -> 500fps
 
 			tim::SteadyTimestamp frame_next = next;
 			tim::SteadyTimestamp frame_prev = next;
@@ -113,7 +109,7 @@ namespace np::app
 
 		virtual void Cleanup() override
 		{
-			auto scenes = _scenes.try_get_access_for(tim::DblMilliseconds(0.5));
+			auto scenes = _scenes.try_get_access_for(tim::DblMilliseconds(0.3));
 			if (scenes)
 				for (siz i = scenes->size() - 1; i < scenes->size(); i--)
 					if ((*scenes)[i].is_expired())

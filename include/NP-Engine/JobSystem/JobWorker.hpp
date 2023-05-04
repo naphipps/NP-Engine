@@ -161,7 +161,7 @@ namespace np::jsys
 
 						if (sleep_count < deep_sleep_threshold.value())
 						{
-							const tim::DblMilliseconds duration((dbl)NP_ENGINE_APPLICATION_LOOP_DURATION / 2.0);
+							const tim::DblMilliseconds duration(1);
 							const tim::SteadyTimestamp start = tim::SteadyClock::now();
 							while (tim::SteadyClock::now() - start < duration)
 								thr::ThisThread::yield();
@@ -170,7 +170,7 @@ namespace np::jsys
 						}
 						else
 						{
-							thr::ThisThread::sleep_for(tim::DblMilliseconds(NP_ENGINE_APPLICATION_LOOP_DURATION));
+							thr::ThisThread::sleep_for(tim::DblMilliseconds(3));
 						}
 					}
 				}

@@ -37,7 +37,7 @@ namespace np::app
 
 		void DestroySceneProcedure(mem::Delegate& d)
 		{
-			const tim::DblMilliseconds duration((dbl)NP_ENGINE_APPLICATION_LOOP_DURATION / 2.0);
+			const tim::DblMilliseconds duration(3);
 			while (_scene.get_strong_count() > 1)
 			{
 				tim::SteadyTimestamp start = tim::SteadyClock::now();

@@ -30,10 +30,6 @@
 #include "AudioLayer.hpp"
 #include "Popup.hpp"
 
-#ifndef NP_ENGINE_APPLICATION_LOOP_DURATION
-	#define NP_ENGINE_APPLICATION_LOOP_DURATION 0 // milliseconds
-#endif
-
 namespace np::app
 {
 	namespace __detail
@@ -215,7 +211,7 @@ namespace np::app
 
 			tim::SteadyTimestamp next = tim::SteadyClock::now();
 			tim::SteadyTimestamp prev = next;
-			const tim::DblMilliseconds min_duration(NP_ENGINE_APPLICATION_LOOP_DURATION);
+			const tim::DblMilliseconds min_duration(4); //max 250 loops per second
 			tim::SteadyTimestamp update_next = next;
 			tim::SteadyTimestamp update_prev = next;
 			tim::DblMilliseconds update_delta(0);

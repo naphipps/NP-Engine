@@ -16,10 +16,6 @@
 
 #include "WindowDetailType.hpp"
 
-#ifndef NP_ENGINE_WINDOW_LOOP_DURATION
-	#define NP_ENGINE_WINDOW_LOOP_DURATION 0 // milliseconds
-#endif
-
 namespace np::win
 {
 	class Window : public nput::InputSource

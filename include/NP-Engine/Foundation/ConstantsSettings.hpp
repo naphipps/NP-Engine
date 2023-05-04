@@ -23,16 +23,4 @@
 	#endif
 #endif
 
-#ifndef NP_ENGINE_APPLICATION_LOOP_DURATION
-	#define NP_ENGINE_APPLICATION_LOOP_DURATION 4 // 1 // milliseconds
-#endif
-
-#ifndef NP_ENGINE_RENDERING_LOOP_DURATION
-	#define NP_ENGINE_RENDERING_LOOP_DURATION 4 // 1.66666667 // milliseconds
-#endif
-
-#ifndef NP_ENGINE_WINDOW_LOOP_DURATION
-	#define NP_ENGINE_WINDOW_LOOP_DURATION 8 // 4 // milliseconds
-#endif
-
 #endif /* NP_ENGINE_CONSTANTS_SETTINGS_HPP */

@@ -32,6 +32,7 @@ namespace np::win::__detail
 		mutexed_wrapper<GLFWwindow*> _glfw_window;
 		str _title;
 		nput::MousePosition _mouse_position;
+		atm_flag _is_closing;
 
 #if NP_ENGINE_PLATFORM_IS_WINDOWS
 		using HitFlags = ui32;
@@ -957,6 +958,7 @@ namespace np::win::__detail
 			_prev_window_placement()
 #endif
 		{
+			_is_closing.test_and_set(mo_release);
 			auto glfw_window = _glfw_window.get_access();
 			if (!*glfw_window)
 			{
@@ -966,6 +968,7 @@ namespace np::win::__detail
 				*glfw_window = glfwCreateWindow(800, 600, _title.c_str(), nullptr, nullptr);
 				SetGlfwCallbacks(*glfw_window);
 				ApplySystemThemeOnGlfw(*glfw_window);
+				_is_closing.clear(mo_release);
 			}
 		}
 
@@ -1108,9 +1111,17 @@ namespace np::win::__detail
 
 		void Close()
 		{
-			mem::sptr<jsys::Job> closing_job = _services->GetJobSystem().CreateJob();
-			mem::sptr<evnt::Event> e = mem::create_sptr<WindowClosingEvent>(_services->GetAllocator(), GetUid(), closing_job);
-			_services->GetEventSubmitter().Submit(e);
+			if (!_is_closing.test_and_set(mo_release))
+			{
+				auto glfw_window = _glfw_window.get_access();
+				if (*glfw_window)
+				{
+					glfwHideWindow(*glfw_window);
+					mem::sptr<jsys::Job> closing_job = _services->GetJobSystem().CreateJob();
+					mem::sptr<evnt::Event> e = mem::create_sptr<WindowClosingEvent>(_services->GetAllocator(), GetUid(), closing_job);
+					_services->GetEventSubmitter().Submit(e);
+				}
+			}
 		}
 
 		void SetTitle(str title) override
