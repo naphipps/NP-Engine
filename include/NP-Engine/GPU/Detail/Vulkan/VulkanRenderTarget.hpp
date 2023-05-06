@@ -23,6 +23,7 @@ namespace np::gpu::__detail
 
 		static void FramebufferCallback(void* caller, ui32 width, ui32 height)
 		{
+			//NVIDIA resizing framebuffer is a nightmare
 			((VulkanRenderTarget*)caller)->_framebuffer_extent = { width, height };
 		}
 
