@@ -307,7 +307,7 @@ namespace np::app
 				_camera.SetProjectionType(gpu::Camera::ProjectionType::Perspective);
 
 			//just in case window is not created in constructor
-			if (!_window && _services->GetUidSystem().Has(_services->GetUidSystem().GetUid(_window_id_handle)))
+			if (!_window && _window_id_handle && _services->GetUidSystem().Has(_services->GetUidSystem().GetUid(_window_id_handle)))
 			{
 				_window = _window_layer.Get(_services->GetUidSystem().GetUid(_window_id_handle));
 				if (_window)
