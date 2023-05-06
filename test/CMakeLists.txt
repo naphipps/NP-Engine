@@ -6,6 +6,7 @@
 
 #TODO: should this cmake start a new project? I think so
 #TODO: I think we can put a lot of this into the test/src
+#TODO: fix cmake setup so linux build can resume
 
 set(NP_ENGINE_TESTER_HEADER_FILES
 	${PROJECT_SOURCE_DIR}/test/include/NP-Engine-Tester.hpp
