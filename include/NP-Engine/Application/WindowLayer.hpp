@@ -246,10 +246,10 @@ namespace np::app
             bl submit_application_close = false;
             {
 				auto windows = _windows.get_access();
-                submit_application_close |= !windows->empty();
-                
                 for (auto wit = windows->begin(); wit != windows->end();)
                 {
+					submit_application_close |= *wit;
+
                     if (!*wit)
                     {
                         wit = windows->erase(wit);
