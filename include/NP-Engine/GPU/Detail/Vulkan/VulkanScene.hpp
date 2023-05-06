@@ -185,6 +185,7 @@ namespace np::gpu::__detail
 			NP_ENGINE_PROFILE_SCOPE("vulkan scene draw");
 
 			//Scene::Render();
+			_on_render_delegate.ConstructData<Scene*>(this);
 			_on_render_delegate();
 			mem::sptr<CommandStaging> command_staging = BeginRenderCommandStaging();
 

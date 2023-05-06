@@ -21,7 +21,7 @@ namespace np::app
 		WindowLayer& _window_layer;
 		mem::sptr<uid::UidHandle> _window_id_handle;
 		mem::sptr<win::Window> _window;
-		mem::sptr<gpu::Scene> _scene;
+		mutexed_wrapper<mem::sptr<gpu::Scene>> _scene;
 		gpu::Camera _camera;
 		str _model_filename;
 		str _model_texture_filename;
@@ -99,11 +99,12 @@ namespace np::app
 				_window.reset();
 			}
 
-			if (_scene->GetRenderTarget()->GetWindow()->GetUid() == windowId)
+			auto scene = _scene.get_access();
+			if ((*scene)->GetRenderTarget()->GetWindow()->GetUid() == windowId)
 			{
 				jsys::JobSystem& job_system = _services->GetJobSystem();
 				mem::sptr<jsys::Job> destroy_scene_job = job_system.CreateJob();
-				destroy_scene_job->GetDelegate().ConstructData<mem::sptr<gpu::Scene>>(::std::move(_scene));
+				destroy_scene_job->GetDelegate().ConstructData<mem::sptr<gpu::Scene>>(::std::move(*scene));
 				destroy_scene_job->GetDelegate().SetCallback(DestroySceneCallback);
 				job_system.SubmitJob(jsys::JobPriority::Higher, destroy_scene_job);
 			}
@@ -143,8 +144,9 @@ namespace np::app
 
 		void SceneOnRender(mem::Delegate& d) //TODO: I think d should have a reference to the scene we're calling from
 		{
-			if (_scene)
-				_scene->SetCamera(_camera);
+			gpu::Scene* scene = d.GetData<gpu::Scene*>();
+			if (scene)
+				scene->SetCamera(_camera);
 		}
 
 		static void CreateSceneCallback(void* caller, mem::Delegate& d)
@@ -197,16 +199,17 @@ namespace np::app
 			mem::sptr<gpu::RenderPipeline> render_pipeline = gpu::RenderPipeline::Create(render_pipeline_properties);
 
 			gpu::Scene::Properties scene_properties{ render_pipeline, _camera };
-			mem::sptr<gpu::Scene> scene = gpu::Scene::Create(scene_properties);
+			auto scene = _scene.get_access();
+			*scene = gpu::Scene::Create(scene_properties);
 
 			_model_handle = _services->GetUidSystem().CreateUidHandle();
 			uid::Uid model_id = _services->GetUidSystem().GetUid(_model_handle);
 			mem::sptr<gpu::VisibleObject> model_visible = mem::create_sptr<gpu::VisibleObject>(_services->GetAllocator());
 
-			scene->Register(model_id, model_visible, _model);
-			scene->GetOnRenderDelegate().SetCallback(this, SceneOnRenderCallback);
+			(*scene)->Register(model_id, model_visible, _model);
+			(*scene)->GetOnRenderDelegate().SetCallback(this, SceneOnRenderCallback);
 
-			mem::sptr<gpu::Resource> resource = scene->GetResource(model_id);
+			mem::sptr<gpu::Resource> resource = (*scene)->GetResource(model_id);
 			if (resource && resource->GetType() == gpu::ResourceType::RenderableModel)
 			{
 				gpu::RenderableModel& renderable_model = (gpu::RenderableModel&)(*resource);
@@ -223,9 +226,7 @@ namespace np::app
 				meta_values.object.Model = ::glm::rotate(meta_values.object.Model, 90.f, _camera.Up);
 			}
 
-			geom::FltAabb3D model_aabb = _model->GetAabb();
-
-			_scene = ::std::move(scene);
+			geom::FltAabb3D model_aabb = _model->GetAabb(); //TODO: we need to update this
 		}
 
 		void SubmitCreateSceneJob()
@@ -314,9 +315,9 @@ namespace np::app
 					SubmitCreateSceneJob();
 			}
 
-			mem::sptr<gpu::Scene> scene = _scene; //_scene could be destroyed between if check and render, hence local sptr
-			if (scene)
-				scene->Render();
+			auto scene = _scene.get_access();
+			if (scene && *scene)
+				(*scene)->Render();
 		}
 
 		virtual evnt::EventCategory GetHandledCategories() const override
