@@ -277,9 +277,15 @@ namespace np::gpu::__detail
 				con::vector<VkPresentModeKHR> present_modes(count);
 				vkGetPhysicalDeviceSurfacePresentModesKHR(physical_device, render_target, &count, present_modes.data());
 
-				present_mode = VK_PRESENT_MODE_FIFO_KHR; //default
+				present_mode = VK_PRESENT_MODE_FIFO_KHR; //default - if we ever decide to support mobile, then we'll want to use fifo
 
-				// TODO: if we ever decide to support mobile, then we'll want to use fifo
+				for (VkPresentModeKHR& p : present_modes)
+					if (p == VK_PRESENT_MODE_IMMEDIATE_KHR)
+					{
+						present_mode = p;
+						break;
+					}
+
 				for (VkPresentModeKHR& p : present_modes)
 					if (p == VK_PRESENT_MODE_MAILBOX_KHR)
 					{
