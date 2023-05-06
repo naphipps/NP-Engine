@@ -19,7 +19,7 @@
 #include "DmsLineSegment.hpp"
 #include "FloodFillImage.hpp"
 
-namespace np::alg //TODO: I think we should just use namespace alg
+namespace np::alg //TODO: refactor DMS stuff to DualMarchingSquares
 {
 	class DmsImage
 	{
