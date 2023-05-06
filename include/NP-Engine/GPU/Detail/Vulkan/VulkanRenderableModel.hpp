@@ -342,8 +342,6 @@ namespace np::gpu::__detail
 
 		void PrepareForPipeline(mem::sptr<Pipeline> pipeline) override
 		{
-			SetOutOfDate();
-
 			if (IsOutOfDate())
 			{
 				NP_ENGINE_PROFILE_SCOPE("preparing for pipeline");
