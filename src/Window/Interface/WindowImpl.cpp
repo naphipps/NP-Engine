@@ -83,7 +83,7 @@ namespace np::win
 		return window;
 	}
 
-	void Window::InvokeResizeCallbacks(ui32 width, ui32 height)
+	void Window::InvokeSizeCallbacks(ui32 width, ui32 height)
 	{
 		mem::sptr<evnt::Event> e = mem::create_sptr<WindowSizeEvent>(_services->GetAllocator(), GetUid(), width, height);
 		_services->GetEventSubmitter().Submit(e);

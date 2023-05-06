@@ -200,7 +200,7 @@ namespace np::win::__detail
 		static void WindowSizeCallback(GLFWwindow* glfw_window, i32 width, i32 height)
 		{
 			GlfwWindow* window = (GlfwWindow*)glfwGetWindowUserPointer(glfw_window);
-			window->InvokeResizeCallbacks(width, height);
+			window->InvokeSizeCallbacks(width, height);
 		}
 
 		static void WindowPositionCallback(GLFWwindow* glfw_window, i32 x, i32 y)
@@ -218,7 +218,7 @@ namespace np::win::__detail
 				height = 0;
 
 			GlfwWindow* window = (GlfwWindow*)glfwGetWindowUserPointer(glfw_window);
-			window->InvokeResizeCallbacks(width, height);
+			window->InvokeFramebufferCallbacks(width, height);
 		}
 
 		static void WindowIconifyCallback(GLFWwindow* glfw_window, i32 iconified)

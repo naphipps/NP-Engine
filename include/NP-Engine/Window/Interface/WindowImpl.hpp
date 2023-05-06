@@ -32,6 +32,7 @@ namespace np::win
 		const thr::Thread::Id _owning_thread_id;
 		mem::sptr<srvc::Services> _services;
 		mem::sptr<uid::UidHandle> _uid_handle;
+		const uid::Uid _id;
 		
 		mutexed_wrapper<con::uset<SizeCallback>> _size_callbacks;
 		mutexed_wrapper<con::uset<PositionCallback>> _position_callbacks;
@@ -47,7 +48,7 @@ namespace np::win
 		mutexed_wrapper<con::umap<void*, MaximizeCallback>> _maximize_caller_callbacks;
 		mutexed_wrapper<con::umap<void*, FocusCallback>> _focus_caller_callbacks;
 
-		void InvokeResizeCallbacks(ui32 width, ui32 height);
+		void InvokeSizeCallbacks(ui32 width, ui32 height);
 
 		void InvokePositionCallbacks(i32 x, i32 y);
 
@@ -67,7 +68,8 @@ namespace np::win
 		Window(mem::sptr<srvc::Services> services):
 			_owning_thread_id(thr::ThisThread::get_id()),
 			_services(services),
-			_uid_handle(_services->GetUidSystem().CreateUidHandle())
+			_uid_handle(_services->GetUidSystem().CreateUidHandle()),
+			_id(_services->GetUidSystem().GetUid(_uid_handle))
 		{}
 
 	public:
@@ -94,7 +96,7 @@ namespace np::win
 
 		uid::Uid GetUid() const
 		{
-			return _services->GetUidSystem().GetUid(_uid_handle);
+			return _id;
 		}
 
 		virtual void SetTitle(str title) = 0;
@@ -265,7 +267,7 @@ namespace np::win
 			}
 		}
 
-		virtual void UnsetResizeCallback(SizeCallback callback)
+		virtual void UnsetSizeCallback(SizeCallback callback)
 		{
 			if (callback)
 				_size_callbacks.get_access()->erase(callback);

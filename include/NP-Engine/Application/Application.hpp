@@ -25,7 +25,6 @@
 #include "ApplicationEvents.hpp"
 #include "Layer.hpp"
 #include "WindowLayer.hpp"
-#include "GpuLayer.hpp"
 #include "NetworkLayer.hpp"
 #include "AudioLayer.hpp"
 #include "Popup.hpp"
@@ -91,7 +90,6 @@ namespace np::app
 	protected:
 		Properties _properties;
 		WindowLayer _window_layer;
-		GpuLayer _gpu_layer;
 		NetworkLayer _network_layer;
 		AudioLayer _audio_layer;
 		con::vector<Layer*> _layers;
@@ -102,7 +100,6 @@ namespace np::app
 			Layer(services),
 			_properties(app_properties),
 			_window_layer(services),
-			_gpu_layer(services),
 			_network_layer(services),
 			_audio_layer(services),
 			_running(false)
@@ -113,10 +110,9 @@ namespace np::app
 
 			_layers.emplace_back(this);
 			_layers.emplace_back(mem::AddressOf(_window_layer));
-			_layers.emplace_back(mem::AddressOf(_gpu_layer));
 		}
 
-		void HandlePopup(mem::sptr<evnt::Event> e)
+		virtual void HandlePopup(mem::sptr<evnt::Event> e)
 		{
 			ApplicationPopupEvent::DataType& data = e->GetData<ApplicationPopupEvent::DataType>();
 			data.select = Popup::Show(GetTitle(), data.message, data.style, data.buttons);
@@ -124,68 +120,43 @@ namespace np::app
 			e->SetHandled();
 		}
 
-		void HandleApplicationClose(mem::sptr<evnt::Event> e)
+		virtual void HandleApplicationClose(mem::sptr<evnt::Event> e)
 		{
 			StopRunning();
 			e->SetHandled();
 		}
 
-		void HandleEvent(mem::sptr<evnt::Event> e) override
+		virtual void HandleEvent(mem::sptr<evnt::Event> e) override
 		{
 			switch (e->GetType())
 			{
 			case evnt::EventType::ApplicationClose:
 				HandleApplicationClose(e);
 				break;
+
 			case evnt::EventType::ApplicationPopup:
 				HandlePopup(e);
 				break;
+
 			default:
 				break;
 			}
 		}
 
-		void PushLayer(Layer* layer)
+		virtual void PushLayer(Layer* layer)
 		{
 			_layers.emplace_back(layer);
 		}
 
-		void PushOverlay(Layer* overlay)
+		virtual void PushOverlay(Layer* overlay)
 		{
 			_overlays.emplace_back(overlay);
-		}
-
-		virtual void CustomizeJobSystem()
-		{
-			jsys::JobSystem& job_system = _services->GetJobSystem();
-			con::vector<jsys::JobWorker>& job_workers = job_system.GetJobWorkers();
-
-			NP_ENGINE_ASSERT(thr::Thread::HardwareConcurrency() >= 4, "NP Engine requires at least four cores");
-
-			using Fetch = jsys::JobWorker::Fetch;
-			// using FetchOrderArray = jsys::JobWorker::FetchOrderArray;
-			/*
-				Examples:
-					FetchOrderArray default_order{Fetch::Immediate, Fetch::PriorityBased, Fetch::Steal};
-					FetchOrderArray thief_order{Fetch::Steal, Fetch::Immediate, Fetch::None};
-					FetchOrderArray priority_order{Fetch::PriorityBased, Fetch::None, Fetch::None};
-					FetchOrderArray immediate_order{Fetch::Immediate, Fetch::Steal, Fetch::None};
-					FetchOrderArray only_immediate_order{ Fetch::Immediate, Fetch::Immediate, Fetch::Immediate };
-			*/
-
-			// rendering loop
-			job_workers[0].SetFetchOrder({Fetch::Immediate, Fetch::None, Fetch::None});
-			_gpu_layer.SetJobWorkerIndex(0);
-
-			// all other workers
-			for (siz i = 1; i < job_workers.size(); i++)
-				job_workers[i].SetFetchOrder({Fetch::Immediate, Fetch::PriorityBased, Fetch::Steal});
 		}
 
 	public:
 		virtual ~Application() {}
 
-		void Run()
+		virtual void Run()
 		{
 			Run(0, nullptr);
 		}
@@ -208,7 +179,7 @@ namespace np::app
 
 			tim::SteadyTimestamp next = tim::SteadyClock::now();
 			tim::SteadyTimestamp prev = next;
-			const tim::DblMilliseconds min_duration(4); //max 250 loops per second
+			const tim::DblMilliseconds min_duration(2); //4 -> 250 loops per second
 			tim::SteadyTimestamp update_next = next;
 			tim::SteadyTimestamp update_prev = next;
 			tim::DblMilliseconds update_delta(0);
@@ -216,10 +187,7 @@ namespace np::app
 			mem::sptr<evnt::Event> e = nullptr;
 			i64 i = 0;
 
-			CustomizeJobSystem();//TODO: move this to test proj
-			_gpu_layer.SubmitRenderingJob(); //TODO: move this to test proj
 			job_system.Start();
-
 			while (_running.load(mo_acquire))
 			{
 				NP_ENGINE_PROFILE_SCOPE("loop");
@@ -273,33 +241,32 @@ namespace np::app
 				prev = next;
 			}
 
-			_gpu_layer.StopRenderingJob();
 			job_system.Stop();
 			job_system.Clear();
 			event_queue.Clear();
 		}
 
-		Properties GetProperties() const
+		virtual Properties GetProperties() const
 		{
 			return _properties;
 		}
 
-		str GetTitle() const
+		virtual str GetTitle() const
 		{
 			return _properties.Title;
 		}
 
-		void StopRunning()
+		virtual void StopRunning()
 		{
 			_running.store(false, mo_release);
 		}
 
-		evnt::EventCategory GetHandledCategories() const override
+		virtual evnt::EventCategory GetHandledCategories() const override
 		{
 			return evnt::EventCategory::Application;
 		}
 
-		bl IsRunning() const
+		virtual bl IsRunning() const
 		{
 			return _running.load(mo_acquire);
 		}

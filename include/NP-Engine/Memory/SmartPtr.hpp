@@ -104,16 +104,19 @@ namespace np::mem
 
 	protected:
 		destroyer_type _destroyer;
-		T* _object;
+		atm<T*> _object;
 
 	public:
 		smart_ptr_resource(destroyer_type destroyer_type, T* object) : _destroyer(destroyer_type), _object(object) {}
 
 		virtual void destroy_object() override
 		{
-			_destroyer.destruct_object(_object);
-			_destroyer.deallocate_object(_object);
-			_object = nullptr;
+			T* object = _object.exchange(nullptr, mo_release);
+			if (object)
+			{
+				_destroyer.destruct_object(object);
+				_destroyer.deallocate_object(object);
+			}
 		}
 
 		virtual void destroy_self() override
@@ -124,7 +127,7 @@ namespace np::mem
 
 		void* get_object_ptr() const override
 		{
-			return _object;
+			return _object.load(mo_acquire);
 		}
 	};
 
