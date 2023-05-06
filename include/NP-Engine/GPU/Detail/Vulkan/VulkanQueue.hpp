@@ -40,6 +40,11 @@ namespace np::gpu::__detail
 			_queue(RetrieveQueue(_device, queue_family_index, queue_index))
 		{}
 
+		virtual ~VulkanQueue()
+		{
+			vkQueueWaitIdle(_queue);
+		}
+
 		operator VkQueue() const
 		{
 			return _queue;
