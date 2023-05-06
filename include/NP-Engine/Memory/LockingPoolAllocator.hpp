@@ -34,13 +34,13 @@ namespace np::mem
 		void Init()
 		{
 			Block block{nullptr, CHUNK_SIZE};
-			for (siz i = 0; i < ChunkCount() - 1; i++)
+			for (siz i = 0; i < GetChunkCount() - 1; i++)
 			{
 				block.ptr = &static_cast<ui8*>(_block.ptr)[i * CHUNK_SIZE];
 				mem::Construct<void*>(block, &static_cast<ui8*>(_block.ptr)[(i + 1) * CHUNK_SIZE]);
 			}
 
-			block.ptr = &static_cast<ui8*>(_block.ptr)[(ChunkCount() - 1) * CHUNK_SIZE];
+			block.ptr = &static_cast<ui8*>(_block.ptr)[(GetChunkCount() - 1) * CHUNK_SIZE];
 			mem::Construct<void*>(block, nullptr);
 
 			_alloc_iterator = _block.ptr;
