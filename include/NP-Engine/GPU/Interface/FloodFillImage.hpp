@@ -92,10 +92,6 @@ namespace np::alg
 
 		void Fill(Payload& payload)
 		{
-			// TODO: do we need some asserts for the following??
-			// TODO: FloodFill requires IsApproved to be connected to a function
-			// TODO: FloodFill requires ApprovedAction to be connected to a function
-
 			ImageSubview* prev_image_subview = payload.imageSubview;
 			if (!prev_image_subview)
 				payload.imageSubview = mem::AddressOf(_image_subview);
