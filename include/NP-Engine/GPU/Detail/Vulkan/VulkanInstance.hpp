@@ -58,7 +58,7 @@ namespace np::gpu::__detail
 					msg += "[[" + to_str(callback_data->pMessageIdName) + ", " + to_str(callback_data->messageIdNumber) + "]] ";
 					msg += to_str(callback_data->pMessage);
 
-					NP_ENGINE_LOG_ERROR(msg);
+					NP_ENGINE_LOG_CRITICAL(msg);
 					// NP_ENGINE_ASSERT(false, msg); // here in case for issues that cause a gpu crash
 				}
 			}
