@@ -128,8 +128,8 @@ namespace np::gpu::__detail
 		{
 			mem::sptr<CommandStaging> command_staging;
 
-			bl has_visibles = !_visibles.get_access()->empty();
-			if (has_visibles || true) { //TODO: cleanup this
+			bl has_visibles = !_visibles.get_access()->empty() || true;
+			if (has_visibles) { //TODO: cleanup this
 				VulkanRenderTarget& vulkan_render_target = (VulkanRenderTarget&)(*GetRenderTarget());
 				VkExtent2D framebuffer_extent = vulkan_render_target.GetFramebufferExtent();
 
