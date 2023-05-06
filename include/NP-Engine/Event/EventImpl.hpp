@@ -16,6 +16,9 @@ namespace np::evnt
 	{
 		None,
 
+		ApplicationClose,
+		ApplicationPopup,
+
 		WindowSetClose,
 		WindowClosing,
 		WindowFramebuffer,
@@ -30,9 +33,6 @@ namespace np::evnt
 		WindowMinimize,
 		WindowSetMaximize,
 		WindowMaximize,
-
-		ApplicationClose,
-		ApplicationPopup,
 
 		Max
 	};
