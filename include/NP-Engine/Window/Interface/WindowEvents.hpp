@@ -45,6 +45,27 @@ namespace np::win
 		}
 	};
 
+	//Window Create Events
+	struct WindowCreateEventData
+	{
+		DetailType detailType;
+		uid::Uid windowId;
+	};
+
+	class WindowCreateEvent : public WindowEvent<WindowCreateEventData>
+	{
+	public:
+		WindowCreateEvent(DetailType detail_type, uid::Uid windowId) : WindowEvent<WindowCreateEventData>()
+		{
+			ConstructData<WindowCreateEventData>(WindowCreateEventData{ detail_type, windowId });
+		}
+
+		evnt::EventType GetType() const override
+		{
+			return evnt::EventType::WindowCreate;
+		}
+	};
+
 	//Window Focus Events
 	struct WindowFocusEventData
 	{

@@ -31,7 +31,6 @@ namespace np::win
 	protected:
 		const thr::Thread::Id _owning_thread_id;
 		mem::sptr<srvc::Services> _services;
-		mem::sptr<uid::UidHandle> _uid_handle;
 		const uid::Uid _id;
 		
 		mutexed_wrapper<con::uset<SizeCallback>> _size_callbacks;
@@ -65,11 +64,10 @@ namespace np::win
 			return _owning_thread_id == thr::ThisThread::get_id();
 		}
 
-		Window(mem::sptr<srvc::Services> services):
+		Window(mem::sptr<srvc::Services> services, uid::Uid id):
 			_owning_thread_id(thr::ThisThread::get_id()),
 			_services(services),
-			_uid_handle(_services->GetUidSystem().CreateUidHandle()),
-			_id(_services->GetUidSystem().GetUid(_uid_handle))
+			_id(id)
 		{}
 
 	public:
@@ -81,7 +79,7 @@ namespace np::win
 
 		static con::vector<str> GetRequiredGpuExtentions(DetailType detail_type);
 
-		static mem::sptr<Window> Create(DetailType detail_type, mem::sptr<srvc::Services> services);
+		static mem::sptr<Window> Create(DetailType detail_type, mem::sptr<srvc::Services> services, uid::Uid id);
 
 		virtual ~Window() = default;
 

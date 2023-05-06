@@ -21,6 +21,7 @@ namespace np::app
 	class WindowLayer : public Layer
 	{
 	private:
+		const thr::Thread::Id _owning_thread_id;
 		mutexed_wrapper<con::vector<mem::sptr<win::Window>>> _windows;
 		mutexed_wrapper<con::uset<uid::Uid>> _windows_to_destroy;
 
@@ -168,6 +169,14 @@ namespace np::app
 			e->SetHandled();
 		}
 
+		void HandleWindowCreate(mem::sptr<evnt::Event> e)
+		{
+			win::WindowCreateEvent& create_event = (win::WindowCreateEvent&)(*e);
+			win::WindowCreateEventData& create_data = create_event.GetData();
+			Create(create_data.detailType, create_data.windowId);
+			e->SetHandled();
+		}
+
 		void HandleEvent(mem::sptr<evnt::Event> e) override
 		{
 			switch (e->GetType())
@@ -203,14 +212,23 @@ namespace np::app
 			case evnt::EventType::WindowSetSize:
 				HandleWindowSetSize(e);
 				break;
+
+			case evnt::EventType::WindowCreate:
+				HandleWindowCreate(e);
+				break;
 			
 			default:
 				break;
 			}
 		}
 
+		bl IsOwningThread() const
+		{
+			return _owning_thread_id == thr::ThisThread::get_id();
+		}
+
 	public:
-		WindowLayer(mem::sptr<srvc::Services> services): Layer(services)
+		WindowLayer(mem::sptr<srvc::Services> services): Layer(services), _owning_thread_id(thr::ThisThread::get_id())
 		{
 			win::Window::Init(win::DetailType::Glfw);
 			win::Window::Init(win::DetailType::Sdl);
@@ -225,9 +243,29 @@ namespace np::app
 			win::Window::Terminate(win::DetailType::Sdl);
 		}
 
-		void Acquire(mem::sptr<win::Window> window)
+		mem::sptr<win::Window> Create(win::DetailType detail_type, uid::Uid id)
 		{
-			_windows.get_access()->emplace_back(window);
+			mem::sptr<win::Window> window = nullptr;
+			if (IsOwningThread())
+			{
+				window = _windows.get_access()->emplace_back(win::Window::Create(detail_type, _services, id));
+			}
+			else
+			{
+				mem::sptr<evnt::Event> e = mem::create_sptr<win::WindowCreateEvent>(_services->GetAllocator(), detail_type, id);
+				_services->GetEventSubmitter().Submit(e);
+			}
+			return window;
+		}
+
+		mem::sptr<win::Window> Get(uid::Uid id)
+		{
+			mem::sptr<win::Window> window = nullptr;
+			auto windows = _windows.get_access();
+			for (auto it = windows->begin(); !window && it != windows->end(); it++)
+				if ((*it)->GetUid() == id)
+					window = *it;
+			return window;
 		}
 
 		void Update(tim::DblMilliseconds time_delta) override

@@ -66,14 +66,14 @@ namespace np::win
 		return extensions;
 	}
 
-	mem::sptr<Window> Window::Create(DetailType detail_type, mem::sptr<srvc::Services> services)
+	mem::sptr<Window> Window::Create(DetailType detail_type, mem::sptr<srvc::Services> services, uid::Uid id)
 	{
 		mem::sptr<Window> window = nullptr;
 
 		switch (detail_type)
 		{
 		case DetailType::Glfw:
-			window = mem::create_sptr<__detail::GlfwWindow>(services->GetAllocator(), services);
+			window = mem::create_sptr<__detail::GlfwWindow>(services->GetAllocator(), services, id);
 			break;
 
 		default:

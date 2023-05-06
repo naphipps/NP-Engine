@@ -948,8 +948,8 @@ namespace np::win::__detail
 			return extensions;
 		}
 
-		GlfwWindow(mem::sptr<srvc::Services> services):
-			Window(services)
+		GlfwWindow(mem::sptr<srvc::Services> services, uid::Uid id):
+			Window(services, id)
 #if NP_ENGINE_PLATFORM_IS_WINDOWS
 			,
 			_prev_window_procedure(nullptr),

@@ -19,6 +19,7 @@ namespace np::app
 	{
 	private:
 		WindowLayer& _window_layer;
+		mem::sptr<uid::UidHandle> _window_id_handle;
 		mem::sptr<win::Window> _window;
 		mem::sptr<gpu::Scene> _scene;
 		gpu::Camera _camera;
@@ -93,7 +94,10 @@ namespace np::app
 			uid::Uid windowId = d.GetData<uid::Uid>();
 
 			if (_window->GetUid() == windowId)
+			{
+				_window_id_handle.reset();
 				_window.reset();
+			}
 
 			if (_scene->GetRenderTarget()->GetWindow()->GetUid() == windowId)
 			{
@@ -132,46 +136,27 @@ namespace np::app
 			}
 		}
 
-		static void SceneOnDrawCallback(void* caller, mem::Delegate& d)
+		static void SceneOnRenderCallback(void* caller, mem::Delegate& d)
 		{
-			((GameLayer*)caller)->SceneOnDraw(d);
+			((GameLayer*)caller)->SceneOnRender(d);
 		}
 
-		void SceneOnDraw(mem::Delegate& d)
+		void SceneOnRender(mem::Delegate& d) //TODO: I think d should have a reference to the scene we're calling from
 		{
 			if (_scene)
 				_scene->SetCamera(_camera);
 		}
 
-	public:
-		GameLayer(mem::sptr<srvc::Services> services, WindowLayer& window_layer):
-			Layer(services),
-			_window_layer(window_layer),
-			_window(nullptr),
-			_scene(nullptr),
-			_model_filename(
-				fsys::Append(fsys::Append(fsys::Append(NP_ENGINE_WORKING_DIR, "test"), "assets"), "viking_room.obj")),
-			_model_texture_filename(
-				fsys::Append(fsys::Append(fsys::Append(NP_ENGINE_WORKING_DIR, "test"), "assets"), "viking_room.png")),
-			_model(mem::create_sptr<gpu::Model>(_services->GetAllocator(), _model_filename, _model_texture_filename, true)),
-			_model_handle(nullptr),
-			_start_timestamp(tim::SteadyClock::now())
+		static void CreateSceneCallback(void* caller, mem::Delegate& d)
 		{
-			//_model->GetTexture().SetHotReloadable();
-			//_renderable_model->GetUpdateMetaValuesOnFrameDelegate().SetCallback(this, UpdateMetaValuesOnFrameCallback);
+			((GameLayer*)caller)->CreateSceneProcedure();
+		}
 
-			_camera.Eye = { 30.f, 30.f, 30.f };
-			_camera.Fovy = 70.f;
-			_camera.NearPlane = 0.01f;
-			_camera.FarPlane = 1000.0f;
-			_camera.LookAt = { 0, 0, 0 };
-
-			//-----------------------------------------------------------
-			void* input_queue = mem::AddressOf(_services->GetInputQueue());
-
-			_window = win::Window::Create(win::DetailType::Glfw, _services);
+		void CreateSceneProcedure()
+		{
 			_window->SetTitle("My Game Window >:D");
 
+			void* input_queue = mem::AddressOf(_services->GetInputQueue());
 			_window->SetKeyCallback(input_queue, nput::InputListener::SubmitKeyState);
 			_window->SetMouseCallback(input_queue, nput::InputListener::SubmitMouseState);
 			_window->SetMousePositionCallback(input_queue, nput::InputListener::SubmitMousePosition);
@@ -188,7 +173,6 @@ namespace np::app
 			_window->SetPositionCallback(this, LogPosition);
 			_window->SetSizeCallback(this, LogSize);
 			//*/
-			_window_layer.Acquire(_window);
 
 			mem::sptr<gpu::DetailInstance> detail_instance = gpu::DetailInstance::Create(gpu::DetailType::Vulkan, _services);
 			mem::sptr<gpu::RenderTarget> render_target = gpu::RenderTarget::Create(detail_instance, _window);
@@ -209,20 +193,20 @@ namespace np::app
 			fragment_shader_properties.filename = fsys::Append(fsys::Append("Vulkan", "shaders"), "object_fragment.glsl");
 			mem::sptr<gpu::RenderShader> fragment_shader = gpu::RenderShader::Create(render_device, fragment_shader_properties);
 
-			gpu::RenderPipeline::Properties render_pipeline_properties{framebuffers, vertex_shader, fragment_shader};
+			gpu::RenderPipeline::Properties render_pipeline_properties{ framebuffers, vertex_shader, fragment_shader };
 			mem::sptr<gpu::RenderPipeline> render_pipeline = gpu::RenderPipeline::Create(render_pipeline_properties);
 
 			gpu::Scene::Properties scene_properties{ render_pipeline, _camera };
-			_scene = gpu::Scene::Create(scene_properties);
+			mem::sptr<gpu::Scene> scene = gpu::Scene::Create(scene_properties);
 
 			_model_handle = _services->GetUidSystem().CreateUidHandle();
 			uid::Uid model_id = _services->GetUidSystem().GetUid(_model_handle);
 			mem::sptr<gpu::VisibleObject> model_visible = mem::create_sptr<gpu::VisibleObject>(_services->GetAllocator());
 
-			_scene->Register(model_id, model_visible, _model);
-			_scene->GetOnRenderDelegate().SetCallback(this, SceneOnDrawCallback);
+			scene->Register(model_id, model_visible, _model);
+			scene->GetOnRenderDelegate().SetCallback(this, SceneOnRenderCallback);
 
-			mem::sptr<gpu::Resource> resource = _scene->GetResource(model_id);
+			mem::sptr<gpu::Resource> resource = scene->GetResource(model_id);
 			if (resource && resource->GetType() == gpu::ResourceType::RenderableModel)
 			{
 				gpu::RenderableModel& renderable_model = (gpu::RenderableModel&)(*resource);
@@ -240,6 +224,46 @@ namespace np::app
 			}
 
 			geom::FltAabb3D model_aabb = _model->GetAabb();
+
+			_scene = ::std::move(scene);
+		}
+
+		void SubmitCreateSceneJob()
+		{
+			NP_ENGINE_ASSERT(_window, "require valid window");
+			mem::sptr<jsys::Job> create_scene_job = _services->GetJobSystem().CreateJob();
+			create_scene_job->GetDelegate().SetCallback(this, CreateSceneCallback);
+			_services->GetJobSystem().SubmitJob(jsys::JobPriority::Higher, create_scene_job);
+		}
+
+	public:
+		GameLayer(mem::sptr<srvc::Services> services, WindowLayer& window_layer):
+			Layer(services),
+			_window_layer(window_layer),
+			_window_id_handle(_services->GetUidSystem().CreateUidHandle()),
+			_window(_window_layer.Create(win::DetailType::Glfw, _services->GetUidSystem().GetUid(_window_id_handle))),
+			_scene(nullptr),
+			_model_filename(
+				fsys::Append(fsys::Append(fsys::Append(NP_ENGINE_WORKING_DIR, "test"), "assets"), "viking_room.obj")),
+			_model_texture_filename(
+				fsys::Append(fsys::Append(fsys::Append(NP_ENGINE_WORKING_DIR, "test"), "assets"), "viking_room.png")),
+			_model(mem::create_sptr<gpu::Model>(_services->GetAllocator(), _model_filename, _model_texture_filename, true)),
+			_model_handle(nullptr),
+			_start_timestamp(tim::SteadyClock::now())
+		{
+			//_model->GetTexture().SetHotReloadable();
+			//_renderable_model->GetUpdateMetaValuesOnFrameDelegate().SetCallback(this, UpdateMetaValuesOnFrameCallback);
+
+			_camera.Eye = { 30.f, 30.f, 30.f };
+			_camera.Fovy = 70.f;
+			_camera.NearPlane = 0.01f;
+			_camera.FarPlane = 1000.0f;
+			_camera.LookAt = { 0, 0, 0 };
+
+			//-----------------------------------------------------------
+
+			if (_window)
+				SubmitCreateSceneJob();
 		}
 
 		void Update(tim::DblMilliseconds time_delta) override
@@ -281,6 +305,14 @@ namespace np::app
 
 			if (key_states[nput::KeyCode::P].IsActive())
 				_camera.SetProjectionType(gpu::Camera::ProjectionType::Perspective);
+
+			//just in case window is not created in constructor
+			if (!_window && _services->GetUidSystem().Has(_services->GetUidSystem().GetUid(_window_id_handle)))
+			{
+				_window = _window_layer.Get(_services->GetUidSystem().GetUid(_window_id_handle));
+				if (_window)
+					SubmitCreateSceneJob();
+			}
 
 			mem::sptr<gpu::Scene> scene = _scene; //_scene could be destroyed between if check and render, hence local sptr
 			if (scene)

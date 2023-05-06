@@ -19,6 +19,7 @@ namespace np::evnt
 		ApplicationClose,
 		ApplicationPopup,
 
+		WindowCreate,
 		WindowSetClose,
 		WindowClosing,
 		WindowFramebuffer,
