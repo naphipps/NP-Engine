@@ -108,7 +108,6 @@ set(NP_ENGINE_GPU_INTERFACE_HPP
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Interface/ScreenshotPass.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Interface/Resource.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Interface/ResourceType.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Interface/DeviceResourcePool.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Interface/RenderableObject.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Interface/RenderableLightObject.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Interface/RenderableImage.hpp

@@ -18,7 +18,6 @@
 
 #include "RenderableObject.hpp"
 #include "Resource.hpp"
-#include "DeviceResourcePool.hpp"
 
 /*
 	TODO: the latest design is the following:
