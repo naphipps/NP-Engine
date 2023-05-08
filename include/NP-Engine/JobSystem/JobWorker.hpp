@@ -7,6 +7,14 @@
 #ifndef NP_ENGINE_JOB_WORKER_HPP
 #define NP_ENGINE_JOB_WORKER_HPP
 
+#ifndef NP_ENGINE_JOB_WORKER_SLEEP_DURATION
+	#define NP_ENGINE_JOB_WORKER_SLEEP_DURATION 1 //milliseconds
+#endif
+
+#ifndef NP_ENGINE_JOB_WORKER_DEEP_SLEEP_DURATION
+	#define NP_ENGINE_JOB_WORKER_DEEP_SLEEP_DURATION 3 //milliseconds
+#endif
+
 #include <utility>
 #include <optional>
 
@@ -161,7 +169,7 @@ namespace np::jsys
 
 						if (sleep_count < deep_sleep_threshold.value())
 						{
-							const tim::DblMilliseconds duration(1);
+							const tim::DblMilliseconds duration(NP_ENGINE_JOB_WORKER_SLEEP_DURATION);
 							const tim::SteadyTimestamp start = tim::SteadyClock::now();
 							while (tim::SteadyClock::now() - start < duration)
 								thr::ThisThread::yield();
@@ -170,7 +178,7 @@ namespace np::jsys
 						}
 						else
 						{
-							thr::ThisThread::sleep_for(tim::DblMilliseconds(3));
+							thr::ThisThread::sleep_for(tim::DblMilliseconds(NP_ENGINE_JOB_WORKER_DEEP_SLEEP_DURATION));
 						}
 					}
 				}

@@ -7,6 +7,10 @@
 #ifndef NP_ENGINE_APPLICATION_HPP
 #define NP_ENGINE_APPLICATION_HPP
 
+#ifndef NP_ENGINE_APPLICATION_LOOP_DURATION
+	#define NP_ENGINE_APPLICATION_LOOP_DURATION 2 //milliseconds -- 4 -> 250 loops per second
+#endif
+
 #include "NP-Engine/Foundation/Foundation.hpp"
 
 #include "NP-Engine/Primitive/Primitive.hpp"
@@ -179,7 +183,7 @@ namespace np::app
 
 			tim::SteadyTimestamp next = tim::SteadyClock::now();
 			tim::SteadyTimestamp prev = next;
-			const tim::DblMilliseconds min_duration(2); //4 -> 250 loops per second
+			const tim::DblMilliseconds min_duration(NP_ENGINE_APPLICATION_LOOP_DURATION);
 			tim::SteadyTimestamp update_next = next;
 			tim::SteadyTimestamp update_prev = next;
 			tim::DblMilliseconds update_delta(0);
