@@ -468,7 +468,6 @@ if (MSVC)
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /D_USE_MATH_DEFINES=1")
 else()
 	set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DDEBUG=1")
-	set(CMAKE_BUILD_TYPE "Debug")
 endif()
 
 target_link_libraries(
