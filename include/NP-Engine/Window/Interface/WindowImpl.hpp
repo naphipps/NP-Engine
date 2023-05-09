@@ -16,6 +16,8 @@
 
 #include "DetailType.hpp"
 
+//TODO: add a wait to create fixed-size windows, fullscreen, frameless, etc
+
 namespace np::win
 {
 	class Window : public nput::InputSource
