@@ -52,7 +52,7 @@ namespace np::mem
 
 		inline pointer allocate(size_type size)
 		{
-			return static_cast<pointer>(_allocator.Allocate(size * sizeof(T)).ptr);
+			return static_cast<pointer>(_allocator.Allocate(size * sizeof(value_type)).ptr);
 		}
 
 		inline void deallocate(pointer ptr, size_type size)
