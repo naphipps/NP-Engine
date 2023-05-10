@@ -89,6 +89,8 @@ namespace np::gpu::__detail
 
 		~VulkanBuffer()
 		{
+			vkDeviceWaitIdle(*_command_pool->GetLogicalDevice());
+
 			if (_buffer)
 			{
 				vkDestroyBuffer(*GetLogicalDevice(), _buffer, nullptr);

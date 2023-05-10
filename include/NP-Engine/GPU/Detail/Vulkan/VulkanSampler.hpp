@@ -67,6 +67,8 @@ namespace np::gpu::__detail
 
 		~VulkanSampler()
 		{
+			vkDeviceWaitIdle(*_device);
+
 			if (_sampler)
 			{
 				vkDestroySampler(*_device, _sampler, nullptr);

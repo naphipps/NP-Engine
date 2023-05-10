@@ -62,6 +62,11 @@ namespace np::gpu::__detail
 			_height(::std::move(other._height))
 		{}
 
+		~VulkanTexture()
+		{
+			vkDeviceWaitIdle(*_command_pool->GetLogicalDevice());
+		}
+
 		mem::sptr<VulkanCommandPool> GetCommandPool() const
 		{
 			return _command_pool;
