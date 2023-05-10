@@ -222,9 +222,14 @@ namespace np::gpu
 			for (auto it = visibles->begin(); it != visibles->end();)
 			{
 				if (!uid_system.Has(it->first))
+				{
+					GetRenderDevice()->Unregister(it->first);
 					it = visibles->erase(it);
+				}
 				else
+				{
 					it++;
+				}
 			}
 		}
 
