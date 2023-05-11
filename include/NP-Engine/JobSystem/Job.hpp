@@ -17,7 +17,13 @@
 
 #include "JobPriority.hpp"
 
-// TODO: how do we build a job (and set dependencies) from concurrent jobs - locks and condition variables maybe? Or not at all??
+/*
+	TODO: how do we build a job (and set dependencies) from concurrent jobs - locks and condition variables maybe? Or not at all??
+
+
+	TODO: test waiting on a job to complete - essentially a syncronyous job that we still submit... use the counter on the sptr...
+	while waiting on sptr.strong_count == 1, we can also pull sub-tasks from queue so we can work while we wait on everyone to finish
+*/
 
 namespace np::jsys
 {
