@@ -12,7 +12,7 @@
 //TODO: I think our test app should contain all assets, including shaders
 // TODO: move as much as we can into test proj
 
-::np::i32 main(::np::i32 argc, ::np::chr** argv) //TODO: moving main to test broke build on linux -- I think our test needs to be it's own project??
+::np::i32 main(::np::i32 argc, ::np::chr** argv)
 {
 	using namespace ::np;
 

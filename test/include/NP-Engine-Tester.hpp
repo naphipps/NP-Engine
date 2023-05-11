@@ -142,7 +142,7 @@ namespace np::app
 			((GameLayer*)caller)->SceneOnRender(d);
 		}
 
-		void SceneOnRender(mem::Delegate& d) //TODO: I think d should have a reference to the scene we're calling from
+		void SceneOnRender(mem::Delegate& d)
 		{
 			gpu::Scene* scene = d.GetData<gpu::Scene*>();
 			if (scene)
