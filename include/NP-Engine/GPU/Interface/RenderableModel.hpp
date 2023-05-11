@@ -29,7 +29,11 @@ namespace np::gpu
 
 		// TODO: add struct that represents all the needed information to render our _model
 
-		RenderableModel(mem::sptr<srvc::Services> services, mem::sptr<Model> model): _services(services), _model(model), _meta_values() {}
+		RenderableModel(mem::sptr<srvc::Services> services, mem::sptr<Model> model): _services(services), _model(model)
+		{
+			_meta_values.object.Model = ::glm::mat4{ 1 };
+			_meta_values.object.Normal = ::glm::mat4{ 1 };
+		}
 
 	public:
 
