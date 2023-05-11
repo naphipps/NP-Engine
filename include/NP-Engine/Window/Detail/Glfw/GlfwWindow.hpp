@@ -1109,7 +1109,7 @@ namespace np::win::__detail
 			return DetailType::Glfw;
 		}
 
-		void Close()
+		void Close() override
 		{
 			if (!_is_closing.test_and_set(mo_release))
 			{

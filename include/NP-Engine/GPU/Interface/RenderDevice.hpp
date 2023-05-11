@@ -38,7 +38,7 @@ namespace np::gpu
 			return _target;
 		}
 
-		virtual mem::sptr<srvc::Services> GetServices() const
+		virtual mem::sptr<srvc::Services> GetServices() const override
 		{
 			return _target->GetServices();
 		}

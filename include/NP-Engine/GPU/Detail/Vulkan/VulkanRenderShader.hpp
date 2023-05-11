@@ -121,7 +121,7 @@ namespace np::gpu::__detail
 			Dispose();
 		}
 
-		mem::sptr<RenderDevice> GetRenderDevice() const
+		mem::sptr<RenderDevice> GetRenderDevice() const override
 		{
 			return _device;
 		}
