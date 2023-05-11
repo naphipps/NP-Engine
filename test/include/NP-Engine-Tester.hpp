@@ -112,7 +112,7 @@ namespace np::app
 			d.DestructData<uid::Uid>();
 		}
 
-		virtual void AdjustForWindowClosing(mem::sptr<evnt::Event> e)
+		void AdjustForWindowClosing(mem::sptr<evnt::Event> e)
 		{
 			win::WindowClosingEvent& closing_event = (win::WindowClosingEvent&)(*e);
 			win::WindowClosingEventData& closing_data = closing_event.GetData();
@@ -124,7 +124,7 @@ namespace np::app
 			_services->GetJobSystem().SubmitJob(jsys::JobPriority::Higher, adjust_job);
 		}
 
-		virtual void HandleEvent(mem::sptr<evnt::Event> e) override
+		void HandleEvent(mem::sptr<evnt::Event> e) override
 		{
 			switch (e->GetType())
 			{
@@ -163,7 +163,7 @@ namespace np::app
 			_window->SetMouseCallback(input_queue, nput::InputListener::SubmitMouseState);
 			_window->SetMousePositionCallback(input_queue, nput::InputListener::SubmitMousePosition);
 			_window->SetControllerCallback(input_queue, nput::InputListener::SubmitControllerState);
-			//*
+			/*
 			_window->SetKeyCallback(this, LogSubmitKeyState);
 			_window->SetMouseCallback(this, LogSubmitMouseState);
 			_window->SetMousePositionCallback(this, LogSubmitMousePosition);
@@ -218,12 +218,12 @@ namespace np::app
 
 				//TODO: improve meta values
 				gpu::RenderableMetaValues& meta_values = renderable_model.GetMetaValues();
-				flt scale = _camera.GetProjectionType() == gpu::Camera::ProjectionType::Perspective ? 10.f : 100.f;
+				flt scale = _camera.projectionType == gpu::Camera::ProjectionType::Perspective ? 10.f : 100.f;
 
-				meta_values.object.Model = glm::mat4(1.0f);
-				meta_values.object.Model = ::glm::scale(meta_values.object.Model, ::glm::vec3(scale, scale, scale));
+				//meta_values.object.Model = glm::mat4(1.0f);
+				//meta_values.object.Model = ::glm::scale(meta_values.object.Model, ::glm::vec3(scale, scale, scale));
 				// meta_values.object.Model = ::glm::translate(meta_values.object.Model, ::glm::vec3(-10, -10, -10));
-				meta_values.object.Model = ::glm::rotate(meta_values.object.Model, 90.f, _camera.Up);
+				//meta_values.object.Model = ::glm::rotate(meta_values.object.Model, 90.f, _camera.Up);
 			}
 
 			geom::FltAabb3D model_aabb = _model->GetAabb(); //TODO: we need to update this
@@ -235,6 +235,191 @@ namespace np::app
 			mem::sptr<jsys::Job> create_scene_job = _services->GetJobSystem().CreateJob();
 			create_scene_job->GetDelegate().SetCallback(this, CreateSceneCallback);
 			_services->GetJobSystem().SubmitJob(jsys::JobPriority::Higher, create_scene_job);
+		}
+
+		nput::KeyCodeStates _prev_keys;
+		nput::MouseCodeStates _prev_mouse;
+		nput::MousePosition _prev_mouse_position;
+
+		bl _mouse_is_dragging = false;
+
+		void DigestInput(tim::DblMilliseconds time_delta)
+		{
+			using Key = nput::KeyCode;
+			using Mouse = nput::MouseCode;
+
+			nput::InputQueue& input = _services->GetInputQueue();
+			const nput::KeyCodeStates& keys = input.GetKeyCodeStates();
+			const nput::MouseCodeStates& mouse = input.GetMouseCodeStates();
+			const nput::MousePosition& mouse_position = input.GetMousePosition();
+
+			//rate = unit / second
+
+			//TODO: improve camera controls and get the camera/visible thing working
+
+			tim::DblSeconds seconds = time_delta;
+			dbl s = seconds.count();
+
+			if (keys[Key::A].IsActive())
+				_camera.position.x -= _rate * s;
+
+			if (keys[Key::D].IsActive())
+				_camera.position.x += _rate * s;
+
+			if (keys[Key::W].IsActive())
+			{
+				::glm::vec3 direction = (_camera.lookAt - _camera.eye) / ::glm::distance(_camera.eye, _camera.lookAt);
+				direction *= _rate * s;
+
+				::glm::vec4 pos = { _camera.position.x, _camera.position.y, _camera.position.z, 1 };
+				pos = ::glm::translate(::glm::mat4{ 1.f }, direction) * pos;
+				_camera.position = { pos.x, pos.y, pos.z };
+				_camera.NormalizeLookAt();
+			}
+
+			if (keys[Key::S].IsActive())
+			{
+				::glm::vec3 direction = _camera.lookAt - _camera.eye;
+				direction /= ::glm::distance(_camera.eye, _camera.lookAt);
+				direction *= -_rate * s;
+
+				::glm::vec4 new_position = { _camera.position.x, _camera.position.y, _camera.position.z, 1 };
+				::glm::mat4 identity{ 1.f };
+				::glm::mat4 trans = ::glm::translate(identity, direction);
+				new_position = trans * new_position;
+				_camera.position = { new_position.x, new_position.y, new_position.z };
+				_camera.NormalizeLookAt();
+			}
+
+			if (keys[Key::Q].IsActive())
+				_camera.position.z += _rate * s;
+
+			if (keys[Key::E].IsActive())
+				_camera.position.z -= _rate * s;
+
+			if (keys[Key::R].IsActive() && _rate < DBL_MAX)
+				_rate += 0.1;
+
+			if (keys[Key::T].IsActive() && _rate > 0)
+				_rate -= 0.1;
+
+			if (keys[Key::O].IsActive())
+				_camera.projectionType = gpu::Camera::ProjectionType::Orthographic;
+
+			if (keys[Key::P].IsActive())
+				_camera.projectionType = gpu::Camera::ProjectionType::Perspective;
+
+			if (keys[Key::C].IsActive() && !_prev_keys[Key::C].IsActive())
+			{
+				_camera._contains = false;
+				//(*_scene.get_access())->UnregisterVisible(_services->GetUidSystem().GetUid(_model_handle));
+				//_model_handle.reset();
+				//(*_scene.get_access())->UnregisterResource(_services->GetUidSystem().GetUid(_model_handle));
+			}
+
+			if (keys[Key::V].IsActive() && !_prev_keys[Key::V].IsActive())
+			{
+				_camera._contains = true;
+				//uid::Uid model_id = _services->GetUidSystem().GetUid(_model_handle);
+				//(*_scene.get_access())->Register(model_id, mem::create_sptr<gpu::VisibleObject>(_services->GetAllocator()));
+			}
+
+			if (keys[Key::Z].IsActive())
+			{
+				//turn camera to origin
+				_camera.lookAt = { 0, 0, 0 };
+				_camera.NormalizeLookAt();
+
+				//make the camera lookat a unit vector
+			}
+
+
+
+
+			if (mouse[Mouse::LeftButton].IsActive())
+			{
+				if (!_prev_mouse[Mouse::LeftButton].IsActive())
+					_mouse_is_dragging = true;
+
+				if (_mouse_is_dragging)
+				{
+					if (mouse_position.GetPosition() != _prev_mouse_position.GetPosition())
+					{
+						/*
+							TODO: implement camera rotations when dragging mouse
+								- <https://www.youtube.com/watch?v=MZuYmG1GBFk>
+								- <https://www.youtube.com/results?search_query=glm+quaterion+camera>
+								- <https://en.wikipedia.org/wiki/Aircraft_principal_axes>
+						*/
+
+						NP_ENGINE_LOG_INFO("mouse dragging");
+
+						flt scale = 0.002;
+						//::glm::vec2 diff = _prev_mouse_position.GetPosition() - mouse_position.GetPosition();
+						//diff = ::glm::radians(-diff);
+						//diff *= scale;
+						//flt sign = diff.x < 0 ? -1 : 1;
+						//diff.x /= 20.f;
+						//diff.y /= 50.f;
+
+						::glm::vec2 curr = mouse_position.GetPosition();
+						curr = ::glm::radians(curr);
+						curr *= scale;
+
+						
+						::glm::quat rot_q{ curr.x, _camera.up };
+						//rot_q = ::glm::normalize(rot_q);
+
+						::glm::vec3 temp{ 1.f, 0.f, 0.f };
+						::glm::quat res = rot_q * temp * ::glm::conjugate(rot_q);
+						temp = { res.x, res.y, res.z };
+						//temp = ::glm::normalize(temp);
+
+						::glm::vec3 right = ::glm::cross(_camera.up, temp);
+						rot_q = { curr.y, right };
+						//rot_q = ::glm::normalize(rot_q);
+						res = rot_q * temp * ::glm::conjugate(rot_q);
+						temp = { res.x, res.y, res.z };
+
+						_camera.lookAt = _camera.eye + temp;
+
+						/*
+							::glm::quat rot_q{ diff.x, _camera.up };
+							rot_q = ::glm::normalize(rot_q);
+							::glm::quat con_q = ::glm::conjugate(rot_q);
+							::glm::vec3 direction = ::glm::normalize(_camera.GetLookDirection());
+							::glm::quat res = rot_q * direction * con_q;
+							direction = { res.x, res.y, res.z };
+							_camera.lookAt = _camera.eye + direction;
+						*/
+						/*
+							quaternion rotation:
+								::glm::quat q, q_;
+								::glm::vec3 p, p_;
+								p_ = q * p * q_;
+						*/
+
+						_camera.NormalizeLookAt();
+					}
+				}
+			}
+			else
+			{
+				_mouse_is_dragging = false;
+			}
+
+
+
+
+
+
+			for (siz i = 0; i < keys.size(); i++)
+				_prev_keys[i] = keys[i];
+
+			for (siz i = 0; i < mouse.size(); i++)
+				_prev_mouse[i] = mouse[i];
+
+			_prev_mouse_position = mouse_position;
 		}
 
 	public:
@@ -255,11 +440,11 @@ namespace np::app
 			//_model->GetTexture().SetHotReloadable();
 			//_renderable_model->GetUpdateMetaValuesOnFrameDelegate().SetCallback(this, UpdateMetaValuesOnFrameCallback);
 
-			_camera.Eye = { 30.f, 30.f, 30.f };
-			_camera.Fovy = 70.f;
-			_camera.NearPlane = 0.01f;
-			_camera.FarPlane = 1000.0f;
-			_camera.LookAt = { 0, 0, 0 };
+			_camera.eye = { 10.f, 10.f, 10.f };
+			_camera.fovy = 70.f;
+			_camera.nearPlane = 0.01f;
+			_camera.farPlane = 100.0f;
+			_camera.lookAt = { 0, 0, 0 };
 
 			//-----------------------------------------------------------
 
@@ -267,45 +452,11 @@ namespace np::app
 				SubmitCreateSceneJob();
 		}
 
+		
+
 		void Update(tim::DblMilliseconds time_delta) override
 		{
-			nput::InputQueue& input = _services->GetInputQueue();
-			const nput::KeyCodeStates& key_states = input.GetKeyCodeStates();
-
-			//rate = unit / second
-
-			tim::DblSeconds seconds = time_delta;
-			dbl s = seconds.count();
-
-			if (key_states[nput::KeyCode::A].IsActive())
-				_camera.Position.x -= _rate * s;
-
-			if (key_states[nput::KeyCode::D].IsActive())
-				_camera.Position.x += _rate * s;
-
-			if (key_states[nput::KeyCode::W].IsActive())
-				_camera.Position.y += _rate * s;
-
-			if (key_states[nput::KeyCode::S].IsActive())
-				_camera.Position.y -= _rate * s;
-
-			if (key_states[nput::KeyCode::Q].IsActive())
-				_camera.Position.z += _rate * s;
-
-			if (key_states[nput::KeyCode::E].IsActive())
-				_camera.Position.z -= _rate * s;
-
-			if (key_states[nput::KeyCode::R].IsActive() && _rate < DBL_MAX)
-				_rate += 0.1;
-
-			if (key_states[nput::KeyCode::T].IsActive() && _rate > 0)
-				_rate -= 0.1;
-
-			if (key_states[nput::KeyCode::O].IsActive())
-				_camera.SetProjectionType(gpu::Camera::ProjectionType::Orthographic);
-
-			if (key_states[nput::KeyCode::P].IsActive())
-				_camera.SetProjectionType(gpu::Camera::ProjectionType::Perspective);
+			DigestInput(time_delta);
 
 			//just in case window is not created in constructor
 			if (!_window && _window_id_handle && _services->GetUidSystem().Has(_services->GetUidSystem().GetUid(_window_id_handle)))
@@ -315,12 +466,25 @@ namespace np::app
 					SubmitCreateSceneJob();
 			}
 
-			auto scene = _scene.get_access();
-			if (scene && *scene)
-				(*scene)->Render();
+			{
+				auto scene = _scene.get_access();
+				if (scene && *scene)
+					(*scene)->Render();
+			}
+
+			
 		}
 
-		virtual evnt::EventCategory GetHandledCategories() const override
+		void Cleanup() override
+		{
+			{
+				auto scene = _scene.get_access();
+				if (scene && *scene)
+					(*scene)->CleanupVisibles();
+			}
+		}
+
+		evnt::EventCategory GetHandledCategories() const override
 		{
 			return evnt::EventCategory::All;
 		}

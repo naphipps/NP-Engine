@@ -106,12 +106,12 @@ namespace np::gpu::__detail
 		{
 			VulkanRenderContext& vulkan_render_context = (VulkanRenderContext&)(*GetRenderContext());
 			VkExtent2D extent = vulkan_render_context.GetExtent();
-			_properties.camera.AspectRatio = vulkan_render_context.GetAspectRatio();
-			_properties.camera.LeftPlane = -(flt)extent.width / 2.f;
-			_properties.camera.RightPlane = (flt)extent.width / 2.f;
-			_properties.camera.BottomPlane = -(flt)extent.height / 2.f;
-			_properties.camera.TopPlane = (flt)extent.height / 2.f;
-			_properties.camera.Update();
+			_properties.camera.aspectRatio = vulkan_render_context.GetAspectRatio();
+			_properties.camera.leftPlane = -(flt)extent.width / 2.f;
+			_properties.camera.rightPlane = (flt)extent.width / 2.f;
+			_properties.camera.bottomPlane = -(flt)extent.height / 2.f;
+			_properties.camera.topPlane = (flt)extent.height / 2.f;
+			_properties.camera.UpdateViewAndProjection();
 		}
 
 		void SetOutOfDate(bl out_of_date = true)
@@ -195,8 +195,8 @@ namespace np::gpu::__detail
 
 				UpdateCamera();
 				PipelineMetaValues pipeline_meta_values = render_pipeline.GetMetaValues();
-				pipeline_meta_values.View = _properties.camera.GetView();
-				pipeline_meta_values.Projection = _properties.camera.GetProjection();
+				pipeline_meta_values.View = _properties.camera.view;
+				pipeline_meta_values.Projection = _properties.camera.projection;
 				render_pipeline.SetMetaValues(pipeline_meta_values);
 
 				BeginRenderPass(command_staging);

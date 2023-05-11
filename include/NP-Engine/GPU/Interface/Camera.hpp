@@ -15,54 +15,51 @@
 
 namespace np::gpu
 {
-	class Camera
+	struct Camera
 	{
-	public:
 		enum class ProjectionType : ui32
 		{
 			Perspective = 0,
 			Orthographic = BIT(0)
 		};
 
-	private:
-		ProjectionType _projection_type = ProjectionType::Perspective;
-		::glm::mat4 _view{1.0f};
-		::glm::mat4 _projection{1.0f};
+		ProjectionType projectionType = ProjectionType::Perspective;
+		::glm::mat4 view{1.0f};
+		::glm::mat4 projection{1.0f};
 
-	public:
-		flt Fovy = 0;
-		flt LeftPlane = 0;
-		flt AspectRatio = 0;
-		flt RightPlane = 0;
-		flt BottomPlane = 0;
-		flt TopPlane = 0;
-		flt NearPlane = 0;
-		flt FarPlane = 0;
+		flt fovy = 0;
+		flt leftPlane = 0;
+		flt aspectRatio = 0;
+		flt rightPlane = 0;
+		flt bottomPlane = 0;
+		flt topPlane = 0;
+		flt nearPlane = 0;
+		flt farPlane = 0;
 
 		union {
-			::glm::vec3 Eye{0};
-			::glm::vec3 Position;
+			::glm::vec3 eye{0};
+			::glm::vec3 position;
 		};
 
 		union {
-			::glm::vec3 Center{0};
-			::glm::vec3 LookAt;
+			::glm::vec3 center{0};
+			::glm::vec3 lookAt;
 		};
 
-		::glm::vec3 Up{0.0f, 0.0f, 1.0f};
+		::glm::vec3 up{0.0f, 0.0f, 1.0f}; //TODO: everyone uses {0,1,0} as up... but I think I like this more...
 
-		void Update()
+		void UpdateViewAndProjection()
 		{
-			_view = ::glm::lookAt(Position, LookAt, Up);
+			view = ::glm::lookAt(position, lookAt, up);
 
-			switch (_projection_type)
+			switch (projectionType)
 			{
 			case ProjectionType::Perspective:
-				_projection = ::glm::perspective(Fovy, AspectRatio, NearPlane, FarPlane);
+				projection = ::glm::perspective(fovy, aspectRatio, nearPlane, farPlane);
 				break;
 
 			case ProjectionType::Orthographic:
-				_projection = ::glm::ortho(LeftPlane, RightPlane, BottomPlane, TopPlane, NearPlane, FarPlane);
+				projection = ::glm::ortho(leftPlane, rightPlane, bottomPlane, topPlane, nearPlane, farPlane);
 				break;
 
 			default:
@@ -70,33 +67,26 @@ namespace np::gpu
 				break;
 			};
 
-			_projection[1][1] *= -1; // ::glm was made for OpenGL, so Y is inverted. We fix/invert Y here.
+			projection[1][1] *= -1; // ::glm was made for OpenGL, so Y is inverted. We fix/invert Y here.
 		}
 
-		const ::glm::mat4& GetView() const
+		void NormalizeLookAt()
 		{
-			return _view;
+			lookAt = eye + (lookAt - eye) / ::glm::distance(eye, lookAt);
 		}
 
-		const ::glm::mat4& GetProjection() const
+		::glm::vec3 GetLookDirection()
 		{
-			return _projection;
+			return lookAt - eye;
 		}
 
-		void SetProjectionType(ProjectionType projection_type)
-		{
-			_projection_type = projection_type;
-		}
 
-		ProjectionType GetProjectionType() const
-		{
-			return _projection_type;
-		}
 
+		bl _contains = true;
 		bl Contains(const VisibleObject& visible_object) const
 		{
 			// TODO: implement this
-			return true;
+			return _contains;
 		}
 	};
 } // namespace np::gpu
