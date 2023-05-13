@@ -18,11 +18,28 @@
 #include "JobPriority.hpp"
 
 /*
-	TODO: how do we build a job (and set dependencies) from concurrent jobs - locks and condition variables maybe? Or not at all??
+	TODO: how do we build a job from concurrent jobs
 
+	(1):
+		- test waiting on a job to complete - essentially a syncronyous job that we still submit... use the counter on the sptr...
+		- while waiting on sptr.strong_count == 1, we can also pull sub-tasks from queue so we can work while we wait on everyone to finish
 
-	TODO: test waiting on a job to complete - essentially a syncronyous job that we still submit... use the counter on the sptr...
-	while waiting on sptr.strong_count == 1, we can also pull sub-tasks from queue so we can work while we wait on everyone to finish
+	(2):
+	finish_job;
+	start_job;
+	vector<job> middle_jobs;
+
+	for (n times)
+	{
+		middle_jobs[i].dependon(start_job)
+		finish_job.dependon(middle_jobs[i])
+		job_sys.submit(middle_jobs[i])
+	}
+
+	job_sys.submit(finish_job)
+	job_sys.submit(start_job)
+
+	^ does not matter which order we submit unless we want middle jobs to wait on start job
 */
 
 namespace np::jsys
