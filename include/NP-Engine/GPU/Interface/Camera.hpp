@@ -42,8 +42,9 @@ namespace np::gpu
 		};
 
 		union {
-			::glm::vec3 center{0};
-			::glm::vec3 lookAt;
+			::glm::vec3 lookAt{0};
+			::glm::vec3 target;
+			::glm::vec3 center;
 		};
 
 		::glm::vec3 up{0.0f, 0.0f, 1.0f}; //TODO: everyone uses {0,1,0} as up... but I think I like this more...
