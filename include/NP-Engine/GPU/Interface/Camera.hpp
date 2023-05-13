@@ -81,6 +81,23 @@ namespace np::gpu
 			return lookAt - eye;
 		}
 
+		flt GetYawAngleFrom(const ::glm::vec3& reference) const
+		{
+			//TODO: get yaw angle - radians
+			return 0;
+		}
+
+		flt GetPitchAngle(const ::glm::vec3& reference) const
+		{
+			//TODO: get pitch angle - radians
+			return 0;
+		}
+
+		flt GetRollAngle(const ::glm::vec3& reference) const
+		{
+			//TODO: get roll angle - radians
+			return 0;
+		}
 
 
 		bl _contains = true;

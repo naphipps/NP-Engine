@@ -384,6 +384,15 @@ namespace np::app
 						_camera.lookAt = _camera.eye + temp;
 
 						/*
+							TODO: I think we need to do this:
+								- get direction
+								- extract angle yaw and pitch based on reference (vec3{1,0,0} for example)
+								- increment those based off diffs
+								- rotate reference above
+								- apply new rotated direction to lookAt
+						*/
+
+						/*
 							::glm::quat rot_q{ diff.x, _camera.up };
 							rot_q = ::glm::normalize(rot_q);
 							::glm::quat con_q = ::glm::conjugate(rot_q);
