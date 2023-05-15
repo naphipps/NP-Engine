@@ -106,7 +106,7 @@ namespace np::gpu::__detail
 		{
 			VulkanRenderContext& vulkan_render_context = (VulkanRenderContext&)(*GetRenderContext());
 			VkExtent2D extent = vulkan_render_context.GetExtent();
-			_properties.camera.aspectRatio = vulkan_render_context.GetAspectRatio();
+			_properties.camera.aspectRatio = (flt)extent.width / (flt)extent.height;
 			_properties.camera.leftPlane = -(flt)extent.width / 2.f;
 			_properties.camera.rightPlane = (flt)extent.width / 2.f;
 			_properties.camera.bottomPlane = -(flt)extent.height / 2.f;
