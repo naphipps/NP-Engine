@@ -18,6 +18,7 @@
 #include <glm/gtx/hash.hpp>
 #include <glm/gtx/quaternion.hpp>
 #include <glm/gtx/compatibility.hpp>
+#include <glm/gtx/vector_angle.hpp>
 
 namespace glm
 {
