@@ -23,12 +23,13 @@ namespace np::app
 		mem::sptr<win::Window> _window;
 		mutexed_wrapper<mem::sptr<gpu::Scene>> _scene;
 		gpu::Camera _camera;
+		::glm::vec2 _angles;
 		str _model_filename;
 		str _model_texture_filename;
 		mem::sptr<gpu::Model> _model;
 		mem::sptr<uid::UidHandle> _model_handle;
 		tim::SteadyTimestamp _start_timestamp;
-		flt _rate = 10.f;
+		flt _rate = 5.f; //units per second
 
 		static void LogSubmitKeyState(void*, const nput::KeyCodeState&)
 		{
@@ -218,12 +219,14 @@ namespace np::app
 
 				//TODO: improve meta values
 				gpu::RenderableMetaValues& meta_values = renderable_model.GetMetaValues();
-				flt scale = _camera.projectionType == gpu::Camera::ProjectionType::Perspective ? 10.f : 100.f;
+				//flt scale = _camera.projectionType == gpu::Camera::ProjectionType::Perspective ? 10.f : 100.f;
 
-				//meta_values.object.Model = glm::mat4(1.0f);
+				//meta_values.object.Model = glm::mat4{ 1.0f };
 				//meta_values.object.Model = ::glm::scale(meta_values.object.Model, ::glm::vec3(scale, scale, scale));
 				// meta_values.object.Model = ::glm::translate(meta_values.object.Model, ::glm::vec3(-10, -10, -10));
-				//meta_values.object.Model = ::glm::rotate(meta_values.object.Model, 90.f, _camera.Up);
+				//::glm::vec3 right = ::glm::cross(gpu::Camera::Up, gpu::Camera::Forward);
+				//meta_values.object.Model = ::glm::rotate(meta_values.object.Model, -(flt)M_PI_2, right);
+				//meta_values.object.Model = ::glm::rotate(meta_values.object.Model, -(flt)M_PI_2, gpu::Camera::Up);
 			}
 
 			geom::FltAabb3D model_aabb = _model->GetAabb(); //TODO: we need to update this
@@ -253,49 +256,91 @@ namespace np::app
 			const nput::MouseCodeStates& mouse = input.GetMouseCodeStates();
 			const nput::MousePosition& mouse_position = input.GetMousePosition();
 
-			//rate = unit / second
-
 			//TODO: improve camera controls and get the camera/visible thing working
 
-			tim::DblSeconds seconds = time_delta;
-			dbl s = seconds.count();
+			const dbl seconds = time_delta.count() / 1000.f;
 
 			if (keys[Key::A].IsActive())
-				_camera.position.x -= _rate * s;
+			{
+				const ::glm::vec3 look = _camera.GetLookDirection();
+				const ::glm::vec3 direction = ::glm::cross(gpu::Camera::Up, _camera.GetLookDirection());
+				::glm::vec3 rate = ::glm::normalize(direction);
+				rate *= _rate * seconds;
+
+				::glm::vec4 pos = { _camera.eye.x, _camera.eye.y, _camera.eye.z, 1 };
+				pos = ::glm::translate(::glm::mat4{ 1.f }, rate) * pos;
+				_camera.eye = { pos.x, pos.y, pos.z };
+				_camera.lookAt = _camera.eye + look;
+				_camera.NormalizeLookAt();
+			}
 
 			if (keys[Key::D].IsActive())
-				_camera.position.x += _rate * s;
+			{
+				const ::glm::vec3 look = _camera.GetLookDirection();
+				const ::glm::vec3 direction = ::glm::cross(gpu::Camera::Up, _camera.GetLookDirection());
+				::glm::vec3 rate = ::glm::normalize(direction);
+				rate *= -_rate * seconds;
+
+				::glm::vec4 pos = { _camera.eye.x, _camera.eye.y, _camera.eye.z, 1 };
+				pos = ::glm::translate(::glm::mat4{ 1.f }, rate) * pos;
+				_camera.eye = { pos.x, pos.y, pos.z };
+				_camera.lookAt = _camera.eye + look;
+				_camera.NormalizeLookAt();
+			}
 
 			if (keys[Key::W].IsActive())
 			{
-				::glm::vec3 direction = (_camera.lookAt - _camera.eye) / ::glm::distance(_camera.eye, _camera.lookAt);
-				direction *= _rate * s;
+				const ::glm::vec3 look = _camera.GetLookDirection();
+				::glm::vec3 rate = ::glm::normalize(look);
+				rate *= _rate * seconds;
 
-				::glm::vec4 pos = { _camera.position.x, _camera.position.y, _camera.position.z, 1 };
-				pos = ::glm::translate(::glm::mat4{ 1.f }, direction) * pos;
-				_camera.position = { pos.x, pos.y, pos.z };
+				::glm::vec4 pos = { _camera.eye.x, _camera.eye.y, _camera.eye.z, 1 };
+				pos = ::glm::translate(::glm::mat4{ 1.f }, rate) * pos;
+				_camera.eye = { pos.x, pos.y, pos.z };
+				_camera.lookAt = _camera.eye + look;
 				_camera.NormalizeLookAt();
 			}
 
 			if (keys[Key::S].IsActive())
 			{
-				::glm::vec3 direction = _camera.lookAt - _camera.eye;
-				direction /= ::glm::distance(_camera.eye, _camera.lookAt);
-				direction *= -_rate * s;
+				const ::glm::vec3 look = _camera.GetLookDirection();
+				::glm::vec3 rate = ::glm::normalize(look);
+				rate *= -_rate * seconds;
 
-				::glm::vec4 new_position = { _camera.position.x, _camera.position.y, _camera.position.z, 1 };
-				::glm::mat4 identity{ 1.f };
-				::glm::mat4 trans = ::glm::translate(identity, direction);
-				new_position = trans * new_position;
-				_camera.position = { new_position.x, new_position.y, new_position.z };
+				::glm::vec4 pos = { _camera.eye.x, _camera.eye.y, _camera.eye.z, 1 };
+				pos = ::glm::translate(::glm::mat4{ 1.f }, rate) * pos;
+				_camera.eye = { pos.x, pos.y, pos.z };
+				_camera.lookAt = _camera.eye + look;
 				_camera.NormalizeLookAt();
 			}
 
 			if (keys[Key::Q].IsActive())
-				_camera.position.z += _rate * s;
+			{
+				const ::glm::vec3 look = _camera.GetLookDirection();
+				const ::glm::vec3 direction = gpu::Camera::Up;
+				::glm::vec3 rate = ::glm::normalize(direction);
+				rate *= -_rate * seconds;
+
+				::glm::vec4 pos = { _camera.eye.x, _camera.eye.y, _camera.eye.z, 1 };
+				pos = ::glm::translate(::glm::mat4{ 1.f }, rate) * pos;
+				_camera.eye = { pos.x, pos.y, pos.z };
+				_camera.lookAt = _camera.eye + look;
+				_camera.NormalizeLookAt();
+			}
 
 			if (keys[Key::E].IsActive())
-				_camera.position.z -= _rate * s;
+			{
+				const ::glm::vec3 look = _camera.GetLookDirection();
+				const ::glm::vec3 direction = gpu::Camera::Up;
+				::glm::vec3 rate = ::glm::normalize(direction);
+				rate *= _rate * seconds;
+
+				::glm::vec4 pos = { _camera.eye.x, _camera.eye.y, _camera.eye.z, 1 };
+				pos = ::glm::translate(::glm::mat4{ 1.f }, rate) * pos;
+				_camera.eye = { pos.x, pos.y, pos.z };
+				_camera.lookAt = _camera.eye + look;
+				_camera.NormalizeLookAt();
+			}
 
 			if (keys[Key::R].IsActive() && _rate < DBL_MAX)
 				_rate += 0.1;
@@ -333,9 +378,6 @@ namespace np::app
 				//make the camera lookat a unit vector
 			}
 
-
-
-
 			if (mouse[Mouse::LeftButton].IsActive())
 			{
 				if (!_prev_mouse[Mouse::LeftButton].IsActive())
@@ -345,69 +387,20 @@ namespace np::app
 				{
 					if (mouse_position.GetPosition() != _prev_mouse_position.GetPosition())
 					{
-						/*
-							TODO: implement camera rotations when dragging mouse
-								- <https://www.youtube.com/watch?v=MZuYmG1GBFk>
-								- <https://www.youtube.com/results?search_query=glm+quaterion+camera>
-								- <https://en.wikipedia.org/wiki/Aircraft_principal_axes>
-						*/
-
-						NP_ENGINE_LOG_INFO("mouse dragging");
-
-						flt scale = 0.002;
-						//::glm::vec2 diff = _prev_mouse_position.GetPosition() - mouse_position.GetPosition();
-						//diff = ::glm::radians(-diff);
-						//diff *= scale;
-						//flt sign = diff.x < 0 ? -1 : 1;
-						//diff.x /= 20.f;
-						//diff.y /= 50.f;
-
-						::glm::vec2 curr = mouse_position.GetPosition();
-						curr = ::glm::radians(curr);
-						curr *= scale;
-
+						const flt scale = 0.04;
+						::glm::vec2 diff = _prev_mouse_position.GetPosition() - mouse_position.GetPosition();
+						diff *= _rate * scale;
+						diff = ::glm::radians(diff);
 						
-						::glm::quat rot_q{ curr.x, _camera.up };
-						//rot_q = ::glm::normalize(rot_q);
+						::glm::vec3 look = _camera.GetLookDirection();
+						::glm::quat rot_q = ::glm::normalize(::glm::angleAxis(diff.x, gpu::Camera::Up));
+						look = ::glm::normalize(rot_q * look);
 
-						::glm::vec3 temp{ 1.f, 0.f, 0.f };
-						::glm::quat res = rot_q * temp * ::glm::conjugate(rot_q);
-						temp = { res.x, res.y, res.z };
-						//temp = ::glm::normalize(temp);
+						::glm::vec3 right = ::glm::cross(look, gpu::Camera::Up);
+						rot_q = ::glm::normalize(::glm::angleAxis(diff.y, right));
+						look = ::glm::normalize(rot_q * look);
 
-						::glm::vec3 right = ::glm::cross(_camera.up, temp);
-						rot_q = { curr.y, right };
-						//rot_q = ::glm::normalize(rot_q);
-						res = rot_q * temp * ::glm::conjugate(rot_q);
-						temp = { res.x, res.y, res.z };
-
-						_camera.lookAt = _camera.eye + temp;
-
-						/*
-							TODO: I think we need to do this:
-								- get direction
-								- extract angle yaw and pitch based on reference (vec3{1,0,0} for example)
-								- increment those based off diffs
-								- rotate reference above
-								- apply new rotated direction to lookAt
-						*/
-
-						/*
-							::glm::quat rot_q{ diff.x, _camera.up };
-							rot_q = ::glm::normalize(rot_q);
-							::glm::quat con_q = ::glm::conjugate(rot_q);
-							::glm::vec3 direction = ::glm::normalize(_camera.GetLookDirection());
-							::glm::quat res = rot_q * direction * con_q;
-							direction = { res.x, res.y, res.z };
-							_camera.lookAt = _camera.eye + direction;
-						*/
-						/*
-							quaternion rotation:
-								::glm::quat q, q_;
-								::glm::vec3 p, p_;
-								p_ = q * p * q_;
-						*/
-
+						_camera.lookAt = _camera.eye + look;
 						_camera.NormalizeLookAt();
 					}
 				}
@@ -416,11 +409,6 @@ namespace np::app
 			{
 				_mouse_is_dragging = false;
 			}
-
-
-
-
-
 
 			for (siz i = 0; i < keys.size(); i++)
 				_prev_keys[i] = keys[i];
@@ -449,11 +437,14 @@ namespace np::app
 			//_model->GetTexture().SetHotReloadable();
 			//_renderable_model->GetUpdateMetaValuesOnFrameDelegate().SetCallback(this, UpdateMetaValuesOnFrameCallback);
 
-			_camera.eye = { 10.f, 10.f, 10.f };
+			_camera.eye = { 3.f, 3.f, 3.f };
 			_camera.fovy = 70.f;
 			_camera.nearPlane = 0.01f;
 			_camera.farPlane = 100.0f;
 			_camera.lookAt = { 0, 0, 0 };
+			_camera.NormalizeLookAt();
+
+			_angles = { -M_PI_2, -M_PI_2 };
 
 			//-----------------------------------------------------------
 

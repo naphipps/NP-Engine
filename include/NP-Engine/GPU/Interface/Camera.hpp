@@ -23,6 +23,9 @@ namespace np::gpu
 			Orthographic = BIT(0)
 		};
 
+		constexpr static ::glm::vec3 Up{ 0.f, 1.f, 0.f };
+		constexpr static ::glm::vec3 Forward{ 0.f, 0.f, 1.f };
+
 		ProjectionType projectionType = ProjectionType::Perspective;
 		::glm::mat4 view{1.0f};
 		::glm::mat4 projection{1.0f};
@@ -47,11 +50,9 @@ namespace np::gpu
 			::glm::vec3 center;
 		};
 
-		::glm::vec3 up{0.0f, 0.0f, 1.0f}; //TODO: everyone uses {0,1,0} as up... but I think I like this more...
-
 		void UpdateViewAndProjection()
 		{
-			view = ::glm::lookAt(position, lookAt, up);
+			view = ::glm::lookAt(position, lookAt, Up);
 
 			switch (projectionType)
 			{
@@ -73,32 +74,13 @@ namespace np::gpu
 
 		void NormalizeLookAt()
 		{
-			lookAt = eye + (lookAt - eye) / ::glm::distance(eye, lookAt);
+			lookAt = eye + ::glm::normalize(lookAt - eye);
 		}
 
-		::glm::vec3 GetLookDirection()
+		::glm::vec3 GetLookDirection() const
 		{
 			return lookAt - eye;
 		}
-
-		flt GetYawAngleFrom(const ::glm::vec3& reference) const
-		{
-			//TODO: get yaw angle - radians
-			return 0;
-		}
-
-		flt GetPitchAngle(const ::glm::vec3& reference) const
-		{
-			//TODO: get pitch angle - radians
-			return 0;
-		}
-
-		flt GetRollAngle(const ::glm::vec3& reference) const
-		{
-			//TODO: get roll angle - radians
-			return 0;
-		}
-
 
 		bl _contains = true;
 		bl Contains(const VisibleObject& visible_object) const
