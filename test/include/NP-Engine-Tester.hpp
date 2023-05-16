@@ -23,7 +23,6 @@ namespace np::app
 		mem::sptr<win::Window> _window;
 		mutexed_wrapper<mem::sptr<gpu::Scene>> _scene;
 		gpu::Camera _camera;
-		::glm::vec2 _angles;
 		str _model_filename;
 		str _model_texture_filename;
 		mem::sptr<gpu::Model> _model;
@@ -446,8 +445,6 @@ namespace np::app
 			_camera.farPlane = 100.0f;
 			_camera.lookAt = { 0, 0, 0 };
 			_camera.NormalizeLookAt();
-
-			_angles = { -M_PI_2, -M_PI_2 };
 
 			//-----------------------------------------------------------
 
