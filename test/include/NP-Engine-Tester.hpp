@@ -220,12 +220,12 @@ namespace np::app
 				gpu::RenderableMetaValues& meta_values = renderable_model.GetMetaValues();
 				//flt scale = _camera.projectionType == gpu::Camera::ProjectionType::Perspective ? 10.f : 100.f;
 
-				//meta_values.object.Model = glm::mat4{ 1.0f };
+				meta_values.object.Model = glm::mat4{ 1.0f };
 				//meta_values.object.Model = ::glm::scale(meta_values.object.Model, ::glm::vec3(scale, scale, scale));
 				// meta_values.object.Model = ::glm::translate(meta_values.object.Model, ::glm::vec3(-10, -10, -10));
-				//::glm::vec3 right = ::glm::cross(gpu::Camera::Up, gpu::Camera::Forward);
-				//meta_values.object.Model = ::glm::rotate(meta_values.object.Model, -(flt)M_PI_2, right);
-				//meta_values.object.Model = ::glm::rotate(meta_values.object.Model, -(flt)M_PI_2, gpu::Camera::Up);
+				meta_values.object.Model = ::glm::rotate(meta_values.object.Model, -(flt)M_PI_2, gpu::Camera::Up);
+				::glm::vec3 right = ::glm::cross(gpu::Camera::Up, gpu::Camera::Forward);
+				meta_values.object.Model = ::glm::rotate(meta_values.object.Model, -(flt)M_PI_2, right);
 			}
 
 			geom::FltAabb3D model_aabb = _model->GetAabb(); //TODO: we need to update this
