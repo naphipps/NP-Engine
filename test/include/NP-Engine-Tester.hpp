@@ -393,12 +393,15 @@ namespace np::app
 						diff = ::glm::radians(diff);
 						
 						::glm::vec3 look = _camera.GetLookDirection();
-						::glm::quat rot_q = ::glm::normalize(::glm::angleAxis(diff.x, gpu::Camera::Up));
-						look = ::glm::normalize(rot_q * look);
+						::glm::quat v{ 0.f, look };
+						::glm::quat q = ::glm::angleAxis(diff.x, gpu::Camera::Up);
+						v = q * v * ::glm::conjugate(q);
+						look = { v.x, v.y, v.z }; //rotated around Up
 
 						::glm::vec3 right = ::glm::cross(look, gpu::Camera::Up);
-						rot_q = ::glm::normalize(::glm::angleAxis(diff.y, right));
-						look = ::glm::normalize(rot_q * look);
+						q = ::glm::angleAxis(diff.y, right);
+						v = q * v * ::glm::conjugate(q);
+						look = { v.x, v.y, v.z }; //rotated around right
 
 						_camera.lookAt = _camera.eye + look;
 						_camera.NormalizeLookAt();
