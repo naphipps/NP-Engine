@@ -20,6 +20,8 @@ This game engine started out as my first video game, but since the project kept 
 		- [x] considerate of the main thread so thread scheduling does not throttle the main thread
 		- [x] how a worker fetches jobs can be customized in real time to allow for direct control on how the worker works throughout the life of the session
 	- [x] A profiler that outputs a JSON file for Chrome's Tracing tool. (Type "chrome://tracing/" in Chrome's url.)
+		- [ ] I am going to migrate to [wolfpld's Tracy Profiler](https://github.com/wolfpld/tracy)
+	- [ ] A wiki (_coming soon_) for all documentation needs, including high-level examples. (I _might_ make a separate repo for working samples.)
 
 ***
 
