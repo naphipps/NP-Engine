@@ -788,7 +788,6 @@ namespace np::mem
 				Margin* footer = (Margin*)((ui8*)_block.End() - MARGIN_SIZE);
 				header->SetSize(_block.size);
 				header->SetIsAllocated(false);
-				;
 				*footer = *header;
 
 				_tree.Insert((Node*)((ui8*)header + MARGIN_SIZE));
