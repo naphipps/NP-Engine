@@ -96,7 +96,7 @@ namespace np::mat
 	/*
 		returns the inverse sqrt of n using Quake III's q_rsqrt algorithm
 	*/
-	static inline flt InvSqrt(const flt n, i32 newton_iteration_count = 2)
+	static inline flt FastInvSqrt(const flt n, i32 newton_iteration_count = 2)
 	{
 		// keeping union for performance
 		union {
