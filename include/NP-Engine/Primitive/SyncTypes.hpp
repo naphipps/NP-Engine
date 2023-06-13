@@ -42,7 +42,7 @@ namespace np
 			access(T* object, mutex& m) : _l(m), _object(object) {}
 
 			template<class R, class P>
-			access(T* object, mutex& m, const ::std::chrono::duration<R, P> duration) : _l(m, try_lock), _object(nullptr)
+			access(T* object, mutex& m, const ::std::chrono::duration<R, P>& duration) : _l(m, try_lock), _object(nullptr)
 			{
 				auto start = ::std::chrono::steady_clock::now();
 				while (!_l && (::std::chrono::steady_clock::now() - start) < duration)
@@ -78,7 +78,7 @@ namespace np
 		}
 
 		template<class R, class P>
-		access try_get_access_for(const ::std::chrono::duration<R, P> duration)
+		access try_get_access_for(const ::std::chrono::duration<R, P>& duration)
 		{
 			return { &_object, _m, duration };
 		}
