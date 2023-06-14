@@ -187,7 +187,6 @@ set(NP_ENGINE_JOBSYSTEM_HPP
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/JobSystem/JobPriority.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/JobSystem/JobRecord.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/JobSystem/JobSystem.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/JobSystem/JobSystemImpl.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/JobSystem/JobWorker.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/JobSystem/JobQueue.hpp
 )
