@@ -11,6 +11,7 @@
 #include <atomic>
 #include <chrono>
 #include <thread>
+#include <condition_variable>
 
 #include "PrimitiveTypes.hpp"
 
@@ -83,6 +84,8 @@ namespace np
 			return { &_object, _m, duration };
 		}
 	};
+
+	using condition = ::std::condition_variable;
 
 	template <typename T>
 	using atm = ::std::atomic<T>;
