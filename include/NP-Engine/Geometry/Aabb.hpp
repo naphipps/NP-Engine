@@ -29,6 +29,23 @@ namespace np::geom
 			return point.x >= center.x - halfLengths.x && point.x <= center.x + halfLengths.x &&
 				point.y >= center.y - halfLengths.y && point.y <= center.y + halfLengths.y;
 		}
+
+		virtual con::array<Point, 4> GetCorners() const
+		{
+			con::array<Point, 4> corners;
+			for (siz i = 0; i < corners.size(); i++)
+				corners[i] = halfLengths;
+
+			corners[1].x *= -1;
+			corners[2].x *= -1;
+			corners[2].y *= -1;
+			corners[3].y *= -1;
+
+			for (siz i = 0; i < corners.size(); i++)
+				corners[i] += center;
+
+			return corners;
+		}
 	};
 
 	template <typename T>
@@ -44,6 +61,30 @@ namespace np::geom
 			return point.x >= center.x - halfLengths.x && point.x <= center.x + halfLengths.x &&
 				point.y >= center.y - halfLengths.y && point.y <= center.y + halfLengths.y &&
 				point.z > center.z - halfLengths.z && point.z <= center.z + halfLengths.z;
+		}
+
+		virtual con::array<Point, 8> GetCorners() const
+		{
+			con::array<Point, 8> corners;
+			for (siz i = 0; i < corners.size(); i++)
+				corners[i] = halfLengths;
+
+			corners[1].x *= -1;
+			corners[2].x *= -1;
+			corners[2].y *= -1;
+			corners[3].y *= -1;
+
+			siz half_size = corners.size() / 2;
+			for (siz i = 0; i < half_size; i++)
+			{
+				corners[half_size + i] = corners[i];
+				corners[half_size + i].z *= -1;
+			}
+
+			for (siz i = 0; i < corners.size(); i++)
+				corners[i] += center;
+
+			return corners;
 		}
 	};
 

@@ -32,6 +32,15 @@ namespace np::geom
 			return pt + center;
 		}
 
+		virtual con::array<Point, 4> GetCorners() const override
+		{
+			con::array<Point, 4> corners = Aabb<2, T>::GetCorners();
+			for (siz i = 0; i < corners.size(); i++)
+				corners[i] = ApplyOrientation(corners[i]);
+
+			return corners;
+		}
+
 		virtual bl Contains(const Point& point) const override
 		{
 			return Aabb<2, T>::Contains(ApplyOrientation(point));
@@ -39,24 +48,13 @@ namespace np::geom
 
 		virtual Aabb<2, T> GetAabb() const
 		{
-			Point a, b, c, d;
-			a = b = c = d = halfLengths;
-
-			b.x *= -1;
-			c.x *= -1;
-			c.y *= -1;
-			d.y *= -1;
-
-			a = ApplyOrientation(a + center);
-			b = ApplyOrientation(b + center);
-			c = ApplyOrientation(c + center);
-			d = ApplyOrientation(d + center);
-
-			Point min, max = {};
-			min.x = ::std::min({ a.x, b.x, c.x, d.x });
-			min.y = ::std::min({ a.y, b.y, c.y, d.y });
-			max.x = ::std::max({ a.x, b.x, c.x, d.x });
-			max.y = ::std::max({ a.y, b.y, c.y, d.y });
+			con::array<Point, 4> corners = GetCorners();
+			Point min = corners[0], max = corners[0];
+			for (siz i = 1; i < corners.size(); i++)
+			{
+				min = ::glm::min(min, corners[i]);
+				max = ::glm::max(max, corners[i]);
+			}
 
 			Aabb<2, T> aabb{};
 			aabb.center = center;
@@ -80,6 +78,15 @@ namespace np::geom
 			return pt + center;
 		}
 
+		virtual con::array<Point, 8> GetCorners() const override
+		{
+			con::array<Point, 8> corners = Aabb<3, T>::GetCorners();
+			for (siz i = 0; i < corners.size(); i++)
+				corners[i] = ApplyOrientation(corners[i]);
+
+			return corners;
+		}
+
 		virtual bl Contains(const Point& point) const override
 		{
 			return Aabb<3, T>::Contains(ApplyOrientation(point));
@@ -87,40 +94,13 @@ namespace np::geom
 
 		virtual Aabb<3, T> GetAabb() const
 		{
-			Point a, b, c, d, e, f, g, h;
-			a = b = c = d = e = f = g = h = halfLengths;
-			
-			b.x *= -1;
-			c.x *= -1;
-			c.y *= -1;
-			d.y *= -1;
-
-			e = a;
-			f = b;
-			g = c;
-			h = d;
-
-			e.z *= -1;
-			f.z *= -1;
-			g.z *= -1;
-			h.z *= -1;
-
-			a = ApplyOrientation(a + center);
-			b = ApplyOrientation(b + center);
-			c = ApplyOrientation(c + center);
-			d = ApplyOrientation(d + center);
-			e = ApplyOrientation(e + center);
-			f = ApplyOrientation(f + center);
-			g = ApplyOrientation(g + center);
-			h = ApplyOrientation(h + center);
-
-			Point min, max = {};
-			min.x = ::std::min({ a.x, b.x, c.x, d.x, e.x, f.x, g.x, h.x });
-			min.y = ::std::min({ a.y, b.y, c.y, d.y, e.y, f.y, g.y, h.y });
-			min.z = ::std::min({ a.z, b.z, c.z, d.z, e.z, f.z, g.z, h.z });
-			max.x = ::std::max({ a.x, b.x, c.x, d.x, e.x, f.x, g.x, h.x });
-			max.y = ::std::max({ a.y, b.y, c.y, d.y, e.y, f.y, g.y, h.y });
-			max.z = ::std::max({ a.z, b.z, c.z, d.z, e.z, f.z, g.z, h.z });
+			con::array<Point, 8> corners = GetCorners();
+			Point min = corners[0], max = corners[0];
+			for (siz i = 1; i < corners.size(); i++)
+			{
+				min = ::glm::min(min, corners[i]);
+				max = ::glm::max(max, corners[i]);
+			}
 
 			Aabb<3, T> aabb{};
 			aabb.center = center;
