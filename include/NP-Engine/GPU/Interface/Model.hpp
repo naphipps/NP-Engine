@@ -42,6 +42,7 @@ namespace np::gpu
 		con::vector<::tinyobj::material_t> _materials;
 		con::vector<Vertex> _vertices;
 		con::vector<ui32> _indices;
+		geom::FltAabb3D _original_aabb;
 		geom::Transform _transform;
 
 	public:
@@ -118,6 +119,8 @@ namespace np::gpu
 				_shapes.assign(::std::make_move_iterator(shapes.begin()), ::std::make_move_iterator(shapes.end()));
 				_materials.assign(::std::make_move_iterator(materials.begin()), ::std::make_move_iterator(materials.end()));
 				con::umap<Vertex, ui32> vertexIndexMap;
+				::glm::vec3 min{ FLT_MAX, FLT_MAX, FLT_MAX };
+				::glm::vec3 max{ FLT_MIN, FLT_MIN, FLT_MIN };
 
 				for (const ::tinyobj::shape_t& shape : _shapes)
 				{
@@ -144,8 +147,23 @@ namespace np::gpu
 						}
 
 						_indices.emplace_back(vertexIndexMap[vertex]);
+
+						min.x = ::std::min(min.x, vertex.position.x);
+						min.y = ::std::min(min.y, vertex.position.y);
+						min.z = ::std::min(min.z, vertex.position.z);
+						max.x = ::std::max(max.x, vertex.position.x);
+						max.y = ::std::max(max.y, vertex.position.y);
+						max.z = ::std::max(max.z, vertex.position.z);
 					}
 				}
+
+				_original_aabb.halfLengths = { max.x - min.x, max.y - min.y, max.z - min.z };
+				_original_aabb.halfLengths.x /= 2.f;
+				_original_aabb.halfLengths.y /= 2.f;
+				_original_aabb.halfLengths.z /= 2.f;
+				_original_aabb.center.x = min.x + _original_aabb.halfLengths.x;
+				_original_aabb.center.y = min.y + _original_aabb.halfLengths.y;
+				_original_aabb.center.z = min.z + _original_aabb.halfLengths.z;
 			}
 
 			return loaded;
@@ -183,31 +201,13 @@ namespace np::gpu
 			return _transform;
 		}
 
-		geom::FltAabb3D GetAabb() const
+		geom::FltObb3D GetObb() const
 		{
-			geom::FltAabb3D aabb;
-
-			::glm::vec3 min{ FLT_MAX, FLT_MAX, FLT_MAX };
-			::glm::vec3 max{ FLT_MIN, FLT_MIN, FLT_MIN };
-
-			for (auto it = _vertices.begin(); it != _vertices.end(); it++)
-			{
-				min.x = ::std::min(min.x, it->Position.x);
-				min.y = ::std::min(min.y, it->Position.y);
-				min.z = ::std::min(min.z, it->Position.z);
-				max.x = ::std::max(max.x, it->Position.x);
-				max.y = ::std::max(max.y, it->Position.y);
-				max.z = ::std::max(max.z, it->Position.z);
-			}
-
-			aabb.HalfLengths = { max.x - min.x, max.y - min.y, max.z - min.z };
-			aabb.HalfLengths.x /= 2.f;
-			aabb.HalfLengths.y /= 2.f;
-			aabb.HalfLengths.z /= 2.f;
-			aabb.Center.x = min.x + aabb.HalfLengths.x;
-			aabb.Center.y = min.y + aabb.HalfLengths.y;
-			aabb.Center.z = min.z + aabb.HalfLengths.z;
-			return aabb;
+			geom::FltObb3D obb;
+			obb.center = _original_aabb.center + _transform.position; //TODO: may not be correct
+			obb.halfLengths = _original_aabb.halfLengths * _transform.scale; //TODO: may not be correct
+			obb.orientation = _transform.orientation;
+			return obb;
 		}
 
 		Texture& GetTexture()
