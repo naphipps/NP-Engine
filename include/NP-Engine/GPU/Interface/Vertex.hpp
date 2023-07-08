@@ -16,15 +16,14 @@ namespace np::gpu
 {
 	struct Vertex
 	{
-		//TODO: camelCase here
-
-		::glm::vec3 Position;
-		::glm::vec3 Color; // TODO: added alpha channel support
-		::glm::vec2 TextureCoordinate;
+		::glm::vec3 position{0.0f};
+		::glm::vec3 color{1.0f}; // TODO: add alpha channel support
+		::glm::vec2 uv{0.0f}; //texture coordinate
+		//::glm::vec3 normal; //TODO: should our vertices have normals? I think this should be understood by vertex order (CCW / CW)
 
 		bl operator==(const Vertex& other) const
 		{
-			return Position == other.Position && Color == other.Color && TextureCoordinate == other.TextureCoordinate;
+			return position == other.position && color == other.color && uv == other.uv;
 		}
 	};
 } // namespace np::gpu

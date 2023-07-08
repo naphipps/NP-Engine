@@ -209,26 +209,9 @@ namespace np::app
 			(*scene)->Register(model_id, model_visible, _model);
 			(*scene)->GetOnRenderDelegate().SetCallback(this, SceneOnRenderCallback);
 
-			mem::sptr<gpu::Resource> resource = (*scene)->GetResource(model_id);
-			if (resource && resource->GetType() == gpu::ResourceType::RenderableModel)
-			{
-				gpu::RenderableModel& renderable_model = (gpu::RenderableModel&)(*resource);
-				mem::sptr<gpu::Model> model = renderable_model.GetModel();
-				NP_ENGINE_ASSERT(model == _model, "these models should be the same!");
 
-				//TODO: improve meta values
-				gpu::RenderableMetaValues& meta_values = renderable_model.GetMetaValues();
-				//flt scale = _camera.projectionType == gpu::Camera::ProjectionType::Perspective ? 10.f : 100.f;
 
-				meta_values.object.Model = glm::mat4{ 1.0f };
-				//meta_values.object.Model = ::glm::scale(meta_values.object.Model, ::glm::vec3(scale, scale, scale));
-				// meta_values.object.Model = ::glm::translate(meta_values.object.Model, ::glm::vec3(-10, -10, -10));
-				meta_values.object.Model = ::glm::rotate(meta_values.object.Model, -(flt)M_PI_2, gpu::Camera::Up);
-				::glm::vec3 right = ::glm::cross(gpu::Camera::Up, gpu::Camera::Forward);
-				meta_values.object.Model = ::glm::rotate(meta_values.object.Model, -(flt)M_PI_2, right);
-			}
-
-			geom::FltAabb3D model_aabb = _model->GetAabb(); //TODO: we need to update this
+			geom::FltObb3D model_obb = _model->GetObb(); //TODO: we need to update this
 		}
 
 		void SubmitCreateSceneJob()
@@ -377,6 +360,20 @@ namespace np::app
 				//make the camera lookat a unit vector
 			}
 
+			if (keys[Key::H].IsActive())
+			{
+				//scale up
+				geom::Transform& transform = _model->GetTransform();
+				transform.scale.z = ::std::clamp(transform.scale.z + _rate, 1.f, 2.f);
+			}
+
+			if (keys[Key::B].IsActive())
+			{
+				//scale down
+				geom::Transform& transform = _model->GetTransform();
+				transform.scale.z = ::std::clamp(transform.scale.z - _rate, 1.f, 2.f);
+			}
+
 			if (mouse[Mouse::LeftButton].IsActive())
 			{
 				if (!_prev_mouse[Mouse::LeftButton].IsActive())
@@ -436,6 +433,15 @@ namespace np::app
 			_model_handle(nullptr),
 			_start_timestamp(tim::SteadyClock::now())
 		{
+			geom::Transform& transform = _model->GetTransform();
+
+			transform.position = { 0.f, 0.f, 0.f };
+			transform.orientation = { 0.f, 0.f, 0.f, 1.f };
+			transform.scale = { 1.f, 1.f, 1.f };
+
+			::glm::quat rot(::glm::vec3{ -M_PI_2, M_PI_2, 0.f});
+			transform.orientation *= rot;
+
 			//_model->GetTexture().SetHotReloadable();
 			//_renderable_model->GetUpdateMetaValuesOnFrameDelegate().SetCallback(this, UpdateMetaValuesOnFrameCallback);
 

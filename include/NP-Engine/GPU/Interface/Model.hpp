@@ -42,7 +42,7 @@ namespace np::gpu
 		con::vector<::tinyobj::material_t> _materials;
 		con::vector<Vertex> _vertices;
 		con::vector<ui32> _indices;
-		::glm::mat4 _transform;
+		geom::Transform _transform;
 
 	public:
 		Model(str model_filename, str model_texture_filename, bl hot_reloadable = false):
@@ -127,15 +127,15 @@ namespace np::gpu
 
 						Vertex vertex;
 
-						vertex.Position = {_attributes.vertices[VERTEX_STRIDE * (siz)index.vertex_index + 0],
+						vertex.position = {_attributes.vertices[VERTEX_STRIDE * (siz)index.vertex_index + 0],
 										   _attributes.vertices[VERTEX_STRIDE * (siz)index.vertex_index + 1],
 										   _attributes.vertices[VERTEX_STRIDE * (siz)index.vertex_index + 2]};
 
-						vertex.TextureCoordinate = {
+						vertex.uv = {
 							_attributes.texcoords[TEXTURE_COORDINATE_STRIDE * (siz)index.texcoord_index + 0],
 							1.0f - _attributes.texcoords[TEXTURE_COORDINATE_STRIDE * (siz)index.texcoord_index + 1]};
 
-						vertex.Color = {1.0f, 1.0f, 1.0f};
+						vertex.color = {1.0f, 1.0f, 1.0f};
 
 						if (vertexIndexMap.find(vertex) == vertexIndexMap.end())
 						{
@@ -171,6 +171,16 @@ namespace np::gpu
 		bl IsHotReloadable() const
 		{
 			return _hot_reloadable;
+		}
+
+		geom::Transform& GetTransform()
+		{
+			return _transform;
+		}
+
+		const geom::Transform& GetTransform() const
+		{
+			return _transform;
 		}
 
 		geom::FltAabb3D GetAabb() const

@@ -8,46 +8,27 @@
 #define NP_ENGINE_GPU_INTERFACE_RENDERABLE_META_VALUES_HPP
 
 #include "NP-Engine/Primitive/Primitive.hpp"
-#include "NP-Engine/Foundation/Foundation.hpp"
-
-#include "NP-Engine/Vendor/GlmInclude.hpp"
+#include "NP-Engine/Geometry/Geometry.hpp"
 
 namespace np::gpu
 {
-	struct RenderableMetaValues //TODO: this is old - try new technique
-	{
-		union {
-			struct
-			{
-				::glm::mat4 Model;
-				::glm::mat4 Normal;
-			} object;
-
-			struct
-			{
-				::glm::vec4 Color;
-				::glm::vec3 Position;
-				flt Radius;
-			} light;
-		};
-	};
-
-	struct RenderableMetaValues_new2
+	struct RenderableMetaValues
 	{
 		//TODO: I think our renderables need to define a struct output-like object
 		//	^ and then the implementation/detail can just grab the largest for the pipeline's layout (max of 128? what is vulkan's max??)
 		//	^ - we will have to make sure that our shaders align
 
-		::glm::mat4 transform;
+		geom::Transform transform;
+		ui32 resourceType; //TODO: ResourceType to ui32 so our shaders can respond properly
+
+		constexpr static siz PADDING_SIZE = 128 - sizeof(geom::Transform) - sizeof(ui32);
 
 		union {
-			struct
-			{
-				::glm::mat4 normal; //TODO: ? I have TODO here without a comment, so I'm wondering why...
-			} object;
+			ui8 padding[PADDING_SIZE];
 
 			struct
 			{
+				//TODO: I feel like we can get the light's color via their vertex
 				::glm::vec4 color;
 				flt radius;
 			} light;

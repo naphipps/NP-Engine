@@ -65,6 +65,7 @@ set(NP_ENGINE_GEOMETRY_HPP
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Geometry/Circular.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Geometry/Aabb.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Geometry/Obb.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Geometry/Transform.hpp
 )
 
 set(NP_ENGINE_GPU_HPP

@@ -88,6 +88,8 @@ namespace np::gpu::__detail
 		{
 			NP_ENGINE_PROFILE_FUNCTION();
 
+			_meta.transform = _model->GetTransform();
+
 			VulkanRenderPipeline& vulkan_render_pipeline = (VulkanRenderPipeline&)(*pipeline);
 			mem::sptr<Framebuffers> framebuffers = vulkan_render_pipeline.GetProperties().framebuffers;
 			mem::sptr<RenderPass> render_pass = framebuffers->GetRenderPass();
@@ -242,7 +244,7 @@ namespace np::gpu::__detail
 			{
 				_push_constants = mem::create_sptr<VulkanCommandPushConstants>(
 					_services->GetAllocator(), vulkan_render_pipeline.GetLayout(),
-					VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(RenderableMetaValues), &_meta_values);
+					VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(RenderableMetaValues), &_meta);
 			}
 
 			if (!_bind_vertex_buffers)
@@ -342,6 +344,8 @@ namespace np::gpu::__detail
 
 		void PrepareForPipeline(mem::sptr<Pipeline> pipeline) override
 		{
+			_meta.transform = _model->GetTransform();
+
 			if (IsOutOfDate())
 			{
 				NP_ENGINE_PROFILE_SCOPE("preparing for pipeline");

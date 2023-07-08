@@ -16,7 +16,6 @@ namespace np::gpu
 	struct VisibleObject
 	{
 		geom::FltAabb3D aabb;
-		glm::mat4 transform;
 		
 		//TODO: add data for the resource
 

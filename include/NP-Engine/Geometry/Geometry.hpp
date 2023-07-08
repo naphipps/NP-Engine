@@ -15,5 +15,6 @@
 #include "Circular.hpp"
 #include "Aabb.hpp"
 #include "Obb.hpp"
+#include "Transform.hpp"
 
 #endif /* NP_ENGINE_GEOMETRY_HPP */

@@ -12,12 +12,30 @@
 #include "CommandStaging.hpp"
 #include "Pipeline.hpp"
 #include "Resource.hpp"
+#include "RenderableMetaValues.hpp"
 
 namespace np::gpu
 {
-	struct RenderableObject : public Resource
+	class RenderableObject : public Resource
 	{
-		// TODO: does this need a virtual destructor?
+	protected:
+		RenderableMetaValues _meta;
+
+	public:
+		virtual RenderableMetaValues& GetMetaValues()
+		{
+			return _meta;
+		}
+
+		virtual const RenderableMetaValues& GetMetaValues() const
+		{
+			return _meta;
+		}
+
+		virtual void SetMetaValues(const RenderableMetaValues& meta)
+		{
+			_meta = meta;
+		}
 
 		virtual ResourceType GetType() const override = 0;
 

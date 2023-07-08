@@ -20,7 +20,7 @@ namespace np::geom
 	struct Obb<2, T> : public Aabb<2, T>
 	{
 		using Point = typename Aabb<2, T>::Point;
-		Point Orientation = {0}; // TODO: this should be a quaternion
+		::glm::quat orientation{0.f, 0.f, 0.f, 1.f}; //default wxyz {0, 0, 0, 1}
 
 		virtual bl Contains(const Point& point) const override
 		{
@@ -35,7 +35,7 @@ namespace np::geom
 	struct Obb<3, T> : public Aabb<3, T>
 	{
 		using Point = typename Aabb<3, T>::Point;
-		Point Orientation = {0}; // TODO: this should be a quaternion
+		::glm::quat orientation{0.f, 0.f, 0.f, 1.f}; //default wxyz {0, 0, 0, 1}
 
 		virtual bl Contains(const Point& point) const override
 		{

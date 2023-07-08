@@ -17,17 +17,17 @@ namespace np::geom
 	struct Aabb;
 
 	template <typename T>
-	struct Aabb<2, T> : public Shape<2, T>
+	struct Aabb<2, T> : public Shape<2, T> //TODO: do we need this??
 	{
 		using Point = typename Shape<2, T>::Point;
 
-		Point Center{0};
-		Point HalfLengths{0};
+		Point center{0};
+		Point halfLengths{0};
 
 		virtual bl Contains(const Point& point) const
 		{
-			return point.x >= Center.x - HalfLengths.x && point.x <= Center.x + HalfLengths.x &&
-				point.y >= Center.y - HalfLengths.y && point.y <= Center.y + HalfLengths.y;
+			return point.x >= center.x - halfLengths.x && point.x <= center.x + halfLengths.x &&
+				point.y >= center.y - halfLengths.y && point.y <= center.y + halfLengths.y;
 		}
 	};
 
@@ -36,14 +36,14 @@ namespace np::geom
 	{
 		using Point = typename Shape<3, T>::Point;
 
-		Point Center{0};
-		Point HalfLengths{0};
+		Point center{0};
+		Point halfLengths{0};
 
 		virtual bl Contains(const Point& point) const
 		{
-			return point.x >= Center.x - HalfLengths.x && point.x <= Center.x + HalfLengths.x &&
-				point.y >= Center.y - HalfLengths.y && point.y <= Center.y + HalfLengths.y &&
-				point.z > Center.z - HalfLengths.z && point.z <= Center.z + HalfLengths.z;
+			return point.x >= center.x - halfLengths.x && point.x <= center.x + halfLengths.x &&
+				point.y >= center.y - halfLengths.y && point.y <= center.y + halfLengths.y &&
+				point.z > center.z - halfLengths.z && point.z <= center.z + halfLengths.z;
 		}
 	};
 

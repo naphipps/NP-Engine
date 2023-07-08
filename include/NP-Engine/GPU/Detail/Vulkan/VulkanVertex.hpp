@@ -21,16 +21,16 @@ namespace np::gpu::__detail
 	{
 		VulkanVertex(const Vertex& other)
 		{
-			Position = other.Position;
-			Color = other.Color;
-			TextureCoordinate = other.TextureCoordinate;
+			position = other.position;
+			color = other.color;
+			uv = other.uv;
 		}
 
 		VulkanVertex& operator=(const Vertex& other)
 		{
-			Position = other.Position;
-			Color = other.Color;
-			TextureCoordinate = other.TextureCoordinate;
+			position = other.position;
+			color = other.color;
+			uv = other.uv;
 			return *this;
 		}
 
@@ -54,16 +54,16 @@ namespace np::gpu::__detail
 			descs[0].binding = 0;
 			descs[0].location = 0;
 			descs[0].format = VK_FORMAT_R32G32B32_SFLOAT;
-			descs[0].offset = offsetof(VulkanVertex, Position);
+			descs[0].offset = offsetof(VulkanVertex, position);
 
 			descs[1].binding = 0;
 			descs[1].location = 1;
 			descs[1].format = VK_FORMAT_R32G32B32_SFLOAT;
-			descs[1].offset = offsetof(VulkanVertex, Color);
+			descs[1].offset = offsetof(VulkanVertex, color);
 
 			descs[2].binding = 0;
 			descs[2].location = 2;
-			descs[2].offset = offsetof(VulkanVertex, TextureCoordinate);
+			descs[2].offset = offsetof(VulkanVertex, uv);
 			descs[2].format = VK_FORMAT_R32G32_SFLOAT;
 
 			return descs;
