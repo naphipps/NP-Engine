@@ -868,7 +868,8 @@ namespace np::win::__detail
 #if NP_ENGINE_PLATFORM_IS_WINDOWS
 				HWND native_window = (HWND)GetNativeFromGlfw(glfw_window);
 				SetWindowLongPtrA(native_window, GWLP_USERDATA, (LONG_PTR)this);
-				_prev_window_procedure = (WNDPROC)SetWindowLongPtrA(native_window, GWLP_WNDPROC, (LONG_PTR)&GlfwWindowProcedure);
+				_prev_window_procedure =
+					(WNDPROC)SetWindowLongPtrA(native_window, GWLP_WNDPROC, (LONG_PTR)&GlfwWindowProcedure);
 #endif
 			}
 		}
@@ -964,7 +965,7 @@ namespace np::win::__detail
 			{
 				glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 				glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
-				//TODO: get default window size and title from config service
+				// TODO: get default window size and title from config service
 				*glfw_window = glfwCreateWindow(800, 600, _title.c_str(), nullptr, nullptr);
 				SetGlfwCallbacks(*glfw_window);
 				ApplySystemThemeOnGlfw(*glfw_window);
@@ -1118,7 +1119,8 @@ namespace np::win::__detail
 				{
 					glfwHideWindow(*glfw_window);
 					mem::sptr<jsys::Job> closing_job = _services->GetJobSystem().CreateJob();
-					mem::sptr<evnt::Event> e = mem::create_sptr<WindowClosingEvent>(_services->GetAllocator(), GetUid(), closing_job);
+					mem::sptr<evnt::Event> e =
+						mem::create_sptr<WindowClosingEvent>(_services->GetAllocator(), GetUid(), closing_job);
 					_services->GetEventSubmitter().Submit(e);
 				}
 			}
@@ -1155,26 +1157,28 @@ namespace np::win::__detail
 				if (*glfw_window)
 				{
 					glfwSetWindowSize(*glfw_window, (i32)width, (i32)height);
-					mem::sptr<evnt::Event> e = mem::create_sptr<WindowSizeEvent>(_services->GetAllocator(), GetUid(), width, height);
+					mem::sptr<evnt::Event> e =
+						mem::create_sptr<WindowSizeEvent>(_services->GetAllocator(), GetUid(), width, height);
 					_services->GetEventSubmitter().Submit(e);
 				}
 			}
 			else
 			{
-				mem::sptr<evnt::Event> e = mem::create_sptr<WindowSetSizeEvent>(_services->GetAllocator(), GetUid(), width, height);
+				mem::sptr<evnt::Event> e =
+					mem::create_sptr<WindowSetSizeEvent>(_services->GetAllocator(), GetUid(), width, height);
 				_services->GetEventSubmitter().Submit(e);
 			}
 		}
 
 		::glm::uvec2 GetSize() override
 		{
-			::glm::uvec2 size{ 0 };
+			::glm::uvec2 size{0};
 			auto glfw_window = _glfw_window.get_access();
 			if (*glfw_window)
 			{
 				i32 x, y = 0;
 				glfwGetWindowSize(*glfw_window, &x, &y);
-				size = { x, y };
+				size = {x, y};
 			}
 
 			return size;
@@ -1201,7 +1205,7 @@ namespace np::win::__detail
 
 		::glm::ivec2 GetPosition() override
 		{
-			::glm::ivec2 position{ 0 };
+			::glm::ivec2 position{0};
 			auto glfw_window = _glfw_window.get_access();
 			if (*glfw_window)
 				glfwGetWindowPos(*glfw_window, &position.x, &position.y);
@@ -1236,7 +1240,8 @@ namespace np::win::__detail
 				if (*glfw_window && glfwGetWindowAttrib(*glfw_window, GLFW_ICONIFIED))
 				{
 					glfwRestoreWindow(*glfw_window);
-					mem::sptr<evnt::Event> e = mem::create_sptr<WindowMinimizeEvent>(_services->GetAllocator(), GetUid(), false);
+					mem::sptr<evnt::Event> e =
+						mem::create_sptr<WindowMinimizeEvent>(_services->GetAllocator(), GetUid(), false);
 					_services->GetEventSubmitter().Submit(e);
 				}
 			}
@@ -1277,7 +1282,8 @@ namespace np::win::__detail
 				if (*glfw_window && glfwGetWindowAttrib(*glfw_window, GLFW_MAXIMIZED))
 				{
 					glfwRestoreWindow(*glfw_window);
-					mem::sptr<evnt::Event> e = mem::create_sptr<WindowMaximizeEvent>(_services->GetAllocator(), GetUid(), false);
+					mem::sptr<evnt::Event> e =
+						mem::create_sptr<WindowMaximizeEvent>(_services->GetAllocator(), GetUid(), false);
 					_services->GetEventSubmitter().Submit(e);
 				}
 			}
@@ -1327,13 +1333,13 @@ namespace np::win::__detail
 
 		::glm::uvec2 GetFramebufferSize() override
 		{
-			::glm::uvec2 size{ 0 };
+			::glm::uvec2 size{0};
 			auto glfw_window = _glfw_window.get_access();
 			if (*glfw_window)
 			{
 				i32 width = 0, height = 0;
 				glfwGetFramebufferSize(*glfw_window, &width, &height);
-				size = { width, height };
+				size = {width, height};
 			}
 
 			return size;

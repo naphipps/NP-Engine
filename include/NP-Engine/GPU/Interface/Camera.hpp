@@ -23,8 +23,8 @@ namespace np::gpu
 			Orthographic = BIT(0)
 		};
 
-		constexpr static ::glm::vec3 Up{ 0.f, 1.f, 0.f };
-		constexpr static ::glm::vec3 Forward{ 0.f, 0.f, 1.f };
+		constexpr static ::glm::vec3 Up{0.f, 1.f, 0.f};
+		constexpr static ::glm::vec3 Forward{0.f, 0.f, 1.f};
 
 		ProjectionType projectionType = ProjectionType::Perspective;
 		::glm::mat4 view{1.0f};

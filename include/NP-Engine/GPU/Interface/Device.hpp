@@ -39,7 +39,8 @@ device.register(fps_id, fps_model) //creates rendering data for fps_model
 device.register(minimap_id, minimap_model) //creates rendering data for minimap_model
 
 //^ I think rendering data should be saved in the device as a sptr, so that when a frame packet uses it, they also use a sptr
-//	^ this means that device.unregister(id) can remove device's sptr, so whenever the frame packet it done with it, then it will destroy itself then
+//	^ this means that device.unregister(id) can remove device's sptr, so whenever the frame packet it done with it, then it will
+destroy itself then
 //		^ this only works if the sptr owns the rendering data
 
 device.update(minimap_id) //updates the rendering data for minimap_model //api might not read "update"
@@ -57,10 +58,11 @@ minimap_scene.unregister(visible)
 device.unregister(minimap_id) //minimap_model rendering data will be marked to be destoryed
 minimap_scene.render() // minimap_model will not be rendered
 	* wait some time to ensure rendering data is destroyed *
-minimap_scene.register(visible, minimap_id) // this should succeed whether or not minimap_id is associated with actual rendering data
-minimap_scene.render() //every id will submitted to a job for visible-calculation-then-command-list-submission, but before that, the job will check if "device.HasResource(id)"
-	^ since device.HasResource(minimap_id) would be false, then that job would resolve there
-	^ this is more strain on the scene and job system, but enables us to reserve a spot before we have rendering data on the device
+minimap_scene.register(visible, minimap_id) // this should succeed whether or not minimap_id is associated with actual rendering
+data minimap_scene.render() //every id will submitted to a job for visible-calculation-then-command-list-submission, but before
+that, the job will check if "device.HasResource(id)" ^ since device.HasResource(minimap_id) would be false, then that job would
+resolve there ^ this is more strain on the scene and job system, but enables us to reserve a spot before we have rendering data
+on the device
 
 */
 
@@ -80,18 +82,19 @@ namespace np::gpu
 		Line,
 		Lines,
 		Polygon,
-		Quads, //TODO: I feel like this could be two diffent kinds since the interal triangles could be one of two different kinds
-		QuadStrip, //TODO: ^ same here
+		Quads, // TODO: I feel like this could be two diffent kinds since the interal triangles could be one of two different
+			   // kinds
+		QuadStrip, // TODO: ^ same here
 		Triangles,
 		TriangleStrip,
 		TriangleFan,
-		Circle, //TODO: two vertices per circle, center point, then radius point, create a circle in whatever way performs best
+		Circle, // TODO: two vertices per circle, center point, then radius point, create a circle in whatever way performs best
 
 		Loop = Polygon,
 		LineStrip = Line,
 		LineLoop = Polygon
 	};
-}
+} // namespace np::gpu
 
 /*
 	TODO: encapsulate all vulkan commands, and bring some standard naming to the interface
@@ -104,7 +107,7 @@ namespace np::gpu
 	class Device
 	{
 	protected:
-		mutexed_wrapper<con::umap<uid::Uid, mem::sptr<Resource>>> _resources; //TODO: is umap the best here? what about vector?
+		mutexed_wrapper<con::umap<uid::Uid, mem::sptr<Resource>>> _resources; // TODO: is umap the best here? what about vector?
 
 	public:
 		virtual void Register(uid::Uid id, mem::sptr<Resource> resource)
@@ -147,6 +150,6 @@ namespace np::gpu
 
 		virtual mem::sptr<srvc::Services> GetServices() const = 0;
 	};
-}
+} // namespace np::gpu
 
 #endif /* NP_ENGINE_GPU_INTERFACE_DEVICE_HPP */

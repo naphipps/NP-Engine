@@ -57,6 +57,6 @@ namespace np
 	using chr32 = char32_t;
 
 	using bl = bool;
-}
+} // namespace np
 
 #endif /* NP_ENGINE_PRIMITIVE_TYPES_HPP */

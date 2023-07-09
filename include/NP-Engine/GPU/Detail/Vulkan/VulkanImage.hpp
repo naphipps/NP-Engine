@@ -34,7 +34,8 @@ namespace np::gpu::__detail
 			return image;
 		}
 
-		static VkDeviceMemory CreateDeviceMemory(mem::sptr<VulkanLogicalDevice> device, VkImage image, VkMemoryPropertyFlags memory_property_flags)
+		static VkDeviceMemory CreateDeviceMemory(mem::sptr<VulkanLogicalDevice> device, VkImage image,
+												 VkMemoryPropertyFlags memory_property_flags)
 		{
 			VkDeviceMemory device_memory = nullptr;
 
@@ -46,7 +47,8 @@ namespace np::gpu::__detail
 				VkMemoryAllocateInfo allocate_info{};
 				allocate_info.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
 				allocate_info.allocationSize = requirements.size;
-				allocate_info.memoryTypeIndex = device->GetMemoryTypeIndex(requirements.memoryTypeBits, memory_property_flags).value();
+				allocate_info.memoryTypeIndex =
+					device->GetMemoryTypeIndex(requirements.memoryTypeBits, memory_property_flags).value();
 
 				if (vkAllocateMemory(*device, &allocate_info, nullptr, &device_memory) != VK_SUCCESS)
 					device_memory = nullptr;
@@ -74,7 +76,8 @@ namespace np::gpu::__detail
 			return info;
 		}
 
-		VulkanImage(mem::sptr<VulkanCommandPool> command_pool, VkImageCreateInfo& image_create_info, VkMemoryPropertyFlags memory_property_flags):
+		VulkanImage(mem::sptr<VulkanCommandPool> command_pool, VkImageCreateInfo& image_create_info,
+					VkMemoryPropertyFlags memory_property_flags):
 			_command_pool(command_pool),
 			_image(CreateImage(GetLogicalDevice(), image_create_info)),
 			_device_memory(CreateDeviceMemory(GetLogicalDevice(), _image, memory_property_flags))
@@ -111,9 +114,11 @@ namespace np::gpu::__detail
 		}
 
 		VkResult AsyncAssign(VulkanBuffer& buffer, VkBufferImageCopy buffer_image_copy, VkSubmitInfo& submit_info,
-							 con::vector<mem::sptr<VulkanCommandBuffer>>& command_buffers, mem::sptr<VulkanQueue> queue, VkFence fence = nullptr)
+							 con::vector<mem::sptr<VulkanCommandBuffer>>& command_buffers, mem::sptr<VulkanQueue> queue,
+							 VkFence fence = nullptr)
 		{
-			VulkanCommandCopyBufferToImage copy_buffer_to_image(buffer, _image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &buffer_image_copy);
+			VulkanCommandCopyBufferToImage copy_buffer_to_image(buffer, _image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1,
+																&buffer_image_copy);
 
 			con::vector<mem::sptr<VulkanCommandBuffer>> buffers = _command_pool->AllocateCommandBuffers(1);
 			VkCommandBufferBeginInfo begin_info = VulkanCommandBuffer::CreateBeginInfo();
@@ -126,7 +131,8 @@ namespace np::gpu::__detail
 			return queue->Submit(buffers, submit_info, fence);
 		}
 
-		VkResult SyncAssign(VulkanBuffer& buffer, VkBufferImageCopy buffer_image_copy, mem::sptr<VulkanQueue> queue, VkSubmitInfo& submit_info)
+		VkResult SyncAssign(VulkanBuffer& buffer, VkBufferImageCopy buffer_image_copy, mem::sptr<VulkanQueue> queue,
+							VkSubmitInfo& submit_info)
 		{
 			con::vector<mem::sptr<VulkanCommandBuffer>> command_buffers;
 			VulkanFence fence(GetLogicalDevice());
@@ -226,7 +232,7 @@ namespace np::gpu::__detail
 			return queue->Submit(buffers, submit_info, fence);
 		}
 
-		//TODO: we have a few method with params like this -- we need to make them consistent
+		// TODO: we have a few method with params like this -- we need to make them consistent
 		VkResult SyncTransitionLayout(VkFormat format, VkImageLayout old_image_layout, VkImageLayout new_image_layout,
 									  VkSubmitInfo& submit_info, mem::sptr<VulkanQueue> queue)
 		{

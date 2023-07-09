@@ -16,7 +16,8 @@
 
 namespace np::gpu
 {
-	class Shader //TODO: we need to break this up to RenderShader, ComputeShader, etc, so that we can put the correct device with the correct shader
+	class Shader // TODO: we need to break this up to RenderShader, ComputeShader, etc, so that we can put the correct device
+				 // with the correct shader
 	{
 	public:
 		enum class Type // TODO: refactor to Pascal case
@@ -33,7 +34,7 @@ namespace np::gpu
 		{
 			Type type;
 			str filename;
-			str entrypoint; //TODO: default to "main"?
+			str entrypoint; // TODO: default to "main"?
 		};
 
 	protected:
@@ -68,12 +69,11 @@ namespace np::gpu
 			return stage;
 		}
 
-		Shader(Properties& properties) : _properties(properties) {}
+		Shader(Properties& properties): _properties(properties) {}
 
 	public:
-
 		virtual DetailType GetDetailType() const = 0;
-		
+
 		virtual siz Size() const = 0;
 
 		virtual void* Bytes() const = 0;

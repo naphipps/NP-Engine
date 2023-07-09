@@ -24,7 +24,7 @@ namespace np::con
 		mem::sptr<entity_registry> _registry;
 
 	public:
-		entity(mem::sptr<entity_registry> registry) : _entity(registry->create()), _registry(registry) {}
+		entity(mem::sptr<entity_registry> registry): _entity(registry->create()), _registry(registry) {}
 
 		~entity()
 		{
@@ -62,6 +62,6 @@ namespace np::con
 			return _registry->emplace<T>(_entity, ::std::forward<Args>(args)...);
 		}
 	};
-}
+} // namespace np::con
 
 #endif /* NP_ENGINE_ENTITY_HPP */

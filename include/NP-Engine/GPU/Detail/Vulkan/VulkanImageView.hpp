@@ -54,9 +54,12 @@ namespace np::gpu::__detail
 			_image_view(CreateImageView(_device, image_view_create_info))
 		{}
 
-		//TODO: we have a lot of move constructors that need to consider _device, etc
-		//TODO: also, with smart ptrs, I think we can support default constructors for many of our types since after a move, the other would be default anyways
-		VulkanImageView(VulkanImageView&& other) noexcept: _device(::std::move(other._device)), _image_view(::std::move(other._image_view))
+		// TODO: we have a lot of move constructors that need to consider _device, etc
+		// TODO: also, with smart ptrs, I think we can support default constructors for many of our types since after a move,
+		// the other would be default anyways
+		VulkanImageView(VulkanImageView&& other) noexcept:
+			_device(::std::move(other._device)),
+			_image_view(::std::move(other._image_view))
 		{
 			other._device = nullptr;
 			other._image_view = nullptr;

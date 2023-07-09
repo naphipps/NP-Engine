@@ -20,7 +20,7 @@
 #include "Texture.hpp"
 #include "Vertex.hpp"
 
-//TODO: I feel like we need to load the skeleton somewhere around here, and them base it off our root bone
+// TODO: I feel like we need to load the skeleton somewhere around here, and them base it off our root bone
 
 namespace np::gpu
 {
@@ -119,14 +119,14 @@ namespace np::gpu
 				_shapes.assign(::std::make_move_iterator(shapes.begin()), ::std::make_move_iterator(shapes.end()));
 				_materials.assign(::std::make_move_iterator(materials.begin()), ::std::make_move_iterator(materials.end()));
 				con::umap<Vertex, ui32> vertexIndexMap;
-				::glm::vec3 min{ FLT_MAX, FLT_MAX, FLT_MAX };
-				::glm::vec3 max{ FLT_MIN, FLT_MIN, FLT_MIN };
+				::glm::vec3 min{FLT_MAX, FLT_MAX, FLT_MAX};
+				::glm::vec3 max{FLT_MIN, FLT_MIN, FLT_MIN};
 
 				for (const ::tinyobj::shape_t& shape : _shapes)
 				{
 					for (const ::tinyobj::index_t& index : shape.mesh.indices)
 					{
-						//TODO: extract Obb and Aabb here
+						// TODO: extract Obb and Aabb here
 
 						Vertex vertex;
 
@@ -134,9 +134,8 @@ namespace np::gpu
 										   _attributes.vertices[VERTEX_STRIDE * (siz)index.vertex_index + 1],
 										   _attributes.vertices[VERTEX_STRIDE * (siz)index.vertex_index + 2]};
 
-						vertex.uv = {
-							_attributes.texcoords[TEXTURE_COORDINATE_STRIDE * (siz)index.texcoord_index + 0],
-							1.0f - _attributes.texcoords[TEXTURE_COORDINATE_STRIDE * (siz)index.texcoord_index + 1]};
+						vertex.uv = {_attributes.texcoords[TEXTURE_COORDINATE_STRIDE * (siz)index.texcoord_index + 0],
+									 1.0f - _attributes.texcoords[TEXTURE_COORDINATE_STRIDE * (siz)index.texcoord_index + 1]};
 
 						vertex.color = {1.0f, 1.0f, 1.0f};
 
@@ -157,7 +156,7 @@ namespace np::gpu
 					}
 				}
 
-				_original_aabb.halfLengths = { max.x - min.x, max.y - min.y, max.z - min.z };
+				_original_aabb.halfLengths = {max.x - min.x, max.y - min.y, max.z - min.z};
 				_original_aabb.halfLengths.x /= 2.f;
 				_original_aabb.halfLengths.y /= 2.f;
 				_original_aabb.halfLengths.z /= 2.f;
@@ -204,8 +203,8 @@ namespace np::gpu
 		geom::FltObb3D GetObb() const
 		{
 			geom::FltObb3D obb;
-			obb.center = _original_aabb.center + _transform.position; //TODO: may not be correct
-			obb.halfLengths = _original_aabb.halfLengths * _transform.scale; //TODO: may not be correct
+			obb.center = _original_aabb.center + _transform.position; // TODO: may not be correct
+			obb.halfLengths = _original_aabb.halfLengths * _transform.scale; // TODO: may not be correct
 			obb.orientation = _transform.orientation;
 			return obb;
 		}

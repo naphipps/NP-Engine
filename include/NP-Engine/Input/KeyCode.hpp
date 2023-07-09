@@ -130,7 +130,7 @@ namespace np
 		using KeyCodeState = InputState<KeyCode>;
 		using KeyCodeStates = InputStates<KeyCode, (siz)KeyCode::Max>;
 		using KeyCallback = void (*)(void* caller, const nput::KeyCodeState& key_code_state);
-	}
+	} // namespace nput
 
 	static str to_str(nput::KeyCode code)
 	{
@@ -567,6 +567,6 @@ namespace np
 
 		return name;
 	}
-}
+} // namespace np
 
 #endif /* NP_ENGINE_KEY_CODE_HPP */

@@ -23,9 +23,10 @@ namespace np::gpu::__detail
 		VkDescriptorPool _descriptor_pool;
 		con::vector<VkDescriptorSet> _descriptor_sets;
 
-		static VkDescriptorPool CreateDescriptorPool(mem::sptr<VulkanLogicalDevice> device, ui32 sets_count, mem::sptr<VulkanDescriptorSetLayout> layout)
+		static VkDescriptorPool CreateDescriptorPool(mem::sptr<VulkanLogicalDevice> device, ui32 sets_count,
+													 mem::sptr<VulkanDescriptorSetLayout> layout)
 		{
-			ui32 size = 10; //TODO: where does this value come from??
+			ui32 size = 10; // TODO: where does this value come from??
 			con::vector<VkDescriptorPoolSize> pool_sizes;
 			for (const VkDescriptorSetLayoutBinding& binding : layout->GetBindings())
 				pool_sizes.emplace_back(VkDescriptorPoolSize{binding.descriptorType, size});
@@ -43,7 +44,9 @@ namespace np::gpu::__detail
 			return pool;
 		}
 
-		static con::vector<VkDescriptorSet> CreateDescriptorSets(mem::sptr<VulkanLogicalDevice> device, ui32 sets_count, mem::sptr<VulkanDescriptorSetLayout> layout, VkDescriptorPool pool)
+		static con::vector<VkDescriptorSet> CreateDescriptorSets(mem::sptr<VulkanLogicalDevice> device, ui32 sets_count,
+																 mem::sptr<VulkanDescriptorSetLayout> layout,
+																 VkDescriptorPool pool)
 		{
 			con::vector<VkDescriptorSetLayout> layouts(sets_count, *layout);
 
@@ -61,7 +64,8 @@ namespace np::gpu::__detail
 		}
 
 	public:
-		VulkanDescriptorSets(mem::sptr<VulkanLogicalDevice> device, ui32 sets_count, mem::sptr<VulkanDescriptorSetLayout> descriptor_set_layout) :
+		VulkanDescriptorSets(mem::sptr<VulkanLogicalDevice> device, ui32 sets_count,
+							 mem::sptr<VulkanDescriptorSetLayout> descriptor_set_layout):
 			_device(device),
 			_descriptor_set_layout(descriptor_set_layout),
 			_descriptor_pool(CreateDescriptorPool(device, sets_count, _descriptor_set_layout)),

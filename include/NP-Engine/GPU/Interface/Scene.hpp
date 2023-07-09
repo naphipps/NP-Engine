@@ -56,13 +56,13 @@ namespace np::gpu
 
 		virtual void BeginRenderSceneProcedure(mem::Delegate& d)
 		{
-			//RenderScenePayload* payload = d.GetData<RenderScenePayload*>();
+			// RenderScenePayload* payload = d.GetData<RenderScenePayload*>();
 			mem::sptr<RenderContext> context = GetRenderContext();
 			mem::sptr<RenderPipeline> pipeline = GetRenderPipeline();
 
-			//payload->staging = context->ProduceCommandStaging();
-			//context->Begin(*payload->staging);
-			//pipeline->BeginRenderPass(*payload->staging);
+			// payload->staging = context->ProduceCommandStaging();
+			// context->Begin(*payload->staging);
+			// pipeline->BeginRenderPass(*payload->staging);
 		}
 
 		static void EndRenderSceneCallback(void* caller, mem::Delegate& d)
@@ -72,16 +72,16 @@ namespace np::gpu
 
 		virtual void EndRenderSceneProcedure(mem::Delegate& d)
 		{
-			//RenderScenePayload* payload = d.GetData<RenderScenePayload*>();
-			//RenderContext& context = GetRenderContext();
-			//RenderPipeline& pipeline = GetRenderPipeline();
+			// RenderScenePayload* payload = d.GetData<RenderScenePayload*>();
+			// RenderContext& context = GetRenderContext();
+			// RenderPipeline& pipeline = GetRenderPipeline();
 
-			//pipeline.EndRenderPass(*payload->staging);
-			//payload->staging->DigestCommands();
+			// pipeline.EndRenderPass(*payload->staging);
+			// payload->staging->DigestCommands();
 			//.End(*payload->staging);
-			//context.ConsumeCommandStaging(*payload->staging);
+			// context.ConsumeCommandStaging(*payload->staging);
 
-			//mem::Destroy<RenderScenePayload>(GetServices()->GetAllocator(), payload);
+			// mem::Destroy<RenderScenePayload>(GetServices()->GetAllocator(), payload);
 		}
 
 		static void RenderVisibleCallback(void* caller, mem::Delegate& d)
@@ -91,20 +91,20 @@ namespace np::gpu
 
 		virtual void RenderVisibleProcedure(mem::Delegate& d)
 		{
-			//RenderVisiblePayload* payload = d.GetData<RenderVisiblePayload*>();
-			mem::sptr<Resource> resource;// = GetRenderDevice().GetResource(payload->id);
+			// RenderVisiblePayload* payload = d.GetData<RenderVisiblePayload*>();
+			mem::sptr<Resource> resource; // = GetRenderDevice().GetResource(payload->id);
 
-			//if (resource && payload->scenePayload->camera.Contains(payload->visible))
-				//StageResource(resource, *payload);
+			// if (resource && payload->scenePayload->camera.Contains(payload->visible))
+			// StageResource(resource, *payload);
 
-			//TODO: ^ figure out how to get animation data ?
+			// TODO: ^ figure out how to get animation data ?
 
-			//mem::Destroy<RenderVisiblePayload>(GetServices()->GetAllocator(), payload);
+			// mem::Destroy<RenderVisiblePayload>(GetServices()->GetAllocator(), payload);
 		}
 
-		//virtual void StageResource(mem::sptr<Resource> resource, RenderVisiblePayload& payload) = 0;
+		// virtual void StageResource(mem::sptr<Resource> resource, RenderVisiblePayload& payload) = 0;
 
-		Scene(Properties& properties) : _properties(properties) {}
+		Scene(Properties& properties): _properties(properties) {}
 
 	public:
 		static mem::sptr<Scene> Create(Properties properties);
@@ -171,7 +171,7 @@ namespace np::gpu
 			return _on_render_delegate;
 		}
 
-		virtual mem::sptr<Resource> CreateResource(mem::sptr<Model> model) = 0; //TODO: for image and light too
+		virtual mem::sptr<Resource> CreateResource(mem::sptr<Model> model) = 0; // TODO: for image and light too
 
 		virtual void Register(uid::Uid id, mem::sptr<VisibleObject> visible, mem::sptr<Model> model)
 		{
@@ -184,7 +184,7 @@ namespace np::gpu
 			(*_visibles.get_access())[id] = visible;
 		}
 
-		virtual void Register(uid::Uid id, mem::sptr<Model> model) //TODO: for image and light too
+		virtual void Register(uid::Uid id, mem::sptr<Model> model) // TODO: for image and light too
 		{
 			GetRenderDevice()->Register(id, CreateResource(model));
 		}
@@ -238,7 +238,7 @@ namespace np::gpu
 		virtual void EndRenderPass(mem::sptr<CommandStaging> staging) = 0;
 
 		virtual void Render() = 0;
-		
+
 		virtual void Render2()
 		{
 			/*
@@ -246,12 +246,13 @@ namespace np::gpu
 			jsys::JobSystem& job_system = services->GetJobSystem();
 			mem::Allocator& allocator = services->GetAllocator();
 
-			mem::sptr<RenderScenePayload> render_scene_payload = mem::create_sptr<RenderScenePayload>(allocator, nullptr, GetCamera());
+			mem::sptr<RenderScenePayload> render_scene_payload = mem::create_sptr<RenderScenePayload>(allocator, nullptr,
+			GetCamera());
 
 			mem::sptr<jsys::Job> begin_render_scene_job = job_system.CreateJob();
 			begin_render_scene_job->GetDelegate().ConstructData<mem::sptr<RenderScenePayload>>(render_scene_payload);
 			begin_render_scene_job->GetDelegate().SetCallback(this, BeginRenderSceneCallback);
-			
+
 			mem::sptr<jsys::Job> end_render_scene_job = job_system.CreateJob();
 			end_render_scene_job->GetDelegate().ConstructData<mem::sptr<RenderScenePayload>>(render_scene_payload);
 			end_render_scene_job->GetDelegate().SetCallback(this, EndRenderSceneCallback);
@@ -262,12 +263,13 @@ namespace np::gpu
 			mem::sptr<RenderVisiblePayload> render_visible_payload = nullptr;
 			//*/
 
-			//TODO: how do we allow the following jobs to organize/digest resources by type then come together before the end job??
+			// TODO: how do we allow the following jobs to organize/digest resources by type then come together before the end
+			// job??
 
 			/*
 				TODO:
-					- On scene render, decide if the end job is going to be a deferred render frame or forward. 
-						Then make checking jobs create commands based on that. We can collect those commands in a 
+					- On scene render, decide if the end job is going to be a deferred render frame or forward.
+						Then make checking jobs create commands based on that. We can collect those commands in a
 						mpmc queue or something on scene payload
 
 					- Extract AABB from model to determine size and where the camera should be
@@ -278,11 +280,12 @@ namespace np::gpu
 				Lock l(_visibles_mutex);
 				for (auto it = _visibles.begin(); it != _visibles.end(); it++)
 				{
-					//render_visible_payload = mem::create_sptr<RenderVisiblePayload>(allocator, render_scene_payload, *it->first, it->second);
-					render_visible_job = job_system.CreateJob();
-					//render_visible_job->GetDelegate().ConstructData<RenderVisiblePayload*>(render_visible_payload); #error //TODO: invalid construction, type is sptr
-					render_visible_job->GetDelegate().SetCallback(this, RenderVisibleCallback);
-					
+					//render_visible_payload = mem::create_sptr<RenderVisiblePayload>(allocator, render_scene_payload,
+			*it->first, it->second); render_visible_job = job_system.CreateJob();
+					//render_visible_job->GetDelegate().ConstructData<RenderVisiblePayload*>(render_visible_payload); #error
+			//TODO: invalid construction, type is sptr render_visible_job->GetDelegate().SetCallback(this,
+			RenderVisibleCallback);
+
 					//render_visible_job->AddDependency(*begin_render_scene_job);
 					//end_render_scene_job->AddDependency(*render_visible_job);
 

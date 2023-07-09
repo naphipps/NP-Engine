@@ -8,7 +8,7 @@
 #define NP_ENGINE_APPLICATION_HPP
 
 #ifndef NP_ENGINE_APPLICATION_LOOP_DURATION
-	#define NP_ENGINE_APPLICATION_LOOP_DURATION 2 //milliseconds -- 4 -> 250 loops per second
+	#define NP_ENGINE_APPLICATION_LOOP_DURATION 2 // milliseconds -- 4 -> 250 loops per second
 #endif
 
 #include "NP-Engine/Foundation/Foundation.hpp"

@@ -374,7 +374,8 @@ namespace np::noiz
 
 		inline flt operator()(flt x, flt y, flt z, flt w) const
 		{
-			return GetAmplitude() * CalculateNoiseValue(GetFrequency() * x, GetFrequency() * y, GetFrequency() * z, GetFrequency() * w);
+			return GetAmplitude() *
+				CalculateNoiseValue(GetFrequency() * x, GetFrequency() * y, GetFrequency() * z, GetFrequency() * w);
 		}
 
 		/*
@@ -938,8 +939,8 @@ namespace np::noiz
 
 			for (ui8 i = 0; i < _octave_count; i++)
 			{
-				output +=
-					amplitude * CalculateNoiseValue(x * frequency, y * frequency, z * frequency, i * _fractional_increment * frequency);
+				output += amplitude *
+					CalculateNoiseValue(x * frequency, y * frequency, z * frequency, i * _fractional_increment * frequency);
 				denom += amplitude;
 				frequency *= _lacunarity;
 				amplitude *= _persistence;
@@ -1122,7 +1123,8 @@ namespace np::noiz
 
 			for (ui8 i = 0; i < _octave_count; i++)
 			{
-				output += amplitude * ::std::abs(CalculateNoiseValue(x * frequency, y * frequency, z * frequency, w * frequency));
+				output +=
+					amplitude * ::std::abs(CalculateNoiseValue(x * frequency, y * frequency, z * frequency, w * frequency));
 				denom += amplitude;
 				frequency *= _lacunarity;
 				amplitude *= _persistence;
@@ -1232,8 +1234,8 @@ namespace np::noiz
 
 			for (ui8 i = 0; i < _octave_count; i++)
 			{
-				output +=
-					amplitude * ::std::abs(CalculateNoiseValue(x * frequency, y * frequency, i * _fractional_increment * frequency));
+				output += amplitude *
+					::std::abs(CalculateNoiseValue(x * frequency, y * frequency, i * _fractional_increment * frequency));
 				denom += amplitude;
 				frequency *= _lacunarity;
 				amplitude *= _persistence;
@@ -1289,7 +1291,8 @@ namespace np::noiz
 			for (ui8 i = 0; i < _octave_count; i++)
 			{
 				output += amplitude *
-					::std::abs(CalculateNoiseValue(x * frequency, y * frequency, z * frequency, i * _fractional_increment * frequency));
+					::std::abs(CalculateNoiseValue(x * frequency, y * frequency, z * frequency,
+												   i * _fractional_increment * frequency));
 				denom += amplitude;
 				frequency *= _lacunarity;
 				amplitude *= _persistence;

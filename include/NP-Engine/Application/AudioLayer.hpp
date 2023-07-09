@@ -17,8 +17,8 @@ namespace np::app
 	class AudioLayer : public Layer
 	{
 	public:
-		AudioLayer(mem::sptr<srvc::Services> services) : Layer(services) {}
+		AudioLayer(mem::sptr<srvc::Services> services): Layer(services) {}
 	};
-}
+} // namespace np::app
 
 #endif /* NP_ENGINE_AUDIO_LAYER_HPP */

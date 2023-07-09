@@ -100,7 +100,8 @@ namespace np::mem
 	template <typename T, typename... Args>
 	T* Create(Allocator& allocator, Args&&... args)
 	{
-		return mem::Construct<T>(allocator.Allocate(sizeof(T)), ::std::forward<Args>(args)...);;
+		return mem::Construct<T>(allocator.Allocate(sizeof(T)), ::std::forward<Args>(args)...);
+		;
 	}
 
 	template <typename T>

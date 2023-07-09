@@ -32,7 +32,6 @@ namespace np::thr
 		using StdThreadBlock = mem::SizedBlock<sizeof(::std::thread)>;
 		mutexed_wrapper<StdThreadBlock> _thread_block;
 
-
 		void Zeroize(StdThreadBlock& thread_block)
 		{
 			((mem::Block)thread_block).Zeroize();

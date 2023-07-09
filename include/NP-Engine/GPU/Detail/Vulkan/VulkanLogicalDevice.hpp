@@ -26,7 +26,7 @@ namespace np::gpu::__detail
 		mem::sptr<srvc::Services> _services;
 		VkPhysicalDevice _physical_device;
 		VkDevice _device;
-		
+
 		static VkDeviceCreateInfo CreateDeviceInfo()
 		{
 			VkDeviceCreateInfo info{};
@@ -84,10 +84,9 @@ namespace np::gpu::__detail
 		}
 
 	public:
-
 		static con::vector<str> GetRequiredDeviceExtensionNames()
 		{
-			con::vector<str> extensions{ VK_KHR_SWAPCHAIN_EXTENSION_NAME };
+			con::vector<str> extensions{VK_KHR_SWAPCHAIN_EXTENSION_NAME};
 
 #if NP_ENGINE_PLATFORM_IS_APPLE
 			// Apple uses MoltenVK, hence insert VK_KHR_portability_subset
@@ -156,7 +155,8 @@ namespace np::gpu::__detail
 			return names;
 		}
 
-		VulkanLogicalDevice(mem::sptr<srvc::Services> services, VkPhysicalDevice physical_device, con::vector<VkDeviceQueueCreateInfo> queue_infos):
+		VulkanLogicalDevice(mem::sptr<srvc::Services> services, VkPhysicalDevice physical_device,
+							con::vector<VkDeviceQueueCreateInfo> queue_infos):
 			_services(services),
 			_physical_device(physical_device),
 			_device(CreateLogicalDevice(_physical_device, queue_infos))

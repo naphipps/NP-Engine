@@ -48,7 +48,7 @@ namespace np
 		using ControllerCodeState = InputState<ControllerCode>;
 		using ControllerCodeStates = InputStates<ControllerCode, (siz)ControllerCode::Max>;
 		using ControllerCallback = void (*)(void* caller, const nput::ControllerCodeState& controller_state);
-	}
+	} // namespace nput
 
 	static str to_str(nput::ControllerCode code)
 	{
@@ -133,6 +133,6 @@ namespace np
 
 		return name;
 	}
-}
+} // namespace np
 
 #endif /* NP_ENGINE_CONTROLLER_CODE_HPP */

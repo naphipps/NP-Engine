@@ -18,10 +18,12 @@ namespace np::gpu
 	class RenderableLightObject : public RenderableObject
 	{
 	private:
-		virtual void Stage(mem::sptr<CommandStaging> command_staging, mem::sptr<Pipeline> pipline) override {} //lights do not need this
+		virtual void Stage(mem::sptr<CommandStaging> command_staging, mem::sptr<Pipeline> pipline) override {
+		} // lights do not need this
 
 	public:
-		virtual void Stage(mem::sptr<CommandStaging> command_staging, mem::sptr<Pipeline> pipline, mem::sptr<Resource> resource) = 0;
+		virtual void Stage(mem::sptr<CommandStaging> command_staging, mem::sptr<Pipeline> pipline,
+						   mem::sptr<Resource> resource) = 0;
 	};
 } // namespace np::gpu
 

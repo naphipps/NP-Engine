@@ -23,8 +23,8 @@ namespace np::gpu::__detail
 
 		static void FramebufferCallback(void* caller, ui32 width, ui32 height)
 		{
-			//NVIDIA resizing framebuffer is a nightmare
-			((VulkanRenderTarget*)caller)->_framebuffer_extent = { width, height };
+			// NVIDIA resizing framebuffer is a nightmare
+			((VulkanRenderTarget*)caller)->_framebuffer_extent = {width, height};
 		}
 
 		VkSurfaceKHR CreateSurface()
@@ -47,17 +47,16 @@ namespace np::gpu::__detail
 		}
 
 	public:
-
-		VulkanRenderTarget(mem::sptr<DetailInstance> instance, mem::sptr<win::Window> window): 
-			RenderTarget(instance, window), 
+		VulkanRenderTarget(mem::sptr<DetailInstance> instance, mem::sptr<win::Window> window):
+			RenderTarget(instance, window),
 			_surface(CreateSurface())
 		{
-			//TODO: bring the following checks to all the detail's constructors
+			// TODO: bring the following checks to all the detail's constructors
 			NP_ENGINE_ASSERT(GetDetailType() == DetailType::Vulkan,
-				"VulkanRenderTarget requires given DetailInstance to be DetailType::Vulkan");
+							 "VulkanRenderTarget requires given DetailInstance to be DetailType::Vulkan");
 
 			::glm::uvec2 framebuffer_size = _window->GetFramebufferSize();
-			_framebuffer_extent = { framebuffer_size.x, framebuffer_size.y };
+			_framebuffer_extent = {framebuffer_size.x, framebuffer_size.y};
 			_window->SetFramebufferCallback(this, FramebufferCallback);
 		}
 
@@ -81,6 +80,6 @@ namespace np::gpu::__detail
 			return _surface;
 		}
 	};
-}
+} // namespace np::gpu::__detail
 
 #endif /* NP_ENGINE_VULKAN_RENDER_TARGET_HPP */

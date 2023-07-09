@@ -85,7 +85,7 @@ namespace np::gpu::__detail
 		//*/
 
 	public:
-		VulkanScene(Scene::Properties& properties) :
+		VulkanScene(Scene::Properties& properties):
 			Scene(properties),
 			_command_buffer_begin_info(VulkanCommandBuffer::CreateBeginInfo()),
 			_command_buffers(CreateCommandBuffers(GetRenderContext())),
@@ -96,9 +96,9 @@ namespace np::gpu::__detail
 
 		~VulkanScene() = default;
 
-		mem::sptr<Resource> CreateResource(mem::sptr<Model> model) override //TODO: for image and light too
+		mem::sptr<Resource> CreateResource(mem::sptr<Model> model) override // TODO: for image and light too
 		{
-			//TODO: consider an accumulating pool
+			// TODO: consider an accumulating pool
 			return mem::create_sptr<VulkanRenderableModel>(GetServices()->GetAllocator(), GetServices(), model);
 		}
 
@@ -129,11 +129,13 @@ namespace np::gpu::__detail
 			mem::sptr<CommandStaging> command_staging;
 
 			bl has_visibles = !_visibles.get_access()->empty() || true;
-			if (has_visibles) { //TODO: cleanup this
+			if (has_visibles)
+			{ // TODO: cleanup this
 				VulkanRenderTarget& vulkan_render_target = (VulkanRenderTarget&)(*GetRenderTarget());
 				VkExtent2D framebuffer_extent = vulkan_render_target.GetFramebufferExtent();
 
-				if (framebuffer_extent.width != 0 && framebuffer_extent.height != 0 && !vulkan_render_target.GetWindow()->IsMinimized())
+				if (framebuffer_extent.width != 0 && framebuffer_extent.height != 0 &&
+					!vulkan_render_target.GetWindow()->IsMinimized())
 				{
 					VulkanRenderContext& vulkan_render_context = (VulkanRenderContext&)(*GetRenderContext());
 					VkResult result = vulkan_render_context.AcquireImage();
@@ -141,8 +143,10 @@ namespace np::gpu::__detail
 					{
 						vulkan_render_context.MarkAcquiredImageForUse();
 
-						mem::sptr<VulkanCommandBuffer> vulkan_command_buffer = _command_buffers[vulkan_render_context.GetCurrentImageIndex()];
-						command_staging = mem::create_sptr<CommandStaging>(GetServices()->GetAllocator(), vulkan_command_buffer);
+						mem::sptr<VulkanCommandBuffer> vulkan_command_buffer =
+							_command_buffers[vulkan_render_context.GetCurrentImageIndex()];
+						command_staging =
+							mem::create_sptr<CommandStaging>(GetServices()->GetAllocator(), vulkan_command_buffer);
 						vulkan_command_buffer->Begin(_command_buffer_begin_info);
 						NP_ENGINE_ASSERT(command_staging->IsValid(), "command_staging must be valid here");
 					}
@@ -184,7 +188,7 @@ namespace np::gpu::__detail
 		{
 			NP_ENGINE_PROFILE_SCOPE("vulkan scene draw");
 
-			//Scene::Render();
+			// Scene::Render();
 			_on_render_delegate.ConstructData<Scene*>(this);
 			_on_render_delegate();
 			mem::sptr<CommandStaging> command_staging = BeginRenderCommandStaging();
@@ -253,11 +257,11 @@ namespace np::gpu::__detail
 			NP_ENGINE_PROFILE_SCOPE("vulkan renderer draw frame");
 			ui32 image_index = vulkan_render_context.GetAcquiredImageIndex();
 			ui32 current_index = vulkan_render_context.GetCurrentImageIndex();
-			con::vector<VkCommandBuffer> buffers = { *_command_buffers[current_index] };
-			con::vector<VkSemaphore> wait_semaphores{ vulkan_render_context.GetImageSemaphores()[current_index] };
-			con::vector<VkPipelineStageFlags> wait_stages{ VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
-			con::vector<VkSemaphore> signal_semaphores{ vulkan_render_context.GetRenderSemaphores()[current_index] };
-			con::vector<VkSwapchainKHR> swapchains{ vulkan_render_context };
+			con::vector<VkCommandBuffer> buffers = {*_command_buffers[current_index]};
+			con::vector<VkSemaphore> wait_semaphores{vulkan_render_context.GetImageSemaphores()[current_index]};
+			con::vector<VkPipelineStageFlags> wait_stages{VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
+			con::vector<VkSemaphore> signal_semaphores{vulkan_render_context.GetRenderSemaphores()[current_index]};
+			con::vector<VkSwapchainKHR> swapchains{vulkan_render_context};
 
 			VkSubmitInfo submit_info{};
 			submit_info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
@@ -271,7 +275,8 @@ namespace np::gpu::__detail
 
 			vkResetFences(vulkan_render_device, 1, &vulkan_render_context.GetFences()[current_index]);
 
-			if (vulkan_render_device.GetGraphicsQueue()->Submit({ submit_info }, vulkan_render_context.GetFences()[current_index]) != VK_SUCCESS)
+			if (vulkan_render_device.GetGraphicsQueue()->Submit({submit_info},
+																vulkan_render_context.GetFences()[current_index]) != VK_SUCCESS)
 				NP_ENGINE_ASSERT(false, "failed to submit draw command buffer!");
 
 			VkPresentInfoKHR present_info{};
@@ -298,7 +303,7 @@ namespace np::gpu::__detail
 			_properties.camera = camera;
 		}
 
-		virtual void AdjustForWindowResize(win::Window& window) 
+		virtual void AdjustForWindowResize(win::Window& window)
 		{
 			NP_ENGINE_LOG_INFO("scene adjusting for window resize?");
 		}

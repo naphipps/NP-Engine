@@ -57,11 +57,11 @@ namespace np::uid
 			UidSystem& _uid_system;
 
 		public:
-			HndlDestroyer(UidSystem& uid_system, mem::Allocator& allocator) : base(allocator), _uid_system(uid_system) {}
+			HndlDestroyer(UidSystem& uid_system, mem::Allocator& allocator): base(allocator), _uid_system(uid_system) {}
 
-			HndlDestroyer(const HndlDestroyer& other) : base(other), _uid_system(other._uid_system) {}
+			HndlDestroyer(const HndlDestroyer& other): base(other), _uid_system(other._uid_system) {}
 
-			HndlDestroyer(HndlDestroyer&& other) noexcept : base(other), _uid_system(other._uid_system) {}
+			HndlDestroyer(HndlDestroyer&& other) noexcept: base(other), _uid_system(other._uid_system) {}
 
 			void destruct_object(UidHandle* ptr) override
 			{
@@ -79,7 +79,7 @@ namespace np::uid
 			rng::Random64 _rng;
 
 		public:
-			UidGenerator() : uuids::basic_uuid_random_generator<rng::Random64>(_rng) {}
+			UidGenerator(): uuids::basic_uuid_random_generator<rng::Random64>(_rng) {}
 
 			rng::Random64& GetRng()
 			{
@@ -178,7 +178,7 @@ namespace np::uid
 		}
 
 	public:
-		UidSystem() : _destroyer(*this, _allocator) {}
+		UidSystem(): _destroyer(*this, _allocator) {}
 
 		~UidSystem()
 		{
@@ -208,11 +208,11 @@ namespace np::uid
 				while (bookkeeping->masterSet.count(*id));
 				bookkeeping->masterSet.emplace(*id);
 
-				const UidHandle next{ GetNextKey(*bookkeeping), GetNextGeneration(*bookkeeping) };
+				const UidHandle next{GetNextKey(*bookkeeping), GetNextGeneration(*bookkeeping)};
 				HndlBlock* blocks = mem::Create<HndlBlock>(_allocator);
 				UidHandle* object = mem::Construct<UidHandle>(blocks->object_block, next);
 				hndl = mem::sptr<UidHandle>(mem::Construct<HndlResource>(blocks->resource_block, _destroyer, object));
-				bookkeeping->keyToRecord.emplace(hndl->key, UidRecord{ id, hndl->generation });
+				bookkeeping->keyToRecord.emplace(hndl->key, UidRecord{id, hndl->generation});
 			}
 
 			return hndl;

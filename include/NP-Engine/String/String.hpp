@@ -37,26 +37,26 @@ namespace np
 		using const_reverse_iterator = typename base::const_reverse_iterator;
 		using std_type = STD_T;
 
-		tstr() noexcept : base() {}
+		tstr() noexcept: base() {}
 
-		tstr(size_type count, T c) : base(count, c) {}
+		tstr(size_type count, T c): base(count, c) {}
 
-		tstr(const base& b) : base(b.c_str()) {}
+		tstr(const base& b): base(b.c_str()) {}
 
-		tstr(const tstr& other) : base(other) {}
+		tstr(const tstr& other): base(other) {}
 
-		tstr(tstr&& other) noexcept : base(other) {}
+		tstr(tstr&& other) noexcept: base(other) {}
 
-		tstr(const T* chrs) : base(chrs) {}
+		tstr(const T* chrs): base(chrs) {}
 
-		tstr(const T* chrs, size_type count) : base(chrs, count) {}
+		tstr(const T* chrs, size_type count): base(chrs, count) {}
 
-		tstr(const std_type& other) : tstr<T>(other.c_str()) {}
+		tstr(const std_type& other): tstr<T>(other.c_str()) {}
 
-		tstr(::std::initializer_list<T> list) : base(list) {}
+		tstr(::std::initializer_list<T> list): base(list) {}
 
 		template <class InputIt>
-		tstr(InputIt first, InputIt last) : base(first, last)
+		tstr(InputIt first, InputIt last): base(first, last)
 		{}
 
 		operator std_type() const
@@ -118,7 +118,7 @@ namespace np
 	{
 		return ::std::to_string(t);
 	}
-}
+} // namespace np
 
 namespace std
 {
@@ -134,7 +134,7 @@ namespace std
 
 namespace np
 {
-	using wstr = tstr<wchr, ::std::wstring>; //TODO: this is 16bit on windows, 32bit elsewhere... our wstr should be 32bit
+	using wstr = tstr<wchr, ::std::wstring>; // TODO: this is 16bit on windows, 32bit elsewhere... our wstr should be 32bit
 
 	static wstr to_wstr(const wchr* c)
 	{
@@ -189,7 +189,7 @@ namespace np
 		return ::std::to_wstring(t);
 	}
 	//*/
-}
+} // namespace np
 
 namespace std
 {

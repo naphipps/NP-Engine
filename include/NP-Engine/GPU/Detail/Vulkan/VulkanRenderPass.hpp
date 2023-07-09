@@ -122,8 +122,8 @@ namespace np::gpu::__detail
 
 			con::vector<VkSubpassDescription> subpass_descriptions = {subpass_description};
 
-			con::vector<VkAttachmentDescription> attachment_descriptions = { CreateColorAttachmentDescription(device),
-																			CreateDepthAttachmentDescription(GetDepthFormat(device)) };
+			con::vector<VkAttachmentDescription> attachment_descriptions = {
+				CreateColorAttachmentDescription(device), CreateDepthAttachmentDescription(GetDepthFormat(device))};
 
 			con::vector<VkSubpassDependency> subpass_dependencies = CreateSubpassDependencies();
 
@@ -165,9 +165,9 @@ namespace np::gpu::__detail
 			depth_image_view_create_info.format = depth_image_create_info.format;
 			depth_image_view_create_info.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
 
-			return mem::create_sptr<VulkanTexture>(context->GetServices()->GetAllocator(), 
-				render_device.GetCommandPool(), depth_image_create_info, depth_memory_property_flags,
-				depth_image_view_create_info);
+			return mem::create_sptr<VulkanTexture>(context->GetServices()->GetAllocator(), render_device.GetCommandPool(),
+												   depth_image_create_info, depth_memory_property_flags,
+												   depth_image_view_create_info);
 			/*
 			the following transition is covered in the render pass, but here it is for reference
 
@@ -254,7 +254,8 @@ namespace np::gpu::__detail
 			VulkanRenderContext& render_context = (VulkanRenderContext&)(*GetRenderContext());
 			render_pass_begin_info.renderPass = _render_pass;
 			render_pass_begin_info.renderArea.extent = render_context.GetExtent();
-			_begin_render_pass = mem::create_sptr<VulkanCommandBeginRenderPass>(GetServices()->GetAllocator(), render_pass_begin_info, VK_SUBPASS_CONTENTS_INLINE);
+			_begin_render_pass = mem::create_sptr<VulkanCommandBeginRenderPass>(
+				GetServices()->GetAllocator(), render_pass_begin_info, VK_SUBPASS_CONTENTS_INLINE);
 			staging->Stage(_begin_render_pass);
 		}
 

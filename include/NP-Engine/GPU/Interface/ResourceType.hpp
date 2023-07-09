@@ -17,9 +17,9 @@ namespace np::gpu
 		RenderableModel,
 		RenderableImage,
 		RenderableLight,
-		RenderableTexture, //TODO: ??
+		RenderableTexture, // TODO: ??
 		Buffer
 	};
-}
+} // namespace np::gpu
 
 #endif /* NP_ENGINE_GPU_INTERFACE_RESOURCE_TYPE_HPP */

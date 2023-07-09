@@ -29,7 +29,7 @@ namespace np::gpu::__detail
 		VkRenderPassBeginInfo RenderPassBeginInfo;
 		VkSubpassContents SubpassContents;
 
-		VulkanCommandBeginRenderPass(VkRenderPassBeginInfo render_pass_begin_info, VkSubpassContents subpass_contents) :
+		VulkanCommandBeginRenderPass(VkRenderPassBeginInfo render_pass_begin_info, VkSubpassContents subpass_contents):
 			RenderPassBeginInfo(render_pass_begin_info),
 			SubpassContents(subpass_contents)
 		{}
@@ -52,8 +52,8 @@ namespace np::gpu::__detail
 		ui32* DynamicOffsets;
 
 		VulkanCommandBindDescriptorSets(VkPipelineBindPoint pipeline_bind_point, VkPipelineLayout layout, ui32 first_set,
-			ui32 descriptor_set_count, VkDescriptorSet* descriptor_sets, ui32 dynamic_offset_count,
-			ui32* dynamic_offsets) :
+										ui32 descriptor_set_count, VkDescriptorSet* descriptor_sets, ui32 dynamic_offset_count,
+										ui32* dynamic_offsets):
 			PipelineBindPoint(pipeline_bind_point),
 			PipelineLayout(layout),
 			FirstSet(first_set),
@@ -66,7 +66,7 @@ namespace np::gpu::__detail
 		void ApplyTo(VkCommandBuffer command_buffer) override
 		{
 			vkCmdBindDescriptorSets(command_buffer, PipelineBindPoint, PipelineLayout, FirstSet, DescriptorSetCount,
-				DescriptorSets, DynamicOffsetCount, DynamicOffsets);
+									DescriptorSets, DynamicOffsetCount, DynamicOffsets);
 		}
 	};
 
@@ -77,7 +77,7 @@ namespace np::gpu::__detail
 		VkDeviceSize Offset;
 		VkIndexType IndexType;
 
-		VulkanCommandBindIndexBuffer(VkBuffer buffer, VkDeviceSize offset, VkIndexType index_type) :
+		VulkanCommandBindIndexBuffer(VkBuffer buffer, VkDeviceSize offset, VkIndexType index_type):
 			Buffer(buffer),
 			Offset(offset),
 			IndexType(index_type)
@@ -95,7 +95,7 @@ namespace np::gpu::__detail
 		VkPipelineBindPoint PipelineBindPoint;
 		VkPipeline Pipeline;
 
-		VulkanCommandBindPipeline(VkPipelineBindPoint pipeline_bind_point, VkPipeline pipeline) :
+		VulkanCommandBindPipeline(VkPipelineBindPoint pipeline_bind_point, VkPipeline pipeline):
 			PipelineBindPoint(pipeline_bind_point),
 			Pipeline(pipeline)
 		{}
@@ -114,7 +114,7 @@ namespace np::gpu::__detail
 		VkBuffer* Buffers;
 		VkDeviceSize* Offsets;
 
-		VulkanCommandBindVertexBuffers(ui32 first_binding, ui32 binding_count, VkBuffer* buffers, VkDeviceSize* offsets) :
+		VulkanCommandBindVertexBuffers(ui32 first_binding, ui32 binding_count, VkBuffer* buffers, VkDeviceSize* offsets):
 			FirstBinding(first_binding),
 			BindingCount(binding_count),
 			Buffers(buffers),
@@ -137,7 +137,7 @@ namespace np::gpu::__detail
 		ui32 FirstInstance;
 
 		VulkanCommandDrawIndexed(ui32 index_count, ui32 instance_count, ui32 first_index, i32 vertex_offset,
-			ui32 first_instance) :
+								 ui32 first_instance):
 			IndexCount(index_count),
 			InstanceCount(instance_count),
 			FirstIndex(first_index),
@@ -174,10 +174,10 @@ namespace np::gpu::__detail
 		VkImageMemoryBarrier* ImageMemoryBarriers;
 
 		VulkanCommandPipelineBarrier(VkPipelineStageFlags src_pipeline_stage_flags,
-			VkPipelineStageFlags dst_pipeline_stage_flags, VkDependencyFlags dependency_flags,
-			ui32 memory_barrier_count, VkMemoryBarrier* memory_barriers,
-			ui32 buffer_memory_barrier_count, VkBufferMemoryBarrier* buffer_memory_barriers,
-			ui32 image_memory_barrier_count, VkImageMemoryBarrier* image_memory_barriers) :
+									 VkPipelineStageFlags dst_pipeline_stage_flags, VkDependencyFlags dependency_flags,
+									 ui32 memory_barrier_count, VkMemoryBarrier* memory_barriers,
+									 ui32 buffer_memory_barrier_count, VkBufferMemoryBarrier* buffer_memory_barriers,
+									 ui32 image_memory_barrier_count, VkImageMemoryBarrier* image_memory_barriers):
 			SrcPipelineStageFlags(src_pipeline_stage_flags),
 			DstPipelineStageFlags(dst_pipeline_stage_flags),
 			DependencyFlags(dependency_flags),
@@ -192,8 +192,8 @@ namespace np::gpu::__detail
 		void ApplyTo(VkCommandBuffer command_buffer) override
 		{
 			vkCmdPipelineBarrier(command_buffer, SrcPipelineStageFlags, DstPipelineStageFlags, DependencyFlags,
-				MemoryBarrierCount, MemoryBarriers, BufferMemoryBarrierCount, BufferMemoryBarriers,
-				ImageMemoryBarrierCount, ImageMemoryBarriers);
+								 MemoryBarrierCount, MemoryBarriers, BufferMemoryBarrierCount, BufferMemoryBarriers,
+								 ImageMemoryBarrierCount, ImageMemoryBarriers);
 		}
 	};
 
@@ -205,7 +205,7 @@ namespace np::gpu::__detail
 		ui32 RegionCount;
 		VkBufferCopy* Regions;
 
-		VulkanCommandCopyBuffers(VkBuffer src_buffer, VkBuffer dst_buffer, ui32 region_count, VkBufferCopy* regions) :
+		VulkanCommandCopyBuffers(VkBuffer src_buffer, VkBuffer dst_buffer, ui32 region_count, VkBufferCopy* regions):
 			SrcBuffer(src_buffer),
 			DstBuffer(dst_buffer),
 			RegionCount(region_count),
@@ -237,13 +237,13 @@ namespace np::gpu::__detail
 			buffer_image_copy.imageSubresource.mipLevel = 0;
 			buffer_image_copy.imageSubresource.baseArrayLayer = 0;
 			buffer_image_copy.imageSubresource.layerCount = 1;
-			buffer_image_copy.imageOffset = { 0, 0, 0 };
+			buffer_image_copy.imageOffset = {0, 0, 0};
 			// buffer_image_copy.imageExtent = { width, height, 1 };
 			return buffer_image_copy;
 		}
 
 		VulkanCommandCopyBufferToImage(VkBuffer src_buffer, VkImage dst_image, VkImageLayout dst_image_layout,
-			ui32 region_count, VkBufferImageCopy* regions) :
+									   ui32 region_count, VkBufferImageCopy* regions):
 			SrcBuffer(src_buffer),
 			DstImage(dst_image),
 			DstImageLayout(dst_image_layout),
@@ -267,7 +267,7 @@ namespace np::gpu::__detail
 		void* Values;
 
 		VulkanCommandPushConstants(VkPipelineLayout pipeline_layout, VkShaderStageFlags shader_stage_flags, ui32 offset,
-			ui32 size, void* values) :
+								   ui32 size, void* values):
 			PipelineLayout(pipeline_layout),
 			ShaderStageFlags(shader_stage_flags),
 			Offset(offset),

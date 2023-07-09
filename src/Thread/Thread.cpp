@@ -23,7 +23,7 @@ namespace np::thr
 		auto thread_access = _thread_block.get_access();
 
 		bl set = false;
-		
+
 #if NP_ENGINE_PLATFORM_IS_APPLE
 		// Apple does NOT support thread affinity - not even their pthread.h implementation supports it
 

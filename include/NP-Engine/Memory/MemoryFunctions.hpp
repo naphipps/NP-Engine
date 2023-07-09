@@ -23,7 +23,7 @@ namespace np::mem
 	{
 		return ((size + ALIGNMENT - 1) / ALIGNMENT) * ALIGNMENT;
 	}
-	
+
 	template <class T>
 	constexpr T* AddressOf(T& t) noexcept
 	{

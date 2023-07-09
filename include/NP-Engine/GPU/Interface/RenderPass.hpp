@@ -18,10 +18,9 @@ namespace np::gpu
 	class RenderPass : public Pass
 	{
 	protected:
-
 		mem::sptr<RenderContext> _context;
 
-		RenderPass(mem::sptr<RenderContext> context) : Pass(), _context(context) {}
+		RenderPass(mem::sptr<RenderContext> context): Pass(), _context(context) {}
 
 	public:
 		static mem::sptr<RenderPass> Create(mem::sptr<RenderContext> context);
@@ -41,6 +40,6 @@ namespace np::gpu
 			return _context->GetServices();
 		}
 	};
-}
+} // namespace np::gpu
 
 #endif /* NP_ENGINE_GPU_INTERFACE_RENDER_PASS_HPP */

@@ -23,12 +23,12 @@ namespace np::noiz
 	class Turbulence : public rng::Random64Base
 	{
 	protected:
-		flt _scalar; //can be anything
+		flt _scalar; // can be anything
 
 	public:
-		constexpr static flt DEFAULT_SCALAR = 0.1f; //arbitary
+		constexpr static flt DEFAULT_SCALAR = 0.1f; // arbitary
 
-		Turbulence(const rng::Random64& engine = rng::Random64()) : rng::Random64Base(engine), _scalar(DEFAULT_SCALAR)
+		Turbulence(const rng::Random64& engine = rng::Random64()): rng::Random64Base(engine), _scalar(DEFAULT_SCALAR)
 		{
 			Init();
 		}
@@ -56,7 +56,7 @@ namespace np::noiz
 		con::array<Perlin, 3> _perlins;
 
 	public:
-		PerlinTurbulence(const rng::Random64& engine = rng::Random64()) : Turbulence(engine) {}
+		PerlinTurbulence(const rng::Random64& engine = rng::Random64()): Turbulence(engine) {}
 
 		inline void Init() override
 		{
@@ -132,12 +132,12 @@ namespace np::noiz
 		con::array<Simplex, 4> _simplexes;
 
 	public:
-		SimplexTurbulence(const rng::Random64& engine = rng::Random64()) : Turbulence(engine) {}
+		SimplexTurbulence(const rng::Random64& engine = rng::Random64()): Turbulence(engine) {}
 
 		inline void Init() override
 		{
 			Turbulence::Init();
-			for(Simplex& simplex : _simplexes)
+			for (Simplex& simplex : _simplexes)
 			{
 				simplex.SetRandomEngine(GetRandomEngine().CreateSeed());
 				simplex.Init();

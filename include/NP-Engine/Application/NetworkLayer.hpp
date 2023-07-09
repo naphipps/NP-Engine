@@ -17,8 +17,8 @@ namespace np::app
 	class NetworkLayer : public Layer
 	{
 	public:
-		NetworkLayer(mem::sptr<srvc::Services> services) : Layer(services) {}
+		NetworkLayer(mem::sptr<srvc::Services> services): Layer(services) {}
 	};
-}
+} // namespace np::app
 
 #endif /* NP_ENGINE_NETWORK_LAYER_HPP */

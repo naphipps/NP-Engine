@@ -17,7 +17,7 @@ namespace np::geom
 	struct Aabb;
 
 	template <typename T>
-	struct Aabb<2, T> : public Shape<2, T> //TODO: do we need this??
+	struct Aabb<2, T> : public Shape<2, T> // TODO: do we need this??
 	{
 		using Point = typename Shape<2, T>::Point;
 

@@ -20,10 +20,9 @@ namespace np::win
 	class WindowEvent : public evnt::Event
 	{
 	protected:
-		WindowEvent() : evnt::Event() {}
+		WindowEvent(): evnt::Event() {}
 
 	public:
-
 		virtual ~WindowEvent()
 		{
 			DestructData<T>();
@@ -45,7 +44,7 @@ namespace np::win
 		}
 	};
 
-	//Window Create Events
+	// Window Create Events
 	struct WindowCreateEventData
 	{
 		DetailType detailType;
@@ -55,9 +54,9 @@ namespace np::win
 	class WindowCreateEvent : public WindowEvent<WindowCreateEventData>
 	{
 	public:
-		WindowCreateEvent(DetailType detail_type, uid::Uid windowId) : WindowEvent<WindowCreateEventData>()
+		WindowCreateEvent(DetailType detail_type, uid::Uid windowId): WindowEvent<WindowCreateEventData>()
 		{
-			ConstructData<WindowCreateEventData>(WindowCreateEventData{ detail_type, windowId });
+			ConstructData<WindowCreateEventData>(WindowCreateEventData{detail_type, windowId});
 		}
 
 		evnt::EventType GetType() const override
@@ -66,7 +65,7 @@ namespace np::win
 		}
 	};
 
-	//Window Focus Events
+	// Window Focus Events
 	struct WindowFocusEventData
 	{
 		uid::Uid windowId;
@@ -76,9 +75,9 @@ namespace np::win
 	class WindowFocusEvent : public WindowEvent<WindowFocusEventData>
 	{
 	public:
-		WindowFocusEvent(uid::Uid windowId, bl isFocused) : WindowEvent<WindowFocusEventData>()
+		WindowFocusEvent(uid::Uid windowId, bl isFocused): WindowEvent<WindowFocusEventData>()
 		{
-			ConstructData<WindowFocusEventData>(WindowFocusEventData{ windowId, isFocused });
+			ConstructData<WindowFocusEventData>(WindowFocusEventData{windowId, isFocused});
 		}
 
 		evnt::EventType GetType() const override
@@ -90,9 +89,9 @@ namespace np::win
 	class WindowSetFocusEvent : public WindowEvent<WindowFocusEventData>
 	{
 	public:
-		WindowSetFocusEvent(uid::Uid windowId, bl isFocused) : WindowEvent<WindowFocusEventData>()
+		WindowSetFocusEvent(uid::Uid windowId, bl isFocused): WindowEvent<WindowFocusEventData>()
 		{
-			ConstructData<WindowFocusEventData>(WindowFocusEventData{ windowId, isFocused });
+			ConstructData<WindowFocusEventData>(WindowFocusEventData{windowId, isFocused});
 		}
 
 		evnt::EventType GetType() const override
@@ -101,7 +100,7 @@ namespace np::win
 		}
 	};
 
-	//Window Size Events
+	// Window Size Events
 	struct WindowSizeEventData
 	{
 		uid::Uid windowId;
@@ -112,10 +111,9 @@ namespace np::win
 	class WindowSizeEvent : public WindowEvent<WindowSizeEventData>
 	{
 	public:
-
-		WindowSizeEvent(uid::Uid windowId, ui32 width, ui32 height) : WindowEvent<WindowSizeEventData>()
+		WindowSizeEvent(uid::Uid windowId, ui32 width, ui32 height): WindowEvent<WindowSizeEventData>()
 		{
-			ConstructData<WindowSizeEventData>(WindowSizeEventData{ windowId, width, height });
+			ConstructData<WindowSizeEventData>(WindowSizeEventData{windowId, width, height});
 		}
 
 		evnt::EventType GetType() const override
@@ -127,10 +125,9 @@ namespace np::win
 	class WindowSetSizeEvent : public WindowEvent<WindowSizeEventData>
 	{
 	public:
-
-		WindowSetSizeEvent(uid::Uid windowId, ui32 width, ui32 height) : WindowEvent<WindowSizeEventData>()
+		WindowSetSizeEvent(uid::Uid windowId, ui32 width, ui32 height): WindowEvent<WindowSizeEventData>()
 		{
-			ConstructData<WindowSizeEventData>(WindowSizeEventData{ windowId, width, height });
+			ConstructData<WindowSizeEventData>(WindowSizeEventData{windowId, width, height});
 		}
 
 		evnt::EventType GetType() const override
@@ -139,7 +136,7 @@ namespace np::win
 		}
 	};
 
-	//Window Minimize Events
+	// Window Minimize Events
 	struct WindowMinimizeEventData
 	{
 		uid::Uid windowId;
@@ -149,9 +146,9 @@ namespace np::win
 	class WindowMinimizeEvent : public WindowEvent<WindowMinimizeEventData>
 	{
 	public:
-		WindowMinimizeEvent(uid::Uid windowId, bl isMinimized) : WindowEvent<WindowMinimizeEventData>()
+		WindowMinimizeEvent(uid::Uid windowId, bl isMinimized): WindowEvent<WindowMinimizeEventData>()
 		{
-			ConstructData<WindowMinimizeEventData>(WindowMinimizeEventData{ windowId, isMinimized });
+			ConstructData<WindowMinimizeEventData>(WindowMinimizeEventData{windowId, isMinimized});
 		}
 
 		evnt::EventType GetType() const override
@@ -163,9 +160,9 @@ namespace np::win
 	class WindowSetMinimizeEvent : public WindowEvent<WindowMinimizeEventData>
 	{
 	public:
-		WindowSetMinimizeEvent(uid::Uid windowId, bl isMinimized) : WindowEvent<WindowMinimizeEventData>()
+		WindowSetMinimizeEvent(uid::Uid windowId, bl isMinimized): WindowEvent<WindowMinimizeEventData>()
 		{
-			ConstructData<WindowMinimizeEventData>(WindowMinimizeEventData{ windowId, isMinimized });
+			ConstructData<WindowMinimizeEventData>(WindowMinimizeEventData{windowId, isMinimized});
 		}
 
 		evnt::EventType GetType() const override
@@ -174,7 +171,7 @@ namespace np::win
 		}
 	};
 
-	//Window Maximize Events
+	// Window Maximize Events
 	struct WindowMaximizeEventData
 	{
 		uid::Uid windowId;
@@ -184,9 +181,9 @@ namespace np::win
 	class WindowMaximizeEvent : public WindowEvent<WindowMaximizeEventData>
 	{
 	public:
-		WindowMaximizeEvent(uid::Uid windowId, bl isMaximized) : WindowEvent<WindowMaximizeEventData>()
+		WindowMaximizeEvent(uid::Uid windowId, bl isMaximized): WindowEvent<WindowMaximizeEventData>()
 		{
-			ConstructData<WindowMaximizeEventData>(WindowMaximizeEventData{ windowId, isMaximized });
+			ConstructData<WindowMaximizeEventData>(WindowMaximizeEventData{windowId, isMaximized});
 		}
 
 		evnt::EventType GetType() const override
@@ -198,9 +195,9 @@ namespace np::win
 	class WindowSetMaximizeEvent : public WindowEvent<WindowMaximizeEventData>
 	{
 	public:
-		WindowSetMaximizeEvent(uid::Uid windowId, bl isMaximized) : WindowEvent<WindowMaximizeEventData>()
+		WindowSetMaximizeEvent(uid::Uid windowId, bl isMaximized): WindowEvent<WindowMaximizeEventData>()
 		{
-			ConstructData<WindowMaximizeEventData>(WindowMaximizeEventData{ windowId, isMaximized });
+			ConstructData<WindowMaximizeEventData>(WindowMaximizeEventData{windowId, isMaximized});
 		}
 
 		evnt::EventType GetType() const override
@@ -209,7 +206,7 @@ namespace np::win
 		}
 	};
 
-	//Window Position Events
+	// Window Position Events
 	struct WindowPositionEventData
 	{
 		uid::Uid windowId;
@@ -220,9 +217,9 @@ namespace np::win
 	class WindowPositionEvent : public WindowEvent<WindowPositionEventData>
 	{
 	public:
-		WindowPositionEvent(uid::Uid windowId, i32 x, i32 y) : WindowEvent<WindowPositionEventData>()
+		WindowPositionEvent(uid::Uid windowId, i32 x, i32 y): WindowEvent<WindowPositionEventData>()
 		{
-			ConstructData<WindowPositionEventData>(WindowPositionEventData{ windowId, x, y });
+			ConstructData<WindowPositionEventData>(WindowPositionEventData{windowId, x, y});
 		}
 
 		evnt::EventType GetType() const override
@@ -234,9 +231,9 @@ namespace np::win
 	class WindowSetPositionEvent : public WindowEvent<WindowPositionEventData>
 	{
 	public:
-		WindowSetPositionEvent(uid::Uid windowId, i32 x, i32 y) : WindowEvent<WindowPositionEventData>()
+		WindowSetPositionEvent(uid::Uid windowId, i32 x, i32 y): WindowEvent<WindowPositionEventData>()
 		{
-			ConstructData<WindowPositionEventData>(WindowPositionEventData{ windowId, x, y });
+			ConstructData<WindowPositionEventData>(WindowPositionEventData{windowId, x, y});
 		}
 
 		evnt::EventType GetType() const override
@@ -245,7 +242,7 @@ namespace np::win
 		}
 	};
 
-	//Window Framebuffer Events
+	// Window Framebuffer Events
 	struct WindowFramebufferEventData
 	{
 		uid::Uid windowId;
@@ -256,9 +253,9 @@ namespace np::win
 	class WindowFramebufferEvent : public WindowEvent<WindowFramebufferEventData>
 	{
 	public:
-		WindowFramebufferEvent(uid::Uid windowId, ui32 width, ui32 height) : WindowEvent<WindowFramebufferEventData>()
+		WindowFramebufferEvent(uid::Uid windowId, ui32 width, ui32 height): WindowEvent<WindowFramebufferEventData>()
 		{
-			ConstructData<WindowFramebufferEventData>(WindowFramebufferEventData{ windowId, width, height });
+			ConstructData<WindowFramebufferEventData>(WindowFramebufferEventData{windowId, width, height});
 		}
 
 		evnt::EventType GetType() const override
@@ -267,7 +264,7 @@ namespace np::win
 		}
 	};
 
-	//Window Title Events
+	// Window Title Events
 	struct WindowTitleEventData
 	{
 		uid::Uid windowId;
@@ -277,9 +274,9 @@ namespace np::win
 	class WindowSetTitleEvent : public WindowEvent<WindowTitleEventData>
 	{
 	public:
-		WindowSetTitleEvent(uid::Uid windowId, str title) : WindowEvent<WindowTitleEventData>()
+		WindowSetTitleEvent(uid::Uid windowId, str title): WindowEvent<WindowTitleEventData>()
 		{
-			ConstructData<WindowTitleEventData>(WindowTitleEventData{ windowId, title });
+			ConstructData<WindowTitleEventData>(WindowTitleEventData{windowId, title});
 		}
 
 		evnt::EventType GetType() const override
@@ -287,8 +284,8 @@ namespace np::win
 			return evnt::EventType::WindowSetTitle;
 		}
 	};
-	
-	//Window Closed Events
+
+	// Window Closed Events
 	struct WindowCloseEventData
 	{
 		uid::Uid windowId;
@@ -297,9 +294,9 @@ namespace np::win
 	class WindowSetCloseEvent : public WindowEvent<WindowCloseEventData>
 	{
 	public:
-		WindowSetCloseEvent(uid::Uid windowId) : WindowEvent<WindowCloseEventData>()
+		WindowSetCloseEvent(uid::Uid windowId): WindowEvent<WindowCloseEventData>()
 		{
-			ConstructData<WindowCloseEventData>(WindowCloseEventData{ windowId });
+			ConstructData<WindowCloseEventData>(WindowCloseEventData{windowId});
 		}
 
 		evnt::EventType GetType() const override
@@ -308,7 +305,7 @@ namespace np::win
 		}
 	};
 
-	//Window Closing Events
+	// Window Closing Events
 	struct WindowClosingEventData
 	{
 		uid::Uid windowId;
@@ -318,9 +315,9 @@ namespace np::win
 	class WindowClosingEvent : public WindowEvent<WindowClosingEventData>
 	{
 	public:
-		WindowClosingEvent(uid::Uid windowId, mem::sptr<jsys::Job> job) : WindowEvent<WindowClosingEventData>()
+		WindowClosingEvent(uid::Uid windowId, mem::sptr<jsys::Job> job): WindowEvent<WindowClosingEventData>()
 		{
-			ConstructData<WindowClosingEventData>(WindowClosingEventData{ windowId, job });
+			ConstructData<WindowClosingEventData>(WindowClosingEventData{windowId, job});
 		}
 
 		evnt::EventType GetType() const override

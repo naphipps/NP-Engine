@@ -66,8 +66,8 @@ namespace np::gpu::__detail
 			return writer;
 		}
 
-		mem::sptr<VulkanBuffer> CreateBuffer(mem::sptr<VulkanCommandPool> command_pool, VkDeviceSize size, VkBufferUsageFlags buffer_usage_flags,
-								   VkMemoryPropertyFlags memory_property_flags)
+		mem::sptr<VulkanBuffer> CreateBuffer(mem::sptr<VulkanCommandPool> command_pool, VkDeviceSize size,
+											 VkBufferUsageFlags buffer_usage_flags, VkMemoryPropertyFlags memory_property_flags)
 		{
 			VkBufferCreateInfo info = VulkanBuffer::CreateInfo();
 			info.size = size;
@@ -77,11 +77,11 @@ namespace np::gpu::__detail
 		}
 
 		mem::sptr<VulkanTexture> CreateTexture(mem::sptr<VulkanCommandPool> command_pool, VkImageCreateInfo& image_create_info,
-									 VkMemoryPropertyFlags image_memory_property_flags,
-									 VkImageViewCreateInfo& image_view_create_info, bl hot_reloadable)
+											   VkMemoryPropertyFlags image_memory_property_flags,
+											   VkImageViewCreateInfo& image_view_create_info, bl hot_reloadable)
 		{
-			return mem::create_sptr<VulkanTexture>(_services->GetAllocator(), command_pool, image_create_info, image_memory_property_flags,
-											  image_view_create_info, hot_reloadable);
+			return mem::create_sptr<VulkanTexture>(_services->GetAllocator(), command_pool, image_create_info,
+												   image_memory_property_flags, image_view_create_info, hot_reloadable);
 		}
 
 		void BringUpToDate(mem::sptr<Pipeline> pipeline)
@@ -135,8 +135,9 @@ namespace np::gpu::__detail
 			// create staging
 			if (!_texture_staging || _texture_staging->GetSize() != _model->GetTexture().Size())
 			{
-				_texture_staging = CreateBuffer(vulkan_command_pool, _model->GetTexture().Size(), VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-												VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+				_texture_staging =
+					CreateBuffer(vulkan_command_pool, _model->GetTexture().Size(), VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+								 VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 			}
 
 			if (!_vertex_staging || _vertex_staging->GetSize() != vertex_buffer_data_size)
@@ -197,7 +198,8 @@ namespace np::gpu::__detail
 
 			VkBufferImageCopy buffer_image_copy = VulkanCommandCopyBufferToImage::CreateBufferImageCopy();
 			buffer_image_copy.imageExtent = {_model->GetTexture().GetWidth(), _model->GetTexture().GetHeight(), 1};
-			_texture->GetImage().AsyncAssign(*_texture_staging, buffer_image_copy, assign_image_submit, command_buffers, vulkan_graphics_queue);
+			_texture->GetImage().AsyncAssign(*_texture_staging, buffer_image_copy, assign_image_submit, command_buffers,
+											 vulkan_graphics_queue);
 
 			_texture->GetImage().AsyncTransitionLayout(VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
 													   VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, transition_to_shader_submit,
@@ -218,7 +220,8 @@ namespace np::gpu::__detail
 
 			// copy vertex data to staging
 			_vertex_staging->AssignData(_model->GetVertices().data());
-			_vertex_staging->AsyncCopyTo(*_vertex_buffer, vertex_buffer_copy_submit, command_buffers, vulkan_graphics_queue, vertex_complete_fence);
+			_vertex_staging->AsyncCopyTo(*_vertex_buffer, vertex_buffer_copy_submit, command_buffers, vulkan_graphics_queue,
+										 vertex_complete_fence);
 
 			// create index submit infos
 			VulkanSemaphore index_buffer_copy_semaphore(vulkan_logical_device);
@@ -235,7 +238,8 @@ namespace np::gpu::__detail
 
 			// copy index data to staging
 			_index_staging->AssignData(_model->GetIndices().data());
-			_index_staging->AsyncCopyTo(*_index_buffer, index_buffer_copy_submit, command_buffers, vulkan_graphics_queue, index_complete_fence);
+			_index_staging->AsyncCopyTo(*_index_buffer, index_buffer_copy_submit, command_buffers, vulkan_graphics_queue,
+										index_complete_fence);
 
 			// create commands
 			_vk_vertex_buffer = *_vertex_buffer;
@@ -249,8 +253,8 @@ namespace np::gpu::__detail
 
 			if (!_bind_vertex_buffers)
 			{
-				_bind_vertex_buffers = mem::create_sptr<VulkanCommandBindVertexBuffers>(_services->GetAllocator(), 0, 1,
-																				   &_vk_vertex_buffer, _vertex_offsets.data());
+				_bind_vertex_buffers = mem::create_sptr<VulkanCommandBindVertexBuffers>(
+					_services->GetAllocator(), 0, 1, &_vk_vertex_buffer, _vertex_offsets.data());
 			}
 			else
 			{
@@ -259,8 +263,8 @@ namespace np::gpu::__detail
 
 			if (!_bind_index_buffer)
 			{
-				_bind_index_buffer = mem::create_sptr<VulkanCommandBindIndexBuffer>(_services->GetAllocator(), *_index_buffer, 0,
-																			   VK_INDEX_TYPE_UINT32);
+				_bind_index_buffer = mem::create_sptr<VulkanCommandBindIndexBuffer>(_services->GetAllocator(), *_index_buffer,
+																					0, VK_INDEX_TYPE_UINT32);
 			}
 			else
 			{
@@ -270,7 +274,7 @@ namespace np::gpu::__detail
 			if (!_draw_indexed)
 			{
 				_draw_indexed = mem::create_sptr<VulkanCommandDrawIndexed>(_services->GetAllocator(),
-																	  (ui32)_model->GetIndices().size(), 1, 0, 0, 0);
+																		   (ui32)_model->GetIndices().size(), 1, 0, 0, 0);
 			}
 			else
 			{
@@ -353,7 +357,9 @@ namespace np::gpu::__detail
 			}
 
 			VulkanRenderPipeline& vulkan_render_pipeline = (VulkanRenderPipeline&)(*pipeline);
-			VulkanRenderContext& vulkan_render_context = (VulkanRenderContext&)(*vulkan_render_pipeline.GetProperties().framebuffers->GetRenderPass()->GetRenderContext());
+			VulkanRenderContext& vulkan_render_context = (VulkanRenderContext&)(*vulkan_render_pipeline.GetProperties()
+																					 .framebuffers->GetRenderPass()
+																					 ->GetRenderContext());
 
 			_push_constants->PipelineLayout = vulkan_render_pipeline.GetLayout();
 
@@ -361,7 +367,8 @@ namespace np::gpu::__detail
 				SetSampler(vulkan_render_pipeline.GetDefaultSampler());
 
 			_descriptor_info.imageView = _texture ? (VkImageView)_texture->GetImageView() : nullptr;
-			vulkan_render_pipeline.GetDescriptorSets()->SubmitWriter(_descriptor_writer, vulkan_render_context.GetCurrentImageIndex());
+			vulkan_render_pipeline.GetDescriptorSets()->SubmitWriter(_descriptor_writer,
+																	 vulkan_render_context.GetCurrentImageIndex());
 		}
 
 		void DisposeForPipeline(mem::sptr<Pipeline> pipeline) override

@@ -26,7 +26,7 @@ namespace np::win
 
 		WindowFramebufferEvent(uid::Uid windowId, ui32 width, ui32 height): evnt::Event()
 		{
-			ConstructData<DataType>(DataType{ windowId, width, height });
+			ConstructData<DataType>(DataType{windowId, width, height});
 		}
 
 		~WindowFramebufferEvent()

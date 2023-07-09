@@ -17,7 +17,7 @@ namespace np::gpu
 	protected:
 		mem::sptr<RenderDevice> _device;
 
-		RenderContext(mem::sptr<RenderDevice> device) : Context(), _device(device) {}
+		RenderContext(mem::sptr<RenderDevice> device): Context(), _device(device) {}
 
 	public:
 		static mem::sptr<RenderContext> Create(mem::sptr<RenderDevice> device);
@@ -60,8 +60,7 @@ namespace np::gpu
 		}
 
 		//*/
-
 	};
-}
+} // namespace np::gpu
 
 #endif /* NP_ENGINE_GPU_INTERFACE_RENDER_CONTEXT_HPP */

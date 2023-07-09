@@ -15,15 +15,14 @@ namespace np::gpu
 {
 	class Context
 	{
-		//TODO: I think our other contexts inherit from this?
-	protected:
+		// TODO: I think our other contexts inherit from this?
 
+	protected:
 		Context() {}
 
 	public:
-
 		virtual DetailType GetDetailType() const = 0;
 	};
-}
+} // namespace np::gpu
 
 #endif /* NP_ENGINE_GPU_INTERFACE_CONTEXT_HPP */

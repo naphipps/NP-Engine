@@ -16,7 +16,7 @@
 
 #include "DetailType.hpp"
 
-//TODO: add a wait to create fixed-size windows, fullscreen, frameless, etc
+// TODO: add a wait to create fixed-size windows, fullscreen, frameless, etc
 
 namespace np::win
 {
@@ -34,7 +34,7 @@ namespace np::win
 		const thr::Thread::Id _owning_thread_id;
 		mem::sptr<srvc::Services> _services;
 		const uid::Uid _id;
-		
+
 		mutexed_wrapper<con::uset<SizeCallback>> _size_callbacks;
 		mutexed_wrapper<con::uset<PositionCallback>> _position_callbacks;
 		mutexed_wrapper<con::uset<FramebufferCallback>> _framebuffer_callbacks;

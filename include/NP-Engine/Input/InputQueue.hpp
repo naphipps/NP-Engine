@@ -28,7 +28,7 @@ namespace np::nput
 		MouseCodeStates _mouse_states;
 		MousePosition _mouse_position;
 		ControllerCodeStates _controller_states;
-		
+
 		con::array<KeyCodeStateSubmissions, 2> _key_submissions;
 		con::array<MouseCodeStateSubmissions, 2> _mouse_submissions;
 		con::array<MousePositionSubmissions, 2> _mouse_position_submissions;
@@ -71,7 +71,7 @@ namespace np::nput
 		{
 			bl flag = _flag.load(mo_acquire);
 			while (!_flag.compare_exchange_weak(flag, !flag, mo_release, mo_relaxed)) {}
-			
+
 			{
 				KeyCodeState state;
 				auto submissions = GetKeyCodeSubmissions(flag).get_access();

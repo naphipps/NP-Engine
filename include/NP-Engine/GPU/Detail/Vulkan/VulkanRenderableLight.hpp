@@ -27,7 +27,7 @@ namespace np::gpu::__detail
 
 		void Dispose()
 		{
-			//TODO: implement
+			// TODO: implement
 		}
 
 	public:

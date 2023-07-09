@@ -27,7 +27,7 @@ namespace np::gpu::__detail
 	class VulkanRenderShader : public RenderShader
 	{
 	private:
-		//VulkanDevice& _device;
+		// VulkanDevice& _device;
 		siz _size;
 		str _filename_spv;
 		con::vector<ui32> _bytes;

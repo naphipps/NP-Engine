@@ -28,7 +28,7 @@ namespace np::app
 		mem::sptr<gpu::Model> _model;
 		mem::sptr<uid::UidHandle> _model_handle;
 		tim::SteadyTimestamp _start_timestamp;
-		flt _rate = 5.f; //units per second
+		flt _rate = 5.f; // units per second
 
 		static void LogSubmitKeyState(void*, const nput::KeyCodeState&)
 		{
@@ -195,10 +195,10 @@ namespace np::app
 			fragment_shader_properties.filename = fsys::Append(fsys::Append("Vulkan", "shaders"), "object_fragment.glsl");
 			mem::sptr<gpu::RenderShader> fragment_shader = gpu::RenderShader::Create(render_device, fragment_shader_properties);
 
-			gpu::RenderPipeline::Properties render_pipeline_properties{ framebuffers, vertex_shader, fragment_shader };
+			gpu::RenderPipeline::Properties render_pipeline_properties{framebuffers, vertex_shader, fragment_shader};
 			mem::sptr<gpu::RenderPipeline> render_pipeline = gpu::RenderPipeline::Create(render_pipeline_properties);
 
-			gpu::Scene::Properties scene_properties{ render_pipeline, _camera };
+			gpu::Scene::Properties scene_properties{render_pipeline, _camera};
 			auto scene = _scene.get_access();
 			*scene = gpu::Scene::Create(scene_properties);
 
@@ -209,9 +209,7 @@ namespace np::app
 			(*scene)->Register(model_id, model_visible, _model);
 			(*scene)->GetOnRenderDelegate().SetCallback(this, SceneOnRenderCallback);
 
-
-
-			geom::FltObb3D model_obb = _model->GetObb(); //TODO: we need to update this
+			geom::FltObb3D model_obb = _model->GetObb(); // TODO: we need to update this
 		}
 
 		void SubmitCreateSceneJob()
@@ -238,7 +236,7 @@ namespace np::app
 			const nput::MouseCodeStates& mouse = input.GetMouseCodeStates();
 			const nput::MousePosition& mouse_position = input.GetMousePosition();
 
-			//TODO: improve camera controls and get the camera/visible thing working
+			// TODO: improve camera controls and get the camera/visible thing working
 
 			const dbl seconds = time_delta.count() / 1000.f;
 
@@ -249,9 +247,9 @@ namespace np::app
 				::glm::vec3 rate = ::glm::normalize(direction);
 				rate *= _rate * seconds;
 
-				::glm::vec4 pos = { _camera.eye.x, _camera.eye.y, _camera.eye.z, 1 };
-				pos = ::glm::translate(::glm::mat4{ 1.f }, rate) * pos;
-				_camera.eye = { pos.x, pos.y, pos.z };
+				::glm::vec4 pos = {_camera.eye.x, _camera.eye.y, _camera.eye.z, 1};
+				pos = ::glm::translate(::glm::mat4{1.f}, rate) * pos;
+				_camera.eye = {pos.x, pos.y, pos.z};
 				_camera.lookAt = _camera.eye + look;
 				_camera.NormalizeLookAt();
 			}
@@ -263,9 +261,9 @@ namespace np::app
 				::glm::vec3 rate = ::glm::normalize(direction);
 				rate *= -_rate * seconds;
 
-				::glm::vec4 pos = { _camera.eye.x, _camera.eye.y, _camera.eye.z, 1 };
-				pos = ::glm::translate(::glm::mat4{ 1.f }, rate) * pos;
-				_camera.eye = { pos.x, pos.y, pos.z };
+				::glm::vec4 pos = {_camera.eye.x, _camera.eye.y, _camera.eye.z, 1};
+				pos = ::glm::translate(::glm::mat4{1.f}, rate) * pos;
+				_camera.eye = {pos.x, pos.y, pos.z};
 				_camera.lookAt = _camera.eye + look;
 				_camera.NormalizeLookAt();
 			}
@@ -276,9 +274,9 @@ namespace np::app
 				::glm::vec3 rate = ::glm::normalize(look);
 				rate *= _rate * seconds;
 
-				::glm::vec4 pos = { _camera.eye.x, _camera.eye.y, _camera.eye.z, 1 };
-				pos = ::glm::translate(::glm::mat4{ 1.f }, rate) * pos;
-				_camera.eye = { pos.x, pos.y, pos.z };
+				::glm::vec4 pos = {_camera.eye.x, _camera.eye.y, _camera.eye.z, 1};
+				pos = ::glm::translate(::glm::mat4{1.f}, rate) * pos;
+				_camera.eye = {pos.x, pos.y, pos.z};
 				_camera.lookAt = _camera.eye + look;
 				_camera.NormalizeLookAt();
 			}
@@ -289,9 +287,9 @@ namespace np::app
 				::glm::vec3 rate = ::glm::normalize(look);
 				rate *= -_rate * seconds;
 
-				::glm::vec4 pos = { _camera.eye.x, _camera.eye.y, _camera.eye.z, 1 };
-				pos = ::glm::translate(::glm::mat4{ 1.f }, rate) * pos;
-				_camera.eye = { pos.x, pos.y, pos.z };
+				::glm::vec4 pos = {_camera.eye.x, _camera.eye.y, _camera.eye.z, 1};
+				pos = ::glm::translate(::glm::mat4{1.f}, rate) * pos;
+				_camera.eye = {pos.x, pos.y, pos.z};
 				_camera.lookAt = _camera.eye + look;
 				_camera.NormalizeLookAt();
 			}
@@ -303,9 +301,9 @@ namespace np::app
 				::glm::vec3 rate = ::glm::normalize(direction);
 				rate *= -_rate * seconds;
 
-				::glm::vec4 pos = { _camera.eye.x, _camera.eye.y, _camera.eye.z, 1 };
-				pos = ::glm::translate(::glm::mat4{ 1.f }, rate) * pos;
-				_camera.eye = { pos.x, pos.y, pos.z };
+				::glm::vec4 pos = {_camera.eye.x, _camera.eye.y, _camera.eye.z, 1};
+				pos = ::glm::translate(::glm::mat4{1.f}, rate) * pos;
+				_camera.eye = {pos.x, pos.y, pos.z};
 				_camera.lookAt = _camera.eye + look;
 				_camera.NormalizeLookAt();
 			}
@@ -317,9 +315,9 @@ namespace np::app
 				::glm::vec3 rate = ::glm::normalize(direction);
 				rate *= _rate * seconds;
 
-				::glm::vec4 pos = { _camera.eye.x, _camera.eye.y, _camera.eye.z, 1 };
-				pos = ::glm::translate(::glm::mat4{ 1.f }, rate) * pos;
-				_camera.eye = { pos.x, pos.y, pos.z };
+				::glm::vec4 pos = {_camera.eye.x, _camera.eye.y, _camera.eye.z, 1};
+				pos = ::glm::translate(::glm::mat4{1.f}, rate) * pos;
+				_camera.eye = {pos.x, pos.y, pos.z};
 				_camera.lookAt = _camera.eye + look;
 				_camera.NormalizeLookAt();
 			}
@@ -347,29 +345,29 @@ namespace np::app
 			if (keys[Key::V].IsActive() && !_prev_keys[Key::V].IsActive())
 			{
 				_camera._contains = true;
-				//uid::Uid model_id = _services->GetUidSystem().GetUid(_model_handle);
+				// uid::Uid model_id = _services->GetUidSystem().GetUid(_model_handle);
 				//(*_scene.get_access())->Register(model_id, mem::create_sptr<gpu::VisibleObject>(_services->GetAllocator()));
 			}
 
 			if (keys[Key::Z].IsActive())
 			{
-				//turn camera to origin
-				_camera.lookAt = { 0, 0, 0 };
+				// turn camera to origin
+				_camera.lookAt = {0, 0, 0};
 				_camera.NormalizeLookAt();
 
-				//make the camera lookat a unit vector
+				// make the camera lookat a unit vector
 			}
 
 			if (keys[Key::H].IsActive())
 			{
-				//scale up
+				// scale up
 				geom::Transform& transform = _model->GetTransform();
 				transform.scale.z = ::std::clamp(transform.scale.z + _rate, 1.f, 2.f);
 			}
 
 			if (keys[Key::B].IsActive())
 			{
-				//scale down
+				// scale down
 				geom::Transform& transform = _model->GetTransform();
 				transform.scale.z = ::std::clamp(transform.scale.z - _rate, 1.f, 2.f);
 			}
@@ -387,17 +385,17 @@ namespace np::app
 						::glm::vec2 diff = _prev_mouse_position.GetPosition() - mouse_position.GetPosition();
 						diff *= _rate * scale;
 						diff = ::glm::radians(diff);
-						
+
 						::glm::vec3 look = _camera.GetLookDirection();
-						::glm::quat v{ 0.f, look };
+						::glm::quat v{0.f, look};
 						::glm::quat q = ::glm::angleAxis(diff.x, gpu::Camera::Up);
 						v = q * v * ::glm::conjugate(q);
-						look = { v.x, v.y, v.z }; //rotated around Up
+						look = {v.x, v.y, v.z}; // rotated around Up
 
 						::glm::vec3 right = ::glm::cross(look, gpu::Camera::Up);
 						q = ::glm::angleAxis(diff.y, right);
 						v = q * v * ::glm::conjugate(q);
-						look = { v.x, v.y, v.z }; //rotated around right
+						look = {v.x, v.y, v.z}; // rotated around right
 
 						_camera.lookAt = _camera.eye + look;
 						_camera.NormalizeLookAt();
@@ -435,21 +433,21 @@ namespace np::app
 		{
 			geom::Transform& transform = _model->GetTransform();
 
-			transform.position = { 0.f, 0.f, 0.f };
-			transform.orientation = { 0.f, 0.f, 0.f, 1.f };
-			transform.scale = { 1.f, 1.f, 1.f };
+			transform.position = {0.f, 0.f, 0.f};
+			transform.orientation = {0.f, 0.f, 0.f, 1.f};
+			transform.scale = {1.f, 1.f, 1.f};
 
-			::glm::quat rot(::glm::vec3{ -M_PI_2, M_PI_2, 0.f});
+			::glm::quat rot(::glm::vec3{-M_PI_2, M_PI_2, 0.f});
 			transform.orientation *= rot;
 
 			//_model->GetTexture().SetHotReloadable();
 			//_renderable_model->GetUpdateMetaValuesOnFrameDelegate().SetCallback(this, UpdateMetaValuesOnFrameCallback);
 
-			_camera.eye = { 3.f, 3.f, 3.f };
+			_camera.eye = {3.f, 3.f, 3.f};
 			_camera.fovy = 70.f;
 			_camera.nearPlane = 0.01f;
 			_camera.farPlane = 100.0f;
-			_camera.lookAt = { 0, 0, 0 };
+			_camera.lookAt = {0, 0, 0};
 			_camera.NormalizeLookAt();
 
 			//-----------------------------------------------------------
@@ -458,14 +456,13 @@ namespace np::app
 				SubmitCreateSceneJob();
 		}
 
-		
-
 		void Update(tim::DblMilliseconds time_delta) override
 		{
 			DigestInput(time_delta);
 
-			//just in case window is not created in constructor
-			if (!_window && _window_id_handle && _services->GetUidSystem().Has(_services->GetUidSystem().GetUid(_window_id_handle)))
+			// just in case window is not created in constructor
+			if (!_window && _window_id_handle &&
+				_services->GetUidSystem().Has(_services->GetUidSystem().GetUid(_window_id_handle)))
 			{
 				_window = _window_layer.Get(_services->GetUidSystem().GetUid(_window_id_handle));
 				if (_window)
@@ -477,8 +474,6 @@ namespace np::app
 				if (scene && *scene)
 					(*scene)->Render();
 			}
-
-			
 		}
 
 		void Cleanup() override

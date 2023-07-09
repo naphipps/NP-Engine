@@ -23,7 +23,8 @@ namespace np::gpu::__detail
 		const con::vector<VkDescriptorSetLayoutBinding> _layout_bindings;
 		VkDescriptorSetLayout _layout;
 
-		static VkDescriptorSetLayout CreateLayout(mem::sptr<VulkanLogicalDevice> device, const con::vector<VkDescriptorSetLayoutBinding>& layout_bindings)
+		static VkDescriptorSetLayout CreateLayout(mem::sptr<VulkanLogicalDevice> device,
+												  const con::vector<VkDescriptorSetLayoutBinding>& layout_bindings)
 		{
 			VkDescriptorSetLayout layout = nullptr;
 			VkDescriptorSetLayoutCreateInfo info{};

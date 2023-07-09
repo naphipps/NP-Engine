@@ -17,7 +17,6 @@ namespace np::gpu
 	class Framebuffers
 	{
 	protected:
-
 		mem::sptr<RenderPass> _render_pass;
 
 		Framebuffers(mem::sptr<RenderPass> render_pass): _render_pass(render_pass) {}
@@ -40,6 +39,6 @@ namespace np::gpu
 			return _render_pass->GetServices();
 		}
 	};
-}
+} // namespace np::gpu
 
 #endif /* NP_ENGINE_GPU_INTERFACE_FRAMEBUFFERS_HPP */

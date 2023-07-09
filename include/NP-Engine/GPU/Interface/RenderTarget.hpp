@@ -12,7 +12,7 @@
 #include "DetailType.hpp"
 #include "DetailInstance.hpp"
 
-//TODO: add ability to render to just half the window/surface, etc -- will be helpful adding DX12/etc support
+// TODO: add ability to render to just half the window/surface, etc -- will be helpful adding DX12/etc support
 
 namespace np::gpu
 {
@@ -47,6 +47,6 @@ namespace np::gpu
 			return _window;
 		}
 	};
-}
+} // namespace np::gpu
 
 #endif /* NP_ENGINE_GPU_INTERFACE_RENDER_TARGET_HPP */

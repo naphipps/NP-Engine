@@ -16,12 +16,12 @@ namespace np::gpu
 	struct VisibleObject
 	{
 		geom::FltAabb3D aabb;
-		
-		//TODO: add data for the resource
 
-		//AnimationData animationData;
+		// TODO: add data for the resource
 
-		//TODO: should we add a transform for the Model/Image/Light? some way to update RenderableMetaValues
+		// AnimationData animationData;
+
+		// TODO: should we add a transform for the Model/Image/Light? some way to update RenderableMetaValues
 	};
 } // namespace np::gpu
 

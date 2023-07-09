@@ -37,25 +37,27 @@ namespace np::gpu::__detail
 		con::vector<VkDescriptorSet> _bound_descriptor_sets;
 		mem::sptr<VulkanCommandBindDescriptorSets> _bind_descriptor_sets;
 
-		static mem::sptr<VulkanDescriptorSetLayout> CreateDescriptorSetLayout(mem::sptr<srvc::Services> services, mem::sptr<VulkanLogicalDevice> device)
+		static mem::sptr<VulkanDescriptorSetLayout> CreateDescriptorSetLayout(mem::sptr<srvc::Services> services,
+																			  mem::sptr<VulkanLogicalDevice> device)
 		{
 			return mem::create_sptr<VulkanDescriptorSetLayout>(services->GetAllocator(), device);
 		}
 
-		static mem::sptr<VulkanDescriptorSets> CreateDescriptorSets(mem::sptr<srvc::Services> services, 
-			mem::sptr<RenderContext> context, 
-			mem::sptr<VulkanDescriptorSetLayout> descriptor_set_layout)
+		static mem::sptr<VulkanDescriptorSets> CreateDescriptorSets(mem::sptr<srvc::Services> services,
+																	mem::sptr<RenderContext> context,
+																	mem::sptr<VulkanDescriptorSetLayout> descriptor_set_layout)
 		{
 			VulkanRenderContext& render_context = (VulkanRenderContext&)(*context);
 			VulkanRenderDevice& render_device = (VulkanRenderDevice&)(*render_context.GetRenderDevice());
 
-			return mem::create_sptr<VulkanDescriptorSets>(services->GetAllocator(), render_device.GetLogicalDevice(), render_context.GetFramesInFlightCount(), descriptor_set_layout);
+			return mem::create_sptr<VulkanDescriptorSets>(services->GetAllocator(), render_device.GetLogicalDevice(),
+														  render_context.GetFramesInFlightCount(), descriptor_set_layout);
 		}
 
 		static mem::sptr<VulkanBuffer> CreateBuffer(mem::sptr<srvc::Services> services,
-			mem::sptr<VulkanCommandPool> command_pool, VkDeviceSize size, 
-			VkBufferUsageFlags buffer_usage_flags,
-			VkMemoryPropertyFlags memory_property_flags)
+													mem::sptr<VulkanCommandPool> command_pool, VkDeviceSize size,
+													VkBufferUsageFlags buffer_usage_flags,
+													VkMemoryPropertyFlags memory_property_flags)
 		{
 			VkBufferCreateInfo info = VulkanBuffer::CreateInfo();
 			info.size = size;
@@ -64,23 +66,26 @@ namespace np::gpu::__detail
 			return mem::create_sptr<VulkanBuffer>(services->GetAllocator(), command_pool, info, memory_property_flags);
 		}
 
-		static con::vector<mem::sptr<VulkanBuffer>> CreateMetaValueBuffers(mem::sptr<srvc::Services> services, mem::sptr<RenderContext> context)
+		static con::vector<mem::sptr<VulkanBuffer>> CreateMetaValueBuffers(mem::sptr<srvc::Services> services,
+																		   mem::sptr<RenderContext> context)
 		{
 			VulkanRenderContext& render_context = (VulkanRenderContext&)(*context);
 			VulkanRenderDevice& render_device = (VulkanRenderDevice&)(*render_context.GetRenderDevice());
-			
+
 			con::vector<mem::sptr<VulkanBuffer>> buffers(render_context.GetFramesInFlightCount());
 
 			for (siz i = 0; i < buffers.size(); i++)
 			{
-				buffers[i] = CreateBuffer(services, render_device.GetCommandPool(), sizeof(PipelineMetaValues), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
-					VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+				buffers[i] = CreateBuffer(services, render_device.GetCommandPool(), sizeof(PipelineMetaValues),
+										  VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+										  VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 			}
 
 			return buffers;
 		}
 
-		static con::vector<VkDescriptorBufferInfo> CreateMetaValueDescriptorInfos(mem::sptr<RenderContext> context, const con::vector<mem::sptr<VulkanBuffer>>& _meta_value_buffers)
+		static con::vector<VkDescriptorBufferInfo> CreateMetaValueDescriptorInfos(
+			mem::sptr<RenderContext> context, const con::vector<mem::sptr<VulkanBuffer>>& _meta_value_buffers)
 		{
 			VulkanRenderContext& render_context = (VulkanRenderContext&)(*context);
 			con::vector<VkDescriptorBufferInfo> infos(render_context.GetFramesInFlightCount());
@@ -95,11 +100,12 @@ namespace np::gpu::__detail
 			return infos;
 		}
 
-		static con::vector<VkWriteDescriptorSet> CreateMetaValueDescriptorWriters(mem::sptr<RenderContext> context, const con::vector<VkDescriptorBufferInfo>& _meta_value_descriptor_infos)
+		static con::vector<VkWriteDescriptorSet> CreateMetaValueDescriptorWriters(
+			mem::sptr<RenderContext> context, const con::vector<VkDescriptorBufferInfo>& _meta_value_descriptor_infos)
 		{
 			VulkanRenderContext& render_context = (VulkanRenderContext&)(*context);
 			con::vector<VkWriteDescriptorSet> writers(render_context.GetFramesInFlightCount(),
-				{ VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET });
+													  {VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET});
 
 			for (siz i = 0; i < writers.size(); i++)
 			{
@@ -111,7 +117,8 @@ namespace np::gpu::__detail
 			return writers;
 		}
 
-		static mem::sptr<VulkanSampler> CreateSampler(mem::sptr<srvc::Services> services, mem::sptr<RenderContext> render_context, VkSamplerCreateInfo info)
+		static mem::sptr<VulkanSampler> CreateSampler(mem::sptr<srvc::Services> services,
+													  mem::sptr<RenderContext> render_context, VkSamplerCreateInfo info)
 		{
 			VulkanRenderDevice& render_device = (VulkanRenderDevice&)(*render_context->GetRenderDevice());
 			return mem::create_sptr<VulkanSampler>(services->GetAllocator(), render_device.GetLogicalDevice(), info);
@@ -135,7 +142,8 @@ namespace np::gpu::__detail
 			return info;
 		}
 
-		static VkPipelineLayout CreatePipelineLayout(mem::sptr<RenderContext> render_context, mem::sptr<VulkanDescriptorSetLayout> descriptor_set_layout)
+		static VkPipelineLayout CreatePipelineLayout(mem::sptr<RenderContext> render_context,
+													 mem::sptr<VulkanDescriptorSetLayout> descriptor_set_layout)
 		{
 			VulkanRenderDevice& render_device = (VulkanRenderDevice&)(*render_context->GetRenderDevice());
 
@@ -221,7 +229,7 @@ namespace np::gpu::__detail
 			VulkanRenderContext& render_context = (VulkanRenderContext&)(*context);
 
 			VkRect2D scissor{};
-			scissor.offset = { 0, 0 };
+			scissor.offset = {0, 0};
 			scissor.extent = render_context.GetExtent();
 			return scissor;
 		}
@@ -365,8 +373,8 @@ namespace np::gpu::__detail
 
 				// TODO: use dynamic viewport and scissor:
 				// https://github.com/Overv/VulkanTutorial/commit/87803541171579165caa354120157a0cc6c8192f
-				con::vector<VkViewport> viewports{ CreateViewport(render_pass.GetRenderContext()) };
-				con::vector<VkRect2D> scissors{ CreateScissor(render_pass.GetRenderContext()) };
+				con::vector<VkViewport> viewports{CreateViewport(render_pass.GetRenderContext())};
+				con::vector<VkRect2D> scissors{CreateScissor(render_pass.GetRenderContext())};
 
 				VkPipelineViewportStateCreateInfo viewport_state_info = CreatePipelineViewportStateInfo();
 				viewport_state_info.viewportCount = viewports.size();
@@ -378,7 +386,7 @@ namespace np::gpu::__detail
 				VkPipelineMultisampleStateCreateInfo multisample_state_info = CreatePipelineMultisampleStateInfo();
 
 				con::vector<VkPipelineColorBlendAttachmentState> color_blend_attachment_states = {
-					CreatePipelineColorBlendAttachmentState() };
+					CreatePipelineColorBlendAttachmentState()};
 				VkPipelineColorBlendStateCreateInfo color_blend_state_info = CreatePipelineColorBlendStateInfo();
 				color_blend_state_info.attachmentCount = color_blend_attachment_states.size();
 				color_blend_state_info.pAttachments = color_blend_attachment_states.data();
@@ -403,7 +411,8 @@ namespace np::gpu::__detail
 				pipeline_info.basePipelineIndex = -1; // Optional
 				pipeline_info.pDepthStencilState = &depth_stencil_state_info;
 
-				if (vkCreateGraphicsPipelines(*render_device.GetLogicalDevice(), nullptr, 1, &pipeline_info, nullptr, &pipeline) != VK_SUCCESS)
+				if (vkCreateGraphicsPipelines(*render_device.GetLogicalDevice(), nullptr, 1, &pipeline_info, nullptr,
+											  &pipeline) != VK_SUCCESS)
 					pipeline = nullptr;
 			}
 
@@ -423,7 +432,8 @@ namespace np::gpu::__detail
 
 		mem::sptr<VulkanLogicalDevice> GetLogicalDevice() const
 		{
-			VulkanRenderDevice& render_device = (VulkanRenderDevice&)(*_properties.framebuffers->GetRenderPass()->GetRenderContext()->GetRenderDevice());
+			VulkanRenderDevice& render_device =
+				(VulkanRenderDevice&)(*_properties.framebuffers->GetRenderPass()->GetRenderContext()->GetRenderDevice());
 			return render_device.GetLogicalDevice();
 		}
 
@@ -445,7 +455,7 @@ namespace np::gpu::__detail
 		}
 
 	public:
-		VulkanRenderPipeline(RenderPipeline::Properties& properties) : 
+		VulkanRenderPipeline(RenderPipeline::Properties& properties):
 			RenderPipeline(properties),
 			_descriptor_set_layout(CreateDescriptorSetLayout(GetServices(), GetLogicalDevice())),
 			_descriptor_sets(CreateDescriptorSets(GetServices(), GetRenderContext(), _descriptor_set_layout)),
@@ -472,7 +482,8 @@ namespace np::gpu::__detail
 
 		void BindPipeline(mem::sptr<CommandStaging> staging)
 		{
-			_bind_pipeline = mem::create_sptr<VulkanCommandBindPipeline>(GetServices()->GetAllocator(), VK_PIPELINE_BIND_POINT_GRAPHICS, _pipeline);
+			_bind_pipeline = mem::create_sptr<VulkanCommandBindPipeline>(GetServices()->GetAllocator(),
+																		 VK_PIPELINE_BIND_POINT_GRAPHICS, _pipeline);
 			staging->Stage(_bind_pipeline);
 		}
 
@@ -486,12 +497,12 @@ namespace np::gpu::__detail
 			VulkanRenderContext& vulkan_render_context = (VulkanRenderContext&)(*GetRenderContext());
 			ui32 current_image_index = vulkan_render_context.GetCurrentImageIndex();
 			GetDescriptorSets()->SubmitWriter(_meta_value_descriptor_writers[current_image_index], current_image_index);
-			_bound_descriptor_sets = { (*_descriptor_sets)[current_image_index] };
+			_bound_descriptor_sets = {(*_descriptor_sets)[current_image_index]};
 
-			_bind_descriptor_sets = mem::create_sptr<VulkanCommandBindDescriptorSets>(GetServices()->GetAllocator(),
-				VK_PIPELINE_BIND_POINT_GRAPHICS, _pipeline_layout, 0, (ui32)_bound_descriptor_sets.size(),
-				_bound_descriptor_sets.empty() ? nullptr : _bound_descriptor_sets.data(), 0,
-				nullptr);
+			_bind_descriptor_sets = mem::create_sptr<VulkanCommandBindDescriptorSets>(
+				GetServices()->GetAllocator(), VK_PIPELINE_BIND_POINT_GRAPHICS, _pipeline_layout, 0,
+				(ui32)_bound_descriptor_sets.size(), _bound_descriptor_sets.empty() ? nullptr : _bound_descriptor_sets.data(),
+				0, nullptr);
 
 			staging->Stage(_bind_descriptor_sets_command_slot, _bind_descriptor_sets);
 		}
@@ -543,6 +554,6 @@ namespace np::gpu::__detail
 			UpdateMetaValueBuffer();
 		}
 	};
-}
+} // namespace np::gpu::__detail
 
 #endif /* NP_ENGINE_VULKAN_RENDER_PIPELINE_HPP */

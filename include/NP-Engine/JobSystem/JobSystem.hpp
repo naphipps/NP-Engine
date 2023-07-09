@@ -34,7 +34,7 @@ namespace np::jsys
 		JobQueue _job_queue;
 
 	public:
-		JobSystem() : _running(false), _thread_pool(nullptr)
+		JobSystem(): _running(false), _thread_pool(nullptr)
 		{
 			SetDefaultJobWorkerCount();
 		}

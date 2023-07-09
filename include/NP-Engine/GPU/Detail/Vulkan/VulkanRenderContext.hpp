@@ -45,7 +45,7 @@ namespace np::gpu::__detail
 		con::vector<VkFence> _fences;
 		con::vector<VkFence> _acquired_image_fences;
 
-		//con::vector<Frame> _frames;//TODO: I like this way better
+		// con::vector<Frame> _frames;//TODO: I like this way better
 
 		ui32 _current_image_index;
 		ui32 _acquired_image_index;
@@ -106,8 +106,8 @@ namespace np::gpu::__detail
 				VkExtent2D min_extent = capabilities.minImageExtent;
 				VkExtent2D max_extent = capabilities.maxImageExtent;
 
-				extent = { ::std::clamp(framebuffer_extent.width, min_extent.width, max_extent.width),
-						  ::std::clamp(framebuffer_extent.height, min_extent.height, max_extent.height) };
+				extent = {::std::clamp(framebuffer_extent.width, min_extent.width, max_extent.width),
+						  ::std::clamp(framebuffer_extent.height, min_extent.height, max_extent.height)};
 			}
 
 			return extent;
@@ -125,7 +125,7 @@ namespace np::gpu::__detail
 			swapchain_info.clipped = VK_TRUE;
 			swapchain_info.oldSwapchain = nullptr;
 
-			con::vector<ui32> indices{ render_device.GetGraphicsFamilyIndex(), render_device.GetPresentFamilyIndex() };
+			con::vector<ui32> indices{render_device.GetGraphicsFamilyIndex(), render_device.GetPresentFamilyIndex()};
 
 			if (render_device.GetGraphicsFamilyIndex() != render_device.GetPresentFamilyIndex())
 			{
@@ -245,7 +245,7 @@ namespace np::gpu::__detail
 		}
 
 	public:
-		VulkanRenderContext(mem::sptr<RenderDevice> device) :
+		VulkanRenderContext(mem::sptr<RenderDevice> device):
 			RenderContext(device),
 			_extent(ChooseExtent(device)),
 			_swapchain(CreateSwapchain(device)),
@@ -283,7 +283,7 @@ namespace np::gpu::__detail
 			Dispose();
 		}
 
-		static siz GetFramesInFlightCount() //TODO: I think we need to be able to change this per render context...
+		static siz GetFramesInFlightCount() // TODO: I think we need to be able to change this per render context...
 		{
 			return 3;
 		}
@@ -326,10 +326,10 @@ namespace np::gpu::__detail
 			vkWaitForFences(device, 1, &_fences[_current_image_index], VK_TRUE, UI64_MAX);
 
 			VkResult result = vkAcquireNextImageKHR(device, _swapchain, UI64_MAX, _image_semaphores[_current_image_index],
-				nullptr, &_acquired_image_index);
+													nullptr, &_acquired_image_index);
 
-			NP_ENGINE_ASSERT(result == VK_SUCCESS || result == VK_SUBOPTIMAL_KHR || result == VK_ERROR_OUT_OF_DATE_KHR, 
-				"vkAcquireNextImageKHR error");
+			NP_ENGINE_ASSERT(result == VK_SUCCESS || result == VK_SUBOPTIMAL_KHR || result == VK_ERROR_OUT_OF_DATE_KHR,
+							 "vkAcquireNextImageKHR error");
 
 			return result;
 		}
@@ -388,6 +388,6 @@ namespace np::gpu::__detail
 	};
 
 	using VulkanRenderSwapchain = VulkanRenderContext;
-}
+} // namespace np::gpu::__detail
 
 #endif /* NP_ENGINE_VULKAN_RENDER_CONTEXT_HPP */

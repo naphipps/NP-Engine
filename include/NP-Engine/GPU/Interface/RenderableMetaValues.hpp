@@ -14,12 +14,12 @@ namespace np::gpu
 {
 	struct RenderableMetaValues
 	{
-		//TODO: I think our renderables need to define a struct output-like object
-		//	^ and then the implementation/detail can just grab the largest for the pipeline's layout (max of 128? what is vulkan's max??)
-		//	^ - we will have to make sure that our shaders align
+		// TODO: I think our renderables need to define a struct output-like object
+		//	^ and then the implementation/detail can just grab the largest for the pipeline's layout (max of 128? what is
+		//vulkan's max??) 	^ - we will have to make sure that our shaders align
 
 		geom::Transform transform;
-		ui32 resourceType; //TODO: ResourceType to ui32 so our shaders can respond properly
+		ui32 resourceType; // TODO: ResourceType to ui32 so our shaders can respond properly
 
 		constexpr static siz PADDING_SIZE = 128 - sizeof(geom::Transform) - sizeof(ui32);
 
@@ -28,7 +28,7 @@ namespace np::gpu
 
 			struct
 			{
-				//TODO: I feel like we can get the light's color via their vertex
+				// TODO: I feel like we can get the light's color via their vertex
 				::glm::vec4 color;
 				flt radius;
 			} light;

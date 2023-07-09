@@ -21,7 +21,8 @@ namespace np::gpu
 		switch (properties.renderPipeline->GetDetailType())
 		{
 		case DetailType::Vulkan:
-			scene = mem::create_sptr<__detail::VulkanScene>(properties.renderPipeline->GetServices()->GetAllocator(), properties);
+			scene =
+				mem::create_sptr<__detail::VulkanScene>(properties.renderPipeline->GetServices()->GetAllocator(), properties);
 			break;
 
 		default:

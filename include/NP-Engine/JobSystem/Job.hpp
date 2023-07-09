@@ -21,8 +21,10 @@
 	TODO: how do we build a job from concurrent jobs
 
 	(1):
-		- test waiting on a job to complete - essentially a syncronyous job that we still submit... use the counter on the sptr...
-		- while waiting on sptr.strong_count == 1, we can also pull sub-tasks from queue so we can work while we wait on everyone to finish
+		- test waiting on a job to complete - essentially a syncronyous job that we still submit... use the counter on the
+   sptr...
+		- while waiting on sptr.strong_count == 1, we can also pull sub-tasks from queue so we can work while we wait on
+   everyone to finish
 
 	(2):
 	finish_job;

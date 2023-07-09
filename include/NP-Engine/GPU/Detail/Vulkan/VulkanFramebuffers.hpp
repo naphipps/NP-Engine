@@ -43,7 +43,7 @@ namespace np::gpu::__detail
 
 			for (siz i = 0; i < framebuffers.size(); i++)
 			{
-				con::vector<VkImageView> image_views{ render_context.GetImageViews()[i],
+				con::vector<VkImageView> image_views{render_context.GetImageViews()[i],
 													 render_pass.GetDepthTexture()->GetImageView()};
 
 				VkFramebufferCreateInfo framebuffer_info = CreateFramebufferInfo(pass->GetRenderContext());
@@ -69,9 +69,7 @@ namespace np::gpu::__detail
 		}
 
 	public:
-		VulkanFramebuffers(mem::sptr<RenderPass> pass): Framebuffers(pass),
-			_framebuffers(CreateFramebuffers(pass))
-		{}
+		VulkanFramebuffers(mem::sptr<RenderPass> pass): Framebuffers(pass), _framebuffers(CreateFramebuffers(pass)) {}
 
 		~VulkanFramebuffers()
 		{

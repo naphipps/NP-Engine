@@ -7,7 +7,7 @@
 #include "NP-Engine/GPU/Interface/RenderPipeline.hpp"
 
 #if NP_ENGINE_PLATFORM_IS_LINUX || NP_ENGINE_PLATFORM_IS_WINDOWS
-#include "NP-Engine/GPU/Detail/OpenGL/OpenGLGraphics.hpp"
+	#include "NP-Engine/GPU/Detail/OpenGL/OpenGLGraphics.hpp"
 #endif
 
 #include "NP-Engine/GPU/Detail/Vulkan/VulkanRenderPipeline.hpp"
@@ -21,7 +21,8 @@ namespace np::gpu
 		switch (properties.framebuffers->GetDetailType())
 		{
 		case DetailType::Vulkan:
-			pipeline = mem::create_sptr<__detail::VulkanRenderPipeline>(properties.framebuffers->GetServices()->GetAllocator(), properties);
+			pipeline = mem::create_sptr<__detail::VulkanRenderPipeline>(properties.framebuffers->GetServices()->GetAllocator(),
+																		properties);
 
 		default:
 			break;
@@ -29,4 +30,4 @@ namespace np::gpu
 
 		return pipeline;
 	}
-}
+} // namespace np::gpu

@@ -216,7 +216,7 @@ namespace np::app
 			case evnt::EventType::WindowCreate:
 				HandleWindowCreate(e);
 				break;
-			
+
 			default:
 				break;
 			}
@@ -236,8 +236,8 @@ namespace np::app
 
 		virtual ~WindowLayer()
 		{
-            _windows.get_access()->clear();
-            _windows_to_destroy.get_access()->clear();
+			_windows.get_access()->clear();
+			_windows_to_destroy.get_access()->clear();
 
 			win::Window::Terminate(win::DetailType::Glfw);
 			win::Window::Terminate(win::DetailType::Sdl);
@@ -281,35 +281,35 @@ namespace np::app
 
 		void Cleanup() override
 		{
-            bl submit_application_close = false;
-            {
+			bl submit_application_close = false;
+			{
 				auto windows = _windows.get_access();
-                for (auto wit = windows->begin(); wit != windows->end();)
-                {
+				for (auto wit = windows->begin(); wit != windows->end();)
+				{
 					submit_application_close |= *wit;
 
-                    if (!*wit)
-                    {
-                        wit = windows->erase(wit);
-                        continue;
-                    }
-                    else if (*wit && wit->get_strong_count() == 1)
-                    {
+					if (!*wit)
+					{
+						wit = windows->erase(wit);
+						continue;
+					}
+					else if (*wit && wit->get_strong_count() == 1)
+					{
 						auto to_destroy = _windows_to_destroy.get_access();
-                        auto dit = to_destroy->find((*wit)->GetUid());
-                        if (dit != to_destroy->end())
-                        {
-                            wit = windows->erase(wit);
-                            to_destroy->erase(dit);
-                            continue;
-                        }
-                    }
-                    
-                    wit++;
-                }
-                
-                submit_application_close &= windows->empty();
-            }
+						auto dit = to_destroy->find((*wit)->GetUid());
+						if (dit != to_destroy->end())
+						{
+							wit = windows->erase(wit);
+							to_destroy->erase(dit);
+							continue;
+						}
+					}
+
+					wit++;
+				}
+
+				submit_application_close &= windows->empty();
+			}
 			if (submit_application_close)
 				_services->GetEventSubmitter().Submit(mem::create_sptr<ApplicationCloseEvent>(_services->GetAllocator()));
 		}

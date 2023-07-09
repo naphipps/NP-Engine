@@ -40,12 +40,12 @@ namespace np::gpu::__detail
 			return info;
 		}
 
-		VulkanCommandPool(mem::sptr<VulkanLogicalDevice> device, VkCommandPoolCreateInfo command_pool_create_info) :
+		VulkanCommandPool(mem::sptr<VulkanLogicalDevice> device, VkCommandPoolCreateInfo command_pool_create_info):
 			_device(device),
 			_command_pool(CreateCommandPool(_device, command_pool_create_info))
 		{}
 
-		VulkanCommandPool(VulkanCommandPool&& other) noexcept :
+		VulkanCommandPool(VulkanCommandPool&& other) noexcept:
 			_device(::std::move(other._device)),
 			_command_pool(::std::move(other._command_pool))
 		{
@@ -53,7 +53,7 @@ namespace np::gpu::__detail
 			other._command_pool = nullptr;
 		}
 
-		~VulkanCommandPool() //TODO: all these need virtual
+		~VulkanCommandPool() // TODO: all these need virtual
 		{
 			Dispose();
 		}
@@ -98,7 +98,8 @@ namespace np::gpu::__detail
 			return AllocateCommandBuffers(command_buffer_allocate_info);
 		}
 
-		con::vector<mem::sptr<VulkanCommandBuffer>> AllocateCommandBuffers(const VkCommandBufferAllocateInfo& command_buffer_allocate_info)
+		con::vector<mem::sptr<VulkanCommandBuffer>> AllocateCommandBuffers(
+			const VkCommandBufferAllocateInfo& command_buffer_allocate_info)
 		{
 			con::vector<VkCommandBuffer> buffers(command_buffer_allocate_info.commandBufferCount);
 			if (vkAllocateCommandBuffers(*_device, &command_buffer_allocate_info, buffers.data()) != VK_SUCCESS)
@@ -120,13 +121,15 @@ namespace np::gpu::__detail
 			vkFreeCommandBuffers(*_device, _command_pool, (ui32)buffers.size(), buffers.data());
 		}
 
-		static void BeginCommandBuffers(con::vector<mem::sptr<VulkanCommandBuffer>>& command_buffers, VkCommandBufferBeginInfo& begin_info)
+		static void BeginCommandBuffers(con::vector<mem::sptr<VulkanCommandBuffer>>& command_buffers,
+										VkCommandBufferBeginInfo& begin_info)
 		{
 			for (mem::sptr<VulkanCommandBuffer>& command_buffer : command_buffers)
 				command_buffer->Begin(begin_info);
 		}
 
-		static void BeginCommandBuffers(con::vector<mem::sptr<VulkanCommandBuffer>>& command_buffers, con::vector<VkCommandBufferBeginInfo>& begin_infos)
+		static void BeginCommandBuffers(con::vector<mem::sptr<VulkanCommandBuffer>>& command_buffers,
+										con::vector<VkCommandBufferBeginInfo>& begin_infos)
 		{
 			NP_ENGINE_ASSERT(command_buffers.size() == begin_infos.size(), "command_buffers size must equal begin_infos size");
 			for (siz i = 0; i < command_buffers.size(); i++)

@@ -40,11 +40,9 @@ namespace np::gpu::__detail
 		}
 
 	public:
-		VulkanTexture(mem::sptr<VulkanCommandPool> command_pool, 
-			VkImageCreateInfo& image_create_info, 
-			VkMemoryPropertyFlags memory_property_flags,
-			VkImageViewCreateInfo& image_view_create_info,
-			bl hot_reloadable = false):
+		VulkanTexture(mem::sptr<VulkanCommandPool> command_pool, VkImageCreateInfo& image_create_info,
+					  VkMemoryPropertyFlags memory_property_flags, VkImageViewCreateInfo& image_view_create_info,
+					  bl hot_reloadable = false):
 			_command_pool(command_pool),
 			_image(GetCommandPool(), image_create_info, memory_property_flags),
 			_image_view(GetLogicalDevice(), ApplyImageToImageViewCreateInfo(_image, image_view_create_info)),

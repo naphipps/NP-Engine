@@ -127,7 +127,7 @@ namespace np::gpu::__detail
 #endif
 
 			con::vector<str> window_required = win::Window::GetRequiredGpuExtentions(win::DetailType::Glfw);
-			
+
 			for (const str& extension : window_required)
 				extension_set.emplace(extension);
 
@@ -252,7 +252,11 @@ namespace np::gpu::__detail
 		}
 
 	public:
-		VulkanInstance(mem::sptr<srvc::Services> services): DetailInstance(services), _instance(CreateInstance()), _debug_messenger(CreateDebugMessenger()) {}
+		VulkanInstance(mem::sptr<srvc::Services> services):
+			DetailInstance(services),
+			_instance(CreateInstance()),
+			_debug_messenger(CreateDebugMessenger())
+		{}
 
 		~VulkanInstance()
 		{

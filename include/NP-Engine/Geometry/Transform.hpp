@@ -15,7 +15,7 @@ namespace np::geom
 {
 	struct Transform
 	{
-		::glm::vec3 position{ 0.f }; // default: {0, 0, 0}
+		::glm::vec3 position{0.f}; // default: {0, 0, 0}
 		::glm::quat orientation{0.f, 0.f, 0.f, 1.f}; // default: wxyz {0, 0, 0, 1}
 		::glm::vec3 scale{1.f}; // default: {1, 1, 1}
 
@@ -33,6 +33,6 @@ namespace np::geom
 			return ToMat4(*this);
 		}
 	};
-}
+} // namespace np::geom
 
 #endif /* NP_ENGINE_TRANSFORM_HPP */

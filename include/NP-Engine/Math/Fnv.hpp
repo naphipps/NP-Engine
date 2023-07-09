@@ -21,7 +21,7 @@ namespace np::mat
 		fnv-1a algorithm
 		<http://www.isthe.com/chongo/tech/comp/fnv/index.html#FNV-1a>
 	*/
-	
+
 	static inline ui32 HashFnv1aUi32(const void* src, siz byte_count, ui32 hash = (ui32)0x811c9dc5)
 	{
 		const ui32 prime = 0x01000193;
@@ -51,6 +51,6 @@ namespace np::mat
 
 		return hash;
 	}
-}
+} // namespace np::mat
 
 #endif /* NP_ENGINE_FNV_HPP */

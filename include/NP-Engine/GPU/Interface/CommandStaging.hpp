@@ -22,13 +22,13 @@ namespace np::gpu
 		con::vector<mem::sptr<Command>> _commands;
 
 	public:
-		CommandStaging() : _command_buffer(nullptr) {}
+		CommandStaging(): _command_buffer(nullptr) {}
 
-		CommandStaging(nptr) : CommandStaging() {}
+		CommandStaging(nptr): CommandStaging() {}
 
-		CommandStaging(mem::sptr<CommandBuffer> command_buffer) : _command_buffer(command_buffer) {}
+		CommandStaging(mem::sptr<CommandBuffer> command_buffer): _command_buffer(command_buffer) {}
 
-		CommandStaging(CommandStaging&& other) noexcept :
+		CommandStaging(CommandStaging&& other) noexcept:
 			_command_buffer(::std::move(other._command_buffer)),
 			_commands(::std::move(other._commands))
 		{

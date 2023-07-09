@@ -18,7 +18,7 @@ namespace np::gpu
 	protected:
 		mem::sptr<RenderTarget> _target;
 
-		RenderDevice(mem::sptr<RenderTarget> target) : Device(), _target(target) {}
+		RenderDevice(mem::sptr<RenderTarget> target): Device(), _target(target) {}
 
 	public:
 		static mem::sptr<RenderDevice> Create(mem::sptr<RenderTarget> target);
@@ -43,6 +43,6 @@ namespace np::gpu
 			return _target->GetServices();
 		}
 	};
-}
+} // namespace np::gpu
 
 #endif /* NP_ENGINE_GPU_INTERFACE_RENDER_DEVICE_HPP */

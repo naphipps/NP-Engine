@@ -27,7 +27,7 @@ namespace np::app
 
 		ApplicationPopupEvent(str message, Popup::Style style, Popup::Buttons buttons)
 		{
-			ConstructData<DataType>(DataType{ message, style, buttons, Popup::Select::None });
+			ConstructData<DataType>(DataType{message, style, buttons, Popup::Select::None});
 		}
 
 		~ApplicationPopupEvent()

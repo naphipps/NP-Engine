@@ -59,7 +59,6 @@ namespace np::gpu::__detail
 			return _command_buffer;
 		}
 
-
 		bl IsValid() const override
 		{
 			return _command_buffer != nullptr;
@@ -72,18 +71,19 @@ namespace np::gpu::__detail
 
 		void Add(Command& command) override
 		{
-			NP_ENGINE_ASSERT(IsValid() && command.GetDetailType() == DetailType::Vulkan,
+			NP_ENGINE_ASSERT(
+				IsValid() && command.GetDetailType() == DetailType::Vulkan,
 				"VulkanCommandBuffer must be valid and given command must be a vulkan command before Add is called.");
 			((VulkanCommand&)command).ApplyTo(_command_buffer);
 		}
 
-		VkResult Begin(VkCommandBufferBeginInfo& command_buffer_begin_info) //TODO: should this be in Device??
+		VkResult Begin(VkCommandBufferBeginInfo& command_buffer_begin_info) // TODO: should this be in Device??
 		{
 			NP_ENGINE_ASSERT(IsValid(), "VulkanCommandBuffer must be valid before Begin is called.");
 			return vkBeginCommandBuffer(_command_buffer, &command_buffer_begin_info);
 		}
 
-		VkResult End()//TODO: should this be in Device??
+		VkResult End() // TODO: should this be in Device??
 		{
 			NP_ENGINE_ASSERT(IsValid(), "VulkanCommandBuffer must be valid before End is called.");
 			return vkEndCommandBuffer(_command_buffer);

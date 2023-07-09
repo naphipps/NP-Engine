@@ -15,6 +15,6 @@ namespace np::gpu
 	{
 		virtual ResourceType GetType() const = 0;
 	};
-}
+} // namespace np::gpu
 
 #endif /* NP_ENGINE_GPU_INTERFACE_RESOURCE_HPP */

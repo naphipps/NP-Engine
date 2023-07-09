@@ -80,7 +80,7 @@ namespace np::mem
 
 		operator Block() const
 		{
-			return { (void*)allocation, SIZE };
+			return {(void*)allocation, SIZE};
 		}
 	};
 } // namespace np::mem

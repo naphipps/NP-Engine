@@ -7,7 +7,7 @@
 #include "NP-Engine/GPU/Interface/RenderPass.hpp"
 
 #if NP_ENGINE_PLATFORM_IS_LINUX || NP_ENGINE_PLATFORM_IS_WINDOWS
-#include "NP-Engine/GPU/Detail/OpenGL/OpenGLGraphics.hpp"
+	#include "NP-Engine/GPU/Detail/OpenGL/OpenGLGraphics.hpp"
 #endif
 
 #include "NP-Engine/GPU/Detail/Vulkan/VulkanRenderPass.hpp"
@@ -30,4 +30,4 @@ namespace np::gpu
 
 		return pass;
 	}
-}
+} // namespace np::gpu

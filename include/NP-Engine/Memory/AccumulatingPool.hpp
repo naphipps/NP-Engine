@@ -29,8 +29,8 @@ namespace np::mem
 			const siz chunk_size = A::CHUNK_SIZE;
 			const siz size = POOL_TYPE_SIZE + (chunk_size * object_count);
 			const Block block = _c_allocator.Allocate(size);
-			const Block object_block{ block.ptr, POOL_TYPE_SIZE };
-			const Block allocate_block{ object_block.End(), block.size - object_block.size };
+			const Block object_block{block.ptr, POOL_TYPE_SIZE};
+			const Block allocate_block{object_block.End(), block.size - object_block.size};
 			pools.emplace_back(mem::Construct<PoolType>(object_block, allocate_block));
 		}
 

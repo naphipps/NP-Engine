@@ -18,10 +18,9 @@ namespace np::gpu
 	class RenderShader : public Shader
 	{
 	protected:
-
 		mem::sptr<RenderDevice> _device;
 
-		RenderShader(mem::sptr<RenderDevice> device, Shader::Properties& properties) : Shader(properties), _device(device) {}
+		RenderShader(mem::sptr<RenderDevice> device, Shader::Properties& properties): Shader(properties), _device(device) {}
 
 	public:
 		static mem::sptr<RenderShader> Create(mem::sptr<RenderDevice> device, Shader::Properties properties);
@@ -41,6 +40,6 @@ namespace np::gpu
 			return _device->GetServices();
 		}
 	};
-}
+} // namespace np::gpu
 
 #endif /* NP_ENGINE_GPU_INTERFACE_RENDER_SHADER_HPP */

@@ -485,8 +485,8 @@ namespace np::noiz
 
 			for (ui8 i = 0; i < _octave_count; i++)
 			{
-				output +=
-					amplitude * ::std::abs(CalculateNoiseValue(x * frequency, y * frequency, i * _fractional_increment * frequency));
+				output += amplitude *
+					::std::abs(CalculateNoiseValue(x * frequency, y * frequency, i * _fractional_increment * frequency));
 				denom += amplitude;
 				frequency *= _lacunarity;
 				amplitude *= _persistence;

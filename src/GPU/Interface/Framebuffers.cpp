@@ -7,7 +7,7 @@
 #include "NP-Engine/GPU/Interface/Framebuffers.hpp"
 
 #if NP_ENGINE_PLATFORM_IS_LINUX || NP_ENGINE_PLATFORM_IS_WINDOWS
-#include "NP-Engine/GPU/Detail/OpenGL/OpenGLGraphics.hpp"
+	#include "NP-Engine/GPU/Detail/OpenGL/OpenGLGraphics.hpp"
 #endif
 
 #include "NP-Engine/GPU/Detail/Vulkan/VulkanFramebuffers.hpp"
@@ -21,7 +21,8 @@ namespace np::gpu
 		switch (render_pass->GetDetailType())
 		{
 		case DetailType::Vulkan:
-			framebuffers = mem::create_sptr<__detail::VulkanFramebuffers>(render_pass->GetServices()->GetAllocator(), render_pass);
+			framebuffers =
+				mem::create_sptr<__detail::VulkanFramebuffers>(render_pass->GetServices()->GetAllocator(), render_pass);
 			break;
 
 		default:
@@ -30,4 +31,4 @@ namespace np::gpu
 
 		return framebuffers;
 	}
-}
+} // namespace np::gpu

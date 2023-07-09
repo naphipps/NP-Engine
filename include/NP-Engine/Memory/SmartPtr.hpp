@@ -59,11 +59,11 @@ namespace np::mem
 		Allocator& _allocator;
 
 	public:
-		smart_ptr_allocator_destroyer(Allocator& allocator) : _allocator(allocator) {}
+		smart_ptr_allocator_destroyer(Allocator& allocator): _allocator(allocator) {}
 
-		smart_ptr_allocator_destroyer(const smart_ptr_allocator_destroyer& other) : _allocator(other._allocator) {}
+		smart_ptr_allocator_destroyer(const smart_ptr_allocator_destroyer& other): _allocator(other._allocator) {}
 
-		smart_ptr_allocator_destroyer(smart_ptr_allocator_destroyer&& other) noexcept : _allocator(other._allocator) {}
+		smart_ptr_allocator_destroyer(smart_ptr_allocator_destroyer&& other) noexcept: _allocator(other._allocator) {}
 
 		virtual void deallocate_object(T* ptr) override
 		{
@@ -83,11 +83,11 @@ namespace np::mem
 		using base = smart_ptr_allocator_destroyer<T>;
 
 	public:
-		smart_ptr_contiguous_destroyer(Allocator& allocator) : base(allocator) {}
+		smart_ptr_contiguous_destroyer(Allocator& allocator): base(allocator) {}
 
-		smart_ptr_contiguous_destroyer(const smart_ptr_contiguous_destroyer& other) : base(other._allocator) {}
+		smart_ptr_contiguous_destroyer(const smart_ptr_contiguous_destroyer& other): base(other._allocator) {}
 
-		smart_ptr_contiguous_destroyer(smart_ptr_contiguous_destroyer&& other) noexcept : base(other._allocator) {}
+		smart_ptr_contiguous_destroyer(smart_ptr_contiguous_destroyer&& other) noexcept: base(other._allocator) {}
 
 		virtual void deallocate_object(T* ptr) override {}
 	};
@@ -96,8 +96,10 @@ namespace np::mem
 	class smart_ptr_resource : public smart_ptr_resource_base
 	{
 	private:
-		NP_ENGINE_STATIC_ASSERT((::std::is_copy_constructible_v<D> || ::std::is_move_constructible_v<D>), "(D)estroyer must be copy constructible or move constructible");
-		NP_ENGINE_STATIC_ASSERT((::std::is_base_of_v<smart_ptr_destroyer<T>, D>), "(D)estroyer must derive from smart_ptr_destroyer<T>");
+		NP_ENGINE_STATIC_ASSERT((::std::is_copy_constructible_v<D> || ::std::is_move_constructible_v<D>),
+								"(D)estroyer must be copy constructible or move constructible");
+		NP_ENGINE_STATIC_ASSERT((::std::is_base_of_v<smart_ptr_destroyer<T>, D>),
+								"(D)estroyer must derive from smart_ptr_destroyer<T>");
 
 	public:
 		using destroyer_type = D;
@@ -107,7 +109,7 @@ namespace np::mem
 		atm<T*> _object;
 
 	public:
-		smart_ptr_resource(destroyer_type destroyer_type, T* object) : _destroyer(destroyer_type), _object(object) {}
+		smart_ptr_resource(destroyer_type destroyer_type, T* object): _destroyer(destroyer_type), _object(object) {}
 
 		virtual void destroy_object() override
 		{
@@ -134,7 +136,8 @@ namespace np::mem
 	template <typename T, typename R>
 	struct smart_ptr_contiguous_block
 	{
-		NP_ENGINE_STATIC_ASSERT((::std::is_base_of_v<smart_ptr_resource_base, R>), "(R)esource must derive from smart_ptr_resource_base");
+		NP_ENGINE_STATIC_ASSERT((::std::is_base_of_v<smart_ptr_resource_base, R>),
+								"(R)esource must derive from smart_ptr_resource_base");
 
 		using resource_block_type = SizedBlock<sizeof(R)>;
 		using object_block_type = SizedBlock<sizeof(T)>;
@@ -199,30 +202,30 @@ namespace np::mem
 			}
 		}
 
-		smart_ptr() : _resource(nullptr) {}
+		smart_ptr(): _resource(nullptr) {}
 
-		smart_ptr(nptr) : smart_ptr() {}
+		smart_ptr(nptr): smart_ptr() {}
 
-		smart_ptr(smart_ptr_resource_base* resource) : _resource(resource) {}
+		smart_ptr(smart_ptr_resource_base* resource): _resource(resource) {}
 
-		smart_ptr(const smart_ptr<T>& other) : _resource(other._resource) {}
+		smart_ptr(const smart_ptr<T>& other): _resource(other._resource) {}
 
-		smart_ptr(smart_ptr<T>&& other) noexcept : _resource(::std::move(other._resource))
+		smart_ptr(smart_ptr<T>&& other) noexcept: _resource(::std::move(other._resource))
 		{
 			other._resource = nullptr;
 		}
 
 		template <typename U, ::std::enable_if_t<::std::is_convertible_v<U*, T*>, bl> = true>
-		smart_ptr(const smart_ptr<U>& other) : smart_ptr(other._resource) {}
+		smart_ptr(const smart_ptr<U>& other): smart_ptr(other._resource)
+		{}
 
 		template <typename U, ::std::enable_if_t<::std::is_convertible_v<U*, T*>, bl> = true>
-		smart_ptr(smart_ptr<U>&& other) noexcept : smart_ptr(::std::move(other._resource))
+		smart_ptr(smart_ptr<U>&& other) noexcept: smart_ptr(::std::move(other._resource))
 		{
 			other._resource = nullptr;
 		}
 
 	public:
-
 		virtual ~smart_ptr() {}
 
 		virtual void reset() = 0;
@@ -261,24 +264,23 @@ namespace np::mem
 		}
 
 	public:
+		sptr(): base() {}
 
-		sptr() : base() {}
-			
 		sptr(nptr): base() {}
 
-		sptr(smart_ptr_resource_base* resource) : base(resource)
+		sptr(smart_ptr_resource_base* resource): base(resource)
 		{
 			base::increment_strong_counter();
 			base::increment_weak_counter();
 		}
 
-		sptr(const sptr<T>& other) : base(other)
+		sptr(const sptr<T>& other): base(other)
 		{
 			base::increment_strong_counter();
 			base::increment_weak_counter();
 		}
 
-		sptr(sptr<T>&& other) noexcept : base(::std::move(other)) {}
+		sptr(sptr<T>&& other) noexcept: base(::std::move(other)) {}
 
 		template <typename U, ::std::enable_if_t<::std::is_convertible_v<U*, T*>, bl> = true>
 		sptr(const sptr<U>& other): base(other)
@@ -288,7 +290,8 @@ namespace np::mem
 		}
 
 		template <typename U, ::std::enable_if_t<::std::is_convertible_v<U*, T*>, bl> = true>
-		sptr(sptr<U>&& other) noexcept : base(::std::move(other)) {}
+		sptr(sptr<U>&& other) noexcept: base(::std::move(other))
+		{}
 
 		virtual ~sptr()
 		{
@@ -382,37 +385,37 @@ namespace np::mem
 		virtual void decrement_strong_counter() override {}
 
 	public:
+		wptr(): base(nullptr) {}
 
-		wptr() :base(nullptr) {}
-
-		wptr(nptr) : base() {}
+		wptr(nptr): base() {}
 
 		wptr(const sptr<T>& other): base(other)
 		{
 			base::increment_weak_counter();
 		}
 
-		wptr(const wptr<T>& other) : base(other)
+		wptr(const wptr<T>& other): base(other)
 		{
 			base::increment_weak_counter();
 		}
 
-		wptr(wptr<T>&& other) noexcept : base(::std::move(other)) {}
+		wptr(wptr<T>&& other) noexcept: base(::std::move(other)) {}
 
 		template <typename U, ::std::enable_if_t<::std::is_convertible_v<U*, T*>, bl> = true>
-		wptr(const sptr<U>& other) : base(other)
-		{
-			base::increment_weak_counter();
-		}
-
-		template <typename U, ::std::enable_if_t<::std::is_convertible_v<U*, T*>, bl> = true>
-		wptr(const wptr<U>& other) : base(other)
+		wptr(const sptr<U>& other): base(other)
 		{
 			base::increment_weak_counter();
 		}
 
 		template <typename U, ::std::enable_if_t<::std::is_convertible_v<U*, T*>, bl> = true>
-		wptr(wptr<U>&& other) noexcept : base(::std::move(other)) {}
+		wptr(const wptr<U>& other): base(other)
+		{
+			base::increment_weak_counter();
+		}
+
+		template <typename U, ::std::enable_if_t<::std::is_convertible_v<U*, T*>, bl> = true>
+		wptr(wptr<U>&& other) noexcept: base(::std::move(other))
+		{}
 
 		virtual ~wptr()
 		{
@@ -492,14 +495,14 @@ namespace np::mem
 			return mem::sptr<T>(is_expired() ? nullptr : base::_resource);
 		}
 	};
-	
+
 	template <typename T, typename... Args>
 	constexpr sptr<T> create_sptr(Allocator& allocator, Args&&... args)
 	{
 		using destroyer_type = smart_ptr_contiguous_destroyer<T>;
 		using resource_type = smart_ptr_resource<T, destroyer_type>;
 		using contiguous_block_type = smart_ptr_contiguous_block<T, resource_type>;
-		
+
 		resource_type* resource = nullptr;
 		contiguous_block_type* contiguous_block = mem::Create<contiguous_block_type>(allocator);
 		if (contiguous_block)

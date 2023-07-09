@@ -40,10 +40,10 @@ namespace np
 			T* _object;
 
 		public:
-			access(T* object, mutex& m) : _l(m), _object(object) {}
+			access(T* object, mutex& m): _l(m), _object(object) {}
 
-			template<class R, class P>
-			access(T* object, mutex& m, const ::std::chrono::duration<R, P>& duration) : _l(m, try_lock), _object(nullptr)
+			template <class R, class P>
+			access(T* object, mutex& m, const ::std::chrono::duration<R, P>& duration): _l(m, try_lock), _object(nullptr)
 			{
 				auto start = ::std::chrono::steady_clock::now();
 				while (!_l && (::std::chrono::steady_clock::now() - start) < duration)
@@ -71,17 +71,18 @@ namespace np
 		};
 
 		template <typename... Args>
-		mutexed_wrapper(Args&&... args) : _object(::std::forward<Args>(args)...) {}
+		mutexed_wrapper(Args&&... args): _object(::std::forward<Args>(args)...)
+		{}
 
 		access get_access()
 		{
-			return { &_object, _m };
+			return {&_object, _m};
 		}
 
-		template<class R, class P>
+		template <class R, class P>
 		access try_get_access_for(const ::std::chrono::duration<R, P>& duration)
 		{
-			return { &_object, _m, duration };
+			return {&_object, _m, duration};
 		}
 	};
 
@@ -116,6 +117,6 @@ namespace np
 	inline constexpr ::std::memory_order mo_release = ::std::memory_order_release;
 	inline constexpr ::std::memory_order mo_acq_rel = ::std::memory_order_acq_rel;
 	inline constexpr ::std::memory_order mo_seq_cst = ::std::memory_order_seq_cst;
-}
+} // namespace np
 
 #endif /* NP_ENGINE_SYNC_TYPES_HPP */

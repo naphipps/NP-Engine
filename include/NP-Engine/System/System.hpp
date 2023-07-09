@@ -26,7 +26,7 @@ namespace np::sys
 	} // namespace __detail
 
 	using TerminateHandler = ::std::terminate_handler;
-	using SignalHandler = void(*)(i32 signal);
+	using SignalHandler = void (*)(i32 signal);
 
 	static inline ::std::string GetEnv(::std::string variable)
 	{

@@ -21,14 +21,14 @@ namespace np::geom
 	struct Obb<2, T> : public Aabb<2, T>
 	{
 		using Point = typename Aabb<2, T>::Point;
-		::glm::quat orientation{0.f, 0.f, 0.f, 1.f}; //default wxyz {0, 0, 0, 1}
+		::glm::quat orientation{0.f, 0.f, 0.f, 1.f}; // default wxyz {0, 0, 0, 1}
 
 		virtual Point ApplyOrientation(const Point& point) const
 		{
 			Point pt = point - center;
-			::glm::vec4 t = { (flt)pt.x, (flt)pt.y, 0.f, 1.f };
+			::glm::vec4 t = {(flt)pt.x, (flt)pt.y, 0.f, 1.f};
 			t = ::glm::toMat4(orientation) * t;
-			pt = { (T)t.x, (T)t.y };
+			pt = {(T)t.x, (T)t.y};
 			return pt + center;
 		}
 
@@ -67,14 +67,14 @@ namespace np::geom
 	struct Obb<3, T> : public Aabb<3, T>
 	{
 		using Point = typename Aabb<3, T>::Point;
-		::glm::quat orientation{0.f, 0.f, 0.f, 1.f}; //default wxyz {0, 0, 0, 1}
+		::glm::quat orientation{0.f, 0.f, 0.f, 1.f}; // default wxyz {0, 0, 0, 1}
 
 		virtual Point ApplyOrientation(const Point& point) const
 		{
 			Point pt = point - center;
-			::glm::vec4 t = { (flt)pt.x, (flt)pt.y, (flt)pt.z, 1.f };
+			::glm::vec4 t = {(flt)pt.x, (flt)pt.y, (flt)pt.z, 1.f};
 			t = ::glm::toMat4(orientation) * t;
-			pt = { (T)t.x, (T)t.y, (T)t.z };
+			pt = {(T)t.x, (T)t.y, (T)t.z};
 			return pt + center;
 		}
 

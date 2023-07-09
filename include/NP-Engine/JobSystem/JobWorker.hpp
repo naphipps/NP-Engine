@@ -8,11 +8,11 @@
 #define NP_ENGINE_JOB_WORKER_HPP
 
 #ifndef NP_ENGINE_JOB_WORKER_SLEEP_DURATION
-	#define NP_ENGINE_JOB_WORKER_SLEEP_DURATION 1 //milliseconds
+	#define NP_ENGINE_JOB_WORKER_SLEEP_DURATION 1 // milliseconds
 #endif
 
 #ifndef NP_ENGINE_JOB_WORKER_DEEP_SLEEP_DURATION
-	#define NP_ENGINE_JOB_WORKER_DEEP_SLEEP_DURATION 3 //milliseconds
+	#define NP_ENGINE_JOB_WORKER_DEEP_SLEEP_DURATION 3 // milliseconds
 #endif
 
 #include <utility>
@@ -109,7 +109,7 @@ namespace np::jsys
 						if (!next_job.job->CanExecute())
 						{
 							_job_queue.Push(NormalizePriority(next_job.priority), next_job.job);
-							next_job.Invalidate(); //done with record
+							next_job.Invalidate(); // done with record
 						}
 					}
 					else
@@ -200,7 +200,7 @@ namespace np::jsys
 					if (!immediate->IsComplete())
 						SubmitImmediateJob(immediate);
 
-					immediate.reset(); //done with job
+					immediate.reset(); // done with job
 				}
 			}
 
@@ -223,7 +223,7 @@ namespace np::jsys
 					if (!record.job->IsComplete())
 						_job_queue.Push(NormalizePriority(record.priority), record.job);
 
-					record.Invalidate(); //done with record
+					record.Invalidate(); // done with record
 				}
 			}
 
@@ -245,7 +245,7 @@ namespace np::jsys
 					if (!stolen->IsComplete())
 						SubmitImmediateJob(stolen);
 
-					stolen.reset(); //done with job
+					stolen.reset(); // done with job
 				}
 				else
 				{
@@ -258,16 +258,12 @@ namespace np::jsys
 		}
 
 	public:
-		JobWorker(JobQueue& job_queue):
-			_keep_working(false),
-			_thread(nullptr),
-			_job_queue(job_queue),
-			_coworker_index(0)
+		JobWorker(JobQueue& job_queue): _keep_working(false), _thread(nullptr), _job_queue(job_queue), _coworker_index(0)
 		{
-			SetFetchOrder({ Fetch::Immediate, Fetch::PriorityBased, Fetch::Steal });
+			SetFetchOrder({Fetch::Immediate, Fetch::PriorityBased, Fetch::Steal});
 		}
 
-		JobWorker(JobWorker&& other) noexcept :
+		JobWorker(JobWorker&& other) noexcept:
 			_keep_working(::std::move(other._keep_working.load(mo_acquire))),
 			_thread(::std::move(other._thread)),
 			_job_queue(other._job_queue),

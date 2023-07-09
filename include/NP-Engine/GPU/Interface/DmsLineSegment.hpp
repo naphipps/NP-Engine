@@ -64,8 +64,8 @@ namespace std
 				} p;
 			};
 
-			p = { (::np::flt)line.Midpoint().x, (::np::flt)line.Midpoint().y };
-			//TODO: I'd rather combine the hashes from line.Begin() and line.End()
+			p = {(::np::flt)line.Midpoint().x, (::np::flt)line.Midpoint().y};
+			// TODO: I'd rather combine the hashes from line.Begin() and line.End()
 			return h;
 		}
 	};

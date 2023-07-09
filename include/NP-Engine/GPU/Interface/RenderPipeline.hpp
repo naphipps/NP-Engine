@@ -19,20 +19,18 @@ namespace np::gpu
 	class RenderPipeline : public Pipeline
 	{
 	public:
-
 		struct Properties
 		{
 			mem::sptr<Framebuffers> framebuffers;
 			mem::sptr<RenderShader> vertexShader;
 			mem::sptr<RenderShader> fragmentShader;
-			//TODO: I think we should be able to have more than one of each shader (maybe not the vertex shader...)
+			// TODO: I think we should be able to have more than one of each shader (maybe not the vertex shader...)
 		};
 
 	protected:
-
 		Properties _properties;
 
-		RenderPipeline(Properties& properties) : _properties(properties) {}
+		RenderPipeline(Properties& properties): _properties(properties) {}
 
 	public:
 		static mem::sptr<RenderPipeline> Create(Properties properties);
@@ -52,6 +50,6 @@ namespace np::gpu
 			return _properties.framebuffers->GetServices();
 		}
 	};
-}
+} // namespace np::gpu
 
 #endif /* NP_ENGINE_GPU_INTERFACE_RENDER_PIPELINE_HPP */

@@ -38,7 +38,8 @@ namespace np::gpu::__detail
 			return buffer;
 		}
 
-		static VkDeviceMemory CreateDeviceMemory(mem::sptr<VulkanLogicalDevice> device, VkBuffer buffer, VkMemoryPropertyFlags memory_property_flags)
+		static VkDeviceMemory CreateDeviceMemory(mem::sptr<VulkanLogicalDevice> device, VkBuffer buffer,
+												 VkMemoryPropertyFlags memory_property_flags)
 		{
 			VkDeviceMemory device_memory = nullptr;
 
@@ -48,7 +49,8 @@ namespace np::gpu::__detail
 			VkMemoryAllocateInfo allocate_info{};
 			allocate_info.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
 			allocate_info.allocationSize = requirements.size;
-			allocate_info.memoryTypeIndex = device->GetMemoryTypeIndex(requirements.memoryTypeBits, memory_property_flags).value();
+			allocate_info.memoryTypeIndex =
+				device->GetMemoryTypeIndex(requirements.memoryTypeBits, memory_property_flags).value();
 
 			if (vkAllocateMemory(*device, &allocate_info, nullptr, &device_memory) != VK_SUCCESS)
 				device_memory = nullptr;
@@ -67,7 +69,8 @@ namespace np::gpu::__detail
 			return info;
 		}
 
-		VulkanBuffer(mem::sptr<VulkanCommandPool> command_pool, VkBufferCreateInfo& buffer_create_info, VkMemoryPropertyFlags memory_property_flags):
+		VulkanBuffer(mem::sptr<VulkanCommandPool> command_pool, VkBufferCreateInfo& buffer_create_info,
+					 VkMemoryPropertyFlags memory_property_flags):
 			Buffer(),
 			_command_pool(command_pool),
 			_buffer(CreateBuffer(_command_pool->GetLogicalDevice(), buffer_create_info)),
@@ -109,7 +112,9 @@ namespace np::gpu::__detail
 			return _buffer;
 		}
 
-		VkResult AsyncCopyTo(VulkanBuffer& other, VkSubmitInfo& submit_info, con::vector<mem::sptr<VulkanCommandBuffer>>& command_buffers, mem::sptr<VulkanQueue> queue, VkFence fence = nullptr)
+		VkResult AsyncCopyTo(VulkanBuffer& other, VkSubmitInfo& submit_info,
+							 con::vector<mem::sptr<VulkanCommandBuffer>>& command_buffers, mem::sptr<VulkanQueue> queue,
+							 VkFence fence = nullptr)
 		{
 			VkBufferCopy buffer_copy{};
 			buffer_copy.size = _size;

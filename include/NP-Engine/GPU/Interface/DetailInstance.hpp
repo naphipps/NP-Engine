@@ -33,6 +33,6 @@ namespace np::gpu
 			return _services;
 		}
 	};
-}
+} // namespace np::gpu
 
 #endif /* NP_ENGINE_GPU_INTERFACE_DETAIL_INSTANCE_HPP */

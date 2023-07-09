@@ -56,7 +56,7 @@ namespace np::jsys
 	public:
 		void Push(JobPriority priority, mem::sptr<Job> job)
 		{
-			Push({ priority, job });
+			Push({priority, job});
 		}
 
 		void Push(JobRecord record)
@@ -88,6 +88,6 @@ namespace np::jsys
 			}
 		}
 	};
-}
+} // namespace np::jsys
 
 #endif /* NP_ENGINE_JOB_QUEUE_HPP */
