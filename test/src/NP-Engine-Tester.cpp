@@ -29,6 +29,10 @@
 		mem::AccumulatingAllocator<mem::RedBlackTreeAllocator> allocator;
 		mem::TraitAllocator::Register(allocator);
 		{
+#if NP_ENGINE_PLATFORM_IS_LINUX
+			mem::sptr<siz> x = mem::create_sptr<siz>(allocator); // TODO: linux still signals when this is not here - FIX
+#endif
+
 			NP_ENGINE_PROFILE_SCOPE("application lifespan");
 			mem::sptr<srvc::Services> services = mem::create_sptr<srvc::Services>(allocator);
 			mem::sptr<app::Application> application = mem::create_sptr<app::GameApp>(services->GetAllocator(), services);
