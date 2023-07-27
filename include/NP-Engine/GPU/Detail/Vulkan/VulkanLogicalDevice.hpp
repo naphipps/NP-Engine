@@ -17,6 +17,7 @@
 #include "NP-Engine/Vendor/VulkanInclude.hpp"
 
 #include "VulkanInstance.hpp"
+#include "VulkanPhysicalDevice.hpp"
 
 namespace np::gpu::__detail
 {
@@ -65,6 +66,13 @@ namespace np::gpu::__detail
 					info.queueCount = (ui32)queue_priorities.size();
 					info.pQueuePriorities = queue_priorities.data();
 				}
+
+				VkPhysicalDeviceCoherentMemoryFeaturesAMD enable_coherent_memory_amd{};
+				enable_coherent_memory_amd.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_COHERENT_MEMORY_FEATURES_AMD;
+				enable_coherent_memory_amd.deviceCoherentMemory = VK_TRUE;
+
+				if (VulkanPhysicalDevice::GetType(physical_device) == VulkanPhysicalDeviceType::Amd)
+					physical_features12.pNext = &enable_coherent_memory_amd;
 
 				VkDeviceCreateInfo device_info = CreateDeviceInfo();
 				device_info.pNext = &physical_features12;
