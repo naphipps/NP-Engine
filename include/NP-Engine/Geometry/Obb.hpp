@@ -25,11 +25,11 @@ namespace np::geom
 
 		virtual Point ApplyOrientation(const Point& point) const
 		{
-			Point pt = point - center;
+			Point pt = point - this->center;
 			::glm::vec4 t = {(flt)pt.x, (flt)pt.y, 0.f, 1.f};
 			t = ::glm::toMat4(orientation) * t;
 			pt = {(T)t.x, (T)t.y};
-			return pt + center;
+			return pt + this->center;
 		}
 
 		virtual con::array<Point, 4> GetCorners() const override
@@ -57,7 +57,7 @@ namespace np::geom
 			}
 
 			Aabb<2, T> aabb{};
-			aabb.center = center;
+			aabb.center = this->center;
 			aabb.halfLengths = max - min;
 			return aabb;
 		}
@@ -71,11 +71,11 @@ namespace np::geom
 
 		virtual Point ApplyOrientation(const Point& point) const
 		{
-			Point pt = point - center;
+			Point pt = point - this->center;
 			::glm::vec4 t = {(flt)pt.x, (flt)pt.y, (flt)pt.z, 1.f};
 			t = ::glm::toMat4(orientation) * t;
 			pt = {(T)t.x, (T)t.y, (T)t.z};
-			return pt + center;
+			return pt + this->center;
 		}
 
 		virtual con::array<Point, 8> GetCorners() const override
@@ -103,7 +103,7 @@ namespace np::geom
 			}
 
 			Aabb<3, T> aabb{};
-			aabb.center = center;
+			aabb.center = this->center;
 			aabb.halfLengths = max - min;
 			return aabb;
 		}
