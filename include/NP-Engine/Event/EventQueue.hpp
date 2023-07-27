@@ -36,7 +36,8 @@ namespace np::evnt
 		void ToggleState()
 		{
 			bl flag = _flag.load(mo_acquire);
-			while (!_flag.compare_exchange_weak(flag, !flag, mo_release, mo_relaxed)) {}
+			while (!_flag.compare_exchange_weak(flag, !flag, mo_release, mo_relaxed))
+			{}
 		}
 
 		void Push(mem::sptr<Event> e)
