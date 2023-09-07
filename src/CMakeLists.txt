@@ -460,8 +460,6 @@ set(NP_ENGINE_SOURCE_FILES
 
 add_library(${PROJECT_NAME} STATIC ${NP_ENGINE_SOURCE_FILES} ${NP_ENGINE_HEADER_FILES})
 
-find_package(RapidJSON REQUIRED) # TODO: cleanup this file, it's getting a little messy
-
 # TODO: I think we should make use of the cpp standard NDEBUG macro instead of DEBUG
 
 if (MSVC)
@@ -480,7 +478,6 @@ target_link_libraries(
 	EnTT::EnTT
 	glm
 	glfw
-	${RapidJSON_LIBRARY}
 	tinyobjloader
 	lodepng
 	stduuid
@@ -490,7 +487,7 @@ target_include_directories(
 	${PROJECT_NAME} PUBLIC
 	${PROJECT_SOURCE_DIR}/include
 	${Box2D_SOURCE_DIR}
-	${RapidJSON_INCLUDE_DIR}
+	${RapidJSON_SOURCE_DIR}/include
 	${stduuid_INCLUDE_DIR}
 )
 
