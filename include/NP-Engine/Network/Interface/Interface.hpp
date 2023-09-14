@@ -7,6 +7,8 @@
 #ifndef NP_ENGINE_NETWORK_INTERFACE_HPP
 #define NP_ENGINE_NETWORK_INTERFACE_HPP
 
+#include "NP-Engine/Foundation/Foundation.hpp"
+
 #include "Context.hpp"
 #include "DetailType.hpp"
 #include "Message.hpp"
