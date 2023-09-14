@@ -22,7 +22,7 @@ namespace np::net::__detail
 	{
 	protected:
 		ui64 _socket;
-		Protocol _protocol; //TODO: do we need this?? I admit, it makes things easier
+		Protocol _protocol; // TODO: do we need this?? I admit, it makes things easier
 		atm_bl _keep_receiving;
 
 		void SendBytes(const chr* src, siz byte_count)
@@ -112,7 +112,7 @@ namespace np::net::__detail
 		}
 
 	public:
-		NativeSocket(mem::sptr<Context> context) : Socket(context), _protocol(Protocol::None), _keep_receiving(false)
+		NativeSocket(mem::sptr<Context> context): Socket(context), _protocol(Protocol::None), _keep_receiving(false)
 		{
 			Close();
 		}
@@ -140,7 +140,7 @@ namespace np::net::__detail
 				proto = IPPROTO_TCP;
 				break;
 
-			case Protocol::Udp: //TODO: NOT IMPLEMENTED YET
+			case Protocol::Udp: // TODO: NOT IMPLEMENTED YET
 				af = AF_INET;
 				type = SOCK_DGRAM;
 				proto = IPPROTO_UDP;
@@ -237,7 +237,7 @@ namespace np::net::__detail
 					host->ipv4s.emplace(ipv4, port);
 					break;
 				}
-				case AF_INET6: //TODO: NOT IMPLEMENTED YET
+				case AF_INET6: // TODO: NOT IMPLEMENTED YET
 				{
 					Ipv6 ipv6;
 					mem::CopyBytes(ipv6.shorts.data(), &saddrin.sin_addr.s_addr, ipv6.shorts.size() * sizeof(ui16));
@@ -304,12 +304,12 @@ namespace np::net::__detail
 			return _keep_receiving.load(mo_release);
 		}
 
-		virtual void StopReceiving() override //TODO: implement
+		virtual void StopReceiving() override // TODO: implement
 		{
-			//TODO: this could affect Close()?
+			// TODO: this could affect Close()?
 			_keep_receiving.store(false, mo_release);
 		}
 	};
-}
+} // namespace np::net::__detail
 
 #endif /* NP_ENGINE_NETWORK_WINDOWS_SOCKET_HPP */

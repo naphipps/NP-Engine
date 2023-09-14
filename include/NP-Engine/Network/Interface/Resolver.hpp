@@ -32,6 +32,6 @@ namespace np::net
 
 		virtual Host GetHost(const Ip& ip) = 0;
 	};
-}
+} // namespace np::net
 
 #endif /* NP_ENGINE_NETWORK_INTERFACE_RESOVLER_HPP */

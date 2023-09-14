@@ -30,6 +30,6 @@ namespace np::net
 			ipv6s.clear();
 		}
 	};
-}
+} // namespace np::net
 
 #endif /* NP_ENGINE_NETWORK_INTERFACE_HOST_HPP */

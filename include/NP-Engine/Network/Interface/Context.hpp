@@ -35,6 +35,6 @@ namespace np::net
 			return _services;
 		}
 	};
-}
+} // namespace np::net
 
 #endif /* NP_ENGINE_NETWORK_INTERFACE_CONTEXT_HPP */

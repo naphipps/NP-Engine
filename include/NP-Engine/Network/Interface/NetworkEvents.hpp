@@ -21,7 +21,7 @@ namespace np::net
 	class NetworkEvent : public evnt::Event
 	{
 	protected:
-		NetworkEvent() : evnt::Event() {}
+		NetworkEvent(): evnt::Event() {}
 
 	public:
 		virtual ~NetworkEvent()
@@ -45,7 +45,7 @@ namespace np::net
 		}
 	};
 
-	//Network Client Event
+	// Network Client Event
 	struct NetworkClientEventData
 	{
 		mem::sptr<Host> host;
@@ -55,9 +55,9 @@ namespace np::net
 	class NetworkClientEvent : public NetworkEvent<NetworkClientEventData>
 	{
 	public:
-		NetworkClientEvent(mem::sptr<Host> host, mem::sptr<Socket> socket) : NetworkEvent<NetworkClientEventData>()
+		NetworkClientEvent(mem::sptr<Host> host, mem::sptr<Socket> socket): NetworkEvent<NetworkClientEventData>()
 		{
-			ConstructData<NetworkClientEventData>(NetworkClientEventData{ host, socket });
+			ConstructData<NetworkClientEventData>(NetworkClientEventData{host, socket});
 		}
 
 		evnt::EventType GetType() const override
@@ -65,6 +65,6 @@ namespace np::net
 			return evnt::EventType::NetworkClient;
 		}
 	};
-}
+} // namespace np::net
 
 #endif /* NP_ENGINE_NETWORK_INTERFACE_EVENTS_HPP */

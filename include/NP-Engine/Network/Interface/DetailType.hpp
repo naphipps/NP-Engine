@@ -11,13 +11,13 @@
 
 namespace np::net
 {
-    enum class DetailType : ui32
-    {
-        None = 0,
-        Native,
+	enum class DetailType : ui32
+	{
+		None = 0,
+		Native,
 
-        Max
-    };
-}
+		Max
+	};
+} // namespace np::net
 
 #endif /* NP_ENGINE_NETWORK_INTERFACE_DETAIL_TYPE_HPP */

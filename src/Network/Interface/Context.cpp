@@ -28,4 +28,4 @@ namespace np::net
 
 		return context;
 	}
-}
+} // namespace np::net

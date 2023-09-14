@@ -28,4 +28,4 @@ namespace np::net
 
 		return socket;
 	}
-}
+} // namespace np::net

@@ -11,7 +11,7 @@
 #define NP_ENGINE_NETWORK_SOCKET_HANDLE_INVALID_GENERATION 0
 
 #ifndef NP_ENGINE_NETWORK_SOCKET_RECEIVING_SLEEP_DURATION
-    #define NP_ENGINE_NETWORK_SOCKET_RECEIVING_SLEEP_DURATION 4
+	#define NP_ENGINE_NETWORK_SOCKET_RECEIVING_SLEEP_DURATION 4
 #endif
 
 #include "NP-Engine/Services/Services.hpp"
@@ -25,97 +25,95 @@
 
 namespace np::net
 {
-    class Socket
-    {
-    protected:
-        mem::sptr<Context> _context;
-        MessageQueue _inbox;
-        mutexed_wrapper<con::queue<Message>> _outbox;
-        
-        virtual void DetailSend(Message msg) = 0;
+	class Socket
+	{
+	protected:
+		mem::sptr<Context> _context;
+		MessageQueue _inbox;
+		mutexed_wrapper<con::queue<Message>> _outbox;
 
-        Socket(mem::sptr<Context> context) : 
-            _context(context)
-        {}
+		virtual void DetailSend(Message msg) = 0;
 
-    public:
-        static mem::sptr<Socket> Create(mem::sptr<Context> context);
+		Socket(mem::sptr<Context> context): _context(context) {}
 
-        //TODO: add Create functions accepting Ip addresses 
+	public:
+		static mem::sptr<Socket> Create(mem::sptr<Context> context);
 
-        virtual ~Socket() = default;
+		// TODO: add Create functions accepting Ip addresses
 
-        operator bl() const
-        {
-            return IsOpen();
-        }
+		virtual ~Socket() = default;
 
-        virtual void Open(Protocol protocol) = 0;
+		operator bl() const
+		{
+			return IsOpen();
+		}
 
-        virtual void Close() = 0;
+		virtual void Open(Protocol protocol) = 0;
 
-        virtual bl IsOpen() const = 0;
+		virtual void Close() = 0;
 
-        virtual void BindTo(const Ip& ip, ui16 port) = 0;
+		virtual bl IsOpen() const = 0;
 
-        virtual void Listen() = 0;
+		virtual void BindTo(const Ip& ip, ui16 port) = 0;
 
-        virtual mem::sptr<Socket> Accept(bl enable_client_resolution = false) = 0;
+		virtual void Listen() = 0;
 
-        virtual void ConnectTo(const Ip& ip, ui16 port) = 0;
+		virtual mem::sptr<Socket> Accept(bl enable_client_resolution = false) = 0;
 
-        void Send(Message msg)
-        {
-            if (CanSend(msg))
-                DetailSend(msg);
-        }
+		virtual void ConnectTo(const Ip& ip, ui16 port) = 0;
 
-        virtual bl CanSend(const Message& msg) const
-        {
-            bl can = true;
+		void Send(Message msg)
+		{
+			if (CanSend(msg))
+				DetailSend(msg);
+		}
 
-            NP_ENGINE_ASSERT(msg.header.bodySize <= NP_ENGINE_NETWORK_MAX_MESSAGE_BODY_SIZE,
-                "Message.header.bodySize is larger than " + to_str(NP_ENGINE_NETWORK_MAX_MESSAGE_BODY_SIZE));
+		virtual bl CanSend(const Message& msg) const
+		{
+			bl can = true;
 
-            if (msg.header.bodySize > NP_ENGINE_NETWORK_MAX_MESSAGE_BODY_SIZE)
-                can = false;
+			NP_ENGINE_ASSERT(msg.header.bodySize <= NP_ENGINE_NETWORK_MAX_MESSAGE_BODY_SIZE,
+							 "Message.header.bodySize is larger than " + to_str(NP_ENGINE_NETWORK_MAX_MESSAGE_BODY_SIZE));
 
-            //TODO: I think we can improve our message validation for sending
-            //TODO: check msg body size, etc
-            return can;
-        }
+			if (msg.header.bodySize > NP_ENGINE_NETWORK_MAX_MESSAGE_BODY_SIZE)
+				can = false;
 
-        virtual void StartReceiving() = 0;
+			// TODO: I think we can improve our message validation for sending
+			// TODO: check msg body size, etc
+			return can;
+		}
 
-        virtual bl IsRecieving() const = 0;
+		virtual void StartReceiving() = 0;
 
-        virtual void StopReceiving() = 0;
+		virtual bl IsRecieving() const = 0;
 
-        virtual MessageQueue& GetInbox()
-        {
-            return _inbox;
-        }
+		virtual void StopReceiving() = 0;
 
-        virtual const MessageQueue& GetInbox() const
-        {
-            return _inbox;
-        }
+		virtual MessageQueue& GetInbox()
+		{
+			return _inbox;
+		}
 
-        virtual DetailType GetDetailType() const
-        {
-            return _context->GetDetailType();
-        }
+		virtual const MessageQueue& GetInbox() const
+		{
+			return _inbox;
+		}
 
-        virtual mem::sptr<Context> GetContext() const
-        {
-            return _context;
-        }
+		virtual DetailType GetDetailType() const
+		{
+			return _context->GetDetailType();
+		}
 
-        virtual mem::sptr<srvc::Services> GetServices() const
-        {
-            return _context->GetServices();
-        }
-    };
-}
+		virtual mem::sptr<Context> GetContext() const
+		{
+			return _context;
+		}
+
+		virtual mem::sptr<srvc::Services> GetServices() const
+		{
+			return _context->GetServices();
+		}
+	};
+} // namespace np::net
 
 #endif /* NP_ENGINE_NETWORK_INTERFACE_SOCKET_HPP */

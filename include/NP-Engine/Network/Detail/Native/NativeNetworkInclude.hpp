@@ -23,7 +23,7 @@
 	#undef min
 
 #else
-	#error //TODO: implement native networking
+	#error // TODO: implement native networking
 
 #endif
 

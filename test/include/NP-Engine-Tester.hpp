@@ -36,7 +36,6 @@ namespace np::app
 		mutexed_wrapper<con::vector<mem::sptr<net::Socket>>> _clients;
 		tim::SteadyTimestamp _clients_send_msg_timestamp;
 
-
 		static void LogSubmitKeyState(void*, const nput::KeyCodeState&)
 		{
 			NP_ENGINE_LOG_INFO("key code callback");
@@ -504,7 +503,7 @@ namespace np::app
 			if (client)
 			{
 				client->Open(net::Protocol::Tcp);
-				client->ConnectTo(net::Ipv4{ 127, 0, 0, 1 }, 55555);
+				client->ConnectTo(net::Ipv4{127, 0, 0, 1}, 55555);
 			}
 
 			if (client)
@@ -565,7 +564,7 @@ namespace np::app
 
 			_server = net::Socket::Create(_network_context);
 			_server->Open(net::Protocol::Tcp);
-			_server->BindTo(net::Ipv4{ 127, 0, 0, 1 }, 55555);
+			_server->BindTo(net::Ipv4{127, 0, 0, 1}, 55555);
 			_server->Listen();
 			SubmitServerAcceptClientJob();
 
@@ -653,7 +652,7 @@ namespace np::app
 			}
 
 			{
-				//TODO: cleanup our _server_clients and _clients
+				// TODO: cleanup our _server_clients and _clients
 			}
 		}
 

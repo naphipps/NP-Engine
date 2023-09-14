@@ -19,13 +19,13 @@ namespace np::net::__detail
 	class NativeContext : public Context
 	{
 	public:
-		NativeContext(mem::sptr<srvc::Services> services) : Context(services) {}
+		NativeContext(mem::sptr<srvc::Services> services): Context(services) {}
 
 		virtual DetailType GetDetailType() const override
 		{
 			return DetailType::Native;
 		}
 	};
-}
+} // namespace np::net::__detail
 
 #endif /* NP_ENGINE_NETWORK_CONTEXT_HPP */

@@ -11,15 +11,15 @@
 
 namespace np::net
 {
-    enum class Protocol : ui32
-    {
-        None = 0,
-        Udp,
-        Tcp,
-        Http,
+	enum class Protocol : ui32
+	{
+		None = 0,
+		Udp,
+		Tcp,
+		Http,
 
-        Max
-    };
-}
+		Max
+	};
+} // namespace np::net
 
 #endif /* NP_ENGINE_NETWORK_INTERFACE_PROTOCOL_HPP */

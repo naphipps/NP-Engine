@@ -53,7 +53,7 @@ namespace np::sys
 
 	static inline void Init()
 	{
-		nsit::Log::Init(); //log needs to be primed
+		nsit::Log::Init(); // log needs to be primed
 
 		if (__detail::InitialWorkingDir.empty())
 			__detail::InitialWorkingDir = fsys::GetCurrentPath();

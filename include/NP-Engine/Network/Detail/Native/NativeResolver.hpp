@@ -18,13 +18,13 @@ namespace np::net::__detail
 	class NativeResolver : public Resolver
 	{
 	public:
-		NativeResolver(mem::sptr<Context> context) : Resolver(context) {}
+		NativeResolver(mem::sptr<Context> context): Resolver(context) {}
 
 		virtual Host GetHost(str name) override
 		{
 			Host host;
 			host.name = name;
-			
+
 			addrinfo hints{};
 			hints.ai_flags = AI_CANONNAME;
 
@@ -49,7 +49,7 @@ namespace np::net::__detail
 						host.ipv4s.emplace(ipv4, port);
 						break;
 					}
-					case AF_INET6: //TODO: NOT IMPLEMENTEDD YET
+					case AF_INET6: // TODO: NOT IMPLEMENTEDD YET
 					{
 						break;
 					}
@@ -87,7 +87,7 @@ namespace np::net::__detail
 				res = getnameinfo((SOCKADDR*)&saddrin, sizeof(sockaddr_in), name, NI_MAXHOST, nullptr, 0, 0);
 				break;
 			}
-			case IpType::V6: //TODO: NOT IMPLEMENTEDD YET
+			case IpType::V6: // TODO: NOT IMPLEMENTEDD YET
 			{
 				break;
 			}
@@ -97,11 +97,11 @@ namespace np::net::__detail
 
 			if (!res)
 				host.name = name;
-			
+
 			host.aliases.emplace(host.name);
 			return host;
 		}
 	};
-}
+} // namespace np::net::__detail
 
 #endif /* NP_ENGINE_NETWORK_WINDOWS_RESOLVER_HPP */

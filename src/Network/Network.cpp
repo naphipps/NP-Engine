@@ -25,10 +25,10 @@ namespace np::net
 			NP_ENGINE_ASSERT(err == 0, "NativeContext err on WSAStartup: " + to_str(err));
 
 			NP_ENGINE_ASSERT(LOBYTE(wsa_data.wVersion) == 2 || HIBYTE(wsa_data.wVersion) == 2,
-				"NativeContext err with WSAStartup: Found winsock " + to_str(wsa_data.wVersion) +
-				" when expecting " + to_str(expected_version));
+							 "NativeContext err with WSAStartup: Found winsock " + to_str(wsa_data.wVersion) +
+								 " when expecting " + to_str(expected_version));
 #else
-#error //TODO: implement native networking
+	#error // TODO: implement native networking
 #endif
 			break;
 		}
@@ -45,7 +45,7 @@ namespace np::net
 		{
 #if NP_ENGINE_PLATFORM_IS_WINDOWS
 #else
-#error //TODO: implement native networking
+	#error // TODO: implement native networking
 #endif
 			break;
 		}
@@ -63,7 +63,7 @@ namespace np::net
 #if NP_ENGINE_PLATFORM_IS_WINDOWS
 			WSACleanup();
 #else
-#error //TODO: implement native networking
+	#error // TODO: implement native networking
 #endif
 			break;
 		}
@@ -71,4 +71,4 @@ namespace np::net
 			break;
 		}
 	}
-}
+} // namespace np::net

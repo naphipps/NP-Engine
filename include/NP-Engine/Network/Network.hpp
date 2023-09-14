@@ -13,11 +13,11 @@
 
 namespace np::net
 {
-    void Init(DetailType detail_type);
+	void Init(DetailType detail_type);
 
-    void Terminate(DetailType detail_type);
+	void Terminate(DetailType detail_type);
 
-    void Update(DetailType detail_type);
-}
+	void Update(DetailType detail_type);
+} // namespace np::net
 
 #endif /* NP_ENGINE_NETWORK_HPP */

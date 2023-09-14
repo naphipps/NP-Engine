@@ -29,4 +29,4 @@ namespace np::net
 		return resolver;
 	}
 
-}
+} // namespace np::net
