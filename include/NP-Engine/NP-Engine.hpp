@@ -19,6 +19,7 @@
 #include "Insight/Insight.hpp"
 #include "JobSystem/JobSystem.hpp"
 #include "Math/Math.hpp"
+#include "Network/Network.hpp"
 #include "Noise/Noise.hpp"
 #include "Physics/Physics.hpp"
 #include "Platform/Platform.hpp"

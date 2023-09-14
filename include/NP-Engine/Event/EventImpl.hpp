@@ -35,6 +35,8 @@ namespace np::evnt
 		WindowSetMaximize,
 		WindowMaximize,
 
+		NetworkClient,
+
 		Max
 	};
 
@@ -52,6 +54,7 @@ namespace np::evnt
 		Application = BIT(0),
 		Window = BIT(1),
 		Gpu = BIT(2),
+		Network = BIT(3),
 		All = ~((ui64)0)
 	};
 

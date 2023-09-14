@@ -30,6 +30,13 @@ namespace np::app
 		tim::SteadyTimestamp _start_timestamp;
 		flt _rate = 5.f; // units per second
 
+		mem::sptr<net::Context> _network_context;
+		mem::sptr<net::Socket> _server;
+		mutexed_wrapper<con::vector<mem::sptr<net::Socket>>> _server_clients;
+		mutexed_wrapper<con::vector<mem::sptr<net::Socket>>> _clients;
+		tim::SteadyTimestamp _clients_send_msg_timestamp;
+
+
 		static void LogSubmitKeyState(void*, const nput::KeyCodeState&)
 		{
 			NP_ENGINE_LOG_INFO("key code callback");
@@ -124,12 +131,56 @@ namespace np::app
 			_services->GetJobSystem().SubmitJob(jsys::JobPriority::Higher, adjust_job);
 		}
 
+		void AdjustForApplicationClose(mem::sptr<evnt::Event> e)
+		{
+			ServerCloseClients();
+		}
+
+		void HandleNetworkClient(mem::sptr<evnt::Event> e)
+		{
+			net::NetworkClientEvent& client_event = (net::NetworkClientEvent&)*e;
+			net::NetworkClientEventData& client_data = client_event.GetData();
+
+			str name = "UNKNOWN";
+			if (client_data.host)
+			{
+				if (client_data.host->name != "")
+					name = client_data.host->name;
+				else if (!client_data.host->ipv4s.empty())
+					name = to_str(client_data.host->ipv4s.begin()->first);
+				else if (!client_data.host->ipv6s.empty())
+					name = to_str(client_data.host->ipv6s.begin()->first);
+			}
+
+			if (client_data.socket && *client_data.socket)
+			{
+				NP_ENGINE_LOG_INFO("server accepted: " + name);
+
+				_server_clients.get_access()->emplace_back(client_data.socket);
+				client_data.socket->StartReceiving();
+			}
+			else
+			{
+				NP_ENGINE_LOG_INFO("server denied: " + name);
+			}
+
+			e->SetHandled();
+		}
+
 		void HandleEvent(mem::sptr<evnt::Event> e) override
 		{
 			switch (e->GetType())
 			{
+			case evnt::EventType::ApplicationClose:
+				AdjustForApplicationClose(e);
+				break;
+
 			case evnt::EventType::WindowClosing:
 				AdjustForWindowClosing(e);
+				break;
+
+			case evnt::EventType::NetworkClient:
+				HandleNetworkClient(e);
 				break;
 
 			default:
@@ -416,6 +467,57 @@ namespace np::app
 			_prev_mouse_position = mouse_position;
 		}
 
+		static void ServerAcceptClientCallback(void* caller, mem::Delegate& d)
+		{
+			((GameLayer*)caller)->_server->Accept(true);
+		}
+
+		void SubmitServerAcceptClientJob()
+		{
+			mem::sptr<jsys::Job> job = _services->GetJobSystem().CreateJob();
+			job->GetDelegate().SetCallback(this, ServerAcceptClientCallback);
+			_services->GetJobSystem().SubmitJob(jsys::JobPriority::Higher, job);
+		}
+
+		void StopServerReceiving()
+		{
+			auto clients = _server_clients.get_access();
+			for (auto c = clients->begin(); c != clients->end(); c++)
+				(*c)->StopReceiving();
+		}
+
+		void ServerCloseClients()
+		{
+			auto clients = _server_clients.get_access();
+			for (auto c = clients->begin(); c != clients->end(); c++)
+				(*c)->Close();
+		}
+
+		static void ClientConnectToServerCallback(void* caller, mem::Delegate& d)
+		{
+			((GameLayer*)caller)->ClientConnectToServerProcedure();
+		}
+
+		void ClientConnectToServerProcedure()
+		{
+			mem::sptr<net::Socket> client = net::Socket::Create(_network_context);
+			if (client)
+			{
+				client->Open(net::Protocol::Tcp);
+				client->ConnectTo(net::Ipv4{ 127, 0, 0, 1 }, 55555);
+			}
+
+			if (client)
+				_clients.get_access()->emplace_back(client);
+		}
+
+		void SubmitClientConnectToServerJob()
+		{
+			mem::sptr<jsys::Job> job = _services->GetJobSystem().CreateJob();
+			job->GetDelegate().SetCallback(this, ClientConnectToServerCallback);
+			_services->GetJobSystem().SubmitJob(jsys::JobPriority::Higher, job);
+		}
+
 	public:
 		GameLayer(mem::sptr<srvc::Services> services, WindowLayer& window_layer):
 			Layer(services),
@@ -429,8 +531,12 @@ namespace np::app
 				fsys::Append(fsys::Append(fsys::Append(NP_ENGINE_WORKING_DIR, "test"), "assets"), "viking_room.png")),
 			_model(mem::create_sptr<gpu::Model>(_services->GetAllocator(), _model_filename, _model_texture_filename, true)),
 			_model_handle(nullptr),
-			_start_timestamp(tim::SteadyClock::now())
+			_start_timestamp(tim::SteadyClock::now()),
+			_network_context(net::Context::Create(net::DetailType::Native, _services)),
+			_clients_send_msg_timestamp(tim::SteadyClock::now())
 		{
+			net::Init(net::DetailType::Native);
+
 			geom::Transform& transform = _model->GetTransform();
 
 			transform.position = {0.f, 0.f, 0.f};
@@ -454,6 +560,25 @@ namespace np::app
 
 			if (_window)
 				SubmitCreateSceneJob();
+
+			//-----------------------------------------------------------
+
+			_server = net::Socket::Create(_network_context);
+			_server->Open(net::Protocol::Tcp);
+			_server->BindTo(net::Ipv4{ 127, 0, 0, 1 }, 55555);
+			_server->Listen();
+			SubmitServerAcceptClientJob();
+
+			//-----------------------------------------------------------
+
+			SubmitClientConnectToServerJob();
+		}
+
+		~GameLayer()
+		{
+			ServerCloseClients();
+
+			net::Terminate(net::DetailType::Native);
 		}
 
 		void Update(tim::DblMilliseconds time_delta) override
@@ -474,6 +599,49 @@ namespace np::app
 				if (scene && *scene)
 					(*scene)->Render();
 			}
+
+			{
+				auto clients = _server_clients.get_access();
+				for (auto c = clients->begin(); c != clients->end(); c++)
+				{
+					net::MessageQueue& inbox = (*c)->GetInbox();
+					inbox.ToggleState();
+					for (net::Message msg = inbox.Pop(); msg; msg = inbox.Pop())
+					{
+						switch (msg.header.type)
+						{
+						case net::MessageType::Text:
+						{
+							net::TextMessageBody& text = (net::TextMessageBody&)*msg.body;
+							::std::stringstream ss;
+							ss << thr::ThisThread::get_id();
+							NP_ENGINE_LOG_INFO("Server received(" + str(ss.str()) + "):\n" + text.content);
+							break;
+						}
+						default:
+							break;
+						}
+					}
+				}
+			}
+
+			tim::SteadyTimestamp now = tim::SteadyClock::now();
+			if (now - _clients_send_msg_timestamp > tim::DblMilliseconds(1000))
+			{
+				_clients_send_msg_timestamp = now;
+				auto clients = _clients.get_access();
+
+				for (auto c = clients->begin(); c != clients->end(); c++)
+				{
+					net::Message msg;
+					msg.header.type = net::MessageType::Text;
+					msg.body = mem::create_sptr<net::TextMessageBody>(_services->GetAllocator());
+					net::TextMessageBody& msg_body = (net::TextMessageBody&)*msg.body;
+					msg_body.content = "Hello Server!\n\t- client: " + to_str((siz)mem::AddressOf(**c)) + " <3";
+					msg.header.bodySize = msg_body.content.size();
+					(*c)->Send(msg);
+				}
+			}
 		}
 
 		void Cleanup() override
@@ -482,6 +650,10 @@ namespace np::app
 				auto scene = _scene.get_access();
 				if (scene && *scene)
 					(*scene)->CleanupVisibles();
+			}
+
+			{
+				//TODO: cleanup our _server_clients and _clients
 			}
 		}
 

@@ -232,6 +232,32 @@ set(NP_ENGINE_MEMORY_HPP
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Memory/BookkeepingAllocator.hpp
 )
 
+set(NP_ENGINE_NETWORK_HPP
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Network/Network.hpp
+)
+
+set(NP_ENGINE_NETWORK_INTERFACE_HPP
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Network/Interface/Interface.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Network/Interface/DetailType.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Network/Interface/NetworkEvents.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Network/Interface/Context.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Network/Interface/Socket.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Network/Interface/Message.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Network/Interface/MessageQueue.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Network/Interface/Resolver.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Network/Interface/Ip.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Network/Interface/Host.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Network/Interface/Protocol.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Network/Interface/Resolver.hpp
+)
+
+set(NP_ENGINE_NETWORK_NATIVE_HPP
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Network/Detail/Native/NativeContext.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Network/Detail/Native/NativeSocket.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Network/Detail/Native/NativeResolver.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Network/Detail/Native/NativeNetworkInclude.hpp
+)
+
 set(NP_ENGINE_NOISE_HPP
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Noise/Noise.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Noise/Perlin.hpp
@@ -346,6 +372,9 @@ set(NP_ENGINE_HEADER_FILES
 	${NP_ENGINE_JOBSYSTEM_HPP}
 	${NP_ENGINE_MATH_HPP}
 	${NP_ENGINE_MEMORY_HPP}
+	${NP_ENGINE_NETWORK_HPP}
+	${NP_ENGINE_NETWORK_INTERFACE_HPP}
+	${NP_ENGINE_NETWORK_NATIVE_HPP}
 	${NP_ENGINE_NOISE_HPP}
 	${NP_ENGINE_HPP}
 	${NP_ENGINE_PHYSICS_HPP}
@@ -420,6 +449,15 @@ set(NP_ENGINE_MEMORY_CPP
 	Memory/TraitAllocator.cpp
 )
 
+set(NP_ENGINE_NETWORK_CPP
+	Network/Network.cpp
+)
+
+set(NP_ENGINE_NETWORK_INTERFACE_CPP
+	Network/Interface/Context.cpp
+	Network/Interface/Socket.cpp
+	Network/Interface/Resolver.cpp
+)
 
 set(NP_ENGINE_PHYSICS_CPP
 	Physics/ParticleSystem.cpp
@@ -451,6 +489,8 @@ set(NP_ENGINE_SOURCE_FILES
 	${NP_ENGINE_GPU_OPENGL_CPP}
 	${NP_ENGINE_GPU_VULKAN_CPP}
 	${NP_ENGINE_GPU_VULKAN_SHADERS_GLSL}
+	${NP_ENGINE_NETWORK_CPP}
+	${NP_ENGINE_NETWORK_INTERFACE_CPP}
 	${NP_ENGINE_APPPLICATION_CPP}
 	${NP_ENGINE_SYSTEM_CPP}
 )
@@ -513,7 +553,10 @@ elseif (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 	endif()
 elseif(MSVC)
 	file(TO_NATIVE_PATH "$ENV{ALLUSERSPROFILE}/NP-Engine" NP_ENGINE_WORKING_DIR)
-	target_link_libraries(${PROJECT_NAME} PUBLIC "dwmapi.lib")
+	target_link_libraries(${PROJECT_NAME} PUBLIC 
+		"dwmapi.lib"
+		"Ws2_32.lib"
+	)
 endif()
 
 find_package(Vulkan REQUIRED FATAL_ERROR)
@@ -577,6 +620,9 @@ source_group(Insight FILES ${NP_ENGINE_INSIGHT_HPP} ${NP_ENGINE_INSIGHT_CPP})
 source_group(JobSystem FILES ${NP_ENGINE_JOBSYSTEM_HPP})
 source_group(Math FILES ${NP_ENGINE_MATH_HPP} ${NP_ENGINE_MATH_CPP})
 source_group(Memory FILES ${NP_ENGINE_MEMORY_HPP} ${NP_ENGINE_MEMORY_CPP})
+source_group(Network FILES ${NP_ENGINE_NETWORK_HPP} ${NP_ENGINE_NETWORK_CPP})
+source_group(Network/Interface FILES ${NP_ENGINE_NETWORK_INTERFACE_HPP} ${NP_ENGINE_NETWORK_INTERFACE_CPP})
+source_group(Network/Detail/Native FILES ${NP_ENGINE_NETWORK_NATIVE_HPP})
 source_group(Noise FILES ${NP_ENGINE_NOISE_HPP})
 source_group(Physics FILES ${NP_ENGINE_PHYSICS_HPP} ${NP_ENGINE_PHYSICS_CPP})
 source_group(Platform FILES ${NP_ENGINE_PLATFORM_HPP})
