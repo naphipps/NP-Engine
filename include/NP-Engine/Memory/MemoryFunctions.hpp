@@ -44,6 +44,14 @@ namespace np::mem
 		for (siz i = 0; i < loops; i++, dst_it++, src_it++)
 			*dst_it = *src_it;
 	}
+
+	constexpr void ReverseBytes(void* dst, const void* src, siz byte_count)
+	{
+		ui8* dst_it = (ui8*)dst + byte_count - 1;
+		ui8* src_it = (ui8*)src;
+		for (siz i = 0; i < byte_count; i++, dst_it--, src_it++)
+			*dst_it = *src_it;
+	}
 } // namespace np::mem
 
 #endif /* NP_ENGINE_MEMORY_FUNCTIONS_HPP */
