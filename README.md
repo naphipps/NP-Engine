@@ -7,7 +7,7 @@ This game engine started out as my first video game, but since the project kept 
 - Goals/Features/Baseline of this engine:
 	- [x] Detailed memory management. (I aim to use vendors that I can pipe memory management through my own stuff.)
 	- [ ] Vulkan rendering - **currently under heavy construction.** (OpenGL and DX11/DX12 _probably much_ later as means to improve our API).
-	- [x] Support for Windows and Linux (latest Ubunutu). Official support for Apple is deferred.
+	- [x] Support for Windows and Linux (latest Debian). Official support for Apple is deferred.
 	- [x] ECS via [Entt](https://github.com/skypjack/entt)
 		- [ ] I am seriously considering forking Entt to force it support my own containers, which all use my memory management.
 	- [ ] 2D Physics via [Box2D](https://github.com/erincatto/box2d) with [liquidfun's](https://github.com/google/liquidfun) particle physics.
