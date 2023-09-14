@@ -113,10 +113,79 @@ namespace np
 		return str(c);
 	}
 
-	template <class T>
-	static str to_str(T t)
+	static str to_str(ui8 n)
 	{
-		return ::std::to_string(t);
+		return ::std::to_string(n);
+	}
+
+	static str to_str(ui16 n)
+	{
+		return ::std::to_string(n);
+	}
+
+	static str to_str(ui32 n)
+	{
+		return ::std::to_string(n);
+	}
+
+	static str to_str(ui64 n)
+	{
+		return ::std::to_string(n);
+	}
+
+	static str to_str(i8 n)
+	{
+		return ::std::to_string(n);
+	}
+
+	static str to_str(i16 n)
+	{
+		return ::std::to_string(n);
+	}
+
+	static str to_str(i32 n)
+	{
+		return ::std::to_string(n);
+	}
+
+	static str to_str(i64 n)
+	{
+		return ::std::to_string(n);
+	}
+
+	static str to_str(bl b)
+	{
+		return ::std::to_string(b);
+	}
+
+	static str to_str(flt n)
+	{
+		return ::std::to_string(n);
+	}
+
+	static str to_str(dbl n)
+	{
+		return ::std::to_string(n);
+	}
+
+	static str to_str(chr c)
+	{
+		return ::std::to_string(c);
+	}
+
+	static str to_str(wchr c)
+	{
+		return ::std::to_string(c);
+	}
+
+	static str to_str(chr16 c)
+	{
+		return ::std::to_string(c);
+	}
+
+	static str to_str(chr32 c)
+	{
+		return ::std::to_string(c);
 	}
 } // namespace np
 
