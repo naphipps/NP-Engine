@@ -7,6 +7,8 @@
 #ifndef NP_ENGINE_GPU_INTERFACE_HPP
 #define NP_ENGINE_GPU_INTERFACE_HPP
 
+#include "NP-Engine/Foundation/Foundation.hpp"
+
 #include "Buffer.hpp"
 #include "Camera.hpp"
 #include "Color.hpp"
