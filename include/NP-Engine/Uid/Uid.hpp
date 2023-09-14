@@ -195,7 +195,7 @@ namespace np::uid
 			_pool.Clear();
 		}
 
-		mem::sptr<UidHandle> CreateUidHandle()
+		mem::sptr<UidHandle> CreateUid()
 		{
 			auto bookkeeping = _bookkeeping.get_access();
 			mem::sptr<UidHandle> hndl = nullptr;

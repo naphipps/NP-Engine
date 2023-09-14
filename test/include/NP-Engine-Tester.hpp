@@ -253,7 +253,7 @@ namespace np::app
 			auto scene = _scene.get_access();
 			*scene = gpu::Scene::Create(scene_properties);
 
-			_model_handle = _services->GetUidSystem().CreateUidHandle();
+			_model_handle = _services->GetUidSystem().CreateUid();
 			uid::Uid model_id = _services->GetUidSystem().GetUid(_model_handle);
 			mem::sptr<gpu::VisibleObject> model_visible = mem::create_sptr<gpu::VisibleObject>(_services->GetAllocator());
 
@@ -522,7 +522,7 @@ namespace np::app
 		GameLayer(mem::sptr<srvc::Services> services, WindowLayer& window_layer):
 			Layer(services),
 			_window_layer(window_layer),
-			_window_id_handle(_services->GetUidSystem().CreateUidHandle()),
+			_window_id_handle(_services->GetUidSystem().CreateUid()),
 			_window(_window_layer.Create(win::DetailType::Glfw, _services->GetUidSystem().GetUid(_window_id_handle))),
 			_scene(nullptr),
 			_model_filename(
