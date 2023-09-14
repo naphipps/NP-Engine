@@ -7,13 +7,14 @@
 #ifndef NP_ENGINE_NETWORK_INTERFACE_MESSAGE_HPP
 #define NP_ENGINE_NETWORK_INTERFACE_MESSAGE_HPP
 
-#ifndef NP_ENGINE_MAX_MESSAGE_BODY_SIZE
-    #define NP_ENGINE_MAX_MESSAGE_BODY_SIZE MEGABYTE_SIZE
+#ifndef NP_ENGINE_NETWORK_MAX_MESSAGE_BODY_SIZE
+    #define NP_ENGINE_NETWORK_MAX_MESSAGE_BODY_SIZE MEBIBYTE_SIZE
 #endif
 
 #include "NP-Engine/Primitive/Primitive.hpp"
 #include "NP-Engine/Memory/Memory.hpp"
 #include "NP-Engine/String/String.hpp"
+#include "NP-Engine/Math/Math.hpp"
 
 #include "NP-Engine/Vendor/RapidJsonInclude.hpp"
 
@@ -72,7 +73,7 @@ namespace np::net
 
         virtual void SetSize(siz size) override
         {
-            blob.resize(size);
+            blob.resize(::std::min(size, NP_ENGINE_NETWORK_MAX_MESSAGE_BODY_SIZE));
         }
     };
 
@@ -87,7 +88,7 @@ namespace np::net
 
         virtual void SetSize(siz size) override
         {
-            content.resize(size);
+            content.resize(::std::min(size, NP_ENGINE_NETWORK_MAX_MESSAGE_BODY_SIZE));
         }
     };
 

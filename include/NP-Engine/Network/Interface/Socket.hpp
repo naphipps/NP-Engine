@@ -72,9 +72,17 @@ namespace np::net
 
         virtual bl CanSend(const Message& msg) const
         {
+            bl can = true;
+
+            NP_ENGINE_ASSERT(msg.header.bodySize <= NP_ENGINE_NETWORK_MAX_MESSAGE_BODY_SIZE,
+                "Message.header.bodySize is larger than " + to_str(NP_ENGINE_NETWORK_MAX_MESSAGE_BODY_SIZE));
+
+            if (msg.header.bodySize > NP_ENGINE_NETWORK_MAX_MESSAGE_BODY_SIZE)
+                can = false;
+
             //TODO: I think we can improve our message validation for sending
             //TODO: check msg body size, etc
-            return true;
+            return can;
         }
 
         virtual void StartReceiving() = 0;
