@@ -7,11 +7,12 @@
 #ifndef NP_ENGINE_GLFW_WINDOW_HPP
 #define NP_ENGINE_GLFW_WINDOW_HPP
 
+#include "NP-Engine/Foundation/Foundation.hpp"
+
 #if NP_ENGINE_PLATFORM_IS_WINDOWS
 	#include <dwmapi.h>
 #endif
 
-#include "NP-Engine/Foundation/Foundation.hpp"
 #include "NP-Engine/Time/Time.hpp"
 #include "NP-Engine/String/String.hpp"
 #include "NP-Engine/Math/Math.hpp"
