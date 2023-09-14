@@ -187,22 +187,24 @@ namespace np::uid
 
 		void Dispose()
 		{
-			auto bookkeeping = _bookkeeping.get_access();
-			bookkeeping->keyToRecord.clear();
-			bookkeeping->masterSet.clear();
-			bookkeeping->releasedKeys.clear();
-			bookkeeping->nextHandle = UidHandle{};
+			{
+				auto bookkeeping = _bookkeeping.get_access();
+				bookkeeping->keyToRecord.clear();
+				bookkeeping->masterSet.clear();
+				bookkeeping->releasedKeys.clear();
+				bookkeeping->nextHandle = UidHandle{};
+			}
 			_pool.Clear();
 		}
 
 		mem::sptr<UidHandle> CreateUid()
 		{
-			auto bookkeeping = _bookkeeping.get_access();
 			mem::sptr<UidHandle> hndl = nullptr;
 			mem::sptr<Uid> id = _pool.CreateObject();
 
 			if (id)
 			{
+				auto bookkeeping = _bookkeeping.get_access();
 				do
 					*id = bookkeeping->generator();
 				while (bookkeeping->masterSet.count(*id));
@@ -220,16 +222,14 @@ namespace np::uid
 
 		Uid GetUid(mem::sptr<UidHandle> hndl)
 		{
-			auto bookkeeping = _bookkeeping.get_access();
 			mem::sptr<Uid> id = nullptr;
-
-			if (hndl->IsValid())
+			if (hndl && hndl->IsValid())
 			{
+				auto bookkeeping = _bookkeeping.get_access();
 				auto it = bookkeeping->keyToRecord.find(hndl->key);
 				if (it != bookkeeping->keyToRecord.end() && hndl->generation == it->second.generation)
 					id = it->second.uidSptr;
 			}
-
 			return id ? *id : Uid{};
 		}
 
