@@ -348,7 +348,7 @@ set(NP_ENGINE_WINDOW_INTERFACE_HPP
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Window/Interface/DetailType.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Window/Interface/WindowImpl.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Window/Interface/WindowEvents.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Window/Interface/WindowInterface.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Window/Interface/Interface.hpp
 )
 
 set(NP_ENGINE_WINDOW_GLFW_HPP

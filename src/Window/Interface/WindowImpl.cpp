@@ -4,7 +4,7 @@
 //
 //##===----------------------------------------------------------------------===##//
 
-#include "NP-Engine/Window/Interface/WindowInterface.hpp"
+#include "NP-Engine/Window/Interface/Interface.hpp"
 
 #include "NP-Engine/Window/Detail/Glfw/GlfwWindow.hpp"
 

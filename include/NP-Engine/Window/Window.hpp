@@ -9,6 +9,6 @@
 
 #include "NP-Engine/Foundation/Foundation.hpp"
 
-#include "Interface/WindowInterface.hpp"
+#include "Interface/Interface.hpp"
 
 #endif /* NP_ENGINE_WINDOW_HPP */

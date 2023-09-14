@@ -20,7 +20,7 @@
 #include "NP-Engine/Vendor/GlfwInclude.hpp"
 #include "NP-Engine/Vendor/GlmInclude.hpp"
 
-#include "NP-Engine/Window/Interface/WindowInterface.hpp"
+#include "NP-Engine/Window/Interface/Interface.hpp"
 
 // TODO: resizing window smaller than min siz results with mouse offset to be incorrect
 // TODO: dragging window to window edges does not trigger snapping effects (windows - maybe linux too?)
