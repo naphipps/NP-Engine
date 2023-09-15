@@ -503,6 +503,7 @@ namespace np::app
 			if (client)
 			{
 				client->Open(net::Protocol::Tcp);
+				client->Enable({net::SocketOptions::ReuseAddress, net::SocketOptions::ReusePort});
 				client->ConnectTo(net::Ipv4{127, 0, 0, 1}, 55555);
 			}
 
@@ -564,6 +565,7 @@ namespace np::app
 
 			_server = net::Socket::Create(_network_context);
 			_server->Open(net::Protocol::Tcp);
+			_server->Enable({net::SocketOptions::ReuseAddress, net::SocketOptions::ReusePort});
 			_server->BindTo(net::Ipv4{127, 0, 0, 1}, 55555);
 			_server->Listen();
 			SubmitServerAcceptClientJob();

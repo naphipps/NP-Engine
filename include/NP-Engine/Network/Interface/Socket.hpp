@@ -16,6 +16,7 @@
 
 #include "NP-Engine/Services/Services.hpp"
 #include "NP-Engine/Math/Math.hpp"
+#include "NP-Engine/Container/Container.hpp"
 
 #include "Context.hpp"
 #include "Message.hpp"
@@ -25,6 +26,15 @@
 
 namespace np::net
 {
+	enum class SocketOptions : ui32
+	{
+		None = 0,
+		ReuseAddress,
+		ReusePort,
+
+		Max
+	};
+
 	class Socket
 	{
 	protected:
@@ -49,6 +59,10 @@ namespace np::net
 		}
 
 		virtual void Open(Protocol protocol) = 0;
+
+		virtual void Enable(con::vector<SocketOptions> options) = 0;
+
+		virtual void Disable(con::vector<SocketOptions> options) = 0;
 
 		virtual void Close() = 0;
 

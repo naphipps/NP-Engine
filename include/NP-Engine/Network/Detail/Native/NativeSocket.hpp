@@ -11,6 +11,7 @@
 #include "NP-Engine/Primitive/Primitive.hpp"
 #include "NP-Engine/Memory/Memory.hpp"
 #include "NP-Engine/String/String.hpp"
+#include "NP-Engine/Container/Container.hpp"
 
 #include "NP-Engine/Network/Interface/Interface.hpp"
 
@@ -194,6 +195,54 @@ namespace np::net::__detail
 
 			_socket = INVALID_SOCKET;
 			_protocol = Protocol::None;
+		}
+
+		virtual void Enable(con::vector<SocketOptions> options) override
+		{
+			const i32 enable = 1;
+			const siz enable_size = sizeof(i32);
+			for (auto it = options.begin(); it != options.end(); it++)
+			{
+				switch (*it)
+				{
+				case SocketOptions::ReuseAddress:
+				{
+					setsockopt(_socket, SOL_SOCKET, SO_REUSEADDR, &enable, enable_size);
+					break;
+				}
+				case SocketOptions::ReusePort:
+				{
+					setsockopt(_socket, SOL_SOCKET, SO_REUSEPORT, &enable, enable_size);
+					break;
+				}
+				default:
+					break;
+				}
+			}
+		}
+
+		virtual void Disable(con::vector<SocketOptions> options) override
+		{
+			const i32 disable = 1;
+			const siz disable_size = sizeof(i32);
+			for (auto it = options.begin(); it != options.end(); it++)
+			{
+				switch (*it)
+				{
+				case SocketOptions::ReuseAddress:
+				{
+					setsockopt(_socket, SOL_SOCKET, SO_REUSEADDR, &disable, disable_size);
+					break;
+				}
+				case SocketOptions::ReusePort:
+				{
+					setsockopt(_socket, SOL_SOCKET, SO_REUSEPORT, &disable, disable_size);
+					break;
+				}
+				default:
+					break;
+				}
+			}
 		}
 
 		virtual bl IsOpen() const override
