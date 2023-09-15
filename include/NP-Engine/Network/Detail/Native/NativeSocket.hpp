@@ -166,7 +166,7 @@ namespace np::net::__detail
 
 			for (ui64 r : rejections)
 			{
-#if NP_ENGINE_PLATOFORM_IS_WINDOWS
+#if NP_ENGINE_PLATFORM_IS_WINDOWS
 				closesocket(r);
 #elif NP_ENGINE_PLATFORM_IS_LINUX
 				close(r);
