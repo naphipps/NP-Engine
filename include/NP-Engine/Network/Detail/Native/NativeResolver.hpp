@@ -84,7 +84,7 @@ namespace np::net::__detail
 				saddrin.sin_family = AF_INET;
 				mem::CopyBytes(&saddrin.sin_addr.s_addr, ipv4.bytes.data(), ipv4.bytes.size());
 
-				res = getnameinfo((SOCKADDR*)&saddrin, sizeof(sockaddr_in), name, NI_MAXHOST, nullptr, 0, 0);
+				res = getnameinfo((sockaddr*)&saddrin, sizeof(sockaddr_in), name, NI_MAXHOST, nullptr, 0, 0);
 				break;
 			}
 			case IpType::V6: // TODO: NOT IMPLEMENTEDD YET
