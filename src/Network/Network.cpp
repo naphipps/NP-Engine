@@ -27,6 +27,9 @@ namespace np::net
 			NP_ENGINE_ASSERT(LOBYTE(wsa_data.wVersion) == 2 || HIBYTE(wsa_data.wVersion) == 2,
 							 "NativeContext err with WSAStartup: Found winsock " + to_str(wsa_data.wVersion) +
 								 " when expecting " + to_str(expected_version));
+
+#elif NP_ENGINE_PLATFORM_IS_LINUX
+			// empty on purpose
 #else
 	#error // TODO: implement native networking
 #endif
@@ -44,6 +47,9 @@ namespace np::net
 		case DetailType::Native:
 		{
 #if NP_ENGINE_PLATFORM_IS_WINDOWS
+			// empty on purpose
+#elif NP_ENGINE_PLATFORM_IS_LINUX
+			// empty on purpose
 #else
 	#error // TODO: implement native networking
 #endif
@@ -62,6 +68,8 @@ namespace np::net
 		{
 #if NP_ENGINE_PLATFORM_IS_WINDOWS
 			WSACleanup();
+#elif NP_ENGINE_PLATFORM_IS_LINUX
+			// empty on purpose
 #else
 	#error // TODO: implement native networking
 #endif

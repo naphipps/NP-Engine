@@ -151,7 +151,28 @@ namespace np::net::__detail
 				break;
 			}
 
-			_socket = socket(af, type, proto);
+			con::vector<ui64> rejections;
+			while (_socket == INVALID_SOCKET)
+			{
+				_socket = socket(af, type, proto);
+				// linux may return 0/1/2(stdin/out/err) so we reject them on all platforms
+				if (_socket == 0 || _socket == 1 || _socket == 2)
+				{
+					rejections.emplace_back(_socket);
+					_socket = INVALID_SOCKET;
+				}
+			}
+
+			for (ui64 r : rejections)
+			{
+#if NP_ENGINE_PLATOFORM_IS_WINDOWS
+				closesocket(r);
+#elif NP_ENGINE_PLATFORM_IS_LINUX
+				close(r);
+#else
+	#error // TODO: implement native networking
+#endif
+			}
 		}
 
 		virtual void Close() override
@@ -162,7 +183,13 @@ namespace np::net::__detail
 			if (IsOpen())
 			{
 				shutdown(_socket, SD_BOTH);
+#if NP_ENGINE_PLATFORM_IS_WINDOWS
 				closesocket(_socket);
+#elif NP_ENGINE_PLATFORM_IS_LINUX
+				close(_socket);
+#else
+	#error // TODO: implement native networking
+#endif
 			}
 
 			_socket = INVALID_SOCKET;
@@ -216,7 +243,13 @@ namespace np::net::__detail
 			if (IsOpen())
 			{
 				sockaddr_in saddrin{};
+#if NP_ENGINE_PLATFORM_IS_WINDOWS
 				i32 saddrin_size = sizeof(sockaddr_in);
+#elif NP_ENGINE_PLATFORM_IS_LINUX
+				ui32 saddrin_size = sizeof(sockaddr_in);
+#else
+	#error // TODO: implement native networking
+#endif
 				client = Create(GetContext());
 				if (client)
 					((NativeSocket&)*client)._socket = accept(_socket, (sockaddr*)&saddrin, &saddrin_size);
