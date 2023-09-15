@@ -13,12 +13,6 @@
 
 namespace np
 {
-	template <typename T>
-	constexpr static bl is_init_list_size(con::init_list<T> ilist, siz size)
-	{
-		return list.size() == size;
-	}
-
 	namespace net
 	{
 		enum class IpType : ui8
