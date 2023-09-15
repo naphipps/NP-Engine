@@ -15,6 +15,7 @@
 #include "NP-Engine/Memory/Memory.hpp"
 #include "NP-Engine/String/String.hpp"
 #include "NP-Engine/Math/Math.hpp"
+#include "NP-Engine/Container/Container.hpp"
 
 #include "NP-Engine/Vendor/RapidJsonInclude.hpp"
 
@@ -107,6 +108,7 @@ namespace np::net
 			::rapidjson::Writer<::rapidjson::StringBuffer> writer(buffer);
 			doc.Accept(writer);
 			content = buffer.GetString();
+			return *this;
 		}
 	};
 
