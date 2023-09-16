@@ -25,6 +25,7 @@ namespace np::net::__detail
 		ui64 _socket;
 		Protocol _protocol;
 		atm_bl _keep_receiving;
+		atm_bl _direct_mode;
 
 		void SendBytes(const chr* src, siz byte_count)
 		{
@@ -59,9 +60,10 @@ namespace np::net::__detail
 			}
 		}
 
-		void RecvBytes(chr* dst, siz byte_count)
+		i32 RecvBytes(chr* dst, siz byte_count, const bl direct_mode = false)
 		{
-			for (ui32 total = 0; total < byte_count;)
+			i32 total = 0;
+			while (total < byte_count)
 			{
 				i32 recvd = -1;
 				switch (_protocol)
@@ -80,10 +82,15 @@ namespace np::net::__detail
 				{
 					// NP_ENGINE_LOG_ERROR("RecvBytes failed: " + to_str(recvd));
 					Close();
+					total = -1;
 					break;
 				}
 				total += recvd;
+
+				if (direct_mode)
+					break;
 			}
+			return total;
 		}
 
 		virtual void DetailSend(Message msg) override
@@ -91,9 +98,17 @@ namespace np::net::__detail
 			NP_ENGINE_PROFILE_FUNCTION();
 			if (IsOpen() && msg)
 			{
-				SendBytes((chr*)&msg.header, sizeof(MessageHeader));
-				if (msg.header.bodySize > 0)
-					SendBytes((chr*)msg.body->GetData(), msg.header.bodySize);
+				if (_direct_mode.load(mo_acquire))
+				{
+					if (msg.header.bodySize > 0)
+						SendBytes((chr*)msg.body->GetData(), msg.header.bodySize);
+				}
+				else
+				{
+					SendBytes((chr*)&msg.header, sizeof(MessageHeader));
+					if (msg.header.bodySize > 0)
+						SendBytes((chr*)msg.body->GetData(), msg.header.bodySize);
+				}
 			}
 		}
 
@@ -102,9 +117,17 @@ namespace np::net::__detail
 			NP_ENGINE_PROFILE_FUNCTION();
 			if (IsOpen() && msg)
 			{
-				SendBytesTo((chr*)&msg.header, sizeof(MessageHeader), ip, port);
-				if (msg.header.bodySize > 0)
-					SendBytesTo((chr*)msg.body->GetData(), msg.header.bodySize, ip, port);
+				if (_direct_mode.load(mo_acquire))
+				{
+					if (msg.header.bodySize > 0)
+						SendBytesTo((chr*)msg.body->GetData(), msg.header.bodySize, ip, port);
+				}
+				else
+				{
+					SendBytesTo((chr*)&msg.header, sizeof(MessageHeader), ip, port);
+					if (msg.header.bodySize > 0)
+						SendBytesTo((chr*)msg.body->GetData(), msg.header.bodySize, ip, port);
+				}
 			}
 		}
 
@@ -116,31 +139,46 @@ namespace np::net::__detail
 		void ReceivingProcedure()
 		{
 			Message msg;
-			RecvBytes((chr*)&msg.header, sizeof(MessageHeader));
-
-			if (msg.header.bodySize > 0)
+			if (_direct_mode.load(mo_acquire))
 			{
-				bl supported = true;
-				switch (msg.header.type)
+				ui8 blob[NP_ENGINE_NETWORK_MAX_MESSAGE_BODY_SIZE];
+				i32 recvd = RecvBytes((chr*)blob, NP_ENGINE_NETWORK_MAX_MESSAGE_BODY_SIZE, true);
+				if (recvd > 0)
 				{
-				case MessageType::Text:
-					msg.body = mem::create_sptr<TextMessageBody>(GetServices()->GetAllocator());
-					msg.body->SetSize(msg.header.bodySize);
-					break;
-
-				case MessageType::Blob:
+					msg.header.type = MessageType::Blob;
+					msg.header.bodySize = recvd;
 					msg.body = mem::create_sptr<BlobMessageBody>(GetServices()->GetAllocator());
-					msg.body->SetSize(msg.header.bodySize);
-					break;
-
-				default:
-					NP_ENGINE_LOG_CRITICAL("ReceivingProcedure found unsupported MessageType: " + to_str((ui32)msg.header.type));
-					supported = false;
-					break;
+					msg.body->SetSize(recvd);
+					mem::CopyBytes(msg.body->GetData(), blob, msg.header.bodySize);
 				}
+			}
+			else
+			{
+				i32 recvd = RecvBytes((chr*)&msg.header, sizeof(MessageHeader));
+				if (recvd > 0 && msg.header.bodySize > 0)
+				{
+					bl supported = true;
+					switch (msg.header.type)
+					{
+					case MessageType::Text:
+						msg.body = mem::create_sptr<TextMessageBody>(GetServices()->GetAllocator());
+						msg.body->SetSize(msg.header.bodySize);
+						break;
 
-				if (supported)
-					RecvBytes((chr*)msg.body->GetData(), msg.header.bodySize);
+					case MessageType::Blob:
+						msg.body = mem::create_sptr<BlobMessageBody>(GetServices()->GetAllocator());
+						msg.body->SetSize(msg.header.bodySize);
+						break;
+
+					default:
+						NP_ENGINE_LOG_CRITICAL("ReceivingProcedure found unsupported MessageType: " + to_str((ui32)msg.header.type));
+						supported = false;
+						break;
+					}
+
+					if (supported)
+						RecvBytes((chr*)msg.body->GetData(), msg.header.bodySize);
+				}
 			}
 
 			if (msg)
@@ -164,7 +202,7 @@ namespace np::net::__detail
 		}
 
 	public:
-		NativeSocket(mem::sptr<Context> context): Socket(context), _protocol(Protocol::None), _keep_receiving(false)
+		NativeSocket(mem::sptr<Context> context): Socket(context), _protocol(Protocol::None), _keep_receiving(false), _direct_mode(false)
 		{
 			Close();
 		}
@@ -250,29 +288,37 @@ namespace np::net::__detail
 
 		virtual void Enable(con::vector<SocketOptions> options, const bl enable = true) override
 		{
-			for (auto it = options.begin(); it != options.end(); it++)
+			if (IsOpen())
 			{
-				switch (*it)
+				for (auto it = options.begin(); it != options.end(); it++)
 				{
-				case SocketOptions::ReuseAddress:
-				{
-					setsockopt(_socket, SOL_SOCKET, SO_REUSEADDR, (chr*)&enable, sizeof(bl));
-					break;
-				}
-				case SocketOptions::ReusePort:
-				{
+					switch (*it)
+					{
+					case SocketOptions::ReuseAddress:
+					{
+						setsockopt(_socket, SOL_SOCKET, SO_REUSEADDR, (chr*)&enable, sizeof(bl));
+						break;
+					}
+					case SocketOptions::ReusePort:
+					{
 #if NP_ENGINE_PLATFORM_IS_WINDOWS
-					i32 optname = SO_REUSEADDR;
+						i32 optname = SO_REUSEADDR;
 #elif NP_ENGINE_PLATFORM_IS_LINUX
-					i32 optname = SO_REUSEPORT;
+						i32 optname = SO_REUSEPORT;
 #else
 	#error implement native networking
 #endif
-					setsockopt(_socket, SOL_SOCKET, optname, (chr*)&enable, sizeof(bl));
-					break;
-				}
-				default:
-					break;
+						setsockopt(_socket, SOL_SOCKET, optname, (chr*)&enable, sizeof(bl));
+						break;
+					}
+					case SocketOptions::Direct:
+					{
+						_direct_mode.store(true, mo_release);
+						break;
+					}
+					default:
+						break;
+					}
 				}
 			}
 		}

@@ -35,6 +35,8 @@ namespace np::app
 		mutexed_wrapper<con::vector<mem::sptr<net::Socket>>> _tcp_server_clients;
 		mutexed_wrapper<con::vector<mem::sptr<net::Socket>>> _tcp_clients;
 
+		mem::sptr<net::Socket> _http_socket;
+
 		mem::sptr<net::Socket> _udp_server;
 		mem::sptr<net::Socket> _udp_client;
 
@@ -138,6 +140,7 @@ namespace np::app
 		{
 			TcpServerCloseClients();
 			_udp_server->Close();
+			_http_socket->Close();
 		}
 
 		void HandleNetworkClient(mem::sptr<evnt::Event> e)
@@ -582,6 +585,22 @@ namespace np::app
 
 			//-----------------------------------------------------------
 
+			mem::sptr<net::Resolver> resv = net::Resolver::Create(_network_context);
+
+			net::Host host = resv->GetHost("example.com");
+
+			_http_socket = net::Socket::Create(_network_context);
+			_http_socket->Open(net::Protocol::Tcp);
+			_http_socket->Enable({ net::SocketOptions::ReuseAddress, net::SocketOptions::ReusePort, net::SocketOptions::Direct });
+			_http_socket->ConnectTo(host.ipv4s.begin()->first, 80);
+			str http_get = "GET /index.html HTTP/1.1\r\n"
+				"Host: example.com\r\n"
+				"Connection: close\r\n\r\n";
+			_http_socket->Send(http_get.data(), http_get.size());
+			_http_socket->StartReceiving();
+
+			//-----------------------------------------------------------
+
 			SubmitClientConnectToTcpServerJob();
 		}
 
@@ -589,6 +608,7 @@ namespace np::app
 		{
 			TcpServerCloseClients();
 			_udp_server->Close();
+			_http_socket->Close();
 
 			net::Terminate(net::DetailType::Native);
 		}
@@ -647,14 +667,33 @@ namespace np::app
 					case net::MessageType::Text:
 					{
 						net::TextMessageBody& text = (net::TextMessageBody&)*msg.body;
-						NP_ENGINE_LOG_INFO("Server received(" + str(ss.str()) + "):\n" + text.content);
+						NP_ENGINE_LOG_INFO("Server received(" + str(ss.str()) + ") text:\n" + text.content);
 						break;
 					}
 					case net::MessageType::Blob:
 					{
 						net::BlobMessageBody& blob = (net::BlobMessageBody&)*msg.body;
 						str blob_str((chr*)blob.GetData(), msg.header.bodySize);
-						NP_ENGINE_LOG_INFO("Server received(" + str(ss.str()) + "):\n" + blob_str);
+						NP_ENGINE_LOG_INFO("Server received(" + str(ss.str()) + ") blob:\n" + blob_str);
+						break;
+					}
+					default:
+						break;
+					}
+				}
+			}
+			{
+				net::MessageQueue& inbox = _http_socket->GetInbox();
+				inbox.ToggleState();
+				for (net::Message msg = inbox.Pop(); msg; msg = inbox.Pop())
+				{
+					switch (msg.header.type)
+					{
+					case net::MessageType::Blob:
+					{
+						net::BlobMessageBody& blob = (net::BlobMessageBody&)*msg.body;
+						str blob_str((chr*)blob.GetData(), msg.header.bodySize);
+						NP_ENGINE_LOG_INFO("_http_socket received:\n\n" + blob_str + "\n\n");
 						break;
 					}
 					default:

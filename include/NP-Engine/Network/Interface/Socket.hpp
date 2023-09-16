@@ -29,6 +29,7 @@ namespace np::net
 	enum class SocketOptions : ui32
 	{
 		None = 0,
+		Direct,
 		ReuseAddress,
 		ReusePort,
 
