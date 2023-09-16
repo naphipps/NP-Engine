@@ -248,76 +248,27 @@ namespace np::net::__detail
 			_protocol = Protocol::None;
 		}
 
-		virtual void Enable(con::vector<SocketOptions> options) override
+		virtual void Enable(con::vector<SocketOptions> options, const bl enable = true) override
 		{
-#if NP_ENGINE_PLATFORM_IS_WINDOWS
-			const chr enable = 1;
-			const i32 enable_size = sizeof(i32);
-
-#elif NP_ENGINE_PLATFORM_IS_LINUX
-			const i32 enable = 1;
-			const siz enable_size = sizeof(i32);
-
-#else
-	#error implement native networking
-#endif
 			for (auto it = options.begin(); it != options.end(); it++)
 			{
 				switch (*it)
 				{
 				case SocketOptions::ReuseAddress:
 				{
-					setsockopt(_socket, SOL_SOCKET, SO_REUSEADDR, &enable, enable_size);
+					setsockopt(_socket, SOL_SOCKET, SO_REUSEADDR, (chr*)&enable, sizeof(bl));
 					break;
 				}
 				case SocketOptions::ReusePort:
 				{
 #if NP_ENGINE_PLATFORM_IS_WINDOWS
-					setsockopt(_socket, SOL_SOCKET, SO_REUSEADDR, &enable, enable_size);
+					i32 optname = SO_REUSEADDR;
 #elif NP_ENGINE_PLATFORM_IS_LINUX
-					setsockopt(_socket, SOL_SOCKET, SO_REUSEPORT, &enable, enable_size);
+					i32 optname = SO_REUSEPORT;
 #else
 	#error implement native networking
 #endif
-					break;
-				}
-				default:
-					break;
-				}
-			}
-		}
-
-		virtual void Disable(con::vector<SocketOptions> options) override
-		{
-#if NP_ENGINE_PLATFORM_IS_WINDOWS
-			const chr disable = 1;
-			const i32 disable_size = sizeof(i32);
-
-#elif NP_ENGINE_PLATFORM_IS_LINUX
-			const i32 disable = 1;
-			const siz disable_size = sizeof(i32);
-
-#else
-	#error implement native networking
-#endif
-			for (auto it = options.begin(); it != options.end(); it++)
-			{
-				switch (*it)
-				{
-				case SocketOptions::ReuseAddress:
-				{
-					setsockopt(_socket, SOL_SOCKET, SO_REUSEADDR, &disable, disable_size);
-					break;
-				}
-				case SocketOptions::ReusePort:
-				{
-#if NP_ENGINE_PLATFORM_IS_WINDOWS
-					setsockopt(_socket, SOL_SOCKET, SO_REUSEADDR, &disable, disable_size);
-#elif NP_ENGINE_PLATFORM_IS_LINUX
-					setsockopt(_socket, SOL_SOCKET, SO_REUSEPORT, &disable, disable_size);
-#else
-	#error implement native networking
-#endif
+					setsockopt(_socket, SOL_SOCKET, optname, (chr*)&enable, sizeof(bl));
 					break;
 				}
 				default:

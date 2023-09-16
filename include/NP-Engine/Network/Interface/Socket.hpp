@@ -71,9 +71,7 @@ namespace np::net
 
 		virtual void Open(Protocol protocol) = 0;
 
-		virtual void Enable(con::vector<SocketOptions> options) = 0;
-
-		virtual void Disable(con::vector<SocketOptions> options) = 0;
+		virtual void Enable(con::vector<SocketOptions> options, const bl enable = true) = 0;
 
 		virtual void Close() = 0;
 
