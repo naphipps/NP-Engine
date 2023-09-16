@@ -46,6 +46,17 @@ namespace np::net
 
 		virtual void DetailSendTo(Message msg, const Ip& ip, ui16 port) = 0;
 
+		virtual Message CreateBlobMessage(void* src, siz byte_count)
+		{
+			Message msg;
+			msg.header.type = MessageType::Blob;
+			msg.header.bodySize = byte_count;
+			msg.body = mem::create_sptr<BlobMessageBody>(GetServices()->GetAllocator());
+			msg.body->SetSize(msg.header.bodySize);
+			mem::CopyBytes(msg.body->GetData(), src, msg.header.bodySize);
+			return msg;
+		}
+
 		Socket(mem::sptr<Context> context): _context(context) {}
 
 	public:
@@ -86,6 +97,16 @@ namespace np::net
 		{
 			if (CanSend(msg))
 				DetailSendTo(msg, ip, port);
+		}
+
+		void Send(void* src, siz byte_count)
+		{
+			Send(CreateBlobMessage(src, byte_count));
+		}
+
+		void SendTo(void* src, siz byte_count, const Ip& ip, ui16 port)
+		{
+			SendTo(CreateBlobMessage(src, byte_count), ip, port);
 		}
 
 		virtual bl CanSend(const Message& msg) const

@@ -635,6 +635,9 @@ namespace np::app
 				}
 			}
 			{
+				::std::stringstream ss;
+				ss << thr::ThisThread::get_id();
+
 				net::MessageQueue& inbox = _udp_server->GetInbox();
 				inbox.ToggleState();
 				for (net::Message msg = inbox.Pop(); msg; msg = inbox.Pop())
@@ -644,9 +647,14 @@ namespace np::app
 					case net::MessageType::Text:
 					{
 						net::TextMessageBody& text = (net::TextMessageBody&)*msg.body;
-						::std::stringstream ss;
-						ss << thr::ThisThread::get_id();
 						NP_ENGINE_LOG_INFO("Server received(" + str(ss.str()) + "):\n" + text.content);
+						break;
+					}
+					case net::MessageType::Blob:
+					{
+						net::BlobMessageBody& blob = (net::BlobMessageBody&)*msg.body;
+						str blob_str((chr*)blob.GetData(), msg.header.bodySize);
+						NP_ENGINE_LOG_INFO("Server received(" + str(ss.str()) + "):\n" + blob_str);
 						break;
 					}
 					default:
@@ -681,6 +689,10 @@ namespace np::app
 							"Hello UDP Server!\n\t- udp client: " + to_str((siz)mem::AddressOf(*_udp_client)) + " <3";
 						msg.header.bodySize = msg_body.content.size();
 						_udp_client->SendTo(msg, net::Ipv4{127, 0, 0, 1}, 54555);
+					}
+					{
+						str blob = "hello from blob! >:D";
+						_udp_client->SendTo(blob.data(), blob.size(), net::Ipv4{ 127,0,0,1 }, 54555);
 					}
 				}
 			}

@@ -120,6 +120,7 @@ namespace np::net::__detail
 
 			if (msg.header.bodySize > 0)
 			{
+				bl supported = true;
 				switch (msg.header.type)
 				{
 				case MessageType::Text:
@@ -127,11 +128,19 @@ namespace np::net::__detail
 					msg.body->SetSize(msg.header.bodySize);
 					break;
 
+				case MessageType::Blob:
+					msg.body = mem::create_sptr<BlobMessageBody>(GetServices()->GetAllocator());
+					msg.body->SetSize(msg.header.bodySize);
+					break;
+
 				default:
+					NP_ENGINE_LOG_CRITICAL("ReceivingProcedure found unsupported MessageType: " + to_str((ui32)msg.header.type));
+					supported = false;
 					break;
 				}
 
-				RecvBytes((chr*)msg.body->GetData(), msg.header.bodySize);
+				if (supported)
+					RecvBytes((chr*)msg.body->GetData(), msg.header.bodySize);
 			}
 
 			if (msg)
