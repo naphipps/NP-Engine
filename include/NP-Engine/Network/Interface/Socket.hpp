@@ -44,12 +44,12 @@ namespace np::net
 
 		virtual void DetailSend(Message msg) = 0;
 
+		virtual void DetailSendTo(Message msg, const Ip& ip, ui16 port) = 0;
+
 		Socket(mem::sptr<Context> context): _context(context) {}
 
 	public:
 		static mem::sptr<Socket> Create(mem::sptr<Context> context);
-
-		// TODO: add Create functions accepting Ip addresses
 
 		virtual ~Socket() = default;
 
@@ -82,18 +82,20 @@ namespace np::net
 				DetailSend(msg);
 		}
 
+		void SendTo(Message msg, const Ip& ip, ui16 port)
+		{
+			if (CanSend(msg))
+				DetailSendTo(msg, ip, port);
+		}
+
 		virtual bl CanSend(const Message& msg) const
 		{
+			NP_ENGINE_ASSERT(msg && msg.header.bodySize <= NP_ENGINE_NETWORK_MAX_MESSAGE_BODY_SIZE,
+				"Message.header.bodySize is larger than " + to_str(NP_ENGINE_NETWORK_MAX_MESSAGE_BODY_SIZE));
+
 			bl can = true;
-
-			NP_ENGINE_ASSERT(msg.header.bodySize <= NP_ENGINE_NETWORK_MAX_MESSAGE_BODY_SIZE,
-							 "Message.header.bodySize is larger than " + to_str(NP_ENGINE_NETWORK_MAX_MESSAGE_BODY_SIZE));
-
-			if (msg.header.bodySize > NP_ENGINE_NETWORK_MAX_MESSAGE_BODY_SIZE)
+			if (msg && msg.header.bodySize > NP_ENGINE_NETWORK_MAX_MESSAGE_BODY_SIZE)
 				can = false;
-
-			// TODO: I think we can improve our message validation for sending
-			// TODO: check msg body size, etc
 			return can;
 		}
 

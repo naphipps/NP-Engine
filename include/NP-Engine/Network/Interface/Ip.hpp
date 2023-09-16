@@ -25,6 +25,15 @@ namespace np
 		struct Ip
 		{
 			virtual IpType GetType() const = 0;
+
+			virtual bl IsValid() const = 0;
+
+			virtual void Invalidate() = 0;
+
+			operator bl() const
+			{
+				return IsValid();
+			}
 		};
 
 		struct Ipv4 : public Ip
@@ -57,6 +66,20 @@ namespace np
 			virtual IpType GetType() const override
 			{
 				return IpType::V4;
+			}
+
+			virtual bl IsValid() const override
+			{
+				bl valid = false;
+				for (auto it = bytes.begin(); it != bytes.end(); it++)
+					valid |= *it != 0;
+				return valid;
+			}
+
+			virtual void Invalidate() override
+			{
+				for (auto it = bytes.begin(); it != bytes.end(); it++)
+					*it = 0;
 			}
 		};
 
@@ -94,6 +117,20 @@ namespace np
 			virtual IpType GetType() const override
 			{
 				return IpType::V6;
+			}
+
+			virtual bl IsValid() const override
+			{
+				bl valid = false;
+				for (auto it = shorts.begin(); it != shorts.end(); it++)
+					valid |= *it != 0;
+				return valid;
+			}
+
+			virtual void Invalidate() override
+			{
+				for (auto it = shorts.begin(); it != shorts.end(); it++)
+					*it = 0;
 			}
 		};
 	} // namespace net

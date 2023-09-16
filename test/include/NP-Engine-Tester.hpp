@@ -31,9 +31,13 @@ namespace np::app
 		flt _rate = 5.f; // units per second
 
 		mem::sptr<net::Context> _network_context;
-		mem::sptr<net::Socket> _server;
-		mutexed_wrapper<con::vector<mem::sptr<net::Socket>>> _server_clients;
-		mutexed_wrapper<con::vector<mem::sptr<net::Socket>>> _clients;
+		mem::sptr<net::Socket> _tcp_server;
+		mutexed_wrapper<con::vector<mem::sptr<net::Socket>>> _tcp_server_clients;
+		mutexed_wrapper<con::vector<mem::sptr<net::Socket>>> _tcp_clients;
+
+		mem::sptr<net::Socket> _udp_server;
+		mem::sptr<net::Socket> _udp_client;
+
 		tim::SteadyTimestamp _clients_send_msg_timestamp;
 
 		static void LogSubmitKeyState(void*, const nput::KeyCodeState&)
@@ -132,7 +136,8 @@ namespace np::app
 
 		void AdjustForApplicationClose(mem::sptr<evnt::Event> e)
 		{
-			ServerCloseClients();
+			TcpServerCloseClients();
+			_udp_server->Close();
 		}
 
 		void HandleNetworkClient(mem::sptr<evnt::Event> e)
@@ -155,7 +160,7 @@ namespace np::app
 			{
 				NP_ENGINE_LOG_INFO("server accepted: " + name);
 
-				_server_clients.get_access()->emplace_back(client_data.socket);
+				_tcp_server_clients.get_access()->emplace_back(client_data.socket);
 				client_data.socket->StartReceiving();
 			}
 			else
@@ -466,38 +471,31 @@ namespace np::app
 			_prev_mouse_position = mouse_position;
 		}
 
-		static void ServerAcceptClientCallback(void* caller, mem::Delegate& d)
+		static void TcpServerAcceptClientCallback(void* caller, mem::Delegate& d)
 		{
-			((GameLayer*)caller)->_server->Accept(true);
+			((GameLayer*)caller)->_tcp_server->Accept(true);
 		}
 
-		void SubmitServerAcceptClientJob()
+		void SubmitTcpServerAcceptClientJob()
 		{
 			mem::sptr<jsys::Job> job = _services->GetJobSystem().CreateJob();
-			job->GetDelegate().SetCallback(this, ServerAcceptClientCallback);
+			job->GetDelegate().SetCallback(this, TcpServerAcceptClientCallback);
 			_services->GetJobSystem().SubmitJob(jsys::JobPriority::Higher, job);
 		}
 
-		void StopServerReceiving()
+		void TcpServerCloseClients()
 		{
-			auto clients = _server_clients.get_access();
-			for (auto c = clients->begin(); c != clients->end(); c++)
-				(*c)->StopReceiving();
-		}
-
-		void ServerCloseClients()
-		{
-			auto clients = _server_clients.get_access();
+			auto clients = _tcp_server_clients.get_access();
 			for (auto c = clients->begin(); c != clients->end(); c++)
 				(*c)->Close();
 		}
 
-		static void ClientConnectToServerCallback(void* caller, mem::Delegate& d)
+		static void ClientConnectToTcpServerCallback(void* caller, mem::Delegate& d)
 		{
-			((GameLayer*)caller)->ClientConnectToServerProcedure();
+			((GameLayer*)caller)->ClientConnectToTcpServerProcedure();
 		}
 
-		void ClientConnectToServerProcedure()
+		void ClientConnectToTcpServerProcedure()
 		{
 			mem::sptr<net::Socket> client = net::Socket::Create(_network_context);
 			if (client)
@@ -508,13 +506,13 @@ namespace np::app
 			}
 
 			if (client)
-				_clients.get_access()->emplace_back(client);
+				_tcp_clients.get_access()->emplace_back(client);
 		}
 
-		void SubmitClientConnectToServerJob()
+		void SubmitClientConnectToTcpServerJob()
 		{
 			mem::sptr<jsys::Job> job = _services->GetJobSystem().CreateJob();
-			job->GetDelegate().SetCallback(this, ClientConnectToServerCallback);
+			job->GetDelegate().SetCallback(this, ClientConnectToTcpServerCallback);
 			_services->GetJobSystem().SubmitJob(jsys::JobPriority::Higher, job);
 		}
 
@@ -563,21 +561,34 @@ namespace np::app
 
 			//-----------------------------------------------------------
 
-			_server = net::Socket::Create(_network_context);
-			_server->Open(net::Protocol::Tcp);
-			_server->Enable({net::SocketOptions::ReuseAddress, net::SocketOptions::ReusePort});
-			_server->BindTo(net::Ipv4{127, 0, 0, 1}, 55555);
-			_server->Listen();
-			SubmitServerAcceptClientJob();
+			_tcp_server = net::Socket::Create(_network_context);
+			_tcp_server->Open(net::Protocol::Tcp);
+			_tcp_server->Enable({net::SocketOptions::ReuseAddress, net::SocketOptions::ReusePort});
+			_tcp_server->BindTo(net::Ipv4{127, 0, 0, 1}, 55555);
+			_tcp_server->Listen();
+			SubmitTcpServerAcceptClientJob();
 
 			//-----------------------------------------------------------
 
-			SubmitClientConnectToServerJob();
+			_udp_server = net::Socket::Create(_network_context);
+			_udp_server->Open(net::Protocol::Udp);
+			_udp_server->Enable({ net::SocketOptions::ReuseAddress, net::SocketOptions::ReusePort });
+			_udp_server->BindTo(net::Ipv4{ 127, 0, 0, 1 }, 54555);
+			_udp_server->StartReceiving();
+
+			_udp_client = net::Socket::Create(_network_context);
+			_udp_client->Open(net::Protocol::Udp);
+			_udp_client->Enable({ net::SocketOptions::ReuseAddress, net::SocketOptions::ReusePort });
+			
+			//-----------------------------------------------------------
+
+			SubmitClientConnectToTcpServerJob();
 		}
 
 		~GameLayer()
 		{
-			ServerCloseClients();
+			TcpServerCloseClients();
+			_udp_server->Close();
 
 			net::Terminate(net::DetailType::Native);
 		}
@@ -594,15 +605,13 @@ namespace np::app
 				if (_window)
 					SubmitCreateSceneJob();
 			}
-
 			{
 				auto scene = _scene.get_access();
 				if (scene && *scene)
 					(*scene)->Render();
 			}
-
 			{
-				auto clients = _server_clients.get_access();
+				auto clients = _tcp_server_clients.get_access();
 				for (auto c = clients->begin(); c != clients->end(); c++)
 				{
 					net::MessageQueue& inbox = (*c)->GetInbox();
@@ -625,22 +634,53 @@ namespace np::app
 					}
 				}
 			}
-
-			tim::SteadyTimestamp now = tim::SteadyClock::now();
-			if (now - _clients_send_msg_timestamp > tim::DblMilliseconds(1000))
 			{
-				_clients_send_msg_timestamp = now;
-				auto clients = _clients.get_access();
-
-				for (auto c = clients->begin(); c != clients->end(); c++)
+				net::MessageQueue& inbox = _udp_server->GetInbox();
+				inbox.ToggleState();
+				for (net::Message msg = inbox.Pop(); msg; msg = inbox.Pop())
 				{
-					net::Message msg;
-					msg.header.type = net::MessageType::Text;
-					msg.body = mem::create_sptr<net::TextMessageBody>(_services->GetAllocator());
-					net::TextMessageBody& msg_body = (net::TextMessageBody&)*msg.body;
-					msg_body.content = "Hello Server!\n\t- client: " + to_str((siz)mem::AddressOf(**c)) + " <3";
-					msg.header.bodySize = msg_body.content.size();
-					(*c)->Send(msg);
+					switch (msg.header.type)
+					{
+					case net::MessageType::Text:
+					{
+						net::TextMessageBody& text = (net::TextMessageBody&)*msg.body;
+						::std::stringstream ss;
+						ss << thr::ThisThread::get_id();
+						NP_ENGINE_LOG_INFO("Server received(" + str(ss.str()) + "):\n" + text.content);
+						break;
+					}
+					default:
+						break;
+					}
+				}
+			}
+			{
+				tim::SteadyTimestamp now = tim::SteadyClock::now();
+				if (now - _clients_send_msg_timestamp > tim::DblMilliseconds(1000))
+				{
+					_clients_send_msg_timestamp = now;
+					{
+						auto clients = _tcp_clients.get_access();
+						for (auto c = clients->begin(); c != clients->end(); c++)
+						{
+							net::Message msg;
+							msg.header.type = net::MessageType::Text;
+							msg.body = mem::create_sptr<net::TextMessageBody>(_services->GetAllocator());
+							net::TextMessageBody& msg_body = (net::TextMessageBody&)*msg.body;
+							msg_body.content = "Hello TCP Server!\n\t- tcp client: " + to_str((siz)mem::AddressOf(**c)) + " <3";
+							msg.header.bodySize = msg_body.content.size();
+							(*c)->Send(msg);
+						}
+					}
+					{
+						net::Message msg;
+						msg.header.type = net::MessageType::Text;
+						msg.body = mem::create_sptr<net::TextMessageBody>(_services->GetAllocator());
+						net::TextMessageBody& msg_body = (net::TextMessageBody&)*msg.body;
+						msg_body.content = "Hello UDP Server!\n\t- udp client: " + to_str((siz)mem::AddressOf(*_udp_client)) + " <3";
+						msg.header.bodySize = msg_body.content.size();
+						_udp_client->SendTo(msg, net::Ipv4{ 127, 0, 0, 1 }, 54555);
+					}
 				}
 			}
 		}
@@ -652,7 +692,6 @@ namespace np::app
 				if (scene && *scene)
 					(*scene)->CleanupVisibles();
 			}
-
 			{
 				// TODO: cleanup our _server_clients and _clients
 			}

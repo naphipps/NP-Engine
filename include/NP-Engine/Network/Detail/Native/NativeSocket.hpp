@@ -23,7 +23,7 @@ namespace np::net::__detail
 	{
 	protected:
 		ui64 _socket;
-		Protocol _protocol; // TODO: do we need this?? I admit, it makes things easier
+		Protocol _protocol;
 		atm_bl _keep_receiving;
 
 		void SendBytes(const chr* src, siz byte_count)
@@ -34,6 +34,24 @@ namespace np::net::__detail
 				i32 sent = send(_socket, src + total, byte_count - total, 0);
 				if (sent < 0)
 				{
+					//NP_ENGINE_LOG_ERROR("SendBytes failed: " + to_str(sent));
+					Close();
+					break;
+				}
+				total += sent;
+			}
+		}
+
+		void SendBytesTo(const chr* src, siz byte_count, const Ip& ip, ui16 port)
+		{
+			NP_ENGINE_PROFILE_FUNCTION();
+			sockaddr_in saddrin = ToSaddrin(ip, port);
+			for (siz total = 0; total < byte_count;)
+			{
+				i32 sent = sendto(_socket, src + total, byte_count - total, 0, (sockaddr*)&saddrin, sizeof(sockaddr_in));
+				if (sent < 0)
+				{
+					//NP_ENGINE_LOG_ERROR("SendBytesTo failed: " + to_str(sent));
 					Close();
 					break;
 				}
@@ -45,9 +63,22 @@ namespace np::net::__detail
 		{
 			for (ui32 total = 0; total < byte_count;)
 			{
-				i32 recvd = recv(_socket, dst + total, byte_count - total, 0);
+				i32 recvd = -1;
+				switch (_protocol)
+				{
+				case Protocol::Tcp:
+					recvd = recv(_socket, dst + total, byte_count - total, 0);
+					break;
+				case Protocol::Udp:
+					recvd = recvfrom(_socket, dst + total, byte_count - total, 0, nullptr, nullptr);
+					break;
+				default:
+					break;
+				}
+
 				if (recvd < 0)
 				{
+					//NP_ENGINE_LOG_ERROR("RecvBytes failed: " + to_str(recvd));
 					Close();
 					break;
 				}
@@ -63,6 +94,17 @@ namespace np::net::__detail
 				SendBytes((chr*)&msg.header, sizeof(MessageHeader));
 				if (msg.header.bodySize > 0)
 					SendBytes((chr*)msg.body->GetData(), msg.header.bodySize);
+			}
+		}
+
+		virtual void DetailSendTo(Message msg, const Ip& ip, ui16 port) override
+		{
+			NP_ENGINE_PROFILE_FUNCTION();
+			if (IsOpen() && msg)
+			{
+				SendBytesTo((chr*)&msg.header, sizeof(MessageHeader), ip, port);
+				if (msg.header.bodySize > 0)
+					SendBytesTo((chr*)msg.body->GetData(), msg.header.bodySize, ip, port);
 			}
 		}
 
@@ -141,7 +183,7 @@ namespace np::net::__detail
 				proto = IPPROTO_TCP;
 				break;
 
-			case Protocol::Udp: // TODO: NOT IMPLEMENTED YET
+			case Protocol::Udp:
 				af = AF_INET;
 				type = SOCK_DGRAM;
 				proto = IPPROTO_UDP;
@@ -171,7 +213,7 @@ namespace np::net::__detail
 #elif NP_ENGINE_PLATFORM_IS_LINUX
 				close(r);
 #else
-	#error // TODO: implement native networking
+	#error implement native networking
 #endif
 			}
 		}
@@ -189,7 +231,7 @@ namespace np::net::__detail
 #elif NP_ENGINE_PLATFORM_IS_LINUX
 				close(_socket);
 #else
-	#error // TODO: implement native networking
+	#error implement native networking
 #endif
 			}
 
@@ -208,7 +250,7 @@ namespace np::net::__detail
 			const siz enable_size = sizeof(i32);
 
 #else
-	#error //TODO: implement native networking
+	#error implement native networking
 #endif
 			for (auto it = options.begin(); it != options.end(); it++)
 			{
@@ -226,7 +268,7 @@ namespace np::net::__detail
 #elif NP_ENGINE_PLATFORM_IS_LINUX
 					setsockopt(_socket, SOL_SOCKET, SO_REUSEPORT, &enable, enable_size);
 #else
-	#error //TODO: implement native networking
+	#error implement native networking
 #endif
 					break;
 				}
@@ -247,7 +289,7 @@ namespace np::net::__detail
 			const siz disable_size = sizeof(i32);
 
 #else
-	#error //TODO: implement native networking
+	#error implement native networking
 #endif
 			for (auto it = options.begin(); it != options.end(); it++)
 			{
@@ -265,7 +307,7 @@ namespace np::net::__detail
 #elif NP_ENGINE_PLATFORM_IS_LINUX
 					setsockopt(_socket, SOL_SOCKET, SO_REUSEPORT, &disable, disable_size);
 #else
-	#error //TODO: implement native networking
+	#error implement native networking
 #endif
 					break;
 				}
@@ -285,23 +327,13 @@ namespace np::net::__detail
 			NP_ENGINE_PROFILE_FUNCTION();
 			if (IsOpen())
 			{
-				sockaddr_in saddrin{};
-				switch (_protocol)
+				sockaddr_in saddrin = ToSaddrin(ip, port);
+				i32 err = bind(_socket, (sockaddr*)&saddrin, sizeof(sockaddr_in));
+				if (err)
 				{
-				case Protocol::Tcp:
-				{
-					saddrin.sin_family = AF_INET;
-					Ipv4& ipv4 = (Ipv4&)ip;
-					mem::CopyBytes(&saddrin.sin_addr.s_addr, ipv4.bytes.data(), ipv4.bytes.size());
-					saddrin.sin_port = htons(port);
-					break;
-				}
-				default:
-					break;
-				}
-
-				if (bind(_socket, (sockaddr*)&saddrin, sizeof(sockaddr_in)) != 0)
+					//NP_ENGINE_LOG_ERROR("BindTo failed: " + to_str(err));
 					Close();
+				}
 			}
 		}
 
@@ -310,8 +342,12 @@ namespace np::net::__detail
 			NP_ENGINE_PROFILE_FUNCTION();
 			if (IsOpen())
 			{
-				if (listen(_socket, SOMAXCONN) != 0)
+				i32 err = listen(_socket, SOMAXCONN);
+				if (err)
+				{
+					//NP_ENGINE_LOG_ERROR("Listen failed: " + to_str(err));
 					Close();
+				}
 			}
 		}
 
@@ -321,52 +357,36 @@ namespace np::net::__detail
 			mem::sptr<Socket> client = nullptr;
 			if (IsOpen())
 			{
-				sockaddr_in saddrin{};
-#if NP_ENGINE_PLATFORM_IS_WINDOWS
-				i32 saddrin_size = sizeof(sockaddr_in);
-#elif NP_ENGINE_PLATFORM_IS_LINUX
-				ui32 saddrin_size = sizeof(sockaddr_in);
-#else
-	#error // TODO: implement native networking
-#endif
-				client = Create(GetContext());
-				if (client)
-					((NativeSocket&)*client)._socket = accept(_socket, (sockaddr*)&saddrin, &saddrin_size);
-
 				mem::sptr<srvc::Services> services = GetServices();
 				mem::Allocator& allocator = services->GetAllocator();
 				evnt::EventQueue& event_queue = services->GetEventQueue();
-
 				mem::sptr<Host> host = mem::create_sptr<Host>(allocator);
-				ui16 port = ntohs(saddrin.sin_port);
 
-				switch (saddrin.sin_family)
+				client = Create(GetContext());
+				if (client)
 				{
-				case AF_INET:
-				{
-					Ipv4 ipv4;
-					mem::CopyBytes(ipv4.bytes.data(), &saddrin.sin_addr.s_addr, ipv4.bytes.size());
-					host->ipv4s.emplace(ipv4, port);
-					break;
-				}
-				case AF_INET6: // TODO: NOT IMPLEMENTED YET
-				{
-					Ipv6 ipv6;
-					mem::CopyBytes(ipv6.shorts.data(), &saddrin.sin_addr.s_addr, ipv6.shorts.size() * sizeof(ui16));
-					host->ipv6s.emplace(ipv6, port);
-					break;
-				}
-				default:
-					break;
-				}
+					sockaddr_in saddrin{};
+#if NP_ENGINE_PLATFORM_IS_WINDOWS
+					i32 saddrin_size = sizeof(sockaddr_in);
+#elif NP_ENGINE_PLATFORM_IS_LINUX
+					ui32 saddrin_size = sizeof(sockaddr_in);
+#else
+	#error implement native networking
+#endif
+					NativeSocket& native_client = (NativeSocket&)*client;
+					native_client._socket = accept(_socket, (sockaddr*)&saddrin, &saddrin_size);
+					native_client._protocol = Protocol::Tcp;
 
-				if (enable_client_resolution)
-				{
-					mem::sptr<Resolver> resolver = net::Resolver::Create(_context);
-					if (!host->ipv4s.empty())
-						*host = resolver->GetHost(host->ipv4s.begin()->first);
-					else if (!host->ipv6s.empty())
-						*host = resolver->GetHost(host->ipv6s.begin()->first);
+					if (enable_client_resolution && native_client)
+					{
+						PopulateHost(saddrin, *host);
+						mem::sptr<Resolver> resolver = net::Resolver::Create(_context);
+
+						if (!host->ipv4s.empty())
+							*host = resolver->GetHost(host->ipv4s.begin()->first);
+						else if (!host->ipv6s.empty())
+							*host = resolver->GetHost(host->ipv6s.begin()->first);
+					}
 				}
 
 				event_queue.Push(mem::create_sptr<NetworkClientEvent>(allocator, host, client));
@@ -380,23 +400,13 @@ namespace np::net::__detail
 			NP_ENGINE_PROFILE_FUNCTION();
 			if (IsOpen())
 			{
-				sockaddr_in saddrin{};
-				switch (_protocol)
+				sockaddr_in saddrin = ToSaddrin(ip, port);
+				i32 err = connect(_socket, (sockaddr*)&saddrin, sizeof(sockaddr_in));
+				if (err)
 				{
-				case Protocol::Tcp:
-				{
-					saddrin.sin_family = AF_INET;
-					Ipv4& ipv4 = (Ipv4&)ip;
-					mem::CopyBytes(&saddrin.sin_addr.s_addr, ipv4.bytes.data(), ipv4.bytes.size());
-					saddrin.sin_port = htons(port);
-					break;
-				}
-				default:
-					break;
-				}
-
-				if (connect(_socket, (sockaddr*)&saddrin, sizeof(sockaddr_in)) != 0)
+					//NP_ENGINE_LOG_ERROR("ConnectTo failed: " + to_str(err));
 					Close();
+				}
 			}
 		}
 
@@ -416,9 +426,8 @@ namespace np::net::__detail
 			return _keep_receiving.load(mo_release);
 		}
 
-		virtual void StopReceiving() override // TODO: implement
+		virtual void StopReceiving() override
 		{
-			// TODO: this could affect Close()?
 			_keep_receiving.store(false, mo_release);
 		}
 	};

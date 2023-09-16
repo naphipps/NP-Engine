@@ -31,7 +31,7 @@ namespace np::net
 #elif NP_ENGINE_PLATFORM_IS_LINUX
 			// empty on purpose
 #else
-	#error // TODO: implement native networking
+	#error implement native networking
 #endif
 			break;
 		}
@@ -51,7 +51,7 @@ namespace np::net
 #elif NP_ENGINE_PLATFORM_IS_LINUX
 			// empty on purpose
 #else
-	#error // TODO: implement native networking
+	#error implement native networking
 #endif
 			break;
 		}
@@ -71,7 +71,7 @@ namespace np::net
 #elif NP_ENGINE_PLATFORM_IS_LINUX
 			// empty on purpose
 #else
-	#error // TODO: implement native networking
+	#error implement native networking
 #endif
 			break;
 		}

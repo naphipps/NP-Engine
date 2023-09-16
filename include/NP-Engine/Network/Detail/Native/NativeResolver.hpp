@@ -34,7 +34,6 @@ namespace np::net::__detail
 			if (!res)
 			{
 				host.name = info->ai_canonname;
-
 				for (addrinfo* it = info; it; it = it->ai_next)
 				{
 					switch (it->ai_family)
@@ -42,15 +41,13 @@ namespace np::net::__detail
 					case AF_INET:
 					{
 						sockaddr_in* saddrin = (sockaddr_in*)it->ai_addr;
-						ui16 port = ntohs(saddrin->sin_port);
-
-						Ipv4 ipv4;
-						mem::CopyBytes(ipv4.bytes.data(), &saddrin->sin_addr.s_addr, ipv4.bytes.size());
-						host.ipv4s.emplace(ipv4, port);
+						PopulateHost(*saddrin, host);
 						break;
 					}
-					case AF_INET6: // TODO: NOT IMPLEMENTEDD YET
+					case AF_INET6:
 					{
+						sockaddr_in6* saddrin = (sockaddr_in6*)it->ai_addr;
+						PopulateHost(*saddrin, host);
 						break;
 					}
 					default:
@@ -71,29 +68,8 @@ namespace np::net::__detail
 		{
 			Host host;
 			chr name[NI_MAXHOST]{};
-			i32 res = -1;
-
-			switch (ip.GetType())
-			{
-			case IpType::V4:
-			{
-				Ipv4& ipv4 = (Ipv4&)ip;
-				host.ipv4s.emplace(ipv4, 0);
-
-				sockaddr_in saddrin{};
-				saddrin.sin_family = AF_INET;
-				mem::CopyBytes(&saddrin.sin_addr.s_addr, ipv4.bytes.data(), ipv4.bytes.size());
-
-				res = getnameinfo((sockaddr*)&saddrin, sizeof(sockaddr_in), name, NI_MAXHOST, nullptr, 0, 0);
-				break;
-			}
-			case IpType::V6: // TODO: NOT IMPLEMENTEDD YET
-			{
-				break;
-			}
-			default:
-				break;
-			}
+			sockaddr_in saddrin = ToSaddrin(ip, 0);
+			i32 res = getnameinfo((sockaddr*)&saddrin, sizeof(sockaddr_in), name, NI_MAXHOST, nullptr, 0, 0);
 
 			if (!res)
 				host.name = name;
