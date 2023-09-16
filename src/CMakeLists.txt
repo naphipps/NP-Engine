@@ -559,7 +559,7 @@ elseif(MSVC)
 	)
 endif()
 
-find_package(Vulkan REQUIRED FATAL_ERROR)
+find_package(Vulkan REQUIRED)
 if(NOT Vulkan_FOUND OR NOT DEFINED Vulkan_FOUND)
 	message(FATAL_ERROR "Could not find Vulkan. Install the Vulkan SDK")
 else()
