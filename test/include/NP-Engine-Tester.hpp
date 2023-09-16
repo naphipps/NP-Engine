@@ -667,7 +667,7 @@ namespace np::app
 							msg.header.type = net::MessageType::Text;
 							msg.body = mem::create_sptr<net::TextMessageBody>(_services->GetAllocator());
 							net::TextMessageBody& msg_body = (net::TextMessageBody&)*msg.body;
-							msg_body.content = "Hello TCP Server!\n\t- tcp client: " + to_str((siz)&(**c)) + " <3";
+							msg_body.content = "Hello TCP Server!\n\t- tcp client: " + to_str((siz)mem::AddressOf(**c)) + " <3";
 							msg.header.bodySize = msg_body.content.size();
 							(*c)->Send(msg);
 						}
@@ -677,7 +677,8 @@ namespace np::app
 						msg.header.type = net::MessageType::Text;
 						msg.body = mem::create_sptr<net::TextMessageBody>(_services->GetAllocator());
 						net::TextMessageBody& msg_body = (net::TextMessageBody&)*msg.body;
-						msg_body.content = "Hello UDP Server!\n\t- udp client: " + to_str((siz)&(*_udp_client)) + " <3";
+						msg_body.content =
+							"Hello UDP Server!\n\t- udp client: " + to_str((siz)mem::AddressOf(*_udp_client)) + " <3";
 						msg.header.bodySize = msg_body.content.size();
 						_udp_client->SendTo(msg, net::Ipv4{127, 0, 0, 1}, 54555);
 					}
