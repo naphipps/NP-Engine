@@ -34,7 +34,7 @@ namespace np::net::__detail
 				i32 sent = send(_socket, src + total, byte_count - total, 0);
 				if (sent < 0)
 				{
-					//NP_ENGINE_LOG_ERROR("SendBytes failed: " + to_str(sent));
+					// NP_ENGINE_LOG_ERROR("SendBytes failed: " + to_str(sent));
 					Close();
 					break;
 				}
@@ -51,7 +51,7 @@ namespace np::net::__detail
 				i32 sent = sendto(_socket, src + total, byte_count - total, 0, (sockaddr*)&saddrin, sizeof(sockaddr_in));
 				if (sent < 0)
 				{
-					//NP_ENGINE_LOG_ERROR("SendBytesTo failed: " + to_str(sent));
+					// NP_ENGINE_LOG_ERROR("SendBytesTo failed: " + to_str(sent));
 					Close();
 					break;
 				}
@@ -78,7 +78,7 @@ namespace np::net::__detail
 
 				if (recvd < 0)
 				{
-					//NP_ENGINE_LOG_ERROR("RecvBytes failed: " + to_str(recvd));
+					// NP_ENGINE_LOG_ERROR("RecvBytes failed: " + to_str(recvd));
 					Close();
 					break;
 				}
@@ -331,7 +331,7 @@ namespace np::net::__detail
 				i32 err = bind(_socket, (sockaddr*)&saddrin, sizeof(sockaddr_in));
 				if (err)
 				{
-					//NP_ENGINE_LOG_ERROR("BindTo failed: " + to_str(err));
+					// NP_ENGINE_LOG_ERROR("BindTo failed: " + to_str(err));
 					Close();
 				}
 			}
@@ -345,7 +345,7 @@ namespace np::net::__detail
 				i32 err = listen(_socket, SOMAXCONN);
 				if (err)
 				{
-					//NP_ENGINE_LOG_ERROR("Listen failed: " + to_str(err));
+					// NP_ENGINE_LOG_ERROR("Listen failed: " + to_str(err));
 					Close();
 				}
 			}
@@ -404,7 +404,7 @@ namespace np::net::__detail
 				i32 err = connect(_socket, (sockaddr*)&saddrin, sizeof(sockaddr_in));
 				if (err)
 				{
-					//NP_ENGINE_LOG_ERROR("ConnectTo failed: " + to_str(err));
+					// NP_ENGINE_LOG_ERROR("ConnectTo failed: " + to_str(err));
 					Close();
 				}
 			}

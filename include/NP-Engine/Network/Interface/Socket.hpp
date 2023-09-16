@@ -91,7 +91,7 @@ namespace np::net
 		virtual bl CanSend(const Message& msg) const
 		{
 			NP_ENGINE_ASSERT(msg && msg.header.bodySize <= NP_ENGINE_NETWORK_MAX_MESSAGE_BODY_SIZE,
-				"Message.header.bodySize is larger than " + to_str(NP_ENGINE_NETWORK_MAX_MESSAGE_BODY_SIZE));
+							 "Message.header.bodySize is larger than " + to_str(NP_ENGINE_NETWORK_MAX_MESSAGE_BODY_SIZE));
 
 			bl can = true;
 			if (msg && msg.header.bodySize > NP_ENGINE_NETWORK_MAX_MESSAGE_BODY_SIZE)

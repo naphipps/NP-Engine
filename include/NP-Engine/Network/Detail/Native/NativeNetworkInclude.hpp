@@ -55,7 +55,7 @@ namespace np::net
 			saddrin.sin_port = htons(port);
 			break;
 		}
-		case IpType::V6: //TODO: implement -- I think we'll have to overload this function since sockaddr_in6 is so different
+		case IpType::V6: // TODO: implement -- I think we'll have to overload this function since sockaddr_in6 is so different
 		{
 			NP_ENGINE_ASSERT(false, "ToSaddrin using IpType::V6 is not supported yet");
 			break;
@@ -79,6 +79,6 @@ namespace np::net
 		mem::CopyBytes(ipv6.shorts.data(), &saddrin.sin6_addr.s6_addr, ipv6.shorts.size() * sizeof(ui16));
 		host.ipv6s.emplace(ipv6, ntohs(saddrin.sin6_port));
 	}
-}
+} // namespace np::net
 
 #endif /* NP_ENGINE_NETWORK_NETWORK_INCLUDE_HPP */

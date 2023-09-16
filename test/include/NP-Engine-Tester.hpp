@@ -572,14 +572,14 @@ namespace np::app
 
 			_udp_server = net::Socket::Create(_network_context);
 			_udp_server->Open(net::Protocol::Udp);
-			_udp_server->Enable({ net::SocketOptions::ReuseAddress, net::SocketOptions::ReusePort });
-			_udp_server->BindTo(net::Ipv4{ 127, 0, 0, 1 }, 54555);
+			_udp_server->Enable({net::SocketOptions::ReuseAddress, net::SocketOptions::ReusePort});
+			_udp_server->BindTo(net::Ipv4{127, 0, 0, 1}, 54555);
 			_udp_server->StartReceiving();
 
 			_udp_client = net::Socket::Create(_network_context);
 			_udp_client->Open(net::Protocol::Udp);
-			_udp_client->Enable({ net::SocketOptions::ReuseAddress, net::SocketOptions::ReusePort });
-			
+			_udp_client->Enable({net::SocketOptions::ReuseAddress, net::SocketOptions::ReusePort});
+
 			//-----------------------------------------------------------
 
 			SubmitClientConnectToTcpServerJob();
@@ -679,7 +679,7 @@ namespace np::app
 						net::TextMessageBody& msg_body = (net::TextMessageBody&)*msg.body;
 						msg_body.content = "Hello UDP Server!\n\t- udp client: " + to_str((siz)&(*_udp_client)) + " <3";
 						msg.header.bodySize = msg_body.content.size();
-						_udp_client->SendTo(msg, net::Ipv4{ 127, 0, 0, 1 }, 54555);
+						_udp_client->SendTo(msg, net::Ipv4{127, 0, 0, 1}, 54555);
 					}
 				}
 			}
