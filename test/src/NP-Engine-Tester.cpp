@@ -30,7 +30,8 @@
 		mem::TraitAllocator::Register(allocator);
 		{
 #if NP_ENGINE_PLATFORM_IS_LINUX
-			mem::sptr<siz> x = mem::create_sptr<siz>(allocator); // TODO: linux still signals when this is not here - FIX
+			// mem::sptr<siz> x = mem::create_sptr<siz>(allocator); // TODO: linux still signals when this is not here - FIX
+			// TODO: Debian 12 is fine with above, yet Ubuntu (last I checked) does not like it... do we care?
 #endif
 
 			NP_ENGINE_PROFILE_SCOPE("application lifespan");
