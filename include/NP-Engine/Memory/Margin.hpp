@@ -16,7 +16,7 @@ namespace np::mem::__detail
 	class Margin
 	{
 	private:
-		NP_ENGINE_STATIC_ASSERT(ALIGNMENT >= 2, "This implementation requires ALIGNMENT >= 2 because we use that last bit.");
+		NP_ENGINE_STATIC_ASSERT(ALIGNMENT % 2 == 0, "This implementation requires an even ALIGNMENT because we use that last bit.");
 
 		siz _size_and_is_allocated = 0;
 
