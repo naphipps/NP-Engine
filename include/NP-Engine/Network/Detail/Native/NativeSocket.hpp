@@ -46,10 +46,13 @@ namespace np::net::__detail
 		void SendBytesTo(const chr* src, siz byte_count, const Ip& ip, ui16 port)
 		{
 			NP_ENGINE_PROFILE_FUNCTION();
-			sockaddr_in saddrin = ToSaddrin(ip, port);
+			sockaddr_in saddrin4{};
+			sockaddr_in6 saddrin6{};
+			auto saddrin = ToSaddrin(ip, port, saddrin4, saddrin6);
+
 			for (siz total = 0; total < byte_count;)
 			{
-				i32 sent = sendto(_socket, src + total, byte_count - total, 0, (sockaddr*)&saddrin, sizeof(sockaddr_in));
+				i32 sent = sendto(_socket, src + total, byte_count - total, 0, saddrin.first, saddrin.second);
 				if (sent < 0)
 				{
 					// NP_ENGINE_LOG_ERROR("SendBytesTo failed: " + to_str(sent));
@@ -333,8 +336,11 @@ namespace np::net::__detail
 			NP_ENGINE_PROFILE_FUNCTION();
 			if (IsOpen())
 			{
-				sockaddr_in saddrin = ToSaddrin(ip, port);
-				i32 err = bind(_socket, (sockaddr*)&saddrin, sizeof(sockaddr_in));
+				sockaddr_in saddrin4{};
+				sockaddr_in6 saddrin6{};
+				auto saddrin = ToSaddrin(ip, port, saddrin4, saddrin6);
+
+				i32 err = bind(_socket, saddrin.first, saddrin.second);
 				if (err)
 				{
 					// NP_ENGINE_LOG_ERROR("BindTo failed: " + to_str(err));
@@ -406,8 +412,11 @@ namespace np::net::__detail
 			NP_ENGINE_PROFILE_FUNCTION();
 			if (IsOpen())
 			{
-				sockaddr_in saddrin = ToSaddrin(ip, port);
-				i32 err = connect(_socket, (sockaddr*)&saddrin, sizeof(sockaddr_in));
+				sockaddr_in saddrin4{};
+				sockaddr_in6 saddrin6{};
+				auto saddrin = ToSaddrin(ip, port, saddrin4, saddrin6);
+
+				i32 err = connect(_socket, saddrin.first, saddrin.second);
 				if (err)
 				{
 					// NP_ENGINE_LOG_ERROR("ConnectTo failed: " + to_str(err));

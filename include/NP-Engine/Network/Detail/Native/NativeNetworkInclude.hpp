@@ -42,29 +42,44 @@
 
 namespace np::net
 {
-	static sockaddr_in ToSaddrin(const Ip& ip, ui16 port)
+	namespace __detail
 	{
-		sockaddr_in saddrin{};
+		static void PopulateSaddrin(sockaddr_in& saddrin, const Ipv4 ipv4, const ui16 port)
+		{
+			saddrin.sin_family = AF_INET;
+			mem::CopyBytes(&saddrin.sin_addr.s_addr, ipv4.bytes.data(), ipv4.bytes.size());
+			saddrin.sin_port = htons(port);
+		}
+
+		static void PopulateSaddrin(sockaddr_in6& saddrin, const Ipv6 ipv6, const ui16 port)
+		{
+			saddrin.sin6_family = AF_INET6;
+			mem::CopyBytes(&saddrin.sin6_addr.s6_addr, ipv6.shorts.data(), ipv6.shorts.size() * sizeof(ui16));
+			saddrin.sin6_port = htons(port);
+		}
+	}
+
+	static ::std::pair<sockaddr*, siz> ToSaddrin(const Ip& ip, ui16 port, sockaddr_in& saddrin4, sockaddr_in6& saddrin6)
+	{
+		::std::pair<sockaddr*, siz> saddrin{nullptr, 0};
 		switch (ip.GetType())
 		{
 		case IpType::V4:
-		{
-			saddrin.sin_family = AF_INET;
-			Ipv4& ipv4 = (Ipv4&)ip;
-			mem::CopyBytes(&saddrin.sin_addr.s_addr, ipv4.bytes.data(), ipv4.bytes.size());
-			saddrin.sin_port = htons(port);
+			__detail::PopulateSaddrin(saddrin4, (Ipv4&)ip, port);
+			saddrin = {(sockaddr*)&saddrin4, sizeof(sockaddr_in)};
 			break;
-		}
-		case IpType::V6: // TODO: implement -- I think we'll have to overload this function since sockaddr_in6 is so different
-		{
-			NP_ENGINE_ASSERT(false, "ToSaddrin using IpType::V6 is not supported yet");
+
+		case IpType::V6:
+			__detail::PopulateSaddrin(saddrin6, (Ipv6&)ip, port);
+			saddrin = {(sockaddr*)&saddrin6, sizeof(sockaddr_in6)};
 			break;
-		}
+
 		default:
 			break;
 		}
 		return saddrin;
 	}
+
 
 	static void PopulateHost(const sockaddr_in& saddrin, Host& host)
 	{

@@ -29,9 +29,8 @@ namespace np::net::__detail
 			hints.ai_flags = AI_CANONNAME;
 
 			addrinfo* info = nullptr;
-			i32 res = getaddrinfo(host.name.c_str(), nullptr, &hints, &info);
-
-			if (!res)
+			i32 err = getaddrinfo(host.name.c_str(), nullptr, &hints, &info);
+			if (!err)
 			{
 				host.name = info->ai_canonname;
 				for (addrinfo* it = info; it; it = it->ai_next)
@@ -39,17 +38,13 @@ namespace np::net::__detail
 					switch (it->ai_family)
 					{
 					case AF_INET:
-					{
-						sockaddr_in* saddrin = (sockaddr_in*)it->ai_addr;
-						PopulateHost(*saddrin, host);
+						PopulateHost(*(sockaddr_in*)it->ai_addr, host);
 						break;
-					}
+						
 					case AF_INET6:
-					{
-						sockaddr_in6* saddrin = (sockaddr_in6*)it->ai_addr;
-						PopulateHost(*saddrin, host);
+						PopulateHost(*(sockaddr_in6*)it->ai_addr, host);
 						break;
-					}
+						
 					default:
 						break;
 					}
@@ -66,12 +61,14 @@ namespace np::net::__detail
 
 		virtual Host GetHost(const Ip& ip) override
 		{
+			sockaddr_in saddrin4{};
+			sockaddr_in6 saddrin6{};
+			auto saddrin = ToSaddrin(ip, 0, saddrin4, saddrin6);
+
 			Host host;
 			chr name[NI_MAXHOST]{};
-			sockaddr_in saddrin = ToSaddrin(ip, 0);
-			i32 res = getnameinfo((sockaddr*)&saddrin, sizeof(sockaddr_in), name, NI_MAXHOST, nullptr, 0, 0);
-
-			if (!res)
+			i32 err = getnameinfo(saddrin.first, saddrin.second, name, NI_MAXHOST, nullptr, 0, 0);
+			if (!err)
 				host.name = name;
 
 			host.aliases.emplace(host.name);
