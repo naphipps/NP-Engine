@@ -12,6 +12,8 @@
 
 #include "NP-Engine/Vendor/VulkanInclude.hpp"
 
+// TODO: Move all vulkan physical device stuff to here
+
 namespace np::gpu::__detail
 {
 	enum class VulkanPhysicalDeviceType : ui32
