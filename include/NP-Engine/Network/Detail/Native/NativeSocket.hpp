@@ -144,15 +144,20 @@ namespace np::net::__detail
 			Message msg;
 			if (_direct_mode.load(mo_acquire))
 			{
-				ui8 blob[NP_ENGINE_NETWORK_MAX_MESSAGE_BODY_SIZE];
-				i32 recvd = RecvBytes((chr*)blob, NP_ENGINE_NETWORK_MAX_MESSAGE_BODY_SIZE, true);
+				msg.header.type = MessageType::Blob;
+				msg.header.bodySize = NP_ENGINE_NETWORK_MAX_MESSAGE_BODY_SIZE;
+				msg.body = mem::create_sptr<BlobMessageBody>(GetServices()->GetAllocator());
+				msg.body->SetSize(msg.header.bodySize);
+
+				i32 recvd = RecvBytes((chr*)msg.body->GetData(), msg.header.bodySize, true);
 				if (recvd > 0)
 				{
-					msg.header.type = MessageType::Blob;
 					msg.header.bodySize = recvd;
-					msg.body = mem::create_sptr<BlobMessageBody>(GetServices()->GetAllocator());
-					msg.body->SetSize(recvd);
-					mem::CopyBytes(msg.body->GetData(), blob, msg.header.bodySize);
+					msg.body->SetSize(msg.header.bodySize);
+				}
+				else
+				{
+					msg.Invalidate();
 				}
 			}
 			else
