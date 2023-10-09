@@ -53,7 +53,7 @@ namespace np::gpu::__detail
 			other._command_pool = nullptr;
 		}
 
-		~VulkanCommandPool() // TODO: all these need virtual
+		~VulkanCommandPool()
 		{
 			Dispose();
 		}
