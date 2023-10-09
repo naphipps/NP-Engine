@@ -1,3 +1,3 @@
 #! /bin/sh
 
-cd ../out/build; make -j $(nproc --all)
+cd ../out/build; make -j
