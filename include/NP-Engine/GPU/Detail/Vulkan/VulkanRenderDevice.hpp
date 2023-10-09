@@ -24,7 +24,7 @@ namespace np::gpu::__detail
 	class VulkanRenderDevice : public RenderDevice
 	{
 	private:
-		VkPhysicalDevice _physical_device;
+		VulkanPhysicalDevice _physical_device;
 		ui32 _graphics_family_index;
 		ui32 _present_family_index;
 		VkSurfaceFormatKHR _surface_format;
@@ -34,7 +34,7 @@ namespace np::gpu::__detail
 		mem::sptr<VulkanQueue> _graphics_queue;
 		mem::sptr<VulkanQueue> _present_queue;
 
-		static siz GetPhysicalDeviceScore(VkPhysicalDevice physical_device, mem::sptr<RenderTarget> target)
+		static siz GetPhysicalDeviceScore(VulkanPhysicalDevice physical_device, mem::sptr<RenderTarget> target)
 		{
 			siz score = 0;
 
@@ -76,8 +76,6 @@ namespace np::gpu::__detail
 					break;
 				}
 
-				// TODO: go through all properties and features to determine best score...
-
 				if (features.samplerAnisotropy == VK_TRUE)
 					score += 200;
 
@@ -88,8 +86,7 @@ namespace np::gpu::__detail
 
 				// check queue families
 				{
-					con::vector<VkQueueFamilyProperties> queue_family_properties =
-						VulkanLogicalDevice::GetQueueFamilyProperties(physical_device);
+					con::vector<VkQueueFamilyProperties> queue_family_properties = physical_device.GetQueueFamilyProperties();
 
 					for (siz i = 0; i < queue_family_properties.size(); i++)
 					{
@@ -113,8 +110,7 @@ namespace np::gpu::__detail
 					if (required_extensions.size() > 0)
 					{
 						con::uset<str> required_extensions_set(required_extensions.begin(), required_extensions.end());
-						con::vector<str> supported_extensions =
-							VulkanLogicalDevice::GetSupportedDeviceExtensionNames(physical_device);
+						con::vector<str> supported_extensions = physical_device.GetSupportedDeviceExtensionNames();
 						for (const str& e : supported_extensions)
 							required_extensions_set.erase(e);
 						supports_required_extensions = required_extensions_set.empty();
@@ -131,7 +127,7 @@ namespace np::gpu::__detail
 					if (required_layers.size() > 0)
 					{
 						con::uset<str> required_layers_set(required_layers.begin(), required_layers.end());
-						con::vector<str> supported_layers = VulkanLogicalDevice::GetSupportedDeviceLayerNames(physical_device);
+						con::vector<str> supported_layers = physical_device.GetSupportedDeviceLayerNames();
 						for (const str& l : supported_layers)
 							required_layers_set.erase(l);
 						supports_required_layers = required_layers_set.empty();
@@ -152,19 +148,18 @@ namespace np::gpu::__detail
 			return score;
 		}
 
-		static VkPhysicalDevice ChoosePhysicalDevice(mem::sptr<RenderTarget> render_target)
+		static VulkanPhysicalDevice ChoosePhysicalDevice(mem::sptr<RenderTarget> render_target)
 		{
-			VkPhysicalDevice physical_device = nullptr;
-
+			VulkanPhysicalDevice physical_device;
 			if (render_target)
 			{
 				mem::sptr<DetailInstance> instance = render_target->GetInstance();
 
-				using CandidateType = ::std::pair<siz, VkPhysicalDevice>;
-				con::vector<VkPhysicalDevice> physical_devices = VulkanLogicalDevice::GetPhysicalDevices(instance);
+				using CandidateType = ::std::pair<siz, VulkanPhysicalDevice>;
+				con::vector<VulkanPhysicalDevice> physical_devices = VulkanPhysicalDevice::GetAllDevices(instance);
 				con::vector<CandidateType> candidates;
 
-				for (VkPhysicalDevice pd : physical_devices)
+				for (VulkanPhysicalDevice pd : physical_devices)
 					candidates.emplace_back(GetPhysicalDeviceScore(pd, render_target), pd);
 
 				::std::sort(candidates.begin(), candidates.end(),
@@ -176,133 +171,24 @@ namespace np::gpu::__detail
 				if (!candidates.empty() && candidates.front().first > 0)
 					physical_device = candidates.front().second;
 			}
-
 			return physical_device;
 		}
 
-		static ui32 GetGraphicsFamilyIndex(VkPhysicalDevice physical_device)
-		{
-			::std::optional<ui32> graphics_family_index;
-			graphics_family_index.reset(); // ensure it is reset
-
-			ui32 count = 0;
-			vkGetPhysicalDeviceQueueFamilyProperties(physical_device, &count, nullptr);
-			con::vector<VkQueueFamilyProperties> queue_families(count);
-			vkGetPhysicalDeviceQueueFamilyProperties(physical_device, &count, queue_families.data());
-
-			for (siz i = 0; i < queue_families.size() && !graphics_family_index.has_value(); i++)
-				if (queue_families[i].queueFlags & VK_QUEUE_GRAPHICS_BIT) // TODO: we may want to compare other queue families?
-					graphics_family_index = (ui32)i;
-
-			NP_ENGINE_ASSERT(graphics_family_index.has_value(), "we require graphics family index");
-			return graphics_family_index.value();
-		}
-
-		static ui32 GetPresentFamilyIndex(VkPhysicalDevice physical_device, mem::sptr<RenderTarget> target)
-		{
-			VulkanRenderTarget& render_target = (VulkanRenderTarget&)(*target);
-			::std::optional<ui32> present_family_index;
-			present_family_index.reset();
-
-			ui32 count = 0;
-			vkGetPhysicalDeviceQueueFamilyProperties(physical_device, &count, nullptr);
-			con::vector<VkQueueFamilyProperties> queue_families(count);
-			vkGetPhysicalDeviceQueueFamilyProperties(physical_device, &count, queue_families.data());
-
-			for (siz i = 0; i < queue_families.size() && !present_family_index.has_value(); i++)
-			{
-				VkBool32 supported = VK_FALSE;
-				vkGetPhysicalDeviceSurfaceSupportKHR(physical_device, i, render_target, &supported);
-				if (supported == VK_TRUE)
-					present_family_index = (ui32)i;
-			}
-
-			NP_ENGINE_ASSERT(present_family_index.has_value(), "we require present family index");
-			return present_family_index.value();
-		}
-
-		static con::vector<VkDeviceQueueCreateInfo> CreateQueueCreateInfos(VkPhysicalDevice physical_device,
-																		   con::oset<ui32> families)
+		static con::vector<VkDeviceQueueCreateInfo> CreateQueueCreateInfos(con::oset<ui32> families)
 		{
 			con::vector<VkDeviceQueueCreateInfo> infos;
-
-			if (physical_device)
+			for (ui32 family : families)
 			{
-				for (ui32 family : families)
-				{
-					VkDeviceQueueCreateInfo info{};
-					info.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-					info.queueFamilyIndex = family;
-					infos.emplace_back(info);
-				}
+				VkDeviceQueueCreateInfo info{};
+				info.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+				info.queueFamilyIndex = family;
+				infos.emplace_back(info);
 			}
-
 			return infos;
 		}
 
-		static VkSurfaceFormatKHR ChooseSurfaceFormat(VkPhysicalDevice physical_device, mem::sptr<RenderTarget> target)
-		{
-			VkSurfaceFormatKHR surface_format = {};
-
-			if (physical_device)
-			{
-				VulkanRenderTarget& render_target = (VulkanRenderTarget&)(*target);
-
-				ui32 count;
-				vkGetPhysicalDeviceSurfaceFormatsKHR(physical_device, render_target, &count, nullptr);
-				con::vector<VkSurfaceFormatKHR> surface_formats(count);
-				vkGetPhysicalDeviceSurfaceFormatsKHR(physical_device, render_target, &count, surface_formats.data());
-
-				surface_format = surface_formats.front(); // default
-
-				// TODO: may need to rank formats to choose best one
-				for (VkSurfaceFormatKHR& f : surface_formats)
-					if (f.format == VK_FORMAT_B8G8R8A8_SRGB && f.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR)
-					{
-						surface_format = f;
-						break;
-					}
-			}
-
-			return surface_format;
-		}
-
-		static VkPresentModeKHR ChoosePresentMode(VkPhysicalDevice physical_device, mem::sptr<RenderTarget> target)
-		{
-			VkPresentModeKHR present_mode = {};
-
-			if (physical_device)
-			{
-				VulkanRenderTarget& render_target = (VulkanRenderTarget&)(*target);
-
-				ui32 count;
-				vkGetPhysicalDeviceSurfacePresentModesKHR(physical_device, render_target, &count, nullptr);
-				con::vector<VkPresentModeKHR> present_modes(count);
-				vkGetPhysicalDeviceSurfacePresentModesKHR(physical_device, render_target, &count, present_modes.data());
-
-				present_mode =
-					VK_PRESENT_MODE_FIFO_KHR; // default - if we ever decide to support mobile, then we'll want to use fifo
-
-				for (VkPresentModeKHR& p : present_modes)
-					if (p == VK_PRESENT_MODE_IMMEDIATE_KHR)
-					{
-						present_mode = p;
-						break;
-					}
-
-				for (VkPresentModeKHR& p : present_modes)
-					if (p == VK_PRESENT_MODE_MAILBOX_KHR)
-					{
-						present_mode = p;
-						break;
-					}
-			}
-
-			return present_mode;
-		}
-
 		static mem::sptr<VulkanLogicalDevice> CreateLogicalDevice(mem::sptr<srvc::Services> services,
-																  VkPhysicalDevice physical_device,
+																  VulkanPhysicalDevice physical_device,
 																  con::vector<VkDeviceQueueCreateInfo> queue_infos)
 		{
 			return mem::create_sptr<VulkanLogicalDevice>(services->GetAllocator(), services, physical_device, queue_infos);
@@ -333,13 +219,12 @@ namespace np::gpu::__detail
 		VulkanRenderDevice(mem::sptr<RenderTarget> target):
 			RenderDevice(target),
 			_physical_device(ChoosePhysicalDevice(target)),
-			_graphics_family_index(GetGraphicsFamilyIndex(_physical_device)),
-			_present_family_index(GetPresentFamilyIndex(_physical_device, target)),
-			_surface_format(ChooseSurfaceFormat(_physical_device, target)),
-			_present_mode(ChoosePresentMode(_physical_device, target)),
+			_graphics_family_index(_physical_device.GetGraphicsFamilyIndex()),
+			_present_family_index(_physical_device.GetPresentFamilyIndex(target)),
+			_surface_format(_physical_device.ChooseSurfaceFormat(target)),
+			_present_mode(_physical_device.ChoosePresentMode(target)),
 			_device(
-				CreateLogicalDevice(GetServices(), _physical_device,
-									CreateQueueCreateInfos(_physical_device, {_graphics_family_index, _present_family_index}))),
+				CreateLogicalDevice(GetServices(), _physical_device, CreateQueueCreateInfos({_graphics_family_index, _present_family_index}))),
 			_command_pool(CreateCommandPool(GetServices(), _device, CreateCommandPoolInfo(_graphics_family_index))),
 			_graphics_queue(CreateQueue(GetServices(), _device, _graphics_family_index, 0)),
 			_present_queue(CreateQueue(GetServices(), _device, _present_family_index, 0))
@@ -388,7 +273,7 @@ namespace np::gpu::__detail
 			return _device->GetPhysicalDeviceName();
 		}
 
-		VkPhysicalDevice GetPhysicalDevice() const
+		VulkanPhysicalDevice GetPhysicalDevice() const
 		{
 			return _physical_device;
 		}

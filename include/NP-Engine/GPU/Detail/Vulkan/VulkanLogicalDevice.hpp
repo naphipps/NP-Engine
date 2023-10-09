@@ -25,7 +25,7 @@ namespace np::gpu::__detail
 	{
 	private:
 		mem::sptr<srvc::Services> _services;
-		VkPhysicalDevice _physical_device;
+		VulkanPhysicalDevice _physical_device;
 		VkDevice _device;
 
 		static VkDeviceCreateInfo CreateDeviceInfo()
@@ -35,10 +35,9 @@ namespace np::gpu::__detail
 			return info;
 		}
 
-		static VkDevice CreateLogicalDevice(VkPhysicalDevice physical_device, con::vector<VkDeviceQueueCreateInfo> queue_infos)
+		static VkDevice CreateLogicalDevice(VulkanPhysicalDevice physical_device, con::vector<VkDeviceQueueCreateInfo> queue_infos)
 		{
 			VkDevice logical_device = nullptr;
-
 			if (physical_device)
 			{
 				VkPhysicalDeviceFeatures physical_features{};
@@ -71,7 +70,7 @@ namespace np::gpu::__detail
 				enable_coherent_memory_amd.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_COHERENT_MEMORY_FEATURES_AMD;
 				enable_coherent_memory_amd.deviceCoherentMemory = VK_TRUE;
 
-				if (VulkanPhysicalDevice::GetType(physical_device) == VulkanPhysicalDeviceType::Amd)
+				if (physical_device.GetType() == VulkanPhysicalDeviceType::Amd)
 					physical_features12.pNext = &enable_coherent_memory_amd;
 
 				VkDeviceCreateInfo device_info = CreateDeviceInfo();
@@ -87,7 +86,6 @@ namespace np::gpu::__detail
 				if (vkCreateDevice(physical_device, &device_info, nullptr, &logical_device) != VK_SUCCESS)
 					logical_device = nullptr;
 			}
-
 			return logical_device;
 		}
 
@@ -108,69 +106,14 @@ namespace np::gpu::__detail
 			return {};
 		}
 
-		static con::vector<VkPhysicalDevice> GetPhysicalDevices(mem::sptr<DetailInstance> instance)
-		{
-			VulkanInstance& vulkan_instance = (VulkanInstance&)(*instance);
-			ui32 count = 0;
-			vkEnumeratePhysicalDevices(vulkan_instance, &count, nullptr);
-			con::vector<VkPhysicalDevice> devices(count);
-			vkEnumeratePhysicalDevices(vulkan_instance, &count, devices.data());
-			return devices;
-		}
-
-		static con::vector<VkLayerProperties> GetSupportedDeviceLayers(VkPhysicalDevice physical_device)
-		{
-			ui32 count;
-			vkEnumerateDeviceLayerProperties(physical_device, &count, nullptr);
-			con::vector<VkLayerProperties> layers(count);
-			vkEnumerateDeviceLayerProperties(physical_device, &count, layers.data());
-			return layers;
-		}
-
-		static con::vector<str> GetSupportedDeviceLayerNames(VkPhysicalDevice physical_device)
-		{
-			con::vector<VkLayerProperties> layers = GetSupportedDeviceLayers(physical_device);
-			con::vector<str> names;
-			for (VkLayerProperties& layer : layers)
-				names.emplace_back(layer.layerName);
-			return names;
-		}
-
-		static con::vector<VkQueueFamilyProperties> GetQueueFamilyProperties(VkPhysicalDevice physical_device)
-		{
-			ui32 count = 0;
-			vkGetPhysicalDeviceQueueFamilyProperties(physical_device, &count, nullptr);
-			con::vector<VkQueueFamilyProperties> properties(count);
-			vkGetPhysicalDeviceQueueFamilyProperties(physical_device, &count, properties.data());
-			return properties;
-		}
-
-		static con::vector<VkExtensionProperties> GetSupportedDeviceExtensions(VkPhysicalDevice physical_device)
-		{
-			ui32 count = 0;
-			vkEnumerateDeviceExtensionProperties(physical_device, nullptr, &count, nullptr);
-			con::vector<VkExtensionProperties> extensions(count);
-			vkEnumerateDeviceExtensionProperties(physical_device, nullptr, &count, extensions.data());
-			return extensions;
-		}
-
-		static con::vector<str> GetSupportedDeviceExtensionNames(VkPhysicalDevice physical_device)
-		{
-			con::vector<VkExtensionProperties> extensions = GetSupportedDeviceExtensions(physical_device);
-			con::vector<str> names;
-			for (VkExtensionProperties& e : extensions)
-				names.emplace_back(e.extensionName);
-			return names;
-		}
-
-		VulkanLogicalDevice(mem::sptr<srvc::Services> services, VkPhysicalDevice physical_device,
+		VulkanLogicalDevice(mem::sptr<srvc::Services> services, VulkanPhysicalDevice physical_device,
 							con::vector<VkDeviceQueueCreateInfo> queue_infos):
 			_services(services),
 			_physical_device(physical_device),
 			_device(CreateLogicalDevice(_physical_device, queue_infos))
 		{}
 
-		~VulkanLogicalDevice()
+		virtual ~VulkanLogicalDevice()
 		{
 			if (_device)
 			{
@@ -192,18 +135,16 @@ namespace np::gpu::__detail
 		str GetPhysicalDeviceName() const
 		{
 			str name = "";
-
 			if (_physical_device)
 			{
 				VkPhysicalDeviceProperties properties;
 				vkGetPhysicalDeviceProperties(_physical_device, &properties);
 				name = properties.deviceName;
 			}
-
 			return name;
 		}
 
-		VkPhysicalDevice GetPhysicalDevice() const
+		VulkanPhysicalDevice GetPhysicalDevice() const
 		{
 			return _physical_device;
 		}
@@ -225,7 +166,6 @@ namespace np::gpu::__detail
 									VkFormatFeatureFlags format_features) const
 		{
 			VkFormat format = VK_FORMAT_UNDEFINED;
-
 			for (const VkFormat& format_candidate : format_candidates)
 			{
 				VkFormatProperties format_properties;
@@ -243,7 +183,6 @@ namespace np::gpu::__detail
 					break;
 				}
 			}
-
 			return format;
 		}
 	};
