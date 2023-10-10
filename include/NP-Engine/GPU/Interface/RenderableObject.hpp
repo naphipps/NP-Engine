@@ -22,6 +22,8 @@ namespace np::gpu
 		RenderableMetaValues _meta;
 
 	public:
+		virtual ~RenderableObject() = default;
+
 		virtual RenderableMetaValues& GetMetaValues()
 		{
 			return _meta;

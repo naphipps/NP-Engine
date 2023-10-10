@@ -25,6 +25,8 @@ namespace np::gpu
 	public:
 		static mem::sptr<RenderShader> Create(mem::sptr<RenderDevice> device, Shader::Properties properties);
 
+		virtual ~RenderShader() = default;
+
 		virtual DetailType GetDetailType() const
 		{
 			return _device->GetDetailType();

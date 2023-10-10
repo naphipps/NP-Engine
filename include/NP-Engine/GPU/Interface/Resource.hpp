@@ -13,6 +13,8 @@ namespace np::gpu
 {
 	struct Resource
 	{
+		virtual ~Resource() = default;
+
 		virtual ResourceType GetType() const = 0;
 	};
 } // namespace np::gpu

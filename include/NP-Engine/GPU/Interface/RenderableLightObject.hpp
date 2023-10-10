@@ -22,6 +22,8 @@ namespace np::gpu
 		} // lights do not need this
 
 	public:
+		virtual ~RenderableLightObject() = default;
+
 		virtual void Stage(mem::sptr<CommandStaging> command_staging, mem::sptr<Pipeline> pipline,
 						   mem::sptr<Resource> resource) = 0;
 	};

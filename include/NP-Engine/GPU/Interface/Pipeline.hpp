@@ -19,7 +19,10 @@ namespace np::gpu
 		con::vector<PipelineMetaValues> _meta_values;
 
 	public:
+		virtual ~Pipeline() = default;
+
 		virtual PipelineMetaValues GetMetaValues() const = 0;
+
 		virtual void SetMetaValues(PipelineMetaValues meta_values) = 0;
 	};
 } // namespace np::gpu

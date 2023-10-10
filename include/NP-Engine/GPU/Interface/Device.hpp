@@ -110,6 +110,8 @@ namespace np::gpu
 		mutexed_wrapper<con::umap<uid::Uid, mem::sptr<Resource>>> _resources; // TODO: is umap the best here? what about vector?
 
 	public:
+		virtual ~Device() = default;
+
 		virtual void Register(uid::Uid id, mem::sptr<Resource> resource)
 		{
 			(*_resources.get_access())[id] = resource;

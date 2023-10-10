@@ -62,6 +62,8 @@ namespace np::gpu
 			other.Clear();
 		}
 
+		virtual ~Image() = default;
+
 		Image& operator=(const Image& other)
 		{
 			_width = other._width;

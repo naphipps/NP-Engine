@@ -14,6 +14,8 @@ namespace np::gpu
 	class CommandBuffer
 	{
 	public:
+		virtual ~CommandBuffer() = default;
+
 		virtual bl IsValid() const = 0;
 
 		virtual void Invalidate() = 0;

@@ -23,6 +23,8 @@ namespace np::gpu
 	public:
 		static mem::sptr<DetailInstance> Create(DetailType detail_type, mem::sptr<srvc::Services> services);
 
+		virtual ~DetailInstance() = default;
+
 		virtual DetailType GetDetailType() const
 		{
 			return DetailType::None;

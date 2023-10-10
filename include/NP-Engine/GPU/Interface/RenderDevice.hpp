@@ -23,6 +23,8 @@ namespace np::gpu
 	public:
 		static mem::sptr<RenderDevice> Create(mem::sptr<RenderTarget> target);
 
+		virtual ~RenderDevice() = default;
+
 		virtual mem::sptr<DetailInstance> GetInstance() const override
 		{
 			return _target->GetInstance();

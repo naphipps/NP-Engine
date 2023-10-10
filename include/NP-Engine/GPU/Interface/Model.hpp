@@ -75,6 +75,8 @@ namespace np::gpu
 			_indices(::std::move(other._indices))
 		{}
 
+		virtual ~Model() = default;
+
 		Model& operator=(const Model& other)
 		{
 			_texture = other._texture;

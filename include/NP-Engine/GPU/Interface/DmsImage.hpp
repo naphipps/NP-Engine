@@ -255,6 +255,8 @@ namespace np::alg // TODO: refactor DMS stuff to DualMarchingSquares
 
 		DmsImage(gpu::Image& image, Subview subview): _image_subview(image, subview) {}
 
+		virtual ~DmsImage() = default;
+
 		dbl GetIsovalue(const Point& point, gpu::ColorChannel channel) const
 		{
 			return GetIsovalue(_image_subview, point, channel);

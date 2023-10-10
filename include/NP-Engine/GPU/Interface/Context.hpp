@@ -21,6 +21,8 @@ namespace np::gpu
 		Context() {}
 
 	public:
+		virtual ~Context() = default;
+
 		virtual DetailType GetDetailType() const = 0;
 	};
 } // namespace np::gpu

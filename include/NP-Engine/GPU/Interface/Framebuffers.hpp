@@ -24,6 +24,8 @@ namespace np::gpu
 	public:
 		static mem::sptr<Framebuffers> Create(mem::sptr<RenderPass> render_pass);
 
+		virtual ~Framebuffers() = default;
+
 		virtual DetailType GetDetailType() const
 		{
 			return _render_pass->GetDetailType();

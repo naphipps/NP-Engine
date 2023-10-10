@@ -60,6 +60,8 @@ namespace np::alg
 
 		FloodFillImage(gpu::Image& image, Subview subview): _image_subview(image, subview) {}
 
+		virtual ~FloodFillImage() = default;
+
 		mem::BlDelegate& GetIsApprovedDelegate()
 		{
 			return _is_approved;

@@ -72,6 +72,8 @@ namespace np::gpu
 		Shader(Properties& properties): _properties(properties) {}
 
 	public:
+		virtual ~Shader() = default;
+
 		virtual DetailType GetDetailType() const = 0;
 
 		virtual siz Size() const = 0;

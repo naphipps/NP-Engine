@@ -25,6 +25,8 @@ namespace np::gpu
 	public:
 		static mem::sptr<RenderPass> Create(mem::sptr<RenderContext> context);
 
+		virtual ~RenderPass() = default;
+
 		virtual DetailType GetDetailType() const
 		{
 			return _context->GetDetailType();

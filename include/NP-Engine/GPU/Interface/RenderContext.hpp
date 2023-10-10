@@ -22,6 +22,8 @@ namespace np::gpu
 	public:
 		static mem::sptr<RenderContext> Create(mem::sptr<RenderDevice> device);
 
+		virtual ~RenderContext() = default;
+
 		virtual DetailType GetDetailType() const override
 		{
 			return _device->GetDetailType();

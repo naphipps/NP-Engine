@@ -35,6 +35,8 @@ namespace np::gpu
 	public:
 		static mem::sptr<RenderPipeline> Create(Properties properties);
 
+		virtual ~RenderPipeline() = default;
+
 		virtual DetailType GetDetailType() const
 		{
 			return _properties.framebuffers->GetDetailType();

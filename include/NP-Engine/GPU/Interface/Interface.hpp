@@ -9,8 +9,6 @@
 
 #include "NP-Engine/Foundation/Foundation.hpp"
 
-// TODO: all interface packages need virtual destructors -- all detail packages are not required to have them
-
 #include "Buffer.hpp"
 #include "Camera.hpp"
 #include "Color.hpp"

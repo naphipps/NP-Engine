@@ -16,6 +16,8 @@ namespace np::gpu
 
 	public:
 		// TODO: we need to better understand subpasses and how we can feed the output of one into the input of a later one
+
+		virtual ~Pass() = default;
 	};
 } // namespace np::gpu
 

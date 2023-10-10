@@ -13,6 +13,8 @@ namespace np::gpu
 {
 	struct Buffer : public Resource
 	{
+		virtual ~Buffer() = default;
+
 		virtual ResourceType GetType() const
 		{
 			return ResourceType::Buffer;

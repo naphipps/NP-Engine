@@ -27,6 +27,8 @@ namespace np::gpu
 	public:
 		static mem::sptr<RenderTarget> Create(mem::sptr<DetailInstance> instance, mem::sptr<win::Window> window);
 
+		virtual ~RenderTarget() = default;
+
 		virtual DetailType GetDetailType() const
 		{
 			return _instance->GetDetailType();

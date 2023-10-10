@@ -36,6 +36,8 @@ namespace np::gpu
 
 		// TODO: add move constructor
 
+		virtual ~Light() = default;
+
 		virtual Type GetType() const
 		{
 			return _type;

@@ -101,6 +101,8 @@ namespace np::alg
 
 		DrawableImage(gpu::Image& image, Subview subview): _image_subview(image, subview) {}
 
+		virtual ~DrawableImage() = default;
+
 		ImageSubview& GetImageSubview()
 		{
 			return _image_subview;

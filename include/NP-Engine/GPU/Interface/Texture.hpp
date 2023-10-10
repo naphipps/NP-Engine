@@ -34,6 +34,8 @@ namespace np::gpu
 
 		Texture(Texture&& other) noexcept: Image(::std::move(other)), _hot_reloadable(::std::move(other._hot_reloadable)) {}
 
+		virtual ~Texture() = default;
+
 		Texture& operator=(const Texture& other)
 		{
 			Image::operator=(other);

@@ -40,6 +40,8 @@ namespace np::alg
 
 		ImageSubview(Image& image, Subview subview): _image(image), _subview(subview) {}
 
+		virtual ~ImageSubview() = default;
+
 		void SetSubview(Subview subview)
 		{
 			NP_ENGINE_ASSERT(subview.origin.x <= _image.GetWidth(), "subview origin needs to be within image width");

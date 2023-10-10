@@ -35,6 +35,8 @@ namespace np::gpu
 			other.Invalidate();
 		}
 
+		virtual ~CommandStaging() = default;
+
 		CommandStaging& operator=(CommandStaging&& other) noexcept
 		{
 			_command_buffer = ::std::move(other._command_buffer);
