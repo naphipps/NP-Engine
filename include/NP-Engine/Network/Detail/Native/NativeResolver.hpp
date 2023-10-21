@@ -40,11 +40,11 @@ namespace np::net::__detail
 					case AF_INET:
 						PopulateHost(*(sockaddr_in*)it->ai_addr, host);
 						break;
-						
+
 					case AF_INET6:
 						PopulateHost(*(sockaddr_in6*)it->ai_addr, host);
 						break;
-						
+
 					default:
 						break;
 					}

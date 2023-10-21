@@ -591,11 +591,11 @@ namespace np::app
 
 			_http_socket = net::Socket::Create(_network_context);
 			_http_socket->Open(net::Protocol::Tcp);
-			_http_socket->Enable({ net::SocketOptions::ReuseAddress, net::SocketOptions::ReusePort, net::SocketOptions::Direct });
+			_http_socket->Enable({net::SocketOptions::ReuseAddress, net::SocketOptions::ReusePort, net::SocketOptions::Direct});
 			_http_socket->ConnectTo(host.ipv4s.begin()->first, 80);
 			str http_get = "GET /index.html HTTP/1.1\r\n"
-				"Host: example.com\r\n"
-				"Connection: close\r\n\r\n";
+						   "Host: example.com\r\n"
+						   "Connection: close\r\n\r\n";
 			_http_socket->Send(http_get.data(), http_get.size());
 			_http_socket->StartReceiving();
 
@@ -731,7 +731,7 @@ namespace np::app
 					}
 					{
 						str blob = "hello from blob! >:D";
-						_udp_client->SendTo(blob.data(), blob.size(), net::Ipv4{ 127,0,0,1 }, 54555);
+						_udp_client->SendTo(blob.data(), blob.size(), net::Ipv4{127, 0, 0, 1}, 54555);
 					}
 				}
 			}

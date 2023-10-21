@@ -31,7 +31,6 @@ namespace np::gpu::__detail
 		VkPhysicalDevice _physical_device;
 
 	public:
-
 		static con::vector<VulkanPhysicalDevice> GetAllDevices(mem::sptr<DetailInstance> instance)
 		{
 			VulkanInstance& vulkan_instance = (VulkanInstance&)(*instance);
@@ -46,11 +45,11 @@ namespace np::gpu::__detail
 			return devices;
 		}
 
-		VulkanPhysicalDevice(VkPhysicalDevice physical_device = nullptr) : _physical_device(physical_device) {}
+		VulkanPhysicalDevice(VkPhysicalDevice physical_device = nullptr): _physical_device(physical_device) {}
 
-		VulkanPhysicalDevice(const VulkanPhysicalDevice& other) : _physical_device(other._physical_device) {}
+		VulkanPhysicalDevice(const VulkanPhysicalDevice& other): _physical_device(other._physical_device) {}
 
-		VulkanPhysicalDevice(VulkanPhysicalDevice&& other) noexcept : _physical_device(::std::move(other._physical_device))
+		VulkanPhysicalDevice(VulkanPhysicalDevice&& other) noexcept: _physical_device(::std::move(other._physical_device))
 		{
 			other.Invalidate();
 		}
@@ -177,7 +176,8 @@ namespace np::gpu::__detail
 				vkGetPhysicalDeviceQueueFamilyProperties(_physical_device, &count, queue_families.data());
 
 				for (siz i = 0; i < queue_families.size() && !graphics_family_index.has_value(); i++)
-					if (queue_families[i].queueFlags & VK_QUEUE_GRAPHICS_BIT) // TODO: we may want to compare other queue families?
+					if (queue_families[i].queueFlags & VK_QUEUE_GRAPHICS_BIT)
+						// TODO: we may want to compare other queue families?
 						graphics_family_index = (ui32)i;
 			}
 			NP_ENGINE_ASSERT(graphics_family_index.has_value(), "we require graphics family index");

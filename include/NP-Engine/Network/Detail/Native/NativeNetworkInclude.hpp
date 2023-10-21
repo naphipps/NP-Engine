@@ -57,7 +57,7 @@ namespace np::net
 			mem::CopyBytes(&saddrin.sin6_addr.s6_addr, ipv6.shorts.data(), ipv6.shorts.size() * sizeof(ui16));
 			saddrin.sin6_port = htons(port);
 		}
-	}
+	} // namespace __detail
 
 	static ::std::pair<sockaddr*, siz> ToSaddrin(const Ip& ip, ui16 port, sockaddr_in& saddrin4, sockaddr_in6& saddrin6)
 	{
@@ -79,7 +79,6 @@ namespace np::net
 		}
 		return saddrin;
 	}
-
 
 	static void PopulateHost(const sockaddr_in& saddrin, Host& host)
 	{

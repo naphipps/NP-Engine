@@ -179,7 +179,8 @@ namespace np::net::__detail
 						break;
 
 					default:
-						NP_ENGINE_LOG_CRITICAL("ReceivingProcedure found unsupported MessageType: " + to_str((ui32)msg.header.type));
+						NP_ENGINE_LOG_CRITICAL("ReceivingProcedure found unsupported MessageType: " +
+											   to_str((ui32)msg.header.type));
 						supported = false;
 						break;
 					}
@@ -210,7 +211,11 @@ namespace np::net::__detail
 		}
 
 	public:
-		NativeSocket(mem::sptr<Context> context): Socket(context), _protocol(Protocol::None), _keep_receiving(false), _direct_mode(false)
+		NativeSocket(mem::sptr<Context> context):
+			Socket(context),
+			_protocol(Protocol::None),
+			_keep_receiving(false),
+			_direct_mode(false)
 		{
 			Close();
 		}

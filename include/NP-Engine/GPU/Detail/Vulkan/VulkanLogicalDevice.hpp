@@ -35,7 +35,8 @@ namespace np::gpu::__detail
 			return info;
 		}
 
-		static VkDevice CreateLogicalDevice(VulkanPhysicalDevice physical_device, con::vector<VkDeviceQueueCreateInfo> queue_infos)
+		static VkDevice CreateLogicalDevice(VulkanPhysicalDevice physical_device,
+											con::vector<VkDeviceQueueCreateInfo> queue_infos)
 		{
 			VkDevice logical_device = nullptr;
 			if (physical_device)

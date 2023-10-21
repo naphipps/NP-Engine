@@ -223,8 +223,8 @@ namespace np::gpu::__detail
 			_present_family_index(_physical_device.GetPresentFamilyIndex(target)),
 			_surface_format(_physical_device.ChooseSurfaceFormat(target)),
 			_present_mode(_physical_device.ChoosePresentMode(target)),
-			_device(
-				CreateLogicalDevice(GetServices(), _physical_device, CreateQueueCreateInfos({_graphics_family_index, _present_family_index}))),
+			_device(CreateLogicalDevice(GetServices(), _physical_device,
+										CreateQueueCreateInfos({_graphics_family_index, _present_family_index}))),
 			_command_pool(CreateCommandPool(GetServices(), _device, CreateCommandPoolInfo(_graphics_family_index))),
 			_graphics_queue(CreateQueue(GetServices(), _device, _graphics_family_index, 0)),
 			_present_queue(CreateQueue(GetServices(), _device, _present_family_index, 0))
