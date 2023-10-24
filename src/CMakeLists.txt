@@ -159,6 +159,7 @@ set(NP_ENGINE_GPU_VULKAN_HPP
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Detail/Vulkan/VulkanRenderTarget.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Detail/Vulkan/VulkanRenderContext.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Detail/Vulkan/VulkanRenderPipeline.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Detail/Vulkan/VulkanRenderFrame.hpp
 )
 
 set(NP_ENGINE_INPUT_HPP

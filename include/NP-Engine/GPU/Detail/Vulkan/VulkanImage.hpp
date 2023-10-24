@@ -136,6 +136,7 @@ namespace np::gpu::__detail
 		{
 			con::vector<mem::sptr<VulkanCommandBuffer>> command_buffers;
 			VulkanFence fence(GetLogicalDevice());
+			fence.Reset();
 			VkResult result = AsyncAssign(buffer, buffer_image_copy, submit_info, command_buffers, queue, fence);
 			fence.Wait();
 			_command_pool->FreeCommandBuffers(command_buffers);
@@ -238,6 +239,7 @@ namespace np::gpu::__detail
 		{
 			con::vector<mem::sptr<VulkanCommandBuffer>> command_buffers;
 			VulkanFence fence(GetLogicalDevice());
+			fence.Reset();
 			VkResult result =
 				AsyncTransitionLayout(format, old_image_layout, new_image_layout, submit_info, command_buffers, queue, fence);
 			fence.Wait();

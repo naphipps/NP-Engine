@@ -26,19 +26,10 @@ namespace np::gpu::__detail
 	{
 	private:
 		VkCommandBufferBeginInfo _command_buffer_begin_info;
-		con::vector<mem::sptr<VulkanCommandBuffer>> _command_buffers;
 
 		con::vector<VkClearValue> _clear_values;
 		VkRenderPassBeginInfo _render_pass_begin_info;
 		bl _is_out_of_date;
-
-		static con::vector<mem::sptr<VulkanCommandBuffer>> CreateCommandBuffers(mem::sptr<RenderContext> render_context)
-		{
-			VulkanRenderContext& vulkan_render_context = (VulkanRenderContext&)(*render_context);
-			VulkanRenderDevice& vulkan_render_device = (VulkanRenderDevice&)(*render_context->GetRenderDevice());
-			VulkanCommandPool& vulkan_command_pool = (VulkanCommandPool&)(*vulkan_render_device.GetCommandPool());
-			return vulkan_command_pool.AllocateCommandBuffers(vulkan_render_context.GetFramesInFlightCount());
-		}
 
 		static VkRenderPassBeginInfo CreateRenderPassBeginInfo(con::vector<VkClearValue>& clear_values)
 		{
@@ -88,7 +79,6 @@ namespace np::gpu::__detail
 		VulkanScene(Scene::Properties& properties):
 			Scene(properties),
 			_command_buffer_begin_info(VulkanCommandBuffer::CreateBeginInfo()),
-			_command_buffers(CreateCommandBuffers(GetRenderContext())),
 			_clear_values(VulkanRenderPass::CreateClearValues()),
 			_render_pass_begin_info(CreateRenderPassBeginInfo(_clear_values)),
 			_is_out_of_date(false)
@@ -144,7 +134,8 @@ namespace np::gpu::__detail
 						vulkan_render_context.MarkAcquiredImageForUse();
 
 						mem::sptr<VulkanCommandBuffer> vulkan_command_buffer =
-							_command_buffers[vulkan_render_context.GetCurrentImageIndex()];
+							vulkan_render_context.GetCurrentFrame().commandBuffer;
+
 						command_staging =
 							mem::create_sptr<CommandStaging>(GetServices()->GetAllocator(), vulkan_command_buffer);
 						vulkan_command_buffer->Begin(_command_buffer_begin_info);
@@ -173,7 +164,7 @@ namespace np::gpu::__detail
 			VulkanFramebuffers& vulkan_framebuffers = (VulkanFramebuffers&)(*GetRenderPipeline()->GetProperties().framebuffers);
 			VulkanRenderPass& vulkan_render_pass = (VulkanRenderPass&)(*vulkan_framebuffers.GetRenderPass());
 
-			_render_pass_begin_info.framebuffer = vulkan_framebuffers[vulkan_render_context.GetAcquiredImageIndex()];
+			_render_pass_begin_info.framebuffer = vulkan_framebuffers[vulkan_render_context.GetNextFrame().index];
 			vulkan_render_pass.Begin(_render_pass_begin_info, command_staging);
 		}
 
@@ -255,12 +246,13 @@ namespace np::gpu::__detail
 			VulkanRenderDevice& vulkan_render_device = (VulkanRenderDevice&)(*GetRenderDevice());
 
 			NP_ENGINE_PROFILE_SCOPE("vulkan renderer draw frame");
-			ui32 image_index = vulkan_render_context.GetAcquiredImageIndex();
-			ui32 current_index = vulkan_render_context.GetCurrentImageIndex();
-			con::vector<VkCommandBuffer> buffers = {*_command_buffers[current_index]};
-			con::vector<VkSemaphore> wait_semaphores{vulkan_render_context.GetImageSemaphores()[current_index]};
+			VulkanRenderFrame& current_frame = vulkan_render_context.GetCurrentFrame();
+			VulkanRenderFrame& next_frame = vulkan_render_context.GetNextFrame();
+			ui32 image_index = next_frame.index; // TODO: cleanup this area
+			con::vector<VkCommandBuffer> buffers = {*current_frame.commandBuffer};
+			con::vector<VkSemaphore> wait_semaphores{current_frame.imageSemaphore};
 			con::vector<VkPipelineStageFlags> wait_stages{VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
-			con::vector<VkSemaphore> signal_semaphores{vulkan_render_context.GetRenderSemaphores()[current_index]};
+			con::vector<VkSemaphore> signal_semaphores{current_frame.renderSemaphore};
 			con::vector<VkSwapchainKHR> swapchains{vulkan_render_context};
 
 			VkSubmitInfo submit_info{};
@@ -273,10 +265,9 @@ namespace np::gpu::__detail
 			submit_info.signalSemaphoreCount = (ui32)signal_semaphores.size();
 			submit_info.pSignalSemaphores = signal_semaphores.data();
 
-			vkResetFences(vulkan_render_device, 1, &vulkan_render_context.GetFences()[current_index]);
+			current_frame.fence.Reset();
 
-			if (vulkan_render_device.GetGraphicsQueue()->Submit({submit_info},
-																vulkan_render_context.GetFences()[current_index]) != VK_SUCCESS)
+			if (vulkan_render_device.GetGraphicsQueue()->Submit({submit_info}, current_frame.fence) != VK_SUCCESS)
 				NP_ENGINE_ASSERT(false, "failed to submit draw command buffer!");
 
 			VkPresentInfoKHR present_info{};
@@ -295,7 +286,7 @@ namespace np::gpu::__detail
 				NP_ENGINE_ASSERT(false, "vkQueuePresentKHR error");
 
 			vkQueueWaitIdle(*vulkan_render_device.GetPresentQueue());
-			vulkan_render_context.IncCurrentImage();
+			vulkan_render_context.IncFrame();
 		}
 
 		virtual void SetCamera(Camera& camera) override

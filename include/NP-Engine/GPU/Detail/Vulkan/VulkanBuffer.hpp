@@ -135,6 +135,7 @@ namespace np::gpu::__detail
 		{
 			con::vector<mem::sptr<VulkanCommandBuffer>> command_buffers;
 			VulkanFence fence(GetLogicalDevice());
+			fence.Reset();
 			VkResult result = AsyncCopyTo(other, submit_info, command_buffers, queue, fence);
 			fence.Wait();
 			_command_pool->FreeCommandBuffers(command_buffers);

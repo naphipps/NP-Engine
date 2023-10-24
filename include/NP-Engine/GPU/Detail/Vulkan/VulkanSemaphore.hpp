@@ -34,6 +34,14 @@ namespace np::gpu::__detail
 	public:
 		VulkanSemaphore(mem::sptr<VulkanLogicalDevice> device): _device(device), _semaphore(CreateSemaphore()) {}
 
+		VulkanSemaphore(VulkanSemaphore&& other) noexcept:
+			_device(::std::move(other._device)),
+			_semaphore(::std::move(other._semaphore))
+		{
+			other._semaphore = nullptr;
+			other._device.reset();
+		}
+
 		~VulkanSemaphore()
 		{
 			if (_semaphore)

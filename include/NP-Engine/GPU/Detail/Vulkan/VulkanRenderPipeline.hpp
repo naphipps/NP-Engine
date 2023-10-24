@@ -51,7 +51,7 @@ namespace np::gpu::__detail
 			VulkanRenderDevice& render_device = (VulkanRenderDevice&)(*render_context.GetRenderDevice());
 
 			return mem::create_sptr<VulkanDescriptorSets>(services->GetAllocator(), render_device.GetLogicalDevice(),
-														  render_context.GetFramesInFlightCount(), descriptor_set_layout);
+														  render_context.GetFramesCount(), descriptor_set_layout);
 		}
 
 		static mem::sptr<VulkanBuffer> CreateBuffer(mem::sptr<srvc::Services> services,
@@ -72,7 +72,7 @@ namespace np::gpu::__detail
 			VulkanRenderContext& render_context = (VulkanRenderContext&)(*context);
 			VulkanRenderDevice& render_device = (VulkanRenderDevice&)(*render_context.GetRenderDevice());
 
-			con::vector<mem::sptr<VulkanBuffer>> buffers(render_context.GetFramesInFlightCount());
+			con::vector<mem::sptr<VulkanBuffer>> buffers(render_context.GetFramesCount());
 
 			for (siz i = 0; i < buffers.size(); i++)
 			{
@@ -88,7 +88,7 @@ namespace np::gpu::__detail
 			mem::sptr<RenderContext> context, const con::vector<mem::sptr<VulkanBuffer>>& _meta_value_buffers)
 		{
 			VulkanRenderContext& render_context = (VulkanRenderContext&)(*context);
-			con::vector<VkDescriptorBufferInfo> infos(render_context.GetFramesInFlightCount());
+			con::vector<VkDescriptorBufferInfo> infos(render_context.GetFramesCount());
 
 			for (siz i = 0; i < infos.size(); i++)
 			{
@@ -104,7 +104,7 @@ namespace np::gpu::__detail
 			mem::sptr<RenderContext> context, const con::vector<VkDescriptorBufferInfo>& _meta_value_descriptor_infos)
 		{
 			VulkanRenderContext& render_context = (VulkanRenderContext&)(*context);
-			con::vector<VkWriteDescriptorSet> writers(render_context.GetFramesInFlightCount(),
+			con::vector<VkWriteDescriptorSet> writers(render_context.GetFramesCount(),
 													  {VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET});
 
 			for (siz i = 0; i < writers.size(); i++)
@@ -422,7 +422,7 @@ namespace np::gpu::__detail
 		void UpdateMetaValueBuffer()
 		{
 			VulkanRenderContext& render_context = (VulkanRenderContext&)(*GetRenderContext());
-			ui32 index = render_context.GetCurrentImageIndex();
+			ui32 index = render_context.GetCurrentFrame().index;
 			VkDeviceMemory device_memory = _meta_value_buffers[index]->GetDeviceMemory();
 			void* data;
 			vkMapMemory(*GetLogicalDevice(), device_memory, 0, sizeof(PipelineMetaValues), 0, &data);
@@ -471,7 +471,7 @@ namespace np::gpu::__detail
 			_bind_descriptor_sets(nullptr)
 		{
 			VulkanRenderContext& vulkan_render_context = (VulkanRenderContext&)(*GetRenderContext());
-			_meta_values.resize(vulkan_render_context.GetFramesInFlightCount());
+			_meta_values.resize(vulkan_render_context.GetFramesCount());
 		}
 
 		~VulkanRenderPipeline()
@@ -495,7 +495,7 @@ namespace np::gpu::__detail
 		void BindDescriptorSets(mem::sptr<CommandStaging> staging)
 		{
 			VulkanRenderContext& vulkan_render_context = (VulkanRenderContext&)(*GetRenderContext());
-			ui32 current_image_index = vulkan_render_context.GetCurrentImageIndex();
+			ui32 current_image_index = vulkan_render_context.GetCurrentFrame().index;
 			GetDescriptorSets()->SubmitWriter(_meta_value_descriptor_writers[current_image_index], current_image_index);
 			_bound_descriptor_sets = {(*_descriptor_sets)[current_image_index]};
 
@@ -527,13 +527,13 @@ namespace np::gpu::__detail
 			mem::sptr<RenderContext> render_context = GetRenderContext();
 			VulkanRenderContext& vulkan_render_context = (VulkanRenderContext&)(*render_context);
 
-			_descriptor_sets->Rebuild(vulkan_render_context.GetFramesInFlightCount());
+			_descriptor_sets->Rebuild(vulkan_render_context.GetFramesCount());
 
 			// TODO: pretty sure we only need to rebuild ubo stuff?? Nah I think everything needs to be rebuilt....??
 
 			Dispose();
 
-			_meta_values.resize(vulkan_render_context.GetFramesInFlightCount());
+			_meta_values.resize(vulkan_render_context.GetFramesCount());
 			_meta_value_buffers = CreateMetaValueBuffers(GetServices(), render_context);
 			_meta_value_descriptor_infos = CreateMetaValueDescriptorInfos(render_context, _meta_value_buffers);
 			_meta_value_descriptor_writers = CreateMetaValueDescriptorWriters(render_context, _meta_value_descriptor_infos);
@@ -544,13 +544,13 @@ namespace np::gpu::__detail
 		virtual PipelineMetaValues GetMetaValues() const override
 		{
 			VulkanRenderContext& render_context = (VulkanRenderContext&)(*GetRenderContext());
-			return _meta_values[render_context.GetCurrentImageIndex()];
+			return _meta_values[render_context.GetCurrentFrame().index];
 		}
 
 		virtual void SetMetaValues(PipelineMetaValues meta_values) override
 		{
 			VulkanRenderContext& render_context = (VulkanRenderContext&)(*GetRenderContext());
-			_meta_values[render_context.GetCurrentImageIndex()] = meta_values;
+			_meta_values[render_context.GetCurrentFrame().index] = meta_values;
 			UpdateMetaValueBuffer();
 		}
 	};

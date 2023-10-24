@@ -9,6 +9,7 @@
 
 #include "NP-Engine/Primitive/Primitive.hpp"
 #include "NP-Engine/Container/Container.hpp"
+#include "NP-Engine/Memory/Memory.hpp"
 
 #include "NP-Engine/Vendor/VulkanInclude.hpp"
 
@@ -91,6 +92,11 @@ namespace np::gpu::__detail
 			return info;
 		}
 
+		mem::sptr<VulkanCommandBuffer> AllocateCommandBuffer()
+		{
+			return AllocateCommandBuffers(1).front();
+		}
+
 		con::vector<mem::sptr<VulkanCommandBuffer>> AllocateCommandBuffers(siz count)
 		{
 			VkCommandBufferAllocateInfo command_buffer_allocate_info = CreateCommandBufferAllocateInfo();
@@ -112,6 +118,11 @@ namespace np::gpu::__detail
 			return vulkan_command_buffers;
 		}
 
+		void FreeCommandBuffer(mem::sptr<VulkanCommandBuffer> command_buffer)
+		{
+			FreeCommandBuffers({command_buffer});
+		}
+
 		void FreeCommandBuffers(const con::vector<mem::sptr<VulkanCommandBuffer>>& command_buffers)
 		{
 			con::vector<VkCommandBuffer> buffers(command_buffers.size());
@@ -121,14 +132,19 @@ namespace np::gpu::__detail
 			vkFreeCommandBuffers(*_device, _command_pool, (ui32)buffers.size(), buffers.data());
 		}
 
-		static void BeginCommandBuffers(con::vector<mem::sptr<VulkanCommandBuffer>>& command_buffers,
+		static void BeginCommandBuffer(mem::sptr<VulkanCommandBuffer> command_buffer, VkCommandBufferBeginInfo& begin_info)
+		{
+			BeginCommandBuffers({command_buffer}, begin_info);
+		}
+
+		static void BeginCommandBuffers(const con::vector<mem::sptr<VulkanCommandBuffer>>& command_buffers,
 										VkCommandBufferBeginInfo& begin_info)
 		{
-			for (mem::sptr<VulkanCommandBuffer>& command_buffer : command_buffers)
+			for (const mem::sptr<VulkanCommandBuffer>& command_buffer : command_buffers)
 				command_buffer->Begin(begin_info);
 		}
 
-		static void BeginCommandBuffers(con::vector<mem::sptr<VulkanCommandBuffer>>& command_buffers,
+		static void BeginCommandBuffers(const con::vector<mem::sptr<VulkanCommandBuffer>>& command_buffers,
 										con::vector<VkCommandBufferBeginInfo>& begin_infos)
 		{
 			NP_ENGINE_ASSERT(command_buffers.size() == begin_infos.size(), "command_buffers size must equal begin_infos size");
@@ -136,9 +152,14 @@ namespace np::gpu::__detail
 				command_buffers[i]->Begin(begin_infos[i]);
 		}
 
-		static void EndCommandBuffers(con::vector<mem::sptr<VulkanCommandBuffer>>& command_buffers)
+		static void EndCommandBuffer(mem::sptr<VulkanCommandBuffer> command_buffer)
 		{
-			for (mem::sptr<VulkanCommandBuffer>& command_buffer : command_buffers)
+			EndCommandBuffers({command_buffer});
+		}
+
+		static void EndCommandBuffers(const con::vector<mem::sptr<VulkanCommandBuffer>>& command_buffers)
+		{
+			for (const mem::sptr<VulkanCommandBuffer>& command_buffer : command_buffers)
 				command_buffer->End();
 		}
 	};

@@ -15,6 +15,30 @@
 
 #include "VulkanRenderPass.hpp"
 
+/*
+	TODO: VkFramebufferCreateInfo issue - might be linux-specific
+		[critical, NP_ENGINE_LOG, 2023-10-23 21:44:37.651, pid:10233, tid:10233]
+		NP Validation Layer: [[VUID-VkFramebufferCreateInfo-flags-04533, -26532824]]
+		Validation Error: [ VUID-VkFramebufferCreateInfo-flags-04533 ] Object 0: handle = 0x7fffb53c3140,
+		type = VK_OBJECT_TYPE_DEVICE; | MessageID = 0xfe6b2428 | vkCreateFramebuffer(): VkFramebufferCreateInfo
+		attachment #0 mip level 0 has width (838) smaller than the corresponding framebuffer width (839). The
+		Vulkan spec states: If flags does not include VK_FRAMEBUFFER_CREATE_IMAGELESS_BIT, each element of
+		pAttachments that is used as an input, color, resolve, or depth/stencil attachment by renderPass must
+		have been created with a VkImageCreateInfo::extent.width greater than or equal to width
+		(https://vulkan.lunarg.com/doc/view/1.3.250.1/linux/1.3-extensions/vkspec.html#VUID-VkFramebufferCreateInfo-flags-04533)
+
+	Prexisting:
+		[critical, NP_ENGINE_LOG, 2023-10-23 21:48:10.549, pid:11242, tid:11242]
+		NP Validation Layer: [[VUID-VkFramebufferCreateInfo-flags-04534, 2011804586]]
+		Validation Error: [ VUID-VkFramebufferCreateInfo-flags-04534 ] Object 0: handle = 0x7fffb13c35e0,
+		type = VK_OBJECT_TYPE_DEVICE; | MessageID = 0x77e9b3aa | vkCreateFramebuffer(): VkFramebufferCreateInfo
+		attachment #0 mip level 0 has height (698) smaller than the corresponding framebuffer height (699). The
+		Vulkan spec states: If flags does not include VK_FRAMEBUFFER_CREATE_IMAGELESS_BIT, each element of
+		pAttachments that is used as an input, color, resolve, or depth/stencil attachment by renderPass must
+		have been created with a VkImageCreateInfo::extent.height greater than or equal to height
+		(https://vulkan.lunarg.com/doc/view/1.3.250.1/linux/1.3-extensions/vkspec.html#VUID-VkFramebufferCreateInfo-flags-04534)
+*/
+
 namespace np::gpu::__detail
 {
 	class VulkanFramebuffers : public Framebuffers
@@ -39,11 +63,11 @@ namespace np::gpu::__detail
 			VulkanRenderContext& render_context = (VulkanRenderContext&)(*pass->GetRenderContext());
 			VulkanRenderDevice& render_device = (VulkanRenderDevice&)(*pass->GetRenderContext()->GetRenderDevice());
 
-			con::vector<VkFramebuffer> framebuffers(render_context.GetFramesInFlightCount());
+			con::vector<VkFramebuffer> framebuffers(render_context.GetFramesCount());
 
 			for (siz i = 0; i < framebuffers.size(); i++)
 			{
-				con::vector<VkImageView> image_views{render_context.GetImageViews()[i],
+				con::vector<VkImageView> image_views{render_context.GetFrames()[i].imageView,
 													 render_pass.GetDepthTexture()->GetImageView()};
 
 				VkFramebufferCreateInfo framebuffer_info = CreateFramebufferInfo(pass->GetRenderContext());

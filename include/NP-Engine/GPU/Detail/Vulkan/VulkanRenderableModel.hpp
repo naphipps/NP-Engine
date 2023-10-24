@@ -187,6 +187,7 @@ namespace np::gpu::__detail
 			transition_to_shader_submit.pSignalSemaphores = &transition_to_shader_complete;
 
 			VulkanFence texture_complete_fence(vulkan_logical_device);
+			texture_complete_fence.Reset();
 
 			// copy image data to staging
 			_texture_staging->AssignData(_model->GetTexture().Data());
@@ -217,6 +218,7 @@ namespace np::gpu::__detail
 			vertex_buffer_copy_submit.pSignalSemaphores = &vertex_buffer_copy_complete;
 
 			VulkanFence vertex_complete_fence(vulkan_logical_device);
+			vertex_complete_fence.Reset();
 
 			// copy vertex data to staging
 			_vertex_staging->AssignData(_model->GetVertices().data());
@@ -235,6 +237,7 @@ namespace np::gpu::__detail
 			index_buffer_copy_submit.pSignalSemaphores = &index_buffer_copy_complete;
 
 			VulkanFence index_complete_fence(vulkan_logical_device);
+			index_complete_fence.Reset();
 
 			// copy index data to staging
 			_index_staging->AssignData(_model->GetIndices().data());
@@ -368,7 +371,7 @@ namespace np::gpu::__detail
 
 			_descriptor_info.imageView = _texture ? (VkImageView)_texture->GetImageView() : nullptr;
 			vulkan_render_pipeline.GetDescriptorSets()->SubmitWriter(_descriptor_writer,
-																	 vulkan_render_context.GetCurrentImageIndex());
+																	 vulkan_render_context.GetCurrentFrame().index);
 		}
 
 		void DisposeForPipeline(mem::sptr<Pipeline> pipeline) override

@@ -7,7 +7,14 @@
 #ifndef NP_ENGINE_VULKAN_FENCE_HPP
 #define NP_ENGINE_VULKAN_FENCE_HPP
 
+#include <utility>
+
+#include "NP-Engine/Memory/Memory.hpp"
+#include "NP-Engine/Primitive/Primitive.hpp"
+
 #include "NP-Engine/Vendor/VulkanInclude.hpp"
+
+#include "VulkanLogicalDevice.hpp"
 
 namespace np::gpu::__detail
 {
@@ -31,9 +38,12 @@ namespace np::gpu::__detail
 		}
 
 	public:
-		VulkanFence(mem::sptr<VulkanLogicalDevice> device): _device(device), _fence(CreateFence(_device))
+		VulkanFence(mem::sptr<VulkanLogicalDevice> device): _device(device), _fence(CreateFence(_device)) {}
+
+		VulkanFence(VulkanFence&& other) noexcept: _fence(::std::move(other._fence)), _device(::std::move(other._device))
 		{
-			Reset();
+			other._fence = nullptr;
+			other._device.reset();
 		}
 
 		~VulkanFence()

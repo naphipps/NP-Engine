@@ -30,6 +30,17 @@ namespace np::gpu::__detail
 			return image_view;
 		}
 
+		void Dispose()
+		{
+			if (_device && _image_view)
+			{
+				vkDestroyImageView(*_device, _image_view, nullptr);
+				_image_view = nullptr;
+			}
+
+			_device.reset();
+		}
+
 	public:
 		static VkImageViewCreateInfo CreateInfo()
 		{
@@ -61,17 +72,23 @@ namespace np::gpu::__detail
 			_device(::std::move(other._device)),
 			_image_view(::std::move(other._image_view))
 		{
-			other._device = nullptr;
+			other._device.reset();
 			other._image_view = nullptr;
 		}
 
 		~VulkanImageView()
 		{
-			if (_image_view)
-			{
-				vkDestroyImageView(*_device, _image_view, nullptr);
-				_image_view = nullptr;
-			}
+			Dispose();
+		}
+
+		VulkanImageView& operator=(VulkanImageView&& other) noexcept
+		{
+			Dispose();
+			_device = ::std::move(other._device);
+			_image_view = ::std::move(other._image_view);
+			other._device.reset();
+			other._image_view = nullptr;
+			return *this;
 		}
 
 		operator VkImageView() const

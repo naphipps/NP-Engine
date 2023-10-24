@@ -18,37 +18,18 @@
 #include "VulkanRenderDevice.hpp"
 #include "VulkanSemaphore.hpp"
 #include "VulkanFence.hpp"
+#include "VulkanRenderFrame.hpp"
 
 namespace np::gpu::__detail
 {
 	class VulkanRenderContext : public RenderContext
 	{
-	public:
-		struct Frame
-		{
-			VulkanImage image;
-			VulkanImageView imageView;
-			mem::sptr<Framebuffers> framebuffers;
-			mem::sptr<CommandBuffer> commandBuffer;
-			VulkanSemaphore imageSemaphore;
-			VulkanSemaphore presentSemaphore;
-			VulkanFence inFlightFence;
-		};
-
 	private:
 		VkExtent2D _extent;
 		VkSwapchainKHR _swapchain;
-		con::vector<VkImage> _images; // we do not have device memory for these so we'll keep VkImage type
-		con::vector<VulkanImageView> _image_views;
-		con::vector<VkSemaphore> _image_semaphores;
-		con::vector<VkSemaphore> _render_semaphores;
-		con::vector<VkFence> _fences;
-		con::vector<VkFence> _acquired_image_fences;
-
-		// con::vector<Frame> _frames;//TODO: I like this way better
-
-		ui32 _current_image_index;
-		ui32 _acquired_image_index;
+		con::vector<VulkanRenderFrame> _frames;
+		ui32 _current_frame_index;
+		ui32 _next_frame_index;
 
 		static VkSwapchainCreateInfoKHR CreateSwapchainInfo(mem::sptr<RenderDevice> device)
 		{
@@ -145,7 +126,7 @@ namespace np::gpu::__detail
 
 			swapchain_info.imageExtent = ChooseExtent(device);
 			swapchain_info.preTransform = surface_capabilities.currentTransform; // says that we don't want any local transform
-			swapchain_info.minImageCount = GetFramesInFlightCount();
+			swapchain_info.minImageCount = 3; // TODO: NO - figure out best way to set this
 
 			if (surface_capabilities.maxImageCount != 0)
 				swapchain_info.minImageCount = ::std::min(swapchain_info.minImageCount, surface_capabilities.maxImageCount);
@@ -172,70 +153,25 @@ namespace np::gpu::__detail
 			return images;
 		}
 
-		static con::vector<VulkanImageView> CreateImageViews(mem::sptr<RenderDevice> device, const con::vector<VkImage>& images)
+		static con::vector<VulkanRenderFrame> CreateFrames(mem::sptr<RenderDevice> device, VkSwapchainKHR swapchain)
 		{
 			VulkanRenderDevice& render_device = (VulkanRenderDevice&)(*device);
-			con::vector<VulkanImageView> image_views;
+			con::vector<VkImage> images = RetrieveImages(device, swapchain);
+			VkImageViewCreateInfo image_view_info = VulkanImageView::CreateInfo();
+			image_view_info.format = render_device.GetSurfaceFormat().format;
 
-			VkImageViewCreateInfo info = VulkanImageView::CreateInfo();
-			info.format = render_device.GetSurfaceFormat().format;
-
-			for (const VkImage& image : images)
+			con::vector<VulkanRenderFrame> frames;
+			for (siz i = 0; i < images.size(); i++)
 			{
-				info.image = image;
-				image_views.emplace_back(render_device.GetLogicalDevice(), info);
+				image_view_info.image = images[i];
+				frames.emplace_back(i, device, image_view_info);
 			}
 
-			return image_views;
+			return frames;
 		}
 
-		static con::vector<VkSemaphore> CreateSemaphores(mem::sptr<RenderDevice> device, siz count)
+		void DestroySwapchain()
 		{
-			VulkanRenderDevice& render_device = (VulkanRenderDevice&)(*device);
-			con::vector<VkSemaphore> semaphores(count, nullptr);
-
-			for (siz i = 0; i < count; i++)
-			{
-				VkSemaphoreCreateInfo semaphore_info{};
-				semaphore_info.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
-
-				if (vkCreateSemaphore(render_device, &semaphore_info, nullptr, &semaphores[i]) != VK_SUCCESS)
-				{
-					semaphores.clear();
-					break;
-				}
-			}
-
-			return semaphores;
-		}
-
-		static con::vector<VkFence> CreateFences(mem::sptr<RenderDevice> device, siz count)
-		{
-			VulkanRenderDevice& render_device = (VulkanRenderDevice&)(*device);
-			con::vector<VkFence> fences(count, nullptr);
-
-			for (siz i = 0; i < count; i++)
-			{
-				VkFenceCreateInfo fence_info{};
-				fence_info.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
-				fence_info.flags = VK_FENCE_CREATE_SIGNALED_BIT;
-
-				if (vkCreateFence(render_device, &fence_info, nullptr, &fences[i]) != VK_SUCCESS)
-				{
-					fences.clear();
-					break;
-				}
-			}
-
-			return fences;
-		}
-
-		void Dispose()
-		{
-			_image_views.clear();
-			_images.clear();
-			_acquired_image_fences.clear();
-
 			if (_swapchain)
 			{
 				VulkanRenderDevice& device = (VulkanRenderDevice&)(*GetRenderDevice());
@@ -244,48 +180,55 @@ namespace np::gpu::__detail
 			}
 		}
 
+		void RebuildFrames()
+		{
+			VulkanRenderDevice& render_device = (VulkanRenderDevice&)(*_device);
+			con::vector<VkImage> images = RetrieveImages(_device, _swapchain);
+			VkImageViewCreateInfo image_view_info = VulkanImageView::CreateInfo();
+			image_view_info.format = render_device.GetSurfaceFormat().format;
+			mem::sptr<VulkanLogicalDevice> logical_device = render_device.GetLogicalDevice();
+
+			while (images.size() < _frames.size())
+				_frames.pop_back();
+
+			for (siz i = 0; i < images.size(); i++)
+			{
+				image_view_info.image = images[i];
+
+				if (i < _frames.size())
+				{
+					_frames[i].image = images[i];
+					_frames[i].imageView = VulkanImageView{logical_device, image_view_info};
+					_frames[i].prevFrameFence = nullptr;
+				}
+				else
+				{
+					_frames.emplace_back(i, _device, image_view_info);
+				}
+			}
+		}
+
 	public:
 		VulkanRenderContext(mem::sptr<RenderDevice> device):
 			RenderContext(device),
-			_extent(ChooseExtent(device)),
-			_swapchain(CreateSwapchain(device)),
-			_images(RetrieveImages(device, _swapchain)),
-			_image_views(CreateImageViews(device, _images)),
-			_image_semaphores(CreateSemaphores(device, GetFramesInFlightCount())),
-			_render_semaphores(CreateSemaphores(device, GetFramesInFlightCount())),
-			_fences(CreateFences(device, GetFramesInFlightCount())),
-			_acquired_image_fences(GetImages().size(), nullptr),
-			_current_image_index(0),
-			_acquired_image_index(0)
+			_extent(ChooseExtent(_device)),
+			_swapchain(CreateSwapchain(_device)),
+			_frames(CreateFrames(_device, _swapchain)),
+			_current_frame_index(0),
+			_next_frame_index(0)
 		{}
 
 		~VulkanRenderContext()
 		{
 			VulkanRenderDevice& device = (VulkanRenderDevice&)(*GetRenderDevice());
-
 			vkDeviceWaitIdle(device);
-
-			for (VkSemaphore& semaphore : _render_semaphores)
-				vkDestroySemaphore(device, semaphore, nullptr);
-
-			_render_semaphores.clear();
-
-			for (VkSemaphore& semaphore : _image_semaphores)
-				vkDestroySemaphore(device, semaphore, nullptr);
-
-			_image_semaphores.clear();
-
-			for (VkFence& fence : _fences)
-				vkDestroyFence(device, fence, nullptr);
-
-			_fences.clear();
-
-			Dispose();
+			_frames.clear();
+			DestroySwapchain();
 		}
 
-		static siz GetFramesInFlightCount() // TODO: I think we need to be able to change this per render context...
+		siz GetFramesCount() const
 		{
-			return 3;
+			return _frames.size();
 		}
 
 		VkExtent2D GetExtent() const
@@ -298,35 +241,41 @@ namespace np::gpu::__detail
 			return (flt)_extent.width / (flt)_extent.height;
 		}
 
-		ui32 GetCurrentImageIndex() const
+		VulkanRenderFrame& GetCurrentFrame()
 		{
-			return _current_image_index;
+			return _frames[_current_frame_index];
 		}
 
-		ui32 GetAcquiredImageIndex() const
+		const VulkanRenderFrame& GetCurrentFrame() const
 		{
-			return _acquired_image_index;
+			return _frames[_current_frame_index];
+		}
+
+		VulkanRenderFrame& GetNextFrame()
+		{
+			return _frames[_next_frame_index];
+		}
+
+		const VulkanRenderFrame& GetNextFrame() const
+		{
+			return _frames[_next_frame_index];
 		}
 
 		void Rebuild()
 		{
-			Dispose();
-
+			DestroySwapchain();
 			_extent = ChooseExtent(_device);
 			_swapchain = CreateSwapchain(_device);
-			_images = RetrieveImages(_device, _swapchain);
-			_image_views = CreateImageViews(_device, _images);
-
-			_acquired_image_fences.resize(_images.size(), nullptr);
+			RebuildFrames();
 		}
 
 		VkResult AcquireImage()
 		{
 			VulkanRenderDevice& device = (VulkanRenderDevice&)(*GetRenderDevice());
-			vkWaitForFences(device, 1, &_fences[_current_image_index], VK_TRUE, UI64_MAX);
+			_frames[_current_frame_index].fence.Wait();
 
-			VkResult result = vkAcquireNextImageKHR(device, _swapchain, UI64_MAX, _image_semaphores[_current_image_index],
-													nullptr, &_acquired_image_index);
+			VkResult result = vkAcquireNextImageKHR(device, _swapchain, UI64_MAX, _frames[_current_frame_index].imageSemaphore,
+													nullptr, &_next_frame_index);
 
 			NP_ENGINE_ASSERT(result == VK_SUCCESS || result == VK_SUBOPTIMAL_KHR || result == VK_ERROR_OUT_OF_DATE_KHR,
 							 "vkAcquireNextImageKHR error");
@@ -339,46 +288,26 @@ namespace np::gpu::__detail
 			VulkanRenderDevice& device = (VulkanRenderDevice&)(*GetRenderDevice());
 
 			// Check if a previous frame is using this image (i.e. there is its fence to wait on)
-			if (_acquired_image_fences[_acquired_image_index] != nullptr)
-				vkWaitForFences(device, 1, &_acquired_image_fences[_acquired_image_index], VK_TRUE, UI64_MAX);
+			if (_frames[_next_frame_index].prevFrameFence)
+				_frames[_next_frame_index].prevFrameFence->Wait();
 
 			// Mark the image as now being in use by this frame
-			_acquired_image_fences[_acquired_image_index] = _fences[_current_image_index];
+			_frames[_next_frame_index].prevFrameFence = &_frames[_current_frame_index].fence;
 		}
 
-		void IncCurrentImage()
+		void IncFrame()
 		{
-			_current_image_index = (_current_image_index + 1) % GetFramesInFlightCount();
+			_current_frame_index = (_current_frame_index + 1) % GetFramesCount();
 		}
 
-		const con::vector<VkImage>& GetImages() const
+		const con::vector<VulkanRenderFrame>& GetFrames() const
 		{
-			return _images;
+			return _frames;
 		}
 
-		const con::vector<VulkanImageView>& GetImageViews() const
+		con::vector<VulkanRenderFrame>& GetFrames()
 		{
-			return _image_views;
-		}
-
-		const con::vector<VkSemaphore> GetImageSemaphores() const
-		{
-			return _image_semaphores;
-		}
-
-		const con::vector<VkSemaphore> GetRenderSemaphores() const
-		{
-			return _render_semaphores;
-		}
-
-		const con::vector<VkFence> GetFences() const
-		{
-			return _fences;
-		}
-
-		const con::vector<VkFence> GetImageFences() const
-		{
-			return _acquired_image_fences;
+			return _frames;
 		}
 
 		operator VkSwapchainKHR() const
