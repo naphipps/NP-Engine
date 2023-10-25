@@ -126,7 +126,8 @@ namespace np::gpu::__detail
 
 			swapchain_info.imageExtent = ChooseExtent(device);
 			swapchain_info.preTransform = surface_capabilities.currentTransform; // says that we don't want any local transform
-			swapchain_info.minImageCount = 3; // TODO: NO - figure out best way to set this
+			swapchain_info.minImageCount =
+				::std::max((ui32)NP_ENGINE_GPU_FRAMES_IN_FLIGHT_COUNT, surface_capabilities.minImageCount);
 
 			if (surface_capabilities.maxImageCount != 0)
 				swapchain_info.minImageCount = ::std::min(swapchain_info.minImageCount, surface_capabilities.maxImageCount);

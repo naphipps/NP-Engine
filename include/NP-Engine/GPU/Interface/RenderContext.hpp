@@ -7,6 +7,10 @@
 #ifndef NP_ENGINE_GPU_INTERFACE_RENDER_CONTEXT_HPP
 #define NP_ENGINE_GPU_INTERFACE_RENDER_CONTEXT_HPP
 
+#ifndef NP_ENGINE_GPU_FRAMES_IN_FLIGHT_COUNT
+	#define NP_ENGINE_GPU_FRAMES_IN_FLIGHT_COUNT 3
+#endif
+
 #include "RenderDevice.hpp"
 #include "Context.hpp"
 
