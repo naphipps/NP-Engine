@@ -88,7 +88,6 @@ namespace np::gpu::__detail
 
 		mem::sptr<Resource> CreateResource(mem::sptr<Model> model) override // TODO: for image and light too
 		{
-			// TODO: consider an accumulating pool
 			return mem::create_sptr<VulkanRenderableModel>(GetServices()->GetAllocator(), GetServices(), model);
 		}
 
