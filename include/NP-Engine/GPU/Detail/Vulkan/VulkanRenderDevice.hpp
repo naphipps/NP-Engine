@@ -328,7 +328,7 @@ namespace np::gpu::__detail
 		{
 			VkBufferCopy buffer_copy{};
 			buffer_copy.size = src.GetSize();
-			VulkanCommandCopyBuffers copy_buffers(src, dst, 1, &buffer_copy);
+			VulkanCommandCopyBuffers copy_buffers(dst, src, 1, &buffer_copy);
 
 			mem::sptr<VulkanCommandBuffer> buffer = _command_pool->AllocateCommandBuffer();
 			VkCommandBufferBeginInfo begin_info = VulkanCommandBuffer::CreateBeginInfo();
@@ -356,7 +356,7 @@ namespace np::gpu::__detail
 			VkSubmitInfo& submit_info, mem::sptr<VulkanQueue> queue, 
 			con::vector<mem::sptr<VulkanCommandBuffer>>& command_buffers, VkFence fence = nullptr)
 		{
-			VulkanCommandCopyBufferToImage copy_buffer_to_image(src, dst, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1,
+			VulkanCommandCopyBufferToImage copy_buffer_to_image(dst, src, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1,
 				&buffer_image_copy);
 
 			mem::sptr<VulkanCommandBuffer> buffer = _command_pool->AllocateCommandBuffer();
@@ -438,7 +438,7 @@ namespace np::gpu::__detail
 				image_memory_barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
 			}
 
-			VulkanCommandPipelineBarrier pipeline_barrier(src_pipeline_stage_flags, dst_pipeline_stage_flags, 0, 0, nullptr, 0,
+			VulkanCommandPipelineBarrier pipeline_barrier(dst_pipeline_stage_flags, src_pipeline_stage_flags, 0, 0, nullptr, 0,
 				nullptr, 1, &image_memory_barrier);
 
 			mem::sptr<VulkanCommandBuffer> buffer = _command_pool->AllocateCommandBuffer();

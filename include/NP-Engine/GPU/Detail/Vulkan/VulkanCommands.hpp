@@ -11,8 +11,6 @@
 
 #include "NP-Engine/GPU/Interface/Interface.hpp"
 
-//TODO: make command put dst first, then src
-
 namespace np::gpu::__detail
 {
 	struct VulkanCommand : public Command
@@ -165,8 +163,8 @@ namespace np::gpu::__detail
 	class VulkanCommandPipelineBarrier : public VulkanCommand
 	{
 	public:
-		VkPipelineStageFlags SrcPipelineStageFlags;
 		VkPipelineStageFlags DstPipelineStageFlags;
+		VkPipelineStageFlags SrcPipelineStageFlags;
 		VkDependencyFlags DependencyFlags;
 		ui32 MemoryBarrierCount;
 		VkMemoryBarrier* MemoryBarriers;
@@ -175,13 +173,13 @@ namespace np::gpu::__detail
 		ui32 ImageMemoryBarrierCount;
 		VkImageMemoryBarrier* ImageMemoryBarriers;
 
-		VulkanCommandPipelineBarrier(VkPipelineStageFlags src_pipeline_stage_flags,
-									 VkPipelineStageFlags dst_pipeline_stage_flags, VkDependencyFlags dependency_flags,
+		VulkanCommandPipelineBarrier(VkPipelineStageFlags dst_pipeline_stage_flags,
+									 VkPipelineStageFlags src_pipeline_stage_flags, VkDependencyFlags dependency_flags,
 									 ui32 memory_barrier_count, VkMemoryBarrier* memory_barriers,
 									 ui32 buffer_memory_barrier_count, VkBufferMemoryBarrier* buffer_memory_barriers,
 									 ui32 image_memory_barrier_count, VkImageMemoryBarrier* image_memory_barriers):
-			SrcPipelineStageFlags(src_pipeline_stage_flags),
 			DstPipelineStageFlags(dst_pipeline_stage_flags),
+			SrcPipelineStageFlags(src_pipeline_stage_flags),
 			DependencyFlags(dependency_flags),
 			MemoryBarrierCount(memory_barrier_count),
 			MemoryBarriers(memory_barriers),
@@ -202,14 +200,14 @@ namespace np::gpu::__detail
 	class VulkanCommandCopyBuffers : public VulkanCommand
 	{
 	public:
-		VkBuffer SrcBuffer;
 		VkBuffer DstBuffer;
+		VkBuffer SrcBuffer;
 		ui32 RegionCount;
 		VkBufferCopy* Regions;
 
-		VulkanCommandCopyBuffers(VkBuffer src_buffer, VkBuffer dst_buffer, ui32 region_count, VkBufferCopy* regions):
-			SrcBuffer(src_buffer),
+		VulkanCommandCopyBuffers(VkBuffer dst_buffer, VkBuffer src_buffer, ui32 region_count, VkBufferCopy* regions):
 			DstBuffer(dst_buffer),
+			SrcBuffer(src_buffer),
 			RegionCount(region_count),
 			Regions(regions)
 		{}
@@ -223,8 +221,8 @@ namespace np::gpu::__detail
 	class VulkanCommandCopyBufferToImage : public VulkanCommand
 	{
 	public:
-		VkBuffer SrcBuffer;
 		VkImage DstImage;
+		VkBuffer SrcBuffer;
 		VkImageLayout DstImageLayout;
 		ui32 RegionCount;
 		VkBufferImageCopy* Regions;
@@ -244,10 +242,10 @@ namespace np::gpu::__detail
 			return buffer_image_copy;
 		}
 
-		VulkanCommandCopyBufferToImage(VkBuffer src_buffer, VkImage dst_image, VkImageLayout dst_image_layout,
+		VulkanCommandCopyBufferToImage(VkImage dst_image, VkBuffer src_buffer, VkImageLayout dst_image_layout,
 									   ui32 region_count, VkBufferImageCopy* regions):
-			SrcBuffer(src_buffer),
 			DstImage(dst_image),
+			SrcBuffer(src_buffer),
 			DstImageLayout(dst_image_layout),
 			RegionCount(region_count),
 			Regions(regions)
