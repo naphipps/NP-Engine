@@ -55,7 +55,12 @@ namespace np::gpu::__detail
 			return vkQueueSubmit(_queue, (ui32)submit_infos.size(), submit_infos.data(), fence);
 		}
 
-		VkResult Submit(con::vector<mem::sptr<VulkanCommandBuffer>>& command_buffers, VkSubmitInfo submit_info,
+		VkResult Submit(mem::sptr<VulkanCommandBuffer> command_buffer, VkSubmitInfo submit_info, VkFence fence = nullptr)
+		{
+			return Submit(con::vector<mem::sptr<VulkanCommandBuffer>>{ command_buffer }, submit_info, fence);
+		}
+
+		VkResult Submit(const con::vector<mem::sptr<VulkanCommandBuffer>>& command_buffers, VkSubmitInfo submit_info,
 						VkFence fence = nullptr)
 		{
 			con::vector<VkCommandBuffer> buffers(command_buffers.size());

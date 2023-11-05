@@ -55,7 +55,7 @@ namespace np::gpu::__detail
 		}
 
 		static mem::sptr<VulkanBuffer> CreateBuffer(mem::sptr<srvc::Services> services,
-													mem::sptr<VulkanCommandPool> command_pool, VkDeviceSize size,
+													mem::sptr<VulkanLogicalDevice> logical_device, VkDeviceSize size,
 													VkBufferUsageFlags buffer_usage_flags,
 													VkMemoryPropertyFlags memory_property_flags)
 		{
@@ -63,7 +63,7 @@ namespace np::gpu::__detail
 			info.size = size;
 			info.usage = buffer_usage_flags;
 
-			return mem::create_sptr<VulkanBuffer>(services->GetAllocator(), command_pool, info, memory_property_flags);
+			return mem::create_sptr<VulkanBuffer>(services->GetAllocator(), logical_device, info, memory_property_flags);
 		}
 
 		static con::vector<mem::sptr<VulkanBuffer>> CreateMetaValueBuffers(mem::sptr<srvc::Services> services,
@@ -76,7 +76,7 @@ namespace np::gpu::__detail
 
 			for (siz i = 0; i < buffers.size(); i++)
 			{
-				buffers[i] = CreateBuffer(services, render_device.GetCommandPool(), sizeof(PipelineMetaValues),
+				buffers[i] = CreateBuffer(services, render_device.GetLogicalDevice(), sizeof(PipelineMetaValues),
 										  VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
 										  VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 			}

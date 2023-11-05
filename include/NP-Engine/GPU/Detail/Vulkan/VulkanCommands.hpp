@@ -11,6 +11,8 @@
 
 #include "NP-Engine/GPU/Interface/Interface.hpp"
 
+//TODO: make command put dst first, then src
+
 namespace np::gpu::__detail
 {
 	struct VulkanCommand : public Command

@@ -68,7 +68,7 @@ namespace np::gpu::__detail
 			{
 				VulkanRenderDevice& render_device = (VulkanRenderDevice&)*device;
 				VulkanCommandPool& command_pool = (VulkanCommandPool&)*render_device.GetCommandPool();
-				command_pool.FreeCommandBuffer(commandBuffer);
+				command_pool.DeallocateCommandBuffer(commandBuffer);
 			}
 		}
 

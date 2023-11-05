@@ -118,49 +118,18 @@ namespace np::gpu::__detail
 			return vulkan_command_buffers;
 		}
 
-		void FreeCommandBuffer(mem::sptr<VulkanCommandBuffer> command_buffer)
+		void DeallocateCommandBuffer(mem::sptr<VulkanCommandBuffer> command_buffer)
 		{
-			FreeCommandBuffers({command_buffer});
+			DeallocateCommandBuffers({command_buffer});
 		}
 
-		void FreeCommandBuffers(const con::vector<mem::sptr<VulkanCommandBuffer>>& command_buffers)
+		void DeallocateCommandBuffers(const con::vector<mem::sptr<VulkanCommandBuffer>>& command_buffers)
 		{
 			con::vector<VkCommandBuffer> buffers(command_buffers.size());
 			for (siz i = 0; i < buffers.size(); i++)
 				buffers[i] = *command_buffers[i];
 
 			vkFreeCommandBuffers(*_device, _command_pool, (ui32)buffers.size(), buffers.data());
-		}
-
-		static void BeginCommandBuffer(mem::sptr<VulkanCommandBuffer> command_buffer, VkCommandBufferBeginInfo& begin_info)
-		{
-			BeginCommandBuffers({command_buffer}, begin_info);
-		}
-
-		static void BeginCommandBuffers(const con::vector<mem::sptr<VulkanCommandBuffer>>& command_buffers,
-										VkCommandBufferBeginInfo& begin_info)
-		{
-			for (const mem::sptr<VulkanCommandBuffer>& command_buffer : command_buffers)
-				command_buffer->Begin(begin_info);
-		}
-
-		static void BeginCommandBuffers(const con::vector<mem::sptr<VulkanCommandBuffer>>& command_buffers,
-										con::vector<VkCommandBufferBeginInfo>& begin_infos)
-		{
-			NP_ENGINE_ASSERT(command_buffers.size() == begin_infos.size(), "command_buffers size must equal begin_infos size");
-			for (siz i = 0; i < command_buffers.size(); i++)
-				command_buffers[i]->Begin(begin_infos[i]);
-		}
-
-		static void EndCommandBuffer(mem::sptr<VulkanCommandBuffer> command_buffer)
-		{
-			EndCommandBuffers({command_buffer});
-		}
-
-		static void EndCommandBuffers(const con::vector<mem::sptr<VulkanCommandBuffer>>& command_buffers)
-		{
-			for (const mem::sptr<VulkanCommandBuffer>& command_buffer : command_buffers)
-				command_buffer->End();
 		}
 	};
 } // namespace np::gpu::__detail

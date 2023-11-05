@@ -55,7 +55,7 @@ namespace np::gpu::__detail
 			vulkan_render_pipeline.Rebuild();
 		}
 
-		/*
+		/* TODO: 
 		void StageResource(mem::sptr<Resource> resource, Scene::RenderVisiblePayload& payload) override
 		{
 			switch (resource->GetType())
@@ -121,24 +121,25 @@ namespace np::gpu::__detail
 			bl has_visibles = !_visibles.get_access()->empty() || true;
 			if (has_visibles)
 			{ // TODO: cleanup this
-				VulkanRenderTarget& vulkan_render_target = (VulkanRenderTarget&)(*GetRenderTarget());
-				VkExtent2D framebuffer_extent = vulkan_render_target.GetFramebufferExtent();
+				VulkanRenderTarget& render_target = (VulkanRenderTarget&)*GetRenderTarget();
+				VkExtent2D framebuffer_extent = render_target.GetFramebufferExtent();
 
 				if (framebuffer_extent.width != 0 && framebuffer_extent.height != 0 &&
-					!vulkan_render_target.GetWindow()->IsMinimized())
+					!render_target.GetWindow()->IsMinimized())
 				{
-					VulkanRenderContext& vulkan_render_context = (VulkanRenderContext&)(*GetRenderContext());
-					VkResult result = vulkan_render_context.AcquireImage();
+					VulkanRenderContext& render_context = (VulkanRenderContext&)*GetRenderContext();
+					VulkanRenderDevice& render_device = (VulkanRenderDevice&)*GetRenderDevice();
+					VkResult result = render_context.AcquireImage();
 					if (result == VK_SUCCESS || result == VK_SUBOPTIMAL_KHR)
 					{
-						vulkan_render_context.MarkAcquiredImageForUse();
+						render_context.MarkAcquiredImageForUse();
 
-						mem::sptr<VulkanCommandBuffer> vulkan_command_buffer =
-							vulkan_render_context.GetCurrentFrame().commandBuffer;
+						mem::sptr<VulkanCommandBuffer> command_buffer =
+							render_context.GetCurrentFrame().commandBuffer;
 
 						command_staging =
-							mem::create_sptr<CommandStaging>(GetServices()->GetAllocator(), vulkan_command_buffer);
-						vulkan_command_buffer->Begin(_command_buffer_begin_info);
+							mem::create_sptr<CommandStaging>(GetServices()->GetAllocator(), command_buffer);
+						render_device.BeginCommandBuffer(command_buffer, _command_buffer_begin_info);
 						NP_ENGINE_ASSERT(command_staging->IsValid(), "command_staging must be valid here");
 					}
 					else if (result == VK_ERROR_OUT_OF_DATE_KHR)
@@ -153,9 +154,8 @@ namespace np::gpu::__detail
 
 		void EndRenderCommandStaging(mem::sptr<CommandStaging> command_staging)
 		{
-			mem::sptr<CommandBuffer> command_buffer = command_staging->GetCommandBuffer();
-			VulkanCommandBuffer& vulkan_command_buffer = (VulkanCommandBuffer&)(*command_buffer);
-			vulkan_command_buffer.End();
+			VulkanRenderDevice& render_device = (VulkanRenderDevice&)*GetRenderDevice();
+			render_device.EndCommandBuffer(command_staging->GetCommandBuffer());
 		}
 
 		void BeginRenderPass(mem::sptr<CommandStaging> command_staging) override

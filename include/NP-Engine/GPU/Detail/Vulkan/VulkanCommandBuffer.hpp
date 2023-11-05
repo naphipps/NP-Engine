@@ -76,18 +76,6 @@ namespace np::gpu::__detail
 				"VulkanCommandBuffer must be valid and given command must be a vulkan command before Add is called.");
 			((VulkanCommand&)command).ApplyTo(_command_buffer);
 		}
-
-		VkResult Begin(VkCommandBufferBeginInfo& command_buffer_begin_info) // TODO: should this be in Device??
-		{
-			NP_ENGINE_ASSERT(IsValid(), "VulkanCommandBuffer must be valid before Begin is called.");
-			return vkBeginCommandBuffer(_command_buffer, &command_buffer_begin_info);
-		}
-
-		VkResult End() // TODO: should this be in Device??
-		{
-			NP_ENGINE_ASSERT(IsValid(), "VulkanCommandBuffer must be valid before End is called.");
-			return vkEndCommandBuffer(_command_buffer);
-		}
 	};
 } // namespace np::gpu::__detail
 

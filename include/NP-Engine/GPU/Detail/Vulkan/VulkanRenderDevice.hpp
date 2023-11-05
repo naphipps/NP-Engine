@@ -18,6 +18,9 @@
 #include "VulkanLogicalDevice.hpp"
 #include "VulkanCommandPool.hpp"
 #include "VulkanQueue.hpp"
+#include "VulkanImage.hpp"
+#include "VulkanBuffer.hpp"
+#include "VulkanFence.hpp"
 
 namespace np::gpu::__detail
 {
@@ -286,6 +289,179 @@ namespace np::gpu::__detail
 		mem::sptr<VulkanCommandPool> GetCommandPool() const
 		{
 			return _command_pool;
+		}
+
+		void BeginCommandBuffer(mem::sptr<VulkanCommandBuffer> command_buffer, VkCommandBufferBeginInfo& begin_info)
+		{
+			BeginCommandBuffers({ command_buffer }, begin_info);
+		}
+
+		void BeginCommandBuffers(const con::vector<mem::sptr<VulkanCommandBuffer>>& command_buffers,
+			VkCommandBufferBeginInfo& begin_info)
+		{
+			for (const mem::sptr<VulkanCommandBuffer>& command_buffer : command_buffers)
+				vkBeginCommandBuffer(*command_buffer, &begin_info);
+		}
+
+		void BeginCommandBuffers(const con::vector<mem::sptr<VulkanCommandBuffer>>& command_buffers,
+			con::vector<VkCommandBufferBeginInfo>& begin_infos)
+		{
+			NP_ENGINE_ASSERT(command_buffers.size() == begin_infos.size(), "command_buffers size must equal begin_infos size");
+			for (siz i = 0; i < command_buffers.size(); i++)
+				vkBeginCommandBuffer(*command_buffers[i], &begin_infos[i]);
+		}
+
+		void EndCommandBuffer(mem::sptr<VulkanCommandBuffer> command_buffer)
+		{
+			EndCommandBuffers({ command_buffer });
+		}
+
+		void EndCommandBuffers(const con::vector<mem::sptr<VulkanCommandBuffer>>& command_buffers)
+		{
+			for (const mem::sptr<VulkanCommandBuffer>& command_buffer : command_buffers)
+				vkEndCommandBuffer(*command_buffer);
+		}
+
+		VkResult AsyncCopy(VulkanBuffer& dst, const VulkanBuffer& src, 
+			VkSubmitInfo& submit_info, mem::sptr<VulkanQueue> queue,
+			con::vector<mem::sptr<VulkanCommandBuffer>>& command_buffers, VkFence fence = nullptr)
+		{
+			VkBufferCopy buffer_copy{};
+			buffer_copy.size = src.GetSize();
+			VulkanCommandCopyBuffers copy_buffers(src, dst, 1, &buffer_copy);
+
+			mem::sptr<VulkanCommandBuffer> buffer = _command_pool->AllocateCommandBuffer();
+			VkCommandBufferBeginInfo begin_info = VulkanCommandBuffer::CreateBeginInfo();
+			begin_info.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+			BeginCommandBuffer(buffer, begin_info);
+			buffer->Add(copy_buffers);
+			EndCommandBuffer(buffer);
+			command_buffers.emplace_back(buffer);
+			return queue->Submit(buffer, submit_info, fence);
+		}
+
+		VkResult SyncCopy(VulkanBuffer& dst, const VulkanBuffer& src, VkSubmitInfo& submit_info, 
+			mem::sptr<VulkanQueue> queue)
+		{
+			con::vector<mem::sptr<VulkanCommandBuffer>> command_buffers;
+			VulkanFence fence(GetLogicalDevice());
+			fence.Reset();
+			VkResult result = AsyncCopy(dst, src, submit_info, queue, command_buffers, fence);
+			fence.Wait();
+			_command_pool->DeallocateCommandBuffers(command_buffers);
+			return result;
+		}
+
+		VkResult AsyncCopy(VulkanImage& dst, const VulkanBuffer& src, VkBufferImageCopy buffer_image_copy, 
+			VkSubmitInfo& submit_info, mem::sptr<VulkanQueue> queue, 
+			con::vector<mem::sptr<VulkanCommandBuffer>>& command_buffers, VkFence fence = nullptr)
+		{
+			VulkanCommandCopyBufferToImage copy_buffer_to_image(src, dst, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1,
+				&buffer_image_copy);
+
+			mem::sptr<VulkanCommandBuffer> buffer = _command_pool->AllocateCommandBuffer();
+			VkCommandBufferBeginInfo begin_info = VulkanCommandBuffer::CreateBeginInfo();
+			begin_info.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+			BeginCommandBuffer(buffer, begin_info);
+			buffer->Add(copy_buffer_to_image);
+			EndCommandBuffer(buffer);
+			command_buffers.emplace_back(buffer);
+			return queue->Submit(buffer, submit_info, fence);
+		}
+
+		VkResult SyncCopy(VulkanImage& dst, const VulkanBuffer& src, VkBufferImageCopy buffer_image_copy, 
+			VkSubmitInfo& submit_info, mem::sptr<VulkanQueue> queue)
+		{
+			con::vector<mem::sptr<VulkanCommandBuffer>> command_buffers;
+			VulkanFence fence(GetLogicalDevice());
+			fence.Reset();
+			VkResult result = AsyncCopy(dst, src, buffer_image_copy, submit_info, queue, command_buffers, fence);
+			fence.Wait();
+			_command_pool->DeallocateCommandBuffers(command_buffers);
+			return result;
+		}
+
+		VkResult AsyncTransition(VulkanImage& image, VkFormat format, VkImageLayout old_image_layout, 
+			VkImageLayout new_image_layout, VkSubmitInfo& submit_info, mem::sptr<VulkanQueue> queue,
+			con::vector<mem::sptr<VulkanCommandBuffer>>& command_buffers, VkFence fence = nullptr)
+		{
+			VkImageMemoryBarrier image_memory_barrier{};
+			image_memory_barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+			image_memory_barrier.oldLayout = old_image_layout;
+			image_memory_barrier.newLayout = new_image_layout;
+			image_memory_barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+			image_memory_barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+			image_memory_barrier.image = image;
+			image_memory_barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+			image_memory_barrier.subresourceRange.baseMipLevel = 0;
+			image_memory_barrier.subresourceRange.levelCount = 1;
+			image_memory_barrier.subresourceRange.baseArrayLayer = 0;
+			image_memory_barrier.subresourceRange.layerCount = 1;
+
+			VkPipelineStageFlags src_pipeline_stage_flags = 0;
+			VkPipelineStageFlags dst_pipeline_stage_flags = 0;
+
+			if (old_image_layout == VK_IMAGE_LAYOUT_UNDEFINED && new_image_layout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL)
+			{
+				image_memory_barrier.srcAccessMask = 0;
+				image_memory_barrier.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+				src_pipeline_stage_flags = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
+				dst_pipeline_stage_flags = VK_PIPELINE_STAGE_TRANSFER_BIT;
+			}
+			else if (old_image_layout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL &&
+				new_image_layout == VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL)
+			{
+				image_memory_barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+				image_memory_barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+				src_pipeline_stage_flags = VK_PIPELINE_STAGE_TRANSFER_BIT;
+				dst_pipeline_stage_flags = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+			}
+			else if (old_image_layout == VK_IMAGE_LAYOUT_UNDEFINED &&
+				new_image_layout == VK_IMAGE_LAYOUT_STENCIL_ATTACHMENT_OPTIMAL)
+			{
+				image_memory_barrier.srcAccessMask = 0;
+				image_memory_barrier.dstAccessMask =
+					VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+				src_pipeline_stage_flags = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
+				dst_pipeline_stage_flags = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
+			}
+
+			if (new_image_layout == VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL)
+			{
+				image_memory_barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
+
+				if (VulkanHasStencilComponent(format))
+					image_memory_barrier.subresourceRange.aspectMask |= VK_IMAGE_ASPECT_STENCIL_BIT;
+			}
+			else
+			{
+				image_memory_barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+			}
+
+			VulkanCommandPipelineBarrier pipeline_barrier(src_pipeline_stage_flags, dst_pipeline_stage_flags, 0, 0, nullptr, 0,
+				nullptr, 1, &image_memory_barrier);
+
+			mem::sptr<VulkanCommandBuffer> buffer = _command_pool->AllocateCommandBuffer();
+			VkCommandBufferBeginInfo begin_info = VulkanCommandBuffer::CreateBeginInfo();
+			begin_info.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+			BeginCommandBuffer(buffer, begin_info);
+			buffer->Add(pipeline_barrier);
+			EndCommandBuffer(buffer);
+			command_buffers.emplace_back(buffer);
+			return queue->Submit(buffer, submit_info, fence);
+		}
+
+		VkResult SyncTransition(VulkanImage& image, VkFormat format, VkImageLayout old_image_layout,
+			VkImageLayout new_image_layout, VkSubmitInfo& submit_info, mem::sptr<VulkanQueue> queue)
+		{
+			con::vector<mem::sptr<VulkanCommandBuffer>> command_buffers;
+			VulkanFence fence(GetLogicalDevice());
+			fence.Reset();
+			VkResult result =
+				AsyncTransition(image, format, old_image_layout, new_image_layout, submit_info, queue, command_buffers, fence);
+			fence.Wait();
+			_command_pool->DeallocateCommandBuffers(command_buffers);
+			return result;
 		}
 	};
 } // namespace np::gpu::__detail

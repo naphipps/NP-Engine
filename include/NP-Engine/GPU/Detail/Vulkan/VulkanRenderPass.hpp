@@ -165,7 +165,7 @@ namespace np::gpu::__detail
 			depth_image_view_create_info.format = depth_image_create_info.format;
 			depth_image_view_create_info.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
 
-			return mem::create_sptr<VulkanTexture>(context->GetServices()->GetAllocator(), render_device.GetCommandPool(),
+			return mem::create_sptr<VulkanTexture>(context->GetServices()->GetAllocator(), render_device.GetLogicalDevice(),
 												   depth_image_create_info, depth_memory_property_flags,
 												   depth_image_view_create_info);
 			/*

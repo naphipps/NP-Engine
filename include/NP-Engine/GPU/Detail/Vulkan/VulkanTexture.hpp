@@ -15,7 +15,6 @@
 
 #include "NP-Engine/GPU/Interface/Interface.hpp"
 
-#include "VulkanCommandPool.hpp"
 #include "VulkanLogicalDevice.hpp"
 #include "VulkanImage.hpp"
 #include "VulkanImageView.hpp"
@@ -26,7 +25,6 @@ namespace np::gpu::__detail
 	class VulkanTexture
 	{
 	private:
-		mem::sptr<VulkanCommandPool> _command_pool;
 		VulkanImage _image;
 		VulkanImageView _image_view;
 		bl _hot_reloadable;
@@ -40,11 +38,10 @@ namespace np::gpu::__detail
 		}
 
 	public:
-		VulkanTexture(mem::sptr<VulkanCommandPool> command_pool, VkImageCreateInfo& image_create_info,
+		VulkanTexture(mem::sptr<VulkanLogicalDevice> device, VkImageCreateInfo& image_create_info,
 					  VkMemoryPropertyFlags memory_property_flags, VkImageViewCreateInfo& image_view_create_info,
 					  bl hot_reloadable = false):
-			_command_pool(command_pool),
-			_image(GetCommandPool(), image_create_info, memory_property_flags),
+			_image(device, image_create_info, memory_property_flags),
 			_image_view(GetLogicalDevice(), ApplyImageToImageViewCreateInfo(_image, image_view_create_info)),
 			_hot_reloadable(hot_reloadable),
 			_width(image_create_info.extent.width),
@@ -52,7 +49,6 @@ namespace np::gpu::__detail
 		{}
 
 		VulkanTexture(VulkanTexture&& other) noexcept:
-			_command_pool(::std::move(other._command_pool)),
 			_image(::std::move(other._image)),
 			_image_view(::std::move(other._image_view)),
 			_hot_reloadable(::std::move(other._hot_reloadable)),
@@ -62,17 +58,12 @@ namespace np::gpu::__detail
 
 		~VulkanTexture()
 		{
-			vkDeviceWaitIdle(*_command_pool->GetLogicalDevice());
-		}
-
-		mem::sptr<VulkanCommandPool> GetCommandPool() const
-		{
-			return _command_pool;
+			vkDeviceWaitIdle(*GetLogicalDevice());
 		}
 
 		mem::sptr<VulkanLogicalDevice> GetLogicalDevice() const
 		{
-			return _command_pool->GetLogicalDevice();
+			return _image.GetLogicalDevice();
 		}
 
 		VulkanImage& GetImage()

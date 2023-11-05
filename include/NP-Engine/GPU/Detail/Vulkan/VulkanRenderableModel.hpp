@@ -66,21 +66,21 @@ namespace np::gpu::__detail
 			return writer;
 		}
 
-		mem::sptr<VulkanBuffer> CreateBuffer(mem::sptr<VulkanCommandPool> command_pool, VkDeviceSize size,
+		mem::sptr<VulkanBuffer> CreateBuffer(mem::sptr<VulkanLogicalDevice> logical_device, VkDeviceSize size,
 											 VkBufferUsageFlags buffer_usage_flags, VkMemoryPropertyFlags memory_property_flags)
 		{
 			VkBufferCreateInfo info = VulkanBuffer::CreateInfo();
 			info.size = size;
 			info.usage = buffer_usage_flags;
 
-			return mem::create_sptr<VulkanBuffer>(_services->GetAllocator(), command_pool, info, memory_property_flags);
+			return mem::create_sptr<VulkanBuffer>(_services->GetAllocator(), logical_device, info, memory_property_flags);
 		}
 
-		mem::sptr<VulkanTexture> CreateTexture(mem::sptr<VulkanCommandPool> command_pool, VkImageCreateInfo& image_create_info,
+		mem::sptr<VulkanTexture> CreateTexture(mem::sptr<VulkanLogicalDevice> logical_device, VkImageCreateInfo& image_create_info,
 											   VkMemoryPropertyFlags image_memory_property_flags,
 											   VkImageViewCreateInfo& image_view_create_info, bl hot_reloadable)
 		{
-			return mem::create_sptr<VulkanTexture>(_services->GetAllocator(), command_pool, image_create_info,
+			return mem::create_sptr<VulkanTexture>(_services->GetAllocator(), logical_device, image_create_info,
 												   image_memory_property_flags, image_view_create_info, hot_reloadable);
 		}
 
@@ -112,14 +112,14 @@ namespace np::gpu::__detail
 				texture_image_create_info.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
 				VkMemoryPropertyFlags texture_memory_property_flags = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
 				VkImageViewCreateInfo texture_image_view_create_info = VulkanImageView::CreateInfo();
-				_texture = CreateTexture(vulkan_command_pool, texture_image_create_info, texture_memory_property_flags,
+				_texture = CreateTexture(vulkan_logical_device, texture_image_create_info, texture_memory_property_flags,
 										 texture_image_view_create_info, _model->GetTexture().IsHotReloadable());
 			}
 
 			// create vertex buffer
 			if (!_vertex_buffer || _vertex_buffer->GetSize() != vertex_buffer_data_size)
 			{
-				_vertex_buffer = CreateBuffer(vulkan_command_pool, vertex_buffer_data_size,
+				_vertex_buffer = CreateBuffer(vulkan_logical_device, vertex_buffer_data_size,
 											  VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
 											  VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 			}
@@ -127,7 +127,7 @@ namespace np::gpu::__detail
 			// create index buffer
 			if (!_index_buffer || _index_buffer->GetSize() != index_buffer_data_size)
 			{
-				_index_buffer = CreateBuffer(vulkan_command_pool, index_buffer_data_size,
+				_index_buffer = CreateBuffer(vulkan_logical_device, index_buffer_data_size,
 											 VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
 											 VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 			}
@@ -136,19 +136,19 @@ namespace np::gpu::__detail
 			if (!_texture_staging || _texture_staging->GetSize() != _model->GetTexture().Size())
 			{
 				_texture_staging =
-					CreateBuffer(vulkan_command_pool, _model->GetTexture().Size(), VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+					CreateBuffer(vulkan_logical_device, _model->GetTexture().Size(), VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
 								 VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 			}
 
 			if (!_vertex_staging || _vertex_staging->GetSize() != vertex_buffer_data_size)
 			{
-				_vertex_staging = CreateBuffer(vulkan_command_pool, vertex_buffer_data_size, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+				_vertex_staging = CreateBuffer(vulkan_logical_device, vertex_buffer_data_size, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
 											   VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 			}
 
 			if (!_index_staging || _index_staging->GetSize() != index_buffer_data_size)
 			{
-				_index_staging = CreateBuffer(vulkan_command_pool, index_buffer_data_size, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+				_index_staging = CreateBuffer(vulkan_logical_device, index_buffer_data_size, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
 											  VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 			}
 
@@ -193,18 +193,18 @@ namespace np::gpu::__detail
 			_texture_staging->AssignData(_model->GetTexture().Data());
 
 			// copy staging to texture
-			_texture->GetImage().AsyncTransitionLayout(VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_UNDEFINED,
-													   VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, transition_to_dst_submit,
-													   command_buffers, vulkan_graphics_queue);
+			vulkan_render_device.AsyncTransition(_texture->GetImage(), VK_FORMAT_R8G8B8A8_SRGB, 
+				VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, transition_to_dst_submit,
+				vulkan_graphics_queue, command_buffers);
 
 			VkBufferImageCopy buffer_image_copy = VulkanCommandCopyBufferToImage::CreateBufferImageCopy();
 			buffer_image_copy.imageExtent = {_model->GetTexture().GetWidth(), _model->GetTexture().GetHeight(), 1};
-			_texture->GetImage().AsyncAssign(*_texture_staging, buffer_image_copy, assign_image_submit, command_buffers,
-											 vulkan_graphics_queue);
+			vulkan_render_device.AsyncCopy(_texture->GetImage(), *_texture_staging, buffer_image_copy, 
+				assign_image_submit, vulkan_graphics_queue, command_buffers);
 
-			_texture->GetImage().AsyncTransitionLayout(VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-													   VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, transition_to_shader_submit,
-													   command_buffers, vulkan_graphics_queue, texture_complete_fence);
+			vulkan_render_device.AsyncTransition(_texture->GetImage(), VK_FORMAT_R8G8B8A8_SRGB, 
+				VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, 
+				transition_to_shader_submit, vulkan_graphics_queue, command_buffers, texture_complete_fence);
 
 			// create vertex submit infos
 			VulkanSemaphore vertex_buffer_copy_semaphore(vulkan_logical_device);
@@ -222,8 +222,8 @@ namespace np::gpu::__detail
 
 			// copy vertex data to staging
 			_vertex_staging->AssignData(_model->GetVertices().data());
-			_vertex_staging->AsyncCopyTo(*_vertex_buffer, vertex_buffer_copy_submit, command_buffers, vulkan_graphics_queue,
-										 vertex_complete_fence);
+			vulkan_render_device.AsyncCopy(*_vertex_buffer, *_vertex_staging, vertex_buffer_copy_submit, 
+				vulkan_graphics_queue, command_buffers, vertex_complete_fence);
 
 			// create index submit infos
 			VulkanSemaphore index_buffer_copy_semaphore(vulkan_logical_device);
@@ -241,8 +241,8 @@ namespace np::gpu::__detail
 
 			// copy index data to staging
 			_index_staging->AssignData(_model->GetIndices().data());
-			_index_staging->AsyncCopyTo(*_index_buffer, index_buffer_copy_submit, command_buffers, vulkan_graphics_queue,
-										index_complete_fence);
+			vulkan_render_device.AsyncCopy(*_index_buffer, *_index_staging, index_buffer_copy_submit,
+				vulkan_graphics_queue, command_buffers, index_complete_fence);
 
 			// create commands
 			_vk_vertex_buffer = *_vertex_buffer;
@@ -288,7 +288,7 @@ namespace np::gpu::__detail
 			vertex_complete_fence.Wait();
 			index_complete_fence.Wait();
 
-			vulkan_command_pool->FreeCommandBuffers(command_buffers);
+			vulkan_command_pool->DeallocateCommandBuffers(command_buffers);
 			SetOutOfDate(false);
 		}
 
