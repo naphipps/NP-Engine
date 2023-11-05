@@ -146,13 +146,15 @@ namespace np::gpu::__detail
 													 mem::sptr<VulkanDescriptorSetLayout> descriptor_set_layout)
 		{
 			VulkanRenderDevice& render_device = (VulkanRenderDevice&)(*render_context->GetRenderDevice());
+			VkPhysicalDeviceProperties device_properties{};
+			vkGetPhysicalDeviceProperties(render_device.GetPhysicalDevice(), &device_properties);
 
 			VkPipelineLayout layout = nullptr;
 			VkDescriptorSetLayout descriptor_layout = *descriptor_set_layout;
 			VkPushConstantRange push_constant_range = CreatePushConstantRange();
 			VkPipelineLayoutCreateInfo create_info = CreatePipelineLayoutInfo();
-			// TODO: setLayoutCount must be less than or equal to VkPhysicalDeviceLimits::maxBoundDescriptorSets
-			create_info.setLayoutCount = 1;
+
+			create_info.setLayoutCount = ::std::min((ui32)1, device_properties.limits.maxBoundDescriptorSets);
 			create_info.pSetLayouts = &descriptor_layout;
 			create_info.pushConstantRangeCount = 1;
 			create_info.pPushConstantRanges = &push_constant_range;
