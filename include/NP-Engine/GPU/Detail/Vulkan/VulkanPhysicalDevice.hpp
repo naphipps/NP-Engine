@@ -177,7 +177,7 @@ namespace np::gpu::__detail
 
 				for (siz i = 0; i < queue_families.size() && !graphics_family_index.has_value(); i++)
 					if (queue_families[i].queueFlags & VK_QUEUE_GRAPHICS_BIT)
-						// TODO: we may want to compare other queue families?
+						// we may want to compare other queue families?
 						graphics_family_index = (ui32)i;
 			}
 			NP_ENGINE_ASSERT(graphics_family_index.has_value(), "we require graphics family index");
@@ -222,7 +222,7 @@ namespace np::gpu::__detail
 
 				surface_format = surface_formats.front(); // default
 
-				// TODO: may need to rank formats to choose best one
+				// we may need to rank formats to choose best one
 				for (VkSurfaceFormatKHR& f : surface_formats)
 					if (f.format == VK_FORMAT_B8G8R8A8_SRGB && f.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR)
 					{
