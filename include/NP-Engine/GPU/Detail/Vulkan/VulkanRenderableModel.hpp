@@ -261,7 +261,7 @@ namespace np::gpu::__detail
 			}
 			else
 			{
-				_bind_vertex_buffers->Buffers = &_vk_vertex_buffer;
+				_bind_vertex_buffers->buffers = &_vk_vertex_buffer;
 			}
 
 			if (!_bind_index_buffer)
@@ -271,7 +271,7 @@ namespace np::gpu::__detail
 			}
 			else
 			{
-				_bind_index_buffer->Buffer = *_index_buffer;
+				_bind_index_buffer->buffer = *_index_buffer;
 			}
 
 			if (!_draw_indexed)
@@ -281,7 +281,7 @@ namespace np::gpu::__detail
 			}
 			else
 			{
-				_draw_indexed->IndexCount = (ui32)_model->GetIndices().size();
+				_draw_indexed->indexCount = (ui32)_model->GetIndices().size();
 			}
 
 			texture_complete_fence.Wait();
@@ -364,7 +364,7 @@ namespace np::gpu::__detail
 																					 .framebuffers->GetRenderPass()
 																					 ->GetRenderContext());
 
-			_push_constants->PipelineLayout = vulkan_render_pipeline.GetLayout();
+			_push_constants->pipelineLayout = vulkan_render_pipeline.GetLayout();
 
 			if (!_sampler)
 				SetSampler(vulkan_render_pipeline.GetDefaultSampler());

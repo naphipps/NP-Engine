@@ -23,209 +23,199 @@ namespace np::gpu::__detail
 		virtual void ApplyTo(VkCommandBuffer command_buffer) = 0;
 	};
 
-	class VulkanCommandBeginRenderPass : public VulkanCommand
+	struct VulkanCommandBeginRenderPass : public VulkanCommand
 	{
-	public:
-		VkRenderPassBeginInfo RenderPassBeginInfo;
-		VkSubpassContents SubpassContents;
+		VkRenderPassBeginInfo renderPassBeginInfo;
+		VkSubpassContents subpassContents;
 
 		VulkanCommandBeginRenderPass(VkRenderPassBeginInfo render_pass_begin_info, VkSubpassContents subpass_contents):
-			RenderPassBeginInfo(render_pass_begin_info),
-			SubpassContents(subpass_contents)
+			renderPassBeginInfo(render_pass_begin_info),
+			subpassContents(subpass_contents)
 		{}
 
 		void ApplyTo(VkCommandBuffer command_buffer) override
 		{
-			vkCmdBeginRenderPass(command_buffer, &RenderPassBeginInfo, SubpassContents);
+			vkCmdBeginRenderPass(command_buffer, &renderPassBeginInfo, subpassContents);
 		}
 	};
 
-	class VulkanCommandBindDescriptorSets : public VulkanCommand
+	struct VulkanCommandBindDescriptorSets : public VulkanCommand
 	{
-	public:
-		VkPipelineBindPoint PipelineBindPoint;
-		VkPipelineLayout PipelineLayout;
-		ui32 FirstSet;
-		ui32 DescriptorSetCount;
-		VkDescriptorSet* DescriptorSets;
-		ui32 DynamicOffsetCount;
-		ui32* DynamicOffsets;
+		VkPipelineBindPoint pipelineBindPoint;
+		VkPipelineLayout pipelineLayout;
+		ui32 firstSet;
+		ui32 descriptorSetCount;
+		VkDescriptorSet* descriptorSets;
+		ui32 dynamicOffsetCount;
+		ui32* dynamicOffsets;
 
 		VulkanCommandBindDescriptorSets(VkPipelineBindPoint pipeline_bind_point, VkPipelineLayout layout, ui32 first_set,
 										ui32 descriptor_set_count, VkDescriptorSet* descriptor_sets, ui32 dynamic_offset_count,
 										ui32* dynamic_offsets):
-			PipelineBindPoint(pipeline_bind_point),
-			PipelineLayout(layout),
-			FirstSet(first_set),
-			DescriptorSetCount(descriptor_set_count),
-			DescriptorSets(descriptor_sets),
-			DynamicOffsetCount(dynamic_offset_count),
-			DynamicOffsets(dynamic_offsets)
+			pipelineBindPoint(pipeline_bind_point),
+			pipelineLayout(layout),
+			firstSet(first_set),
+			descriptorSetCount(descriptor_set_count),
+			descriptorSets(descriptor_sets),
+			dynamicOffsetCount(dynamic_offset_count),
+			dynamicOffsets(dynamic_offsets)
 		{}
 
 		void ApplyTo(VkCommandBuffer command_buffer) override
 		{
-			vkCmdBindDescriptorSets(command_buffer, PipelineBindPoint, PipelineLayout, FirstSet, DescriptorSetCount,
-									DescriptorSets, DynamicOffsetCount, DynamicOffsets);
+			vkCmdBindDescriptorSets(command_buffer, pipelineBindPoint, pipelineLayout, firstSet, descriptorSetCount,
+									descriptorSets, dynamicOffsetCount, dynamicOffsets);
 		}
 	};
 
-	class VulkanCommandBindIndexBuffer : public VulkanCommand
+	struct VulkanCommandBindIndexBuffer : public VulkanCommand
 	{
-	public:
-		VkBuffer Buffer;
-		VkDeviceSize Offset;
-		VkIndexType IndexType;
+		VkBuffer buffer;
+		VkDeviceSize offset;
+		VkIndexType indexType;
 
 		VulkanCommandBindIndexBuffer(VkBuffer buffer, VkDeviceSize offset, VkIndexType index_type):
-			Buffer(buffer),
-			Offset(offset),
-			IndexType(index_type)
+			buffer(buffer),
+			offset(offset),
+			indexType(index_type)
 		{}
 
 		void ApplyTo(VkCommandBuffer command_buffer) override
 		{
-			vkCmdBindIndexBuffer(command_buffer, Buffer, Offset, IndexType);
+			vkCmdBindIndexBuffer(command_buffer, buffer, offset, indexType);
 		}
 	};
 
-	class VulkanCommandBindPipeline : public VulkanCommand
+	struct VulkanCommandBindPipeline : public VulkanCommand
 	{
-	public:
-		VkPipelineBindPoint PipelineBindPoint;
-		VkPipeline Pipeline;
+		VkPipelineBindPoint pipelineBindPoint;
+		VkPipeline pipeline;
 
 		VulkanCommandBindPipeline(VkPipelineBindPoint pipeline_bind_point, VkPipeline pipeline):
-			PipelineBindPoint(pipeline_bind_point),
-			Pipeline(pipeline)
+			pipelineBindPoint(pipeline_bind_point),
+			pipeline(pipeline)
 		{}
 
 		void ApplyTo(VkCommandBuffer command_buffer) override
 		{
-			vkCmdBindPipeline(command_buffer, PipelineBindPoint, Pipeline);
+			vkCmdBindPipeline(command_buffer, pipelineBindPoint, pipeline);
 		}
 	};
 
-	class VulkanCommandBindVertexBuffers : public VulkanCommand
+	struct VulkanCommandBindVertexBuffers : public VulkanCommand
 	{
-	public:
-		ui32 FirstBinding;
-		ui32 BindingCount;
-		VkBuffer* Buffers;
-		VkDeviceSize* Offsets;
+		ui32 firstBinding;
+		ui32 bindingCount;
+		VkBuffer* buffers;
+		VkDeviceSize* offsets;
 
 		VulkanCommandBindVertexBuffers(ui32 first_binding, ui32 binding_count, VkBuffer* buffers, VkDeviceSize* offsets):
-			FirstBinding(first_binding),
-			BindingCount(binding_count),
-			Buffers(buffers),
-			Offsets(offsets)
+			firstBinding(first_binding),
+			bindingCount(binding_count),
+			buffers(buffers),
+			offsets(offsets)
 		{}
 
 		void ApplyTo(VkCommandBuffer command_buffer) override
 		{
-			vkCmdBindVertexBuffers(command_buffer, FirstBinding, BindingCount, Buffers, Offsets);
+			vkCmdBindVertexBuffers(command_buffer, firstBinding, bindingCount, buffers, offsets);
 		}
 	};
 
-	class VulkanCommandDrawIndexed : public VulkanCommand
+	struct VulkanCommandDrawIndexed : public VulkanCommand
 	{
-	public:
-		ui32 IndexCount;
-		ui32 InstanceCount;
-		ui32 FirstIndex;
-		i32 VertexOffset;
-		ui32 FirstInstance;
+		ui32 indexCount;
+		ui32 instanceCount;
+		ui32 firstIndex;
+		i32 vertexOffset;
+		ui32 firstInstance;
 
 		VulkanCommandDrawIndexed(ui32 index_count, ui32 instance_count, ui32 first_index, i32 vertex_offset,
 								 ui32 first_instance):
-			IndexCount(index_count),
-			InstanceCount(instance_count),
-			FirstIndex(first_index),
-			VertexOffset(vertex_offset),
-			FirstInstance(first_instance)
+			indexCount(index_count),
+			instanceCount(instance_count),
+			firstIndex(first_index),
+			vertexOffset(vertex_offset),
+			firstInstance(first_instance)
 		{}
 
 		void ApplyTo(VkCommandBuffer command_buffer) override
 		{
-			vkCmdDrawIndexed(command_buffer, IndexCount, InstanceCount, FirstIndex, VertexOffset, FirstInstance);
+			vkCmdDrawIndexed(command_buffer, indexCount, instanceCount, firstIndex, vertexOffset, firstInstance);
 		}
 	};
 
-	class VulkanCommandEndRenderPass : public VulkanCommand
+	struct VulkanCommandEndRenderPass : public VulkanCommand
 	{
-	public:
 		void ApplyTo(VkCommandBuffer command_buffer) override
 		{
 			vkCmdEndRenderPass(command_buffer);
 		}
 	};
 
-	class VulkanCommandPipelineBarrier : public VulkanCommand
+	struct VulkanCommandPipelineBarrier : public VulkanCommand
 	{
-	public:
-		VkPipelineStageFlags DstPipelineStageFlags;
-		VkPipelineStageFlags SrcPipelineStageFlags;
-		VkDependencyFlags DependencyFlags;
-		ui32 MemoryBarrierCount;
-		VkMemoryBarrier* MemoryBarriers;
-		ui32 BufferMemoryBarrierCount;
-		VkBufferMemoryBarrier* BufferMemoryBarriers;
-		ui32 ImageMemoryBarrierCount;
-		VkImageMemoryBarrier* ImageMemoryBarriers;
+		VkPipelineStageFlags dstPipelineStageFlags;
+		VkPipelineStageFlags srcPipelineStageFlags;
+		VkDependencyFlags dependencyFlags;
+		ui32 memoryBarrierCount;
+		VkMemoryBarrier* memoryBarriers;
+		ui32 bufferMemoryBarrierCount;
+		VkBufferMemoryBarrier* bufferMemoryBarriers;
+		ui32 imageMemoryBarrierCount;
+		VkImageMemoryBarrier* imageMemoryBarriers;
 
 		VulkanCommandPipelineBarrier(VkPipelineStageFlags dst_pipeline_stage_flags,
 									 VkPipelineStageFlags src_pipeline_stage_flags, VkDependencyFlags dependency_flags,
 									 ui32 memory_barrier_count, VkMemoryBarrier* memory_barriers,
 									 ui32 buffer_memory_barrier_count, VkBufferMemoryBarrier* buffer_memory_barriers,
 									 ui32 image_memory_barrier_count, VkImageMemoryBarrier* image_memory_barriers):
-			DstPipelineStageFlags(dst_pipeline_stage_flags),
-			SrcPipelineStageFlags(src_pipeline_stage_flags),
-			DependencyFlags(dependency_flags),
-			MemoryBarrierCount(memory_barrier_count),
-			MemoryBarriers(memory_barriers),
-			BufferMemoryBarrierCount(buffer_memory_barrier_count),
-			BufferMemoryBarriers(buffer_memory_barriers),
-			ImageMemoryBarrierCount(image_memory_barrier_count),
-			ImageMemoryBarriers(image_memory_barriers)
+			dstPipelineStageFlags(dst_pipeline_stage_flags),
+			srcPipelineStageFlags(src_pipeline_stage_flags),
+			dependencyFlags(dependency_flags),
+			memoryBarrierCount(memory_barrier_count),
+			memoryBarriers(memory_barriers),
+			bufferMemoryBarrierCount(buffer_memory_barrier_count),
+			bufferMemoryBarriers(buffer_memory_barriers),
+			imageMemoryBarrierCount(image_memory_barrier_count),
+			imageMemoryBarriers(image_memory_barriers)
 		{}
 
 		void ApplyTo(VkCommandBuffer command_buffer) override
 		{
-			vkCmdPipelineBarrier(command_buffer, SrcPipelineStageFlags, DstPipelineStageFlags, DependencyFlags,
-								 MemoryBarrierCount, MemoryBarriers, BufferMemoryBarrierCount, BufferMemoryBarriers,
-								 ImageMemoryBarrierCount, ImageMemoryBarriers);
+			vkCmdPipelineBarrier(command_buffer, srcPipelineStageFlags, dstPipelineStageFlags, dependencyFlags,
+								 memoryBarrierCount, memoryBarriers, bufferMemoryBarrierCount, bufferMemoryBarriers,
+								 imageMemoryBarrierCount, imageMemoryBarriers);
 		}
 	};
 
-	class VulkanCommandCopyBuffers : public VulkanCommand
+	struct VulkanCommandCopyBuffers : public VulkanCommand
 	{
-	public:
-		VkBuffer DstBuffer;
-		VkBuffer SrcBuffer;
-		ui32 RegionCount;
-		VkBufferCopy* Regions;
+		VkBuffer dstBuffer;
+		VkBuffer srcBuffer;
+		ui32 regionCount;
+		VkBufferCopy* regions;
 
 		VulkanCommandCopyBuffers(VkBuffer dst_buffer, VkBuffer src_buffer, ui32 region_count, VkBufferCopy* regions):
-			DstBuffer(dst_buffer),
-			SrcBuffer(src_buffer),
-			RegionCount(region_count),
-			Regions(regions)
+			dstBuffer(dst_buffer),
+			srcBuffer(src_buffer),
+			regionCount(region_count),
+			regions(regions)
 		{}
 
 		void ApplyTo(VkCommandBuffer command_buffer) override
 		{
-			vkCmdCopyBuffer(command_buffer, SrcBuffer, DstBuffer, RegionCount, Regions);
+			vkCmdCopyBuffer(command_buffer, srcBuffer, dstBuffer, regionCount, regions);
 		}
 	};
 
-	class VulkanCommandCopyBufferToImage : public VulkanCommand
+	struct VulkanCommandCopyBufferToImage : public VulkanCommand
 	{
-	public:
-		VkImage DstImage;
-		VkBuffer SrcBuffer;
-		VkImageLayout DstImageLayout;
-		ui32 RegionCount;
-		VkBufferImageCopy* Regions;
+		VkImage dstImage;
+		VkBuffer srcBuffer;
+		VkImageLayout dstImageLayout;
+		ui32 regionCount;
+		VkBufferImageCopy* regions;
 
 		static VkBufferImageCopy CreateBufferImageCopy()
 		{
@@ -244,40 +234,39 @@ namespace np::gpu::__detail
 
 		VulkanCommandCopyBufferToImage(VkImage dst_image, VkBuffer src_buffer, VkImageLayout dst_image_layout,
 									   ui32 region_count, VkBufferImageCopy* regions):
-			DstImage(dst_image),
-			SrcBuffer(src_buffer),
-			DstImageLayout(dst_image_layout),
-			RegionCount(region_count),
-			Regions(regions)
+			dstImage(dst_image),
+			srcBuffer(src_buffer),
+			dstImageLayout(dst_image_layout),
+			regionCount(region_count),
+			regions(regions)
 		{}
 
 		void ApplyTo(VkCommandBuffer command_buffer) override
 		{
-			vkCmdCopyBufferToImage(command_buffer, SrcBuffer, DstImage, DstImageLayout, RegionCount, Regions);
+			vkCmdCopyBufferToImage(command_buffer, srcBuffer, dstImage, dstImageLayout, regionCount, regions);
 		}
 	};
 
-	class VulkanCommandPushConstants : public VulkanCommand
+	struct VulkanCommandPushConstants : public VulkanCommand
 	{
-	public:
-		VkPipelineLayout PipelineLayout;
-		VkShaderStageFlags ShaderStageFlags;
-		ui32 Offset;
-		ui32 Size;
-		void* Values;
+		VkPipelineLayout pipelineLayout;
+		VkShaderStageFlags shaderStageFlags;
+		ui32 offset;
+		ui32 size;
+		void* values;
 
 		VulkanCommandPushConstants(VkPipelineLayout pipeline_layout, VkShaderStageFlags shader_stage_flags, ui32 offset,
 								   ui32 size, void* values):
-			PipelineLayout(pipeline_layout),
-			ShaderStageFlags(shader_stage_flags),
-			Offset(offset),
-			Size(size),
-			Values(values)
+			pipelineLayout(pipeline_layout),
+			shaderStageFlags(shader_stage_flags),
+			offset(offset),
+			size(size),
+			values(values)
 		{}
 
 		void ApplyTo(VkCommandBuffer command_buffer) override
 		{
-			vkCmdPushConstants(command_buffer, PipelineLayout, ShaderStageFlags, Offset, Size, Values);
+			vkCmdPushConstants(command_buffer, pipelineLayout, shaderStageFlags, offset, size, values);
 		}
 	};
 } // namespace np::gpu::__detail
