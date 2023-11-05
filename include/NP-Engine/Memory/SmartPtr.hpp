@@ -215,12 +215,26 @@ namespace np::mem
 			other._resource = nullptr;
 		}
 
+		//downcast
 		template <typename U, ::std::enable_if_t<::std::is_convertible_v<U*, T*>, bl> = true>
 		smart_ptr(const smart_ptr<U>& other): smart_ptr(other._resource)
 		{}
 
+		//downcast
 		template <typename U, ::std::enable_if_t<::std::is_convertible_v<U*, T*>, bl> = true>
 		smart_ptr(smart_ptr<U>&& other) noexcept: smart_ptr(::std::move(other._resource))
+		{
+			other._resource = nullptr;
+		}
+
+		//upcast
+		template <typename U, ::std::enable_if_t<::std::is_convertible_v<T*, U*>, bl> = true>
+		smart_ptr(const smart_ptr<U>& other) : smart_ptr(other._resource)
+		{}
+
+		//upcast
+		template <typename U, ::std::enable_if_t<::std::is_convertible_v<T*, U*>, bl> = true>
+		smart_ptr(smart_ptr<U>&& other) noexcept : smart_ptr(::std::move(other._resource))
 		{
 			other._resource = nullptr;
 		}
@@ -282,6 +296,7 @@ namespace np::mem
 
 		sptr(sptr<T>&& other) noexcept: base(::std::move(other)) {}
 
+		//downcast
 		template <typename U, ::std::enable_if_t<::std::is_convertible_v<U*, T*>, bl> = true>
 		sptr(const sptr<U>& other): base(other)
 		{
@@ -289,8 +304,22 @@ namespace np::mem
 			base::increment_weak_counter();
 		}
 
+		//downcast
 		template <typename U, ::std::enable_if_t<::std::is_convertible_v<U*, T*>, bl> = true>
 		sptr(sptr<U>&& other) noexcept: base(::std::move(other))
+		{}
+
+		//upcast
+		template <typename U, ::std::enable_if_t<::std::is_convertible_v<T*, U*>, bl> = true>
+		sptr(const sptr<U>& other) : base(other)
+		{
+			base::increment_strong_counter();
+			base::increment_weak_counter();
+		}
+
+		//upcast
+		template <typename U, ::std::enable_if_t<::std::is_convertible_v<T*, U*>, bl> = true>
+		sptr(sptr<U>&& other) noexcept : base(::std::move(other))
 		{}
 
 		virtual ~sptr()
