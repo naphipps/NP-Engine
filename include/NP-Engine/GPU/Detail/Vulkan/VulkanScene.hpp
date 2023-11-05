@@ -55,7 +55,7 @@ namespace np::gpu::__detail
 			vulkan_render_pipeline.Rebuild();
 		}
 
-		/* TODO: 
+		/* TODO: is this StageResource idea still applicable?
 		void StageResource(mem::sptr<Resource> resource, Scene::RenderVisiblePayload& payload) override
 		{
 			switch (resource->GetType())
