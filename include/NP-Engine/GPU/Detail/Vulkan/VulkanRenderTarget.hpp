@@ -51,10 +51,6 @@ namespace np::gpu::__detail
 			RenderTarget(instance, window),
 			_surface(CreateSurface())
 		{
-			// TODO: bring the following checks to all the detail's constructors
-			NP_ENGINE_ASSERT(GetDetailType() == DetailType::Vulkan,
-							 "VulkanRenderTarget requires given DetailInstance to be DetailType::Vulkan");
-
 			::glm::uvec2 framebuffer_size = _window->GetFramebufferSize();
 			_framebuffer_extent = {framebuffer_size.x, framebuffer_size.y};
 			_window->SetFramebufferCallback(this, FramebufferCallback);
