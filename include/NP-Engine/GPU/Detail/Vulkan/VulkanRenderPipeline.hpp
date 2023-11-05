@@ -29,7 +29,7 @@ namespace np::gpu::__detail
 		con::vector<VkDescriptorBufferInfo> _meta_value_descriptor_infos;
 		con::vector<VkWriteDescriptorSet> _meta_value_descriptor_writers;
 
-		mem::sptr<VulkanSampler> _sampler; // TODO: our RenderPipeline::Properties could store this
+		mem::sptr<VulkanSampler> _sampler;
 		VkPipelineLayout _pipeline_layout;
 		VkPipeline _pipeline;
 		mem::sptr<VulkanCommandBindPipeline> _bind_pipeline;
