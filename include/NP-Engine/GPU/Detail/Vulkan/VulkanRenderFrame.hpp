@@ -36,10 +36,10 @@ namespace np::gpu::__detail
 			index(index),
 			device(device),
 			image(image_view_info.image),
-			imageView(GetLogicalDevice(), image_view_info),
-			imageSemaphore(GetLogicalDevice()),
-			renderSemaphore(GetLogicalDevice()),
-			fence(GetLogicalDevice()),
+			imageView(GetDevice(), image_view_info),
+			imageSemaphore(GetDevice()),
+			renderSemaphore(GetDevice()),
+			fence(GetDevice()),
 			prevFrameFence(nullptr),
 			commandBuffer(((VulkanCommandPool&)*((VulkanRenderDevice&)*device).GetCommandPool()).AllocateCommandBuffer())
 		{}
@@ -72,7 +72,7 @@ namespace np::gpu::__detail
 			}
 		}
 
-		mem::sptr<VulkanLogicalDevice> GetLogicalDevice() const
+		mem::sptr<VulkanLogicalDevice> GetDevice() const
 		{
 			VulkanRenderDevice& render_device = (VulkanRenderDevice&)*device;
 			return render_device.GetLogicalDevice();

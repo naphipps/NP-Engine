@@ -108,7 +108,7 @@ namespace np::gpu::__detail
 			return _buffer;
 		}
 
-		mem::sptr<VulkanLogicalDevice> GetLogicalDevice() const
+		mem::sptr<VulkanLogicalDevice> GetDevice() const
 		{
 			return _device;
 		}

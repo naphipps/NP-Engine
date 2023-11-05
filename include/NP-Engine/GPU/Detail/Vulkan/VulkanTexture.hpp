@@ -42,7 +42,7 @@ namespace np::gpu::__detail
 					  VkMemoryPropertyFlags memory_property_flags, VkImageViewCreateInfo& image_view_create_info,
 					  bl hot_reloadable = false):
 			_image(device, image_create_info, memory_property_flags),
-			_image_view(GetLogicalDevice(), ApplyImageToImageViewCreateInfo(_image, image_view_create_info)),
+			_image_view(GetDevice(), ApplyImageToImageViewCreateInfo(_image, image_view_create_info)),
 			_hot_reloadable(hot_reloadable),
 			_width(image_create_info.extent.width),
 			_height(image_create_info.extent.height)
@@ -58,12 +58,12 @@ namespace np::gpu::__detail
 
 		~VulkanTexture()
 		{
-			vkDeviceWaitIdle(*GetLogicalDevice());
+			vkDeviceWaitIdle(*GetDevice());
 		}
 
-		mem::sptr<VulkanLogicalDevice> GetLogicalDevice() const
+		mem::sptr<VulkanLogicalDevice> GetDevice() const
 		{
-			return _image.GetLogicalDevice();
+			return _image.GetDevice();
 		}
 
 		VulkanImage& GetImage()
