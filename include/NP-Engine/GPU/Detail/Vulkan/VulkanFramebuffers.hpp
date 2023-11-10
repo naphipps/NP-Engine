@@ -16,7 +16,7 @@
 #include "VulkanRenderPass.hpp"
 
 /*
-	TODO: VkFramebufferCreateInfo issue - might be linux-specific
+	TODO: VkFramebufferCreateInfo issue - might be linux-specific - happens when resizing window
 		[critical, NP_ENGINE_LOG, 2023-10-23 21:44:37.651, pid:10233, tid:10233]
 		NP Validation Layer: [[VUID-VkFramebufferCreateInfo-flags-04533, -26532824]]
 		Validation Error: [ VUID-VkFramebufferCreateInfo-flags-04533 ] Object 0: handle = 0x7fffb53c3140,
