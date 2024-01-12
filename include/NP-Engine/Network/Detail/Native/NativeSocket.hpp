@@ -445,7 +445,7 @@ namespace np::net::__detail
 
 		virtual bl IsRecieving() const override
 		{
-			return _keep_receiving.load(mo_release);
+			return _keep_receiving.load(mo_acquire);
 		}
 
 		virtual void StopReceiving() override
