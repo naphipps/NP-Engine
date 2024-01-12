@@ -44,10 +44,10 @@ namespace np::alg
 	private:
 		ImageSubview _image_subview;
 
-		static bl IsOldColor(void* caller, mem::BlDelegate& d)
+		static bl IsOldColor(mem::BlDelegate& d)
 		{
 			using Relation = FloodFillImage::PointRelation;
-			Payload& payload = *d.GetData<Payload*>();
+			Payload& payload = *((Payload*)d.GetPayload());
 			Point point = payload.point;
 
 			if (FloodFillImage::PointRelationContains(payload.relation, Relation::Upper))
@@ -62,16 +62,16 @@ namespace np::alg
 			return payload.imageSubview->Get(point) == payload.oldColor;
 		}
 
-		static void SetToNewColor(void* caller, mem::VoidDelegate& d)
+		static void SetToNewColor(mem::VoidDelegate& d)
 		{
-			Payload& payload = *d.GetData<Payload*>();
+			Payload& payload = *((Payload*)d.GetPayload());
 			payload.imageSubview->Set(payload.point, payload.newColor);
 		}
 
-		static void GetOutsideEdgePoints(void* caller, mem::VoidDelegate& d)
+		static void GetOutsideEdgePoints(mem::VoidDelegate& d)
 		{
 			using Relation = FloodFillImage::PointRelation;
-			Payload& payload = *d.GetData<Payload*>();
+			Payload& payload = *((Payload*)d.GetPayload());
 			OutsidePoint point = payload.point;
 
 			if (FloodFillImage::PointRelationContains(payload.relation, Relation::Upper))
@@ -86,9 +86,9 @@ namespace np::alg
 			payload.outsideEdgePoints->emplace(point);
 		}
 
-		static void GetEdgePoints(void* caller, mem::VoidDelegate& d)
+		static void GetEdgePoints(mem::VoidDelegate& d)
 		{
-			Payload& payload = *d.GetData<Payload*>();
+			Payload& payload = *((Payload*)d.GetPayload());
 			payload.edgePoints->emplace(payload.point);
 		}
 
@@ -158,7 +158,7 @@ namespace np::alg
 			FloodFillImage flood(_image_subview);
 			flood.GetIsApprovedDelegate().SetCallback(IsOldColor);
 			flood.GetApprovedActionDelegate().SetCallback(SetToNewColor);
-			flood.GetRejectedActionDelegate().UnsetCallback();
+			flood.GetRejectedActionDelegate().SetCallback(nullptr);
 			flood.Fill(payload);
 		}
 

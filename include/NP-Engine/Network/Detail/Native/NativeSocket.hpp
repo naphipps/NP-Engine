@@ -134,22 +134,18 @@ namespace np::net::__detail
 			}
 		}
 
-		static void ReceivingCallback(void* caller, mem::Delegate& d)
+		static void ReceivingCallback(mem::Delegate& d)
 		{
-			((NativeSocket*)caller)->ReceivingProcedure();
-		}
-
-		void ReceivingProcedure()
-		{
+			NativeSocket& self = *((NativeSocket*)d.GetPayload());
 			Message msg;
-			if (_direct_mode.load(mo_acquire))
+			if (self._direct_mode.load(mo_acquire))
 			{
 				msg.header.type = MessageType::Blob;
 				msg.header.bodySize = NP_ENGINE_NETWORK_MAX_MESSAGE_BODY_SIZE;
-				msg.body = mem::create_sptr<BlobMessageBody>(GetServices()->GetAllocator());
+				msg.body = mem::create_sptr<BlobMessageBody>(self.GetServices()->GetAllocator());
 				msg.body->SetSize(msg.header.bodySize);
 
-				i32 recvd = RecvBytes((chr*)msg.body->GetData(), msg.header.bodySize, true);
+				i32 recvd = self.RecvBytes((chr*)msg.body->GetData(), msg.header.bodySize, true);
 				if (recvd > 0)
 				{
 					msg.header.bodySize = recvd;
@@ -162,19 +158,19 @@ namespace np::net::__detail
 			}
 			else
 			{
-				i32 recvd = RecvBytes((chr*)&msg.header, sizeof(MessageHeader));
+				i32 recvd = self.RecvBytes((chr*)&msg.header, sizeof(MessageHeader));
 				if (recvd > 0 && msg.header.bodySize > 0)
 				{
 					bl supported = true;
 					switch (msg.header.type)
 					{
 					case MessageType::Text:
-						msg.body = mem::create_sptr<TextMessageBody>(GetServices()->GetAllocator());
+						msg.body = mem::create_sptr<TextMessageBody>(self.GetServices()->GetAllocator());
 						msg.body->SetSize(msg.header.bodySize);
 						break;
 
 					case MessageType::Blob:
-						msg.body = mem::create_sptr<BlobMessageBody>(GetServices()->GetAllocator());
+						msg.body = mem::create_sptr<BlobMessageBody>(self.GetServices()->GetAllocator());
 						msg.body->SetSize(msg.header.bodySize);
 						break;
 
@@ -186,27 +182,28 @@ namespace np::net::__detail
 					}
 
 					if (supported)
-						RecvBytes((chr*)msg.body->GetData(), msg.header.bodySize);
+						self.RecvBytes((chr*)msg.body->GetData(), msg.header.bodySize);
 				}
 			}
 
 			if (msg)
 			{
-				_inbox.Push(msg);
-				if (_keep_receiving.load(mo_acquire))
-					SubmitReceivingJob();
+				self._inbox.Push(msg);
+				if (self._keep_receiving.load(mo_acquire))
+					self.SubmitReceivingJob();
 			}
-			else if (_keep_receiving.load(mo_acquire))
+			else if (self._keep_receiving.load(mo_acquire))
 			{
 				thr::ThisThread::sleep_for(tim::DblMilliseconds(NP_ENGINE_NETWORK_SOCKET_RECEIVING_SLEEP_DURATION));
-				SubmitReceivingJob();
+				self.SubmitReceivingJob();
 			}
 		}
 
 		void SubmitReceivingJob()
 		{
 			mem::sptr<jsys::Job> job = GetServices()->GetJobSystem().CreateJob();
-			job->GetDelegate().SetCallback(this, ReceivingCallback);
+			job->GetDelegate().SetPayload(this);
+			job->GetDelegate().SetCallback(ReceivingCallback);
 			GetServices()->GetJobSystem().SubmitJob(jsys::JobPriority::Normal, job);
 		}
 

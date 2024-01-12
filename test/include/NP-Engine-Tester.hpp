@@ -91,37 +91,29 @@ namespace np::app
 			NP_ENGINE_LOG_INFO("size callback");
 		}
 
-		static void DestroySceneCallback(void* caller, mem::Delegate& d)
+		struct AdjustForWindowClosingPayload
 		{
-			d.DestructData<mem::sptr<gpu::Scene>>();
-		}
+			GameLayer* caller = nullptr;
+			uid::Uid windowId{};
+		};
 
-		static void AdjustForWindowClosingCallback(void* caller, mem::Delegate& d)
+		static void AdjustForWindowClosingCallback(mem::Delegate& d)
 		{
-			((GameLayer*)caller)->AdjustForWindowClosingProcedure(d);
-		}
+			AdjustForWindowClosingPayload* payload = (AdjustForWindowClosingPayload*)d.GetPayload();
 
-		void AdjustForWindowClosingProcedure(mem::Delegate& d)
-		{
-			uid::Uid windowId = d.GetData<uid::Uid>();
-
-			if (_window->GetUid() == windowId)
+			if (payload->caller->_window->GetUid() == payload->windowId)
 			{
-				_window_id_handle.reset();
-				_window.reset();
+				payload->caller->_window_id_handle.reset();
+				payload->caller->_window.reset();
 			}
 
-			auto scene = _scene.get_access();
-			if ((*scene)->GetRenderTarget()->GetWindow()->GetUid() == windowId)
 			{
-				jsys::JobSystem& job_system = _services->GetJobSystem();
-				mem::sptr<jsys::Job> destroy_scene_job = job_system.CreateJob();
-				destroy_scene_job->GetDelegate().ConstructData<mem::sptr<gpu::Scene>>(::std::move(*scene));
-				destroy_scene_job->GetDelegate().SetCallback(DestroySceneCallback);
-				job_system.SubmitJob(jsys::JobPriority::Higher, destroy_scene_job);
+				auto scene = payload->caller->_scene.get_access();
+				if ((*scene)->GetRenderTarget()->GetWindow()->GetUid() == payload->windowId)
+					scene->reset(); //TODO: can we job-ify this?
 			}
 
-			d.DestructData<uid::Uid>();
+			mem::Destroy<AdjustForWindowClosingPayload>(payload->caller->_services->GetAllocator(), payload);
 		}
 
 		void AdjustForWindowClosing(mem::sptr<evnt::Event> e)
@@ -129,9 +121,12 @@ namespace np::app
 			win::WindowClosingEvent& closing_event = (win::WindowClosingEvent&)(*e);
 			win::WindowClosingEventData& closing_data = closing_event.GetData();
 
+			AdjustForWindowClosingPayload* payload = mem::Create<AdjustForWindowClosingPayload>(_services->GetAllocator());
+			*payload = AdjustForWindowClosingPayload{ this, closing_data.windowId };
+
 			mem::sptr<jsys::Job> adjust_job = _services->GetJobSystem().CreateJob();
-			adjust_job->GetDelegate().ConstructData<uid::Uid>(closing_data.windowId);
-			adjust_job->GetDelegate().SetCallback(this, AdjustForWindowClosingCallback);
+			adjust_job->GetDelegate().SetPayload(payload);
+			adjust_job->GetDelegate().SetCallback(AdjustForWindowClosingCallback);
 			jsys::Job::AddDependency(closing_data.job, adjust_job);
 			_services->GetJobSystem().SubmitJob(jsys::JobPriority::Higher, adjust_job);
 		}
@@ -195,47 +190,41 @@ namespace np::app
 			}
 		}
 
-		static void SceneOnRenderCallback(void* caller, mem::Delegate& d)
+		static void SceneOnRenderCallback(mem::Delegate& d)
 		{
-			((GameLayer*)caller)->SceneOnRender(d);
+			gpu::Scene::OnRenderPayload* payload = (gpu::Scene::OnRenderPayload*)d.GetPayload();
+			GameLayer& self = *((GameLayer*)payload->caller);
+
+			if (payload->scene)
+				payload->scene->SetCamera(self._camera);
 		}
 
-		void SceneOnRender(mem::Delegate& d)
+		static void CreateSceneCallback(mem::Delegate& d)
 		{
-			gpu::Scene* scene = d.GetData<gpu::Scene*>();
-			if (scene)
-				scene->SetCamera(_camera);
-		}
+			GameLayer& self = *((GameLayer*)d.GetPayload());
 
-		static void CreateSceneCallback(void* caller, mem::Delegate& d)
-		{
-			((GameLayer*)caller)->CreateSceneProcedure();
-		}
+			self._window->SetTitle("My Game Window >:D");
 
-		void CreateSceneProcedure()
-		{
-			_window->SetTitle("My Game Window >:D");
-
-			void* input_queue = mem::AddressOf(_services->GetInputQueue());
-			_window->SetKeyCallback(input_queue, nput::InputListener::SubmitKeyState);
-			_window->SetMouseCallback(input_queue, nput::InputListener::SubmitMouseState);
-			_window->SetMousePositionCallback(input_queue, nput::InputListener::SubmitMousePosition);
-			_window->SetControllerCallback(input_queue, nput::InputListener::SubmitControllerState);
+			void* input_queue = mem::AddressOf(self._services->GetInputQueue());
+			self._window->SetKeyCallback(input_queue, nput::InputListener::SubmitKeyState);
+			self._window->SetMouseCallback(input_queue, nput::InputListener::SubmitMouseState);
+			self._window->SetMousePositionCallback(input_queue, nput::InputListener::SubmitMousePosition);
+			self._window->SetControllerCallback(input_queue, nput::InputListener::SubmitControllerState);
 			/*
-			_window->SetKeyCallback(this, LogSubmitKeyState);
-			_window->SetMouseCallback(this, LogSubmitMouseState);
-			_window->SetMousePositionCallback(this, LogSubmitMousePosition);
-			_window->SetControllerCallback(this, LogSubmitControllerState);
-			_window->SetFocusCallback(this, LogFocus);
-			_window->SetFramebufferCallback(this, LogFramebuffer);
-			_window->SetMaximizeCallback(this, LogMaximize);
-			_window->SetMinimizeCallback(this, LogMinimize);
-			_window->SetPositionCallback(this, LogPosition);
-			_window->SetSizeCallback(this, LogSize);
+			self._window->SetKeyCallback(mem::AddressOf(self), LogSubmitKeyState);
+			self._window->SetMouseCallback(mem::AddressOf(self), LogSubmitMouseState);
+			self._window->SetMousePositionCallback(mem::AddressOf(self), LogSubmitMousePosition);
+			self._window->SetControllerCallback(mem::AddressOf(self), LogSubmitControllerState);
+			self._window->SetFocusCallback(mem::AddressOf(self), LogFocus);
+			self._window->SetFramebufferCallback(mem::AddressOf(self), LogFramebuffer);
+			self._window->SetMaximizeCallback(mem::AddressOf(self), LogMaximize);
+			self._window->SetMinimizeCallback(mem::AddressOf(self), LogMinimize);
+			self._window->SetPositionCallback(mem::AddressOf(self), LogPosition);
+			self._window->SetSizeCallback(mem::AddressOf(self), LogSize);
 			//*/
 
-			mem::sptr<gpu::DetailInstance> detail_instance = gpu::DetailInstance::Create(gpu::DetailType::Vulkan, _services);
-			mem::sptr<gpu::RenderTarget> render_target = gpu::RenderTarget::Create(detail_instance, _window);
+			mem::sptr<gpu::DetailInstance> detail_instance = gpu::DetailInstance::Create(gpu::DetailType::Vulkan, self._services);
+			mem::sptr<gpu::RenderTarget> render_target = gpu::RenderTarget::Create(detail_instance, self._window);
 			mem::sptr<gpu::RenderDevice> render_device = gpu::RenderDevice::Create(render_target);
 			mem::sptr<gpu::RenderContext> render_context = gpu::RenderContext::Create(render_device);
 			mem::sptr<gpu::RenderPass> render_pass = gpu::RenderPass::Create(render_context);
@@ -256,25 +245,27 @@ namespace np::app
 			gpu::RenderPipeline::Properties render_pipeline_properties{framebuffers, vertex_shader, fragment_shader};
 			mem::sptr<gpu::RenderPipeline> render_pipeline = gpu::RenderPipeline::Create(render_pipeline_properties);
 
-			gpu::Scene::Properties scene_properties{render_pipeline, _camera};
-			auto scene = _scene.get_access();
+			gpu::Scene::Properties scene_properties{render_pipeline, self._camera};
+			auto scene = self._scene.get_access();
 			*scene = gpu::Scene::Create(scene_properties);
 
-			_model_handle = _services->GetUidSystem().CreateUid();
-			uid::Uid model_id = _services->GetUidSystem().GetUid(_model_handle);
-			mem::sptr<gpu::VisibleObject> model_visible = mem::create_sptr<gpu::VisibleObject>(_services->GetAllocator());
+			self._model_handle = self._services->GetUidSystem().CreateUid();
+			uid::Uid model_id = self._services->GetUidSystem().GetUid(self._model_handle);
+			mem::sptr<gpu::VisibleObject> model_visible = mem::create_sptr<gpu::VisibleObject>(self._services->GetAllocator());
 
-			(*scene)->Register(model_id, model_visible, _model);
-			(*scene)->GetOnRenderDelegate().SetCallback(this, SceneOnRenderCallback);
+			(*scene)->Register(model_id, model_visible, self._model);
+			(*scene)->SetOnRenderCaller(mem::AddressOf(self));
+			(*scene)->SetOnRenderCallback(SceneOnRenderCallback);
 
-			geom::FltObb3D model_obb = _model->GetObb(); // TODO: we need to update this
+			geom::FltObb3D model_obb = self._model->GetObb(); // TODO: we need to update this
 		}
 
 		void SubmitCreateSceneJob()
 		{
 			NP_ENGINE_ASSERT(_window, "require valid window");
 			mem::sptr<jsys::Job> create_scene_job = _services->GetJobSystem().CreateJob();
-			create_scene_job->GetDelegate().SetCallback(this, CreateSceneCallback);
+			create_scene_job->GetDelegate().SetPayload(this);
+			create_scene_job->GetDelegate().SetCallback(CreateSceneCallback);
 			_services->GetJobSystem().SubmitJob(jsys::JobPriority::Higher, create_scene_job);
 		}
 
@@ -474,15 +465,17 @@ namespace np::app
 			_prev_mouse_position = mouse_position;
 		}
 
-		static void TcpServerAcceptClientCallback(void* caller, mem::Delegate& d)
+		static void TcpServerAcceptClientCallback( mem::Delegate& d)
 		{
-			((GameLayer*)caller)->_tcp_server->Accept(true);
+			GameLayer& self = *((GameLayer*)d.GetPayload());
+			self._tcp_server->Accept(true);
 		}
 
 		void SubmitTcpServerAcceptClientJob()
 		{
 			mem::sptr<jsys::Job> job = _services->GetJobSystem().CreateJob();
-			job->GetDelegate().SetCallback(this, TcpServerAcceptClientCallback);
+			job->GetDelegate().SetPayload(this);
+			job->GetDelegate().SetCallback(TcpServerAcceptClientCallback);
 			_services->GetJobSystem().SubmitJob(jsys::JobPriority::Higher, job);
 		}
 
@@ -493,29 +486,26 @@ namespace np::app
 				(*c)->Close();
 		}
 
-		static void ClientConnectToTcpServerCallback(void* caller, mem::Delegate& d)
+		static void ClientConnectToTcpServerCallback(mem::Delegate& d)
 		{
-			((GameLayer*)caller)->ClientConnectToTcpServerProcedure();
-		}
-
-		void ClientConnectToTcpServerProcedure()
-		{
-			mem::sptr<net::Socket> client = net::Socket::Create(_network_context);
+			GameLayer& self = *((GameLayer*)d.GetPayload());
+			mem::sptr<net::Socket> client = net::Socket::Create(self._network_context);
 			if (client)
 			{
 				client->Open(net::Protocol::Tcp);
-				client->Enable({net::SocketOptions::ReuseAddress, net::SocketOptions::ReusePort});
-				client->ConnectTo(net::Ipv4{127, 0, 0, 1}, 55555);
+				client->Enable({ net::SocketOptions::ReuseAddress, net::SocketOptions::ReusePort });
+				client->ConnectTo(net::Ipv4{ 127, 0, 0, 1 }, 55555);
 			}
 
 			if (client)
-				_tcp_clients.get_access()->emplace_back(client);
+				self._tcp_clients.get_access()->emplace_back(client);
 		}
 
 		void SubmitClientConnectToTcpServerJob()
 		{
 			mem::sptr<jsys::Job> job = _services->GetJobSystem().CreateJob();
-			job->GetDelegate().SetCallback(this, ClientConnectToTcpServerCallback);
+			job->GetDelegate().SetPayload(this);
+			job->GetDelegate().SetCallback(ClientConnectToTcpServerCallback);
 			_services->GetJobSystem().SubmitJob(jsys::JobPriority::Higher, job);
 		}
 
@@ -764,22 +754,13 @@ namespace np::app
 		{
 			jsys::JobSystem& job_system = _services->GetJobSystem();
 			con::vector<jsys::JobWorker>& job_workers = job_system.GetJobWorkers();
-			using Fetch = jsys::JobWorker::Fetch;
 
 			NP_ENGINE_ASSERT(thr::Thread::HardwareConcurrency() >= 4, "NP Engine Test requires at least four cores");
 
 			/*
-				Examples:
-					FetchOrderArray = jsys::JobWorker::FetchOrderArray;
-					FetchOrderArray default_order{Fetch::Immediate, Fetch::PriorityBased, Fetch::Steal};
-					FetchOrderArray thief_order{Fetch::Steal, Fetch::Immediate, Fetch::None};
-					FetchOrderArray priority_order{Fetch::PriorityBased, Fetch::None, Fetch::None};
-					FetchOrderArray immediate_order{Fetch::Immediate, Fetch::Steal, Fetch::None};
-					FetchOrderArray only_immediate_order{ Fetch::Immediate, Fetch::Immediate, Fetch::Immediate };
-
-					//disable deep sleep on workers - better performance from workers, but 100% CPU
-					for (auto it = job_workers.begin(); it != job_workers.end(); it++)
-						it->DisableDeepSleep();
+				//disable deep sleep on workers - better performance from workers, but 100% CPU
+				for (auto it = job_workers.begin(); it != job_workers.end(); it++)
+					it->DisableDeepSleep();
 			*/
 		}
 

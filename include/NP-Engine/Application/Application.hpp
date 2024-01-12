@@ -115,7 +115,7 @@ namespace np::app
 
 		virtual void HandlePopup(mem::sptr<evnt::Event> e)
 		{
-			ApplicationPopupEvent::DataType& data = e->GetData<ApplicationPopupEvent::DataType>();
+			ApplicationPopupEvent::DataType& data = *((ApplicationPopupEvent::DataType*)e->GetPayload());
 			data.select = Popup::Show(GetTitle(), data.message, data.style, data.buttons);
 			(*e)();
 			e->SetHandled();

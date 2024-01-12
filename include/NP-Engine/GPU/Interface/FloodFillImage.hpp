@@ -100,9 +100,9 @@ namespace np::alg
 
 			payload.relation = PointRelation::None;
 
-			_is_approved.ConstructData<Payload*>(mem::AddressOf(payload));
-			_approved_action.ConstructData<Payload*>(mem::AddressOf(payload));
-			_rejected_action.ConstructData<Payload*>(mem::AddressOf(payload));
+			_is_approved.SetPayload(mem::AddressOf(payload));
+			_approved_action.SetPayload(mem::AddressOf(payload));
+			_rejected_action.SetPayload(mem::AddressOf(payload));
 
 			ui32 height = _image_subview.GetHeight();
 			ui32 width = _image_subview.GetWidth();
@@ -229,9 +229,9 @@ namespace np::alg
 				flood.pop();
 			}
 
-			_is_approved.DestructData<Payload*>();
-			_approved_action.DestructData<Payload*>();
-			_rejected_action.DestructData<Payload*>();
+			_is_approved.SetPayload(nullptr);
+			_approved_action.SetPayload(nullptr);
+			_rejected_action.SetPayload(nullptr);
 
 			payload.imageSubview = prev_image_subview;
 		}

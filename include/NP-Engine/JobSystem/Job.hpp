@@ -52,20 +52,16 @@ namespace np::jsys
 		con::vector<mem::wptr<Job>> _dependents;
 		atm_i32 _antecedent_count;
 		mem::Delegate _delegate;
-		bl _can_be_stolen;
 
 	public:
-		Job(): _antecedent_count(0), _can_be_stolen(true) {}
-
-		Job(mem::Delegate& d): _antecedent_count(0), _delegate(d), _can_be_stolen(true) {}
+		Job(): _antecedent_count(0) {}
 
 		Job(const Job& other) = delete;
 
 		Job(Job&& other) noexcept:
 			_dependents(::std::move(other._dependents)),
 			_antecedent_count(::std::move(other._antecedent_count.load(mo_acquire))),
-			_delegate(::std::move(other._delegate)),
-			_can_be_stolen(::std::move(other._can_be_stolen))
+			_delegate(::std::move(other._delegate))
 		{}
 
 		~Job()
@@ -80,7 +76,6 @@ namespace np::jsys
 			_dependents = ::std::move(other._dependents);
 			_antecedent_count.store(::std::move(other._antecedent_count.load(mo_acquire)), mo_release);
 			_delegate = ::std::move(other._delegate);
-			_can_be_stolen = ::std::move(other._can_be_stolen);
 			return *this;
 		}
 
@@ -103,8 +98,7 @@ namespace np::jsys
 		{
 			_dependents.clear();
 			_antecedent_count.store(0, mo_release);
-			_delegate.UnsetCallback();
-			_can_be_stolen = true;
+			_delegate = mem::Delegate{};
 		}
 
 		bl CanExecute() const
@@ -112,10 +106,11 @@ namespace np::jsys
 			return _antecedent_count.load(mo_acquire) == 0;
 		}
 
-		void operator()()
+		void operator()(siz workerId)
 		{
 			if (CanExecute())
 			{
+				_delegate.SetId(workerId);
 				_delegate();
 				_antecedent_count--;
 
@@ -181,16 +176,6 @@ namespace np::jsys
 					}
 				}
 			}
-		}
-
-		void SetCanBeStolen(bl can_be_stolen)
-		{
-			_can_be_stolen = can_be_stolen;
-		}
-
-		bl CanBeStolen() const
-		{
-			return _can_be_stolen;
 		}
 	};
 } // namespace np::jsys

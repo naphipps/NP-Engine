@@ -16,6 +16,9 @@ namespace np::app
 {
 	class ApplicationPopupEvent : public evnt::Event
 	{
+	protected:
+		mem::TraitAllocator _allocator;
+
 	public:
 		struct DataType
 		{
@@ -27,22 +30,22 @@ namespace np::app
 
 		ApplicationPopupEvent(str message, Popup::Style style, Popup::Buttons buttons)
 		{
-			ConstructData<DataType>(DataType{message, style, buttons, Popup::Select::None});
+			SetPayload(mem::Create<DataType>(_allocator, DataType{message, style, buttons, Popup::Select::None}));
 		}
 
 		~ApplicationPopupEvent()
 		{
-			DestructData<DataType>();
+			mem::Destroy<DataType>(_allocator, (DataType*)GetPayload());
 		}
 
 		DataType& GetData()
 		{
-			return mem::PadObject::GetData<DataType>();
+			return *((DataType*)GetPayload());
 		}
 
 		const DataType& GetData() const
 		{
-			return mem::PadObject::GetData<DataType>();
+			return *((DataType*)GetPayload());
 		}
 
 		evnt::EventType GetType() const override

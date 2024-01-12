@@ -42,10 +42,10 @@ namespace np::alg // TODO: refactor DMS stuff to DualMarchingSquares
 	private:
 		ImageSubview _image_subview;
 
-		static bl IsNotVisitedAndUnderIsothreshold(void* caller, mem::BlDelegate& d)
+		static bl IsNotVisitedAndUnderIsothreshold(mem::BlDelegate& d)
 		{
 			using Relation = FloodFillImage::PointRelation;
-			Payload& payload = *d.GetData<Payload*>();
+			Payload& payload = *((Payload*)d.GetPayload());
 			Point point = payload.point;
 
 			if (FloodFillImage::PointRelationContains(payload.relation, Relation::Upper))
@@ -61,15 +61,15 @@ namespace np::alg // TODO: refactor DMS stuff to DualMarchingSquares
 				GetIsovalue(*payload.imageSubview, point, payload.channel) < payload.isothreshold;
 		}
 
-		static void MarkAsVisited(void* caller, mem::VoidDelegate& d)
+		static void MarkAsVisited(mem::VoidDelegate& d)
 		{
-			Payload& payload = *d.GetData<Payload*>();
+			Payload& payload = *((Payload*)d.GetPayload());
 			payload.visited->emplace(payload.point);
 		}
 
-		static void ExtractEdgePoint(void* caller, mem::VoidDelegate& d)
+		static void ExtractEdgePoint(mem::VoidDelegate& d)
 		{
-			Payload& payload = *d.GetData<Payload*>();
+			Payload& payload = *((Payload*)d.GetPayload());
 			payload.edgePoints->emplace(payload.point);
 		}
 

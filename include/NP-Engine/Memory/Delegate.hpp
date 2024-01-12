@@ -12,67 +12,80 @@
 
 #include "NP-Engine/Primitive/Primitive.hpp"
 
-#include "PadObject.hpp"
-
 namespace np::mem
 {
 	template <typename R>
-	class DelegateTemplate : public PadObject
+	class DelegateTemplate
 	{
 	public:
-		using Callback = R (*)(void*, DelegateTemplate<R>&);
+		using Callback = R(*)(DelegateTemplate<R>&);
 
 	protected:
-		void* _caller;
+		siz _id;
 		Callback _callback;
+		void* _payload;
 
 	public:
-		DelegateTemplate(): _caller(nullptr), _callback(nullptr) {}
+		DelegateTemplate() : _id(-1), _callback(nullptr), _payload(nullptr) {}
 
 		DelegateTemplate(const DelegateTemplate<R>& other):
-			PadObject(static_cast<const PadObject&>(other)),
-			_caller(other._caller),
-			_callback(other._callback)
+			_id(other._id),
+			_callback(other._callback),
+			_payload(other._payload)
 		{}
 
-		DelegateTemplate(DelegateTemplate<R>&& other) noexcept:
-			PadObject(static_cast<PadObject&&>(other)),
-			_caller(::std::move(other._caller)),
-			_callback(::std::move(other._callback))
+		DelegateTemplate(DelegateTemplate<R>&& other) noexcept :
+			_id(::std::move(other._id)),
+			_callback(::std::move(other._callback)),
+			_payload(::std::move(other._payload))
 		{}
 
 		virtual ~DelegateTemplate() {}
 
 		DelegateTemplate<R>& operator=(const DelegateTemplate<R>& other)
 		{
-			PadObject::operator=(static_cast<const PadObject&>(other));
-			_caller = other._caller;
+			_id = other._id;
 			_callback = other._callback;
+			_payload = other._payload;
 			return *this;
 		}
 
 		DelegateTemplate<R>& operator=(DelegateTemplate<R>&& other) noexcept
 		{
-			PadObject::operator=(static_cast<PadObject&&>(other));
-			_caller = ::std::move(other._caller);
+			_id = ::std::move(other._id);
 			_callback = ::std::move(other._callback);
+			_payload = ::std::move(other._payload);
 			return *this;
 		}
 
-		virtual void SetCallback(void* caller, Callback callback)
+		virtual void SetId(siz id)
 		{
-			_caller = caller;
-			_callback = callback;
+			_id = id;
+		}
+
+		virtual siz GetId() const
+		{
+			return _id;
 		}
 
 		virtual void SetCallback(Callback callback)
 		{
-			SetCallback(nullptr, callback);
+			_callback = callback;
 		}
 
-		virtual void UnsetCallback()
+		virtual Callback GetCallback() const
 		{
-			SetCallback(nullptr, nullptr);
+			return _callback;
+		}
+
+		virtual void SetPayload(void* payload)
+		{
+			_payload = payload;
+		}
+
+		virtual void* GetPayload() const
+		{
+			return _payload;
 		}
 
 		virtual R operator()()
@@ -80,7 +93,7 @@ namespace np::mem
 			if constexpr (::std::is_same_v<void, R>)
 			{
 				if (_callback)
-					_callback(_caller, *this);
+					_callback(*this);
 
 				return;
 			}
@@ -89,7 +102,7 @@ namespace np::mem
 				R r;
 
 				if (_callback)
-					r = _callback(_caller, *this);
+					r = _callback(*this);
 
 				return r;
 			}

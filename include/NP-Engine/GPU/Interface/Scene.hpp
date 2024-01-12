@@ -29,6 +29,12 @@ namespace np::gpu
 			Camera camera;
 		};
 
+		struct OnRenderPayload
+		{
+			void* caller = nullptr;
+			Scene* scene = nullptr;
+		};
+
 	protected:
 		Properties _properties;
 		mutexed_wrapper<con::umap<uid::Uid, mem::sptr<VisibleObject>>> _visibles;
@@ -104,13 +110,26 @@ namespace np::gpu
 
 		// virtual void StageResource(mem::sptr<Resource> resource, RenderVisiblePayload& payload) = 0;
 
-		Scene(Properties& properties): _properties(properties) {}
+		void SetOnRenderScene(Scene* scene)
+		{
+			OnRenderPayload* payload = (OnRenderPayload*)_on_render_delegate.GetPayload();
+			payload->scene = scene;
+		}
+
+		Scene(Properties& properties): _properties(properties) 
+		{
+			OnRenderPayload* payload = mem::Create<OnRenderPayload>(GetServices()->GetAllocator());
+			payload->scene = this;
+			_on_render_delegate.SetPayload(payload);
+		}
 
 	public:
 		static mem::sptr<Scene> Create(Properties properties);
 
 		virtual ~Scene()
 		{
+			mem::Destroy<OnRenderPayload>(GetServices()->GetAllocator(), (OnRenderPayload*)_on_render_delegate.GetPayload());
+
 			auto visibles = _visibles.get_access();
 			for (auto it = visibles->begin(); it != visibles->end(); it++)
 				UnregisterResource(it->first);
@@ -161,14 +180,15 @@ namespace np::gpu
 			return _properties;
 		}
 
-		mem::Delegate& GetOnRenderDelegate()
+		void SetOnRenderCaller(void* caller)
 		{
-			return _on_render_delegate;
+			OnRenderPayload* payload = (OnRenderPayload*)_on_render_delegate.GetPayload();
+			payload->caller = caller;
 		}
 
-		const mem::Delegate& GetOnRenderDelegate() const
+		void SetOnRenderCallback(mem::Delegate::Callback callback)
 		{
-			return _on_render_delegate;
+			_on_render_delegate.SetCallback(callback);
 		}
 
 		virtual mem::sptr<Resource> CreateResource(mem::sptr<Model> model) = 0; // TODO: for image and light too

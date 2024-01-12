@@ -26,15 +26,18 @@ namespace np::app
 		mutexed_wrapper<con::uset<uid::Uid>> _windows_to_destroy;
 
 	protected:
-		static void WindowClosedCallback(void* caller, mem::Delegate& d)
-		{
-			((WindowLayer*)caller)->WindowClosedProcedure(d);
-		}
 
-		void WindowClosedProcedure(mem::Delegate& d)
+		struct WindowClosingPayload
 		{
-			_windows_to_destroy.get_access()->emplace(d.GetData<uid::Uid>());
-			d.DestructData<uid::Uid>();
+			WindowLayer* caller = nullptr;
+			uid::Uid windowId{};
+		};
+
+		static void WindowClosedCallback(mem::Delegate& d)
+		{
+			WindowClosingPayload* payload = (WindowClosingPayload*)d.GetPayload();
+			payload->caller->_windows_to_destroy.get_access()->emplace(payload->windowId);
+			mem::Destroy<WindowClosingPayload>(payload->caller->_services->GetAllocator(), payload);
 		}
 
 		void HandleWindowClosing(mem::sptr<evnt::Event> e)
@@ -43,9 +46,12 @@ namespace np::app
 			win::WindowClosingEventData& closing_data = closing_event.GetData();
 			jsys::JobSystem& job_system = _services->GetJobSystem();
 
+			WindowClosingPayload* payload = mem::Create<WindowClosingPayload>(_services->GetAllocator());
+			*payload = WindowClosingPayload{ this, closing_data.windowId };
+
 			mem::sptr<jsys::Job> closed_job = job_system.CreateJob();
-			closed_job->GetDelegate().ConstructData<uid::Uid>(closing_data.windowId);
-			closed_job->GetDelegate().SetCallback(this, WindowClosedCallback);
+			closed_job->GetDelegate().SetPayload(payload);
+			closed_job->GetDelegate().SetCallback(WindowClosedCallback);
 			jsys::Job::AddDependency(closed_job, closing_data.job);
 
 			job_system.SubmitJob(jsys::JobPriority::Higher, closing_data.job);

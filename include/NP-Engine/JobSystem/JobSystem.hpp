@@ -65,18 +65,8 @@ namespace np::jsys
 			_job_workers.clear();
 			_thread_pool = mem::create_sptr<thr::ThreadPool>(_thread_pool_allocator, count);
 
-			while (_job_workers.size() < count)
-				_job_workers.emplace_back(_job_queue);
-
-			while (_job_workers.size() > count)
-				_job_workers.pop_back();
-
-			for (auto it1 = _job_workers.begin(); it1 != _job_workers.end(); it1++)
-			{
-				it1->ClearCoworkers();
-				for (auto it2 = _job_workers.begin(); it2 != _job_workers.end(); it2++)
-					it1->AddCoworker(*it2);
-			}
+			for (siz i = 0; i < count; i++)
+				_job_workers.emplace_back(i, _job_queue);
 		}
 
 		void Start()

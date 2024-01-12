@@ -21,22 +21,24 @@ namespace np::net
 	class NetworkEvent : public evnt::Event
 	{
 	protected:
+		mem::TraitAllocator _allocator;
+
 		NetworkEvent(): evnt::Event() {}
 
 	public:
 		virtual ~NetworkEvent()
 		{
-			DestructData<T>();
+			mem::Destroy<T>(_allocator, (T*)GetPayload());
 		}
 
 		T& GetData()
 		{
-			return mem::PadObject::GetData<T>();
+			return *((T*)GetPayload());
 		}
 
 		const T& GetData() const
 		{
-			return mem::PadObject::GetData<T>();
+			return *((T*)GetPayload());
 		}
 
 		evnt::EventCategory GetCategory() const override
@@ -57,7 +59,7 @@ namespace np::net
 	public:
 		NetworkClientEvent(mem::sptr<Host> host, mem::sptr<Socket> socket): NetworkEvent<NetworkClientEventData>()
 		{
-			ConstructData<NetworkClientEventData>(NetworkClientEventData{host, socket});
+			SetPayload(mem::Create<NetworkClientEventData>(_allocator, NetworkClientEventData{ host, socket }));
 		}
 
 		evnt::EventType GetType() const override
