@@ -50,8 +50,8 @@ namespace np::app
 			*payload = WindowClosingPayload{ this, closing_data.windowId };
 
 			mem::sptr<jsys::Job> closed_job = job_system.CreateJob();
-			closed_job->GetDelegate().SetPayload(payload);
-			closed_job->GetDelegate().SetCallback(WindowClosedCallback);
+			closed_job->SetPayload(payload);
+			closed_job->SetCallback(WindowClosedCallback);
 			jsys::Job::AddDependency(closed_job, closing_data.job);
 
 			job_system.SubmitJob(jsys::JobPriority::Higher, closing_data.job);

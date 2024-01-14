@@ -20,6 +20,7 @@ namespace np
 	using mutex = ::std::mutex;
 	using scoped_lock = ::std::scoped_lock<mutex>;
 	using general_lock = ::std::unique_lock<mutex>;
+	using condition = ::std::condition_variable;
 
 	inline constexpr ::std::try_to_lock_t try_lock = ::std::try_to_lock;
 	inline constexpr ::std::defer_lock_t defer_lock = ::std::defer_lock;

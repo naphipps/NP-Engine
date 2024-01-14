@@ -26,12 +26,37 @@ namespace np::jsys
 	class JobSystem
 	{
 	private:
+		friend class JobWorker;
+
 		atm_bl _running;
 		con::vector<JobWorker> _job_workers;
 		mem::TraitAllocator _thread_pool_allocator;
 		mem::sptr<thr::ThreadPool> _thread_pool;
 		mem::AccumulatingPool<Job> _job_pool;
 		JobQueue _job_queue;
+
+		JobRecord GetNextJob()
+		{
+			JobRecord next;
+			for (siz i = 0; i < JobPrioritiesHighToLow.size(); i++)
+			{
+				next = _job_queue.Pop(JobPrioritiesHighToLow[i]);
+				if (next.IsValid())
+					break;
+			}
+			return next;
+		}
+
+		mem::sptr<thr::Thread> CreateThread()
+		{
+			return _thread_pool->CreateObject();
+		}
+
+		siz GetThreadAffinity(siz worker_id)
+		{
+			//we add one to help prevent core 0 crowding -- assuming main thread is there
+			return (worker_id + 1) % _thread_pool->GetObjectCount();
+		}
 
 	public:
 		JobSystem(): _running(false), _thread_pool(nullptr)
@@ -66,7 +91,7 @@ namespace np::jsys
 			_thread_pool = mem::create_sptr<thr::ThreadPool>(_thread_pool_allocator, count);
 
 			for (siz i = 0; i < count; i++)
-				_job_workers.emplace_back(i, _job_queue);
+				_job_workers.emplace_back(i);
 		}
 
 		void Start()
@@ -79,7 +104,7 @@ namespace np::jsys
 			_running.store(true, mo_release);
 
 			for (siz i = 0; i < _job_workers.size(); i++)
-				_job_workers[i].StartWork(*_thread_pool, (i + 1) % _thread_pool->GetObjectCount());
+				_job_workers[i].StartWork(*this);
 		}
 
 		void Stop()
@@ -108,16 +133,9 @@ namespace np::jsys
 		void SubmitJob(JobPriority priority, mem::sptr<Job> job)
 		{
 			_job_queue.Push(priority, job);
-		}
-
-		con::vector<JobWorker>& GetJobWorkers()
-		{
-			return _job_workers;
-		}
-
-		const con::vector<JobWorker>& GetJobWorkers() const
-		{
-			return _job_workers;
+			
+			for (auto it = _job_workers.begin(); it != _job_workers.end(); it++)
+				it->WakeUp();
 		}
 	};
 } // namespace np::jsys

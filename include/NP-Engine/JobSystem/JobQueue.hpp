@@ -62,7 +62,7 @@ namespace np::jsys
 		void Push(JobRecord record)
 		{
 			NP_ENGINE_ASSERT(record.IsValid(), "attempted to add an invalid Job -- do not do that my guy");
-			NP_ENGINE_ASSERT(record.job->IsEnabled(), "the dude not enabled bro - why it do");
+			NP_ENGINE_ASSERT(!record.job->IsComplete(), "the dude is complete bro - why it be");
 			GetQueueForPriority(record.priority).get_access()->emplace(record);
 		}
 

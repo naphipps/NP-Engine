@@ -202,8 +202,8 @@ namespace np::net::__detail
 		void SubmitReceivingJob()
 		{
 			mem::sptr<jsys::Job> job = GetServices()->GetJobSystem().CreateJob();
-			job->GetDelegate().SetPayload(this);
-			job->GetDelegate().SetCallback(ReceivingCallback);
+			job->SetPayload(this);
+			job->SetCallback(ReceivingCallback);
 			GetServices()->GetJobSystem().SubmitJob(jsys::JobPriority::Normal, job);
 		}
 

@@ -32,118 +32,51 @@
 
 namespace np::jsys
 {
+	class JobSystem;
+
 	class JobWorker
 	{
 	private:
-		friend class JobSystem;
+		struct WorkPayload
+		{
+			JobWorker* self = nullptr;
+			JobSystem* system = nullptr;
+		};
 
 		siz _id;
 		atm_bl _keep_working;
+		atm_i64 _wake_counter;
 		mem::sptr<thr::Thread> _thread;
-		JobQueue& _job_queue;
-		atm<::std::optional<ui32>> _deep_sleep_threshold;
+		condition _sleep_condition;
 
-		/*
-			returns a valid && CanExecute() job, or invalid job
-		*/
-		JobRecord GetNextJob()
+		static void WorkProcedure(const WorkPayload& payload);
+
+		bl ShouldSleep()
 		{
-			JobRecord next_job;
-			for (siz i = 0; i < JobPrioritiesHighToLow.size() && !next_job.IsValid(); i++)
-			{
-				next_job = _job_queue.Pop(JobPrioritiesHighToLow[i]);
-				if (next_job.IsValid())
-				{
-					if (next_job.job->IsEnabled())
-					{
-						if (!next_job.job->CanExecute())
-						{
-							_job_queue.Push(NormalizePriority(next_job.priority), next_job.job);
-							next_job.Invalidate(); // done with record
-						}
-					}
-					else
-					{
-						NP_ENGINE_ASSERT(false, "next_job must be enabled when valid at all times - probable memory leak");
-					}
-				}
-			}
-			return next_job;
+			return _wake_counter.fetch_add(-1) == 1;
 		}
 
-		void WorkerThreadProcedure()
+		void Sleep()
 		{
-			NP_ENGINE_PROFILE_SCOPE("WorkerThreadProcedure: " + to_str((ui64)this));
-
-			ui32 sleep_count = 0;
-			bl success = false;
-			while (_keep_working.load(mo_acquire))
-			{
-				success = TryPriorityBasedJob();
-
-				if (_keep_working.load(mo_acquire))
+			mutex m;
+			general_lock l(m);
+			_sleep_condition.wait(l, [this]()
 				{
-					if (success)
-					{
-						success = false;
-						sleep_count = 0;
-					}
-					else
-					{
-						::std::optional<ui32> deep_sleep_threshold = _deep_sleep_threshold.load(mo_acquire);
-						if (!deep_sleep_threshold.has_value())
-							deep_sleep_threshold = thr::Thread::HardwareConcurrency() * 3; //arbitrary
+					return !IsAwake();
+				});
 
-						if (sleep_count < deep_sleep_threshold.value())
-						{
-							const tim::DblMilliseconds duration(NP_ENGINE_JOB_WORKER_SLEEP_DURATION);
-							const tim::SteadyTimestamp start = tim::SteadyClock::now();
-							while (tim::SteadyClock::now() - start < duration)
-								thr::ThisThread::yield();
-
-							sleep_count++;
-						}
-						else
-						{
-							thr::ThisThread::sleep_for(tim::DblMilliseconds(NP_ENGINE_JOB_WORKER_DEEP_SLEEP_DURATION));
-						}
-					}
-				}
-			}
-		}
-
-		bl TryPriorityBasedJob()
-		{
-			bl success = !_keep_working.load(mo_acquire);
-
-			if (!success)
-			{
-				JobRecord record = GetNextJob();
-				if (record.IsValid())
-				{
-					NP_ENGINE_PROFILE_SCOPE("executing next Job");
-					success = true;
-					(*record.job)(_id);
-
-					if (!record.job->IsComplete())
-						_job_queue.Push(NormalizePriority(record.priority), record.job);
-
-					record.Invalidate(); // done with record
-				}
-			}
-
-			return success;
+			WakeUp();
 		}
 
 	public:
-		JobWorker(siz id, JobQueue& job_queue): _id(id), _keep_working(false), _thread(nullptr), _job_queue(job_queue)
+		JobWorker(siz id): _id(id), _keep_working(false), _wake_counter(-1/* arbitrary */), _thread(nullptr)
 		{}
 
 		JobWorker(JobWorker&& other) noexcept:
 			_id(::std::move(other._id)),
 			_keep_working(::std::move(other._keep_working.load(mo_acquire))),
-			_thread(::std::move(other._thread)),
-			_job_queue(other._job_queue)
+			_wake_counter(::std::move(other._wake_counter.load(mo_acquire))),
+			_thread(::std::move(other._thread))
 		{}
 
 		virtual ~JobWorker()
@@ -151,35 +84,26 @@ namespace np::jsys
 			StopWork();
 		}
 
-		void SetDeepSleepThreshold(ui32 threshold)
-		{
-			_deep_sleep_threshold.store(threshold, mo_release);
-		}
-
-		void ResetDeepSleepThreshold()
-		{
-			_deep_sleep_threshold.store(::std::optional<ui32>(), mo_release);
-		}
-
-		void DisableDeepSleep()
-		{
-			_deep_sleep_threshold.store(UI32_MAX, mo_release);
-		}
-
-		void StartWork(thr::ThreadPool& thread_pool, siz thread_affinity)
-		{
-			NP_ENGINE_PROFILE_FUNCTION();
-			_keep_working.store(true, mo_release);
-			_thread = thread_pool.CreateObject();
-			_thread->Run(&JobWorker::WorkerThreadProcedure, this);
-			_thread->SetAffinity(thread_affinity);
-		}
+		void StartWork(JobSystem& system);
 
 		void StopWork()
 		{
 			NP_ENGINE_PROFILE_FUNCTION();
 			_keep_working.store(false, mo_release);
+			_wake_counter.store(-1, mo_release);
+			WakeUp();
 			_thread.reset();
+		}
+
+		void WakeUp()
+		{
+			_wake_counter.fetch_add(1);
+			_sleep_condition.notify_all();
+		}
+
+		bl IsAwake() const
+		{
+			return _keep_working.load(mo_acquire) && _wake_counter.load(mo_acquire) > 0;
 		}
 	};
 } // namespace np::jsys

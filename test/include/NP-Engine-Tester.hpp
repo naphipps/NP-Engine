@@ -125,8 +125,8 @@ namespace np::app
 			*payload = AdjustForWindowClosingPayload{ this, closing_data.windowId };
 
 			mem::sptr<jsys::Job> adjust_job = _services->GetJobSystem().CreateJob();
-			adjust_job->GetDelegate().SetPayload(payload);
-			adjust_job->GetDelegate().SetCallback(AdjustForWindowClosingCallback);
+			adjust_job->SetPayload(payload);
+			adjust_job->SetCallback(AdjustForWindowClosingCallback);
 			jsys::Job::AddDependency(closing_data.job, adjust_job);
 			_services->GetJobSystem().SubmitJob(jsys::JobPriority::Higher, adjust_job);
 		}
@@ -264,8 +264,8 @@ namespace np::app
 		{
 			NP_ENGINE_ASSERT(_window, "require valid window");
 			mem::sptr<jsys::Job> create_scene_job = _services->GetJobSystem().CreateJob();
-			create_scene_job->GetDelegate().SetPayload(this);
-			create_scene_job->GetDelegate().SetCallback(CreateSceneCallback);
+			create_scene_job->SetPayload(this);
+			create_scene_job->SetCallback(CreateSceneCallback);
 			_services->GetJobSystem().SubmitJob(jsys::JobPriority::Higher, create_scene_job);
 		}
 
@@ -474,8 +474,8 @@ namespace np::app
 		void SubmitTcpServerAcceptClientJob()
 		{
 			mem::sptr<jsys::Job> job = _services->GetJobSystem().CreateJob();
-			job->GetDelegate().SetPayload(this);
-			job->GetDelegate().SetCallback(TcpServerAcceptClientCallback);
+			job->SetPayload(this);
+			job->SetCallback(TcpServerAcceptClientCallback);
 			_services->GetJobSystem().SubmitJob(jsys::JobPriority::Higher, job);
 		}
 
@@ -504,8 +504,8 @@ namespace np::app
 		void SubmitClientConnectToTcpServerJob()
 		{
 			mem::sptr<jsys::Job> job = _services->GetJobSystem().CreateJob();
-			job->GetDelegate().SetPayload(this);
-			job->GetDelegate().SetCallback(ClientConnectToTcpServerCallback);
+			job->SetPayload(this);
+			job->SetCallback(ClientConnectToTcpServerCallback);
 			_services->GetJobSystem().SubmitJob(jsys::JobPriority::Higher, job);
 		}
 
@@ -750,20 +750,6 @@ namespace np::app
 	private:
 		GameLayer _game_layer;
 
-		void CustomizeJobSystem()
-		{
-			jsys::JobSystem& job_system = _services->GetJobSystem();
-			con::vector<jsys::JobWorker>& job_workers = job_system.GetJobWorkers();
-
-			NP_ENGINE_ASSERT(thr::Thread::HardwareConcurrency() >= 4, "NP Engine Test requires at least four cores");
-
-			/*
-				//disable deep sleep on workers - better performance from workers, but 100% CPU
-				for (auto it = job_workers.begin(); it != job_workers.end(); it++)
-					it->DisableDeepSleep();
-			*/
-		}
-
 	public:
 		GameApp(mem::sptr<srvc::Services> services):
 			Application(Application::Properties{"My Game App"}, services),
@@ -776,7 +762,6 @@ namespace np::app
 		{
 			NP_ENGINE_PROFILE_FUNCTION();
 			NP_ENGINE_LOG_INFO("Hello world from my game app! My title is '" + GetTitle() + "'");
-			CustomizeJobSystem();
 			Application::Run(argc, argv);
 		}
 	};

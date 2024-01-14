@@ -49,7 +49,7 @@ namespace np::jsys
 	class Job
 	{
 	private:
-		con::vector<mem::wptr<Job>> _dependents;
+		con::vector<mem::sptr<Job>> _dependents; //TODO: this prevents dependencies to be added/removed from multiple threads
 		atm_i32 _antecedent_count;
 		mem::Delegate _delegate;
 
@@ -64,10 +64,7 @@ namespace np::jsys
 			_delegate(::std::move(other._delegate))
 		{}
 
-		~Job()
-		{
-			Reset();
-		}
+		~Job() = default;
 
 		Job& operator=(const Job& other) = delete;
 
@@ -79,26 +76,24 @@ namespace np::jsys
 			return *this;
 		}
 
-		mem::Delegate& GetDelegate()
+		void SetCallback(mem::Delegate::Callback callback)
 		{
-			return _delegate;
+			_delegate.SetCallback(callback);
 		}
 
-		const mem::Delegate& GetDelegate() const
+		mem::Delegate::Callback GetCallback() const
 		{
-			return _delegate;
+			return _delegate.GetCallback();
 		}
 
-		void SetDelegate(mem::Delegate& d)
+		void SetPayload(void* payload)
 		{
-			_delegate = d;
+			_delegate.SetPayload(payload);
 		}
 
-		void Reset()
+		void* GetPayload() const
 		{
-			_dependents.clear();
-			_antecedent_count.store(0, mo_release);
-			_delegate = mem::Delegate{};
+			return _delegate.GetPayload();
 		}
 
 		bl CanExecute() const
@@ -106,20 +101,17 @@ namespace np::jsys
 			return _antecedent_count.load(mo_acquire) == 0;
 		}
 
-		void operator()(siz workerId)
+		void operator()(siz worker_id)
 		{
 			if (CanExecute())
 			{
-				_delegate.SetId(workerId);
+				_delegate.SetId(worker_id);
 				_delegate();
-				_antecedent_count--;
-
+				
 				for (auto it = _dependents.begin(); it != _dependents.end(); it++)
-				{
-					mem::sptr<Job> dependent = it->get_sptr();
-					if (dependent)
-						dependent->_antecedent_count--;
-				}
+					(*it)->_antecedent_count.fetch_add(-1);
+
+				_antecedent_count.fetch_add(-1);
 			}
 		}
 
@@ -128,31 +120,15 @@ namespace np::jsys
 			return _antecedent_count.load(mo_acquire) == -1;
 		}
 
-		bl IsEnabled() const
-		{
-			return _antecedent_count.load(mo_acquire) > -1;
-		}
-
 		/*
 			make a depend on b
 		*/
 		static void AddDependency(mem::sptr<Job> a, mem::sptr<Job> b)
 		{
-			if (a->IsEnabled() && b->IsEnabled())
+			if (!a->IsComplete() && !b->IsComplete())
 			{
-				bl found = false;
-				con::vector<mem::wptr<Job>>& dependents = b->_dependents;
-				for (auto it = dependents.begin(); it != dependents.end() && !found; it++)
-				{
-					mem::sptr<Job> dependent = it->get_sptr();
-					found = dependent && dependent == a;
-				}
-
-				if (!found)
-				{
-					dependents.emplace_back(a);
-					a->_antecedent_count++;
-				}
+				b->_dependents.emplace_back(a);
+				a->_antecedent_count.fetch_add(1);
 			}
 		}
 
@@ -161,18 +137,18 @@ namespace np::jsys
 		*/
 		static void RemoveDependency(mem::sptr<Job> a, mem::sptr<Job> b)
 		{
-			if (a->IsEnabled() && b->IsEnabled())
+			if (!a->IsComplete() && !b->IsComplete())
 			{
-				con::vector<mem::wptr<Job>>& dependents = b->_dependents;
-				for (auto it = dependents.begin(); it != dependents.end(); it++)
+				for (auto it = b->_dependents.begin(); it != b->_dependents.end(); )
 				{
-					mem::sptr<Job> dependent = it->get_sptr();
-					if (dependent == a)
+					if (*it == a)
 					{
-						dependent.reset();
-						dependents.erase(it);
-						a->_antecedent_count--;
-						break;
+						it = b->_dependents.erase(it);
+						a->_antecedent_count.fetch_add(-1);
+					}
+					else
+					{
+						it++;
 					}
 				}
 			}
