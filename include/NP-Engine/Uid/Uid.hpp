@@ -13,6 +13,7 @@
 #include "NP-Engine/Primitive/Primitive.hpp"
 #include "NP-Engine/Container/Container.hpp"
 #include "NP-Engine/Memory/Memory.hpp"
+#include "NP-Engine/Random/Random.hpp"
 
 #include "NP-Engine/Vendor/StduuidInclude.hpp"
 

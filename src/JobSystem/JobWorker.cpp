@@ -4,6 +4,8 @@
 //
 //##===----------------------------------------------------------------------===##//
 
+#include "NP-Engine/String/String.hpp" //just for insight usage
+
 #include "NP-Engine/JobSystem/JobWorker.hpp"
 #include "NP-Engine/JobSystem/JobSystem.hpp"
 

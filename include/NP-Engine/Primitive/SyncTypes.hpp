@@ -75,6 +75,15 @@ namespace np
 		mutexed_wrapper(Args&&... args): _object(::std::forward<Args>(args)...)
 		{}
 
+		mutexed_wrapper(mutexed_wrapper<T>&& other) noexcept: _object(::std::move(other._object))
+		{}
+
+		mutexed_wrapper& operator=(mutexed_wrapper<T>&& other) noexcept
+		{
+			_object = ::std::move(other._object);
+			return *this;
+		}
+
 		access get_access()
 		{
 			return {&_object, _m};

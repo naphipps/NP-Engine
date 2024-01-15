@@ -49,7 +49,7 @@ namespace np::jsys
 	class Job
 	{
 	private:
-		con::vector<mem::sptr<Job>> _dependents; //TODO: this prevents dependencies to be added/removed from multiple threads
+		mutexed_wrapper<con::vector<mem::sptr<Job>>> _dependents;
 		atm_i32 _antecedent_count;
 		mem::Delegate _delegate;
 
@@ -108,10 +108,13 @@ namespace np::jsys
 				_delegate.SetId(worker_id);
 				_delegate();
 				
-				for (auto it = _dependents.begin(); it != _dependents.end(); it++)
-					(*it)->_antecedent_count.fetch_add(-1);
+				{
+					auto dependents = _dependents.get_access();
+					for (auto it = dependents->begin(); it != dependents->end(); it++)
+						(*it)->_antecedent_count.fetch_sub(1);
+				}
 
-				_antecedent_count.fetch_add(-1);
+				_antecedent_count.fetch_sub(1);
 			}
 		}
 
@@ -125,9 +128,10 @@ namespace np::jsys
 		*/
 		static void AddDependency(mem::sptr<Job> a, mem::sptr<Job> b)
 		{
+			auto dependents = b->_dependents.get_access();
 			if (!a->IsComplete() && !b->IsComplete())
 			{
-				b->_dependents.emplace_back(a);
+				dependents->emplace_back(a);
 				a->_antecedent_count.fetch_add(1);
 			}
 		}
@@ -137,14 +141,15 @@ namespace np::jsys
 		*/
 		static void RemoveDependency(mem::sptr<Job> a, mem::sptr<Job> b)
 		{
+			auto dependents = b->_dependents.get_access();
 			if (!a->IsComplete() && !b->IsComplete())
 			{
-				for (auto it = b->_dependents.begin(); it != b->_dependents.end(); )
+				for (auto it = dependents->begin(); it != dependents->end(); )
 				{
 					if (*it == a)
 					{
-						it = b->_dependents.erase(it);
-						a->_antecedent_count.fetch_add(-1);
+						it = dependents->erase(it);
+						a->_antecedent_count.fetch_sub(1);
 					}
 					else
 					{

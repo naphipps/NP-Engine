@@ -16,11 +16,13 @@ namespace np::jsys
 {
 	enum class JobPriority : ui32
 	{
-		Highest,
-		Higher,
-		Normal,
+		Lowest = 0,
 		Lower,
-		Lowest
+		Normal,
+		Higher,
+		Highest,
+
+		Max
 	};
 
 	static inline JobPriority NormalizePriority(JobPriority priority)
@@ -29,11 +31,11 @@ namespace np::jsys
 
 		switch (priority)
 		{
-		case JobPriority::Highest:
-			return_priority = JobPriority::Higher;
+		case JobPriority::Lowest:
+			return_priority = JobPriority::Lower;
 			break;
 
-		case JobPriority::Higher:
+		case JobPriority::Lower:
 			return_priority = JobPriority::Normal;
 			break;
 
@@ -41,12 +43,12 @@ namespace np::jsys
 			return_priority = JobPriority::Normal;
 			break;
 
-		case JobPriority::Lower:
+		case JobPriority::Higher:
 			return_priority = JobPriority::Normal;
 			break;
 
-		case JobPriority::Lowest:
-			return_priority = JobPriority::Lower;
+		case JobPriority::Highest:
+			return_priority = JobPriority::Higher;
 			break;
 
 		default:

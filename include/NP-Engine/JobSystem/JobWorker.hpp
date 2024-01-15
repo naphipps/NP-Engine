@@ -7,25 +7,12 @@
 #ifndef NP_ENGINE_JOB_WORKER_HPP
 #define NP_ENGINE_JOB_WORKER_HPP
 
-#ifndef NP_ENGINE_JOB_WORKER_SLEEP_DURATION
-	#define NP_ENGINE_JOB_WORKER_SLEEP_DURATION 1 // milliseconds
-#endif
-
-#ifndef NP_ENGINE_JOB_WORKER_DEEP_SLEEP_DURATION
-	#define NP_ENGINE_JOB_WORKER_DEEP_SLEEP_DURATION 3 // milliseconds
-#endif
-
 #include <utility>
-#include <optional>
 
 #include "NP-Engine/Foundation/Foundation.hpp"
-#include "NP-Engine/Container/Container.hpp"
 #include "NP-Engine/Thread/Thread.hpp"
 #include "NP-Engine/Insight/Insight.hpp"
 #include "NP-Engine/Primitive/Primitive.hpp"
-#include "NP-Engine/Random/Random.hpp"
-#include "NP-Engine/Time/Time.hpp"
-#include "NP-Engine/String/String.hpp"
 
 #include "JobRecord.hpp"
 #include "JobQueue.hpp"

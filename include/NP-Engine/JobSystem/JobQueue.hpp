@@ -19,38 +19,11 @@ namespace np::jsys
 	{
 	private:
 		using JobsQueue = mutexed_wrapper<con::queue<JobRecord>>;
-		con::array<JobsQueue, 5> _jobs_queues;
+		con::array<JobsQueue, (siz)JobPriority::Max> _jobs_queues;
 
 		JobsQueue& GetQueueForPriority(JobPriority priority)
 		{
-			JobsQueue* queue = nullptr;
-			switch (priority)
-			{
-			case JobPriority::Highest:
-				queue = &_jobs_queues[0];
-				break;
-
-			case JobPriority::Higher:
-				queue = &_jobs_queues[1];
-				break;
-
-			case JobPriority::Normal:
-				queue = &_jobs_queues[2];
-				break;
-
-			case JobPriority::Lower:
-				queue = &_jobs_queues[3];
-				break;
-
-			case JobPriority::Lowest:
-				queue = &_jobs_queues[4];
-				break;
-
-			default:
-				NP_ENGINE_ASSERT(false, "requested incorrect priority");
-				break;
-			}
-			return *queue;
+			return _jobs_queues[(siz)priority];
 		}
 
 	public:
