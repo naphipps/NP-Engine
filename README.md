@@ -11,14 +11,16 @@ This game engine started out as my first video game, but since the project kept 
 	- [x] ECS via [Entt](https://github.com/skypjack/entt)
 		- [ ] I am seriously considering forking Entt to force it support my own containers, which all use my memory management.
 	- [ ] 2D Physics via [Box2D](https://github.com/erincatto/box2d) with [liquidfun's](https://github.com/google/liquidfun) particle physics.
+		- I will use Box2D V3 when it is available.
 		- I will also improve the pressure solvers to _probably_ IISPH or something that is better, faster, and more accurate.
 	- [ ] 3D Physics via [Bullet](https://github.com/bulletphysics/bullet3)
 	- [x] A feature-rich JobSystem (task graph architecture):
-		- [x] priority-based jobs
-		- [x] control over individual job workers
-		- [x] automatic scaling up/down for the platform it runs on
-		- [x] considerate of the main thread so thread scheduling does not throttle the main thread
-		- [x] how a worker fetches jobs can be customized in real time to allow for direct control on how the worker works throughout the life of the session
+		- [x] Lightweight. Job submition is as small as an ui32 and smart ptr.
+		- [x] Power-efficient. JobWorkers sleep when no Jobs are available, and are woken up when Jobs are submitted.
+		- [x] Priority-based jobs
+		- [x] Braided-parallelism support (you can create a job anywhere, adding job-dependencies anytime)
+		- [x] Considerate of the main thread so thread scheduling does not throttle/crowd the main thread
+		- [x] Jobs can be checked for completion so the caller can easily know when a Job has completed.
 	- [x] A profiler that outputs a JSON file for Chrome's Tracing tool. (Type "chrome://tracing/" in Chrome's url.)
 		- [ ] I am going to migrate to [wolfpld's Tracy Profiler](https://github.com/wolfpld/tracy)
 	- [x] Networking
