@@ -13,10 +13,21 @@ namespace np::jsys
 	{
 		NP_ENGINE_PROFILE_SCOPE("WorkerThreadProcedure: " + to_str(payload.self->_id));
 
+		struct IsAwakeFunctor
+		{
+			JobWorker& worker;
+
+			bl operator()() const
+			{
+				return worker.IsAwake();
+			}
+		};
+
 		JobWorker& self = *payload.self;
 		JobSystem& system = *payload.system;
 		mutex sleep_mutex;
 		general_lock sleep_lock(sleep_mutex);
+		IsAwakeFunctor is_awake_functor{self};
 		JobRecord next;
 
 		while (self._keep_working.load(mo_acquire))
@@ -35,16 +46,22 @@ namespace np::jsys
 			}
 			else if (self.ShouldSleep())
 			{
-				self.Sleep();
+				self._sleep_condition->wait(sleep_lock, ::std::ref(is_awake_functor)); //preference: no lambda - ew
 			}
+
+			self.ResetWakeCounter();
 		}
 	}
 
 	void JobWorker::StartWork(JobSystem& system)
 	{
 		NP_ENGINE_PROFILE_FUNCTION();
-		_keep_working.store(true, mo_release);
-		WakeUp();
+
+		bl was_working = _keep_working.exchange(true, mo_release);
+		NP_ENGINE_ASSERT(!was_working, "Cannot call JobWorker.StartWork a second time without calling JobWorker.StopWork before");
+
+		ResetWakeCounter();
+		_sleep_condition = system.GetJobWorkerSleepCondition();
 		_thread = system.CreateThread();
 		_thread->Run(WorkProcedure, WorkPayload{ this, &system });
 		_thread->SetAffinity(system.GetThreadAffinity(_id));

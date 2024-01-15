@@ -37,46 +37,61 @@ namespace np::jsys
 	class JobWorker
 	{
 	private:
+		friend class JobSystem;
+
 		struct WorkPayload
 		{
 			JobWorker* self = nullptr;
 			JobSystem* system = nullptr;
 		};
 
+		constexpr static siz SLEEP_STATE = 0;
+		constexpr static siz LOWEST_AWAKE_STATE = 1;
+
 		siz _id;
 		atm_bl _keep_working;
-		atm_i64 _wake_counter;
+		atm_siz _wake_counter;
 		mem::sptr<thr::Thread> _thread;
-		condition _sleep_condition;
+		mem::sptr<condition> _sleep_condition;
 
 		static void WorkProcedure(const WorkPayload& payload);
 
 		bl ShouldSleep()
 		{
-			return _wake_counter.fetch_add(-1) == 1;
+			return _wake_counter.fetch_sub(1) == LOWEST_AWAKE_STATE;
 		}
 
-		void Sleep()
+		void WakeUp()
 		{
-			mutex m;
-			general_lock l(m);
-			_sleep_condition.wait(l, [this]()
-				{
-					return !IsAwake();
-				});
+			_wake_counter.fetch_add(1);
+		}
 
-			WakeUp();
+		void ResetWakeCounter()
+		{
+			_wake_counter.store(LOWEST_AWAKE_STATE, mo_release);
+		}
+
+		bl IsAwake() const
+		{
+			//check if I can not sleep OR if my wake counter is above sleep state
+			return !_keep_working.load(mo_acquire) || _wake_counter.load(mo_acquire) > SLEEP_STATE;
 		}
 
 	public:
-		JobWorker(siz id): _id(id), _keep_working(false), _wake_counter(-1/* arbitrary */), _thread(nullptr)
+		JobWorker(siz id): 
+		_id(id), 
+		_keep_working(false), 
+		_wake_counter(LOWEST_AWAKE_STATE),
+		_thread(nullptr), 
+		_sleep_condition(nullptr)
 		{}
 
 		JobWorker(JobWorker&& other) noexcept:
 			_id(::std::move(other._id)),
 			_keep_working(::std::move(other._keep_working.load(mo_acquire))),
 			_wake_counter(::std::move(other._wake_counter.load(mo_acquire))),
-			_thread(::std::move(other._thread))
+			_thread(::std::move(other._thread)),
+			_sleep_condition(::std::move(other._sleep_condition))
 		{}
 
 		virtual ~JobWorker()
@@ -89,21 +104,14 @@ namespace np::jsys
 		void StopWork()
 		{
 			NP_ENGINE_PROFILE_FUNCTION();
-			_keep_working.store(false, mo_release);
-			_wake_counter.store(-1, mo_release);
-			WakeUp();
-			_thread.reset();
-		}
 
-		void WakeUp()
-		{
-			_wake_counter.fetch_add(1);
-			_sleep_condition.notify_all();
-		}
-
-		bl IsAwake() const
-		{
-			return _keep_working.load(mo_acquire) && _wake_counter.load(mo_acquire) > 0;
+			bl was_working = _keep_working.exchange(false, mo_release);
+			if (was_working)
+			{
+				_sleep_condition->notify_all();
+				_thread.reset();
+				_sleep_condition.reset();
+			}
 		}
 	};
 } // namespace np::jsys

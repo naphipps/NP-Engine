@@ -30,7 +30,8 @@ namespace np::jsys
 
 		atm_bl _running;
 		con::vector<JobWorker> _job_workers;
-		mem::TraitAllocator _thread_pool_allocator;
+		mem::sptr<condition> _job_worker_sleep_condition;
+		mem::TraitAllocator _allocator;
 		mem::sptr<thr::ThreadPool> _thread_pool;
 		mem::AccumulatingPool<Job> _job_pool;
 		JobQueue _job_queue;
@@ -45,6 +46,11 @@ namespace np::jsys
 					break;
 			}
 			return next;
+		}
+
+		mem::sptr<condition> GetJobWorkerSleepCondition()
+		{
+			return _job_worker_sleep_condition;
 		}
 
 		mem::sptr<thr::Thread> CreateThread()
@@ -88,7 +94,7 @@ namespace np::jsys
 		{
 			Stop();
 			_job_workers.clear();
-			_thread_pool = mem::create_sptr<thr::ThreadPool>(_thread_pool_allocator, count);
+			_thread_pool = mem::create_sptr<thr::ThreadPool>(_allocator, count);
 
 			for (siz i = 0; i < count; i++)
 				_job_workers.emplace_back(i);
@@ -101,6 +107,7 @@ namespace np::jsys
 			if (!_thread_pool)
 				SetDefaultJobWorkerCount();
 
+			_job_worker_sleep_condition = mem::create_sptr<condition>(_allocator);
 			_running.store(true, mo_release);
 
 			for (siz i = 0; i < _job_workers.size(); i++)
@@ -113,10 +120,11 @@ namespace np::jsys
 
 			if (IsRunning())
 			{
-				for (auto it = _job_workers.begin(); it != _job_workers.end(); it++)
-					it->StopWork();
+				for (siz i = 0; i < _job_workers.size(); i++)
+					_job_workers[i].StopWork();
 
 				_running.store(false, mo_release);
+				_job_worker_sleep_condition.reset();
 			}
 		}
 
@@ -134,8 +142,11 @@ namespace np::jsys
 		{
 			_job_queue.Push(priority, job);
 			
-			for (auto it = _job_workers.begin(); it != _job_workers.end(); it++)
-				it->WakeUp();
+			for (siz i = 0; i < _job_workers.size(); i++)
+				_job_workers[i].WakeUp();
+
+			if (_job_worker_sleep_condition)
+				_job_worker_sleep_condition->notify_one();
 		}
 	};
 } // namespace np::jsys
