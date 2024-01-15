@@ -100,6 +100,11 @@ namespace np::jsys
 				_job_workers.emplace_back(i);
 		}
 
+		siz GetJobWokerCount() const
+		{
+			return _job_workers.size();
+		}
+
 		void Start()
 		{
 			NP_ENGINE_PROFILE_FUNCTION();
