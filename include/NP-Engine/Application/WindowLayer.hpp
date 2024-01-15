@@ -26,7 +26,6 @@ namespace np::app
 		mutexed_wrapper<con::uset<uid::Uid>> _windows_to_destroy;
 
 	protected:
-
 		struct WindowClosingPayload
 		{
 			WindowLayer* caller = nullptr;
@@ -46,11 +45,8 @@ namespace np::app
 			win::WindowClosingEventData& closing_data = closing_event.GetData();
 			jsys::JobSystem& job_system = _services->GetJobSystem();
 
-			WindowClosingPayload* payload = mem::Create<WindowClosingPayload>(_services->GetAllocator());
-			*payload = WindowClosingPayload{ this, closing_data.windowId };
-
 			mem::sptr<jsys::Job> closed_job = job_system.CreateJob();
-			closed_job->SetPayload(payload);
+			closed_job->SetPayload(mem::Create<WindowClosingPayload>(_services->GetAllocator(), this, closing_data.windowId));
 			closed_job->SetCallback(WindowClosedCallback);
 			jsys::Job::AddDependency(closed_job, closing_data.job);
 

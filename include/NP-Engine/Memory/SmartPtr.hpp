@@ -215,26 +215,26 @@ namespace np::mem
 			other._resource = nullptr;
 		}
 
-		//downcast
+		// downcast
 		template <typename U, ::std::enable_if_t<::std::is_convertible_v<U*, T*>, bl> = true>
 		smart_ptr(const smart_ptr<U>& other): smart_ptr(other._resource)
 		{}
 
-		//downcast
+		// downcast
 		template <typename U, ::std::enable_if_t<::std::is_convertible_v<U*, T*>, bl> = true>
 		smart_ptr(smart_ptr<U>&& other) noexcept: smart_ptr(::std::move(other._resource))
 		{
 			other._resource = nullptr;
 		}
 
-		//upcast
+		// upcast
 		template <typename U, ::std::enable_if_t<::std::is_convertible_v<T*, U*>, bl> = true>
-		smart_ptr(const smart_ptr<U>& other) : smart_ptr(other._resource)
+		smart_ptr(const smart_ptr<U>& other): smart_ptr(other._resource)
 		{}
 
-		//upcast
+		// upcast
 		template <typename U, ::std::enable_if_t<::std::is_convertible_v<T*, U*>, bl> = true>
-		smart_ptr(smart_ptr<U>&& other) noexcept : smart_ptr(::std::move(other._resource))
+		smart_ptr(smart_ptr<U>&& other) noexcept: smart_ptr(::std::move(other._resource))
 		{
 			other._resource = nullptr;
 		}
@@ -296,7 +296,7 @@ namespace np::mem
 
 		sptr(sptr<T>&& other) noexcept: base(::std::move(other)) {}
 
-		//downcast
+		// downcast
 		template <typename U, ::std::enable_if_t<::std::is_convertible_v<U*, T*>, bl> = true>
 		sptr(const sptr<U>& other): base(other)
 		{
@@ -304,22 +304,22 @@ namespace np::mem
 			base::increment_weak_counter();
 		}
 
-		//downcast
+		// downcast
 		template <typename U, ::std::enable_if_t<::std::is_convertible_v<U*, T*>, bl> = true>
 		sptr(sptr<U>&& other) noexcept: base(::std::move(other))
 		{}
 
-		//upcast
+		// upcast
 		template <typename U, ::std::enable_if_t<::std::is_convertible_v<T*, U*>, bl> = true>
-		sptr(const sptr<U>& other) : base(other)
+		sptr(const sptr<U>& other): base(other)
 		{
 			base::increment_strong_counter();
 			base::increment_weak_counter();
 		}
 
-		//upcast
+		// upcast
 		template <typename U, ::std::enable_if_t<::std::is_convertible_v<T*, U*>, bl> = true>
-		sptr(sptr<U>&& other) noexcept : base(::std::move(other))
+		sptr(sptr<U>&& other) noexcept: base(::std::move(other))
 		{}
 
 		virtual ~sptr()

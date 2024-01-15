@@ -116,11 +116,9 @@ namespace np::gpu
 			payload->scene = scene;
 		}
 
-		Scene(Properties& properties): _properties(properties) 
+		Scene(Properties& properties): _properties(properties)
 		{
-			OnRenderPayload* payload = mem::Create<OnRenderPayload>(GetServices()->GetAllocator());
-			payload->scene = this;
-			_on_render_delegate.SetPayload(payload);
+			_on_render_delegate.SetPayload(mem::Create<OnRenderPayload>(GetServices()->GetAllocator(), nullptr, this));
 		}
 
 	public:

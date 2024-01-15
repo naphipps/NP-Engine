@@ -60,7 +60,7 @@ namespace np::jsys
 
 		siz GetThreadAffinity(siz worker_id)
 		{
-			//we add one to help prevent core 0 crowding -- assuming main thread is there
+			// we add one to help prevent core 0 crowding -- assuming main thread is there
 			return (worker_id + 1) % _thread_pool->GetObjectCount();
 		}
 
@@ -146,7 +146,7 @@ namespace np::jsys
 		void SubmitJob(JobPriority priority, mem::sptr<Job> job)
 		{
 			_job_queue.Push(priority, job);
-			
+
 			for (siz i = 0; i < _job_workers.size(); i++)
 				_job_workers[i].WakeUp();
 

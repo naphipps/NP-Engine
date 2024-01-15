@@ -51,7 +51,7 @@ namespace np::gpu::__detail
 			VulkanRenderDevice& render_device = (VulkanRenderDevice&)(*render_context.GetRenderDevice());
 
 			return mem::create_sptr<VulkanDescriptorSets>(services->GetAllocator(), render_device.GetLogicalDevice(),
-														  render_context.GetFramesCount(), descriptor_set_layout);
+														  (ui32)render_context.GetFramesCount(), descriptor_set_layout);
 		}
 
 		static mem::sptr<VulkanBuffer> CreateBuffer(mem::sptr<srvc::Services> services,
@@ -501,9 +501,9 @@ namespace np::gpu::__detail
 			_bound_descriptor_sets = {(*_descriptor_sets)[current_image_index]};
 
 			_bind_descriptor_sets = mem::create_sptr<VulkanCommandBindDescriptorSets>(
-				GetServices()->GetAllocator(), VK_PIPELINE_BIND_POINT_GRAPHICS, _pipeline_layout, 0,
+				GetServices()->GetAllocator(), VK_PIPELINE_BIND_POINT_GRAPHICS, _pipeline_layout, (ui32)0,
 				(ui32)_bound_descriptor_sets.size(), _bound_descriptor_sets.empty() ? nullptr : _bound_descriptor_sets.data(),
-				0, nullptr);
+				(ui32)0, nullptr);
 
 			staging->Stage(_bind_descriptor_sets_command_slot, _bind_descriptor_sets);
 		}

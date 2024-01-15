@@ -30,7 +30,7 @@ namespace np::app
 
 		ApplicationPopupEvent(str message, Popup::Style style, Popup::Buttons buttons)
 		{
-			SetPayload(mem::Create<DataType>(_allocator, DataType{message, style, buttons, Popup::Select::None}));
+			SetPayload(mem::Create<DataType>(_allocator, message, style, buttons, Popup::Select::None));
 		}
 
 		~ApplicationPopupEvent()

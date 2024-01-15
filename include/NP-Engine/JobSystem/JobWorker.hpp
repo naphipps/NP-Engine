@@ -60,17 +60,17 @@ namespace np::jsys
 
 		bl IsAwake() const
 		{
-			//check if I can not sleep OR if my wake counter is above sleep state
+			// check if I can not sleep OR if my wake counter is above sleep state
 			return !_keep_working.load(mo_acquire) || _wake_counter.load(mo_acquire) > SLEEP_STATE;
 		}
 
 	public:
-		JobWorker(siz id): 
-		_id(id), 
-		_keep_working(false), 
-		_wake_counter(LOWEST_AWAKE_STATE),
-		_thread(nullptr), 
-		_sleep_condition(nullptr)
+		JobWorker(siz id):
+			_id(id),
+			_keep_working(false),
+			_wake_counter(LOWEST_AWAKE_STATE),
+			_thread(nullptr),
+			_sleep_condition(nullptr)
 		{}
 
 		JobWorker(JobWorker&& other) noexcept:

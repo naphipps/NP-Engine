@@ -48,7 +48,7 @@ namespace np::jsys
 			}
 			else if (self.ShouldSleep())
 			{
-				self._sleep_condition->wait(sleep_lock, ::std::ref(is_awake_functor)); //preference: no lambda - ew
+				self._sleep_condition->wait(sleep_lock, ::std::ref(is_awake_functor)); // preference: no lambda - ew
 			}
 
 			self.ResetWakeCounter();
@@ -60,12 +60,12 @@ namespace np::jsys
 		NP_ENGINE_PROFILE_FUNCTION();
 
 		bl was_working = _keep_working.exchange(true, mo_release);
-		NP_ENGINE_ASSERT(!was_working, "Cannot call JobWorker.StartWork a second time without calling JobWorker.StopWork before");
+		NP_ENGINE_ASSERT(!was_working, "JobWorker is already working.");
 
 		ResetWakeCounter();
 		_sleep_condition = system.GetJobWorkerSleepCondition();
 		_thread = system.CreateThread();
-		_thread->Run(WorkProcedure, WorkPayload{ this, &system });
+		_thread->Run(WorkProcedure, WorkPayload{this, &system});
 		_thread->SetAffinity(system.GetThreadAffinity(_id));
 	}
-}
+} // namespace np::jsys

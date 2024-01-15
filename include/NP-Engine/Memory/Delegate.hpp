@@ -18,7 +18,7 @@ namespace np::mem
 	class DelegateTemplate
 	{
 	public:
-		using Callback = R(*)(DelegateTemplate<R>&);
+		using Callback = R (*)(DelegateTemplate<R>&);
 
 	protected:
 		siz _id;
@@ -26,15 +26,12 @@ namespace np::mem
 		void* _payload;
 
 	public:
-		DelegateTemplate() : _id(-1), _callback(nullptr), _payload(nullptr) {}
+		DelegateTemplate(): _id(-1), _callback(nullptr), _payload(nullptr) {}
 
-		DelegateTemplate(const DelegateTemplate<R>& other):
-			_id(other._id),
-			_callback(other._callback),
-			_payload(other._payload)
+		DelegateTemplate(const DelegateTemplate<R>& other): _id(other._id), _callback(other._callback), _payload(other._payload)
 		{}
 
-		DelegateTemplate(DelegateTemplate<R>&& other) noexcept :
+		DelegateTemplate(DelegateTemplate<R>&& other) noexcept:
 			_id(::std::move(other._id)),
 			_callback(::std::move(other._callback)),
 			_payload(::std::move(other._payload))

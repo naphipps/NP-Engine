@@ -76,7 +76,8 @@ namespace np::gpu::__detail
 			return mem::create_sptr<VulkanBuffer>(_services->GetAllocator(), logical_device, info, memory_property_flags);
 		}
 
-		mem::sptr<VulkanTexture> CreateTexture(mem::sptr<VulkanLogicalDevice> logical_device, VkImageCreateInfo& image_create_info,
+		mem::sptr<VulkanTexture> CreateTexture(mem::sptr<VulkanLogicalDevice> logical_device,
+											   VkImageCreateInfo& image_create_info,
 											   VkMemoryPropertyFlags image_memory_property_flags,
 											   VkImageViewCreateInfo& image_view_create_info, bl hot_reloadable)
 		{
@@ -193,18 +194,19 @@ namespace np::gpu::__detail
 			_texture_staging->AssignData(_model->GetTexture().Data());
 
 			// copy staging to texture
-			vulkan_render_device.AsyncTransition(_texture->GetImage(), VK_FORMAT_R8G8B8A8_SRGB, 
-				VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, transition_to_dst_submit,
-				vulkan_graphics_queue, command_buffers);
+			vulkan_render_device.AsyncTransition(_texture->GetImage(), VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_UNDEFINED,
+												 VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, transition_to_dst_submit,
+												 vulkan_graphics_queue, command_buffers);
 
 			VkBufferImageCopy buffer_image_copy = VulkanCommandCopyBufferToImage::CreateBufferImageCopy();
 			buffer_image_copy.imageExtent = {_model->GetTexture().GetWidth(), _model->GetTexture().GetHeight(), 1};
-			vulkan_render_device.AsyncCopy(_texture->GetImage(), *_texture_staging, buffer_image_copy, 
-				assign_image_submit, vulkan_graphics_queue, command_buffers);
+			vulkan_render_device.AsyncCopy(_texture->GetImage(), *_texture_staging, buffer_image_copy, assign_image_submit,
+										   vulkan_graphics_queue, command_buffers);
 
-			vulkan_render_device.AsyncTransition(_texture->GetImage(), VK_FORMAT_R8G8B8A8_SRGB, 
-				VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, 
-				transition_to_shader_submit, vulkan_graphics_queue, command_buffers, texture_complete_fence);
+			vulkan_render_device.AsyncTransition(_texture->GetImage(), VK_FORMAT_R8G8B8A8_SRGB,
+												 VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+												 transition_to_shader_submit, vulkan_graphics_queue, command_buffers,
+												 texture_complete_fence);
 
 			// create vertex submit infos
 			VulkanSemaphore vertex_buffer_copy_semaphore(vulkan_logical_device);
@@ -222,8 +224,8 @@ namespace np::gpu::__detail
 
 			// copy vertex data to staging
 			_vertex_staging->AssignData(_model->GetVertices().data());
-			vulkan_render_device.AsyncCopy(*_vertex_buffer, *_vertex_staging, vertex_buffer_copy_submit, 
-				vulkan_graphics_queue, command_buffers, vertex_complete_fence);
+			vulkan_render_device.AsyncCopy(*_vertex_buffer, *_vertex_staging, vertex_buffer_copy_submit, vulkan_graphics_queue,
+										   command_buffers, vertex_complete_fence);
 
 			// create index submit infos
 			VulkanSemaphore index_buffer_copy_semaphore(vulkan_logical_device);
@@ -241,8 +243,8 @@ namespace np::gpu::__detail
 
 			// copy index data to staging
 			_index_staging->AssignData(_model->GetIndices().data());
-			vulkan_render_device.AsyncCopy(*_index_buffer, *_index_staging, index_buffer_copy_submit,
-				vulkan_graphics_queue, command_buffers, index_complete_fence);
+			vulkan_render_device.AsyncCopy(*_index_buffer, *_index_staging, index_buffer_copy_submit, vulkan_graphics_queue,
+										   command_buffers, index_complete_fence);
 
 			// create commands
 			_vk_vertex_buffer = *_vertex_buffer;
@@ -251,13 +253,14 @@ namespace np::gpu::__detail
 			{
 				_push_constants = mem::create_sptr<VulkanCommandPushConstants>(
 					_services->GetAllocator(), vulkan_render_pipeline.GetLayout(),
-					VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(RenderableMetaValues), &_meta);
+					(VkShaderStageFlags)(VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT), (ui32)0,
+					(ui32)sizeof(RenderableMetaValues), &_meta);
 			}
 
 			if (!_bind_vertex_buffers)
 			{
 				_bind_vertex_buffers = mem::create_sptr<VulkanCommandBindVertexBuffers>(
-					_services->GetAllocator(), 0, 1, &_vk_vertex_buffer, _vertex_offsets.data());
+					_services->GetAllocator(), (ui32)0, (ui32)1, &_vk_vertex_buffer, _vertex_offsets.data());
 			}
 			else
 			{
@@ -267,7 +270,7 @@ namespace np::gpu::__detail
 			if (!_bind_index_buffer)
 			{
 				_bind_index_buffer = mem::create_sptr<VulkanCommandBindIndexBuffer>(_services->GetAllocator(), *_index_buffer,
-																					0, VK_INDEX_TYPE_UINT32);
+																					(ui32)0, VK_INDEX_TYPE_UINT32);
 			}
 			else
 			{
@@ -276,8 +279,8 @@ namespace np::gpu::__detail
 
 			if (!_draw_indexed)
 			{
-				_draw_indexed = mem::create_sptr<VulkanCommandDrawIndexed>(_services->GetAllocator(),
-																		   (ui32)_model->GetIndices().size(), 1, 0, 0, 0);
+				_draw_indexed = mem::create_sptr<VulkanCommandDrawIndexed>(
+					_services->GetAllocator(), (ui32)_model->GetIndices().size(), (ui32)1, (ui32)0, (i32)0, (ui32)0);
 			}
 			else
 			{

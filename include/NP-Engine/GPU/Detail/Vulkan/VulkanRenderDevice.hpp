@@ -290,18 +290,18 @@ namespace np::gpu::__detail
 
 		void BeginCommandBuffer(mem::sptr<VulkanCommandBuffer> command_buffer, VkCommandBufferBeginInfo& begin_info)
 		{
-			BeginCommandBuffers({ command_buffer }, begin_info);
+			BeginCommandBuffers({command_buffer}, begin_info);
 		}
 
 		void BeginCommandBuffers(const con::vector<mem::sptr<VulkanCommandBuffer>>& command_buffers,
-			VkCommandBufferBeginInfo& begin_info)
+								 VkCommandBufferBeginInfo& begin_info)
 		{
 			for (const mem::sptr<VulkanCommandBuffer>& command_buffer : command_buffers)
 				vkBeginCommandBuffer(*command_buffer, &begin_info);
 		}
 
 		void BeginCommandBuffers(const con::vector<mem::sptr<VulkanCommandBuffer>>& command_buffers,
-			con::vector<VkCommandBufferBeginInfo>& begin_infos)
+								 con::vector<VkCommandBufferBeginInfo>& begin_infos)
 		{
 			NP_ENGINE_ASSERT(command_buffers.size() == begin_infos.size(), "command_buffers size must equal begin_infos size");
 			for (siz i = 0; i < command_buffers.size(); i++)
@@ -310,7 +310,7 @@ namespace np::gpu::__detail
 
 		void EndCommandBuffer(mem::sptr<VulkanCommandBuffer> command_buffer)
 		{
-			EndCommandBuffers({ command_buffer });
+			EndCommandBuffers({command_buffer});
 		}
 
 		void EndCommandBuffers(const con::vector<mem::sptr<VulkanCommandBuffer>>& command_buffers)
@@ -319,9 +319,8 @@ namespace np::gpu::__detail
 				vkEndCommandBuffer(*command_buffer);
 		}
 
-		VkResult AsyncCopy(VulkanBuffer& dst, const VulkanBuffer& src, 
-			VkSubmitInfo& submit_info, mem::sptr<VulkanQueue> queue,
-			con::vector<mem::sptr<VulkanCommandBuffer>>& command_buffers, VkFence fence = nullptr)
+		VkResult AsyncCopy(VulkanBuffer& dst, const VulkanBuffer& src, VkSubmitInfo& submit_info, mem::sptr<VulkanQueue> queue,
+						   con::vector<mem::sptr<VulkanCommandBuffer>>& command_buffers, VkFence fence = nullptr)
 		{
 			VkBufferCopy buffer_copy{};
 			buffer_copy.size = src.GetSize();
@@ -337,8 +336,7 @@ namespace np::gpu::__detail
 			return queue->Submit(buffer, submit_info, fence);
 		}
 
-		VkResult SyncCopy(VulkanBuffer& dst, const VulkanBuffer& src, VkSubmitInfo& submit_info, 
-			mem::sptr<VulkanQueue> queue)
+		VkResult SyncCopy(VulkanBuffer& dst, const VulkanBuffer& src, VkSubmitInfo& submit_info, mem::sptr<VulkanQueue> queue)
 		{
 			con::vector<mem::sptr<VulkanCommandBuffer>> command_buffers;
 			VulkanFence fence(GetLogicalDevice());
@@ -349,12 +347,12 @@ namespace np::gpu::__detail
 			return result;
 		}
 
-		VkResult AsyncCopy(VulkanImage& dst, const VulkanBuffer& src, VkBufferImageCopy buffer_image_copy, 
-			VkSubmitInfo& submit_info, mem::sptr<VulkanQueue> queue, 
-			con::vector<mem::sptr<VulkanCommandBuffer>>& command_buffers, VkFence fence = nullptr)
+		VkResult AsyncCopy(VulkanImage& dst, const VulkanBuffer& src, VkBufferImageCopy buffer_image_copy,
+						   VkSubmitInfo& submit_info, mem::sptr<VulkanQueue> queue,
+						   con::vector<mem::sptr<VulkanCommandBuffer>>& command_buffers, VkFence fence = nullptr)
 		{
 			VulkanCommandCopyBufferToImage copy_buffer_to_image(dst, src, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1,
-				&buffer_image_copy);
+																&buffer_image_copy);
 
 			mem::sptr<VulkanCommandBuffer> buffer = _command_pool->AllocateCommandBuffer();
 			VkCommandBufferBeginInfo begin_info = VulkanCommandBuffer::CreateBeginInfo();
@@ -366,8 +364,8 @@ namespace np::gpu::__detail
 			return queue->Submit(buffer, submit_info, fence);
 		}
 
-		VkResult SyncCopy(VulkanImage& dst, const VulkanBuffer& src, VkBufferImageCopy buffer_image_copy, 
-			VkSubmitInfo& submit_info, mem::sptr<VulkanQueue> queue)
+		VkResult SyncCopy(VulkanImage& dst, const VulkanBuffer& src, VkBufferImageCopy buffer_image_copy,
+						  VkSubmitInfo& submit_info, mem::sptr<VulkanQueue> queue)
 		{
 			con::vector<mem::sptr<VulkanCommandBuffer>> command_buffers;
 			VulkanFence fence(GetLogicalDevice());
@@ -378,9 +376,9 @@ namespace np::gpu::__detail
 			return result;
 		}
 
-		VkResult AsyncTransition(VulkanImage& image, VkFormat format, VkImageLayout old_image_layout, 
-			VkImageLayout new_image_layout, VkSubmitInfo& submit_info, mem::sptr<VulkanQueue> queue,
-			con::vector<mem::sptr<VulkanCommandBuffer>>& command_buffers, VkFence fence = nullptr)
+		VkResult AsyncTransition(VulkanImage& image, VkFormat format, VkImageLayout old_image_layout,
+								 VkImageLayout new_image_layout, VkSubmitInfo& submit_info, mem::sptr<VulkanQueue> queue,
+								 con::vector<mem::sptr<VulkanCommandBuffer>>& command_buffers, VkFence fence = nullptr)
 		{
 			VkImageMemoryBarrier image_memory_barrier{};
 			image_memory_barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
@@ -406,7 +404,7 @@ namespace np::gpu::__detail
 				dst_pipeline_stage_flags = VK_PIPELINE_STAGE_TRANSFER_BIT;
 			}
 			else if (old_image_layout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL &&
-				new_image_layout == VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL)
+					 new_image_layout == VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL)
 			{
 				image_memory_barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
 				image_memory_barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
@@ -414,7 +412,7 @@ namespace np::gpu::__detail
 				dst_pipeline_stage_flags = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
 			}
 			else if (old_image_layout == VK_IMAGE_LAYOUT_UNDEFINED &&
-				new_image_layout == VK_IMAGE_LAYOUT_STENCIL_ATTACHMENT_OPTIMAL)
+					 new_image_layout == VK_IMAGE_LAYOUT_STENCIL_ATTACHMENT_OPTIMAL)
 			{
 				image_memory_barrier.srcAccessMask = 0;
 				image_memory_barrier.dstAccessMask =
@@ -436,7 +434,7 @@ namespace np::gpu::__detail
 			}
 
 			VulkanCommandPipelineBarrier pipeline_barrier(dst_pipeline_stage_flags, src_pipeline_stage_flags, 0, 0, nullptr, 0,
-				nullptr, 1, &image_memory_barrier);
+														  nullptr, 1, &image_memory_barrier);
 
 			mem::sptr<VulkanCommandBuffer> buffer = _command_pool->AllocateCommandBuffer();
 			VkCommandBufferBeginInfo begin_info = VulkanCommandBuffer::CreateBeginInfo();
@@ -449,7 +447,7 @@ namespace np::gpu::__detail
 		}
 
 		VkResult SyncTransition(VulkanImage& image, VkFormat format, VkImageLayout old_image_layout,
-			VkImageLayout new_image_layout, VkSubmitInfo& submit_info, mem::sptr<VulkanQueue> queue)
+								VkImageLayout new_image_layout, VkSubmitInfo& submit_info, mem::sptr<VulkanQueue> queue)
 		{
 			con::vector<mem::sptr<VulkanCommandBuffer>> command_buffers;
 			VulkanFence fence(GetLogicalDevice());

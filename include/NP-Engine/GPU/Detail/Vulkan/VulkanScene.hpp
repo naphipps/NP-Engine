@@ -132,12 +132,8 @@ namespace np::gpu::__detail
 					if (result == VK_SUCCESS || result == VK_SUBOPTIMAL_KHR)
 					{
 						render_context.MarkAcquiredImageForUse();
-
-						mem::sptr<VulkanCommandBuffer> command_buffer =
-							render_context.GetCurrentFrame().commandBuffer;
-
-						command_staging =
-							mem::create_sptr<CommandStaging>(GetServices()->GetAllocator(), command_buffer);
+						mem::sptr<VulkanCommandBuffer> command_buffer = render_context.GetCurrentFrame().commandBuffer;
+						command_staging = mem::create_sptr<CommandStaging>(GetServices()->GetAllocator(), command_buffer);
 						render_device.BeginCommandBuffer(command_buffer, _command_buffer_begin_info);
 						NP_ENGINE_ASSERT(command_staging->IsValid(), "command_staging must be valid here");
 					}

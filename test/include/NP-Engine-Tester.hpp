@@ -110,7 +110,7 @@ namespace np::app
 			{
 				auto scene = payload->caller->_scene.get_access();
 				if ((*scene)->GetRenderTarget()->GetWindow()->GetUid() == payload->windowId)
-					scene->reset(); //TODO: can we job-ify this?
+					scene->reset(); // TODO: can we job-ify this?
 			}
 
 			mem::Destroy<AdjustForWindowClosingPayload>(payload->caller->_services->GetAllocator(), payload);
@@ -121,11 +121,9 @@ namespace np::app
 			win::WindowClosingEvent& closing_event = (win::WindowClosingEvent&)(*e);
 			win::WindowClosingEventData& closing_data = closing_event.GetData();
 
-			AdjustForWindowClosingPayload* payload = mem::Create<AdjustForWindowClosingPayload>(_services->GetAllocator());
-			*payload = AdjustForWindowClosingPayload{ this, closing_data.windowId };
-
 			mem::sptr<jsys::Job> adjust_job = _services->GetJobSystem().CreateJob();
-			adjust_job->SetPayload(payload);
+			adjust_job->SetPayload(
+				mem::Create<AdjustForWindowClosingPayload>(_services->GetAllocator(), this, closing_data.windowId));
 			adjust_job->SetCallback(AdjustForWindowClosingCallback);
 			jsys::Job::AddDependency(closing_data.job, adjust_job);
 			_services->GetJobSystem().SubmitJob(jsys::JobPriority::Higher, adjust_job);
@@ -223,7 +221,8 @@ namespace np::app
 			self._window->SetSizeCallback(mem::AddressOf(self), LogSize);
 			//*/
 
-			mem::sptr<gpu::DetailInstance> detail_instance = gpu::DetailInstance::Create(gpu::DetailType::Vulkan, self._services);
+			mem::sptr<gpu::DetailInstance> detail_instance =
+				gpu::DetailInstance::Create(gpu::DetailType::Vulkan, self._services);
 			mem::sptr<gpu::RenderTarget> render_target = gpu::RenderTarget::Create(detail_instance, self._window);
 			mem::sptr<gpu::RenderDevice> render_device = gpu::RenderDevice::Create(render_target);
 			mem::sptr<gpu::RenderContext> render_context = gpu::RenderContext::Create(render_device);
@@ -465,7 +464,7 @@ namespace np::app
 			_prev_mouse_position = mouse_position;
 		}
 
-		static void TcpServerAcceptClientCallback( mem::Delegate& d)
+		static void TcpServerAcceptClientCallback(mem::Delegate& d)
 		{
 			GameLayer& self = *((GameLayer*)d.GetPayload());
 			self._tcp_server->Accept(true);
@@ -493,8 +492,8 @@ namespace np::app
 			if (client)
 			{
 				client->Open(net::Protocol::Tcp);
-				client->Enable({ net::SocketOptions::ReuseAddress, net::SocketOptions::ReusePort });
-				client->ConnectTo(net::Ipv4{ 127, 0, 0, 1 }, 55555);
+				client->Enable({net::SocketOptions::ReuseAddress, net::SocketOptions::ReusePort});
+				client->ConnectTo(net::Ipv4{127, 0, 0, 1}, 55555);
 			}
 
 			if (client)

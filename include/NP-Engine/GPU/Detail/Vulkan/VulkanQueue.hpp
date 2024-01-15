@@ -57,7 +57,7 @@ namespace np::gpu::__detail
 
 		VkResult Submit(mem::sptr<VulkanCommandBuffer> command_buffer, VkSubmitInfo submit_info, VkFence fence = nullptr)
 		{
-			return Submit(con::vector<mem::sptr<VulkanCommandBuffer>>{ command_buffer }, submit_info, fence);
+			return Submit(con::vector<mem::sptr<VulkanCommandBuffer>>{command_buffer}, submit_info, fence);
 		}
 
 		VkResult Submit(const con::vector<mem::sptr<VulkanCommandBuffer>>& command_buffers, VkSubmitInfo submit_info,

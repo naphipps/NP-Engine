@@ -23,7 +23,7 @@ namespace np::mem
 	{
 		T* object = nullptr;
 		if (block.IsValid() && block.size >= sizeof(T))
-			object = new (block.ptr) T(::std::forward<Args>(args)...);
+			object = new (block.ptr) T{::std::forward<Args>(args)...};
 
 		return object;
 	}

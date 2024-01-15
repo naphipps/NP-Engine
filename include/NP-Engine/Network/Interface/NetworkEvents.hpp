@@ -59,7 +59,7 @@ namespace np::net
 	public:
 		NetworkClientEvent(mem::sptr<Host> host, mem::sptr<Socket> socket): NetworkEvent<NetworkClientEventData>()
 		{
-			SetPayload(mem::Create<NetworkClientEventData>(_allocator, NetworkClientEventData{ host, socket }));
+			SetPayload(mem::Create<NetworkClientEventData>(_allocator, host, socket));
 		}
 
 		evnt::EventType GetType() const override

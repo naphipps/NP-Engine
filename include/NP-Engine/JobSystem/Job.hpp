@@ -107,7 +107,7 @@ namespace np::jsys
 			{
 				_delegate.SetId(worker_id);
 				_delegate();
-				
+
 				{
 					auto dependents = _dependents.get_access();
 					for (auto it = dependents->begin(); it != dependents->end(); it++)
@@ -144,7 +144,7 @@ namespace np::jsys
 			auto dependents = b->_dependents.get_access();
 			if (!a->IsComplete() && !b->IsComplete())
 			{
-				for (auto it = dependents->begin(); it != dependents->end(); )
+				for (auto it = dependents->begin(); it != dependents->end();)
 				{
 					if (*it == a)
 					{
