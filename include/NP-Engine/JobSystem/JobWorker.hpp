@@ -10,9 +10,8 @@
 #include <utility>
 
 #include "NP-Engine/Foundation/Foundation.hpp"
-#include "NP-Engine/Thread/Thread.hpp"
-#include "NP-Engine/Insight/Insight.hpp"
 #include "NP-Engine/Primitive/Primitive.hpp"
+#include "NP-Engine/Thread/Thread.hpp"
 
 #include "JobRecord.hpp"
 #include "JobQueue.hpp"
@@ -90,8 +89,6 @@ namespace np::jsys
 
 		void StopWork()
 		{
-			NP_ENGINE_PROFILE_FUNCTION();
-
 			bl was_working = _keep_working.exchange(false, mo_release);
 			if (was_working)
 			{

@@ -10,7 +10,6 @@
 #include "NP-Engine/Foundation/Foundation.hpp"
 #include "NP-Engine/Primitive/Primitive.hpp"
 #include "NP-Engine/Container/Container.hpp"
-#include "NP-Engine/Insight/Insight.hpp"
 
 namespace np::jsys
 {
@@ -36,13 +35,7 @@ namespace np::jsys
 			break;
 
 		case JobPriority::Lower:
-			return_priority = JobPriority::Normal;
-			break;
-
 		case JobPriority::Normal:
-			return_priority = JobPriority::Normal;
-			break;
-
 		case JobPriority::Higher:
 			return_priority = JobPriority::Normal;
 			break;

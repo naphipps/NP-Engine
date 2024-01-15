@@ -10,9 +10,9 @@
 #include <utility>
 
 #include "NP-Engine/Foundation/Foundation.hpp"
+#include "NP-Engine/Primitive/Primitive.hpp"
 #include "NP-Engine/Container/Container.hpp"
 #include "NP-Engine/Thread/Thread.hpp"
-#include "NP-Engine/Primitive/Primitive.hpp"
 #include "NP-Engine/Memory/Memory.hpp"
 
 #include "JobPriority.hpp"

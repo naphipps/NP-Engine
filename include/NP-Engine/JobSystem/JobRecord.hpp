@@ -11,6 +11,7 @@
 
 #include "NP-Engine/Foundation/Foundation.hpp"
 #include "NP-Engine/Primitive/Primitive.hpp"
+#include "NP-Engine/Memory/Memory.hpp"
 
 #include "Job.hpp"
 #include "JobPriority.hpp"

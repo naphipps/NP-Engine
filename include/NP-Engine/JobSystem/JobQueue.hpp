@@ -7,6 +7,8 @@
 #ifndef NP_ENGINE_JOB_QUEUE_HPP
 #define NP_ENGINE_JOB_QUEUE_HPP
 
+#include "NP-Engine/Foundation/Foundation.hpp"
+#include "NP-Engine/Primitive/Primitive.hpp"
 #include "NP-Engine/Container/Container.hpp"
 
 #include "JobRecord.hpp"
