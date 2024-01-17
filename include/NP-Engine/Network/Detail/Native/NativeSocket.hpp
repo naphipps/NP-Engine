@@ -29,7 +29,6 @@ namespace np::net::__detail
 
 		void SendBytes(const chr* src, siz byte_count)
 		{
-			NP_ENGINE_PROFILE_FUNCTION();
 			for (siz total = 0; total < byte_count;)
 			{
 				i32 sent = send(_socket, src + total, byte_count - total, 0);
@@ -45,7 +44,6 @@ namespace np::net::__detail
 
 		void SendBytesTo(const chr* src, siz byte_count, const Ip& ip, ui16 port)
 		{
-			NP_ENGINE_PROFILE_FUNCTION();
 			sockaddr_in saddrin4{};
 			sockaddr_in6 saddrin6{};
 			auto saddrin = ToSaddrin(ip, port, saddrin4, saddrin6);
@@ -98,7 +96,6 @@ namespace np::net::__detail
 
 		virtual void DetailSend(Message msg) override
 		{
-			NP_ENGINE_PROFILE_FUNCTION();
 			if (IsOpen() && msg)
 			{
 				if (_direct_mode.load(mo_acquire))
@@ -117,7 +114,6 @@ namespace np::net::__detail
 
 		virtual void DetailSendTo(Message msg, const Ip& ip, ui16 port) override
 		{
-			NP_ENGINE_PROFILE_FUNCTION();
 			if (IsOpen() && msg)
 			{
 				if (_direct_mode.load(mo_acquire))
@@ -175,11 +171,11 @@ namespace np::net::__detail
 						break;
 
 					default:
-						NP_ENGINE_LOG_CRITICAL("ReceivingProcedure found unsupported MessageType: " +
-											   to_str((ui32)msg.header.type));
 						supported = false;
 						break;
 					}
+
+					NP_ENGINE_ASSERT(supported, "ReceivingProcedure found unsupported MessageType: " + to_str((ui32)msg.header.type));
 
 					if (supported)
 						self.RecvBytes((chr*)msg.body->GetData(), msg.header.bodySize);
@@ -224,7 +220,6 @@ namespace np::net::__detail
 
 		virtual void Open(Protocol protocol) override
 		{
-			NP_ENGINE_PROFILE_FUNCTION();
 			Close();
 			_protocol = protocol;
 
@@ -277,7 +272,6 @@ namespace np::net::__detail
 
 		virtual void Close() override
 		{
-			NP_ENGINE_PROFILE_FUNCTION();
 			StopReceiving();
 
 			if (IsOpen())
@@ -340,7 +334,6 @@ namespace np::net::__detail
 
 		virtual void BindTo(const Ip& ip, ui16 port) override
 		{
-			NP_ENGINE_PROFILE_FUNCTION();
 			if (IsOpen())
 			{
 				sockaddr_in saddrin4{};
@@ -358,7 +351,6 @@ namespace np::net::__detail
 
 		virtual void Listen() override
 		{
-			NP_ENGINE_PROFILE_FUNCTION();
 			if (IsOpen())
 			{
 				i32 err = listen(_socket, SOMAXCONN);
@@ -372,7 +364,6 @@ namespace np::net::__detail
 
 		virtual mem::sptr<Socket> Accept(bl enable_client_resolution = false) override
 		{
-			NP_ENGINE_PROFILE_FUNCTION();
 			mem::sptr<Socket> client = nullptr;
 			if (IsOpen())
 			{
@@ -416,7 +407,6 @@ namespace np::net::__detail
 
 		virtual void ConnectTo(const Ip& ip, ui16 port) override
 		{
-			NP_ENGINE_PROFILE_FUNCTION();
 			if (IsOpen())
 			{
 				sockaddr_in saddrin4{};
@@ -434,7 +424,6 @@ namespace np::net::__detail
 
 		virtual void StartReceiving() override
 		{
-			NP_ENGINE_PROFILE_FUNCTION();
 			if (IsOpen())
 			{
 				bl expected = false;

@@ -107,8 +107,6 @@ namespace np::jsys
 
 		void Start()
 		{
-			NP_ENGINE_PROFILE_FUNCTION();
-
 			if (!_thread_pool)
 				SetDefaultJobWorkerCount();
 
@@ -121,8 +119,6 @@ namespace np::jsys
 
 		void Stop()
 		{
-			NP_ENGINE_PROFILE_FUNCTION();
-
 			if (IsRunning())
 			{
 				for (siz i = 0; i < _job_workers.size(); i++)
