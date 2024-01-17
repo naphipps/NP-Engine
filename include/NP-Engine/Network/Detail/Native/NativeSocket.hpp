@@ -175,7 +175,8 @@ namespace np::net::__detail
 						break;
 					}
 
-					NP_ENGINE_ASSERT(supported, "ReceivingProcedure found unsupported MessageType: " + to_str((ui32)msg.header.type));
+					NP_ENGINE_ASSERT(supported,
+									 "ReceivingProcedure found unsupported MessageType: " + to_str((ui32)msg.header.type));
 
 					if (supported)
 						self.RecvBytes((chr*)msg.body->GetData(), msg.header.bodySize);
