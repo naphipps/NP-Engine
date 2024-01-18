@@ -749,6 +749,27 @@ namespace np::app
 	private:
 		GameLayer _game_layer;
 
+		void CustomizeJobSystem()
+		{
+			jsys::JobSystem& job_system = _services->GetJobSystem();
+			con::vector<jsys::JobWorker>& job_workers = job_system.GetJobWorkers();
+			using Fetch = jsys::JobWorker::Fetch;
+			using FetchOrderArray = jsys::JobWorker::FetchOrderArray;
+
+			NP_ENGINE_ASSERT(thr::Thread::HardwareConcurrency() >= 4, "NP Engine Test requires at least four cores");
+
+			// common JobWorker fetch orders:
+			FetchOrderArray default_order = jsys::JobWorker::DEFAULT_FETCH_ORDER;
+			FetchOrderArray steal_only_order = jsys::JobWorker::STEAL_ONLY_FETCH_ORDER;
+			FetchOrderArray immediate_only_order = jsys::JobWorker::IMMEDIATE_ONLY_FETCH_ORDER;
+			FetchOrderArray priority_only_order = jsys::JobWorker::PRIORITY_BASED_ONLY_FETCH_ORDER;
+
+			// custom JobWorker fetch orders:
+			FetchOrderArray nosy_coworker_order{Fetch::Steal, Fetch::Immediate, Fetch::None};
+			FetchOrderArray lousy_order{Fetch::None, Fetch::None, Fetch::None};
+			FetchOrderArray others_then_me_order{Fetch::Steal, Fetch::PriorityBased, Fetch::Immediate};
+		}
+
 	public:
 		GameApp(mem::sptr<srvc::Services> services):
 			Application(Application::Properties{"My Game App"}, services),
@@ -761,6 +782,7 @@ namespace np::app
 		{
 			NP_ENGINE_PROFILE_FUNCTION();
 			NP_ENGINE_LOG_INFO("Hello world from my game app! My title is '" + GetTitle() + "'");
+			CustomizeJobSystem();
 			Application::Run(argc, argv);
 		}
 	};

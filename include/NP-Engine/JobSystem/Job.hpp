@@ -51,16 +51,18 @@ namespace np::jsys
 		mutexed_wrapper<con::vector<mem::sptr<Job>>> _dependents;
 		atm_i32 _antecedent_count;
 		mem::Delegate _delegate;
+		bl _can_be_stolen;
 
 	public:
-		Job(): _antecedent_count(0) {}
+		Job(): _antecedent_count(0), _can_be_stolen(true) {}
 
 		Job(const Job& other) = delete;
 
 		Job(Job&& other) noexcept:
 			_dependents(::std::move(other._dependents)),
 			_antecedent_count(::std::move(other._antecedent_count.load(mo_acquire))),
-			_delegate(::std::move(other._delegate))
+			_delegate(::std::move(other._delegate)),
+			_can_be_stolen(::std::move(other._can_be_stolen))
 		{}
 
 		~Job() = default;
@@ -72,6 +74,7 @@ namespace np::jsys
 			_dependents = ::std::move(other._dependents);
 			_antecedent_count.store(::std::move(other._antecedent_count.load(mo_acquire)), mo_release);
 			_delegate = ::std::move(other._delegate);
+			_can_be_stolen = ::std::move(other._can_be_stolen);
 			return *this;
 		}
 
@@ -122,11 +125,23 @@ namespace np::jsys
 			return _antecedent_count.load(mo_acquire) == -1;
 		}
 
+		void SetCanBeStolen(bl can_be_stolen = true)
+		{
+			_can_be_stolen = can_be_stolen;
+		}
+
+		bl CanBeStolen() const
+		{
+			return _can_be_stolen;
+		}
+
 		/*
 			make a depend on b
 		*/
 		static void AddDependency(mem::sptr<Job> a, mem::sptr<Job> b)
 		{
+			NP_ENGINE_ASSERT(a && b, "AddDependency requires two valid jobs sptrs");
+
 			auto dependents = b->_dependents.get_access();
 			if (!a->IsComplete() && !b->IsComplete())
 			{
@@ -140,6 +155,8 @@ namespace np::jsys
 		*/
 		static void RemoveDependency(mem::sptr<Job> a, mem::sptr<Job> b)
 		{
+			NP_ENGINE_ASSERT(a && b, "RemoveDependency requires two valid jobs sptrs");
+
 			auto dependents = b->_dependents.get_access();
 			if (!a->IsComplete() && !b->IsComplete())
 			{

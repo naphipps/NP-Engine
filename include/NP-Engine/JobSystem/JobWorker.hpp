@@ -25,6 +25,23 @@ namespace np::jsys
 	private:
 		friend class JobSystem;
 
+	public:
+		enum class Fetch : ui32
+		{
+			None = 0,
+			Immediate,
+			PriorityBased,
+			Steal
+		};
+
+		using FetchOrderArray = con::array<Fetch, 3>;
+
+		constexpr static FetchOrderArray DEFAULT_FETCH_ORDER{Fetch::Immediate, Fetch::PriorityBased, Fetch::Steal};
+		constexpr static FetchOrderArray IMMEDIATE_ONLY_FETCH_ORDER{Fetch::Immediate, Fetch::Immediate, Fetch::Immediate};
+		constexpr static FetchOrderArray PRIORITY_BASED_ONLY_FETCH_ORDER{Fetch::PriorityBased, Fetch::PriorityBased, Fetch::PriorityBased};
+		constexpr static FetchOrderArray STEAL_ONLY_FETCH_ORDER{Fetch::Steal, Fetch::Steal, Fetch::Steal};
+
+	private:
 		struct WorkPayload
 		{
 			JobWorker* self = nullptr;
@@ -39,6 +56,9 @@ namespace np::jsys
 		atm_siz _wake_counter;
 		mem::sptr<thr::Thread> _thread;
 		mem::sptr<condition> _sleep_condition;
+		mutexed_wrapper<con::queue<mem::sptr<Job>>> _immediate_jobs;
+		mutexed_wrapper<con::vector<JobWorker*>> _coworkers;
+		mutexed_wrapper<FetchOrderArray> _fetch_order;
 
 		static void WorkProcedure(const WorkPayload& payload);
 
@@ -63,27 +83,79 @@ namespace np::jsys
 			return !_keep_working.load(mo_acquire) || _wake_counter.load(mo_acquire) > SLEEP_STATE;
 		}
 
-	public:
-		JobWorker(siz id):
-			_id(id),
-			_keep_working(false),
-			_wake_counter(LOWEST_AWAKE_STATE),
-			_thread(nullptr),
-			_sleep_condition(nullptr)
-		{}
-
-		JobWorker(JobWorker&& other) noexcept:
-			_id(::std::move(other._id)),
-			_keep_working(::std::move(other._keep_working.load(mo_acquire))),
-			_wake_counter(::std::move(other._wake_counter.load(mo_acquire))),
-			_thread(::std::move(other._thread)),
-			_sleep_condition(::std::move(other._sleep_condition))
-		{}
-
-		virtual ~JobWorker()
+		/*
+			returns a valid && CanExecute() job, or invalid job
+			iff a job was found AND we are not stealing, we increment our wake counter
+		*/
+		mem::sptr<Job> GetImmediateJob(JobWorker* thief = nullptr)
 		{
-			StopWork();
+			mem::sptr<Job> job = nullptr;
+			auto immediate_jobs = _immediate_jobs.get_access();
+			if (!immediate_jobs->empty())
+			{
+				job = immediate_jobs->front();
+				if (!job->CanExecute())
+				{
+					immediate_jobs->pop();
+					immediate_jobs->emplace(job);
+
+					// tell thief there are jobs to steal even though they are not ready
+					if (thief && job->CanBeStolen())
+						this->WakeUp();
+					else // keep this worker awake to keep checking immediate jobs
+						WakeUp();
+						
+					job.reset();
+				}
+				else if (thief && !job->CanBeStolen())
+				{
+					job.reset();
+				}
+				else
+				{
+					immediate_jobs->pop();
+
+					// tell thief to stay awake in case there are more jobs ready to be stolen
+					if (thief)
+						thief->WakeUp();
+				}
+			}
+			return job;
 		}
+		
+		mem::sptr<Job> GetStolenJob()
+		{
+			mem::sptr<Job> job = nullptr;
+			auto coworkers = _coworkers.get_access();
+			for (siz i=0; i<coworkers->size() && !job; i++)
+				job = (*coworkers)[i]->GetImmediateJob(this);
+
+			return job;
+		}
+
+		bl TryImmediateJob(bl stealing = false)
+		{
+			mem::sptr<Job> immediate = GetImmediateJob();
+			if (immediate)
+				(*immediate)(_id);
+
+			return immediate;
+		}
+
+		bl TryStealingJob()
+		{
+			mem::sptr<Job> stolen = GetStolenJob();
+			if (stolen)
+				(*stolen)(_id);
+
+			return stolen;
+		}
+
+		/*
+			returns true iff a job was found, else false
+			FOUND JOB MAY OR MAY NOT BE EXECUTED
+		*/
+		bl TryPriorityBasedJob(JobSystem& system);
 
 		void StartWork(JobSystem& system);
 
@@ -96,6 +168,82 @@ namespace np::jsys
 				_thread.reset();
 				_sleep_condition.reset();
 			}
+		}
+
+	public:
+		JobWorker(siz id):
+			_id(id),
+			_keep_working(false),
+			_wake_counter(LOWEST_AWAKE_STATE),
+			_thread(nullptr),
+			_sleep_condition(nullptr),
+			_immediate_jobs(),
+			_coworkers(),
+			_fetch_order(DEFAULT_FETCH_ORDER)
+		{}
+
+		JobWorker(JobWorker&& other) noexcept:
+			_id(::std::move(other._id)),
+			_keep_working(::std::move(other._keep_working.load(mo_acquire))),
+			_wake_counter(::std::move(other._wake_counter.load(mo_acquire))),
+			_thread(::std::move(other._thread)),
+			_sleep_condition(::std::move(other._sleep_condition)),
+			_immediate_jobs(::std::move(other._immediate_jobs)),
+			_coworkers(::std::move(other._coworkers)),
+			_fetch_order(::std::move(other._fetch_order))
+		{}
+
+		virtual ~JobWorker()
+		{
+			StopWork();
+		}
+
+		void SubmitImmediateJob(mem::sptr<Job> job)
+		{
+			if (job && !job->IsComplete())
+			{
+				_immediate_jobs.get_access()->emplace(job);
+				WakeUp();
+
+				if (_sleep_condition)
+					_sleep_condition->notify_all(); // ensure that I wake up - necessary evil
+			}
+		}
+
+		FetchOrderArray GetFetchOrder()
+		{
+			return *_fetch_order.get_access();
+		}
+
+		void SetFetchOrder(const FetchOrderArray& fetch_order)
+		{
+			*_fetch_order.get_access() = fetch_order;
+		}
+
+		void AddCoworker(JobWorker& coworker)
+		{
+			// intentionally not checking if we have this coworker already
+			//	^ allows us to support uneven distribution when stealing jobs
+			_coworkers.get_access()->emplace_back(mem::AddressOf(coworker));
+		}
+
+		void RemoveCoworker(JobWorker& coworker)
+		{
+			// because of potential uneven distrubutions for stealing jobs,
+			// we have to iterate through all _coworkers
+			auto coworkers = _coworkers.get_access();
+			for (auto it = coworkers->begin(); it != coworkers->end();)
+			{
+				if (mem::AddressOf(coworker) == *it)
+					it = coworkers->erase(it);
+				else
+					it++;
+			}
+		}
+
+		void ClearCoworkers()
+		{
+			_coworkers.get_access()->clear();
 		}
 	};
 } // namespace np::jsys

@@ -31,35 +31,61 @@ namespace np::jsys
 		mutex sleep_mutex;
 		general_lock sleep_lock(sleep_mutex);
 		IsAwakeFunctor is_awake_functor{self};
-		JobRecord next;
+		FetchOrderArray fetch_order;
+		bl successful_try;
 
 		while (self._keep_working.load(mo_acquire))
 		{
-			next = system.GetNextJob();
-			if (next.IsValid())
+			successful_try = false;
+			fetch_order = self.GetFetchOrder();
+			for (const Fetch& fetch : fetch_order)
 			{
-				NP_ENGINE_ASSERT(!next.job->IsComplete(), "A found valid record must have an incomplete job");
+				switch (fetch)
+				{
+				case Fetch::Immediate:
+					successful_try |= self.TryImmediateJob();
+					break;
 
-				if (next.job->CanExecute())
-					(*next.job)(self._id);
-				else
-					system.SubmitJob(NormalizePriority(next.priority), next.job);
+				case Fetch::PriorityBased:
+					successful_try |= self.TryPriorityBasedJob(system);
+					break;
 
-				next.Invalidate();
+				case Fetch::Steal:
+					successful_try |= self.TryStealingJob();
+					break;
+
+				case Fetch::None:
+				default:
+					successful_try |= false; // redundant - if true, the worker would never sleep
+					break;
+				}
+
+				if (successful_try || !self._keep_working.load(mo_acquire))
+					break;
 			}
-			else if (self.ShouldSleep())
-			{
+			
+			if (!successful_try && self.ShouldSleep())
 				self._sleep_condition->wait(sleep_lock, ::std::ref(is_awake_functor)); // preference: no lambda - ew
-			}
 
 			self.ResetWakeCounter();
 		}
 	}
 
+	bl JobWorker::TryPriorityBasedJob(JobSystem& system)
+	{
+		JobRecord next = system.GetNextJob();
+		if (next.IsValid())
+		{
+			if (next.job->CanExecute())
+				(*next.job)(_id);
+			else
+				system.SubmitJob(NormalizePriority(next.priority), next.job);
+		}
+		return next.IsValid();
+	}
+
 	void JobWorker::StartWork(JobSystem& system)
 	{
-		NP_ENGINE_PROFILE_FUNCTION();
-
 		bl was_working = _keep_working.exchange(true, mo_release);
 		NP_ENGINE_ASSERT(!was_working, "JobWorker is already working.");
 

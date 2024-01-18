@@ -61,7 +61,7 @@ namespace np::jsys
 		siz GetThreadAffinity(siz worker_id)
 		{
 			// we add one to help prevent core 0 crowding -- assuming main thread is there
-			return (worker_id + 1) % _thread_pool->GetObjectCount();
+			return (worker_id + 1) % thr::Thread::HardwareConcurrency();
 		}
 
 	public:
@@ -98,11 +98,31 @@ namespace np::jsys
 
 			for (siz i = 0; i < count; i++)
 				_job_workers.emplace_back(i);
+
+			for (siz i=0; i<_job_workers.size(); i++)
+			{
+				_job_workers[i].ClearCoworkers();
+				for (siz j=0; j<_job_workers.size(); j++)
+				{
+					if (i != j)
+						_job_workers[i].AddCoworker(_job_workers[j]);
+				}
+			}
 		}
 
 		siz GetJobWokerCount() const
 		{
 			return _job_workers.size();
+		}
+
+		con::vector<JobWorker>& GetJobWorkers()
+		{
+			return _job_workers;
+		}
+
+		const con::vector<JobWorker>& GetJobWorkers() const
+		{
+			return _job_workers;
 		}
 
 		void Start()
@@ -141,8 +161,9 @@ namespace np::jsys
 
 		void SubmitJob(JobPriority priority, mem::sptr<Job> job)
 		{
-			_job_queue.Push(priority, job);
+			NP_ENGINE_ASSERT(job && !job->IsComplete(), "you must submit a valid and incomplete job");
 
+			_job_queue.Push(priority, job);
 			for (siz i = 0; i < _job_workers.size(); i++)
 				_job_workers[i].WakeUp();
 
