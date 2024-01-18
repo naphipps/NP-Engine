@@ -99,10 +99,10 @@ namespace np::jsys
 			for (siz i = 0; i < count; i++)
 				_job_workers.emplace_back(i);
 
-			for (siz i=0; i<_job_workers.size(); i++)
+			for (siz i = 0; i < _job_workers.size(); i++)
 			{
 				_job_workers[i].ClearCoworkers();
-				for (siz j=0; j<_job_workers.size(); j++)
+				for (siz j = 0; j < _job_workers.size(); j++)
 				{
 					if (i != j)
 						_job_workers[i].AddCoworker(_job_workers[j]);

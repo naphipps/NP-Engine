@@ -96,7 +96,7 @@ namespace np::jsys
 						this->WakeUp();
 					else // keep this worker awake to keep checking immediate jobs
 						WakeUp();
-						
+
 					job.reset();
 				}
 				else if (thief && !job->CanBeStolen())
@@ -114,12 +114,12 @@ namespace np::jsys
 			}
 			return job;
 		}
-		
+
 		mem::sptr<Job> GetStolenJob()
 		{
 			mem::sptr<Job> job = nullptr;
 			auto coworkers = _coworkers.get_access();
-			for (siz i=0; i<coworkers->size() && !job; i++)
+			for (siz i = 0; i < coworkers->size() && !job; i++)
 				job = (*coworkers)[i]->GetImmediateJob(this);
 
 			return job;
