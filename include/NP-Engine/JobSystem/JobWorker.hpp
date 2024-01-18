@@ -25,27 +25,20 @@ namespace np::jsys
 	private:
 		friend class JobSystem;
 
-	public:
-		enum class Fetch : ui32
-		{
-			None = 0,
-			Immediate,
-			PriorityBased,
-			Steal
-		};
-
-		using FetchOrderArray = con::array<Fetch, 3>;
-
-		constexpr static FetchOrderArray DEFAULT_FETCH_ORDER{Fetch::Immediate, Fetch::PriorityBased, Fetch::Steal};
-		constexpr static FetchOrderArray IMMEDIATE_ONLY_FETCH_ORDER{Fetch::Immediate, Fetch::Immediate, Fetch::Immediate};
-		constexpr static FetchOrderArray PRIORITY_BASED_ONLY_FETCH_ORDER{Fetch::PriorityBased, Fetch::PriorityBased, Fetch::PriorityBased};
-		constexpr static FetchOrderArray STEAL_ONLY_FETCH_ORDER{Fetch::Steal, Fetch::Steal, Fetch::Steal};
-
-	private:
 		struct WorkPayload
 		{
 			JobWorker* self = nullptr;
 			JobSystem* system = nullptr;
+		};
+
+		struct IsAwakeFunctor
+		{
+			JobWorker& worker;
+
+			bl operator()() const
+			{
+				return worker.IsAwake();
+			}
 		};
 
 		constexpr static siz SLEEP_STATE = 0;
@@ -58,7 +51,6 @@ namespace np::jsys
 		mem::sptr<condition> _sleep_condition;
 		mutexed_wrapper<con::queue<mem::sptr<Job>>> _immediate_jobs;
 		mutexed_wrapper<con::vector<JobWorker*>> _coworkers;
-		mutexed_wrapper<FetchOrderArray> _fetch_order;
 
 		static void WorkProcedure(const WorkPayload& payload);
 
@@ -178,8 +170,7 @@ namespace np::jsys
 			_thread(nullptr),
 			_sleep_condition(nullptr),
 			_immediate_jobs(),
-			_coworkers(),
-			_fetch_order(DEFAULT_FETCH_ORDER)
+			_coworkers()
 		{}
 
 		JobWorker(JobWorker&& other) noexcept:
@@ -189,8 +180,7 @@ namespace np::jsys
 			_thread(::std::move(other._thread)),
 			_sleep_condition(::std::move(other._sleep_condition)),
 			_immediate_jobs(::std::move(other._immediate_jobs)),
-			_coworkers(::std::move(other._coworkers)),
-			_fetch_order(::std::move(other._fetch_order))
+			_coworkers(::std::move(other._coworkers))
 		{}
 
 		virtual ~JobWorker()
@@ -208,16 +198,6 @@ namespace np::jsys
 				if (_sleep_condition)
 					_sleep_condition->notify_all(); // ensure that I wake up - necessary evil
 			}
-		}
-
-		FetchOrderArray GetFetchOrder()
-		{
-			return *_fetch_order.get_access();
-		}
-
-		void SetFetchOrder(const FetchOrderArray& fetch_order)
-		{
-			*_fetch_order.get_access() = fetch_order;
 		}
 
 		void AddCoworker(JobWorker& coworker)

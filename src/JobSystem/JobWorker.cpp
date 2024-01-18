@@ -12,59 +12,19 @@
 
 namespace np::jsys
 {
-	void JobWorker::WorkProcedure(const JobWorker::WorkPayload& payload)
+	void JobWorker::WorkProcedure(const WorkPayload& payload)
 	{
 		NP_ENGINE_PROFILE_SCOPE("WorkerThreadProcedure: " + to_str(payload.self->_id));
-
-		struct IsAwakeFunctor
-		{
-			JobWorker& worker;
-
-			bl operator()() const
-			{
-				return worker.IsAwake();
-			}
-		};
 
 		JobWorker& self = *payload.self;
 		JobSystem& system = *payload.system;
 		mutex sleep_mutex;
 		general_lock sleep_lock(sleep_mutex);
 		IsAwakeFunctor is_awake_functor{self};
-		FetchOrderArray fetch_order;
-		bl successful_try;
 
 		while (self._keep_working.load(mo_acquire))
 		{
-			successful_try = false;
-			fetch_order = self.GetFetchOrder();
-			for (const Fetch& fetch : fetch_order)
-			{
-				switch (fetch)
-				{
-				case Fetch::Immediate:
-					successful_try |= self.TryImmediateJob();
-					break;
-
-				case Fetch::PriorityBased:
-					successful_try |= self.TryPriorityBasedJob(system);
-					break;
-
-				case Fetch::Steal:
-					successful_try |= self.TryStealingJob();
-					break;
-
-				case Fetch::None:
-				default:
-					successful_try |= false; // redundant - if true, the worker would never sleep
-					break;
-				}
-
-				if (successful_try || !self._keep_working.load(mo_acquire))
-					break;
-			}
-			
-			if (!successful_try && self.ShouldSleep())
+			if (!(self.TryImmediateJob() || self.TryPriorityBasedJob(system) || self.TryStealingJob()) && self.ShouldSleep())
 				self._sleep_condition->wait(sleep_lock, ::std::ref(is_awake_functor)); // preference: no lambda - ew
 
 			self.ResetWakeCounter();
