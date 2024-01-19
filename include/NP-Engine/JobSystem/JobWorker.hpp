@@ -91,11 +91,15 @@ namespace np::jsys
 					immediate_jobs->pop();
 					immediate_jobs->emplace(job);
 
-					// tell thief there are jobs to steal even though they are not ready
-					if (thief && job->CanBeStolen())
-						this->WakeUp();
-					else // keep this worker awake to keep checking immediate jobs
+					if (thief)
+					{
+						if (job->CanBeStolen())
+							thief->WakeUp();
+					}
+					else
+					{
 						WakeUp();
+					}
 
 					job.reset();
 				}
