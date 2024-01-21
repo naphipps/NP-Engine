@@ -27,11 +27,10 @@ namespace np::mem
 		}
 
 	public:
-		FallbackAllocator(Allocator* primary, Allocator* fallback): _primary(primary), _fallback(fallback)
-		{
-			NP_ENGINE_ASSERT(_primary != nullptr, "we must get a valid primary allocator");
-			NP_ENGINE_ASSERT(_fallback != nullptr, "we must get a valid fallback allocator");
-		}
+		FallbackAllocator(Allocator& primary, Allocator& fallback):
+			_primary(mem::AddressOf(primary)),
+			_fallback(mem::AddressOf(fallback))
+		{}
 
 		virtual Allocator& GetPrimary()
 		{

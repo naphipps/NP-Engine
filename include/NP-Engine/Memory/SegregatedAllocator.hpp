@@ -28,13 +28,11 @@ namespace np::mem
 		}
 
 	public:
-		SegregatedAllocator(Allocator* primary, Allocator* fallback, siz size_threshold):
-			_primary(primary),
-			_fallback(fallback),
+		SegregatedAllocator(Allocator& primary, Allocator& fallback, siz size_threshold):
+			_primary(mem::AddressOf(primary)),
+			_fallback(mem::AddressOf(fallback)),
 			_size_threshold(size_threshold)
 		{
-			NP_ENGINE_ASSERT(_primary != nullptr, "we must get a valid primary allocator");
-			NP_ENGINE_ASSERT(_fallback != nullptr, "we must get a valid fallback allocator");
 			NP_ENGINE_ASSERT(_size_threshold > 0, "we must have a nonzero size threshold");
 		}
 
