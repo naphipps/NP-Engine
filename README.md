@@ -15,12 +15,16 @@ This game engine started out as my first video game, but since the project kept 
 		- I will also improve the pressure solvers to _probably_ IISPH or something that is better, faster, and more accurate.
 	- [ ] 3D Physics via [Bullet](https://github.com/bulletphysics/bullet3)
 	- [x] A feature-rich JobSystem (task graph architecture):
-		- [x] Lightweight. Job submition is as small as an ui32 and smart ptr.
+		- [x] Lightweight. Job submition is as small as an ui32, smart ptr, and boolean.
 		- [x] Power-efficient. JobWorkers sleep when no Jobs are available, and are woken up when Jobs are submitted.
-		- [x] Priority-based jobs
-		- [x] Braided-parallelism support (you can create a job anywhere, adding job-dependencies anytime)
+		- [x] Priority-based jobs: Highest, Higher, Normal, Lower, Lowest.
+		- [x] Braided-parallelism support: you can create a job anywhere, adding job-dependencies anytime.
 		- [x] Considerate of the main thread so thread scheduling does not throttle/crowd the main thread
-		- [x] Jobs can be checked for completion so the caller can easily know when a Job has completed.
+		- [x] Jobs can be directly checked for completion so the caller can easily know when a Job has completed.
+		- [x] JobWorkers can be directly assigned immediate jobs.
+		- [x] JobWorkers can steal their coworkers' next immediate job.
+		- [x] Jobs can be marked as CanBeStolen or not, just in case you want only a specific worker to execute a job. (Priority-Based jobs are stored in the JobSystem, so there's no concept of stealing them.)
+		- [x] Every JobWorker's list of coworkers can be customized any time.
 	- [x] A profiler that outputs a JSON file for Chrome's Tracing tool. (Type "chrome://tracing/" in Chrome's url.)
 		- [ ] I am going to migrate to [wolfpld's Tracy Profiler](https://github.com/wolfpld/tracy)
 	- [x] Networking
