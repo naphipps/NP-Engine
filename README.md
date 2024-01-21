@@ -12,7 +12,7 @@ This game engine started out as my first video game, but since the project kept 
 			- [x] Implicit List (efficient bookkeeping, but allocations are a minimum size)
 			- [x] Explicit List and Explicit Segmented List
 			- [x] Linear (allocate in a straight line until unable -- can only deallocate all)
-			- [x] Fallback (use the primary unlessit fails, then use fallback)
+			- [x] Fallback (use the primary unless it fails, then use fallback)
 			- [x] Segregated (use primary for up-to threshold sized allocations, else use fallback)
 			- [x] TraitAllocator (uses a statically-registered allocator under the hood)
 			- [x] StdAllocator to tap into all std objects
