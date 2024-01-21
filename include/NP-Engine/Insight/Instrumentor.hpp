@@ -32,11 +32,11 @@ namespace np::nsit
 	public:
 		struct Properties
 		{
-			bl isInitialized;
-			::std::shared_ptr<::rapidjson::Document> report;
-			::std::string filepath;
-			bl enableSaveOfTrace;
-			bl enableTrace;
+			bl isInitialized = false;
+			::std::shared_ptr<::rapidjson::Document> report = nullptr;
+			::std::string filepath = "";
+			bl enableSaveOfTrace = false;
+			bl enableTrace = true;
 		};
 
 	private:
