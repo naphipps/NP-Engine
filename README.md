@@ -24,7 +24,7 @@ This game engine started out as my first video game, but since the project kept 
 		- [x] Delegates
 			- [x] Can call functions, methods, and capture-less lambdas
 			- [x] Provide access to a payload
-			- [x] Provide constext via an id value
+			- [x] Provide context to callbacks via an id value
 			- [x] Can return any type via template (all primitive delegates are provide i.e. BlDelegate, I32Delegate, FltDelegate)
 			- _lambdas with capture clauses will not be supported_
 	- [ ] Vulkan rendering - **currently under heavy construction.** (OpenGL and DX11/DX12 _probably much_ later as means to improve our API).
