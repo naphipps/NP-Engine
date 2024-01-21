@@ -226,7 +226,6 @@ set(NP_ENGINE_MEMORY_HPP
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Memory/StdAllocator.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Memory/TraitAllocator.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Memory/SmartPtr.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Memory/PadObject.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Memory/Delegate.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Memory/AccumulatingAllocator.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Memory/AccumulatingPool.hpp
