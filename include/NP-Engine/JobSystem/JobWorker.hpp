@@ -93,6 +93,7 @@ namespace np::jsys
 
 					if (thief)
 					{
+						// tell thief to stay awake to keep checking if it can steal this job
 						if (job->CanBeStolen())
 							thief->WakeUp();
 					}
