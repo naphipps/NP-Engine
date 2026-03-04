@@ -11,7 +11,7 @@
 
 #include "NP-Engine/Platform/Platform.hpp"
 
-#if NP_ENGINE_PLATFORM_IS_LINUX
+#if false //NP_ENGINE_PLATFORM_IS_LINUX //TODO: looks like linux finally supports all these?
 
 namespace std
 {

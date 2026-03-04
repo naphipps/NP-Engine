@@ -24,7 +24,7 @@ namespace np::gpu::__detail
 {
 	struct VulkanSubpassImageResourceReference
 	{
-		ui32 framebufferImageViewIndex = SIZ_MAX;
+		ui32 framebufferImageViewIndex = UI32_MAX;
 		VulkanImageResourceUsage usage = VulkanImageResourceUsage::None;
 
 		VulkanSubpassImageResourceReference(const SubpassImageResourceReference& ref = {}) :

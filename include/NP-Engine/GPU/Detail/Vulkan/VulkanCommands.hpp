@@ -272,7 +272,7 @@ namespace np::gpu::__detail
 
 			if (framebuffer)
 			{
-				const VulkanSubpassUsage usage = this->usage;
+				const VulkanSubpassUsage usage = (ui32)this->usage;
 				const VulkanRenderArea render_area = renderArea;
 
 				con::vector<VkClearValue> clear_values(clearColors.size());
@@ -589,8 +589,8 @@ namespace np::gpu::__detail
 			
 			*/
 			const VulkanCommandBuffer* command_buffer = static_cast<const VulkanCommandBuffer*>(command_buffer_);
-			const VulkanStage dstStage = this->dstStage;
-			const VulkanStage srcStage = this->srcStage;
+			const VulkanStage dstStage{this->dstStage};
+			const VulkanStage srcStage{this->srcStage};
 
 			con::vector<VkMemoryBarrier> vk_barriers(barriers.size());
 			for (siz i = 0; i < vk_barriers.size(); i++)
@@ -666,7 +666,7 @@ namespace np::gpu::__detail
 			if (layout)
 			{
 				const VulkanCommandBuffer* command_buffer = static_cast<const VulkanCommandBuffer*>(command_buffer_);
-				VulkanStage stage = this->stage;
+				const VulkanStage stage{this->stage};
 				con::vector<ui8> bytes = layout->GetPushData().GetAllEntryBytes();
 				vkCmdPushConstants(*command_buffer, *layout, stage.GetVkShaderStageFlags(), 0, bytes.size(), bytes.empty() ? nullptr : bytes.data());
 				applied = true;

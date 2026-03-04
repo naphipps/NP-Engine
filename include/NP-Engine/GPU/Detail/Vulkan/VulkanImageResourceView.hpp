@@ -38,7 +38,7 @@ namespace np::gpu::__detail
 
 		static VkImageView CreateVkImageView(mem::sptr<VulkanDevice> device, mem::sptr<VulkanImageResource> image, VulkanImageResourceUsage usage)
 		{
-			const VulkanFormat format = image->GetFormat();
+			const VulkanFormat format{image->GetFormat()};
 
 			VkImageViewCreateInfo info = CreateVkInfo();
 			info.image = *image;

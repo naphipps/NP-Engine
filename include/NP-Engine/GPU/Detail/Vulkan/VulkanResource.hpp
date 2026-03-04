@@ -120,7 +120,7 @@ namespace np::gpu::__detail
 			{
 			case ResourceType::Buffer:
 			{
-				BufferResourceUsage usage = this->usage;
+				BufferResourceUsage usage = (ui32)this->usage;
 				if (usage.ContainsAll(BufferResourceUsage::Uniform | BufferResourceUsage::Texel))
 					type = VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER;
 				else if (usage.ContainsAll(BufferResourceUsage::Storage | BufferResourceUsage::Texel))
@@ -137,7 +137,7 @@ namespace np::gpu::__detail
 			break;
 			case ResourceType::Image:
 			{
-				ImageResourceUsage usage = this->usage;
+				ImageResourceUsage usage = (ui32)this->usage;
 
 			}
 			break;

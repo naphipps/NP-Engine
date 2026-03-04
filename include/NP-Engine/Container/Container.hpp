@@ -85,7 +85,7 @@ namespace np::con
 
 namespace np::mem
 {
-	constexpr void CopyBytes(void* dst, const con::vector<ui8>& bytes)
+	static inline void CopyBytes(void* dst, const con::vector<ui8>& bytes)
 	{
 		CopyBytes(dst, bytes.data(), bytes.size());
 	}

@@ -321,7 +321,7 @@ namespace np::gpu::__detail
 			_image(image),
 			_enable_destroy(false)
 		{
-			const VulkanImageResourceUsage vulkan_usage = usage;
+			const VulkanImageResourceUsage vulkan_usage = (ui32)usage;
 			_memory = _device->CreateDeviceMemory(GetVkMemoryRequirements(_device, _image), vulkan_usage.GetVkMemoryPropertyFlags());
 			//BindMemory();
 		}
@@ -332,7 +332,7 @@ namespace np::gpu::__detail
 			_format(VulkanFormat::None),
 			_enable_destroy(true)
 		{
-			const VulkanImageResourceUsage vulkan_usage = usage;
+			const VulkanImageResourceUsage vulkan_usage = (ui32)usage;
 
 			if (vulkan_usage.Contains(VulkanImageResourceUsage::Cube)) //TODO: consider VulkanImageUsage::Cube. Is there anything else we need to do?
 			{
