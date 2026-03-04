@@ -89,6 +89,6 @@ namespace np::mem
 	{
 		CopyBytes(dst, bytes.data(), bytes.size());
 	}
-}
+} //namespace np::mem
 
 #endif /* NP_ENGINE_CONTAINER_HPP */

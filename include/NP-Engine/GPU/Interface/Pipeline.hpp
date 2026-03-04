@@ -28,7 +28,8 @@ namespace np::gpu
 	struct PipelineResourceLayout : public DetailObject
 	{
 		static mem::sptr<PipelineResourceLayout> Create(mem::sptr<Device> device,
-			const con::vector<mem::sptr<ResourceLayout>>& resource_layouts, PushData push_data);
+														const con::vector<mem::sptr<ResourceLayout>>& resource_layouts,
+														PushData push_data);
 
 		virtual ~PipelineResourceLayout() = default;
 
@@ -48,9 +49,9 @@ namespace np::gpu
 	public:
 		constexpr static ui32 Compute = BIT(0);
 		constexpr static ui32 Graphics = BIT(1);
-		
+
 		// TODO: we may not need some of the following... investigate
-		
+
 		constexpr static ui32 Input = BIT(23);
 		constexpr static ui32 Tessellation = BIT(24);
 		constexpr static ui32 Viewport = BIT(25);
@@ -63,7 +64,7 @@ namespace np::gpu
 
 		//constexpr static ui32 RayTrace = BIT(2); //TODO: investigate
 
-		PipelineUsage(ui32 value) : Enum<ui32>(value) {}
+		PipelineUsage(ui32 value): Enum<ui32>(value) {}
 	};
 
 	struct Pipeline : public DetailObject

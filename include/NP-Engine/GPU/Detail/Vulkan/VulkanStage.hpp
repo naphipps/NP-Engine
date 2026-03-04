@@ -19,7 +19,7 @@ namespace np::gpu::__detail
 	class VulkanStage : public Stage
 	{
 	public:
-		VulkanStage(ui32 value) : Stage(value) {}
+		VulkanStage(ui32 value): Stage(value) {}
 
 		VkPipelineStageFlags GetVkPipelineStageFlags() const
 		{
@@ -151,6 +151,6 @@ namespace np::gpu::__detail
 			return name;
 		}
 	};
-}
+} //namespace np::gpu::__detail
 
 #endif /* NP_ENGINE_GPU_VULKAN_STAGE_HPP */

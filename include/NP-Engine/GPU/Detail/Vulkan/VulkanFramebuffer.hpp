@@ -53,7 +53,8 @@ namespace np::gpu::__detail
 		con::vector<mem::sptr<VulkanImageResourceView>> _views; //aka: attachments
 		VkFramebuffer _framebuffer;
 
-		static VkFramebufferCreateInfo CreateVkInfo(mem::sptr<VulkanRenderPass> render_pass, ui32 width, ui32 height, ui32 layer_count)
+		static VkFramebufferCreateInfo CreateVkInfo(mem::sptr<VulkanRenderPass> render_pass, ui32 width, ui32 height,
+													ui32 layer_count)
 		{
 			VkFramebufferCreateInfo info{};
 			info.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
@@ -64,8 +65,8 @@ namespace np::gpu::__detail
 			return info;
 		}
 
-		static VkFramebuffer CreateVkFramebuffer(mem::sptr<VulkanRenderPass> render_pass, ui32 width, ui32 height, ui32 layer_count,
-			const con::vector<mem::sptr<VulkanImageResourceView>>& views)
+		static VkFramebuffer CreateVkFramebuffer(mem::sptr<VulkanRenderPass> render_pass, ui32 width, ui32 height,
+												 ui32 layer_count, const con::vector<mem::sptr<VulkanImageResourceView>>& views)
 		{
 			con::vector<VkImageView> image_views(views.size());
 			for (siz i = 0; i < image_views.size(); i++)
@@ -82,12 +83,13 @@ namespace np::gpu::__detail
 		}
 
 	public:
-		VulkanFramebuffer(mem::sptr<RenderPass> render_pass, siz width, siz height, siz layer_count, const con::vector<mem::sptr<ImageResourceView>>& views) :
+		VulkanFramebuffer(mem::sptr<RenderPass> render_pass, siz width, siz height, siz layer_count,
+						  const con::vector<mem::sptr<ImageResourceView>>& views):
 			_render_pass(render_pass),
 			_width(width),
 			_height(height),
 			_layer_count(layer_count),
-			_views{ views.begin(), views.end() },
+			_views{views.begin(), views.end()},
 			_framebuffer(CreateVkFramebuffer(_render_pass, _width, _height, _layer_count, _views))
 		{}
 
@@ -138,7 +140,7 @@ namespace np::gpu::__detail
 
 		virtual con::vector<mem::sptr<ImageResourceView>> GetImageResourceViews() const override
 		{
-			return { _views.begin(), _views.end() };
+			return {_views.begin(), _views.end()};
 		}
 	};
 } // namespace np::gpu::__detail

@@ -49,10 +49,9 @@
 #include "Topology.hpp"
 #include "Viewport.hpp"
 
-
 /*
 	TODO: support the following commands:
-		
+
 		- [x] vkCmdPushConstants(
 				VkCommandBuffer commandBuffer,
 				VkPipelineLayout layout,
@@ -162,7 +161,7 @@
 				uint32_t regionCount,
 				const VkBufferImageCopy * pRegions);
 
-		
+
 
 		- [x] vkCmdSetViewport(
 				VkCommandBuffer commandBuffer,
@@ -264,7 +263,7 @@
 				const VkImageBlit * pRegions,
 				VkFilter filter);
 
-		
+
 
 		- [ ] vkCmdClearColorImage(
 				VkCommandBuffer commandBuffer,
@@ -288,17 +287,17 @@
 				VkImage srcImage, //srcImage
 				VkImageLayout srcImageLayout, //srcImage
 				VkImage dstImage, //dstImage
-				VkImageLayout dstImageLayout, //dstImage, or should we accept a ImageResourceUsage, and we allow asigning a image it's usage after creation? maybe thats a detail thing
-				uint32_t regionCount, //regions
-				const VkImageResolve * pRegions); //regions
+				VkImageLayout dstImageLayout, //dstImage, or should we accept a ImageResourceUsage, and we allow asigning a
+   image it's usage after creation? maybe thats a detail thing uint32_t regionCount, //regions const VkImageResolve * pRegions);
+   //regions
 
 
 		--------------------------------------------------------------
 
 
-		
 
-		
+
+
 
 		- [ ] vkCmdClearAttachments(
 				VkCommandBuffer commandBuffer,
@@ -307,7 +306,7 @@
 				uint32_t rectCount,
 				const VkClearRect * pRects);
 
-		
+
 
 
 
@@ -335,7 +334,7 @@
 				uint32_t imageMemoryBarrierCount,
 				const VkImageMemoryBarrier * pImageMemoryBarriers);
 
-		
+
 
 		- [ ] vkCmdBeginQuery(
 				VkCommandBuffer commandBuffer,
@@ -370,7 +369,6 @@
 				VkDeviceSize stride,
 				VkQueryResultFlags flags);
 */
-
 
 //TODO: we need to determine good default values for everything
 
@@ -445,8 +443,8 @@ namespace np::gpu
 		//ui32 dstImageWidth = 0; //TODO: feel like the image provides this?
 		//ui32 dstImageHeight = 0; //TODO: feel like the image provides this?
 
-
-		//TODO: I feel like we need a begin and end point, but also a good way to indicate that we just want what is in these bounds, or if we want all image data from that point, then sequentially through the image until we reach the end point
+		//TODO: I feel like we need a begin and end point, but also a good way to indicate that we just want what is in these
+		//bounds, or if we want all image data from that point, then sequentially through the image until we reach the end point
 		Image::Point srcBeginPoint{};
 		//TODO: should we consider VkImageSubresourceLayers?
 
@@ -506,7 +504,8 @@ namespace np::gpu
 		mem::sptr<Framebuffer> framebuffer = nullptr;
 		RenderArea renderArea{};
 		con::vector<ClearColor> clearColors{}; //size = [1, N) where N = number of images in framebuffer?
-		SubpassUsage usage = SubpassUsage::None; //TODO: some way to indicate whether to not we're enabling secondary command buffers
+		SubpassUsage usage =
+			SubpassUsage::None; //TODO: some way to indicate whether to not we're enabling secondary command buffers
 
 		virtual CommandType GetCommandType() const override
 		{
@@ -573,15 +572,12 @@ namespace np::gpu
 		}
 	};
 
-	
-
-
-
 	/*
 		TODO: make a better comment here
 		execute given command buffers on the given command buffer
 
-		TODO: investigate nested command buffers: <https://docs.vulkan.org/spec/latest/chapters/features.html#features-nestedCommandBuffer>
+		TODO: investigate nested command buffers:
+	   <https://docs.vulkan.org/spec/latest/chapters/features.html#features-nestedCommandBuffer>
 	*/
 	struct ExecuteCommandsCommand : public Command
 	{
@@ -592,8 +588,6 @@ namespace np::gpu
 			return CommandType::ExecuteCommands;
 		}
 	};
-
-
 
 	struct Barrier
 	{
@@ -620,7 +614,7 @@ namespace np::gpu
 		DeviceQueueFamily dstQueueFamily{};
 		DeviceQueueFamily srcQueueFamily{};
 	};
-	
+
 	struct BarrierCommand : public Command
 	{
 		Stage dstStage = Stage::None;
@@ -634,13 +628,6 @@ namespace np::gpu
 			return CommandType::Barrier;
 		}
 	};
-
-
-
-
-	
-
-	
 
 	struct BindResourceGroupCommand : public Command
 	{
@@ -657,10 +644,13 @@ namespace np::gpu
 		*/
 
 		mem::sptr<Pipeline> pipeline = nullptr;
-		siz resourceLayoutIndex = SIZ_MAX; //index into the PipelineResourceLayout's ResourceLayouts the given group will apply to
-		mem::sptr<ResourceGroup> group = nullptr; //TODO: always check and make sure this group is compatible with the resource layout in the pipeline
+		siz resourceLayoutIndex =
+			SIZ_MAX; //index into the PipelineResourceLayout's ResourceLayouts the given group will apply to
+		mem::sptr<ResourceGroup> group =
+			nullptr; //TODO: always check and make sure this group is compatible with the resource layout in the pipeline
 
-		//TODO: some resources are dynamic and need offsets. We are required to consider them. Doesn't have to be here, but needs to happpen.
+		//TODO: some resources are dynamic and need offsets. We are required to consider them. Doesn't have to be here, but
+		//needs to happpen.
 		con::vector<siz> dynamicResourceOffsets{};
 
 		virtual CommandType GetCommandType() const override
@@ -798,7 +788,6 @@ namespace np::gpu
 	//	}
 	//};
 
-
 	struct DispatchCommand : public Command
 	{
 		siz x = 0;
@@ -822,13 +811,9 @@ namespace np::gpu
 		}
 	};
 
-
-
-
-
 	struct DrawCommand : public Command
 	{
-		siz vertexCount = 0; 
+		siz vertexCount = 0;
 		siz vertexBeginIndex = 0;
 		siz instanceCount = 1;
 		siz instanceBeginIndex = 0;
@@ -846,7 +831,7 @@ namespace np::gpu
 		siz vertexOffset = 0;
 		siz instanceCount = 0;
 		siz instanceBeginIndex = 0;
-		
+
 		virtual CommandType GetCommandType() const override
 		{
 			return CommandType::DrawIndexed;

@@ -18,7 +18,7 @@ namespace np::gpu::__detail
 	class VulkanLogicOperation : public LogicOperation
 	{
 	public:
-		VulkanLogicOperation(ui32 value) : LogicOperation(value) {}
+		VulkanLogicOperation(ui32 value): LogicOperation(value) {}
 
 		VkLogicOp GetVkLogicOp() const
 		{
@@ -78,6 +78,6 @@ namespace np::gpu::__detail
 			return op;
 		}
 	};
-} // namespace np::gpu
+} //namespace np::gpu::__detail
 
 #endif /* NP_ENGINE_GPU_VULKAN_LOGIC_HPP */

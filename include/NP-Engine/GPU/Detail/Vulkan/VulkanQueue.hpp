@@ -29,7 +29,7 @@ namespace np::gpu::__detail
 		con::vector<mem::sptr<VulkanSemaphore>> waitSemaphores{};
 		con::vector<mem::sptr<VulkanSemaphore>> signalSemaphores{};
 
-		VulkanSubmit(const Submit& other = {}) :
+		VulkanSubmit(const Submit& other = {}):
 			stages{other.stages.begin(), other.stages.end()},
 			commandBuffers{other.commandBuffers.begin(), other.commandBuffers.end()},
 			waitSemaphores{other.waitSemaphores.begin(), other.waitSemaphores.end()},
@@ -38,13 +38,10 @@ namespace np::gpu::__detail
 
 		operator Submit() const
 		{
-			return
-			{
-				{stages.begin(), stages.end()},
-				{commandBuffers.begin(), commandBuffers.end()},
-				{waitSemaphores.begin(), waitSemaphores.end()},
-				{signalSemaphores.begin(), signalSemaphores.end()}
-			};
+			return {{stages.begin(), stages.end()},
+					{commandBuffers.begin(), commandBuffers.end()},
+					{waitSemaphores.begin(), waitSemaphores.end()},
+					{signalSemaphores.begin(), signalSemaphores.end()}};
 		}
 
 		con::vector<VkPipelineStageFlags> GetVkWaitPipelineStageFlags() const
@@ -95,18 +92,14 @@ namespace np::gpu::__detail
 		con::vector<mem::sptr<VulkanSemaphore>> waitSemaphores{};
 		con::vector<mem::sptr<VulkanFrameContext>> frameContexts{};
 
-		VulkanPresent(const Present& other) :
-			waitSemaphores{ other.waitSemaphores.begin(), other.waitSemaphores.end() },
-			frameContexts{ other.frameContexts.begin(), other.frameContexts.end() }
+		VulkanPresent(const Present& other):
+			waitSemaphores{other.waitSemaphores.begin(), other.waitSemaphores.end()},
+			frameContexts{other.frameContexts.begin(), other.frameContexts.end()}
 		{}
 
 		operator Present() const
 		{
-			return
-			{
-				{waitSemaphores.begin(), waitSemaphores.end()},
-				{frameContexts.begin(), frameContexts.end()}
-			};
+			return {{waitSemaphores.begin(), waitSemaphores.end()}, {frameContexts.begin(), frameContexts.end()}};
 		}
 
 		con::vector<VkSemaphore> GetVkWaitSemaphores() const
@@ -159,7 +152,8 @@ namespace np::gpu::__detail
 		DeviceQueueFamily _family;
 		siz _index;
 		VkQueue _queue;
-		mutexed_wrapper<con::vector<mem::wptr<VulkanCommandBufferPool>>> _command_buffer_pools; //TODO: do we want this mutex_wrapped?
+		mutexed_wrapper<con::vector<mem::wptr<VulkanCommandBufferPool>>>
+			_command_buffer_pools; //TODO: do we want this mutex_wrapped?
 
 		static VkQueue RetrieveVkQueue(mem::sptr<VulkanDevice> device, DeviceQueueFamily family, ui32 index)
 		{
@@ -220,12 +214,13 @@ namespace np::gpu::__detail
 
 		virtual mem::sptr<CommandBufferPool> CreateCommandBufferPool(CommandBufferPoolUsage usage) override
 		{
-			return mem::create_sptr<VulkanCommandBufferPool>(GetServices()->GetAllocator(), _device->GetLogicalDevice(), usage, _family);
+			return mem::create_sptr<VulkanCommandBufferPool>(GetServices()->GetAllocator(), _device->GetLogicalDevice(), usage,
+															 _family);
 		}
 
 		virtual bl Submit(const gpu::Submit& submit_, mem::sptr<Fence> fence_) override
 		{
-			const VulkanSubmit submit{ submit_ };
+			const VulkanSubmit submit{submit_};
 			const con::vector<VkPipelineStageFlags> wait_flags = submit.GetVkWaitPipelineStageFlags();
 			const con::vector<VkCommandBuffer> command_buffers = submit.GetVkCommandBuffers();
 			const con::vector<VkSemaphore> wait_semaphores = submit.GetVkWaitSemaphores();
@@ -239,15 +234,15 @@ namespace np::gpu::__detail
 			info.pWaitSemaphores = wait_semaphores.empty() ? nullptr : wait_semaphores.data();
 			info.signalSemaphoreCount = signal_semaphores.size();
 			info.pSignalSemaphores = signal_semaphores.empty() ? nullptr : signal_semaphores.data();
-			
+
 			mem::sptr<VulkanFence> fence = DetailObject::EnsureIsDetailType(fence_, DetailType::Vulkan);
-			VkResult result = vkQueueSubmit(_queue, 1, &info, fence ? *fence : (VkFence)nullptr);
+			VkResult result = vkQueueSubmit(_queue, 1, &info, fence ? *fence : (VkFence) nullptr);
 			return result == VK_SUCCESS;
 		}
 
 		virtual con::vector<bl> Present(const gpu::Present& present_) override
 		{
-			const VulkanPresent present{ present_ };
+			const VulkanPresent present{present_};
 			const con::vector<VkSemaphore> wait_semaphores = present.GetVkWaitSemaphores();
 			const con::vector<VkSwapchainKHR> swapchains = present.GetVkSwapchainKHRs();
 			const con::vector<ui32> indices = present.GetImageIndices();
@@ -270,16 +265,10 @@ namespace np::gpu::__detail
 			return successes;
 		}
 
-
-
-
-
-
 		//void WaitUntilIdle() const
 		//{
 		//	vkQueueWaitIdle(_queue);
 		//}
-
 
 		//VkCommandPoolCreateInfo CreateCommandPoolInfo() const
 		//{
@@ -293,7 +282,8 @@ namespace np::gpu::__detail
 		//mem::sptr<VulkanCommandPool> CreateCommandPool(VkCommandPoolCreateInfo info)
 		//{
 		//	info.queueFamilyIndex = GetFamily().index;
-		//	mem::sptr<VulkanCommandPool> pool = mem::create_sptr<VulkanCommandPool>(GetServices()->GetAllocator(), _device, info);
+		//	mem::sptr<VulkanCommandPool> pool = mem::create_sptr<VulkanCommandPool>(GetServices()->GetAllocator(), _device,
+		//info);
 
 		//	CleanupCommandPools();
 		//	_command_pools.get_access()->emplace_back(pool);
@@ -348,7 +338,8 @@ namespace np::gpu::__detail
 
 		//VkResult Present(VkPresentInfoKHR info) const
 		//{
-		//	return _family.usage.Contains(QueueUsage::Present) ? vkQueuePresentKHR(_queue, &info) : VK_RESULT_MAX_ENUM; //TODO: should we use VK_ERROR_UNKNOWN instead?
+		//	return _family.usage.Contains(QueueUsage::Present) ? vkQueuePresentKHR(_queue, &info) : VK_RESULT_MAX_ENUM; //TODO:
+		//should we use VK_ERROR_UNKNOWN instead?
 		//}
 	};
 } // namespace np::gpu::__detail

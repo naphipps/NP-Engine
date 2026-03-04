@@ -101,7 +101,7 @@ namespace np
 			return a._value == b._value;
 		}
 
-		Enum(T value) : _value(value) {}
+		Enum(T value): _value(value) {}
 
 		virtual ~Enum() = default;
 
@@ -110,13 +110,13 @@ namespace np
 			return _value;
 		}
 
-		Enum<T>& operator |=(const Enum<T>& other)
+		Enum<T>& operator|=(const Enum<T>& other)
 		{
 			_value |= other._value;
 			return *this;
 		}
 
-		Enum<T>& operator &=(const Enum<T>& other)
+		Enum<T>& operator&=(const Enum<T>& other)
 		{
 			_value &= other._value;
 			return *this;

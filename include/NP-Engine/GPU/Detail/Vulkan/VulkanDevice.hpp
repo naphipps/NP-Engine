@@ -32,7 +32,8 @@ namespace np::gpu::__detail
 		VkPresentModeKHR _present_mode;
 		mem::sptr<VulkanLogicalDevice> _logical_device;
 
-		static ::std::optional<VulkanPhysicalDevice> ChoosePhysicalDevice(mem::sptr<VulkanInstance> instance, DeviceUsage usage, mem::sptr<VulkanPresentTarget> target)
+		static ::std::optional<VulkanPhysicalDevice> ChoosePhysicalDevice(mem::sptr<VulkanInstance> instance, DeviceUsage usage,
+																		  mem::sptr<VulkanPresentTarget> target)
 		{
 			::std::optional<VulkanPhysicalDevice> device;
 			if (target)
@@ -56,7 +57,8 @@ namespace np::gpu::__detail
 			return device;
 		}
 
-		static con::vector<VkDeviceQueueCreateInfo> CreateVkQueueCreateInfos(VulkanPhysicalDevice physical_device, DeviceUsage usage, mem::sptr<PresentTarget> target)
+		static con::vector<VkDeviceQueueCreateInfo> CreateVkQueueCreateInfos(VulkanPhysicalDevice physical_device,
+																			 DeviceUsage usage, mem::sptr<PresentTarget> target)
 		{
 			const con::vector<VkQueueFamilyProperties> properties = physical_device.GetVkQueueFamilyProperties();
 			con::oset<ui32> indices{};
@@ -84,7 +86,7 @@ namespace np::gpu::__detail
 		}
 
 	public:
-		VulkanDevice(mem::sptr<DetailInstance> instance, DeviceUsage usage, mem::sptr<PresentTarget> target) :
+		VulkanDevice(mem::sptr<DetailInstance> instance, DeviceUsage usage, mem::sptr<PresentTarget> target):
 			_target(target),
 			_surface_format(),
 			_present_mode(),
@@ -93,15 +95,16 @@ namespace np::gpu::__detail
 			mem::sptr<VulkanInstance> vulkan_instance = DetailObject::EnsureIsDetailType(instance, DetailType::Vulkan);
 			if (vulkan_instance)
 			{
-				const ::std::optional<VulkanPhysicalDevice> physical_device_optional = ChoosePhysicalDevice(vulkan_instance, usage, _target);
+				const ::std::optional<VulkanPhysicalDevice> physical_device_optional =
+					ChoosePhysicalDevice(vulkan_instance, usage, _target);
 				if (physical_device_optional.has_value())
 				{
 					const VulkanPhysicalDevice physical_device = physical_device_optional.value();
 					_surface_format = physical_device.ChooseVkSurfaceFormat(_target);
 					_present_mode = physical_device.ChooseVkPresentMode(_target);
 					mem::sptr<srvc::Services> services = physical_device.GetServices();
-					_logical_device = mem::create_sptr<VulkanLogicalDevice>(services->GetAllocator(),
-						physical_device, CreateVkQueueCreateInfos(physical_device, usage, _target));
+					_logical_device = mem::create_sptr<VulkanLogicalDevice>(
+						services->GetAllocator(), physical_device, CreateVkQueueCreateInfos(physical_device, usage, _target));
 				}
 			}
 		}
@@ -134,7 +137,7 @@ namespace np::gpu::__detail
 			const con::vector<VkQueueFamilyProperties> properties = physical_device.GetVkQueueFamilyProperties();
 			con::vector<DeviceQueueFamily> families{};
 
-			for (siz i=0; i<properties.size(); i++)
+			for (siz i = 0; i < properties.size(); i++)
 			{
 				DeviceQueueUsage usage = DeviceQueueUsage::None;
 
@@ -147,7 +150,7 @@ namespace np::gpu::__detail
 				if (physical_device.QueueFamilySupportsCompute(properties, i))
 					usage |= DeviceQueueUsage::Compute;
 
-				families.emplace_back(DeviceQueueFamily{ i, properties[i].queueCount, usage });
+				families.emplace_back(DeviceQueueFamily{i, properties[i].queueCount, usage});
 			}
 
 			return families;
@@ -168,10 +171,6 @@ namespace np::gpu::__detail
 			return mem::create_sptr<VulkanSemaphore>(GetServices()->GetAllocator(), GetLogicalDevice());
 		}
 
-
-
-
-
 		VkExtent2D ChooseVkExtent2D() const
 		{
 			const VulkanPhysicalDevice physical_device = GetLogicalDevice()->GetPhysicalDevice();
@@ -188,15 +187,12 @@ namespace np::gpu::__detail
 				const VkExtent2D min_extent = capabilities.minImageExtent;
 				const VkExtent2D max_extent = capabilities.maxImageExtent;
 
-				extent = { ::std::clamp(framebuffer_extent.width, min_extent.width, max_extent.width),
-						  ::std::clamp(framebuffer_extent.height, min_extent.height, max_extent.height) };
+				extent = {::std::clamp(framebuffer_extent.width, min_extent.width, max_extent.width),
+						  ::std::clamp(framebuffer_extent.height, min_extent.height, max_extent.height)};
 			}
 
 			return extent;
 		}
-
-
-
 
 		mem::sptr<VulkanLogicalDevice> GetLogicalDevice() const
 		{
@@ -218,20 +214,9 @@ namespace np::gpu::__detail
 			return mem::create_sptr<VulkanDeviceMemory>(GetServices()->GetAllocator(), _logical_device, requirements, flags);
 		}
 
-
-
-
-
-
-
-
-
-
-
-
-
-		//VkResult AsyncCopy(mem::sptr<VulkanBuffer> dst, mem::sptr<VulkanBuffer> src, VkSubmitInfo& submit_info, mem::sptr<VulkanQueue> queue,
-		//					mem::sptr<VulkanCommandPool> pool, con::vector<mem::sptr<VulkanCommandBuffer>>& buffers, VkFence fence)
+		//VkResult AsyncCopy(mem::sptr<VulkanBuffer> dst, mem::sptr<VulkanBuffer> src, VkSubmitInfo& submit_info,
+		//mem::sptr<VulkanQueue> queue, 					mem::sptr<VulkanCommandPool> pool, con::vector<mem::sptr<VulkanCommandBuffer>>& buffers,
+		//VkFence fence)
 		//{
 		//	NP_ENGINE_ASSERT(queue->Has(pool), "command pool must pertain to queue");
 		//	VulkanCopyBufferCommand copy_buffer{ dst, src, {{0, 0, src->GetSize()}} };
@@ -244,7 +229,8 @@ namespace np::gpu::__detail
 		//	return queue->Submit({ buffer }, submit_info, fence);
 		//}
 
-		//VkResult SyncCopy(mem::sptr<VulkanBuffer> dst, mem::sptr<VulkanBuffer> src, VkSubmitInfo& submit_info, mem::sptr<VulkanQueue> queue, mem::sptr<VulkanCommandPool> pool)
+		//VkResult SyncCopy(mem::sptr<VulkanBuffer> dst, mem::sptr<VulkanBuffer> src, VkSubmitInfo& submit_info,
+		//mem::sptr<VulkanQueue> queue, mem::sptr<VulkanCommandPool> pool)
 		//{
 		//	con::vector<mem::sptr<VulkanCommandBuffer>> buffers;
 		//	VulkanFence fence{ GetLogicalDevice() };
@@ -261,7 +247,8 @@ namespace np::gpu::__detail
 		//{
 		//	NP_ENGINE_ASSERT(queue->Has(pool), "command pool must pertain to queue");
 
-		//	VulkanCopyBufferToImageCommand copy_buffer_to_image{ dst, src, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, {buffer_image_copy} };
+		//	VulkanCopyBufferToImageCommand copy_buffer_to_image{ dst, src, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+		//{buffer_image_copy} };
 
 		//	mem::sptr<VulkanCommandBuffer> buffer = pool->AllocateCommandBuffer();
 		//	buffer->Begin(VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT);
@@ -284,8 +271,8 @@ namespace np::gpu::__detail
 		//}
 
 		//VkResult AsyncTransition(VulkanImage& image, VkImageLayout old_image_layout,
-		//						 VkImageLayout new_image_layout, VkSubmitInfo& submit_info, mem::sptr<VulkanQueue> queue, mem::sptr<VulkanCommandPool> pool,
-		//						 con::vector<mem::sptr<VulkanCommandBuffer>>& buffers, VkFence fence)
+		//						 VkImageLayout new_image_layout, VkSubmitInfo& submit_info, mem::sptr<VulkanQueue> queue,
+		//mem::sptr<VulkanCommandPool> pool, 						 con::vector<mem::sptr<VulkanCommandBuffer>>& buffers, VkFence fence)
 		//{
 		//	NP_ENGINE_ASSERT(queue->Has(pool), "command pool must pertain to queue");
 
@@ -293,11 +280,10 @@ namespace np::gpu::__detail
 		//	image_memory_barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
 		//	image_memory_barrier.oldLayout = old_image_layout;
 		//	image_memory_barrier.newLayout = new_image_layout;
-		//	image_memory_barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED; //TODO: should we use queue->GetFamilyIndex() here??
-		//	image_memory_barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED; //TODO: should we use queue->GetFamilyIndex() here??
-		//	image_memory_barrier.image = image;
-		//	image_memory_barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-		//	image_memory_barrier.subresourceRange.baseMipLevel = 0;
+		//	image_memory_barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED; //TODO: should we use queue->GetFamilyIndex()
+		//here?? 	image_memory_barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED; //TODO: should we use
+		//queue->GetFamilyIndex() here?? 	image_memory_barrier.image = image; 	image_memory_barrier.subresourceRange.aspectMask =
+		//VK_IMAGE_ASPECT_COLOR_BIT; 	image_memory_barrier.subresourceRange.baseMipLevel = 0;
 		//	image_memory_barrier.subresourceRange.levelCount = 1;
 		//	image_memory_barrier.subresourceRange.baseArrayLayer = 0;
 		//	image_memory_barrier.subresourceRange.layerCount = 1;
@@ -353,15 +339,14 @@ namespace np::gpu::__detail
 		//}
 
 		//VkResult SyncTransition(VulkanImage& image, VkImageLayout old_image_layout,
-		//						VkImageLayout new_image_layout, VkSubmitInfo& submit_info, mem::sptr<VulkanQueue> queue, mem::sptr<VulkanCommandPool> pool)
+		//						VkImageLayout new_image_layout, VkSubmitInfo& submit_info, mem::sptr<VulkanQueue> queue,
+		//mem::sptr<VulkanCommandPool> pool)
 		//{
 		//	con::vector<mem::sptr<VulkanCommandBuffer>> buffers;
 		//	VulkanFence fence(GetLogicalDevice());
 		//	fence.Reset();
-		//	VkResult result = AsyncTransition(image, old_image_layout, new_image_layout, submit_info, queue, pool, buffers, fence);
-		//	fence.Wait();
-		//	pool->DeallocateCommandBuffers(buffers);
-		//	return result;
+		//	VkResult result = AsyncTransition(image, old_image_layout, new_image_layout, submit_info, queue, pool, buffers,
+		//fence); 	fence.Wait(); 	pool->DeallocateCommandBuffers(buffers); 	return result;
 		//}
 	};
 } // namespace np::gpu::__detail

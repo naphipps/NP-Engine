@@ -18,13 +18,14 @@ namespace np::gpu::__detail
 	class VulkanPrimitiveTopology : public PrimitiveTopology
 	{
 	public:
-		VulkanPrimitiveTopology(ui32 value) : PrimitiveTopology(value) {}
+		VulkanPrimitiveTopology(ui32 value): PrimitiveTopology(value) {}
 
 		VkPrimitiveTopology GetVkPrimitiveTopology() const
 		{
 			VkPrimitiveTopology topology = VK_PRIMITIVE_TOPOLOGY_MAX_ENUM;
 
-			if (Contains(Point)) //TODO: check all Enum<T> checks where we use ContainsAll when we should use Contains -- make sure all checks are correct
+			if (Contains(Point)) //TODO: check all Enum<T> checks where we use ContainsAll when we should use Contains -- make
+								 //sure all checks are correct
 				topology = VK_PRIMITIVE_TOPOLOGY_POINT_LIST;
 			else if (Contains(Line | List | Adjacency))
 				topology = VK_PRIMITIVE_TOPOLOGY_LINE_LIST_WITH_ADJACENCY;
@@ -50,6 +51,6 @@ namespace np::gpu::__detail
 			return topology;
 		}
 	};
-} // namespace np::gpu
+} //namespace np::gpu::__detail
 
 #endif /* NP_ENGINE_GPU_VULKAN_TOPOLOGY_HPP */

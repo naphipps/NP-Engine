@@ -30,7 +30,7 @@
 	#include <netdb.h>
 	#include <arpa/inet.h>
 
-	#define INVALID_SOCKET ((ui64)-1)
+	#define INVALID_SOCKET ((ui64) - 1)
 	#define SD_RECEIVE SHUT_RD
 	#define SD_SEND SHUT_WR
 	#define SD_BOTH SHUT_RDWR

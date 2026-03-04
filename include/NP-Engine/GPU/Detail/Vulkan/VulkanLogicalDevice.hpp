@@ -34,7 +34,8 @@ namespace np::gpu::__detail
 			return info;
 		}
 
-		static VkDevice CreateVkLogicalDevice(VulkanPhysicalDevice physical_device, const con::vector<VkDeviceQueueCreateInfo>& queue_infos_)
+		static VkDevice CreateVkLogicalDevice(VulkanPhysicalDevice physical_device,
+											  const con::vector<VkDeviceQueueCreateInfo>& queue_infos_)
 		{
 			VkDevice logical_device = nullptr;
 			if (physical_device)
@@ -54,7 +55,7 @@ namespace np::gpu::__detail
 
 				con::vector<flt> queue_priorities{1.f};
 
-				con::vector<VkDeviceQueueCreateInfo> queue_infos{ queue_infos_.begin(), queue_infos_.end() };
+				con::vector<VkDeviceQueueCreateInfo> queue_infos{queue_infos_.begin(), queue_infos_.end()};
 				for (VkDeviceQueueCreateInfo& info : queue_infos)
 				{
 					info.queueCount = (ui32)queue_priorities.size();
@@ -92,7 +93,7 @@ namespace np::gpu::__detail
 			info.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
 			return info;
 		}
-		
+
 		VulkanLogicalDevice(VulkanPhysicalDevice physical_device, const con::vector<VkDeviceQueueCreateInfo>& queue_infos):
 			_physical_device(physical_device),
 			_device(CreateVkLogicalDevice(_physical_device, queue_infos))

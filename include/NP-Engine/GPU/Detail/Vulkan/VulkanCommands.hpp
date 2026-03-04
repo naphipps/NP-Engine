@@ -37,7 +37,7 @@ namespace np::gpu::__detail
 		siz srcOffset = 0;
 		siz size = 0;
 
-		VulkanCopyBufferRange(const CopyBufferRange& other = {}) :
+		VulkanCopyBufferRange(const CopyBufferRange& other = {}):
 			dstOffset(other.dstOffset),
 			srcOffset(other.srcOffset),
 			size(other.size)
@@ -45,12 +45,12 @@ namespace np::gpu::__detail
 
 		operator CopyBufferRange() const
 		{
-			return { dstOffset, srcOffset, size };
+			return {dstOffset, srcOffset, size};
 		}
 
 		VkBufferCopy GetVkBufferCopy() const
 		{
-			return { srcOffset, dstOffset, size };
+			return {srcOffset, dstOffset, size};
 		}
 	};
 
@@ -65,7 +65,7 @@ namespace np::gpu::__detail
 
 			con::vector<VkBufferCopy> ranges(this->ranges.size());
 			for (siz i = 0; i < ranges.size(); i++)
-				ranges[i] = VulkanCopyBufferRange{ this->ranges[i] }.GetVkBufferCopy();
+				ranges[i] = VulkanCopyBufferRange{this->ranges[i]}.GetVkBufferCopy();
 
 			vkCmdCopyBuffer(*command_buffer, *src, *dst, ranges.size(), ranges.empty() ? nullptr : ranges.data());
 			return true;
@@ -109,7 +109,8 @@ namespace np::gpu::__detail
 	protected:
 		virtual bl ApplyTo(const CommandBuffer* command_buffer_) override
 		{
-			//vkCmdCopyBufferToImage(command_buffer, srcBuffer, dstImage, dstImageLayout, (ui32)regions.size(), regions.data()); //TODO: implement
+			//vkCmdCopyBufferToImage(command_buffer, srcBuffer, dstImage, dstImageLayout, (ui32)regions.size(), regions.data());
+			////TODO: implement
 			return false;
 		}
 
@@ -206,7 +207,6 @@ namespace np::gpu::__detail
 		}
 	};
 
-
 	/*typedef struct VkOffset2D {
 		int32_t    x;
 		int32_t    y;
@@ -223,30 +223,24 @@ namespace np::gpu::__detail
 		VkExtent2D    extent;
 	} VkRect2D;*/
 
-
 	struct VulkanRenderArea
 	{
 		::glm::i32vec2 offset;
 		ui32 width;
 		ui32 height;
 
-		VulkanRenderArea(const RenderArea& other = {}):
-			offset(other.offset),
-			width(other.width),
-			height(other.height)
-		{}
+		VulkanRenderArea(const RenderArea& other = {}): offset(other.offset), width(other.width), height(other.height) {}
 
 		operator RenderArea() const
 		{
-			return { offset, width, height };
+			return {offset, width, height};
 		}
 
 		VkRect2D GetVkRect2D() const
 		{
-			return { {offset.x, offset.y}, {width, height} };
+			return {{offset.x, offset.y}, {width, height}};
 		}
 	};
-
 
 	class VulkanBeginRenderPassCommand : public BeginRenderPassCommand
 	{
@@ -277,7 +271,7 @@ namespace np::gpu::__detail
 
 				con::vector<VkClearValue> clear_values(clearColors.size());
 				for (siz i = 0; i < clear_values.size(); i++)
-					clear_values[i] = { VulkanClearColor{ clearColors[i] }.GetVkClearColorValue() };
+					clear_values[i] = {VulkanClearColor{clearColors[i]}.GetVkClearColorValue()};
 
 				VkRenderPassBeginInfo info = GetVkRenderPassBeginInfo(framebuffer, render_area.GetVkRect2D());
 				info.clearValueCount = clear_values.size();
@@ -442,11 +436,12 @@ namespace np::gpu::__detail
 			for (siz i = 0; i < contexts.size(); i++)
 			{
 				mem::sptr<VulkanBufferResource> buffer = EnsureIsDetailType(this->contexts[i].buffer, DetailType::Vulkan);
-				buffers[i] = buffer ? *buffer : (VkBuffer)nullptr;
+				buffers[i] = buffer ? *buffer : (VkBuffer) nullptr;
 				offsets[i] = contexts[i].offset;
 			}
 
-			vkCmdBindVertexBuffers(*command_buffer, 0, buffers.size(), buffers.empty() ? nullptr : buffers.data(), offsets.data());
+			vkCmdBindVertexBuffers(*command_buffer, 0, buffers.size(), buffers.empty() ? nullptr : buffers.data(),
+								   offsets.data());
 			return true;
 		}
 
@@ -468,7 +463,8 @@ namespace np::gpu::__detail
 		virtual bl ApplyTo(const CommandBuffer* command_buffer_) override
 		{
 			//TODO: implement vkCmdBindDescriptorSets
-			//vkCmdBindDescriptorSets(command_buffer, pipelineBindPoint, pipelineLayout, firstSet, (ui32)descriptorSets.size(), descriptorSets.data(), (ui32)dynamicOffsets.size(), dynamicOffsets.data());
+			//vkCmdBindDescriptorSets(command_buffer, pipelineBindPoint, pipelineLayout, firstSet, (ui32)descriptorSets.size(),
+			//descriptorSets.data(), (ui32)dynamicOffsets.size(), dynamicOffsets.data());
 			return false;
 		}
 
@@ -489,11 +485,11 @@ namespace np::gpu::__detail
 		VulkanAccess dstAccess = VulkanAccess::None;
 		VulkanAccess srcAccess = VulkanAccess::None;
 
-		VulkanBarrier(const Barrier& other = {}) :dstAccess(other.dstAccess), srcAccess(other.srcAccess) {}
+		VulkanBarrier(const Barrier& other = {}): dstAccess(other.dstAccess), srcAccess(other.srcAccess) {}
 
 		operator Barrier() const
 		{
-			return { dstAccess, srcAccess };
+			return {dstAccess, srcAccess};
 		}
 
 		VkMemoryBarrier GetVkMemoryBarrier() const
@@ -514,7 +510,7 @@ namespace np::gpu::__detail
 		DeviceQueueFamily dstQueueFamily{};
 		DeviceQueueFamily srcQueueFamily{};
 
-		VulkanBufferBarrier(const BufferBarrier& other = {}) :
+		VulkanBufferBarrier(const BufferBarrier& other = {}):
 			VulkanBarrier(other),
 			buffer(other.buffer),
 			offset(other.offset),
@@ -525,7 +521,7 @@ namespace np::gpu::__detail
 
 		operator BufferBarrier() const
 		{
-			return { dstAccess, srcAccess, buffer, offset, size, dstQueueFamily, srcQueueFamily };
+			return {dstAccess, srcAccess, buffer, offset, size, dstQueueFamily, srcQueueFamily};
 		}
 
 		VkBufferMemoryBarrier GetVkBufferMemoryBarrier() const
@@ -559,7 +555,7 @@ namespace np::gpu::__detail
 
 		operator ImageBarrier() const
 		{
-			return { dstAccess, srcAccess, image, dstQueueFamily, srcQueueFamily };
+			return {dstAccess, srcAccess, image, dstQueueFamily, srcQueueFamily};
 		}
 
 		VkImageMemoryBarrier GetVkImageMemoryBarrier() const
@@ -584,9 +580,9 @@ namespace np::gpu::__detail
 		virtual bl ApplyTo(const CommandBuffer* command_buffer_) override
 		{
 			/*
-				
+
 				TODO: note that image layout changes are considered a color write access
-			
+
 			*/
 			const VulkanCommandBuffer* command_buffer = static_cast<const VulkanCommandBuffer*>(command_buffer_);
 			const VulkanStage dstStage{this->dstStage};
@@ -594,23 +590,21 @@ namespace np::gpu::__detail
 
 			con::vector<VkMemoryBarrier> vk_barriers(barriers.size());
 			for (siz i = 0; i < vk_barriers.size(); i++)
-				vk_barriers[i] = VulkanBarrier{ barriers[i] }.GetVkMemoryBarrier();
+				vk_barriers[i] = VulkanBarrier{barriers[i]}.GetVkMemoryBarrier();
 
 			con::vector<VkBufferMemoryBarrier> vk_buffer_barriers(bufferBarriers.size());
 			for (siz i = 0; i < vk_buffer_barriers.size(); i++)
-				vk_buffer_barriers[i] = VulkanBufferBarrier{ bufferBarriers[i] }.GetVkBufferMemoryBarrier();
+				vk_buffer_barriers[i] = VulkanBufferBarrier{bufferBarriers[i]}.GetVkBufferMemoryBarrier();
 
 			con::vector<VkImageMemoryBarrier> vk_image_barriers(imageBarriers.size());
 			for (siz i = 0; i < vk_image_barriers.size(); i++)
-				vk_image_barriers[i] = VulkanImageBarrier{ imageBarriers[i] }.GetVkImageMemoryBarrier();
+				vk_image_barriers[i] = VulkanImageBarrier{imageBarriers[i]}.GetVkImageMemoryBarrier();
 
-			vkCmdPipelineBarrier(*command_buffer,
-				srcStage.GetVkPipelineStageFlags(),
-				dstStage.GetVkPipelineStageFlags(),
-				0, //TODO: do we want to do anything with this?
-				vk_barriers.size(), vk_barriers.empty() ? nullptr : vk_barriers.data(),
-				vk_buffer_barriers.size(), vk_buffer_barriers.empty() ? nullptr : vk_buffer_barriers.data(),
-				vk_image_barriers.size(), vk_image_barriers.empty() ? nullptr : vk_image_barriers.data());
+			vkCmdPipelineBarrier(*command_buffer, srcStage.GetVkPipelineStageFlags(), dstStage.GetVkPipelineStageFlags(),
+								 0, //TODO: do we want to do anything with this?
+								 vk_barriers.size(), vk_barriers.empty() ? nullptr : vk_barriers.data(),
+								 vk_buffer_barriers.size(), vk_buffer_barriers.empty() ? nullptr : vk_buffer_barriers.data(),
+								 vk_image_barriers.size(), vk_image_barriers.empty() ? nullptr : vk_image_barriers.data());
 			return true;
 		}
 
@@ -635,11 +629,13 @@ namespace np::gpu::__detail
 			con::vector<VkCommandBuffer> command_buffers(commandBuffers.size());
 			for (siz i = 0; i < command_buffers.size(); i++)
 			{
-				mem::sptr<VulkanCommandBuffer> vulkan_command_buffer = EnsureIsDetailType(commandBuffers[i], DetailType::Vulkan);
+				mem::sptr<VulkanCommandBuffer> vulkan_command_buffer =
+					EnsureIsDetailType(commandBuffers[i], DetailType::Vulkan);
 				command_buffers[i] = *vulkan_command_buffer;
 			}
 
-			vkCmdExecuteCommands(*command_buffer, command_buffers.size(), command_buffers.empty() ? nullptr : command_buffers.data());
+			vkCmdExecuteCommands(*command_buffer, command_buffers.size(),
+								 command_buffers.empty() ? nullptr : command_buffers.data());
 			return true;
 		}
 
@@ -661,14 +657,16 @@ namespace np::gpu::__detail
 		virtual bl ApplyTo(const CommandBuffer* command_buffer_) override
 		{
 			bl applied = false;
-			mem::sptr<VulkanPipelineResourceLayout> layout = EnsureIsDetailType(pipeline->GetPipelineResourceLayout(), DetailType::Vulkan);
+			mem::sptr<VulkanPipelineResourceLayout> layout =
+				EnsureIsDetailType(pipeline->GetPipelineResourceLayout(), DetailType::Vulkan);
 
 			if (layout)
 			{
 				const VulkanCommandBuffer* command_buffer = static_cast<const VulkanCommandBuffer*>(command_buffer_);
 				const VulkanStage stage{this->stage};
 				con::vector<ui8> bytes = layout->GetPushData().GetAllEntryBytes();
-				vkCmdPushConstants(*command_buffer, *layout, stage.GetVkShaderStageFlags(), 0, bytes.size(), bytes.empty() ? nullptr : bytes.data());
+				vkCmdPushConstants(*command_buffer, *layout, stage.GetVkShaderStageFlags(), 0, bytes.size(),
+								   bytes.empty() ? nullptr : bytes.data());
 				applied = true;
 			}
 
@@ -687,7 +685,6 @@ namespace np::gpu::__detail
 		}
 	};
 
-
 	class VulkanSetViewportsCommand : public SetViewportsCommand
 	{
 	protected:
@@ -696,7 +693,7 @@ namespace np::gpu::__detail
 			const VulkanCommandBuffer* command_buffer = static_cast<const VulkanCommandBuffer*>(command_buffer_);
 			con::vector<VkViewport> viewports(this->viewports.size());
 			for (siz i = 0; i < viewports.size(); i++)
-				viewports[i] = VulkanViewport{ this->viewports[i] }.GetVkViewport();
+				viewports[i] = VulkanViewport{this->viewports[i]}.GetVkViewport();
 
 			vkCmdSetViewport(*command_buffer, 0, viewports.size(), viewports.empty() ? nullptr : viewports.data());
 			return true;
@@ -722,7 +719,7 @@ namespace np::gpu::__detail
 			const VulkanCommandBuffer* command_buffer = static_cast<const VulkanCommandBuffer*>(command_buffer_);
 			con::vector<VkRect2D> scissors(this->scissors.size());
 			for (siz i = 0; i < scissors.size(); i++)
-				scissors[i] = VulkanScissor{ this->scissors[i] }.GetVkRect2D();
+				scissors[i] = VulkanScissor{this->scissors[i]}.GetVkRect2D();
 
 			vkCmdSetScissor(*command_buffer, 0, scissors.size(), scissors.empty() ? nullptr : scissors.data());
 			return true;
@@ -872,12 +869,12 @@ namespace np::gpu::__detail
 
 		operator DrawIndirectCommandPayload() const
 		{
-			return { vertexCount, vertexBeginIndex, instanceCount, instanceBeginIndex };
+			return {vertexCount, vertexBeginIndex, instanceCount, instanceBeginIndex};
 		}
 
 		VkDrawIndirectCommand GetVkDrawIndirectCommand() const
 		{
-			return { vertexCount, instanceCount, vertexBeginIndex, instanceBeginIndex };
+			return {vertexCount, instanceCount, vertexBeginIndex, instanceBeginIndex};
 		}
 	};
 
@@ -920,7 +917,7 @@ namespace np::gpu::__detail
 			{
 				con::vector<VkDrawIndirectCommand> payloads(payloads_.size());
 				for (siz i = 0; i < payloads.size(); i++)
-					payloads[i] = VulkanDrawIndirectCommandPayload{ payloads_[i] }.GetVkDrawIndirectCommand();
+					payloads[i] = VulkanDrawIndirectCommandPayload{payloads_[i]}.GetVkDrawIndirectCommand();
 
 				con::vector<ui8> bytes(payloads.size() * sizeof(VkDrawIndirectCommand));
 				mem::CopyBytes(bytes.data(), payloads.data(), bytes.size());
@@ -950,7 +947,7 @@ namespace np::gpu::__detail
 		ui32 instanceCount = 0;
 		ui32 instanceBeginIndex = 0;
 
-		VulkanDrawIndexedIndirectCommandPayload(const DrawIndexedIndirectCommandPayload& other) :
+		VulkanDrawIndexedIndirectCommandPayload(const DrawIndexedIndirectCommandPayload& other):
 			indexCount(other.indexCount),
 			indexBeginIndex(other.indexBeginIndex),
 			vertexOffset(other.vertexOffset),
@@ -960,12 +957,12 @@ namespace np::gpu::__detail
 
 		operator DrawIndexedIndirectCommandPayload() const
 		{
-			return { indexCount, indexBeginIndex, (siz)vertexOffset, instanceCount, instanceBeginIndex };
+			return {indexCount, indexBeginIndex, (siz)vertexOffset, instanceCount, instanceBeginIndex};
 		}
 
 		VkDrawIndexedIndirectCommand GetVkDrawIndexedIndirectCommand() const
 		{
-			return { indexCount, instanceCount, indexBeginIndex, vertexOffset, instanceBeginIndex };
+			return {indexCount, instanceCount, indexBeginIndex, vertexOffset, instanceBeginIndex};
 		}
 	};
 
@@ -981,7 +978,8 @@ namespace np::gpu::__detail
 			mem::sptr<VulkanBufferResource> buffer = EnsureIsDetailType(this->buffer, DetailType::Vulkan);
 			if (buffer)
 			{
-				vkCmdDrawIndexedIndirect(*command_buffer, *buffer, payloadOffset, drawCount, sizeof(VkDrawIndexedIndirectCommand));
+				vkCmdDrawIndexedIndirect(*command_buffer, *buffer, payloadOffset, drawCount,
+										 sizeof(VkDrawIndexedIndirectCommand));
 				applied = true;
 			}
 			return applied;
@@ -1008,7 +1006,7 @@ namespace np::gpu::__detail
 			{
 				con::vector<VkDrawIndexedIndirectCommand> payloads(payloads_.size());
 				for (siz i = 0; i < payloads.size(); i++)
-					payloads[i] = VulkanDrawIndexedIndirectCommandPayload{ payloads_[i] }.GetVkDrawIndexedIndirectCommand();
+					payloads[i] = VulkanDrawIndexedIndirectCommandPayload{payloads_[i]}.GetVkDrawIndexedIndirectCommand();
 
 				con::vector<ui8> bytes(payloads.size() * sizeof(VkDrawIndexedIndirectCommand));
 				mem::CopyBytes(bytes.data(), payloads.data(), bytes.size());

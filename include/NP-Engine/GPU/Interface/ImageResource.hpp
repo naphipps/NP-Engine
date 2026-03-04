@@ -43,8 +43,8 @@ namespace np::gpu
 		constexpr static ui32 Stencil = BIT(11);
 		constexpr static ui32 Transfer = BIT(12);
 		constexpr static ui32 Shader = BIT(13);
-		
-		ImageResourceUsage(ui32 value) : ResourceUsage(value) {}
+
+		ImageResourceUsage(ui32 value): ResourceUsage(value) {}
 	};
 
 	struct ImageResourceDescription
@@ -55,17 +55,19 @@ namespace np::gpu
 		ResourceOperation writeOperation = ResourceOperation::None;
 		ResourceOperation stencilReadOperation = ResourceOperation::None;
 		ResourceOperation stencilWriteOperation = ResourceOperation::None;
-		ImageResourceUsage initialUsage = ImageResourceUsage::None; //TODO: maybe rename this? This is what the render pass shall expect the image's usage/layout to be
-		ImageResourceUsage finalUsage = ImageResourceUsage::None; //TODO: maybe rename this? this is the usage/layout that the render pass shall move the image to at the end
+		ImageResourceUsage initialUsage = ImageResourceUsage::None; //TODO: maybe rename this? This is what the render pass
+																	//shall expect the image's usage/layout to be
+		ImageResourceUsage finalUsage = ImageResourceUsage::None; //TODO: maybe rename this? this is the usage/layout that the
+																  //render pass shall move the image to at the end
 	};
 
 	struct ImageResource : public Resource
 	{
 		using Point = ::glm::uvec3;
 
-		static mem::sptr<ImageResource> Create(mem::sptr<Device> device, ImageResourceUsage usage,
-			Format format, siz mip_count, siz layer_count, siz sample_count, siz width, siz height, siz depth,
-			const con::vector<DeviceQueueFamily>& queue_families);
+		static mem::sptr<ImageResource> Create(mem::sptr<Device> device, ImageResourceUsage usage, Format format, siz mip_count,
+											   siz layer_count, siz sample_count, siz width, siz height, siz depth,
+											   const con::vector<DeviceQueueFamily>& queue_families);
 
 		virtual ~ImageResource() = default;
 

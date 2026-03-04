@@ -48,7 +48,7 @@ namespace np::evnt
 		constexpr static ui64 Gpu = BIT(2);
 		constexpr static ui64 Network = BIT(3);
 
-		EventCategory(ui64 value) : Enum<ui64>(value) {}
+		EventCategory(ui64 value): Enum<ui64>(value) {}
 	};
 
 	class Event : public mem::Delegate

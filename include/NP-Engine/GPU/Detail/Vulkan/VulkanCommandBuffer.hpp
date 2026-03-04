@@ -18,7 +18,7 @@ namespace np::gpu::__detail
 	class VulkanCommandBufferUsage : public CommandBufferUsage
 	{
 	public:
-		VulkanCommandBufferUsage(ui32 value) : CommandBufferUsage(value) {}
+		VulkanCommandBufferUsage(ui32 value): CommandBufferUsage(value) {}
 
 		VkCommandBufferUsageFlags GetVkCommandBufferUsageFlags() const
 		{
@@ -55,9 +55,9 @@ namespace np::gpu::__detail
 		con::vector<mem::sptr<VulkanCommandBuffer>> _depenedencies;
 
 	public:
-		VulkanCommandBuffer(mem::sptr<srvc::Services> services, VkCommandBuffer command_buffer) :
+		VulkanCommandBuffer(mem::sptr<srvc::Services> services, VkCommandBuffer command_buffer):
 			_services(services),
-			_command_buffer(command_buffer), 
+			_command_buffer(command_buffer),
 			_depenedencies{}
 		{}
 
@@ -85,7 +85,7 @@ namespace np::gpu::__detail
 
 		virtual con::vector<mem::sptr<CommandBuffer>> GetDependencies() const override
 		{
-			return { _depenedencies.begin(), _depenedencies.end() };
+			return {_depenedencies.begin(), _depenedencies.end()};
 		}
 	};
 } // namespace np::gpu::__detail

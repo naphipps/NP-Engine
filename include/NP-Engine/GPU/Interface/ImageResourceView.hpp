@@ -15,9 +15,11 @@
 
 namespace np::gpu
 {
-	struct ImageResourceView : public ResourceView //TODO: I don't know if we want to keep views in our interface? depends if a buffer view becomes useful, which is very well might
+	struct ImageResourceView : public ResourceView //TODO: I don't know if we want to keep views in our interface? depends if a
+												   //buffer view becomes useful, which is very well might
 	{
-		static mem::sptr<ImageResourceView> Create(mem::sptr<Device> device, mem::sptr<ImageResource> image, ImageResourceUsage usage);
+		static mem::sptr<ImageResourceView> Create(mem::sptr<Device> device, mem::sptr<ImageResource> image,
+												   ImageResourceUsage usage);
 
 		virtual ~ImageResourceView() = default;
 

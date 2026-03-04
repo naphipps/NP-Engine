@@ -24,12 +24,12 @@ namespace np::gpu
 		constexpr static ui32 AlphaToCoverage = BIT(1);
 		constexpr static ui32 AlphaToOne = BIT(2);
 
-		MultisampleUsage(ui32 value, ui32 sample_count) : Enum<ui32>(value)
+		MultisampleUsage(ui32 value, ui32 sample_count): Enum<ui32>(value)
 		{
 			SetSampleCount(sample_count);
 		}
 
-		MultisampleUsage(ui32 value) : Enum<ui32>(value) {}
+		MultisampleUsage(ui32 value): Enum<ui32>(value) {}
 
 		virtual ui32 GetSampleCount() const
 		{

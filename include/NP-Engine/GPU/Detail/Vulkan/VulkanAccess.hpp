@@ -13,10 +13,10 @@
 
 namespace np::gpu::__detail
 {
-    class VulkanAccess : public Access
-    {
-    public:
-		VulkanAccess(ui32 value) : Access(value) {}
+	class VulkanAccess : public Access
+	{
+	public:
+		VulkanAccess(ui32 value): Access(value) {}
 
 		VkAccessFlags GetVkAccessFlags() const
 		{
@@ -83,7 +83,7 @@ namespace np::gpu::__detail
 
 			return access;
 		}
-    };
-}
+	};
+} //namespace np::gpu::__detail
 
 #endif /* NP_ENGINE_GPU_VULKAN_ACCESS_HPP */

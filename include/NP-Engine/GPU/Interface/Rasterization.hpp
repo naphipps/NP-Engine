@@ -26,9 +26,10 @@ namespace np::gpu
 
 		constexpr static ui32 FrontFaceClockwise = BIT(6); //default is counter clockwise
 
-		constexpr static ui32 DepthClamp = BIT(7); //TODO: this may be resolved via the depthBiasClamp? probably not though (pg 258)
+		constexpr static ui32 DepthClamp =
+			BIT(7); //TODO: this may be resolved via the depthBiasClamp? probably not though (pg 258)
 
-		RasterizationUsage(ui32 value) : Enum<ui32>(value) {}
+		RasterizationUsage(ui32 value): Enum<ui32>(value) {}
 	};
 
 	struct DepthBias

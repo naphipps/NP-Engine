@@ -68,7 +68,8 @@ namespace np::gpu
 
 	class CommandBuffer;
 
-	class Command : public DetailObject //ONLY inherit this virtually for our commands <https://en.cppreference.com/w/cpp/language/derived_class.html>
+	class Command : public DetailObject //ONLY inherit this virtually for our commands
+										//<https://en.cppreference.com/w/cpp/language/derived_class.html>
 	{
 	protected:
 		friend class CommandBuffer;
@@ -94,7 +95,7 @@ namespace np::gpu
 	public:
 		constexpr static ui32 SingleUse = BIT(0);
 
-		CommandBufferUsage(ui32 value) : Enum<ui32>(value) {}
+		CommandBufferUsage(ui32 value): Enum<ui32>(value) {}
 	};
 
 	struct CommandBuffer : public DetailObject

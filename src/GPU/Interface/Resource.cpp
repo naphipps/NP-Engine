@@ -7,7 +7,7 @@
 #include "NP-Engine/GPU/Interface/Resource.hpp"
 
 #if NP_ENGINE_PLATFORM_IS_LINUX || NP_ENGINE_PLATFORM_IS_WINDOWS
-#include "NP-Engine/GPU/Detail/OpenGL/OpenGLGraphics.hpp"
+	#include "NP-Engine/GPU/Detail/OpenGL/OpenGLGraphics.hpp"
 #endif
 
 #include "NP-Engine/GPU/Detail/Vulkan/VulkanResource.hpp"
@@ -21,7 +21,8 @@ namespace np::gpu
 		switch (device->GetDetailType())
 		{
 		case DetailType::Vulkan:
-			layout = mem::create_sptr<__detail::VulkanResourceLayout>(device->GetServices()->GetAllocator(), device, descriptions);
+			layout =
+				mem::create_sptr<__detail::VulkanResourceLayout>(device->GetServices()->GetAllocator(), device, descriptions);
 			break;
 
 		default:
@@ -31,14 +32,16 @@ namespace np::gpu
 		return layout;
 	}
 
-	mem::sptr<ResourceGroupPool> ResourceGroupPool::Create(mem::sptr<Device> device, siz size, con::vector<ResourceDescription> descriptions)
+	mem::sptr<ResourceGroupPool> ResourceGroupPool::Create(mem::sptr<Device> device, siz size,
+														   con::vector<ResourceDescription> descriptions)
 	{
 		mem::sptr<ResourceGroupPool> pool = nullptr;
 
 		switch (device->GetDetailType())
 		{
 		case DetailType::Vulkan:
-			pool = mem::create_sptr<__detail::VulkanResourceGroupPool>(device->GetServices()->GetAllocator(), device, size, descriptions);
+			pool = mem::create_sptr<__detail::VulkanResourceGroupPool>(device->GetServices()->GetAllocator(), device, size,
+																	   descriptions);
 			break;
 
 		default:

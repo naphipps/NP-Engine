@@ -36,7 +36,8 @@ namespace np::gpu::__detail
 			return info;
 		}
 
-		static VkImageView CreateVkImageView(mem::sptr<VulkanDevice> device, mem::sptr<VulkanImageResource> image, VulkanImageResourceUsage usage)
+		static VkImageView CreateVkImageView(mem::sptr<VulkanDevice> device, mem::sptr<VulkanImageResource> image,
+											 VulkanImageResourceUsage usage)
 		{
 			const VulkanFormat format{image->GetFormat()};
 
@@ -47,7 +48,7 @@ namespace np::gpu::__detail
 			info.subresourceRange.levelCount = image->GetMipCount();
 			info.subresourceRange.layerCount = image->GetLayerCount();
 			info.subresourceRange.aspectMask = usage.GetVkAspectFlags(); //TODO: investigate -- what is this?
-			
+
 			VkImageView view = nullptr;
 			VkResult result = vkCreateImageView(*device->GetLogicalDevice(), &info, nullptr, &view);
 			return result == VK_SUCCESS ? view : nullptr;
@@ -57,7 +58,7 @@ namespace np::gpu::__detail
 		VulkanImageResourceView(mem::sptr<Device> device, mem::sptr<ImageResource> image, ImageResourceUsage usage):
 			_device(device),
 			_image(image),
-			_view(CreateVkImageView(_device, _image, VulkanImageResourceUsage{ usage }))
+			_view(CreateVkImageView(_device, _image, VulkanImageResourceUsage{usage}))
 		{}
 
 		~VulkanImageResourceView()

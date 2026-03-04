@@ -11,26 +11,26 @@
 
 namespace np::gpu
 {
-    class Access : public Enum<ui32>
-    {
-    public:
-        constexpr static ui32 Read = BIT(0);
-        constexpr static ui32 Write = BIT(1);
+	class Access : public Enum<ui32>
+	{
+	public:
+		constexpr static ui32 Read = BIT(0);
+		constexpr static ui32 Write = BIT(1);
 
-        constexpr static ui32 Indirect = BIT(2);
-        constexpr static ui32 Index = BIT(3);
-        constexpr static ui32 Vertex = BIT(4);
-        constexpr static ui32 Uniform = BIT(5);
-        constexpr static ui32 Input = BIT(6);
-        constexpr static ui32 Shader = BIT(7);
-        constexpr static ui32 Image = BIT(8);
-        constexpr static ui32 Depth = BIT(9);
-        constexpr static ui32 Stencil = BIT(10);
-        constexpr static ui32 Transfer = BIT(11);
-        constexpr static ui32 Host = BIT(12);
+		constexpr static ui32 Indirect = BIT(2);
+		constexpr static ui32 Index = BIT(3);
+		constexpr static ui32 Vertex = BIT(4);
+		constexpr static ui32 Uniform = BIT(5);
+		constexpr static ui32 Input = BIT(6);
+		constexpr static ui32 Shader = BIT(7);
+		constexpr static ui32 Image = BIT(8);
+		constexpr static ui32 Depth = BIT(9);
+		constexpr static ui32 Stencil = BIT(10);
+		constexpr static ui32 Transfer = BIT(11);
+		constexpr static ui32 Host = BIT(12);
 
-        Access(ui32 value) : Enum<ui32>(value) {}
-    };
-}
+		Access(ui32 value): Enum<ui32>(value) {}
+	};
+} //namespace np::gpu
 
 #endif /* NP_ENGINE_GPU_INTERFACE_ACCESS_HPP */

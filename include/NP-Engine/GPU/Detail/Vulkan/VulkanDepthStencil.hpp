@@ -20,11 +20,12 @@ namespace np::gpu::__detail
 	class VulkanDepthStencilUsage : public DepthStencilUsage
 	{
 	public:
-		VulkanDepthStencilUsage(ui32 value) : DepthStencilUsage(value) {}
+		VulkanDepthStencilUsage(ui32 value): DepthStencilUsage(value) {}
 
 		VkBool32 IsVkDepthTestEnabled() const
 		{
-			return Contains(DepthTest) ? VK_TRUE : VK_FALSE; //TODO: we should do this more often than using VK_TRUE\VK_FALSE everywhere
+			return Contains(DepthTest) ? VK_TRUE
+									   : VK_FALSE; //TODO: we should do this more often than using VK_TRUE\VK_FALSE everywhere
 		}
 
 		VkBool32 IsVkDepthWriteEnabled() const
@@ -46,7 +47,7 @@ namespace np::gpu::__detail
 	class VulkanStencilOperation : public StencilOperation
 	{
 	public:
-		VulkanStencilOperation(ui32 value) : StencilOperation(value) {}
+		VulkanStencilOperation(ui32 value): StencilOperation(value) {}
 
 		VkStencilOp GetVkStencilOp() const
 		{
@@ -97,7 +98,7 @@ namespace np::gpu::__detail
 
 		VulkanStencilOperationState() = default;
 
-		VulkanStencilOperationState(const StencilOperationState& other) :
+		VulkanStencilOperationState(const StencilOperationState& other):
 			stencilFailOperation(other.stencilFailOperation),
 			stencilPassOperation(other.stencilPassOperation),
 			depthFailOperation(other.depthFailOperation),
@@ -109,7 +110,8 @@ namespace np::gpu::__detail
 
 		operator StencilOperationState() const
 		{
-			return { stencilFailOperation, stencilPassOperation, depthFailOperation, compareOperation, compareMask, writeMask, referenceValue };
+			return {stencilFailOperation, stencilPassOperation, depthFailOperation, compareOperation, compareMask, writeMask,
+					referenceValue};
 		}
 
 		VkStencilOpState GetVkStencilOpState() const
@@ -130,7 +132,7 @@ namespace np::gpu::__detail
 	{
 		VulkanDepthBounds() = default;
 
-		VulkanDepthBounds(const DepthBounds& other) 
+		VulkanDepthBounds(const DepthBounds& other)
 		{
 			min = other.min;
 			max = other.max;
@@ -138,7 +140,7 @@ namespace np::gpu::__detail
 
 		operator DepthBounds() const
 		{
-			return { min, max };
+			return {min, max};
 		}
 	};
 
@@ -152,7 +154,7 @@ namespace np::gpu::__detail
 
 		VulkanDepthStencil() = default;
 
-		VulkanDepthStencil(const DepthStencil& other) :
+		VulkanDepthStencil(const DepthStencil& other):
 			usage(other.usage),
 			depthCompareOperation(other.depthCompareOperation),
 			frontState(other.frontState),
@@ -162,14 +164,14 @@ namespace np::gpu::__detail
 
 		operator DepthStencil() const
 		{
-			return { usage, depthCompareOperation, frontState, backState, depthBounds };
+			return {usage, depthCompareOperation, frontState, backState, depthBounds};
 		}
 	};
 
 	class VulkanStencilFace : public StencilFace
 	{
 	public:
-		VulkanStencilFace(ui32 value) : StencilFace(value) {}
+		VulkanStencilFace(ui32 value): StencilFace(value) {}
 
 		VkStencilFaceFlags GetVkStencilFaceFlags() const
 		{
@@ -185,6 +187,6 @@ namespace np::gpu::__detail
 			return flags;
 		}
 	};
-} // namespace np::gpu
+} //namespace np::gpu::__detail
 
 #endif /* NP_ENGINE_GPU_VULKAN_DEPTH_STENCIL_HPP */

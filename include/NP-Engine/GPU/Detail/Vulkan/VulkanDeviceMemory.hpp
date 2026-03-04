@@ -22,18 +22,23 @@ namespace np::gpu::__detail
 		VkDeviceMemory _memory;
 		void* _mapping;
 
-		static VkMemoryAllocateInfo CreateVkMemoryAllocateInfo(mem::sptr<VulkanLogicalDevice> device, VkMemoryRequirements requirements, VkMemoryPropertyFlags flags)
+		static VkMemoryAllocateInfo CreateVkMemoryAllocateInfo(mem::sptr<VulkanLogicalDevice> device,
+															   VkMemoryRequirements requirements, VkMemoryPropertyFlags flags)
 		{
-			::std::optional<ui32> memory_type_index = device->GetPhysicalDevice().GetMemoryTypeIndex(requirements.memoryTypeBits, flags);
+			::std::optional<ui32> memory_type_index =
+				device->GetPhysicalDevice().GetMemoryTypeIndex(requirements.memoryTypeBits, flags);
 
 			VkMemoryAllocateInfo info{};
 			info.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
 			info.allocationSize = requirements.size;
-			info.memoryTypeIndex = memory_type_index.has_value() ? memory_type_index.value() : UI32_MAX; //TODO: what do I do if we don't have a value here? pg83 of guide does UI32_MAX
+			info.memoryTypeIndex = memory_type_index.has_value()
+				? memory_type_index.value()
+				: UI32_MAX; //TODO: what do I do if we don't have a value here? pg83 of guide does UI32_MAX
 			return info;
 		}
 
-		static VkDeviceMemory CreateVkDeviceMemory(mem::sptr<VulkanLogicalDevice> device, VkMemoryRequirements requirements, VkMemoryPropertyFlags flags)
+		static VkDeviceMemory CreateVkDeviceMemory(mem::sptr<VulkanLogicalDevice> device, VkMemoryRequirements requirements,
+												   VkMemoryPropertyFlags flags)
 		{
 			VkMemoryAllocateInfo info = CreateVkMemoryAllocateInfo(device, requirements, flags);
 			VkDeviceMemory memory = nullptr;
@@ -42,8 +47,8 @@ namespace np::gpu::__detail
 		}
 
 	public:
-
-		VulkanDeviceMemory(mem::sptr<VulkanLogicalDevice> device, VkMemoryRequirements requirements, VkMemoryPropertyFlags flags) :
+		VulkanDeviceMemory(mem::sptr<VulkanLogicalDevice> device, VkMemoryRequirements requirements,
+						   VkMemoryPropertyFlags flags):
 			_device(device),
 			_memory(CreateVkDeviceMemory(device, requirements, flags)),
 			_mapping(nullptr)
@@ -136,6 +141,6 @@ namespace np::gpu::__detail
 			return result == VK_SUCCESS;
 		}
 	};
-}
+} //namespace np::gpu::__detail
 
 #endif /* NP_ENGINE_GPU_VULKAN_DEVICE_MEMORY_HPP */

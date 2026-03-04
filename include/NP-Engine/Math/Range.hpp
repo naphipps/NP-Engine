@@ -14,8 +14,7 @@ namespace np::mat
 	template <typename T>
 	struct Range
 	{
-		union
-		{
+		union {
 			T min = 0;
 			T from;
 			T a;
@@ -25,8 +24,7 @@ namespace np::mat
 			T start;
 		};
 
-		union
-		{
+		union {
 			T max = 0;
 			T to;
 			T b;
@@ -36,8 +34,7 @@ namespace np::mat
 			T last;
 		};
 
-		union
-		{
+		union {
 			bl minInclusive = true;
 			bl fromInclusive;
 			bl aInclusive;
@@ -47,8 +44,7 @@ namespace np::mat
 			bl startInclusive;
 		};
 
-		union
-		{
+		union {
 			bl maxInclusive = true;
 			bl toInclusive;
 			bl bInclusive;
@@ -58,16 +54,16 @@ namespace np::mat
 			bl lastInclusive;
 		};
 
-		Range(T min_, T max_, bl min_inclusive_, bl max_inclusive_) :
+		Range(T min_, T max_, bl min_inclusive_, bl max_inclusive_):
 			min(min_),
 			max(max_),
 			minInclusive(min_inclusive_),
 			maxInclusive(max_inclusive_)
 		{}
 
-		Range(T min_, T max_, bl inclusive_) : Range(min_, max_, inclusive_, inclusive_) {}
+		Range(T min_, T max_, bl inclusive_): Range(min_, max_, inclusive_, inclusive_) {}
 
-		Range(T min_, T max_) : Range(min_, max_, true) {}
+		Range(T min_, T max_): Range(min_, max_, true) {}
 
 		Range() = default;
 
@@ -89,6 +85,6 @@ namespace np::mat
 	using FltRange = Range<flt>;
 	using DblRange = Range<dbl>;
 	using LdblRange = Range<ldbl>;
-} // namespace np::gpu
+} //namespace np::mat
 
 #endif /* NP_ENGINE_MATH_RANGE_HPP */

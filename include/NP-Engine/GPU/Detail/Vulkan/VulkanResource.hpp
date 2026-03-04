@@ -22,7 +22,7 @@ namespace np::gpu::__detail
 	class VulkanResourceType : public ResourceType
 	{
 	public:
-		VulkanResourceType(ui32 value) :ResourceType(value) {}
+		VulkanResourceType(ui32 value): ResourceType(value) {}
 
 		//TODO: get Vk things
 	};
@@ -30,7 +30,7 @@ namespace np::gpu::__detail
 	class VulkanResourceUsage : public ResourceUsage
 	{
 	public:
-		VulkanResourceUsage(ui32 value) : ResourceUsage(value) {}
+		VulkanResourceUsage(ui32 value): ResourceUsage(value) {}
 
 		//TODO: get Vk things
 	};
@@ -38,7 +38,7 @@ namespace np::gpu::__detail
 	class VulkanResourceOperation : public ResourceOperation
 	{
 	public:
-		VulkanResourceOperation(ui32 value) :ResourceOperation(value) {}
+		VulkanResourceOperation(ui32 value): ResourceOperation(value) {}
 
 		VkAttachmentLoadOp GetVkAttachmentLoadOp() const
 		{
@@ -67,7 +67,6 @@ namespace np::gpu::__detail
 		}
 	};
 
-
 	struct VulkanResourceDescription //TODO: remove inheritance here to use Vulkan objects as fields
 	{
 		VulkanResourceType type = VulkanResourceType::None;
@@ -75,7 +74,7 @@ namespace np::gpu::__detail
 		ui32 count = 0;
 		VulkanStage stage = VulkanStage::None;
 
-		VulkanResourceDescription(const ResourceDescription& other = {}) :
+		VulkanResourceDescription(const ResourceDescription& other = {}):
 			type(other.type),
 			usage(other.usage),
 			count(other.count),
@@ -91,29 +90,28 @@ namespace np::gpu::__detail
 		{
 			//		VkDescriptorType type{};
 
-//		if (_value == Sampler) //TODO: what comparison should we use? Contains? Any? straight equals?
-//			type = VK_DESCRIPTOR_TYPE_SAMPLER;
-//		/*if (_value == (Sampler | Image))
-//			type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;*/
+			//		if (_value == Sampler) //TODO: what comparison should we use? Contains? Any? straight equals?
+			//			type = VK_DESCRIPTOR_TYPE_SAMPLER;
+			//		/*if (_value == (Sampler | Image))
+			//			type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;*/
 
+			//		/*
+			//			TODO: figure out VkDescriptorType operator here -- this is an actual enum and NOT flags
+			//				- [x] VK_DESCRIPTOR_TYPE_SAMPLER = 0,
+			//				- [ ] VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER = 1,
+			//				- [ ] VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE = 2,
+			//				- [ ] VK_DESCRIPTOR_TYPE_STORAGE_IMAGE = 3,
+			//				- [x] VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER = 4,
+			//				- [x] VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER = 5,
+			//				- [x] VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER = 6,
+			//				- [x] VK_DESCRIPTOR_TYPE_STORAGE_BUFFER = 7,
+			//				- [x] VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC = 8,
+			//				- [x] VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC = 9,
+			//				- [ ] VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT = 10,
+			//				- [ ] VK_DESCRIPTOR_TYPE_INLINE_UNIFORM_BLOCK = 1000138000,
+			//		*/
 
-//		/*
-//			TODO: figure out VkDescriptorType operator here -- this is an actual enum and NOT flags
-//				- [x] VK_DESCRIPTOR_TYPE_SAMPLER = 0,
-//				- [ ] VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER = 1,
-//				- [ ] VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE = 2,
-//				- [ ] VK_DESCRIPTOR_TYPE_STORAGE_IMAGE = 3,
-//				- [x] VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER = 4,
-//				- [x] VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER = 5,
-//				- [x] VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER = 6,
-//				- [x] VK_DESCRIPTOR_TYPE_STORAGE_BUFFER = 7,
-//				- [x] VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC = 8,
-//				- [x] VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC = 9,
-//				- [ ] VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT = 10,
-//				- [ ] VK_DESCRIPTOR_TYPE_INLINE_UNIFORM_BLOCK = 1000138000,
-//		*/
-
-//		return type;
+			//		return type;
 			VkDescriptorType type = VK_DESCRIPTOR_TYPE_MAX_ENUM;
 
 			switch (this->type)
@@ -138,7 +136,6 @@ namespace np::gpu::__detail
 			case ResourceType::Image:
 			{
 				ImageResourceUsage usage = (ui32)this->usage;
-
 			}
 			break;
 			case ResourceType::Sampler:
@@ -177,7 +174,8 @@ namespace np::gpu::__detail
 			return info;
 		}
 
-		static VkDescriptorSetLayout CreateVkDescriptorSetLayout(mem::sptr<VulkanDevice> device, const con::vector<VulkanResourceDescription>& descriptions)
+		static VkDescriptorSetLayout CreateVkDescriptorSetLayout(mem::sptr<VulkanDevice> device,
+																 const con::vector<VulkanResourceDescription>& descriptions)
 		{
 			con::vector<VkDescriptorSetLayoutBinding> bindings(descriptions.size());
 			for (siz i = 0; i < bindings.size(); i++)
@@ -197,8 +195,9 @@ namespace np::gpu::__detail
 		}
 
 	public:
-
-		VulkanResourceLayout(mem::sptr<Device> device, con::vector<ResourceDescription> descriptions) ://TODO: make sure all the things are checking our physical device's limits
+		VulkanResourceLayout(mem::sptr<Device> device,
+							 con::vector<ResourceDescription>
+								 descriptions): //TODO: make sure all the things are checking our physical device's limits
 			_device(device),
 			_descriptions(descriptions.begin(), descriptions.end()),
 			_layout(CreateVkDescriptorSetLayout(_device, _descriptions))
@@ -235,11 +234,9 @@ namespace np::gpu::__detail
 
 		virtual con::vector<ResourceDescription> GetResourceDescriptions() const override
 		{
-			return { _descriptions.begin(), _descriptions.end() };
+			return {_descriptions.begin(), _descriptions.end()};
 		}
 	};
-
-
 
 	class VulkanResourceGroup : public ResourceGroup
 	{
@@ -302,19 +299,19 @@ namespace np::gpu::__detail
 			VkDescriptorPool _pool;
 
 		public:
-			VulkanResourceGroupDestroyer(mem::sptr<VulkanDevice> device, VkDescriptorPool pool, mem::Allocator& allocator) :
+			VulkanResourceGroupDestroyer(mem::sptr<VulkanDevice> device, VkDescriptorPool pool, mem::Allocator& allocator):
 				base(allocator),
 				_device(device),
 				_pool(pool)
 			{}
 
-			VulkanResourceGroupDestroyer(const VulkanResourceGroupDestroyer& other) :
+			VulkanResourceGroupDestroyer(const VulkanResourceGroupDestroyer& other):
 				base(other._allocator),
 				_device(other._device),
 				_pool(other._pool)
 			{}
 
-			VulkanResourceGroupDestroyer(VulkanResourceGroupDestroyer&& other) noexcept :
+			VulkanResourceGroupDestroyer(VulkanResourceGroupDestroyer&& other) noexcept:
 				base(other._allocator),
 				_device(::std::move(other._device)),
 				_pool(::std::move(other._pool))
@@ -326,7 +323,9 @@ namespace np::gpu::__detail
 			void destruct_object(VulkanResourceGroup* ptr) override
 			{
 				VkDescriptorSet set = *ptr;
-				vkFreeDescriptorSets(*_device->GetLogicalDevice(), _pool, 1, &set); //TODO: do we do anything with this result? Other than an assert, I can't imagine what we could do with it
+				vkFreeDescriptorSets(*_device->GetLogicalDevice(), _pool, 1,
+									 &set); //TODO: do we do anything with this result? Other than an assert, I can't imagine
+											//what we could do with it
 				base::destruct_object(ptr);
 			}
 		};
@@ -345,7 +344,8 @@ namespace np::gpu::__detail
 			return info;
 		}
 
-		static VkDescriptorSet CreateVkDescriptorSet(mem::sptr<VulkanResourceLayout> resource_layout, VkDescriptorSetAllocateInfo info)
+		static VkDescriptorSet CreateVkDescriptorSet(mem::sptr<VulkanResourceLayout> resource_layout,
+													 VkDescriptorSetAllocateInfo info)
 		{
 			mem::sptr<VulkanDevice> device = resource_layout->GetDevice();
 			VkDescriptorSetLayout layout = *resource_layout;
@@ -378,7 +378,8 @@ namespace np::gpu::__detail
 			return info;
 		}
 
-		static VkDescriptorPool CreateVkDescriptorPool(mem::sptr<VulkanDevice> device, siz size, const con::vector<VulkanResourceDescription>& descriptions)
+		static VkDescriptorPool CreateVkDescriptorPool(mem::sptr<VulkanDevice> device, siz size,
+													   const con::vector<VulkanResourceDescription>& descriptions)
 		{
 			con::vector<VkDescriptorPoolSize> pool_sizes{};
 			for (const VulkanResourceDescription& description : descriptions)
@@ -394,7 +395,7 @@ namespace np::gpu::__detail
 				}
 
 				if (!found)
-					pool_sizes.emplace_back(VkDescriptorPoolSize{ type, 1 });
+					pool_sizes.emplace_back(VkDescriptorPoolSize{type, 1});
 			}
 
 			VkDescriptorPoolCreateInfo info = CreateVkInfo(size);
@@ -470,15 +471,18 @@ namespace np::gpu::__detail
 
 					if (result == VK_SUCCESS)
 					{
-						VulkanResourceGroup* object = mem::Construct<VulkanResourceGroup>(contiguous_block->object_block, vulkan_layout, set);
-						resource = mem::Construct<resource_type>(contiguous_block->resource_block, destroyer_type{ _device, _pool, allocator }, object);
+						VulkanResourceGroup* object =
+							mem::Construct<VulkanResourceGroup>(contiguous_block->object_block, vulkan_layout, set);
+						resource = mem::Construct<resource_type>(contiguous_block->resource_block,
+																 destroyer_type{_device, _pool, allocator}, object);
 					}
 				}
 			}
-			return { resource };
+			return {resource};
 		}
 
-		virtual con::vector<mem::sptr<ResourceGroup>> CreateResourceGroups(con::vector<mem::sptr<ResourceLayout>> layouts) override
+		virtual con::vector<mem::sptr<ResourceGroup>> CreateResourceGroups(
+			con::vector<mem::sptr<ResourceLayout>> layouts) override
 		{
 			con::vector<mem::sptr<ResourceGroup>> groups{};
 			for (mem::sptr<ResourceLayout> layout : layouts)
@@ -486,6 +490,6 @@ namespace np::gpu::__detail
 			return groups;
 		}
 	};
-} // namespace np::gpu
+} //namespace np::gpu::__detail
 
 #endif /* NP_ENGINE_GPU_VULKAN_RESOURCE_HPP */

@@ -33,7 +33,7 @@ namespace np::gpu::__detail
 			VkSemaphoreCreateInfo info = CreateVkInfo();
 			VkSemaphore semaphore = nullptr;
 			VkResult result = vkCreateSemaphore(*device, &info, nullptr, &semaphore);
-			return result == VK_SUCCESS  ? semaphore : nullptr;
+			return result == VK_SUCCESS ? semaphore : nullptr;
 		}
 
 	public:

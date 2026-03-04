@@ -23,7 +23,7 @@ namespace np::gpu::__detail
 	class VulkanCommandBufferPoolUsage : public CommandBufferPoolUsage
 	{
 	public:
-		VulkanCommandBufferPoolUsage(ui32 value) : CommandBufferPoolUsage(value) {}
+		VulkanCommandBufferPoolUsage(ui32 value): CommandBufferPoolUsage(value) {}
 
 		VkCommandPoolCreateFlags GetVkCommandPoolCreateFlags() const
 		{
@@ -49,19 +49,19 @@ namespace np::gpu::__detail
 			VkCommandPool _pool;
 
 		public:
-			VulkanCommandBufferDestroyer(mem::sptr<VulkanLogicalDevice> device, VkCommandPool pool, mem::Allocator& allocator) :
+			VulkanCommandBufferDestroyer(mem::sptr<VulkanLogicalDevice> device, VkCommandPool pool, mem::Allocator& allocator):
 				base(allocator),
 				_device(device),
 				_pool(pool)
 			{}
 
-			VulkanCommandBufferDestroyer(const VulkanCommandBufferDestroyer& other) :
+			VulkanCommandBufferDestroyer(const VulkanCommandBufferDestroyer& other):
 				base(other._allocator),
 				_device(other._device),
 				_pool(other._pool)
 			{}
 
-			VulkanCommandBufferDestroyer(VulkanCommandBufferDestroyer&& other) noexcept :
+			VulkanCommandBufferDestroyer(VulkanCommandBufferDestroyer&& other) noexcept:
 				base(other._allocator),
 				_device(::std::move(other._device)),
 				_pool(::std::move(other._pool))
@@ -108,7 +108,8 @@ namespace np::gpu::__detail
 			return info;
 		}
 
-		static VkCommandPool CreateVkCommandPool(mem::sptr<VulkanLogicalDevice> device, VulkanCommandBufferPoolUsage usage, DeviceQueueFamily family)
+		static VkCommandPool CreateVkCommandPool(mem::sptr<VulkanLogicalDevice> device, VulkanCommandBufferPoolUsage usage,
+												 DeviceQueueFamily family)
 		{
 			VkCommandPoolCreateInfo info = CreateVkInfo(usage, family);
 			VkCommandPool pool = nullptr;
@@ -117,9 +118,9 @@ namespace np::gpu::__detail
 		}
 
 	public:
-		VulkanCommandBufferPool(mem::sptr<VulkanLogicalDevice> device, CommandBufferPoolUsage usage, DeviceQueueFamily family) :
+		VulkanCommandBufferPool(mem::sptr<VulkanLogicalDevice> device, CommandBufferPoolUsage usage, DeviceQueueFamily family):
 			_device(device),
-			_pool(CreateVkCommandPool(_device, VulkanCommandBufferPoolUsage{ usage }, family))
+			_pool(CreateVkCommandPool(_device, VulkanCommandBufferPoolUsage{usage}, family))
 		{}
 
 		~VulkanCommandBufferPool()
@@ -164,20 +165,23 @@ namespace np::gpu::__detail
 
 				if (result == VK_SUCCESS)
 				{
-					VulkanCommandBuffer* object = mem::Construct<VulkanCommandBuffer>(contiguous_block->object_block, GetServices(), command_buffer);
-					resource = mem::Construct<resource_type>(contiguous_block->resource_block, destroyer_type{ _device, info.commandPool, allocator }, object);
+					VulkanCommandBuffer* object =
+						mem::Construct<VulkanCommandBuffer>(contiguous_block->object_block, GetServices(), command_buffer);
+					resource = mem::Construct<resource_type>(contiguous_block->resource_block,
+															 destroyer_type{_device, info.commandPool, allocator}, object);
 				}
 			}
-			return { resource };
+			return {resource};
 		}
 
 		virtual bl Begin(mem::sptr<CommandBuffer> command_buffer, CommandBufferUsage usage) override
 		{
 			bl begin = false;
-			mem::sptr<VulkanCommandBuffer> vulkan_command_buffer = DetailObject::EnsureIsDetailType(command_buffer, DetailType::Vulkan);
+			mem::sptr<VulkanCommandBuffer> vulkan_command_buffer =
+				DetailObject::EnsureIsDetailType(command_buffer, DetailType::Vulkan);
 			if (vulkan_command_buffer)
 			{
-				VkCommandBufferBeginInfo info = GetVkCommandBufferBeginInfo(VulkanCommandBufferUsage{ usage });
+				VkCommandBufferBeginInfo info = GetVkCommandBufferBeginInfo(VulkanCommandBufferUsage{usage});
 				VkResult result = vkBeginCommandBuffer(*vulkan_command_buffer, &info);
 				begin = result == VK_SUCCESS;
 			}
@@ -188,7 +192,8 @@ namespace np::gpu::__detail
 		virtual bl End(mem::sptr<CommandBuffer> command_buffer, CommandBufferUsage usage) override
 		{
 			bl end = false;
-			mem::sptr<VulkanCommandBuffer> vulkan_command_buffer = DetailObject::EnsureIsDetailType(command_buffer, DetailType::Vulkan);
+			mem::sptr<VulkanCommandBuffer> vulkan_command_buffer =
+				DetailObject::EnsureIsDetailType(command_buffer, DetailType::Vulkan);
 			if (vulkan_command_buffer)
 			{
 				VkResult result = vkEndCommandBuffer(*vulkan_command_buffer);
@@ -200,10 +205,12 @@ namespace np::gpu::__detail
 		virtual bl Reset(mem::sptr<CommandBuffer> command_buffer, CommandBufferUsage usage) override
 		{
 			bl reset = false;
-			mem::sptr<VulkanCommandBuffer> vulkan_command_buffer = DetailObject::EnsureIsDetailType(command_buffer, DetailType::Vulkan);
+			mem::sptr<VulkanCommandBuffer> vulkan_command_buffer =
+				DetailObject::EnsureIsDetailType(command_buffer, DetailType::Vulkan);
 			if (vulkan_command_buffer)
 			{
-				VkResult result = vkResetCommandBuffer(*vulkan_command_buffer, VulkanCommandBufferUsage{ usage }.GetVkCommandBufferResetFlags());
+				VkResult result = vkResetCommandBuffer(*vulkan_command_buffer,
+													   VulkanCommandBufferUsage{usage}.GetVkCommandBufferResetFlags());
 				reset = result == VK_SUCCESS;
 			}
 			return reset;

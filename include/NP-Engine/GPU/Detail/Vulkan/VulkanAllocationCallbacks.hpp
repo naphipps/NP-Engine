@@ -45,12 +45,14 @@ namespace np::gpu::__detail
 			allocator.Deallocate(ptr);
 		}
 
-		static void AllocateNotification(void* user_data, siz size, VkInternalAllocationType type, VkSystemAllocationScope scope)
+		static void AllocateNotification(void* user_data, siz size, VkInternalAllocationType type,
+										 VkSystemAllocationScope scope)
 		{
 			//TODO: add some logging?
 		}
 
-		static void DeallocateNotification(void* user_data, siz size, VkInternalAllocationType type, VkSystemAllocationScope scope)
+		static void DeallocateNotification(void* user_data, siz size, VkInternalAllocationType type,
+										   VkSystemAllocationScope scope)
 		{
 			//TODO: add some logging?
 		}
@@ -61,7 +63,9 @@ namespace np::gpu::__detail
 		}
 
 	public:
-		VulkanAllocationCallbacks(mem::sptr<srvc::Services> services) : _services(services), _callbacks(CreateVkAllocationCallbacks())
+		VulkanAllocationCallbacks(mem::sptr<srvc::Services> services):
+			_services(services),
+			_callbacks(CreateVkAllocationCallbacks())
 		{}
 
 		//TODO: rule of 5 here? pretty sure, might as well
@@ -76,6 +80,6 @@ namespace np::gpu::__detail
 			return _services;
 		}
 	};
-}
+} //namespace np::gpu::__detail
 
 #endif /* NP_ENGINE_GPU_VULKAN_ALLOCATION_CALLBACKS_HPP */

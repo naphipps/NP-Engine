@@ -24,7 +24,7 @@ namespace np::gpu::__detail
 	public:
 		//constexpr static ui32 Src1 = BIT(0); //TODO: investigate
 
-		VulkanBlendScalar(ui32 value) : BlendScalar(value) {}
+		VulkanBlendScalar(ui32 value): BlendScalar(value) {}
 
 		VkBlendFactor GetVkBlendFactor() const
 		{
@@ -90,7 +90,7 @@ namespace np::gpu::__detail
 	class VulkanBlendOperation : public BlendOperation
 	{
 	public:
-		VulkanBlendOperation(ui32 value) : BlendOperation(value) {}
+		VulkanBlendOperation(ui32 value): BlendOperation(value) {}
 
 		VkBlendOp GetVkBlendOp() const
 		{
@@ -127,15 +127,11 @@ namespace np::gpu::__detail
 
 		VulkanBlending() = default;
 
-		VulkanBlending(const Blending& other) :
-			srcScalar(other.srcScalar),
-			dstScalar(other.dstScalar),
-			op(other.op)
-		{}
+		VulkanBlending(const Blending& other): srcScalar(other.srcScalar), dstScalar(other.dstScalar), op(other.op) {}
 
 		operator Blending() const
 		{
-			return { srcScalar, dstScalar, op };
+			return {srcScalar, dstScalar, op};
 		}
 	};
 
@@ -148,11 +144,12 @@ namespace np::gpu::__detail
 
 		bl IsEnabled() const
 		{
-			return color.srcScalar != VulkanBlendScalar::None || color.dstScalar != VulkanBlendScalar::None || color.op != VulkanBlendOperation::None
-				|| alpha.srcScalar != VulkanBlendScalar::None || alpha.dstScalar != VulkanBlendScalar::None || alpha.op != VulkanBlendOperation::None;
+			return color.srcScalar != VulkanBlendScalar::None || color.dstScalar != VulkanBlendScalar::None ||
+				color.op != VulkanBlendOperation::None || alpha.srcScalar != VulkanBlendScalar::None ||
+				alpha.dstScalar != VulkanBlendScalar::None || alpha.op != VulkanBlendOperation::None;
 		}
 
-		VulkanResourceBlending(const ResourceBlending& other) :
+		VulkanResourceBlending(const ResourceBlending& other):
 			enable(other.enable),
 			color(other.color),
 			alpha(other.alpha),
@@ -161,7 +158,7 @@ namespace np::gpu::__detail
 
 		operator ResourceBlending() const
 		{
-			return { enable, color, alpha, colorChannel };
+			return {enable, color, alpha, colorChannel};
 		}
 
 		VkPipelineColorBlendAttachmentState GetVkPipelineColorBlendAttachmentState() const
@@ -185,7 +182,7 @@ namespace np::gpu::__detail
 
 		VulkanBlendConstants() = default;
 
-		VulkanBlendConstants(const BlendConstants& other) : BlendConstants{ other } {}
+		VulkanBlendConstants(const BlendConstants& other): BlendConstants{other} {}
 
 		//operator BlendConstants() const {} //TODO: don't forget
 	};
@@ -196,7 +193,7 @@ namespace np::gpu::__detail
 		con::vector<VulkanResourceBlending> resourceBlendings{};
 		VulkanBlendConstants constants{};
 
-		VulkanBlend(const Blend& other) :
+		VulkanBlend(const Blend& other):
 			logicOperation(other.logicOperation),
 			resourceBlendings{other.resourceBlendings.begin(), other.resourceBlendings.end()},
 			constants(other.constants)
@@ -204,9 +201,9 @@ namespace np::gpu::__detail
 
 		operator Blend() const
 		{
-			return { logicOperation, {resourceBlendings.begin(), resourceBlendings.end()}, constants };
+			return {logicOperation, {resourceBlendings.begin(), resourceBlendings.end()}, constants};
 		}
 	};
-} // namespace np::gpu
+} //namespace np::gpu::__detail
 
 #endif /* NP_ENGINE_GPU_VULKAN_BLEND_HPP */

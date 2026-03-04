@@ -24,7 +24,7 @@ namespace np::gpu::__detail
 		flt height = 0;
 		VulkanDepthBounds depthBounds{};
 
-		VulkanViewport(const Viewport& other = {}) :
+		VulkanViewport(const Viewport& other = {}):
 			position(other.position),
 			width(other.width),
 			height(other.height),
@@ -33,14 +33,14 @@ namespace np::gpu::__detail
 
 		operator Viewport() const
 		{
-			return { position, width, height, depthBounds };
+			return {position, width, height, depthBounds};
 		}
 
 		VkViewport GetVkViewport() const
 		{
-			return { position.x, position.y, width, height, depthBounds.min, depthBounds.max };
+			return {position.x, position.y, width, height, depthBounds.min, depthBounds.max};
 		}
 	};
-} // namespace np::gpu
+} //namespace np::gpu::__detail
 
 #endif /* NP_ENGINE_GPU_VULKAN_VIEWPORT_HPP */

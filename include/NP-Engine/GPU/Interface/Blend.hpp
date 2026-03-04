@@ -32,7 +32,7 @@ namespace np::gpu
 
 		//constexpr static ui32 Src1 = BIT(0); //TODO: investigate
 
-		BlendScalar(ui32 value) :Enum<ui32>(value) {}
+		BlendScalar(ui32 value): Enum<ui32>(value) {}
 	};
 
 	class BlendOperation : public Enum<ui32>
@@ -44,7 +44,7 @@ namespace np::gpu
 		constexpr static ui32 Min = BIT(3);
 		constexpr static ui32 Max = BIT(4);
 
-		BlendOperation(ui32 value) :Enum<ui32>(value) {}
+		BlendOperation(ui32 value): Enum<ui32>(value) {}
 	};
 
 	struct Blending
@@ -63,8 +63,9 @@ namespace np::gpu
 
 		bl IsEnabled() const
 		{
-			return color.srcScalar != BlendScalar::None || color.dstScalar != BlendScalar::None || color.op != BlendOperation::None
-				|| alpha.srcScalar != BlendScalar::None || alpha.dstScalar != BlendScalar::None || alpha.op != BlendOperation::None;
+			return color.srcScalar != BlendScalar::None || color.dstScalar != BlendScalar::None ||
+				color.op != BlendOperation::None || alpha.srcScalar != BlendScalar::None ||
+				alpha.dstScalar != BlendScalar::None || alpha.op != BlendOperation::None;
 		}
 	};
 

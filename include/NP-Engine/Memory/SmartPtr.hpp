@@ -551,15 +551,17 @@ namespace np::mem
 
 		sptr<T> get_sptr()
 		{
-			mem::sptr<T> strong_ptr{ nullptr };
+			mem::sptr<T> strong_ptr{nullptr};
 			siz expected = 0;
 			atm_siz* strong_counter_ptr = base::get_strong_counter_ptr();
 
 			if (strong_counter_ptr)
-				for (expected = strong_counter_ptr->load(mo_acquire);
-					expected != 0 && !strong_counter_ptr->compare_exchange_weak(expected, expected + 1, mo_release, mo_relaxed););
+				for (expected = strong_counter_ptr->load(mo_acquire); expected != 0 &&
+					 !strong_counter_ptr->compare_exchange_weak(expected, expected + 1, mo_release, mo_relaxed);)
+					;
 
-			if (expected != 0) //aka: if we successfully incremented strong counter when it was not zero (aka: if we safely ensured object)
+			if (expected !=
+				0) //aka: if we successfully incremented strong counter when it was not zero (aka: if we safely ensured object)
 			{
 				base::increment_weak_counter();
 				strong_ptr._resource = base::_resource;
@@ -581,9 +583,9 @@ namespace np::mem
 		if (contiguous_block)
 		{
 			T* object = mem::Construct<T>(contiguous_block->object_block, ::std::forward<Args>(args)...);
-			resource = mem::Construct<resource_type>(contiguous_block->resource_block, destroyer_type{ allocator }, object);
+			resource = mem::Construct<resource_type>(contiguous_block->resource_block, destroyer_type{allocator}, object);
 		}
-		return { resource };
+		return {resource};
 	}
 } // namespace np::mem
 

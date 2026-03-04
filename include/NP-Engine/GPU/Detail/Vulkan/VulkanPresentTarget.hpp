@@ -36,7 +36,8 @@ namespace np::gpu::__detail
 			switch (_window->GetDetailType())
 			{
 			case win::DetailType::Glfw:
-				if (glfwCreateWindowSurface(*_instance, (GLFWwindow*)_window->GetDetailWindow(), nullptr, &surface) != VK_SUCCESS)
+				if (glfwCreateWindowSurface(*_instance, (GLFWwindow*)_window->GetDetailWindow(), nullptr, &surface) !=
+					VK_SUCCESS)
 					surface = nullptr;
 				break;
 
@@ -48,7 +49,7 @@ namespace np::gpu::__detail
 		}
 
 	public:
-		VulkanPresentTarget(mem::sptr<DetailInstance> instance, mem::sptr<win::Window> window) :
+		VulkanPresentTarget(mem::sptr<DetailInstance> instance, mem::sptr<win::Window> window):
 			_instance(DetailObject::EnsureIsDetailType(instance, DetailType::Vulkan)),
 			_window(window),
 			_surface(CreateVkSurface())
@@ -92,7 +93,8 @@ namespace np::gpu::__detail
 			return _window;
 		}
 
-		VkExtent2D GetFramebufferExtent() const //TODO: do we want to rename this to GetExtent? seems straight forward enough to me
+		VkExtent2D GetFramebufferExtent()
+			const //TODO: do we want to rename this to GetExtent? seems straight forward enough to me
 		{
 			return _framebuffer_extent;
 		}

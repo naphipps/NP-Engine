@@ -24,13 +24,13 @@ namespace np::gpu
 		constexpr static ui32 Image = BIT(2); //sampled, storage, input, combined-sampler?
 		constexpr static ui32 Sampler = BIT(3); //combined-image?
 
-		ResourceType(ui32 value) :Enum<ui32>(value) {}
+		ResourceType(ui32 value): Enum<ui32>(value) {}
 	};
 
 	class ResourceUsage : public Enum<ui32>
 	{
 	public:
-		ResourceUsage(ui32 value) : Enum<ui32>(value) {}
+		ResourceUsage(ui32 value): Enum<ui32>(value) {}
 	};
 
 	struct Resource : public DetailObject
@@ -54,7 +54,7 @@ namespace np::gpu
 		constexpr static ui32 Clear = BIT(2);
 		constexpr static ui32 DontCare = BIT(3);
 
-		ResourceOperation(ui32 value) : Enum<ui32>(value) {}
+		ResourceOperation(ui32 value): Enum<ui32>(value) {}
 	};
 
 	struct ResourceDescription
@@ -63,9 +63,10 @@ namespace np::gpu
 		ResourceUsage usage = ResourceUsage::None;
 		siz count = 0;
 		Stage stage = Stage::None;
-		//con::vector<mem::sptr<Sampler>> samplers{}; //TODO: add sampler support -- pretty sure length MUST equal count value or be empty
+		//con::vector<mem::sptr<Sampler>> samplers{}; //TODO: add sampler support -- pretty sure length MUST equal count value
+		//or be empty
 
-		bl operator ==(const ResourceDescription& other) const
+		bl operator==(const ResourceDescription& other) const
 		{
 			return type == other.type && usage == other.usage && count == other.count && stage == other.stage;
 		}
@@ -119,7 +120,8 @@ namespace np::gpu
 
 	struct ResourceGroupPool : public DetailObject
 	{
-		static mem::sptr<ResourceGroupPool> Create(mem::sptr<Device> device, siz size, con::vector<ResourceDescription> descriptions);
+		static mem::sptr<ResourceGroupPool> Create(mem::sptr<Device> device, siz size,
+												   con::vector<ResourceDescription> descriptions);
 
 		virtual ~ResourceGroupPool() = default;
 

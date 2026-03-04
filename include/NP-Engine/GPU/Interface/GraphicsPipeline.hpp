@@ -32,22 +32,13 @@ namespace np::gpu
 {
 	struct GraphicsPipeline : public Pipeline
 	{
-		static mem::sptr<GraphicsPipeline> Create(mem::sptr<RenderPass> render_pass,
-			PipelineUsage usage,
-			mem::sptr<PipelineResourceLayout> layout,
-			const con::vector<mem::sptr<Shader>>& shaders,
-			const con::vector<Format>& input_vertex_formatting,
-			const con::vector<Format>& input_instance_formatting,
-			PrimitiveTopology topology,
-			siz tessellation_patch_control_point_count,
-			const con::vector<Viewport>& viewports,
-			const con::vector<Scissor>& scissors,
-			const Rasterization& rasterization,
-			const Multisample& multisample,
-			const DepthStencil& depth_stencil,
-			const Blend& blend,
-			DynamicUsage dynamic_usage,
-			mem::sptr<PipelineCache> cache);
+		static mem::sptr<GraphicsPipeline> Create(
+			mem::sptr<RenderPass> render_pass, PipelineUsage usage, mem::sptr<PipelineResourceLayout> layout,
+			const con::vector<mem::sptr<Shader>>& shaders, const con::vector<Format>& input_vertex_formatting,
+			const con::vector<Format>& input_instance_formatting, PrimitiveTopology topology,
+			siz tessellation_patch_control_point_count, const con::vector<Viewport>& viewports,
+			const con::vector<Scissor>& scissors, const Rasterization& rasterization, const Multisample& multisample,
+			const DepthStencil& depth_stencil, const Blend& blend, DynamicUsage dynamic_usage, mem::sptr<PipelineCache> cache);
 
 		virtual ~GraphicsPipeline() = default;
 

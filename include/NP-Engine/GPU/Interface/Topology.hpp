@@ -28,7 +28,7 @@ namespace np::gpu
 		constexpr static ui32 Strip = BIT(7);
 		constexpr static ui32 Fan = BIT(8);
 
-		PrimitiveTopology(ui32 value) :Enum<ui32>(value) {}
+		PrimitiveTopology(ui32 value): Enum<ui32>(value) {}
 	};
 } // namespace np::gpu
 

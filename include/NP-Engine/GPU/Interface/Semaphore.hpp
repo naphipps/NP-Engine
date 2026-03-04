@@ -11,7 +11,8 @@
 
 namespace np::gpu
 {
-	struct Semaphore : public DetailObject {};
+	struct Semaphore : public DetailObject
+	{};
 } // namespace np::gpu
 
 #endif /* NP_ENGINE_GPU_INTERFACE_SEMAPHORE_HPP */

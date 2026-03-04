@@ -62,7 +62,7 @@ namespace np::fsys
 		p /= (::std::filesystem::path(Append(args...)));
 		return p.string().c_str();
 	}
-	
+
 	/*
 		creates all the directories throughout the given dir path
 	*/

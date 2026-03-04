@@ -16,7 +16,7 @@ namespace np::gpu::__detail
 	class VulkanCompareOperation : public CompareOperation
 	{
 	public:
-		VulkanCompareOperation(ui32 value) : CompareOperation(value) {}
+		VulkanCompareOperation(ui32 value): CompareOperation(value) {}
 
 		VkCompareOp GetVkCompareOp() const
 		{

@@ -24,7 +24,7 @@ namespace np::gpu
 		constexpr static ui32 Black = BIT(2);
 		constexpr static ui32 White = BIT(3);
 
-		SamplerBorder(ui32 value) :Enum<ui32>(value) {}
+		SamplerBorder(ui32 value): Enum<ui32>(value) {}
 	};
 
 	class SamplerAddressMode : public Enum<ui32>
@@ -36,7 +36,7 @@ namespace np::gpu
 		constexpr static ui32 Edge = BIT(3);
 		constexpr static ui32 Border = BIT(4);
 
-		SamplerAddressMode(ui32 value) : Enum<ui32>(value) {}
+		SamplerAddressMode(ui32 value): Enum<ui32>(value) {}
 	};
 
 	struct SamplerAddressModes
@@ -57,15 +57,16 @@ namespace np::gpu
 		constexpr static ui32 MipmapLinear = BIT(5);
 		constexpr static ui32 UnnormalizedCoordinates = BIT(6);
 
-		SamplerResourceUsage(ui32 value) : ResourceUsage(value) {}
+		SamplerResourceUsage(ui32 value): ResourceUsage(value) {}
 	};
 
 	using LodBounds = mat::DblRange;
 
 	struct SamplerResource : public Resource
 	{
-		static mem::sptr<SamplerResource> Create(mem::sptr<Device> device, SamplerResourceUsage usage, dbl anisotrophy, CompareOperation op, LodBounds lod_bounds,
-			SamplerBorder border, SamplerAddressModes address_modes); //TODO: accept formats? memory flags?
+		static mem::sptr<SamplerResource> Create(mem::sptr<Device> device, SamplerResourceUsage usage, dbl anisotrophy,
+												 CompareOperation op, LodBounds lod_bounds, SamplerBorder border,
+												 SamplerAddressModes address_modes); //TODO: accept formats? memory flags?
 
 		virtual ~SamplerResource() = default;
 

@@ -27,19 +27,19 @@ namespace np::gpu::__detail
 		ui32 framebufferImageViewIndex = UI32_MAX;
 		VulkanImageResourceUsage usage = VulkanImageResourceUsage::None;
 
-		VulkanSubpassImageResourceReference(const SubpassImageResourceReference& ref = {}) :
+		VulkanSubpassImageResourceReference(const SubpassImageResourceReference& ref = {}):
 			framebufferImageViewIndex(ref.framebufferImageViewIndex),
 			usage(ref.usage)
 		{}
 
 		operator SubpassImageResourceReference() const
 		{
-			return { framebufferImageViewIndex, usage };
+			return {framebufferImageViewIndex, usage};
 		}
 
 		VkAttachmentReference GetVkAttachmentReference() const
 		{
-			return { framebufferImageViewIndex, usage.GetVkImageLayout() };
+			return {framebufferImageViewIndex, usage.GetVkImageLayout()};
 		}
 	};
 
@@ -50,7 +50,7 @@ namespace np::gpu::__detail
 		con::vector<VulkanSubpassImageResourceReference> multisampleResolves{};
 		con::vector<ui32> preserveFramebufferImageViewIndicies{};
 
-		VulkanSubpassDescription(const SubpassDescription& other = {}) :
+		VulkanSubpassDescription(const SubpassDescription& other = {}):
 			inputs(other.inputs.begin(), other.inputs.end()),
 			outputs(other.outputs.begin(), other.outputs.end()),
 			multisampleResolves(other.multisampleResolves.begin(), other.multisampleResolves.end())
@@ -62,13 +62,10 @@ namespace np::gpu::__detail
 
 		operator SubpassDescription() const
 		{
-			return
-			{
-				{inputs.begin(), inputs.end()},
-				{outputs.begin(), outputs.end()},
-				{multisampleResolves.begin(), multisampleResolves.end()},
-				{preserveFramebufferImageViewIndicies.begin(), preserveFramebufferImageViewIndicies.end()}
-			};
+			return {{inputs.begin(), inputs.end()},
+					{outputs.begin(), outputs.end()},
+					{multisampleResolves.begin(), multisampleResolves.end()},
+					{preserveFramebufferImageViewIndicies.begin(), preserveFramebufferImageViewIndicies.end()}};
 		}
 
 		/*
@@ -120,7 +117,7 @@ namespace np::gpu::__detail
 		VulkanAccess srcAccess = VulkanAccess::None;
 		VulkanAccess dstAccess = VulkanAccess::None;
 
-		VulkanSubpassDependency(const SubpassDependency& other = {}) :
+		VulkanSubpassDependency(const SubpassDependency& other = {}):
 			srcSubpassIndex(other.srcSubpassIndex == SIZ_MAX ? VK_SUBPASS_EXTERNAL : other.srcSubpassIndex),
 			dstSubpassIndex(other.dstSubpassIndex == SIZ_MAX ? VK_SUBPASS_EXTERNAL : other.dstSubpassIndex),
 			srcStage(other.srcStage),
@@ -131,7 +128,7 @@ namespace np::gpu::__detail
 
 		operator SubpassDependency() const
 		{
-			return { srcSubpassIndex, dstSubpassIndex, srcStage, dstStage, srcAccess, dstAccess };
+			return {srcSubpassIndex, dstSubpassIndex, srcStage, dstStage, srcAccess, dstAccess};
 		}
 
 		VkSubpassDependency GetVkSubpassDependency() const
@@ -150,7 +147,7 @@ namespace np::gpu::__detail
 	class VulkanSubpassUsage : public SubpassUsage
 	{
 	public:
-		VulkanSubpassUsage(ui32 value) : SubpassUsage(value) {}
+		VulkanSubpassUsage(ui32 value): SubpassUsage(value) {}
 
 		VkSubpassContents GetVkSubpassContents() const
 		{
@@ -179,8 +176,10 @@ namespace np::gpu::__detail
 			return info;
 		}
 
-		static VkRenderPass CreateVkRenderPass(mem::sptr<VulkanDevice> device, const con::vector<VulkanImageResourceDescription>& descriptions,
-			const con::vector<VulkanSubpassDescription>& subpasses, const con::vector<VulkanSubpassDependency>& dependencies)
+		static VkRenderPass CreateVkRenderPass(mem::sptr<VulkanDevice> device,
+											   const con::vector<VulkanImageResourceDescription>& descriptions,
+											   const con::vector<VulkanSubpassDescription>& subpasses,
+											   const con::vector<VulkanSubpassDependency>& dependencies)
 		{
 			con::vector<VkAttachmentDescription> attachment_descriptions(descriptions.size());
 			for (siz i = 0; i < attachment_descriptions.size(); i++)
@@ -198,22 +197,28 @@ namespace np::gpu::__detail
 				resolve_attachment_references[i] = subpasses[i].GetVkResolveVkAttachmentReferences();
 				preserve_framebuffer_image_view_indicies[i] = subpasses[i].GetPreserveFramebufferImageViewIndices();
 
-				//TODO: should we check: if resolve_attachment_references[i] is not empty, then it's size must equal color_attachment_references[i]
+				//TODO: should we check: if resolve_attachment_references[i] is not empty, then it's size must equal
+				//color_attachment_references[i]
 
 				subpass_descriptions[i] = subpasses[i].GetVkSubpassDescription();
 				subpass_descriptions[i].inputAttachmentCount = input_attachment_references[i].size();
-				subpass_descriptions[i].pInputAttachments = input_attachment_references[i].empty() ? nullptr : input_attachment_references[i].data();
+				subpass_descriptions[i].pInputAttachments =
+					input_attachment_references[i].empty() ? nullptr : input_attachment_references[i].data();
 				subpass_descriptions[i].colorAttachmentCount = color_attachment_references[i].size();
-				subpass_descriptions[i].pColorAttachments = color_attachment_references[i].empty() ? nullptr : color_attachment_references[i].data();
-				subpass_descriptions[i].pResolveAttachments = resolve_attachment_references[i].empty() ? nullptr : resolve_attachment_references[i].data();
+				subpass_descriptions[i].pColorAttachments =
+					color_attachment_references[i].empty() ? nullptr : color_attachment_references[i].data();
+				subpass_descriptions[i].pResolveAttachments =
+					resolve_attachment_references[i].empty() ? nullptr : resolve_attachment_references[i].data();
 				subpass_descriptions[i].preserveAttachmentCount = preserve_framebuffer_image_view_indicies[i].size();
-				subpass_descriptions[i].pPreserveAttachments = preserve_framebuffer_image_view_indicies[i].empty() ? nullptr : preserve_framebuffer_image_view_indicies[i].data();
+				subpass_descriptions[i].pPreserveAttachments = preserve_framebuffer_image_view_indicies[i].empty()
+					? nullptr
+					: preserve_framebuffer_image_view_indicies[i].data();
 			}
 
 			con::vector<VkSubpassDependency> subpass_dependencies(dependencies.size());
 			for (siz i = 0; i < subpass_dependencies.size(); i++)
 				subpass_dependencies[i] = dependencies[i].GetVkSubpassDependency();
-			
+
 			VkRenderPassCreateInfo info = CreateVkInfo();
 			info.attachmentCount = attachment_descriptions.size();
 			info.pAttachments = attachment_descriptions.empty() ? nullptr : attachment_descriptions.data();
@@ -229,7 +234,7 @@ namespace np::gpu::__detail
 
 	public:
 		VulkanRenderPass(mem::sptr<Device> device, const con::vector<ImageResourceDescription>& descriptions,
-			const con::vector<SubpassDescription>& subpasses, const con::vector<SubpassDependency>& dependencies):
+						 const con::vector<SubpassDescription>& subpasses, const con::vector<SubpassDependency>& dependencies):
 			_device(device),
 			_image_descriptions(descriptions.begin(), descriptions.end()),
 			_subpass_descriptions(subpasses.begin(), subpasses.end()),
@@ -268,17 +273,17 @@ namespace np::gpu::__detail
 
 		virtual con::vector<ImageResourceDescription> GetImageResourceDescriptions() const override
 		{
-			return { _image_descriptions.begin(), _image_descriptions.end() };
+			return {_image_descriptions.begin(), _image_descriptions.end()};
 		}
 
 		virtual con::vector<SubpassDescription> GetSubpassDescriptions() const override
 		{
-			return { _subpass_descriptions.begin(), _subpass_descriptions.end() };
+			return {_subpass_descriptions.begin(), _subpass_descriptions.end()};
 		}
 
 		virtual con::vector<SubpassDependency> GetSubpassDepenedencies() const override
 		{
-			return { _subpass_dependencies.begin(), _subpass_dependencies.end() };
+			return {_subpass_dependencies.begin(), _subpass_dependencies.end()};
 		}
 	};
 } // namespace np::gpu::__detail

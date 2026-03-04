@@ -15,7 +15,6 @@
 #include "Device.hpp"
 #include "Stage.hpp"
 
-
 namespace np::gpu
 {
 	struct Shader : public DetailObject

@@ -21,7 +21,7 @@ namespace np::gpu
 		constexpr static ui32 Greater = BIT(4);
 		constexpr static ui32 Always = BIT(5);
 
-		CompareOperation(ui32 value) : Enum<ui32>(value) {}
+		CompareOperation(ui32 value): Enum<ui32>(value) {}
 	};
 } // namespace np::gpu
 

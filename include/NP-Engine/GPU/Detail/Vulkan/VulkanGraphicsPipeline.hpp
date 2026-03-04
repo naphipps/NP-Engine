@@ -163,7 +163,9 @@ namespace np::gpu::__detail
 			return info;
 		}
 
-		static VkGraphicsPipelineCreateInfo CreateVkInfo(mem::sptr<VulkanRenderPass> render_pass, mem::sptr<VulkanPipelineResourceLayout> layout, VulkanPipelineUsage usage)
+		static VkGraphicsPipelineCreateInfo CreateVkInfo(mem::sptr<VulkanRenderPass> render_pass,
+														 mem::sptr<VulkanPipelineResourceLayout> layout,
+														 VulkanPipelineUsage usage)
 		{
 			VkGraphicsPipelineCreateInfo info{};
 			info.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
@@ -173,29 +175,22 @@ namespace np::gpu::__detail
 			return info;
 		}
 
-		static VkPipeline CreateVkPipeline(mem::sptr<VulkanRenderPass> render_pass,
-			VulkanPipelineUsage usage,
-			mem::sptr<VulkanPipelineResourceLayout> layout,
-			const con::vector<mem::sptr<VulkanShader>>& shaders,
-			const con::vector<VulkanFormat>& input_vertex_formatting,
-			const con::vector<VulkanFormat>& input_instance_formatting,
-			VulkanPrimitiveTopology topology, 
-			ui32 tessellation_patch_control_point_count,
-			const con::vector<VulkanViewport>& viewports,
-			const con::vector<VulkanScissor>& scissors,
-			const VulkanRasterization& rasterization,
-			const VulkanMultisample& multisample,
-			const VulkanDepthStencil& depth_stencil,
-			const VulkanBlend& blend,
-			VulkanDynamicUsage dynamic_usage,
-			mem::sptr<VulkanPipelineCache> cache)
+		static VkPipeline CreateVkPipeline(
+			mem::sptr<VulkanRenderPass> render_pass, VulkanPipelineUsage usage, mem::sptr<VulkanPipelineResourceLayout> layout,
+			const con::vector<mem::sptr<VulkanShader>>& shaders, const con::vector<VulkanFormat>& input_vertex_formatting,
+			const con::vector<VulkanFormat>& input_instance_formatting, VulkanPrimitiveTopology topology,
+			ui32 tessellation_patch_control_point_count, const con::vector<VulkanViewport>& viewports,
+			const con::vector<VulkanScissor>& scissors, const VulkanRasterization& rasterization,
+			const VulkanMultisample& multisample, const VulkanDepthStencil& depth_stencil, const VulkanBlend& blend,
+			VulkanDynamicUsage dynamic_usage, mem::sptr<VulkanPipelineCache> cache)
 		{
 			bl vertex_shader_found = false;
 			con::vector<VkPipelineShaderStageCreateInfo> shader_infos(shaders.size());
 			for (siz i = 0; i < shader_infos.size(); i++)
 			{
 				shader_infos[i] = shaders[i]->GetVkPipelineShaderStageCreateInfo();
-				vertex_shader_found |= shaders[i]->GetStage().ContainsAny(VulkanStage::Vertex); //TODO: should this be ContainsAll?
+				vertex_shader_found |=
+					shaders[i]->GetStage().ContainsAny(VulkanStage::Vertex); //TODO: should this be ContainsAll?
 			}
 
 			NP_ENGINE_ASSERT(vertex_shader_found, "VulkanGraphicsPipeline requires a vertex shader");
@@ -212,25 +207,29 @@ namespace np::gpu::__detail
 			con::vector<VkVertexInputBindingDescription> vertex_binding_descs{};
 			const ui32 vertex_binding = vertex_binding_descs.size();
 			if (!input_vertex_formatting.empty())
-				vertex_binding_descs.emplace_back(VkVertexInputBindingDescription{ vertex_binding, vertex_stride, VK_VERTEX_INPUT_RATE_VERTEX });
-			
+				vertex_binding_descs.emplace_back(
+					VkVertexInputBindingDescription{vertex_binding, vertex_stride, VK_VERTEX_INPUT_RATE_VERTEX});
+
 			const ui32 instance_binding = vertex_binding_descs.size();
 			if (!input_instance_formatting.empty())
-				vertex_binding_descs.emplace_back(VkVertexInputBindingDescription{ instance_binding, instance_stride, VK_VERTEX_INPUT_RATE_INSTANCE });
-			
+				vertex_binding_descs.emplace_back(
+					VkVertexInputBindingDescription{instance_binding, instance_stride, VK_VERTEX_INPUT_RATE_INSTANCE});
+
 			ui32 attribute_location = 0;
 			ui32 attribute_offset = 0;
 			con::vector<VkVertexInputAttributeDescription> vertex_attribute_descs{};
 			for (const VulkanFormat& format : input_vertex_formatting)
 			{
-				vertex_attribute_descs.emplace_back(VkVertexInputAttributeDescription{ attribute_location++, vertex_binding, format.GetVkFormat(), attribute_offset });
+				vertex_attribute_descs.emplace_back(VkVertexInputAttributeDescription{attribute_location++, vertex_binding,
+																					  format.GetVkFormat(), attribute_offset});
 				attribute_offset += format.GetComponentSize() * format.GetComponentCount();
 			}
 
 			attribute_offset = 0;
 			for (const VulkanFormat& format : input_instance_formatting)
 			{
-				vertex_attribute_descs.emplace_back(VkVertexInputAttributeDescription{ attribute_location++, instance_binding, format.GetVkFormat(), attribute_offset });
+				vertex_attribute_descs.emplace_back(VkVertexInputAttributeDescription{attribute_location++, instance_binding,
+																					  format.GetVkFormat(), attribute_offset});
 				attribute_offset += format.GetComponentSize() * format.GetComponentCount();
 			}
 
@@ -249,8 +248,10 @@ namespace np::gpu::__detail
 			*/
 
 			//tessellation info
-			const bl tessellation_enabled = usage.Contains(VulkanPipelineUsage::Tessellation) && input_info.topology == VK_PRIMITIVE_TOPOLOGY_PATCH_LIST; //TODO: consider if we have a tessllation shaders too
-			VkPipelineTessellationStateCreateInfo tessellation_info = GetVkTessellationInfo(tessellation_patch_control_point_count); //TODO: support patch control points for tessellation
+			const bl tessellation_enabled = usage.Contains(VulkanPipelineUsage::Tessellation) &&
+				input_info.topology == VK_PRIMITIVE_TOPOLOGY_PATCH_LIST; //TODO: consider if we have a tessllation shaders too
+			VkPipelineTessellationStateCreateInfo tessellation_info = GetVkTessellationInfo(
+				tessellation_patch_control_point_count); //TODO: support patch control points for tessellation
 
 			//viewport infos
 			con::vector<VkViewport> vk_viewports(viewports.size());
@@ -261,8 +262,10 @@ namespace np::gpu::__detail
 			for (siz i = 0; i < vk_scissors.size(); i++)
 				vk_scissors[i] = scissors[i].GetVkRect2D();
 
-			//TODO: vk_viewports.size() MUST equal vk_scissors.size() -- the index vulkan uses per viewport is used to pull the cooresponding scissor
-			//TODO: ^ I'm suspicious if vk_scissors.empty(), then scissor testing is disabled? thus pScissors below could be nullptr? maybe not...
+			//TODO: vk_viewports.size() MUST equal vk_scissors.size() -- the index vulkan uses per viewport is used to pull the
+			//cooresponding scissor
+			//TODO: ^ I'm suspicious if vk_scissors.empty(), then scissor testing is disabled? thus pScissors below could be
+			//nullptr? maybe not...
 			//TODO: ^ it is common to use a viewport that is the same size of the framebuffer we use
 
 			VkPipelineViewportStateCreateInfo viewport_info = GetVkViewportInfo();
@@ -274,18 +277,19 @@ namespace np::gpu::__detail
 			//rasterization info
 			VkPipelineRasterizationStateCreateInfo rasterization_info = GetVkRasterizationInfo(rasterization);
 
-			//TODO: we may not need all the above? I wonder how many we can just make nullptr - to clarify, then below can be nullptr
+			//TODO: we may not need all the above? I wonder how many we can just make nullptr - to clarify, then below can be
+			//nullptr
 
 			//multisample
 			const bl multisample_enable = !multisample.usage.ContainsAll(VulkanMultisampleUsage::None);
 			VkPipelineMultisampleStateCreateInfo multisample_info = GetVkMultisampleInfo(multisample);
 			//TODO: multisample_info.pSampleMask = nullptr;
 			//multisample_info.pSampleMask = multisample.sampleMasks.empty() ? nullptr : multisample.sampleMasks.data();
-			
+
 			//depth stencil
 			const bl depth_stencil_enabled = !depth_stencil.usage.ContainsAll(VulkanDepthStencilUsage::None);
 			VkPipelineDepthStencilStateCreateInfo depth_stencil_info = GetVkDepthStencilInfo(depth_stencil);
-			
+
 			//color blending
 			con::vector<VkPipelineColorBlendAttachmentState> blend_states(blend.resourceBlendings.size());
 			for (siz i = 0; i < blend_states.size(); i++)
@@ -295,7 +299,7 @@ namespace np::gpu::__detail
 			color_blend_info.attachmentCount = blend_states.size();
 			color_blend_info.pAttachments = blend_states.empty() ? nullptr : blend_states.data();
 			const bl color_blend_enable = usage.Contains(VulkanPipelineUsage::ColorBlend);
-			
+
 			//dynamic info
 			const con::vector<VkDynamicState> dynamic_states = dynamic_usage.GetVkDynamicStates();
 			VkPipelineDynamicStateCreateInfo dynamic_info = GetVkDynamicInfo();
@@ -328,7 +332,8 @@ namespace np::gpu::__detail
 
 		static con::vector<mem::sptr<VulkanShader>> ChooseShaders(const con::vector<mem::sptr<Shader>>& shaders)
 		{
-			con::vector<mem::sptr<VulkanShader>> chosen{}; //TODO: we need to filter to the only 5 accepted shader stages --are we sure?
+			con::vector<mem::sptr<VulkanShader>>
+				chosen{}; //TODO: we need to filter to the only 5 accepted shader stages --are we sure?
 
 			for (mem::sptr<Shader> shader : shaders)
 			{
@@ -350,22 +355,14 @@ namespace np::gpu::__detail
 		}
 
 	public:
-		VulkanGraphicsPipeline(mem::sptr<RenderPass> render_pass,
-			PipelineUsage usage,
-			mem::sptr<PipelineResourceLayout> layout,
-			const con::vector<mem::sptr<Shader>>& shaders,
-			const con::vector<Format>& input_vertex_formatting,
-			const con::vector<Format>& input_instance_formatting,
-			PrimitiveTopology topology,
-			siz tessellation_patch_control_point_count,
-			const con::vector<Viewport>& viewports,
-			const con::vector<Scissor>& scissors,
-			const Rasterization& rasterization,
-			const Multisample& multisample,
-			const DepthStencil& depth_stencil,
-			const Blend& blend,
-			DynamicUsage dynamic_usage,
-			mem::sptr<PipelineCache> cache):
+		VulkanGraphicsPipeline(mem::sptr<RenderPass> render_pass, PipelineUsage usage, mem::sptr<PipelineResourceLayout> layout,
+							   const con::vector<mem::sptr<Shader>>& shaders,
+							   const con::vector<Format>& input_vertex_formatting,
+							   const con::vector<Format>& input_instance_formatting, PrimitiveTopology topology,
+							   siz tessellation_patch_control_point_count, const con::vector<Viewport>& viewports,
+							   const con::vector<Scissor>& scissors, const Rasterization& rasterization,
+							   const Multisample& multisample, const DepthStencil& depth_stencil, const Blend& blend,
+							   DynamicUsage dynamic_usage, mem::sptr<PipelineCache> cache):
 			_render_pass(DetailObject::EnsureIsDetailType(render_pass, DetailType::Vulkan)),
 			_layout(DetailObject::EnsureIsDetailType(layout, DetailType::Vulkan)),
 			_shaders(ChooseShaders(shaders)),
@@ -380,22 +377,10 @@ namespace np::gpu::__detail
 			_depth_stencil(depth_stencil),
 			_blend(blend),
 			_dynamic_usage(dynamic_usage),
-			_pipeline(CreateVkPipeline(_render_pass,
-				VulkanPipelineUsage{ usage },
-				_layout,
-				_shaders,
-				_input_vertex_formatting,
-				_input_instance_formatting,
-				_topology,
-				_tessellation_patch_control_point_count,
-				_viewports,
-				_scissors,
-				_rasterization,
-				_multisample,
-				_depth_stencil,
-				_blend,
-				_dynamic_usage,
-				cache))
+			_pipeline(CreateVkPipeline(_render_pass, VulkanPipelineUsage{usage}, _layout, _shaders, _input_vertex_formatting,
+									   _input_instance_formatting, _topology, _tessellation_patch_control_point_count,
+									   _viewports, _scissors, _rasterization, _multisample, _depth_stencil, _blend,
+									   _dynamic_usage, cache))
 		{}
 
 		virtual ~VulkanGraphicsPipeline()
@@ -433,8 +418,6 @@ namespace np::gpu::__detail
 			return _render_pass->GetDevice();
 		}
 
-
-
 		//void Rebuild()
 		//{
 		//	mem::sptr<RenderContext> render_context = GetRenderContext();
@@ -453,9 +436,6 @@ namespace np::gpu::__detail
 		//	_pipeline_layout = CreatePipelineLayout(render_context, _descriptor_set_layout);
 		//	_pipeline = CreatePipeline(_properties, _pipeline_layout);
 		//}
-
-
-
 	};
 } // namespace np::gpu::__detail
 

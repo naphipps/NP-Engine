@@ -55,6 +55,6 @@ namespace np::gpu
 		*/
 		virtual con::vector<bl> Present(const Present& present) = 0;
 	};
-}
+} //namespace np::gpu
 
 #endif /* NP_ENGINE_GPU_INTERFACE_QUEUE_HPP */

@@ -16,7 +16,8 @@ namespace np::gpu
 {
 	mem::sptr<Device> Device::Create(mem::sptr<DetailInstance> instance, DeviceUsage usage, mem::sptr<PresentTarget> target)
 	{
-		usage |= target ? DeviceUsage::Present : DeviceUsage::None; //enforce Present usage when creating device with PresentTarget
+		usage |=
+			target ? DeviceUsage::Present : DeviceUsage::None; //enforce Present usage when creating device with PresentTarget
 		mem::sptr<Device> device = nullptr;
 
 		switch (instance->GetDetailType())

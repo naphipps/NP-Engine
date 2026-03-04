@@ -43,8 +43,7 @@ namespace np::gpu::__detail
 		}
 
 	public:
-		
-		VulkanPipelineCache(mem::sptr<VulkanLogicalDevice> device, con::vector<ui8> bytes) :
+		VulkanPipelineCache(mem::sptr<VulkanLogicalDevice> device, con::vector<ui8> bytes):
 			PipelineCache(),
 			_device(device),
 			_cache(CreateVkPipelineCache(_device, bytes))
@@ -90,6 +89,6 @@ namespace np::gpu::__detail
 			return bytes;
 		}
 	};
-}
+} //namespace np::gpu::__detail
 
 #endif /* NP_ENGINE_GPU_VULKAN_PIPELINE_CACHE_HPP */

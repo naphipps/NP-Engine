@@ -30,7 +30,8 @@ namespace np::gpu
 	{
 		con::vector<SubpassImageResourceReference> inputs{}; //input images
 		con::vector<SubpassImageResourceReference> outputs{}; //output images
-		con::vector<SubpassImageResourceReference> multisampleResolves{}; //multisampled images whose results are to be resolved over subpass
+		con::vector<SubpassImageResourceReference>
+			multisampleResolves{}; //multisampled images whose results are to be resolved over subpass
 		con::vector<siz> preserveFramebufferImageViewIndicies{}; //preserve these images over subpass
 	};
 
@@ -48,14 +49,15 @@ namespace np::gpu
 	{
 	public:
 		constexpr static ui32 HasSecondary = BIT(0);
-		
-		SubpassUsage(ui32 value) : Enum<ui32>(value) {}
+
+		SubpassUsage(ui32 value): Enum<ui32>(value) {}
 	};
 
 	struct RenderPass : public DetailObject //TODO: rename to "Renderpass"
 	{
 		static mem::sptr<RenderPass> Create(mem::sptr<Device> device, const con::vector<ImageResourceDescription>& descriptions,
-			const con::vector<SubpassDescription>& subpasses, const con::vector<SubpassDependency>& dependencies);
+											const con::vector<SubpassDescription>& subpasses,
+											const con::vector<SubpassDependency>& dependencies);
 
 		virtual ~RenderPass() = default;
 

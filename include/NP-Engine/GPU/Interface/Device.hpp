@@ -91,7 +91,7 @@ namespace np::gpu
 		constexpr static ui32 MultiDrawIndirect = BIT(5); //TODO: investigate -- rename to MultiDraw?
 		constexpr static ui32 Tessellation = BIT(6);
 
-		DeviceUsage(ui32 value) : Enum<ui32>(value) {}
+		DeviceUsage(ui32 value): Enum<ui32>(value) {}
 	};
 
 	class DeviceQueueUsage : public Enum<ui32>
@@ -104,7 +104,7 @@ namespace np::gpu
 
 		//constexpr static ui32 Transfer = BIT(0); //TODO: shall we support this?
 
-		DeviceQueueUsage(ui32 value) : Enum<ui32>(value) {}
+		DeviceQueueUsage(ui32 value): Enum<ui32>(value) {}
 	};
 
 	struct DeviceQueueFamily
@@ -116,7 +116,8 @@ namespace np::gpu
 
 	struct Device : public DetailObject
 	{
-		static mem::sptr<Device> Create(mem::sptr<DetailInstance> instance, DeviceUsage usage, mem::sptr<PresentTarget> target = nullptr);
+		static mem::sptr<Device> Create(mem::sptr<DetailInstance> instance, DeviceUsage usage,
+										mem::sptr<PresentTarget> target = nullptr);
 
 		virtual ~Device() = default;
 

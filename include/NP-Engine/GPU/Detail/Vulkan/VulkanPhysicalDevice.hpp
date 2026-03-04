@@ -26,7 +26,7 @@ namespace np
 			constexpr static ui32 Nvidia = BIT(1);
 			constexpr static ui32 Intel = BIT(2);
 
-			VulkanPhysicalDeviceType(ui32 value) : Enum<ui32>(value) {}
+			VulkanPhysicalDeviceType(ui32 value): Enum<ui32>(value) {}
 		};
 
 		class VulkanPhysicalDevice
@@ -38,7 +38,7 @@ namespace np
 		public:
 			static con::vector<str> GetRequiredDeviceExtensionNames()
 			{
-				con::vector<str> extensions{ VK_KHR_SWAPCHAIN_EXTENSION_NAME };
+				con::vector<str> extensions{VK_KHR_SWAPCHAIN_EXTENSION_NAME};
 
 #if NP_ENGINE_PLATFORM_IS_APPLE
 				// Apple uses MoltenVK, hence insert VK_KHR_portability_subset
@@ -65,15 +65,12 @@ namespace np
 				return devices;
 			}
 
-			VulkanPhysicalDevice(mem::sptr<VulkanInstance> instance, VkPhysicalDevice device) :
+			VulkanPhysicalDevice(mem::sptr<VulkanInstance> instance, VkPhysicalDevice device):
 				_instance(instance),
 				_device(device)
 			{}
 
-			VulkanPhysicalDevice(const VulkanPhysicalDevice& other) : 
-				_instance(other._instance),
-				_device(other._device) 
-			{}
+			VulkanPhysicalDevice(const VulkanPhysicalDevice& other): _instance(other._instance), _device(other._device) {}
 
 			VulkanPhysicalDevice& operator=(const VulkanPhysicalDevice& other)
 			{
@@ -95,7 +92,8 @@ namespace np
 			ui32 GetUsageScore(DeviceUsage usage, mem::sptr<VulkanPresentTarget> target) const
 			{
 				//TODO: score physical device based on actual usage
-				//TODO: how do we support scoring a physical device based on requiring it to support certain buffer/image formats? VkFormatProperties
+				//TODO: how do we support scoring a physical device based on requiring it to support certain buffer/image
+				//formats? VkFormatProperties
 
 				ui32 score = 0;
 				VkPhysicalDeviceProperties properties = GetVkProperties();
@@ -184,7 +182,7 @@ namespace np
 
 				if (!supports_required_extensions || !supports_required_layers)
 					score = 0;
-				
+
 				return usage.ContainsAll(DeviceUsage::None) ? 0 : score;
 			}
 
@@ -195,7 +193,8 @@ namespace np
 
 			VulkanPhysicalDeviceType GetDeviceType() const
 			{
-				const con::vector<VulkanPhysicalDeviceType> types{ VulkanPhysicalDeviceType::Amd, VulkanPhysicalDeviceType::Nvidia };
+				const con::vector<VulkanPhysicalDeviceType> types{VulkanPhysicalDeviceType::Amd,
+																  VulkanPhysicalDeviceType::Nvidia};
 				const str name = GetName().toupper();
 
 				VulkanPhysicalDeviceType type = VulkanPhysicalDeviceType::None;
@@ -270,7 +269,7 @@ namespace np
 				properties.pNext = &vk12_properties;
 
 				vkGetPhysicalDeviceProperties2(_device, &properties);
-				return { properties, vk12_properties };
+				return {properties, vk12_properties};
 			}
 
 			VkPhysicalDeviceProperties2 GetVkProperties2() const
@@ -314,7 +313,7 @@ namespace np
 				features.pNext = &vk12_features;
 
 				vkGetPhysicalDeviceFeatures2(_device, &features);
-				return { features, vk12_features };
+				return {features, vk12_features};
 			}
 
 			VkSurfaceCapabilitiesKHR GetVkSurfaceCapabilities(mem::sptr<VulkanPresentTarget> target) const
@@ -357,19 +356,21 @@ namespace np
 				return properties;
 			}
 
-			VkImageFormatProperties GetVkImageFormatProperties(VkFormat format, VkImageType type, VkImageTiling tiling, VkImageUsageFlags usage, VkImageCreateFlags flags) const
+			VkImageFormatProperties GetVkImageFormatProperties(VkFormat format, VkImageType type, VkImageTiling tiling,
+															   VkImageUsageFlags usage, VkImageCreateFlags flags) const
 			{
 				VkImageFormatProperties properties{};
 				vkGetPhysicalDeviceImageFormatProperties(_device, format, type, tiling, usage, flags, &properties);
 				return properties;
 			}
 
-			VkSampleCountFlagBits DetermineVkSampleCountFlagBits(VulkanSampleCount sample_count,
-				VkFormat format, VkImageType type, VkImageTiling tiling, VkImageUsageFlags usage, VkImageCreateFlags flags) const
+			VkSampleCountFlagBits DetermineVkSampleCountFlagBits(VulkanSampleCount sample_count, VkFormat format,
+																 VkImageType type, VkImageTiling tiling,
+																 VkImageUsageFlags usage, VkImageCreateFlags flags) const
 			{
 				const VkImageFormatProperties properties = GetVkImageFormatProperties(format, type, tiling, usage, flags);
 
-				mat::SizRange range{ VulkanSampleCount::AllVkSampleCountFlagBitsArray.size() - 1, 0 };
+				mat::SizRange range{VulkanSampleCount::AllVkSampleCountFlagBitsArray.size() - 1, 0};
 				siz index = 0;
 
 				for (siz i = 0; i < VulkanSampleCount::AllVkSampleCountFlagBitsArray.size(); i++)
@@ -404,7 +405,7 @@ namespace np
 			}
 
 			VkFormat GetSupportedVkFormat(const con::vector<VkFormat>& format_candidates, VkImageTiling image_tiling,
-				VkFormatFeatureFlags format_features) const
+										  VkFormatFeatureFlags format_features) const
 			{
 				VkFormat format = VK_FORMAT_UNDEFINED;
 				for (const VkFormat& format_candidate : format_candidates)
@@ -431,7 +432,8 @@ namespace np
 				return GetVkProperties().deviceName;
 			}
 
-			bl QueueFamilySupportsPresent(con::vector<VkQueueFamilyProperties> properties, siz family_index, mem::sptr<VulkanPresentTarget> target) const
+			bl QueueFamilySupportsPresent(con::vector<VkQueueFamilyProperties> properties, siz family_index,
+										  mem::sptr<VulkanPresentTarget> target) const
 			{
 				VkBool32 supports = VK_FALSE;
 				vkGetPhysicalDeviceSurfaceSupportKHR(_device, family_index, *target, &supports);
@@ -463,7 +465,8 @@ namespace np
 				return QueueFamilySupportsCompute(GetVkQueueFamilyProperties(), family_index);
 			}
 
-			bl HasQueueFamilySupportingPresent(con::vector<VkQueueFamilyProperties> properties, mem::sptr<VulkanPresentTarget> target) const
+			bl HasQueueFamilySupportingPresent(con::vector<VkQueueFamilyProperties> properties,
+											   mem::sptr<VulkanPresentTarget> target) const
 			{
 				bl found = false;
 				for (siz i = 0; !found && i < properties.size(); i++)
@@ -505,9 +508,6 @@ namespace np
 				return HasQueueFamilySupportingCompute(GetVkQueueFamilyProperties());
 			}
 
-
-
-
 			VkSurfaceFormatKHR ChooseVkSurfaceFormat(mem::sptr<VulkanPresentTarget> target) const
 			{
 				VkSurfaceFormatKHR format{};
@@ -535,7 +535,8 @@ namespace np
 			VkPresentModeKHR ChooseVkPresentMode(mem::sptr<VulkanPresentTarget> target) const
 			{
 				const con::vector<VkPresentModeKHR> modes = GetVkSurfacePresentModes(target);
-				const con::array<VkPresentModeKHR, 3> prefered{ VK_PRESENT_MODE_MAILBOX_KHR , VK_PRESENT_MODE_IMMEDIATE_KHR , VK_PRESENT_MODE_FIFO_KHR };
+				const con::array<VkPresentModeKHR, 3> prefered{VK_PRESENT_MODE_MAILBOX_KHR, VK_PRESENT_MODE_IMMEDIATE_KHR,
+															   VK_PRESENT_MODE_FIFO_KHR};
 				// ^ default - if we ever decide to support mobile, then we'll want to use fifo
 				// ^ decreasing prefered order, hence the min below
 
@@ -579,7 +580,7 @@ namespace np
 				return properties;
 			}
 		};
-	}// namespace np::gpu::__detail
+	} //namespace gpu::__detail
 
 	static str to_str(const gpu::__detail::VulkanPhysicalDeviceType& type)
 	{

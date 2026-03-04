@@ -28,7 +28,7 @@ namespace np::gpu
 		constexpr static ui32 Invert = BIT(9);
 		constexpr static ui32 Not = BIT(10);
 
-		LogicOperation(ui32 value) : Enum<ui32>(value) {}
+		LogicOperation(ui32 value): Enum<ui32>(value) {}
 	};
 } // namespace np::gpu
 

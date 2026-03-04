@@ -27,7 +27,7 @@ namespace np::gpu::__detail
 	class VulkanImageResourceUsage : public ImageResourceUsage
 	{
 	public:
-		VulkanImageResourceUsage(ui32 value) : ImageResourceUsage(value) {}
+		VulkanImageResourceUsage(ui32 value): ImageResourceUsage(value) {}
 
 		VkImageLayout GetVkImageLayout() const
 		{
@@ -97,7 +97,8 @@ namespace np::gpu::__detail
 
 		VkImageUsageFlags GetVkImageUsageFlags() const
 		{
-			//TODO: I have seen where our memory property flag value may/can affect our vkBindImageMemory, and our usage might need to consider HostAccessible
+			//TODO: I have seen where our memory property flag value may/can affect our vkBindImageMemory, and our usage might
+			//need to consider HostAccessible
 			//TODO: ^ <https://www.reddit.com/r/vulkan/comments/a4rx16/what_does_vkbindimagememory_really_does/>
 
 			const bl contains_read = Contains(Read);
@@ -120,7 +121,7 @@ namespace np::gpu::__detail
 				flags |= VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
 			if (Contains(Shader))
 				flags |= VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT;
-			
+
 			//TODO: resolve VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT?
 			//TODO: resolve VK_IMAGE_USAGE_SAMPLED_BIT?
 
@@ -129,9 +130,8 @@ namespace np::gpu::__detail
 
 		VkMemoryPropertyFlags GetVkMemoryPropertyFlags() const
 		{
-			return Contains(HostAccessible) ?
-				VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT :
-				VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
+			return Contains(HostAccessible) ? VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
+											: VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
 		}
 
 		VkImageTiling GetVkImageTiling() const
@@ -165,7 +165,7 @@ namespace np::gpu::__detail
 		VulkanImageResourceUsage initialUsage = VulkanImageResourceUsage::None;
 		VulkanImageResourceUsage finalUsage = VulkanImageResourceUsage::None;
 
-		VulkanImageResourceDescription(const ImageResourceDescription& description) :
+		VulkanImageResourceDescription(const ImageResourceDescription& description):
 			format(description.format),
 			sampleCount(description.sampleCount),
 			readOperation(description.readOperation),
@@ -178,24 +178,15 @@ namespace np::gpu::__detail
 
 		operator ImageResourceDescription() const
 		{
-			return
-			{
-				format,
-				sampleCount,
-				readOperation,
-				writeOperation,
-				stencilReadOperation,
-				stencilWriteOperation,
-				initialUsage,
-				finalUsage
-			};
+			return {format,		  sampleCount, readOperation, writeOperation, stencilReadOperation, stencilWriteOperation,
+					initialUsage, finalUsage};
 		}
 
 		VkAttachmentDescription GetVkAttachmentDescription() const
 		{
 			VkAttachmentDescription description{};
 			description.format = format.GetVkFormat();
-			description.samples = VulkanSampleCount{ sampleCount }.GetVkSampleCountFlagBits();
+			description.samples = VulkanSampleCount{sampleCount}.GetVkSampleCountFlagBits();
 			description.loadOp = readOperation.GetVkAttachmentLoadOp();
 			description.storeOp = writeOperation.GetVkAttachmentStoreOp();
 			description.stencilLoadOp = stencilReadOperation.GetVkAttachmentLoadOp();
@@ -219,7 +210,8 @@ namespace np::gpu::__detail
 		VulkanSampleCount _sample_count;
 		con::vector<DeviceQueueFamily> _queue_families;
 		VkImage _image;
-		mem::sptr<VulkanDeviceMemory> _memory; //TODO: not a good idea to allocate this per image, use a device-memory-allocator (guide pg85 mentions this - source code not available)
+		mem::sptr<VulkanDeviceMemory> _memory; //TODO: not a good idea to allocate this per image, use a device-memory-allocator
+											   //(guide pg85 mentions this - source code not available)
 		const bl _enable_destroy;
 
 		static VkImageType GetVkImageType(VkExtent3D extent)
@@ -229,11 +221,11 @@ namespace np::gpu::__detail
 
 		static VkExtent3D GetVkExtent3D(ui32 width, ui32 height, ui32 depth)
 		{
-			return { width, height, depth };
+			return {width, height, depth};
 		}
 
-		static VkImageCreateInfo CreateVkInfo(VulkanImageResourceUsage usage, VulkanFormat format, ui32 mip_count, ui32 layer_count,
-			ui32 width, ui32 height, ui32 depth)
+		static VkImageCreateInfo CreateVkInfo(VulkanImageResourceUsage usage, VulkanFormat format, ui32 mip_count,
+											  ui32 layer_count, ui32 width, ui32 height, ui32 depth)
 		{
 			VkImageCreateInfo info{};
 			info.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
@@ -251,9 +243,9 @@ namespace np::gpu::__detail
 			return info;
 		}
 
-		static VkImage CreateVkImage(mem::sptr<VulkanDevice> device, VulkanImageResourceUsage usage,
-			VulkanFormat format, ui32 mip_count, ui32 layer_count, VulkanSampleCount sample_count, ui32 width, ui32 height, ui32 depth,
-			const con::vector<DeviceQueueFamily>& queue_families)
+		static VkImage CreateVkImage(mem::sptr<VulkanDevice> device, VulkanImageResourceUsage usage, VulkanFormat format,
+									 ui32 mip_count, ui32 layer_count, VulkanSampleCount sample_count, ui32 width, ui32 height,
+									 ui32 depth, const con::vector<DeviceQueueFamily>& queue_families)
 		{
 			con::vector<ui32> family_indices(queue_families.size());
 			for (siz i = 0; i < family_indices.size(); i++)
@@ -264,7 +256,7 @@ namespace np::gpu::__detail
 			info.queueFamilyIndexCount = family_indices.size();
 			info.pQueueFamilyIndices = family_indices.empty() ? nullptr : family_indices.data();
 			info.samples = sample_count.GetVkSampleCountFlagBits();
-			
+
 			VkImage image = nullptr;
 			VkResult result = vkCreateImage(*device->GetLogicalDevice(), &info, nullptr, &image);
 			return result == VK_SUCCESS ? image : nullptr;
@@ -274,16 +266,19 @@ namespace np::gpu::__detail
 		{
 			VkMemoryRequirements requirements{};
 			vkGetImageMemoryRequirements(*device->GetLogicalDevice(), image, &requirements);
-			//vkGetImageSparseMemoryRequirements(*device, image, &count, nullptr); //TODO: support sparse images (guide pg85) (don't think there are sparse buffers
+			//vkGetImageSparseMemoryRequirements(*device, image, &count, nullptr); //TODO: support sparse images (guide pg85)
+			//(don't think there are sparse buffers
 			return requirements;
 		}
 
 		static VulkanSampleCount SanitizeSampleCount(mem::sptr<VulkanDevice> device, VulkanImageResourceUsage usage,
-			VulkanFormat format, VulkanSampleCount sample_count, ui32 width, ui32 height, ui32 depth)
+													 VulkanFormat format, VulkanSampleCount sample_count, ui32 width,
+													 ui32 height, ui32 depth)
 		{
 			const VulkanPhysicalDevice physical_device = device->GetLogicalDevice()->GetPhysicalDevice();
-			const VkSampleCountFlagBits bits = physical_device.DetermineVkSampleCountFlagBits(sample_count, format.GetVkFormat(),
-				GetVkImageType(GetVkExtent3D(width, height, depth)), usage.GetVkImageTiling(), usage.GetVkImageUsageFlags(), usage.GetVkImageCreateFlags());
+			const VkSampleCountFlagBits bits = physical_device.DetermineVkSampleCountFlagBits(
+				sample_count, format.GetVkFormat(), GetVkImageType(GetVkExtent3D(width, height, depth)),
+				usage.GetVkImageTiling(), usage.GetVkImageUsageFlags(), usage.GetVkImageCreateFlags());
 
 			siz index = SIZ_MAX;
 			for (siz i = 0; index == SIZ_MAX && i < VulkanSampleCount::AllVkSampleCountFlagBitsArray.size(); i++)
@@ -299,16 +294,18 @@ namespace np::gpu::__detail
 
 	public:
 		static mem::sptr<VulkanImageResource> Create(mem::sptr<Device> device, ImageResourceUsage usage, VkImage image,
-			Format format, siz mip_count, siz layer_count, siz sample_count, siz width, siz height, siz depth,
-			const con::vector<DeviceQueueFamily>& queue_families)
+													 Format format, siz mip_count, siz layer_count, siz sample_count, siz width,
+													 siz height, siz depth,
+													 const con::vector<DeviceQueueFamily>& queue_families)
 		{
-			return mem::create_sptr<VulkanImageResource>(device->GetServices()->GetAllocator(), device, usage, image,
-				format, mip_count, layer_count, sample_count, width, height, depth, queue_families);
+			return mem::create_sptr<VulkanImageResource>(device->GetServices()->GetAllocator(), device, usage, image, format,
+														 mip_count, layer_count, sample_count, width, height, depth,
+														 queue_families);
 		}
 
-		VulkanImageResource(mem::sptr<Device> device, ImageResourceUsage usage, VkImage image,
-			Format format, siz mip_count, siz layer_count, siz sample_count, siz width, siz height, siz depth,
-			const con::vector<DeviceQueueFamily>& queue_families) :
+		VulkanImageResource(mem::sptr<Device> device, ImageResourceUsage usage, VkImage image, Format format, siz mip_count,
+							siz layer_count, siz sample_count, siz width, siz height, siz depth,
+							const con::vector<DeviceQueueFamily>& queue_families):
 			_device(device),
 			_format(format),
 			_mip_count(mip_count),
@@ -317,24 +314,26 @@ namespace np::gpu::__detail
 			_width(width),
 			_height(height),
 			_depth(depth),
-			_queue_families{ queue_families.begin(), queue_families.end() },
+			_queue_families{queue_families.begin(), queue_families.end()},
 			_image(image),
 			_enable_destroy(false)
 		{
 			const VulkanImageResourceUsage vulkan_usage = (ui32)usage;
-			_memory = _device->CreateDeviceMemory(GetVkMemoryRequirements(_device, _image), vulkan_usage.GetVkMemoryPropertyFlags());
+			_memory =
+				_device->CreateDeviceMemory(GetVkMemoryRequirements(_device, _image), vulkan_usage.GetVkMemoryPropertyFlags());
 			//BindMemory();
 		}
 
-		VulkanImageResource(mem::sptr<Device> device, ImageResourceUsage usage,
-			Format format, siz mip_count, siz layer_count, siz sample_count, siz width, siz height, siz depth,
-			const con::vector<DeviceQueueFamily>& queue_families):
+		VulkanImageResource(mem::sptr<Device> device, ImageResourceUsage usage, Format format, siz mip_count, siz layer_count,
+							siz sample_count, siz width, siz height, siz depth,
+							const con::vector<DeviceQueueFamily>& queue_families):
 			_format(VulkanFormat::None),
 			_enable_destroy(true)
 		{
 			const VulkanImageResourceUsage vulkan_usage = (ui32)usage;
 
-			if (vulkan_usage.Contains(VulkanImageResourceUsage::Cube)) //TODO: consider VulkanImageUsage::Cube. Is there anything else we need to do?
+			if (vulkan_usage.Contains(VulkanImageResourceUsage::Cube)) //TODO: consider VulkanImageUsage::Cube. Is there
+																	   //anything else we need to do?
 			{
 				layer_count = 6;
 				width = ::std::min(width, height);
@@ -350,10 +349,12 @@ namespace np::gpu::__detail
 			_height = height;
 			_depth = depth;
 			_sample_count = SanitizeSampleCount(_device, vulkan_usage, _format, sample_count, _width, _height, _depth);
-			_queue_families = { queue_families.begin(), queue_families.end() };
+			_queue_families = {queue_families.begin(), queue_families.end()};
 
-			_image = CreateVkImage(_device, vulkan_usage, _format, _mip_count, _layer_count, _sample_count, _width, _height, _depth, queue_families);
-			_memory = _device->CreateDeviceMemory(GetVkMemoryRequirements(_device, _image), vulkan_usage.GetVkMemoryPropertyFlags());
+			_image = CreateVkImage(_device, vulkan_usage, _format, _mip_count, _layer_count, _sample_count, _width, _height,
+								   _depth, queue_families);
+			_memory =
+				_device->CreateDeviceMemory(GetVkMemoryRequirements(_device, _image), vulkan_usage.GetVkMemoryPropertyFlags());
 			BindMemory();
 		}
 

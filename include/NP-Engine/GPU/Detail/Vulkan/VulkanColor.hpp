@@ -16,7 +16,7 @@ namespace np::gpu::__detail
 	class VulkanColorChannel : public ColorChannel
 	{
 	public:
-		VulkanColorChannel(ui32 value) : ColorChannel(value) {}
+		VulkanColorChannel(ui32 value): ColorChannel(value) {}
 
 		VkColorComponentFlags GetVkColorComponentFlags() const
 		{
@@ -41,33 +41,24 @@ namespace np::gpu::__detail
 		flt depth;
 		ui32 stencil;
 
-		VulkanClearColor(const ClearColor& other = {}) :
-			color(other.color),
-			depth(other.depth),
-			stencil(other.stencil)
-		{}
+		VulkanClearColor(const ClearColor& other = {}): color(other.color), depth(other.depth), stencil(other.stencil) {}
 
 		operator ClearColor() const
 		{
-			return { color, depth, stencil };
+			return {color, depth, stencil};
 		}
 
 		VkClearColorValue GetVkClearColorValue() const
 		{
-			return
-			{
-				(flt)color.r / (flt)UI8_MAX,
-				(flt)color.g / (flt)UI8_MAX,
-				(flt)color.b / (flt)UI8_MAX,
-				(flt)color.a / (flt)UI8_MAX
-			};
+			return {(flt)color.r / (flt)UI8_MAX, (flt)color.g / (flt)UI8_MAX, (flt)color.b / (flt)UI8_MAX,
+					(flt)color.a / (flt)UI8_MAX};
 		}
 
 		VkClearDepthStencilValue GetVkClearDepthStencilValue() const
 		{
-			return { depth, stencil };
+			return {depth, stencil};
 		}
 	};
-} // namespace np::gpu
+} //namespace np::gpu::__detail
 
 #endif /* NP_ENGINE_GPU_VULKAN_COLOR_HPP */

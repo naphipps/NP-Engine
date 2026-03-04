@@ -20,7 +20,7 @@ namespace np::gpu::__detail
 	class VulkanMultisampleUsage : public MultisampleUsage
 	{
 	public:
-		VulkanMultisampleUsage(ui32 value) : MultisampleUsage(value) {}
+		VulkanMultisampleUsage(ui32 value): MultisampleUsage(value) {}
 
 		//TODO: get Vk things
 
@@ -51,7 +51,7 @@ namespace np::gpu::__detail
 		flt minSampleShadingPercentage = 0;
 		con::vector<ui32> sampleMasks{};
 
-		VulkanMultisample(const Multisample& other = {}) :
+		VulkanMultisample(const Multisample& other = {}):
 			usage(other.usage),
 			minSampleShadingPercentage(other.minSampleShadingPercentage)
 		{
@@ -60,6 +60,6 @@ namespace np::gpu::__detail
 				sampleMasks[i] = (ui32)other.sampleMasks[i];
 		}
 	};
-} // namespace np::gpu
+} //namespace np::gpu::__detail
 
 #endif /* NP_ENGINE_GPU_VULKAN_MULTISAMPLE_HPP */

@@ -25,7 +25,9 @@ namespace np::gpu
 	struct DetailObject
 	{
 		//TODO: make EnsureIsDetailType protected
-		static mem::sptr<DetailObject> EnsureIsDetailType(mem::sptr<DetailObject> object, DetailType type) //TODO: I feel like we ought to have these scattered everywhere just to ensure things
+		static mem::sptr<DetailObject> EnsureIsDetailType(
+			mem::sptr<DetailObject> object,
+			DetailType type) //TODO: I feel like we ought to have these scattered everywhere just to ensure things
 		{
 			return (object && object->GetDetailType() == type) ? object : nullptr;
 		}
@@ -43,7 +45,8 @@ namespace np::gpu
 		}
 	};
 
-	struct DetailObjectWithServices : public DetailObject //TODO: use this for those detail objects that we want services with, then remove DetailObject::GetServices
+	struct DetailObjectWithServices : public DetailObject //TODO: use this for those detail objects that we want services with,
+														  //then remove DetailObject::GetServices
 	{
 		virtual ~DetailObjectWithServices() = default;
 

@@ -37,14 +37,12 @@ namespace np::gpu
 		flt nearPlane = 0;
 		flt farPlane = 0;
 
-		union
-		{
+		union {
 			::glm::vec3 eye{0};
 			::glm::vec3 position;
 		};
 
-		union
-		{
+		union {
 			::glm::vec3 lookAt{0};
 			::glm::vec3 target;
 			::glm::vec3 center;
@@ -81,7 +79,6 @@ namespace np::gpu
 		{
 			return lookAt - eye;
 		}
-
 
 		bl _contains = true;
 		//bl Contains(const VisibleObject& visible_object) const

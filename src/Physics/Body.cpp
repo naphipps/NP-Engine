@@ -389,8 +389,7 @@ namespace np
 	void Body::RemoveDuringFixtureParticleCollisionBeginAction(
 		void (*contactAction)(b2ParticleSystem* particleSystem, b2ParticleBodyContact* particleBodyContact))
 	{
-		std::vector<void (*)(b2ParticleSystem * particleSystem, b2ParticleBodyContact * particleBodyContact)>::iterator
-			iterator;
+		std::vector<void (*)(b2ParticleSystem* particleSystem, b2ParticleBodyContact* particleBodyContact)>::iterator iterator;
 		iterator = find(this->duringFixtureParticleCollisionBeginActions.begin(),
 						this->duringFixtureParticleCollisionBeginActions.end(), contactAction);
 
@@ -404,7 +403,7 @@ namespace np
 																				   b2ParticleSystem* particleSystem,
 																				   int32 particleIndex))
 	{
-		std::vector<void (*)(b2Fixture * fixture, b2ParticleSystem * particleSystem, int32 particleIndex)>::iterator iterator;
+		std::vector<void (*)(b2Fixture* fixture, b2ParticleSystem* particleSystem, int32 particleIndex)>::iterator iterator;
 		iterator = find(this->duringFixtureParticleCollisionEndActions.begin(),
 						this->duringFixtureParticleCollisionEndActions.end(), contactAction);
 
@@ -418,7 +417,7 @@ namespace np
 
 	void Body::RemovePostFixtureCollisionBeginAction(void (*contactAction)(b2Fixture* fixtureA, b2Fixture* fixtureB))
 	{
-		std::vector<void (*)(b2Fixture * fixtureA, b2Fixture * fixtureB)>::iterator iterator;
+		std::vector<void (*)(b2Fixture* fixtureA, b2Fixture* fixtureB)>::iterator iterator;
 		iterator =
 			find(this->postFixtureCollisionBeginActions.begin(), this->postFixtureCollisionBeginActions.end(), contactAction);
 
@@ -430,7 +429,7 @@ namespace np
 
 	void Body::RemovePostFixtureCollisionEndAction(void (*contactAction)(b2Fixture* fixtureA, b2Fixture* fixtureB))
 	{
-		std::vector<void (*)(b2Fixture * fixtureA, b2Fixture * fixtureB)>::iterator iterator;
+		std::vector<void (*)(b2Fixture* fixtureA, b2Fixture* fixtureB)>::iterator iterator;
 		iterator =
 			find(this->postFixtureCollisionEndActions.begin(), this->postFixtureCollisionEndActions.end(), contactAction);
 
@@ -444,7 +443,7 @@ namespace np
 																				   b2ParticleSystem* particleSystem,
 																				   int32 particleIndex))
 	{
-		std::vector<void (*)(b2Fixture * fixture, b2ParticleSystem * particleSystem, int32 particleIndex)>::iterator iterator;
+		std::vector<void (*)(b2Fixture* fixture, b2ParticleSystem* particleSystem, int32 particleIndex)>::iterator iterator;
 		iterator = find(this->postFixtureParticleCollisionBeginActions.begin(),
 						this->postFixtureParticleCollisionBeginActions.end(), contactAction);
 
@@ -458,7 +457,7 @@ namespace np
 																				 b2ParticleSystem* particleSystem,
 																				 int32 particleIndex))
 	{
-		std::vector<void (*)(b2Fixture * fixture, b2ParticleSystem * particleSystem, int32 particleIndex)>::iterator iterator;
+		std::vector<void (*)(b2Fixture* fixture, b2ParticleSystem* particleSystem, int32 particleIndex)>::iterator iterator;
 		iterator = find(this->postFixtureParticleCollisionEndActions.begin(),
 						this->postFixtureParticleCollisionEndActions.end(), contactAction);
 

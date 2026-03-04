@@ -17,7 +17,8 @@ namespace np::gpu
 {
 	struct Framebuffer : public DetailObject
 	{
-		static mem::sptr<Framebuffer> Create(mem::sptr<RenderPass> render_pass, siz width, siz height, siz layer_count, const con::vector<mem::sptr<ImageResourceView>>& views);
+		static mem::sptr<Framebuffer> Create(mem::sptr<RenderPass> render_pass, siz width, siz height, siz layer_count,
+											 const con::vector<mem::sptr<ImageResourceView>>& views);
 
 		//TODO: ^ should we make all collection parameters be const refs? I think so
 

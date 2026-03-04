@@ -66,3 +66,6 @@ AlignOperands: DontAlign
 AlignArrayOfStructures: None
 AlignTrailingComments: false
 ContinuationIndentWidth: 4
+SpacesInLineCommentPrefix:
+    Minimum: 0
+    Maximum: -1

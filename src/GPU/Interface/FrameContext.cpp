@@ -21,7 +21,8 @@ namespace np::gpu
 		switch (device->GetDetailType())
 		{
 		case DetailType::Vulkan:
-			context = mem::create_sptr<__detail::VulkanFrameContext>(device->GetServices()->GetAllocator(), device, queue_families);
+			context =
+				mem::create_sptr<__detail::VulkanFrameContext>(device->GetServices()->GetAllocator(), device, queue_families);
 			break;
 
 		default:

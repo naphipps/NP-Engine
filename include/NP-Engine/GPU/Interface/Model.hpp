@@ -21,8 +21,9 @@
 //#include "Texture.hpp"
 //#include "Vertex.hpp"
 //
-//// TODO: I think we should just use tinyobjloader/tinygltfloader internally, then transition all relevant data to our own structures, like how we treat lodepng and our Image.hpp
-//// TODO: ^ no need to worry about allocators, just let it run and then we get rid of the results after we transition them
+//// TODO: I think we should just use tinyobjloader/tinygltfloader internally, then transition all relevant data to our own
+///structures, like how we treat lodepng and our Image.hpp / TODO: ^ no need to worry about allocators, just let it run and then
+///we get rid of the results after we transition them
 //
 //// TODO: I feel like we need to load the skeleton somewhere around here, and them base it off our root bone
 //
@@ -34,7 +35,7 @@
 //		constexpr static ui32 VERTEX_STRIDE = 3;
 //		constexpr static ui32 TEXTURE_COORDINATE_STRIDE = 2;
 //
-//		struct Accessor 
+//		struct Accessor
 //		{
 //			siz bufferView = -1;
 //			siz byteOffset = 0;
@@ -111,7 +112,7 @@
 //					*/
 //
 //				Accessor a{};
-//				
+//
 //				a.bufferView = (*it)["bufferView"].GetInt();
 //
 //				extracted.emplace_back(a);
@@ -146,7 +147,7 @@
 //
 //			_accessors = ExtractAccessors(json["accessors"].GetArray());
 //
-//			
+//
 //			::rapidjson::Value accessors = json["accessor"].GetArray();
 //
 //			ExtractAccessors(accessors);

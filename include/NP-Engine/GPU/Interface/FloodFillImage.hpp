@@ -31,7 +31,7 @@ namespace np::alg
 			constexpr static ui32 LowerRight = Lower | Right;
 			constexpr static ui32 LowerLeft = Lower | Left;
 
-			PointRelation(ui32 value) : Enum<ui32>(value) {}
+			PointRelation(ui32 value): Enum<ui32>(value) {}
 		};
 
 		struct Payload

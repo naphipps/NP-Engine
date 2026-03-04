@@ -21,7 +21,7 @@ namespace np::gpu
 		constexpr static ui32 Transient = BIT(0);
 		constexpr static ui32 Resettable = BIT(1);
 
-		CommandBufferPoolUsage(ui32 value) : Enum<ui32>(value) {}
+		CommandBufferPoolUsage(ui32 value): Enum<ui32>(value) {}
 	};
 
 	struct CommandBufferPool : public DetailObject
@@ -36,6 +36,6 @@ namespace np::gpu
 
 		virtual bl Reset(mem::sptr<CommandBuffer> command_buffer, CommandBufferUsage usage) = 0;
 	};
-}
+} //namespace np::gpu
 
 #endif /* NP_ENGINE_GPU_INTERFACE_COMMAND_BUFFER_POOL_HPP */

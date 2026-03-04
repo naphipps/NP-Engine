@@ -26,8 +26,9 @@ namespace np::gpu
 
 		virtual mem::sptr<win::Window> GetWindow() const = 0;
 
-		//TODO: I feel like we could benefit from some info we want to use here? maybe this belongs somewhere else? I think we need to be able to pull display info
-		//virtual siz GetPixelsPerInch() const = 0; //TODO: this make have to be a device method
+		//TODO: I feel like we could benefit from some info we want to use here? maybe this belongs somewhere else? I think we
+		//need to be able to pull display info virtual siz GetPixelsPerInch() const = 0; //TODO: this make have to be a device
+		//method
 	};
 } // namespace np::gpu
 

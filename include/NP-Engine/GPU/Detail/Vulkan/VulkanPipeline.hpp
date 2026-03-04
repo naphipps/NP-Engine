@@ -23,7 +23,7 @@ namespace np::gpu::__detail
 	class VulkanPipelineUsage : public PipelineUsage
 	{
 	public:
-		VulkanPipelineUsage(ui32 value) : PipelineUsage(value) {}
+		VulkanPipelineUsage(ui32 value): PipelineUsage(value) {}
 
 		VkPipelineBindPoint GetVkPipelineBindPoint() const
 		{
@@ -66,8 +66,8 @@ namespace np::gpu::__detail
 		}
 
 		static VkPipelineLayout CreateVkPipelineLayout(mem::sptr<VulkanDevice> device,
-			const con::vector<mem::sptr<VulkanResourceLayout>>& resource_layouts,
-			const PushData& push_data)
+													   const con::vector<mem::sptr<VulkanResourceLayout>>& resource_layouts,
+													   const PushData& push_data)
 		{
 			con::vector<VkDescriptorSetLayout> layouts(resource_layouts.size());
 			for (siz i = 0; i < layouts.size(); i++)
@@ -80,13 +80,15 @@ namespace np::gpu::__detail
 			{
 				const PushDataEntry& entry = push_data.entries[i];
 				VkPushConstantRange& range = ranges[i];
-				range = {VulkanStage{ entry.stage }, offset, (ui32)entry.bytes.size()};
+				range = {VulkanStage{entry.stage}, offset, (ui32)entry.bytes.size()};
 				offset += range.size;
 			}
 
 			VkPipelineLayoutCreateInfo info = CreateVkInfo();
 			info.setLayoutCount = (ui32)layouts.size();
-			info.pSetLayouts = layouts.empty() ? nullptr : layouts.data(); //TODO: we should use the empty check everywhere we do this type of thing
+			info.pSetLayouts = layouts.empty()
+				? nullptr
+				: layouts.data(); //TODO: we should use the empty check everywhere we do this type of thing
 			info.pushConstantRangeCount = (ui32)ranges.size();
 			info.pPushConstantRanges = ranges.empty() ? nullptr : ranges.data();
 
@@ -102,9 +104,9 @@ namespace np::gpu::__detail
 		}
 
 	public:
-
-		VulkanPipelineResourceLayout(mem::sptr<Device> device,
-			const con::vector<mem::sptr<ResourceLayout>>& resource_layouts, PushData push_data) : //TODO: make sure all the things are checking our physical device's limits
+		VulkanPipelineResourceLayout(
+			mem::sptr<Device> device, const con::vector<mem::sptr<ResourceLayout>>& resource_layouts,
+			PushData push_data): //TODO: make sure all the things are checking our physical device's limits
 			PipelineResourceLayout(),
 			_device(device),
 			_resource_layouts(resource_layouts.begin(), resource_layouts.end()),
@@ -143,7 +145,7 @@ namespace np::gpu::__detail
 
 		virtual con::vector<mem::sptr<ResourceLayout>> GetResourceLayouts() const override
 		{
-			return { _resource_layouts.begin(), _resource_layouts.end() };
+			return {_resource_layouts.begin(), _resource_layouts.end()};
 		}
 
 		virtual PushData GetPushData() const override
@@ -166,6 +168,6 @@ namespace np::gpu::__detail
 			return set;
 		}
 	};
-}
+} //namespace np::gpu::__detail
 
 #endif /* NP_ENGINE_GPU_VUKLAN_PIPELINE_HPP */

@@ -20,7 +20,7 @@ namespace np::gpu::__detail
 	class VulkanRasterizationUsage : public RasterizationUsage
 	{
 	public:
-		VulkanRasterizationUsage(ui32 value) : RasterizationUsage(value) {}
+		VulkanRasterizationUsage(ui32 value): RasterizationUsage(value) {}
 
 		VkPolygonMode GetVkPolygonMode() const
 		{
@@ -63,7 +63,7 @@ namespace np::gpu::__detail
 		flt clamp = 0;
 		flt slopeScalar = 0;
 
-		VulkanDepthBias(const DepthBias& other = {}) :
+		VulkanDepthBias(const DepthBias& other = {}):
 			constantScalar(other.constantScalar),
 			clamp(other.clamp),
 			slopeScalar(other.slopeScalar)
@@ -71,7 +71,7 @@ namespace np::gpu::__detail
 
 		operator DepthBias() const
 		{
-			return { constantScalar, clamp, slopeScalar };
+			return {constantScalar, clamp, slopeScalar};
 		}
 
 		VkBool32 IsVkEnabled() const
@@ -85,16 +85,16 @@ namespace np::gpu::__detail
 		VulkanRasterizationUsage usage = VulkanRasterizationUsage::None;
 		VulkanDepthBias bias{};
 
-		VulkanRasterization(const Rasterization& other = {}) :usage(other.usage), bias(other.bias) {}
+		VulkanRasterization(const Rasterization& other = {}): usage(other.usage), bias(other.bias) {}
 
 		operator Rasterization() const
 		{
-			return { usage, bias };
+			return {usage, bias};
 		}
 
 		//TODO: get Vk things
 	};
 
-} // namespace np::gpu
+} //namespace np::gpu::__detail
 
 #endif /* NP_ENGINE_GPU_VULKAN_RASTERIZATION_HPP */

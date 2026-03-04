@@ -22,13 +22,12 @@ namespace np::gpu::__detail
 	class VulkanBufferResourceUsage : public BufferResourceUsage
 	{
 	public:
-		VulkanBufferResourceUsage(ui32 value) : BufferResourceUsage(value) {}
+		VulkanBufferResourceUsage(ui32 value): BufferResourceUsage(value) {}
 
 		VkMemoryPropertyFlags GetVkMemoryPropertyFlags() const
 		{
-			return Contains(HostAccessible) ?
-				VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT : 
-				VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
+			return Contains(HostAccessible) ? VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
+											: VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
 		}
 
 		VkBufferUsageFlags GetVkBufferUsageFlags() const
@@ -72,7 +71,8 @@ namespace np::gpu::__detail
 		con::vector<DeviceQueueFamily> _queue_families;
 		VkBuffer _buffer;
 		VkMemoryPropertyFlags _memory_property_flags;
-		mem::sptr<VulkanDeviceMemory> _memory; //TODO: not a good idea to allocate this per buffer, use a device-memory-allocator (guide pg85 mentions this)
+		mem::sptr<VulkanDeviceMemory> _memory; //TODO: not a good idea to allocate this per buffer, use a
+											   //device-memory-allocator (guide pg85 mentions this)
 
 		static VkBufferCreateInfo CreateVkInfo(siz size, VulkanBufferResourceUsage usage)
 		{
@@ -83,7 +83,8 @@ namespace np::gpu::__detail
 			return info;
 		}
 
-		static VkBuffer CreateVkBuffer(mem::sptr<VulkanDevice> device, VulkanBufferResourceUsage usage, siz size, const con::vector<DeviceQueueFamily>& queue_families)
+		static VkBuffer CreateVkBuffer(mem::sptr<VulkanDevice> device, VulkanBufferResourceUsage usage, siz size,
+									   const con::vector<DeviceQueueFamily>& queue_families)
 		{
 			con::vector<ui32> family_indices(queue_families.size());
 			for (siz i = 0; i < family_indices.size(); i++)
@@ -112,12 +113,13 @@ namespace np::gpu::__detail
 		}
 
 	public:
-		VulkanBufferResource(mem::sptr<Device> device, BufferResourceUsage usage, siz size, const con::vector<DeviceQueueFamily>& queue_families) :
+		VulkanBufferResource(mem::sptr<Device> device, BufferResourceUsage usage, siz size,
+							 const con::vector<DeviceQueueFamily>& queue_families):
 			_device(device),
 			_size(size),
-			_queue_families{ queue_families.begin(), queue_families.end() },
+			_queue_families{queue_families.begin(), queue_families.end()},
 			_buffer(CreateVkBuffer(_device, _size, usage, _queue_families)),
-			_memory_property_flags(VulkanBufferResourceUsage{ usage }.GetVkMemoryPropertyFlags()),
+			_memory_property_flags(VulkanBufferResourceUsage{usage}.GetVkMemoryPropertyFlags()),
 			_memory(_device->CreateDeviceMemory(GetVkMemoryRequirements(_device, _buffer), _memory_property_flags))
 		{
 			BindMemory();
@@ -169,7 +171,9 @@ namespace np::gpu::__detail
 			return false;
 		}
 
-		virtual bl Assign(siz offset, const con::vector<ui8>& bytes) override //TODO: support offset and size? This area just feels a little off -- should this belong in the VulkanBufferView??
+		virtual bl Assign(siz offset,
+						  const con::vector<ui8>& bytes) override //TODO: support offset and size? This area just feels a little
+																  //off -- should this belong in the VulkanBufferView??
 		{
 			bl assigned = false;
 			if (offset + bytes.size() < _size)
@@ -181,8 +185,6 @@ namespace np::gpu::__detail
 			}
 			return assigned;
 		}
-
-
 
 		/*const mem::sptr<VulkanDeviceMemory> GetDeviceMemory() const
 		{

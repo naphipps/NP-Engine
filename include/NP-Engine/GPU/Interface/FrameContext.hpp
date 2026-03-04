@@ -59,7 +59,7 @@ namespace np::gpu
 		virtual siz GetFrameHeight() const = 0;
 
 		virtual Format GetFrameFormat() const = 0;
-		
+
 		//TODO: do we need a way to get images/views?
 
 		virtual con::vector<mem::sptr<ImageResourceView>> GetImageViews() const

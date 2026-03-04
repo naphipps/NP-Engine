@@ -24,7 +24,8 @@ namespace np::gpu
 		constexpr static ui32 HostAccessible = BIT(2);
 		constexpr static ui32 Sparse = BIT(3);
 		constexpr static ui32 Dynamic = BIT(4);
-		constexpr static ui32 Indirect = BIT(5); //TODO: I feel like we can make a better name for buffers that are used for cmds (like indirect dispatch)
+		constexpr static ui32 Indirect =
+			BIT(5); //TODO: I feel like we can make a better name for buffers that are used for cmds (like indirect dispatch)
 
 		constexpr static ui32 Transfer = BIT(6);
 		constexpr static ui32 Uniform = BIT(7);
@@ -32,13 +33,15 @@ namespace np::gpu
 		constexpr static ui32 Texel = BIT(9);
 		constexpr static ui32 Index = BIT(10);
 		constexpr static ui32 Vertex = BIT(11);
-		
-		BufferResourceUsage(ui32 value) : ResourceUsage(value) {}
+
+		BufferResourceUsage(ui32 value): ResourceUsage(value) {}
 	};
 
 	struct BufferResource : public Resource
 	{
-		static mem::sptr<BufferResource> Create(mem::sptr<Device> device, BufferResourceUsage usage, siz size, const con::vector<DeviceQueueFamily>& queue_families); //TODO: accept formats? memory flags?
+		static mem::sptr<BufferResource> Create(
+			mem::sptr<Device> device, BufferResourceUsage usage, siz size,
+			const con::vector<DeviceQueueFamily>& queue_families); //TODO: accept formats? memory flags?
 
 		virtual ~BufferResource() = default;
 

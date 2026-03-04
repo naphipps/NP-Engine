@@ -28,8 +28,8 @@ namespace np::gpu
 		constexpr static ui32 Green = G;
 		constexpr static ui32 Blue = B;
 		constexpr static ui32 Alpha = A;
-		
-		ColorChannel(ui32 value) : Enum<ui32>(value) {}
+
+		ColorChannel(ui32 value): Enum<ui32>(value) {}
 
 		bl IsSingleChannel() const
 		{
@@ -42,26 +42,22 @@ namespace np::gpu
 	*/
 	struct Color
 	{
-		union
-		{
+		union {
 			ui8 r = UI8_MIN;
 			ui8 Red;
 		};
 
-		union
-		{
+		union {
 			ui8 g = UI8_MIN;
 			ui8 Green;
 		};
 
-		union
-		{
+		union {
 			ui8 b = UI8_MIN;
 			ui8 Blue;
 		};
 
-		union
-		{
+		union {
 			ui8 a = UI8_MAX;
 			ui8 Alpha;
 		};

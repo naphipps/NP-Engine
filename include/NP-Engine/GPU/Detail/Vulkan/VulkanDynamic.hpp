@@ -19,7 +19,7 @@ namespace np::gpu::__detail
 	class VulkanDynamicUsage : public DynamicUsage
 	{
 	public:
-		VulkanDynamicUsage(ui32 value) : DynamicUsage(value) {}
+		VulkanDynamicUsage(ui32 value): DynamicUsage(value) {}
 
 		con::vector<VkDynamicState> GetVkDynamicStates() const
 		{
@@ -47,6 +47,6 @@ namespace np::gpu::__detail
 			return states;
 		}
 	};
-} // namespace np::gpu
+} //namespace np::gpu::__detail
 
 #endif /* NP_ENGINE_GPU_VULKAN_DYNAMIC_HPP */

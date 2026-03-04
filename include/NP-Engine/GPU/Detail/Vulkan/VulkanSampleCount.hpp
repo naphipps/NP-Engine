@@ -21,13 +21,15 @@ namespace np::gpu::__detail
 		ui32 _value;
 
 	public:
-		constexpr static VkSampleCountFlags AllVkSampleCountFlags = VK_SAMPLE_COUNT_1_BIT | VK_SAMPLE_COUNT_2_BIT | VK_SAMPLE_COUNT_4_BIT |
-			VK_SAMPLE_COUNT_8_BIT | VK_SAMPLE_COUNT_16_BIT | VK_SAMPLE_COUNT_32_BIT | VK_SAMPLE_COUNT_64_BIT;
+		constexpr static VkSampleCountFlags AllVkSampleCountFlags = VK_SAMPLE_COUNT_1_BIT | VK_SAMPLE_COUNT_2_BIT |
+			VK_SAMPLE_COUNT_4_BIT | VK_SAMPLE_COUNT_8_BIT | VK_SAMPLE_COUNT_16_BIT | VK_SAMPLE_COUNT_32_BIT |
+			VK_SAMPLE_COUNT_64_BIT;
 
-		constexpr static con::array<VkSampleCountFlagBits, 7> AllVkSampleCountFlagBitsArray{ VK_SAMPLE_COUNT_1_BIT, VK_SAMPLE_COUNT_2_BIT, VK_SAMPLE_COUNT_4_BIT,
-			VK_SAMPLE_COUNT_8_BIT, VK_SAMPLE_COUNT_16_BIT, VK_SAMPLE_COUNT_32_BIT, VK_SAMPLE_COUNT_64_BIT };
+		constexpr static con::array<VkSampleCountFlagBits, 7> AllVkSampleCountFlagBitsArray{
+			VK_SAMPLE_COUNT_1_BIT,	VK_SAMPLE_COUNT_2_BIT,	VK_SAMPLE_COUNT_4_BIT, VK_SAMPLE_COUNT_8_BIT,
+			VK_SAMPLE_COUNT_16_BIT, VK_SAMPLE_COUNT_32_BIT, VK_SAMPLE_COUNT_64_BIT};
 
-		VulkanSampleCount(ui32 value = 0) :_value(value) {}
+		VulkanSampleCount(ui32 value = 0): _value(value) {}
 
 		operator ui32() const
 		{

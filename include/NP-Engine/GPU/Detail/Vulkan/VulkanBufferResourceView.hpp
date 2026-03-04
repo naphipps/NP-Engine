@@ -52,12 +52,12 @@ namespace np::gpu::__detail
 			return info;
 		}
 
-		VulkanBufferResourceView(mem::sptr<VulkanLogicalDevice> device, const VkBufferViewCreateInfo& info) :
+		VulkanBufferResourceView(mem::sptr<VulkanLogicalDevice> device, const VkBufferViewCreateInfo& info):
 			_device(device),
 			_buffer_view(CreateBufferView(_device, info))
 		{}
 
-		VulkanBufferResourceView(VulkanBufferResourceView&& other) noexcept :
+		VulkanBufferResourceView(VulkanBufferResourceView&& other) noexcept:
 			_device(::std::move(other._device)),
 			_buffer_view(::std::move(other._buffer_view))
 		{

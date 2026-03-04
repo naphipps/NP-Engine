@@ -27,10 +27,10 @@
 			void* alloc(userData, size, alignment, scope)
 			{
 				allocate block with sub-blocks like:
-				[[magic number byte][zeroized bytes][vulkan block for requested size starting on multiple of requested alignment]]
-				size of magic-number-block.size shall be 1
-				size of magic-number-block.size + zeroized-block.size shall be multiple of our ALIGNMENT
-				
+				[[magic number byte][zeroized bytes][vulkan block for requested size starting on multiple of requested
+   alignment]] size of magic-number-block.size shall be 1 size of magic-number-block.size + zeroized-block.size shall be
+   multiple of our ALIGNMENT
+
 				RETURN pointer where vulkan block starts
 
 				^This way, vulkan block can start on pointer that is a multiple of requested alignment
@@ -68,8 +68,9 @@ namespace np::gpu::__detail
 
 			con::vector<str> known_msgs{
 				R"(loader_scanned_icd_add: Driver C:\Windows\System32\DriverStore\FileRepository\u0377495.inf_amd64_58cc395c0bf03a26\B377432\.\amdvlk64.dll says it supports interface version 6 but still exports core entrypoints (Policy #LDP_DRIVER_6))" // vulkansdk 1.3.211
-				,"Layer VK_LAYER_RTSS uses API version 1.1 which is older than the application specified API version of 1.2. May cause issues."
-			};
+				,
+				"Layer VK_LAYER_RTSS uses API version 1.1 which is older than the application specified API version of 1.2. "
+				"May cause issues."};
 
 			VkBool32 retval = VK_TRUE;
 			bl found = false;

@@ -23,17 +23,20 @@ namespace np::gpu::__detail
 		mem::sptr<VulkanPipelineResourceLayout> _layout;
 		VkPipeline _pipeline;
 
-		static VkComputePipelineCreateInfo CreateVkInfo(mem::sptr<VulkanShader> shader, mem::sptr<VulkanPipelineResourceLayout> layout, VulkanPipelineUsage usage)
+		static VkComputePipelineCreateInfo CreateVkInfo(mem::sptr<VulkanShader> shader,
+														mem::sptr<VulkanPipelineResourceLayout> layout,
+														VulkanPipelineUsage usage)
 		{
 			VkComputePipelineCreateInfo info{};
 			info.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO;
 			info.flags = usage.GetVkPipelineCreateFlags();
 			info.stage = shader->GetVkPipelineShaderStageCreateInfo();
-			info.layout = layout ? *layout : (VkPipelineLayout)nullptr;
+			info.layout = layout ? *layout : (VkPipelineLayout) nullptr;
 			return info;
 		}
 
-		static VkPipeline CreateVkPipeline(mem::sptr<VulkanShader> shader, mem::sptr<VulkanPipelineResourceLayout> layout, VulkanPipelineUsage usage, mem::sptr<VulkanPipelineCache> cache)
+		static VkPipeline CreateVkPipeline(mem::sptr<VulkanShader> shader, mem::sptr<VulkanPipelineResourceLayout> layout,
+										   VulkanPipelineUsage usage, mem::sptr<VulkanPipelineCache> cache)
 		{
 			VkComputePipelineCreateInfo info = CreateVkInfo(shader, layout, usage);
 			mem::sptr<VulkanDevice> device = shader->GetDevice();
@@ -43,7 +46,8 @@ namespace np::gpu::__detail
 		}
 
 	public:
-		VulkanComputePipeline(mem::sptr<Shader> shader, mem::sptr<PipelineResourceLayout> layout, PipelineUsage usage, mem::sptr<PipelineCache> cache):
+		VulkanComputePipeline(mem::sptr<Shader> shader, mem::sptr<PipelineResourceLayout> layout, PipelineUsage usage,
+							  mem::sptr<PipelineCache> cache):
 			_shader(shader),
 			_layout(layout),
 			_pipeline(CreateVkPipeline(_shader, _layout, (ui32)usage, cache))
@@ -89,6 +93,6 @@ namespace np::gpu::__detail
 			return _layout;
 		}
 	};
-}
+} //namespace np::gpu::__detail
 
 #endif /* NP_ENGINE_GPU_VUKLAN_COMPUTE_PIPELINE_HPP */

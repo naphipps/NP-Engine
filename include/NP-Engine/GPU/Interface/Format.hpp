@@ -21,7 +21,7 @@ namespace np::gpu
 		//store depth in bits [24, 31]
 		constexpr static ui32 ComponentSizeShift = 24;
 		constexpr static ui32 ComponentSizeMask = BIT(32) - BIT(ComponentSizeShift);
-		
+
 	public:
 		constexpr static ui32 Integer = BIT(0);
 		constexpr static ui32 Floating = BIT(1);
@@ -33,13 +33,13 @@ namespace np::gpu
 		constexpr static ui32 Unsigned = BIT(14);
 		constexpr static ui32 GammaCorrection = BIT(15);
 
-		Format(ui32 value, ui32 component_count, ui32 component_size) : Enum<ui32>(value)
+		Format(ui32 value, ui32 component_count, ui32 component_size): Enum<ui32>(value)
 		{
 			SetComponentCount(component_count);
 			SetComponentSize(component_size);
 		}
 
-		Format(ui32 value) : Enum<ui32>(value) {}
+		Format(ui32 value): Enum<ui32>(value) {}
 
 		virtual ui32 GetComponentSize() const
 		{

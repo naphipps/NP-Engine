@@ -31,7 +31,8 @@ namespace np::net
 
 		void ToggleState()
 		{
-			for (bl flag = _flag.load(mo_acquire); !_flag.compare_exchange_weak(flag, !flag, mo_release, mo_relaxed););
+			for (bl flag = _flag.load(mo_acquire); !_flag.compare_exchange_weak(flag, !flag, mo_release, mo_relaxed);)
+				;
 		}
 
 		void Push(Message msg)

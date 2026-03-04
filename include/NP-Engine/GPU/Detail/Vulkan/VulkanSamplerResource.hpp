@@ -24,7 +24,7 @@ namespace np::gpu::__detail
 	class VulkanSamplerBorder : public SamplerBorder
 	{
 	public:
-		VulkanSamplerBorder(ui32 value) : SamplerBorder(value) {}
+		VulkanSamplerBorder(ui32 value): SamplerBorder(value) {}
 
 		VkBorderColor GetBorderColor() const
 		{
@@ -44,7 +44,7 @@ namespace np::gpu::__detail
 	class VulkanSamplerAddressMode : public SamplerAddressMode
 	{
 	public:
-		VulkanSamplerAddressMode(ui32 value) : SamplerAddressMode(value) {}
+		VulkanSamplerAddressMode(ui32 value): SamplerAddressMode(value) {}
 
 		VkSamplerAddressMode GetSamplerAddressMode() const
 		{
@@ -71,18 +71,18 @@ namespace np::gpu::__detail
 		VulkanSamplerAddressMode v = VulkanSamplerAddressMode::None;
 		VulkanSamplerAddressMode w = VulkanSamplerAddressMode::None;
 
-		VulkanSamplerAddressModes(const SamplerAddressModes& modes = {}) :u(modes.u), v(modes.v), w(modes.w) {}
+		VulkanSamplerAddressModes(const SamplerAddressModes& modes = {}): u(modes.u), v(modes.v), w(modes.w) {}
 
 		operator SamplerAddressModes() const
 		{
-			return { u, v, w };
+			return {u, v, w};
 		}
 	};
 
 	class VulkanSamplerResourceUsage : public SamplerResourceUsage
 	{
 	public:
-		VulkanSamplerResourceUsage(ui32 value) : SamplerResourceUsage(value) {}
+		VulkanSamplerResourceUsage(ui32 value): SamplerResourceUsage(value) {}
 
 		VkFilter GetMagnifyFilter() const
 		{
@@ -110,11 +110,11 @@ namespace np::gpu::__detail
 		flt min = 0;
 		flt max = 0;
 
-		VulkanLodBounds(const LodBounds& other = {}) : min(other.min), max(other.max) {}
+		VulkanLodBounds(const LodBounds& other = {}): min(other.min), max(other.max) {}
 
 		operator LodBounds() const //TODO: I like this -- we should do this for all the vulkan-ized objects we have
 		{
-			return { min, max };
+			return {min, max};
 		}
 	};
 
@@ -129,8 +129,9 @@ namespace np::gpu::__detail
 		VulkanSamplerAddressModes _address_modes;
 		VkSampler _sampler;
 
-		static VkSamplerCreateInfo CreateVkInfo(VulkanSamplerResourceUsage usage, flt anisotrophy, VulkanCompareOperation op, VulkanLodBounds lod_bounds,
-			VulkanSamplerBorder border, VulkanSamplerAddressModes address_modes)
+		static VkSamplerCreateInfo CreateVkInfo(VulkanSamplerResourceUsage usage, flt anisotrophy, VulkanCompareOperation op,
+												VulkanLodBounds lod_bounds, VulkanSamplerBorder border,
+												VulkanSamplerAddressModes address_modes)
 		{
 			VkSamplerCreateInfo info{};
 			info.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
@@ -153,13 +154,15 @@ namespace np::gpu::__detail
 			return info;
 		}
 
-		static VkSampler CreateVkSampler(mem::sptr<VulkanDevice> device, VulkanSamplerResourceUsage usage,
-			flt anisotrophy, VulkanCompareOperation op, VulkanLodBounds lod_bounds,
-			VulkanSamplerBorder border, VulkanSamplerAddressModes address_modes)
+		static VkSampler CreateVkSampler(mem::sptr<VulkanDevice> device, VulkanSamplerResourceUsage usage, flt anisotrophy,
+										 VulkanCompareOperation op, VulkanLodBounds lod_bounds, VulkanSamplerBorder border,
+										 VulkanSamplerAddressModes address_modes)
 		{
 			const VkPhysicalDeviceProperties properties = device->GetLogicalDevice()->GetPhysicalDevice().GetVkProperties();
 			const VkPhysicalDeviceFeatures features = device->GetLogicalDevice()->GetPhysicalDevice().GetVkFeatures();
-			anisotrophy = features.samplerAnisotropy == VK_TRUE ? ::std::clamp(anisotrophy, 1.f, properties.limits.maxSamplerAnisotropy) : 1.f;
+			anisotrophy = features.samplerAnisotropy == VK_TRUE
+				? ::std::clamp(anisotrophy, 1.f, properties.limits.maxSamplerAnisotropy)
+				: 1.f;
 
 			VkSamplerCreateInfo info = CreateVkInfo(usage, anisotrophy, op, lod_bounds, border, address_modes);
 
@@ -169,15 +172,16 @@ namespace np::gpu::__detail
 		}
 
 	public:
-		VulkanSamplerResource(mem::sptr<Device> device, SamplerResourceUsage usage, dbl anisotrophy, CompareOperation op, LodBounds lod_bounds,
-			SamplerBorder border, SamplerAddressModes address_modes):
+		VulkanSamplerResource(mem::sptr<Device> device, SamplerResourceUsage usage, dbl anisotrophy, CompareOperation op,
+							  LodBounds lod_bounds, SamplerBorder border, SamplerAddressModes address_modes):
 			_device(device),
 			_anisotrophy(anisotrophy),
 			_op(op),
 			_lod_bounds(lod_bounds),
 			_border(border),
 			_address_modes(address_modes),
-			_sampler(CreateVkSampler(_device, VulkanSamplerResourceUsage{ usage }, _anisotrophy, _op, _lod_bounds, _border, _address_modes))
+			_sampler(CreateVkSampler(_device, VulkanSamplerResourceUsage{usage}, _anisotrophy, _op, _lod_bounds, _border,
+									 _address_modes))
 		{}
 
 		~VulkanSamplerResource()
