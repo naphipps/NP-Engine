@@ -4,8 +4,8 @@
 //
 //##===----------------------------------------------------------------------===##//
 
-#ifndef NP_ENGINE_DRAWABLE_IMAGE_HPP
-#define NP_ENGINE_DRAWABLE_IMAGE_HPP
+#ifndef NP_ENGINE_GPU_INTERFACE_DRAWABLE_IMAGE_HPP
+#define NP_ENGINE_GPU_INTERFACE_DRAWABLE_IMAGE_HPP
 
 #include <utility>
 
@@ -50,13 +50,13 @@ namespace np::alg
 			Payload& payload = *((Payload*)d.GetPayload());
 			Point point = payload.point;
 
-			if (FloodFillImage::PointRelationContains(payload.relation, Relation::Upper))
+			if (payload.relation.Contains(Relation::Upper))
 				point.y++;
-			if (FloodFillImage::PointRelationContains(payload.relation, Relation::Lower))
+			if (payload.relation.Contains(Relation::Lower))
 				point.y--;
-			if (FloodFillImage::PointRelationContains(payload.relation, Relation::Right))
+			if (payload.relation.Contains(Relation::Right))
 				point.x++;
-			if (FloodFillImage::PointRelationContains(payload.relation, Relation::Left))
+			if (payload.relation.Contains(Relation::Left))
 				point.x--;
 
 			return payload.imageSubview->Get(point) == payload.oldColor;
@@ -74,13 +74,13 @@ namespace np::alg
 			Payload& payload = *((Payload*)d.GetPayload());
 			OutsidePoint point = payload.point;
 
-			if (FloodFillImage::PointRelationContains(payload.relation, Relation::Upper))
+			if (payload.relation.Contains(Relation::Upper))
 				point.y++;
-			if (FloodFillImage::PointRelationContains(payload.relation, Relation::Lower))
+			if (payload.relation.Contains(Relation::Lower))
 				point.y--;
-			if (FloodFillImage::PointRelationContains(payload.relation, Relation::Right))
+			if (payload.relation.Contains(Relation::Right))
 				point.x++;
-			if (FloodFillImage::PointRelationContains(payload.relation, Relation::Left))
+			if (payload.relation.Contains(Relation::Left))
 				point.x--;
 
 			payload.outsideEdgePoints->emplace(point);
@@ -206,4 +206,4 @@ namespace np::alg
 	};
 } // namespace np::alg
 
-#endif /* NP_ENGINE_DRAWABLE_IMAGE_HPP */
+#endif /* NP_ENGINE_GPU_INTERFACE_DRAWABLE_IMAGE_HPP */

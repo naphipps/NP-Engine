@@ -4,44 +4,69 @@
 //
 //##===----------------------------------------------------------------------===##//
 
-#ifndef NP_ENGINE_GPU_INTERFACE_RENDER_PASS_HPP
-#define NP_ENGINE_GPU_INTERFACE_RENDER_PASS_HPP
+#ifndef NP_ENGINE_GPU_INTERFACE_RENDERPASS_HPP
+#define NP_ENGINE_GPU_INTERFACE_RENDERPASS_HPP
 
 #include "NP-Engine/Memory/Memory.hpp"
+#include "NP-Engine/Primitive/Primitive.hpp"
+#include "NP-Engine/Container/Container.hpp"
 
-#include "DetailType.hpp"
-#include "Pass.hpp"
-#include "RenderContext.hpp"
+#include "Access.hpp"
+#include "Device.hpp"
+#include "ImageResource.hpp"
+#include "Stage.hpp"
 
 namespace np::gpu
 {
-	class RenderPass : public Pass
+	//TODO: if subpass is indeed only renderpass related, then consider renaming subpass to renderstep
+
+	struct SubpassImageResourceReference
 	{
-	protected:
-		mem::sptr<RenderContext> _context;
+		siz framebufferImageViewIndex = SIZ_MAX;
+		ImageResourceUsage usage = ImageResourceUsage::None; //the expected usage/layout of the image for this subpass
+	};
 
-		RenderPass(mem::sptr<RenderContext> context): Pass(), _context(context) {}
+	struct SubpassDescription
+	{
+		con::vector<SubpassImageResourceReference> inputs{}; //input images
+		con::vector<SubpassImageResourceReference> outputs{}; //output images
+		con::vector<SubpassImageResourceReference> multisampleResolves{}; //multisampled images whose results are to be resolved over subpass
+		con::vector<siz> preserveFramebufferImageViewIndicies{}; //preserve these images over subpass
+	};
 
+	struct SubpassDependency
+	{
+		siz srcSubpassIndex = 0; //producer
+		siz dstSubpassIndex = 0; //consumer
+		Stage srcStage = Stage::None; //stages we produce
+		Stage dstStage = Stage::None; //stages we consume
+		Access srcAccess = Access::None; //how producer subpass will access attachments
+		Access dstAccess = Access::None; //how consumer subpass will access attachments
+	};
+
+	class SubpassUsage : public Enum<ui32>
+	{
 	public:
-		static mem::sptr<RenderPass> Create(mem::sptr<RenderContext> context);
+		constexpr static ui32 HasSecondary = BIT(0);
+		
+		SubpassUsage(ui32 value) : Enum<ui32>(value) {}
+	};
+
+	struct RenderPass : public DetailObject //TODO: rename to "Renderpass"
+	{
+		static mem::sptr<RenderPass> Create(mem::sptr<Device> device, const con::vector<ImageResourceDescription>& descriptions,
+			const con::vector<SubpassDescription>& subpasses, const con::vector<SubpassDependency>& dependencies);
 
 		virtual ~RenderPass() = default;
 
-		virtual DetailType GetDetailType() const
-		{
-			return _context->GetDetailType();
-		}
+		virtual mem::sptr<Device> GetDevice() const = 0;
 
-		virtual mem::sptr<RenderContext> GetRenderContext() const
-		{
-			return _context;
-		}
+		virtual con::vector<ImageResourceDescription> GetImageResourceDescriptions() const = 0;
 
-		virtual mem::sptr<srvc::Services> GetServices() const
-		{
-			return _context->GetServices();
-		}
+		virtual con::vector<SubpassDescription> GetSubpassDescriptions() const = 0;
+
+		virtual con::vector<SubpassDependency> GetSubpassDepenedencies() const = 0;
 	};
 } // namespace np::gpu
 
-#endif /* NP_ENGINE_GPU_INTERFACE_RENDER_PASS_HPP */
+#endif /* NP_ENGINE_GPU_INTERFACE_RENDERPASS_HPP */

@@ -4,8 +4,8 @@
 //
 //##===----------------------------------------------------------------------===##//
 
-#ifndef NP_ENGINE_VULKAN_INSTANCE_HPP
-#define NP_ENGINE_VULKAN_INSTANCE_HPP
+#ifndef NP_ENGINE_GPU_VULKAN_INSTANCE_HPP
+#define NP_ENGINE_GPU_VULKAN_INSTANCE_HPP
 
 #include <iostream>
 
@@ -15,9 +15,35 @@
 #include "NP-Engine/Platform/Platform.hpp"
 #include "NP-Engine/Services/Services.hpp"
 
+#include "NP-Engine/Vendor/VulkanInclude.hpp"
+
 #include "NP-Engine/GPU/Interface/Interface.hpp"
 
-#include "NP-Engine/Vendor/VulkanInclude.hpp"
+#include "VulkanAllocationCallbacks.hpp"
+
+/*
+	TODO: create VulkanAllocator. Below are some thoughts:
+		- since vulkan requires specific alignment, alloc could look like this:
+			void* alloc(userData, size, alignment, scope)
+			{
+				allocate block with sub-blocks like:
+				[[magic number byte][zeroized bytes][vulkan block for requested size starting on multiple of requested alignment]]
+				size of magic-number-block.size shall be 1
+				size of magic-number-block.size + zeroized-block.size shall be multiple of our ALIGNMENT
+				
+				RETURN pointer where vulkan block starts
+
+				^This way, vulkan block can start on pointer that is a multiple of requested alignment
+					AND we can just navigate before that to find our magic number. The address of that magic-number-byte
+					shall be the address our allocators produce. So we need to calculate an aligned size for
+					all these sub-blocks, allocate that from our allocators, mark the magic number, zeroize
+					the remaining bytes up to where the vulkan block starts, then return where that vulkan block starts.
+					THEN reverse for free, account for realloc, etc.
+
+				Magic number can be 15, 1, ~0, or something. Does not matter. Just NOT zero.
+			}
+		- take advantage of those alloc/free notification callbacks
+*/
 
 namespace np::gpu::__detail
 {
@@ -26,6 +52,8 @@ namespace np::gpu::__detail
 	private:
 		constexpr static ui32 REQUIRED_VERSION = VK_MAKE_API_VERSION(0, 1, 2, 189);
 
+		mem::sptr<srvc::Services> _services;
+		VulkanAllocationCallbacks _allocation_callbacks;
 		VkInstance _instance;
 		VkDebugUtilsMessengerEXT _debug_messenger;
 
@@ -40,6 +68,7 @@ namespace np::gpu::__detail
 
 			con::vector<str> known_msgs{
 				R"(loader_scanned_icd_add: Driver C:\Windows\System32\DriverStore\FileRepository\u0377495.inf_amd64_58cc395c0bf03a26\B377432\.\amdvlk64.dll says it supports interface version 6 but still exports core entrypoints (Policy #LDP_DRIVER_6))" // vulkansdk 1.3.211
+				,"Layer VK_LAYER_RTSS uses API version 1.1 which is older than the application specified API version of 1.2. May cause issues."
 			};
 
 			VkBool32 retval = VK_TRUE;
@@ -81,7 +110,7 @@ namespace np::gpu::__detail
 			return version;
 		}
 
-		con::vector<VkExtensionProperties> GetSupportedInstanceExtensions() const
+		con::vector<VkExtensionProperties> GetVkSupportedInstanceExtensions() const
 		{
 			ui32 count = 0;
 			vkEnumerateInstanceExtensionProperties(nullptr, &count, nullptr);
@@ -92,14 +121,14 @@ namespace np::gpu::__detail
 
 		con::vector<str> GetSupportedInstanceExtensionNames() const
 		{
-			con::vector<VkExtensionProperties> extensions = GetSupportedInstanceExtensions();
+			con::vector<VkExtensionProperties> extensions = GetVkSupportedInstanceExtensions();
 			con::vector<str> names;
-			for (auto e : extensions)
+			for (const VkExtensionProperties& e : extensions)
 				names.emplace_back(e.extensionName);
 			return names;
 		}
 
-		con::vector<VkLayerProperties> GetSupportedInstanceLayers() const
+		con::vector<VkLayerProperties> GetVkSupportedInstanceLayers() const
 		{
 			ui32 count;
 			vkEnumerateInstanceLayerProperties(&count, nullptr);
@@ -110,9 +139,9 @@ namespace np::gpu::__detail
 
 		con::vector<str> GetSupportedInstanceLayerNames() const
 		{
-			con::vector<VkLayerProperties> layers = GetSupportedInstanceLayers();
+			con::vector<VkLayerProperties> layers = GetVkSupportedInstanceLayers();
 			con::vector<str> names;
-			for (auto e : layers)
+			for (const VkLayerProperties& e : layers)
 				names.emplace_back(e.layerName);
 			return names;
 		}
@@ -127,7 +156,10 @@ namespace np::gpu::__detail
 #endif
 
 			con::vector<str> window_required = win::Window::GetRequiredGpuExtentions(win::DetailType::Glfw);
+			for (const str& extension : window_required)
+				extension_set.emplace(extension);
 
+			window_required = win::Window::GetRequiredGpuExtentions(win::DetailType::Sdl);
 			for (const str& extension : window_required)
 				extension_set.emplace(extension);
 
@@ -150,7 +182,7 @@ namespace np::gpu::__detail
 			return layers;
 		}
 
-		VkApplicationInfo CreateApplicationInfo()
+		VkApplicationInfo CreateVkApplicationInfo()
 		{
 			VkApplicationInfo info{};
 			info.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
@@ -158,11 +190,11 @@ namespace np::gpu::__detail
 			info.applicationVersion = VK_MAKE_VERSION(1, 2, 3); // TODO: get version from cmake
 			info.pEngineName = "NP Engine";
 			info.engineVersion = VK_MAKE_VERSION(2, 3, 4); // TODO: get version from cmake
-			info.apiVersion = REQUIRED_VERSION;
+			info.apiVersion = REQUIRED_VERSION; //minimum version we want to run on
 			return info;
 		}
 
-		VkDebugUtilsMessengerCreateInfoEXT CreateDebugMessagerInfo()
+		VkDebugUtilsMessengerCreateInfoEXT CreateVkDebugMessagerInfo()
 		{
 			VkDebugUtilsMessengerCreateInfoEXT info{};
 			info.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
@@ -175,7 +207,7 @@ namespace np::gpu::__detail
 			return info;
 		}
 
-		VkInstanceCreateInfo CreateInstanceInfo()
+		VkInstanceCreateInfo CreateVkInfo()
 		{
 			VkInstanceCreateInfo info{};
 			info.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
@@ -187,12 +219,10 @@ namespace np::gpu::__detail
 			return info;
 		}
 
-		VkInstance CreateInstance()
+		VkInstance CreateVkInstance()
 		{
-			VkInstance instance = nullptr;
-
-			VkApplicationInfo app_info = CreateApplicationInfo();
-			VkDebugUtilsMessengerCreateInfoEXT debug_msgr_info = CreateDebugMessagerInfo();
+			VkApplicationInfo app_info = CreateVkApplicationInfo();
+			VkDebugUtilsMessengerCreateInfoEXT debug_msgr_info = CreateVkDebugMessagerInfo();
 
 			con::vector<str> required_extensions = GetRequiredInstanceExtensionNames();
 			con::vector<const chr*> required_extension_names;
@@ -204,7 +234,7 @@ namespace np::gpu::__detail
 			for (const str& layer : required_layers)
 				required_layer_names.emplace_back(layer.c_str());
 
-			VkInstanceCreateInfo instance_info = CreateInstanceInfo();
+			VkInstanceCreateInfo instance_info = CreateVkInfo();
 			instance_info.pApplicationInfo = &app_info;
 			instance_info.enabledExtensionCount = required_extension_names.size();
 			instance_info.ppEnabledExtensionNames = required_extension_names.data();
@@ -224,15 +254,14 @@ namespace np::gpu::__detail
 
 			bl layers_and_extensions_found = required_extension_set.empty() && required_layer_set.empty();
 
+			VkInstance instance = nullptr;
 			if (!layers_and_extensions_found || vkCreateInstance(&instance_info, nullptr, &instance) != VK_SUCCESS)
-			{
 				instance = nullptr;
-			}
 
 			return instance;
 		}
 
-		VkDebugUtilsMessengerEXT CreateDebugMessenger()
+		VkDebugUtilsMessengerEXT CreateVkDebugMessenger()
 		{
 			VkDebugUtilsMessengerEXT messenger = nullptr;
 
@@ -243,7 +272,7 @@ namespace np::gpu::__detail
 
 				if (func)
 				{
-					VkDebugUtilsMessengerCreateInfoEXT debug_msgr_info = CreateDebugMessagerInfo();
+					VkDebugUtilsMessengerCreateInfoEXT debug_msgr_info = CreateVkDebugMessagerInfo();
 					func(_instance, &debug_msgr_info, nullptr, &messenger);
 				}
 			}
@@ -253,12 +282,13 @@ namespace np::gpu::__detail
 
 	public:
 		VulkanInstance(mem::sptr<srvc::Services> services):
-			DetailInstance(services),
-			_instance(CreateInstance()),
-			_debug_messenger(CreateDebugMessenger())
+			_services(services),
+			_allocation_callbacks(_services),
+			_instance(CreateVkInstance()),
+			_debug_messenger(CreateVkDebugMessenger())
 		{}
 
-		~VulkanInstance()
+		virtual ~VulkanInstance()
 		{
 			if (_debug_messenger)
 			{
@@ -284,9 +314,14 @@ namespace np::gpu::__detail
 			return _instance;
 		}
 
-		DetailType GetDetailType() const override
+		virtual DetailType GetDetailType() const override
 		{
 			return DetailType::Vulkan;
+		}
+
+		virtual mem::sptr<srvc::Services> GetServices() const override
+		{
+			return _services;
 		}
 	};
 } // namespace np::gpu::__detail

@@ -17,6 +17,7 @@
 #include "StatisticImpl.hpp"
 #include "EaseImpl.hpp"
 #include "Fnv.hpp"
+#include "Range.hpp"
 
 // TODO: add Polygon and PolygonUtility - these might should go to alg
 

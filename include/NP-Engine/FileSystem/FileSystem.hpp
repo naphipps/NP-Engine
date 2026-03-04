@@ -45,15 +45,24 @@ namespace np::fsys
 	}
 
 	/*
-		appends the given path b to the given path a
+		the identity append function used for the templated append function below
 	*/
-	static inline ::std::string Append(::std::string a, ::std::string b)
+	static inline std::string Append(std::string a)
 	{
-		::std::filesystem::path pa(a);
-		::std::filesystem::path pb(b);
-		return (pa / pb).string().c_str();
+		return a;
 	}
 
+	/*
+		appends the given path args to the given path a
+	*/
+	template <typename... Args, std::enable_if_t<(std::is_constructible_v<std::string, Args> && ...), bl> = true>
+	static inline std::string Append(std::string a, Args&&... args)
+	{
+		std::filesystem::path p(a);
+		p /= (::std::filesystem::path(Append(args...)));
+		return p.string().c_str();
+	}
+	
 	/*
 		creates all the directories throughout the given dir path
 	*/

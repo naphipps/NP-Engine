@@ -7,21 +7,16 @@
 
 const int RenderableMetaValuesPaddingSize = 21; // sizeof(::np::gpu::RenderableMetaValues.padding)
 
-layout (binding = 0) uniform PipelineMetaValues
-{
-	mat4 view;
-	mat4 projection;
-} _pipeline;
-
 layout (location = 0) in vec3 _in_position;
 layout (location = 1) in vec3 _in_color;
 layout (location = 2) in vec2 _in_uv;
 
-layout (location = 0) out vec3 _out_color;
-layout (location = 1) out vec2 _out_uv;
+layout (set = 0, binding = 0) uniform Camera {
+	mat4 view;
+	mat4 projection;
+} _camera;
 
-layout (push_constant) uniform RenderableMetaValues
-{
+layout (push_constant) uniform RenderableMetaValues {
 	float position[3];
 	float orientation[4];
 	float scale[3];
@@ -29,22 +24,22 @@ layout (push_constant) uniform RenderableMetaValues
 	int padding[RenderableMetaValuesPaddingSize];
 } _renderable;
 
-struct Transform
-{
+layout (location = 0) out vec3 _out_color;
+layout (location = 1) out vec2 _out_uv;
+
+struct Transform {
 	vec3 position;
 	vec4 orientation;
 	vec3 scale;
 };
 
-struct RenderableObject
-{
+struct RenderableObject {
 	Transform transform;
 	int type;
 	int padding[RenderableMetaValuesPaddingSize];
 };
 
-RenderableObject ExtractRenderableObject()
-{
+RenderableObject ExtractRenderableObject() {
 	RenderableObject renderable;
 	renderable.transform.position = vec3(_renderable.position[0], _renderable.position[1], _renderable.position[2]);
 	renderable.transform.orientation = vec4(_renderable.orientation[0], _renderable.orientation[1], _renderable.orientation[2], _renderable.orientation[3]);
@@ -57,15 +52,13 @@ RenderableObject ExtractRenderableObject()
 	return renderable;
 }
 
-mat4 CreateTranslateMatrix(in vec3 translate)
-{
+mat4 CreateTranslateMatrix(in vec3 translate) {
 	mat4 mat = mat4(1.0);
 	mat[3] = vec4(translate, 1.0);
 	return mat;
 }
 
-mat4 CreateOrientationMatrix(in vec4 quat)
-{
+mat4 CreateOrientationMatrix(in vec4 quat) {
 	float xx = quat.x * quat.x;
 	float yy = quat.y * quat.y;
 	float zz = quat.z * quat.z;
@@ -89,8 +82,7 @@ mat4 CreateOrientationMatrix(in vec4 quat)
 	return mat;
 }
 
-mat4 CreateScaleMatrix(in vec3 scale)
-{
+mat4 CreateScaleMatrix(in vec3 scale) {
 	mat4 mat = mat4(1.0);
 	mat[0][0] *= scale.x;
 	mat[1][1] *= scale.y;
@@ -98,16 +90,14 @@ mat4 CreateScaleMatrix(in vec3 scale)
 	return mat;
 }
 
-mat4 ToMat4(in Transform transform)
-{
+mat4 ToMat4(in Transform transform) {
 	mat4 translation = CreateTranslateMatrix(transform.position);
 	mat4 orientation = CreateOrientationMatrix(transform.orientation);
 	mat4 scalation = CreateScaleMatrix(transform.scale);
 	return translation * orientation * scalation;
 }
 
-void main()
-{
+void main() {
 	RenderableObject renderable = ExtractRenderableObject();
 	mat4 model = ToMat4(renderable.transform);
 	gl_Position = _pipeline.projection * _pipeline.view * model * vec4(_in_position, 1.0);

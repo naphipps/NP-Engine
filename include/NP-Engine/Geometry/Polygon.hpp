@@ -4,8 +4,8 @@
 //
 //##===----------------------------------------------------------------------===##//
 
-#ifndef NP_ENGINE_POLYGON_HPP
-#define NP_ENGINE_POLYGON_HPP
+#ifndef NP_ENGINE_GEOMETRY_POLYGON_HPP
+#define NP_ENGINE_GEOMETRY_POLYGON_HPP
 
 #include "NP-Engine/Primitive/Primitive.hpp"
 #include "NP-Engine/Container/Container.hpp"
@@ -34,4 +34,4 @@ namespace np::geom
 	using Polygon4D = Polygon<4, T>;
 } // namespace np::geom
 
-#endif /* NP_ENGINE_POLYGON_HPP */
+#endif /* NP_ENGINE_GEOMETRY_POLYGON_HPP */

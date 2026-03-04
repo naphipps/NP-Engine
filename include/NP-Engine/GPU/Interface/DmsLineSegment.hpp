@@ -4,8 +4,8 @@
 //
 //##===----------------------------------------------------------------------===##//
 
-#ifndef NP_ENGINE_DMS_LINE_SEGMENT_HPP
-#define NP_ENGINE_DMS_LINE_SEGMENT_HPP
+#ifndef NP_ENGINE_GPU_INTERFACE_DMS_LINE_SEGMENT_HPP
+#define NP_ENGINE_GPU_INTERFACE_DMS_LINE_SEGMENT_HPP
 
 #include "NP-Engine/Primitive/Primitive.hpp"
 #include "NP-Engine/Math/Math.hpp"
@@ -73,4 +73,4 @@ namespace std
 	};
 } // namespace std
 
-#endif /* NP_ENGINE_DMS_LINE_SEGMENT_HPP */
+#endif /* NP_ENGINE_GPU_INTERFACE_DMS_LINE_SEGMENT_HPP */

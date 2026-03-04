@@ -4,8 +4,8 @@
 //
 //##===----------------------------------------------------------------------===##//
 
-#ifndef NP_ENGINE_FNV_HPP
-#define NP_ENGINE_FNV_HPP
+#ifndef NP_ENGINE_MAT_FNV_HPP
+#define NP_ENGINE_MAT_FNV_HPP
 
 #include "NP-Engine/Primitive/Primitive.hpp"
 
@@ -25,7 +25,7 @@ namespace np::mat
 	static inline ui32 HashFnv1aUi32(const void* src, siz byte_count, ui32 hash = (ui32)0x811c9dc5)
 	{
 		const ui32 prime = 0x01000193;
-		ui8* it = (ui8*)src;
+		ui8* it = static_cast<ui8*>(const_cast<void*>(src));
 		const ui8* end = it + byte_count;
 
 		for (; it != end; it++)
@@ -40,7 +40,7 @@ namespace np::mat
 	static inline ui64 HashFnv1aUi64(const void* src, siz byte_count, ui64 hash = (ui64)0xcbf29ce484222325ULL)
 	{
 		const ui64 prime = 0x100000001b3ULL;
-		ui8* it = (ui8*)src;
+		ui8* it = static_cast<ui8*>(const_cast<void*>(src));
 		const ui8* end = it + byte_count;
 
 		for (; it != end; it++)
@@ -53,4 +53,4 @@ namespace np::mat
 	}
 } // namespace np::mat
 
-#endif /* NP_ENGINE_FNV_HPP */
+#endif /* NP_ENGINE_MAT_FNV_HPP */

@@ -8,21 +8,19 @@
 #define NP_ENGINE_GPU_INTERFACE_CAMERA_HPP
 
 #include "NP-Engine/Primitive/Primitive.hpp"
-
-#include "NP-Engine/Vendor/GlmInclude.hpp"
-
-#include "VisibleObject.hpp"
+#include "NP-Engine/Math/Math.hpp"
+#include "NP-Engine/Geometry/Geometry.hpp"
 
 namespace np::gpu
 {
+	enum class ProjectionType : ui32
+	{
+		Perspective = 0,
+		Orthographic
+	};
+
 	struct Camera
 	{
-		enum class ProjectionType : ui32
-		{
-			Perspective = 0,
-			Orthographic = BIT(0)
-		};
-
 		constexpr static ::glm::vec3 Up{0.f, 1.f, 0.f};
 		constexpr static ::glm::vec3 Forward{0.f, 0.f, 1.f};
 
@@ -39,12 +37,14 @@ namespace np::gpu
 		flt nearPlane = 0;
 		flt farPlane = 0;
 
-		union {
+		union
+		{
 			::glm::vec3 eye{0};
 			::glm::vec3 position;
 		};
 
-		union {
+		union
+		{
 			::glm::vec3 lookAt{0};
 			::glm::vec3 target;
 			::glm::vec3 center;
@@ -82,10 +82,11 @@ namespace np::gpu
 			return lookAt - eye;
 		}
 
+
 		bl _contains = true;
-		bl Contains(const VisibleObject& visible_object) const
+		//bl Contains(const VisibleObject& visible_object) const
+		bl Contains(/* const geom::Aabb& aabb */) const
 		{
-			// TODO: implement this
 			return _contains;
 		}
 	};

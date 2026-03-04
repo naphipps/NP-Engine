@@ -344,6 +344,7 @@ namespace np::mem
 			return *this;
 		}
 
+		// downcast
 		template <typename U, ::std::enable_if_t<::std::is_convertible_v<U*, T*>, bl> = true>
 		sptr<T>& operator=(const sptr<U>& other)
 		{
@@ -354,7 +355,29 @@ namespace np::mem
 			return *this;
 		}
 
+		// downcast
 		template <typename U, ::std::enable_if_t<::std::is_convertible_v<U*, T*>, bl> = true>
+		sptr<T>& operator=(sptr<U>&& other) noexcept
+		{
+			reset();
+			base::_resource = ::std::move(other._resource);
+			other._resource = nullptr;
+			return *this;
+		}
+
+		// upcast
+		template <typename U, ::std::enable_if_t<::std::is_convertible_v<T*, U*>, bl> = true>
+		sptr<T>& operator=(const sptr<U>& other)
+		{
+			reset();
+			base::_resource = other._resource;
+			base::increment_strong_counter();
+			base::increment_weak_counter();
+			return *this;
+		}
+
+		// upcast
+		template <typename U, ::std::enable_if_t<::std::is_convertible_v<T*, U*>, bl> = true>
 		sptr<T>& operator=(sptr<U>&& other) noexcept
 		{
 			reset();
@@ -399,6 +422,7 @@ namespace np::mem
 
 	/*
 		Weak Ptr (wptr) does not ensure existance of the object, but can indicate if it is expired
+		DOES NOT UPCAST SINCE IT DOES NOT ENSURE EXISTANCE OF THE OBJECT
 	*/
 	template <typename T>
 	class wptr : public smart_ptr<T>
@@ -430,18 +454,21 @@ namespace np::mem
 
 		wptr(wptr<T>&& other) noexcept: base(::std::move(other)) {}
 
+		// downcast from sptr
 		template <typename U, ::std::enable_if_t<::std::is_convertible_v<U*, T*>, bl> = true>
 		wptr(const sptr<U>& other): base(other)
 		{
 			base::increment_weak_counter();
 		}
 
+		// downcast
 		template <typename U, ::std::enable_if_t<::std::is_convertible_v<U*, T*>, bl> = true>
 		wptr(const wptr<U>& other): base(other)
 		{
 			base::increment_weak_counter();
 		}
 
+		// downcast
 		template <typename U, ::std::enable_if_t<::std::is_convertible_v<U*, T*>, bl> = true>
 		wptr(wptr<U>&& other) noexcept: base(::std::move(other))
 		{}
@@ -475,6 +502,7 @@ namespace np::mem
 			return *this;
 		}
 
+		// downcast from sptr
 		template <typename U, ::std::enable_if_t<::std::is_convertible_v<U*, T*>, bl> = true>
 		wptr<T>& operator=(const sptr<U>& other)
 		{
@@ -484,6 +512,7 @@ namespace np::mem
 			return *this;
 		}
 
+		// downcast
 		template <typename U, ::std::enable_if_t<::std::is_convertible_v<U*, T*>, bl> = true>
 		wptr<T>& operator=(const wptr<U>& other)
 		{
@@ -493,6 +522,7 @@ namespace np::mem
 			return *this;
 		}
 
+		// downcast
 		template <typename U, ::std::enable_if_t<::std::is_convertible_v<U*, T*>, bl> = true>
 		wptr<T>& operator=(wptr<U>&& other) noexcept
 		{
@@ -519,9 +549,23 @@ namespace np::mem
 			return base::get_strong_count() == 0;
 		}
 
-		sptr<T> get_sptr() const
+		sptr<T> get_sptr()
 		{
-			return mem::sptr<T>(is_expired() ? nullptr : base::_resource);
+			mem::sptr<T> strong_ptr{ nullptr };
+			siz expected = 0;
+			atm_siz* strong_counter_ptr = base::get_strong_counter_ptr();
+
+			if (strong_counter_ptr)
+				for (expected = strong_counter_ptr->load(mo_acquire);
+					expected != 0 && !strong_counter_ptr->compare_exchange_weak(expected, expected + 1, mo_release, mo_relaxed););
+
+			if (expected != 0) //aka: if we successfully incremented strong counter when it was not zero (aka: if we safely ensured object)
+			{
+				base::increment_weak_counter();
+				strong_ptr._resource = base::_resource;
+			}
+
+			return strong_ptr;
 		}
 	};
 
@@ -537,9 +581,9 @@ namespace np::mem
 		if (contiguous_block)
 		{
 			T* object = mem::Construct<T>(contiguous_block->object_block, ::std::forward<Args>(args)...);
-			resource = mem::Construct<resource_type>(contiguous_block->resource_block, destroyer_type(allocator), object);
+			resource = mem::Construct<resource_type>(contiguous_block->resource_block, destroyer_type{ allocator }, object);
 		}
-		return sptr<T>(resource);
+		return { resource };
 	}
 } // namespace np::mem
 

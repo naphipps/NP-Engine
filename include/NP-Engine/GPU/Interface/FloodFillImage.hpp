@@ -4,8 +4,8 @@
 //
 //##===----------------------------------------------------------------------===##//
 
-#ifndef NP_ENGINE_FLOOD_FILL_IMAGE_HPP
-#define NP_ENGINE_FLOOD_FILL_IMAGE_HPP
+#ifndef NP_ENGINE_GPU_INTERFACE_FLOOD_FILL_IMAGE_HPP
+#define NP_ENGINE_GPU_INTERFACE_FLOOD_FILL_IMAGE_HPP
 
 #include "NP-Engine/Primitive/Primitive.hpp"
 #include "NP-Engine/Memory/Memory.hpp"
@@ -19,23 +19,20 @@ namespace np::alg
 	public:
 		using Point = ImageSubview::Point;
 
-		enum class PointRelation : ui32
+		class PointRelation : public Enum<ui32>
 		{
-			None = 0,
-			Upper = BIT(0),
-			Lower = BIT(1),
-			Right = BIT(2),
-			Left = BIT(3),
-			UpperRight = Upper | Right,
-			UpperLeft = Upper | Left,
-			LowerRight = Lower | Right,
-			LowerLeft = Lower | Left
-		};
+		public:
+			constexpr static ui32 Upper = BIT(0);
+			constexpr static ui32 Lower = BIT(1);
+			constexpr static ui32 Right = BIT(2);
+			constexpr static ui32 Left = BIT(3);
+			constexpr static ui32 UpperRight = Upper | Right;
+			constexpr static ui32 UpperLeft = Upper | Left;
+			constexpr static ui32 LowerRight = Lower | Right;
+			constexpr static ui32 LowerLeft = Lower | Left;
 
-		static bl PointRelationContains(PointRelation a, PointRelation b)
-		{
-			return ((ui32)a & (ui32)b) != (ui32)PointRelation::None;
-		}
+			PointRelation(ui32 value) : Enum<ui32>(value) {}
+		};
 
 		struct Payload
 		{
@@ -238,4 +235,4 @@ namespace np::alg
 	};
 } // namespace np::alg
 
-#endif /* NP_ENGINE_FLOOD_FILL_IMAGE_HPP */
+#endif /* NP_ENGINE_GPU_INTERFACE_FLOOD_FILL_IMAGE_HPP */

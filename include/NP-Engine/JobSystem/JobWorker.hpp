@@ -41,12 +41,13 @@ namespace np::jsys
 			}
 		};
 
-		constexpr static siz SLEEP_STATE = 0;
-		constexpr static siz LOWEST_AWAKE_STATE = 1;
+		constexpr static ui8 SLEEP_STATE = UI8_MIN;
+		constexpr static ui8 MIN_AWAKE_STATE = BIT(0);
+		constexpr static ui8 MAX_AWAKE_STATE = UI8_MAX;
 
 		siz _id;
 		atm_bl _keep_working;
-		atm_siz _wake_counter;
+		atm_ui8 _wake_counter; //ui8 to keep our values (aka, our decremented results) within range [UI8_MIN, UI8_MAX]
 		mem::sptr<thr::Thread> _thread;
 		mem::sptr<condition> _sleep_condition;
 		mutexed_wrapper<con::queue<mem::sptr<Job>>> _immediate_jobs;
@@ -56,17 +57,17 @@ namespace np::jsys
 
 		bl ShouldSleep()
 		{
-			return _wake_counter.fetch_sub(1) == LOWEST_AWAKE_STATE;
+			return _wake_counter.fetch_sub(1) == MIN_AWAKE_STATE;
 		}
 
 		void WakeUp()
 		{
-			_wake_counter.fetch_add(1);
+			_wake_counter.store(MAX_AWAKE_STATE, mo_release);
 		}
 
 		void ResetWakeCounter()
 		{
-			_wake_counter.store(LOWEST_AWAKE_STATE, mo_release);
+			_wake_counter.store(MIN_AWAKE_STATE, mo_release);
 		}
 
 		bl IsAwake() const
@@ -171,7 +172,7 @@ namespace np::jsys
 		JobWorker(siz id):
 			_id(id),
 			_keep_working(false),
-			_wake_counter(LOWEST_AWAKE_STATE),
+			_wake_counter(MIN_AWAKE_STATE),
 			_thread(nullptr),
 			_sleep_condition(nullptr),
 			_immediate_jobs(),

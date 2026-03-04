@@ -4,79 +4,90 @@
 //
 //##===----------------------------------------------------------------------===##//
 
-#ifndef NP_ENGINE_VULKAN_COMMAND_BUFFER_HPP
-#define NP_ENGINE_VULKAN_COMMAND_BUFFER_HPP
+#ifndef NP_ENGINE_GPU_VULKAN_COMMAND_BUFFER_HPP
+#define NP_ENGINE_GPU_VULKAN_COMMAND_BUFFER_HPP
 
 #include <utility>
 
-#include "NP-Engine/GPU/Interface/Interface.hpp"
-
 #include "NP-Engine/Vendor/VulkanInclude.hpp"
 
-#include "VulkanCommands.hpp"
+#include "NP-Engine/GPU/Interface/Interface.hpp"
 
 namespace np::gpu::__detail
 {
+	class VulkanCommandBufferUsage : public CommandBufferUsage
+	{
+	public:
+		VulkanCommandBufferUsage(ui32 value) : CommandBufferUsage(value) {}
+
+		VkCommandBufferUsageFlags GetVkCommandBufferUsageFlags() const
+		{
+			/*
+				VK_COMMAND_BUFFER_USAGE_RENDER_PASS_CONTINUE_BIT = 0x00000002,
+				VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT = 0x00000004,
+				VK_COMMAND_BUFFER_USAGE_FLAG_BITS_MAX_ENUM = 0x7FFFFFFF
+			*/
+
+			VkCommandBufferUsageFlags flags = 0;
+
+			if (Contains(SingleUse))
+				flags |= VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+
+			return flags;
+		}
+
+		VkCommandBufferResetFlags GetVkCommandBufferResetFlags() const
+		{
+			/*
+				VK_COMMAND_BUFFER_RESET_RELEASE_RESOURCES_BIT = 0x00000001,
+			*/
+
+			VkCommandBufferResetFlags flags = 0;
+			return flags;
+		}
+	};
+
 	class VulkanCommandBuffer : public CommandBuffer
 	{
 	private:
+		mem::sptr<srvc::Services> _services;
 		VkCommandBuffer _command_buffer;
+		con::vector<mem::sptr<VulkanCommandBuffer>> _depenedencies;
 
 	public:
-		static VkCommandBufferBeginInfo CreateBeginInfo()
-		{
-			VkCommandBufferBeginInfo info{};
-			info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-			return info;
-		}
+		VulkanCommandBuffer(mem::sptr<srvc::Services> services, VkCommandBuffer command_buffer) :
+			_services(services),
+			_command_buffer(command_buffer), 
+			_depenedencies{}
+		{}
 
-		VulkanCommandBuffer(): VulkanCommandBuffer(nullptr) {}
-
-		VulkanCommandBuffer(VkCommandBuffer command_buffer): _command_buffer(command_buffer) {}
-
-		VulkanCommandBuffer(const VulkanCommandBuffer& other): _command_buffer(other._command_buffer) {}
-
-		VulkanCommandBuffer(VulkanCommandBuffer&& other) noexcept: _command_buffer(::std::move(other._command_buffer))
-		{
-			other._command_buffer = nullptr;
-		}
-
-		VulkanCommandBuffer& operator=(const VulkanCommandBuffer& other)
-		{
-			_command_buffer = other._command_buffer;
-			return *this;
-		}
-
-		VulkanCommandBuffer& operator=(VulkanCommandBuffer&& other) noexcept
-		{
-			_command_buffer = ::std::move(other._command_buffer);
-			other._command_buffer = nullptr;
-			return *this;
-		}
+		~VulkanCommandBuffer() = default;
 
 		operator VkCommandBuffer() const
 		{
 			return _command_buffer;
 		}
 
-		bl IsValid() const override
+		virtual DetailType GetDetailType() const
 		{
-			return _command_buffer != nullptr;
+			return DetailType::Vulkan;
 		}
 
-		void Invalidate() override
+		virtual mem::sptr<srvc::Services> GetServices() const override
 		{
-			_command_buffer = nullptr;
+			return _services;
 		}
 
-		void Add(Command& command) override
+		virtual bl DependOn(mem::sptr<CommandBuffer> other) override
 		{
-			NP_ENGINE_ASSERT(
-				IsValid() && command.GetDetailType() == DetailType::Vulkan,
-				"VulkanCommandBuffer must be valid and given command must be a vulkan command before Add is called.");
-			((VulkanCommand&)command).ApplyTo(_command_buffer);
+			return false; //TODO: is this even a thing?
+		}
+
+		virtual con::vector<mem::sptr<CommandBuffer>> GetDependencies() const override
+		{
+			return { _depenedencies.begin(), _depenedencies.end() };
 		}
 	};
 } // namespace np::gpu::__detail
 
-#endif /* NP_ENGINE_VULKAN_COMMAND_BUFFER_HPP */
+#endif /* NP_ENGINE_GPU_VULKAN_COMMAND_BUFFER_HPP */

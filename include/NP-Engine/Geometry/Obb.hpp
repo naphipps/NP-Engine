@@ -4,8 +4,8 @@
 //
 //##===----------------------------------------------------------------------===##//
 
-#ifndef NP_ENGINE_OBB_HPP
-#define NP_ENGINE_OBB_HPP
+#ifndef NP_ENGINE_GEOMETRY_OBB_HPP
+#define NP_ENGINE_GEOMETRY_OBB_HPP
 
 #include "NP-Engine/Primitive/Primitive.hpp"
 #include "NP-Engine/Math/Math.hpp"
@@ -136,4 +136,4 @@ namespace np::geom
 	using LdblObb3D = Obb<3, ldbl>;
 } // namespace np::geom
 
-#endif /* NP_ENGINE_OBB_HPP */
+#endif /* NP_ENGINE_GEOMETRY_OBB_HPP */

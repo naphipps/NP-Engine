@@ -4,8 +4,8 @@
 //
 //##===----------------------------------------------------------------------===##//
 
-#ifndef NP_ENGINE_LINE_HPP
-#define NP_ENGINE_LINE_HPP
+#ifndef NP_ENGINE_GEOMETRY_LINE_HPP
+#define NP_ENGINE_GEOMETRY_LINE_HPP
 
 #include "NP-Engine/Primitive/Primitive.hpp"
 
@@ -36,4 +36,4 @@ namespace np::geom
 	using Line4D = Line<4, T>;
 } // namespace np::geom
 
-#endif /* NP_ENGINE_LINE_HPP */
+#endif /* NP_ENGINE_GEOMETRY_LINE_HPP */

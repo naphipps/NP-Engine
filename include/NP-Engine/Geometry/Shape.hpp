@@ -4,8 +4,8 @@
 //
 //##===----------------------------------------------------------------------===##//
 
-#ifndef NP_ENGINE_SHAPE_HPP
-#define NP_ENGINE_SHAPE_HPP
+#ifndef NP_ENGINE_GEOMETRY_SHAPE_HPP
+#define NP_ENGINE_GEOMETRY_SHAPE_HPP
 
 #include "NP-Engine/Primitive/Primitive.hpp"
 
@@ -20,4 +20,4 @@ namespace np::geom
 	};
 } // namespace np::geom
 
-#endif /* NP_ENGINE_SHAPE_HPP */
+#endif /* NP_ENGINE_GEOMETRY_SHAPE_HPP */

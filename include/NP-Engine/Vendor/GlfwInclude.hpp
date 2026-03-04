@@ -25,6 +25,7 @@
 		Windows, now is the time we declare this SHALL NOT PASS.
 	*/
 	#undef CreateWindow
+	#undef CreateSemaphore
 	#undef max
 	#undef min
 #endif

@@ -81,6 +81,24 @@ namespace np
 			base::operator+=(other.c_str());
 			return *this;
 		}
+
+		tstr toupper() const
+		{
+			tstr upper = *this;
+			for (siz i = 0; i < upper.size(); i++)
+				upper[i] = ::std::toupper(upper[i]);
+
+			return upper;
+		}
+
+		tstr tolower() const
+		{
+			tstr upper = *this;
+			for (siz i = 0; i < upper.size(); i++)
+				upper[i] = ::std::tolower(upper[i]);
+
+			return upper;
+		}
 	};
 
 	template <class T>

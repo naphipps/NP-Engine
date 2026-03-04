@@ -4,8 +4,8 @@
 //
 //##===----------------------------------------------------------------------===##//
 
-#ifndef NP_ENGINE_AABB_HPP
-#define NP_ENGINE_AABB_HPP
+#ifndef NP_ENGINE_GEOMETRY_AABB_HPP
+#define NP_ENGINE_GEOMETRY_AABB_HPP
 
 #include "NP-Engine/Primitive/Primitive.hpp"
 
@@ -115,4 +115,4 @@ namespace np::geom
 	using LdblAabb3D = Aabb<3, ldbl>;
 } // namespace np::geom
 
-#endif /* NP_ENGINE_AABB_HPP */
+#endif /* NP_ENGINE_GEOMETRY_AABB_HPP */

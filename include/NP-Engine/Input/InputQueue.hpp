@@ -70,8 +70,7 @@ namespace np::nput
 		void ApplySubmissions()
 		{
 			bl flag = _flag.load(mo_acquire);
-			while (!_flag.compare_exchange_weak(flag, !flag, mo_release, mo_relaxed))
-			{}
+			while (!_flag.compare_exchange_weak(flag, !flag, mo_release, mo_relaxed));
 
 			{
 				KeyCodeState state;

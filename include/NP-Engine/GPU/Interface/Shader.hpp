@@ -7,120 +7,38 @@
 #ifndef NP_ENGINE_GPU_INTERFACE_SHADER_HPP
 #define NP_ENGINE_GPU_INTERFACE_SHADER_HPP
 
-#include <iostream> //TODO: remove
-
 #include "NP-Engine/Primitive/Primitive.hpp"
 #include "NP-Engine/String/String.hpp"
+#include "NP-Engine/Memory/Memory.hpp"
 
-#include "DetailType.hpp"
+#include "Detail.hpp"
+#include "Device.hpp"
+#include "Stage.hpp"
+
 
 namespace np::gpu
 {
-	class Shader // TODO: we need to break this up to RenderShader, ComputeShader, etc, so that we can put the correct device
-				 // with the correct shader
+	struct Shader : public DetailObject
 	{
-	public:
-		enum class Type // TODO: refactor to Pascal case
-		{
-			Vertex,
-			Fragment,
-			Compute,
-			TesselationControl,
-			TesselationEvaluation,
-			Geometry
-		};
+		static mem::sptr<Shader> Create(mem::sptr<Device> device, Stage stage, str filename, str entrypoint);
 
-		struct Properties
-		{
-			Type type;
-			str filename;
-			str entrypoint; // TODO: default to "main"?
-		};
-
-	protected:
-		Properties _properties;
-
-		str GetShaderStage() const
-		{
-			str stage = "UNKNOWN";
-
-			switch (_properties.type)
-			{
-			case Type::Vertex:
-				stage = "vertex";
-				break;
-			case Type::Fragment:
-				stage = "fragment";
-				break;
-			case Type::TesselationControl:
-				stage = "tesscontrol";
-				break;
-			case Type::TesselationEvaluation:
-				stage = "tesseval";
-				break;
-			case Type::Geometry:
-				stage = "geometry";
-				break;
-			case Type::Compute:
-				stage = "compute";
-				break;
-			}
-
-			return stage;
-		}
-
-		Shader(Properties& properties): _properties(properties) {}
-
-	public:
 		virtual ~Shader() = default;
 
-		virtual DetailType GetDetailType() const = 0;
-
-		virtual siz Size() const = 0;
-
-		virtual void* Bytes() const = 0;
+		virtual mem::sptr<Device> GetDevice() const = 0;
 
 		virtual void Load(str filename) = 0;
 
-		virtual void Reload()
-		{
-			Load(_properties.filename);
-		}
+		virtual void Reload() = 0;
 
-		str GetFilename() const
-		{
-			return _properties.filename;
-		}
+		virtual str GetFilename() const = 0;
 
-		str GetEntrypoint() const
-		{
-			return _properties.entrypoint;
-		}
+		virtual str GetEntrypoint() const = 0;
 
-		const chr* GetEntrypointCStr() const
-		{
-			return _properties.entrypoint.c_str();
-		}
+		virtual void SetEntrypoint(str entrypoint) = 0;
 
-		void SetEntrypoint(str entrypoint)
-		{
-			_properties.entrypoint = entrypoint;
-		}
+		virtual Stage GetStage() const = 0;
 
-		Type GetType() const
-		{
-			return _properties.type;
-		}
-
-		Properties& GetProperties()
-		{
-			return _properties;
-		}
-
-		const Properties& GetProperties() const
-		{
-			return _properties;
-		}
+		//virtual void SetValueOverrides() = 0; //TODO: add support for value overrides
 	};
 } // namespace np::gpu
 

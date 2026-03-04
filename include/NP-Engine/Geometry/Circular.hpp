@@ -4,8 +4,8 @@
 //
 //##===----------------------------------------------------------------------===##//
 
-#ifndef NP_ENGINE_CIRCLE_HPP
-#define NP_ENGINE_CIRCLE_HPP
+#ifndef NP_ENGINE_GEOMETRY_CIRCLE_HPP
+#define NP_ENGINE_GEOMETRY_CIRCLE_HPP
 
 #include "NP-Engine/Primitive/Primitive.hpp"
 
@@ -62,4 +62,4 @@ namespace np::geom
 	using LdblSphere = Sphere<ldbl>;
 } // namespace np::geom
 
-#endif /* NP_ENGINE_CIRCLE_HPP */
+#endif /* NP_ENGINE_GEOMETRY_CIRCLE_HPP */

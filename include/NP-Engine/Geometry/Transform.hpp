@@ -4,8 +4,8 @@
 //
 //##===----------------------------------------------------------------------===##//
 
-#ifndef NP_ENGINE_TRANSFORM_HPP
-#define NP_ENGINE_TRANSFORM_HPP
+#ifndef NP_ENGINE_GEOMETRY_TRANSFORM_HPP
+#define NP_ENGINE_GEOMETRY_TRANSFORM_HPP
 
 #include "NP-Engine/Primitive/Primitive.hpp"
 
@@ -28,11 +28,11 @@ namespace np::geom
 			return mat;
 		}
 
-		operator ::glm::mat4()
+		operator ::glm::mat4() const
 		{
 			return ToMat4(*this);
 		}
 	};
 } // namespace np::geom
 
-#endif /* NP_ENGINE_TRANSFORM_HPP */
+#endif /* NP_ENGINE_GEOMETRY_TRANSFORM_HPP */

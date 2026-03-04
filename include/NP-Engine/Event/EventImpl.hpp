@@ -40,31 +40,16 @@ namespace np::evnt
 		Max
 	};
 
-	/*
-		determines if EventType a matches b
-	*/
-	constexpr static bl EventTypeMatches(EventType a, EventType b)
+	class EventCategory : public Enum<ui64>
 	{
-		return a == b;
-	}
+	public:
+		constexpr static ui64 Application = BIT(0);
+		constexpr static ui64 Window = BIT(1);
+		constexpr static ui64 Gpu = BIT(2);
+		constexpr static ui64 Network = BIT(3);
 
-	enum class EventCategory : ui64
-	{
-		None = 0,
-		Application = BIT(0),
-		Window = BIT(1),
-		Gpu = BIT(2),
-		Network = BIT(3),
-		All = ~((ui64)0)
+		EventCategory(ui64 value) : Enum<ui64>(value) {}
 	};
-
-	/*
-		determines if EventCategory a contains b
-	*/
-	constexpr static bl EventCategoryContains(EventCategory a, EventCategory b)
-	{
-		return ((ui64)a & (ui64)b) != (ui64)EventCategory::None;
-	}
 
 	class Event : public mem::Delegate
 	{
@@ -103,12 +88,12 @@ namespace np::evnt
 		/*
 			get the type that this event should be treated as
 		*/
-		virtual EventType GetType() const = 0;
+		virtual EventType GetType() const = 0; //TODO: rename to GetEventType
 
 		/*
 			get the category this event should be treated as
 		*/
-		virtual EventCategory GetCategory() const = 0;
+		virtual EventCategory GetCategory() const = 0; //TODO: rename to GetEventCategory
 	};
 } // namespace np::evnt
 

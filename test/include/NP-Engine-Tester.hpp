@@ -18,14 +18,103 @@ namespace np::app
 	class GameLayer : public Layer
 	{
 	private:
+
+		struct Scene
+		{
+			gpu::DetailType detailType = gpu::DetailType::None;
+			mem::sptr<gpu::DetailInstance> detailInstance = nullptr;
+			mem::sptr<gpu::PresentTarget> presentTarget = nullptr;
+			mem::sptr<gpu::Device> device = nullptr;
+			mem::sptr<gpu::Queue> queue = nullptr;
+			mem::sptr<gpu::FrameContext> frameContext = nullptr;
+			mem::sptr<gpu::Shader> vertexShader = nullptr;
+			mem::sptr<gpu::Shader> fragmentShader = nullptr;
+			con::vector<mem::sptr<gpu::Framebuffer>> framebuffers{};
+			mem::sptr<gpu::RenderPass> renderpass = nullptr;
+			mem::sptr<gpu::GraphicsPipeline> graphicsPipeline = nullptr;
+			mem::sptr<gpu::CommandBufferPool> commandBufferPool = nullptr;
+			con::vector<mem::sptr<gpu::CommandBuffer>> commandBuffers{};
+
+			bl once = false;
+
+			void Render()
+			{
+				if (once)
+				{
+					//return;
+				}
+				once = true;
+
+				mem::sptr<srvc::Services> services = detailInstance->GetServices();
+
+				mem::sptr<gpu::Frame> frame = frameContext->TryAcquireFrame() ? frameContext->GetAcquiredFrame() : nullptr;
+				frame->GetReadyFence()->Wait();
+
+				mem::sptr<gpu::BeginRenderPassCommand> begin_renderpass_cmd = gpu::Command::Create(gpu::DetailType::Vulkan, services, gpu::CommandType::BeginRenderPass);
+				begin_renderpass_cmd->framebuffer = framebuffers[frameContext->GetAcquiredFrameIndex()];
+				begin_renderpass_cmd->renderArea = { {/*no offset*/}, frameContext->GetFrameWidth(), frameContext->GetFrameHeight() };
+				begin_renderpass_cmd->clearColors = { gpu::ClearColor{} };
+				//begin_renderpass_cmd->clearColors.front().color.r = UI8_MAX;
+
+				mem::sptr<gpu::BindPipelineCommand> bind_pipeline_cmd = gpu::Command::Create(gpu::DetailType::Vulkan, services, gpu::CommandType::BindPipeline);
+				bind_pipeline_cmd->pipeline = graphicsPipeline;
+				bind_pipeline_cmd->usage = gpu::PipelineUsage::Graphics;
+				
+				mem::sptr<gpu::DrawCommand> draw_cmd = gpu::Command::Create(gpu::DetailType::Vulkan, services, gpu::CommandType::Draw);
+				draw_cmd->vertexCount = 3;
+
+				mem::sptr<gpu::EndRenderPassCommand> end_renderpass_cmd = gpu::Command::Create(gpu::DetailType::Vulkan, services, gpu::CommandType::EndRenderPass);
+				end_renderpass_cmd->framebuffer = begin_renderpass_cmd->framebuffer;
+
+				if (!commandBufferPool)
+					commandBufferPool = queue->CreateCommandBufferPool(gpu::CommandBufferPoolUsage::Resettable);
+
+				if (commandBuffers.empty())
+				{
+					commandBuffers.resize(frameContext->GetFrames().size());
+					for (siz i = 0; i < commandBuffers.size(); i++)
+						commandBuffers[i] = commandBufferPool->CreateCommandBuffer();
+				}
+
+				mem::sptr<gpu::CommandBuffer> command_buffer = commandBuffers[frameContext->GetAcquiredFrameIndex()];
+
+				commandBufferPool->Reset(command_buffer, gpu::CommandBufferUsage::None);
+				commandBufferPool->Begin(command_buffer, gpu::CommandBufferUsage::None);
+				command_buffer->Add(begin_renderpass_cmd);
+				command_buffer->Add(bind_pipeline_cmd);
+				command_buffer->Add(draw_cmd);
+				command_buffer->Add(end_renderpass_cmd);
+				commandBufferPool->End(command_buffer, gpu::CommandBufferUsage::None);
+
+
+				gpu::Submit submit{};
+				submit.stages = { gpu::Stage::PresentComplete };
+				submit.commandBuffers = { command_buffer };
+				submit.waitSemaphores = { frame->GetReadySemaphore() };
+				submit.signalSemaphores = { frame->GetCompletedSemaphore() };
+
+				mem::sptr<gpu::Fence> submit_fence = device->CreateFence();
+				bl submit_success = queue->Submit(submit, submit_fence);
+				submit_fence->Wait();
+
+
+				gpu::Present present{};
+				present.frameContexts = { frameContext };
+				present.waitSemaphores = { frame->GetCompletedSemaphore() };
+				con::vector<bl> present_successes = queue->Present(present);
+			}
+		};
+
+
+
 		WindowLayer& _window_layer;
 		mem::sptr<uid::UidHandle> _window_id_handle;
 		mem::sptr<win::Window> _window;
-		mutexed_wrapper<mem::sptr<gpu::Scene>> _scene;
+		mutexed_wrapper<mem::sptr<Scene>> _scene;
 		gpu::Camera _camera;
 		str _model_filename;
 		str _model_texture_filename;
-		mem::sptr<gpu::Model> _model;
+		//mem::sptr<gpu::Model> _model;
 		mem::sptr<uid::UidHandle> _model_handle;
 		tim::SteadyTimestamp _start_timestamp;
 		flt _rate = 5.f; // units per second
@@ -107,18 +196,18 @@ namespace np::app
 				payload->caller->_window.reset();
 			}
 
-			{
-				auto scene = payload->caller->_scene.get_access();
-				if ((*scene)->GetRenderTarget()->GetWindow()->GetUid() == payload->windowId)
-					scene->reset(); // TODO: can we job-ify this?
-			}
+			//{
+			//	auto scene = payload->caller->_scene.get_access();
+			//	if ((*scene)->GetRenderTarget()->GetWindow()->GetUid() == payload->windowId)
+			//		scene->reset(); // TODO: can we job-ify this?
+			//}
 
 			mem::Destroy<AdjustForWindowClosingPayload>(payload->caller->_services->GetAllocator(), payload);
 		}
 
 		void AdjustForWindowClosing(mem::sptr<evnt::Event> e)
 		{
-			win::WindowClosingEvent& closing_event = (win::WindowClosingEvent&)(*e);
+			/*win::WindowClosingEvent& closing_event = (win::WindowClosingEvent&)(*e);
 			win::WindowClosingEventData& closing_data = closing_event.GetData();
 
 			mem::sptr<jsys::Job> adjust_job = _services->GetJobSystem().CreateJob();
@@ -126,7 +215,7 @@ namespace np::app
 				mem::Create<AdjustForWindowClosingPayload>(_services->GetAllocator(), this, closing_data.windowId));
 			adjust_job->SetCallback(AdjustForWindowClosingCallback);
 			jsys::Job::AddDependency(closing_data.job, adjust_job);
-			_services->GetJobSystem().SubmitJob(jsys::JobPriority::Higher, adjust_job);
+			_services->GetJobSystem().SubmitJob(jsys::JobPriority::Higher, adjust_job);*/
 		}
 
 		void AdjustForApplicationClose(mem::sptr<evnt::Event> e)
@@ -188,14 +277,20 @@ namespace np::app
 			}
 		}
 
-		static void SceneOnRenderCallback(mem::Delegate& d)
+		/*static void SceneOnRenderCallback(mem::Delegate& d)
 		{
 			gpu::Scene::OnRenderPayload* payload = (gpu::Scene::OnRenderPayload*)d.GetPayload();
 			GameLayer& self = *((GameLayer*)payload->caller);
 
 			if (payload->scene)
 				payload->scene->SetCamera(self._camera);
-		}
+
+
+			self._model_handle = self._services->GetUidSystem().CreateUid();
+			uid::Uid model_id = self._services->GetUidSystem().GetUid(self._model_handle);
+
+			mem::sptr<gpu::Resource> resource = payload->scene->GetResource(model_id);
+		}*/
 
 		static void CreateSceneCallback(mem::Delegate& d)
 		{
@@ -221,42 +316,126 @@ namespace np::app
 			self._window->SetSizeCallback(mem::AddressOf(self), LogSize);
 			//*/
 
-			mem::sptr<gpu::DetailInstance> detail_instance =
-				gpu::DetailInstance::Create(gpu::DetailType::Vulkan, self._services);
-			mem::sptr<gpu::RenderTarget> render_target = gpu::RenderTarget::Create(detail_instance, self._window);
-			mem::sptr<gpu::RenderDevice> render_device = gpu::RenderDevice::Create(render_target);
-			mem::sptr<gpu::RenderContext> render_context = gpu::RenderContext::Create(render_device);
-			mem::sptr<gpu::RenderPass> render_pass = gpu::RenderPass::Create(render_context);
-			mem::sptr<gpu::Framebuffers> framebuffers = gpu::Framebuffers::Create(render_pass);
+			mem::sptr<srvc::Services> services = self._services;
+			mem::sptr<Scene> scene = mem::create_sptr<Scene>(services->GetAllocator());
 
-			gpu::Shader::Properties vertex_shader_properties;
-			vertex_shader_properties.type = gpu::Shader::Type::Vertex;
-			vertex_shader_properties.entrypoint = "main";
-			vertex_shader_properties.filename = fsys::Append(fsys::Append("Vulkan", "shaders"), "object_vertex.glsl");
-			mem::sptr<gpu::RenderShader> vertex_shader = gpu::RenderShader::Create(render_device, vertex_shader_properties);
+			scene->detailInstance = gpu::DetailInstance::Create(gpu::DetailType::Vulkan, self._services);
+			scene->presentTarget = gpu::PresentTarget::Create(scene->detailInstance, self._window);
+			scene->device = gpu::Device::Create(scene->detailInstance, gpu::DeviceUsage::Graphics | gpu::DeviceUsage::Present, scene->presentTarget);
 
-			gpu::Shader::Properties fragment_shader_properties;
-			fragment_shader_properties.type = gpu::Shader::Type::Fragment;
-			fragment_shader_properties.entrypoint = "main";
-			fragment_shader_properties.filename = fsys::Append(fsys::Append("Vulkan", "shaders"), "object_fragment.glsl");
-			mem::sptr<gpu::RenderShader> fragment_shader = gpu::RenderShader::Create(render_device, fragment_shader_properties);
+			for (const gpu::DeviceQueueFamily& family : scene->device->GetDeviceQueueFamilies())
+				if (family.usage.Contains(gpu::DeviceQueueUsage::Present | gpu::DeviceQueueUsage::Graphics))
+				{
+					scene->queue = gpu::Queue::Create(scene->device, family, 0);
+					break;
+				}
 
-			gpu::RenderPipeline::Properties render_pipeline_properties{framebuffers, vertex_shader, fragment_shader};
-			mem::sptr<gpu::RenderPipeline> render_pipeline = gpu::RenderPipeline::Create(render_pipeline_properties);
+			scene->frameContext = gpu::FrameContext::Create(scene->device, { scene->queue->GetDeviceQueueFamily() });
 
-			gpu::Scene::Properties scene_properties{render_pipeline, self._camera};
-			auto scene = self._scene.get_access();
-			*scene = gpu::Scene::Create(scene_properties);
+			scene->vertexShader = gpu::Shader::Create(scene->device, gpu::Stage::Vertex, fsys::Append("Vulkan", "shaders", "vertex.glsl"), "main");
+			scene->fragmentShader = gpu::Shader::Create(scene->device, gpu::Stage::Fragment, fsys::Append("Vulkan", "shaders", "fragment.glsl"), "main");
 
-			self._model_handle = self._services->GetUidSystem().CreateUid();
-			uid::Uid model_id = self._services->GetUidSystem().GetUid(self._model_handle);
-			mem::sptr<gpu::VisibleObject> model_visible = mem::create_sptr<gpu::VisibleObject>(self._services->GetAllocator());
+			//this is where we would consolodate our descriptions
 
-			(*scene)->Register(model_id, model_visible, self._model);
-			(*scene)->SetOnRenderCaller(mem::AddressOf(self));
-			(*scene)->SetOnRenderCallback(SceneOnRenderCallback);
+			con::vector<gpu::ImageResourceDescription> image_descriptions
+			{
+				{
+					scene->frameContext->GetFrameFormat(), 1,
+					gpu::ResourceOperation::Load | gpu::ResourceOperation::Clear, gpu::ResourceOperation::Store,
+					gpu::ResourceOperation::Load | gpu::ResourceOperation::DontCare, gpu::ResourceOperation::Store | gpu::ResourceOperation::DontCare,
+					gpu::ImageResourceUsage::None, gpu::ImageResourceUsage::Present
+				}
+			};
 
-			geom::FltObb3D model_obb = self._model->GetObb(); // TODO: we need to update this
+			con::vector<gpu::SubpassDescription> render_subpasses
+			{
+				{{}, { { 0, gpu::ImageResourceUsage::Color } }, {}, {}}
+			};
+
+			con::vector<gpu::SubpassDependency> render_dependencies
+			{
+				{
+					SIZ_MAX, 0,
+					gpu::Stage::PresentComplete, gpu::Stage::PresentComplete,
+					gpu::Access::None, gpu::Access::Image | gpu::Access::Write
+				}
+			};
+
+			scene->renderpass = gpu::RenderPass::Create(scene->device, image_descriptions, render_subpasses, render_dependencies);
+			gpu::PipelineUsage graphics_pipeline_usage = gpu::PipelineUsage::Graphics | gpu::PipelineUsage::ColorBlend;
+
+			mem::sptr<gpu::PipelineResourceLayout> graphics_pipeline_layout = gpu::PipelineResourceLayout::Create(scene->device, {}, {});
+
+			con::vector<mem::sptr<gpu::Shader>> graphics_shaders{ scene->vertexShader, scene->fragmentShader};
+			con::vector<gpu::Format> input_vertex_formatting{};
+			con::vector<gpu::Format> input_instance_formatting{};
+			gpu::PrimitiveTopology graphics_topology = gpu::PrimitiveTopology::Triangle | gpu::PrimitiveTopology::List;
+			con::vector<gpu::Viewport> graphics_viewports
+			{ 
+				{{}, (dbl)scene->frameContext->GetFrameWidth(), (dbl)scene->frameContext->GetFrameHeight(), {0, 1}}
+			};
+			con::vector<gpu::Scissor> graphics_scissors
+			{
+				{{}, scene->frameContext->GetFrameWidth(), scene->frameContext->GetFrameHeight()}
+			};
+			gpu::Rasterization graphics_rasterization
+			{
+				gpu::RasterizationUsage::PolygonFill | gpu::RasterizationUsage::CullBack | gpu::RasterizationUsage::FrontFaceClockwise, {}
+			};
+			gpu::Multisample graphics_multisample
+			{
+				{ gpu::MultisampleUsage::None, 1 },
+				0.0,
+				{}
+			};
+			//gpu::DepthStencil graphics_depth_stencil{};
+			gpu::Blend graphics_blend
+			{
+				gpu::LogicOperation::None,
+				{
+					{
+						false,
+						{gpu::BlendScalar::Src | gpu::BlendScalar::Alpha, gpu::BlendScalar::Src | gpu::BlendScalar::Alpha | gpu::BlendScalar::OneMinus, gpu::BlendOperation::Add},
+						{gpu::BlendScalar::Oned, gpu::BlendScalar::Zeroed, gpu::BlendOperation::Add},
+						gpu::ColorChannel::All
+					}
+				},
+				{}
+			};
+			gpu::DynamicUsage graphics_dynamic_usage = gpu::DynamicUsage::None;
+			
+
+			scene->graphicsPipeline = gpu::GraphicsPipeline::Create(
+				scene->renderpass,
+				graphics_pipeline_usage,
+				graphics_pipeline_layout,
+				graphics_shaders,
+				input_vertex_formatting,
+				input_instance_formatting,
+				graphics_topology,
+				0,
+				graphics_viewports,
+				graphics_scissors,
+				graphics_rasterization,
+				graphics_multisample,
+				{},
+				graphics_blend,
+				graphics_dynamic_usage,
+				nullptr);
+
+			con::vector<mem::sptr<gpu::ImageResourceView>> frame_image_views = scene->frameContext->GetImageViews();
+
+			scene->framebuffers.resize(frame_image_views.size());
+			for (siz i = 0; i < scene->framebuffers.size(); i++)
+				scene->framebuffers[i] = gpu::Framebuffer::Create(scene->renderpass,
+					scene->frameContext->GetFrameWidth(), scene->frameContext->GetFrameHeight(),
+					1, { frame_image_views[i] });
+
+
+			//<https://vulkan-tutorial.com/en/Drawing_a_triangle/Drawing/Command_buffers>
+
+
+			*self._scene.get_access() = scene;
 		}
 
 		void SubmitCreateSceneJob()
@@ -377,10 +556,10 @@ namespace np::app
 				_rate -= 0.1;
 
 			if (keys[Key::O].IsActive())
-				_camera.projectionType = gpu::Camera::ProjectionType::Orthographic;
+				_camera.projectionType = gpu::ProjectionType::Orthographic;
 
 			if (keys[Key::P].IsActive())
-				_camera.projectionType = gpu::Camera::ProjectionType::Perspective;
+				_camera.projectionType = gpu::ProjectionType::Perspective;
 
 			if (keys[Key::C].IsActive() && !_prev_keys[Key::C].IsActive())
 			{
@@ -409,15 +588,15 @@ namespace np::app
 			if (keys[Key::H].IsActive())
 			{
 				// scale up
-				geom::Transform& transform = _model->GetTransform();
-				transform.scale.z = ::std::clamp(transform.scale.z + _rate, 1.f, 2.f);
+				/*geom::Transform& transform = _model->GetTransform();
+				transform.scale.z = ::std::clamp(transform.scale.z + _rate, 1.f, 2.f);*/
 			}
 
 			if (keys[Key::B].IsActive())
 			{
 				// scale down
-				geom::Transform& transform = _model->GetTransform();
-				transform.scale.z = ::std::clamp(transform.scale.z - _rate, 1.f, 2.f);
+				/*geom::Transform& transform = _model->GetTransform();
+				transform.scale.z = ::std::clamp(transform.scale.z - _rate, 1.f, 2.f);*/
 			}
 
 			if (mouse[Mouse::LeftButton].IsActive())
@@ -519,7 +698,7 @@ namespace np::app
 				fsys::Append(fsys::Append(fsys::Append(NP_ENGINE_WORKING_DIR, "test"), "assets"), "viking_room.obj")),
 			_model_texture_filename(
 				fsys::Append(fsys::Append(fsys::Append(NP_ENGINE_WORKING_DIR, "test"), "assets"), "viking_room.png")),
-			_model(mem::create_sptr<gpu::Model>(_services->GetAllocator(), _model_filename, _model_texture_filename, true)),
+			//_model(mem::create_sptr<gpu::Model>(_services->GetAllocator(), _model_filename, _model_texture_filename, true)),
 			_model_handle(nullptr),
 			_start_timestamp(tim::SteadyClock::now()),
 			_network_context(net::Context::Create(net::DetailType::Native, _services)),
@@ -527,14 +706,14 @@ namespace np::app
 		{
 			net::Init(net::DetailType::Native);
 
-			geom::Transform& transform = _model->GetTransform();
+			//geom::Transform& transform = _model->GetTransform();
 
-			transform.position = {0.f, 0.f, 0.f};
+			/*transform.position = {0.f, 0.f, 0.f};
 			transform.orientation = {0.f, 0.f, 0.f, 1.f};
-			transform.scale = {1.f, 1.f, 1.f};
+			transform.scale = {1.f, 1.f, 1.f};*/
 
 			::glm::quat rot(::glm::vec3{-M_PI_2, M_PI_2, 0.f});
-			transform.orientation *= rot;
+			//transform.orientation *= rot;
 
 			//_model->GetTexture().SetHotReloadable();
 			//_renderable_model->GetUpdateMetaValuesOnFrameDelegate().SetCallback(this, UpdateMetaValuesOnFrameCallback);
@@ -729,9 +908,9 @@ namespace np::app
 		void Cleanup() override
 		{
 			{
-				auto scene = _scene.get_access();
+				/*auto scene = _scene.get_access();
 				if (scene && *scene)
-					(*scene)->CleanupVisibles();
+					(*scene)->CleanupVisibles();*/
 			}
 			{
 				// TODO: cleanup our _server_clients and _clients

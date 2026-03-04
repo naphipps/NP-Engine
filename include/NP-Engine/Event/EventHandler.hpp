@@ -20,11 +20,11 @@ namespace np::evnt
 	public:
 		virtual void OnEvent(mem::sptr<Event> e)
 		{
-			if (EventCategoryContains(GetHandledCategories(), e->GetCategory()))
+			if (GetHandledCategories().Contains(e->GetCategory()))
 				HandleEvent(e);
 		}
 
-		virtual EventCategory GetHandledCategories() const = 0;
+		virtual EventCategory GetHandledCategories() const = 0; //TODO: rename to GetHandledEventCategories
 	};
 } // namespace np::evnt
 

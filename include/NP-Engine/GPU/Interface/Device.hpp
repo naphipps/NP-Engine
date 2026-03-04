@@ -7,7 +7,7 @@
 #ifndef NP_ENGINE_GPU_INTERFACE_DEVICE_HPP
 #define NP_ENGINE_GPU_INTERFACE_DEVICE_HPP
 
-#ifndef NP_ENGINE_GPU_INTERFACE_DEVICE_RESOURCE_POOL_DEFAULT_SIZE
+#ifndef NP_ENGINE_GPU_INTERFACE_DEVICE_RESOURCE_POOL_DEFAULT_SIZE //TODO: what is this?
 	#define NP_ENGINE_GPU_INTERFACE_DEVICE_POOL_RESOURCE_DEFAULT_SIZE 500
 #endif
 
@@ -16,8 +16,10 @@
 #include "NP-Engine/Memory/Memory.hpp"
 #include "NP-Engine/Uid/Uid.hpp"
 
-#include "RenderableObject.hpp"
-#include "Resource.hpp"
+#include "PresentTarget.hpp"
+#include "Fence.hpp"
+#include "Semaphore.hpp"
+#include "PipelineCache.hpp"
 
 /*
 	TODO: the latest design is the following:
@@ -75,82 +77,62 @@ on the device
 
 namespace np::gpu
 {
-	enum ShapeType : ui32
+	class DeviceUsage : public Enum<ui32>
 	{
-		None = 0,
-		Points,
-		Line,
-		Lines,
-		Polygon,
-		Quads, // TODO: I feel like this could be two diffent kinds since the interal triangles could be one of two different
-			   // kinds
-		QuadStrip, // TODO: ^ same here
-		Triangles,
-		TriangleStrip,
-		TriangleFan,
-		Circle, // TODO: two vertices per circle, center point, then radius point, create a circle in whatever way performs best
-
-		Loop = Polygon,
-		LineStrip = Line,
-		LineLoop = Polygon
-	};
-} // namespace np::gpu
-
-/*
-	TODO: encapsulate all vulkan commands, and bring some standard naming to the interface
-		- we actually might be able to get away without having to bring these commands to the interface
-		- although I do like the idea of giving more control to the interface...
-*/
-
-namespace np::gpu
-{
-	class Device
-	{
-	protected:
-		mutexed_wrapper<con::umap<uid::Uid, mem::sptr<Resource>>> _resources; // TODO: is umap the best here? what about vector?
-
 	public:
+		constexpr static ui32 Compute = BIT(0);
+		constexpr static ui32 Graphics = BIT(1);
+		constexpr static ui32 Present = BIT(2);
+
+		constexpr static ui32 RayTrace = BIT(4); //TODO: investigate
+
+		//constexpr static ui32 Transfer = BIT(0); //TODO: shall we support this?
+
+		constexpr static ui32 MultiDrawIndirect = BIT(5); //TODO: investigate -- rename to MultiDraw?
+		constexpr static ui32 Tessellation = BIT(6);
+
+		DeviceUsage(ui32 value) : Enum<ui32>(value) {}
+	};
+
+	class DeviceQueueUsage : public Enum<ui32>
+	{
+	public:
+		constexpr static ui32 Present = BIT(0);
+		constexpr static ui32 Graphics = BIT(1);
+		constexpr static ui32 Compute = BIT(2);
+		constexpr static ui32 RayTrace = BIT(4);
+
+		//constexpr static ui32 Transfer = BIT(0); //TODO: shall we support this?
+
+		DeviceQueueUsage(ui32 value) : Enum<ui32>(value) {}
+	};
+
+	struct DeviceQueueFamily
+	{
+		siz index = SIZ_MAX;
+		siz count = 0;
+		DeviceQueueUsage usage = DeviceQueueUsage::None;
+	};
+
+	struct Device : public DetailObject
+	{
+		static mem::sptr<Device> Create(mem::sptr<DetailInstance> instance, DeviceUsage usage, mem::sptr<PresentTarget> target = nullptr);
+
 		virtual ~Device() = default;
 
-		virtual void Register(uid::Uid id, mem::sptr<Resource> resource)
-		{
-			(*_resources.get_access())[id] = resource;
-		}
+		virtual mem::sptr<DetailInstance> GetDetailInstance() const = 0;
 
-		virtual void Unregister(uid::Uid id)
-		{
-			_resources.get_access()->erase(id);
-		}
+		virtual mem::sptr<PresentTarget> GetPresentTarget() const = 0;
 
-		virtual void CleanupResources()
-		{
-			uid::UidSystem& uid_system = GetServices()->GetUidSystem();
-			auto resources = _resources.get_access();
-			for (auto it = resources->begin(); it != resources->end();)
-			{
-				if (!uid_system.Has(it->first))
-					it = resources->erase(it);
-				else
-					it++;
-			}
-		}
+		virtual con::vector<DeviceQueueFamily> GetDeviceQueueFamilies() const = 0;
 
-		virtual mem::sptr<Resource> GetResource(uid::Uid id)
-		{
-			auto resources = _resources.get_access();
-			auto it = resources->find(id);
-			return it != resources->end() ? it->second : nullptr;
-		}
+		virtual mem::sptr<PipelineCache> GetPipelineCache() const = 0;
 
-		virtual bl HasResource(uid::Uid id)
-		{
-			auto resources = _resources.get_access();
-			return resources->find(id) != resources->end();
-		}
+		virtual mem::sptr<Fence> CreateFence() = 0;
 
-		virtual mem::sptr<DetailInstance> GetInstance() const = 0;
+		virtual mem::sptr<Semaphore> CreateSemaphore() = 0;
 
-		virtual mem::sptr<srvc::Services> GetServices() const = 0;
+		//virtual mem::sptr<PipelineCache> CreatePipelineCache(str filename) const = 0; //TODO: how do we want to do this?
 	};
 } // namespace np::gpu
 

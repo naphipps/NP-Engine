@@ -4,8 +4,8 @@
 //
 //##===----------------------------------------------------------------------===##//
 
-#ifndef NP_ENGINE_SUBVIEW_HPP
-#define NP_ENGINE_SUBVIEW_HPP
+#ifndef NP_ENGINE_GPU_INTERFACE_SUBVIEW_HPP
+#define NP_ENGINE_GPU_INTERFACE_SUBVIEW_HPP
 
 #include "Image.hpp"
 
@@ -14,8 +14,8 @@ namespace np::alg
 	struct Subview
 	{
 		using Point = gpu::Image::Point;
-		Point origin = {0, 0};
-		Point boundary = {0, 0};
+		Point origin{};
+		Point boundary{};
 
 		bl Contains(const Point& point) const
 		{
@@ -24,4 +24,4 @@ namespace np::alg
 	};
 } // namespace np::alg
 
-#endif /* NP_ENGINE_SUBVIEW_HPP */
+#endif /* NP_ENGINE_GPU_INTERFACE_SUBVIEW_HPP */

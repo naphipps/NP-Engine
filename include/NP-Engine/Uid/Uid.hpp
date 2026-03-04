@@ -51,10 +51,8 @@ namespace np::uid
 	private:
 		class HndlDestroyer : public mem::smart_ptr_contiguous_destroyer<UidHandle>
 		{
-		public:
-			using base = mem::smart_ptr_contiguous_destroyer<UidHandle>;
-
 		private:
+			using base = mem::smart_ptr_contiguous_destroyer<UidHandle>;
 			UidSystem& _uid_system;
 
 		public:

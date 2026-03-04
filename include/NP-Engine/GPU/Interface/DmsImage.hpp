@@ -4,8 +4,8 @@
 //
 //##===----------------------------------------------------------------------===##//
 
-#ifndef NP_ENGINE_DMS_IMAGE_HPP
-#define NP_ENGINE_DMS_IMAGE_HPP
+#ifndef NP_ENGINE_GPU_INTERFACE_DMS_IMAGE_HPP
+#define NP_ENGINE_GPU_INTERFACE_DMS_IMAGE_HPP
 
 #include "NP-Engine/Foundation/Foundation.hpp"
 #include "NP-Engine/Primitive/Primitive.hpp"
@@ -48,13 +48,13 @@ namespace np::alg // TODO: refactor DMS stuff to DualMarchingSquares
 			Payload& payload = *((Payload*)d.GetPayload());
 			Point point = payload.point;
 
-			if (FloodFillImage::PointRelationContains(payload.relation, Relation::Upper))
+			if (payload.relation.Contains(Relation::Upper))
 				point.y++;
-			if (FloodFillImage::PointRelationContains(payload.relation, Relation::Lower))
+			if (payload.relation.Contains(Relation::Lower))
 				point.y--;
-			if (FloodFillImage::PointRelationContains(payload.relation, Relation::Right))
+			if (payload.relation.Contains(Relation::Right))
 				point.x++;
-			if (FloodFillImage::PointRelationContains(payload.relation, Relation::Left))
+			if (payload.relation.Contains(Relation::Left))
 				point.x--;
 
 			return !payload.visited->count(point) &&
@@ -269,7 +269,7 @@ namespace np::alg // TODO: refactor DMS stuff to DualMarchingSquares
 		Extraction GetExtraction(dbl isothreshold, gpu::ColorChannel channel)
 		{
 			NP_ENGINE_ASSERT(isothreshold >= 0.0 && isothreshold <= 1.0, "isothreshold must be on range [0, 1]");
-			NP_ENGINE_ASSERT(gpu::IsOnlyOneColorChannel(channel), "GetExtraction requires use of only one color channel");
+			NP_ENGINE_ASSERT(channel.IsSingleChannel(), "GetExtraction requires use of only one color channel");
 
 			Extraction extraction;
 			ui32 width = _image_subview.GetWidth();
@@ -394,7 +394,7 @@ namespace np::alg // TODO: refactor DMS stuff to DualMarchingSquares
 		con::uset<DmsLineSegment> MarchCubesStride2(dbl isothreshold, gpu::ColorChannel channel)
 		{
 			NP_ENGINE_ASSERT(isothreshold >= 0.0 && isothreshold <= 1.0, "isothreshold must be on range [0, 1]");
-			NP_ENGINE_ASSERT(gpu::IsOnlyOneColorChannel(channel), "GetExtraction requires use of only one color channel");
+			NP_ENGINE_ASSERT(channel.IsSingleChannel(), "GetExtraction requires use of only one color channel");
 
 			ui32 width = _image_subview.GetWidth();
 			ui32 height = _image_subview.GetHeight();
@@ -423,7 +423,7 @@ namespace np::alg // TODO: refactor DMS stuff to DualMarchingSquares
 		con::uset<DmsLineSegment> MarchCubesFlood(dbl isothreshold, gpu::ColorChannel channel)
 		{
 			NP_ENGINE_ASSERT(isothreshold >= 0.0 && isothreshold <= 1.0, "isothreshold must be on range [0, 1]");
-			NP_ENGINE_ASSERT(gpu::IsOnlyOneColorChannel(channel), "GetExtraction requires use of only one color channel");
+			NP_ENGINE_ASSERT(channel.IsSingleChannel(), "GetExtraction requires use of only one color channel");
 
 			con::uset<DmsPoint> visited;
 			con::uset<DmsPoint> edge_points;
@@ -473,4 +473,4 @@ namespace np::alg // TODO: refactor DMS stuff to DualMarchingSquares
 	};
 } // namespace np::alg
 
-#endif /* NP_ENGINE_DMS_IMAGE_HPP */
+#endif /* NP_ENGINE_GPU_INTERFACE_DMS_IMAGE_HPP */

@@ -4,8 +4,8 @@
 //
 //##===----------------------------------------------------------------------===##//
 
-#ifndef NP_ENGINE_VULKAN_FENCE_HPP
-#define NP_ENGINE_VULKAN_FENCE_HPP
+#ifndef NP_ENGINE_GPU_VULKAN_FENCE_HPP
+#define NP_ENGINE_GPU_VULKAN_FENCE_HPP
 
 #include <utility>
 
@@ -14,36 +14,38 @@
 
 #include "NP-Engine/Vendor/VulkanInclude.hpp"
 
+#include "NP-Engine/GPU/Interface/Interface.hpp"
+
 #include "VulkanLogicalDevice.hpp"
 
 namespace np::gpu::__detail
 {
-	class VulkanFence
+	class VulkanFence : public Fence
 	{
 	private:
 		mem::sptr<VulkanLogicalDevice> _device;
 		VkFence _fence;
 
-		static VkFence CreateFence(mem::sptr<VulkanLogicalDevice> device)
+		static VkFenceCreateInfo CreateVkInfo()
 		{
-			VkFence fence = nullptr;
 			VkFenceCreateInfo info{};
 			info.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
 			info.flags = VK_FENCE_CREATE_SIGNALED_BIT;
+			return info;
+		}
 
-			if (vkCreateFence(*device, &info, nullptr, &fence) != VK_SUCCESS)
-				fence = nullptr;
-
-			return fence;
+		static VkFence CreateVkFence(mem::sptr<VulkanLogicalDevice> device)
+		{
+			VkFenceCreateInfo info = CreateVkInfo();
+			VkFence fence = nullptr;
+			VkResult result = vkCreateFence(*device, &info, nullptr, &fence);
+			return result == VK_SUCCESS ? fence : nullptr;
 		}
 
 	public:
-		VulkanFence(mem::sptr<VulkanLogicalDevice> device): _device(device), _fence(CreateFence(_device)) {}
-
-		VulkanFence(VulkanFence&& other) noexcept: _fence(::std::move(other._fence)), _device(::std::move(other._device))
+		VulkanFence(mem::sptr<VulkanLogicalDevice> device): _device(device), _fence(CreateVkFence(_device))
 		{
-			other._fence = nullptr;
-			other._device.reset();
+			Reset();
 		}
 
 		~VulkanFence()
@@ -60,16 +62,31 @@ namespace np::gpu::__detail
 			return _fence;
 		}
 
-		void Wait()
+		virtual DetailType GetDetailType() const override
 		{
-			vkWaitForFences(*_device, 1, &_fence, VK_TRUE, UI64_MAX);
+			return DetailType::Vulkan;
 		}
 
-		void Reset()
+		virtual mem::sptr<srvc::Services> GetServices() const override
 		{
-			vkResetFences(*_device, 1, &_fence);
+			return _device->GetServices();
+		}
+
+		mem::sptr<VulkanLogicalDevice> GetLogicalDevice() const
+		{
+			return _device;
+		}
+
+		virtual void Wait(siz timeout) const override
+		{
+			vkWaitForFences(*GetLogicalDevice(), 1, &_fence, VK_TRUE, timeout);
+		}
+
+		void Reset() const
+		{
+			vkResetFences(*GetLogicalDevice(), 1, &_fence);
 		}
 	};
 } // namespace np::gpu::__detail
 
-#endif /* NP_ENGINE_VULKAN_FENCE_HPP */
+#endif /* NP_ENGINE_GPU_VULKAN_FENCE_HPP */

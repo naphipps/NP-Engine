@@ -4,237 +4,246 @@
 //
 //##===----------------------------------------------------------------------===##//
 
-#ifndef NP_ENGINE_VULKAN_RENDER_PASS_HPP
-#define NP_ENGINE_VULKAN_RENDER_PASS_HPP
+#ifndef NP_ENGINE_GPU_VULKAN_RENDER_PASS_HPP
+#define NP_ENGINE_GPU_VULKAN_RENDER_PASS_HPP
 
 #include "NP-Engine/Memory/Memory.hpp"
 #include "NP-Engine/Container/Container.hpp"
+#include "NP-Engine/String/String.hpp"
+#include "NP-Engine/Primitive/Primitive.hpp"
 
 #include "NP-Engine/Vendor/VulkanInclude.hpp"
 
 #include "NP-Engine/GPU/Interface/Interface.hpp"
 
-#include "VulkanCommands.hpp"
-#include "VulkanCommandBuffer.hpp"
-#include "VulkanTexture.hpp"
-#include "VulkanRenderContext.hpp"
+#include "VulkanAccess.hpp"
+#include "VulkanPipeline.hpp"
+#include "VulkanImageResource.hpp"
 
 namespace np::gpu::__detail
 {
+	struct VulkanSubpassImageResourceReference
+	{
+		ui32 framebufferImageViewIndex = SIZ_MAX;
+		VulkanImageResourceUsage usage = VulkanImageResourceUsage::None;
+
+		VulkanSubpassImageResourceReference(const SubpassImageResourceReference& ref = {}) :
+			framebufferImageViewIndex(ref.framebufferImageViewIndex),
+			usage(ref.usage)
+		{}
+
+		operator SubpassImageResourceReference() const
+		{
+			return { framebufferImageViewIndex, usage };
+		}
+
+		VkAttachmentReference GetVkAttachmentReference() const
+		{
+			return { framebufferImageViewIndex, usage.GetVkImageLayout() };
+		}
+	};
+
+	struct VulkanSubpassDescription
+	{
+		con::vector<VulkanSubpassImageResourceReference> inputs{};
+		con::vector<VulkanSubpassImageResourceReference> outputs{};
+		con::vector<VulkanSubpassImageResourceReference> multisampleResolves{};
+		con::vector<ui32> preserveFramebufferImageViewIndicies{};
+
+		VulkanSubpassDescription(const SubpassDescription& other = {}) :
+			inputs(other.inputs.begin(), other.inputs.end()),
+			outputs(other.outputs.begin(), other.outputs.end()),
+			multisampleResolves(other.multisampleResolves.begin(), other.multisampleResolves.end())
+		{
+			preserveFramebufferImageViewIndicies.resize(other.preserveFramebufferImageViewIndicies.size());
+			for (siz i = 0; i < preserveFramebufferImageViewIndicies.size(); i++)
+				preserveFramebufferImageViewIndicies[i] = (ui32)other.preserveFramebufferImageViewIndicies[i];
+		}
+
+		operator SubpassDescription() const
+		{
+			return
+			{
+				{inputs.begin(), inputs.end()},
+				{outputs.begin(), outputs.end()},
+				{multisampleResolves.begin(), multisampleResolves.end()},
+				{preserveFramebufferImageViewIndicies.begin(), preserveFramebufferImageViewIndicies.end()}
+			};
+		}
+
+		/*
+			NOTE: MUST BE CALLED ALONGSIDE THE Get____ResourceReferences METHODS
+		*/
+		VkSubpassDescription GetVkSubpassDescription() const
+		{
+			VkSubpassDescription description{};
+			description.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
+			return description;
+		}
+
+		con::vector<VkAttachmentReference> GetVkInputVkAttachmentReferences() const
+		{
+			con::vector<VkAttachmentReference> refs(inputs.size());
+			for (siz i = 0; i < refs.size(); i++)
+				refs[i] = inputs[i].GetVkAttachmentReference();
+			return refs;
+		}
+
+		con::vector<VkAttachmentReference> GetVkColorVkAttachmentReferences() const
+		{
+			con::vector<VkAttachmentReference> refs(outputs.size());
+			for (siz i = 0; i < refs.size(); i++)
+				refs[i] = outputs[i].GetVkAttachmentReference();
+			return refs;
+		}
+
+		con::vector<VkAttachmentReference> GetVkResolveVkAttachmentReferences() const
+		{
+			con::vector<VkAttachmentReference> refs(multisampleResolves.size());
+			for (siz i = 0; i < refs.size(); i++)
+				refs[i] = multisampleResolves[i].GetVkAttachmentReference();
+			return refs;
+		}
+
+		con::vector<ui32> GetPreserveFramebufferImageViewIndices() const
+		{
+			return preserveFramebufferImageViewIndicies;
+		}
+	};
+
+	struct VulkanSubpassDependency
+	{
+		ui32 srcSubpassIndex = 0;
+		ui32 dstSubpassIndex = 0;
+		VulkanStage srcStage = VulkanStage::None;
+		VulkanStage dstStage = VulkanStage::None;
+		VulkanAccess srcAccess = VulkanAccess::None;
+		VulkanAccess dstAccess = VulkanAccess::None;
+
+		VulkanSubpassDependency(const SubpassDependency& other = {}) :
+			srcSubpassIndex(other.srcSubpassIndex == SIZ_MAX ? VK_SUBPASS_EXTERNAL : other.srcSubpassIndex),
+			dstSubpassIndex(other.dstSubpassIndex == SIZ_MAX ? VK_SUBPASS_EXTERNAL : other.dstSubpassIndex),
+			srcStage(other.srcStage),
+			dstStage(other.dstStage),
+			srcAccess(other.srcAccess),
+			dstAccess(other.dstAccess)
+		{}
+
+		operator SubpassDependency() const
+		{
+			return { srcSubpassIndex, dstSubpassIndex, srcStage, dstStage, srcAccess, dstAccess };
+		}
+
+		VkSubpassDependency GetVkSubpassDependency() const
+		{
+			VkSubpassDependency dependency{};
+			dependency.srcSubpass = srcSubpassIndex;
+			dependency.dstSubpass = dstSubpassIndex;
+			dependency.srcStageMask = srcStage.GetVkPipelineStageFlags();
+			dependency.dstStageMask = dstStage.GetVkPipelineStageFlags();
+			dependency.srcAccessMask = srcAccess.GetVkAccessFlags();
+			dependency.dstAccessMask = dstAccess.GetVkAccessFlags();
+			return dependency;
+		}
+	};
+
+	class VulkanSubpassUsage : public SubpassUsage
+	{
+	public:
+		VulkanSubpassUsage(ui32 value) : SubpassUsage(value) {}
+
+		VkSubpassContents GetVkSubpassContents() const
+		{
+			VkSubpassContents contents = VK_SUBPASS_CONTENTS_INLINE;
+
+			if (Contains(HasSecondary))
+				contents = VK_SUBPASS_CONTENTS_SECONDARY_COMMAND_BUFFERS;
+
+			return contents;
+		}
+	};
+
 	class VulkanRenderPass : public RenderPass
 	{
 	private:
+		mem::sptr<VulkanDevice> _device;
+		con::vector<VulkanImageResourceDescription> _image_descriptions;
+		con::vector<VulkanSubpassDescription> _subpass_descriptions;
+		con::vector<VulkanSubpassDependency> _subpass_dependencies;
 		VkRenderPass _render_pass;
-		mem::sptr<VulkanTexture> _depth_texture;
-		mem::sptr<VulkanCommandBeginRenderPass> _begin_render_pass;
-		mem::sptr<VulkanCommandEndRenderPass> _end_render_pass;
 
-		static VkAttachmentDescription CreateColorAttachmentDescription(mem::sptr<RenderDevice> device)
-		{
-			VulkanRenderDevice& render_device = (VulkanRenderDevice&)(*device);
-			VkAttachmentDescription desc{};
-			desc.format = render_device.GetSurfaceFormat().format;
-			desc.samples = VK_SAMPLE_COUNT_1_BIT;
-			desc.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-			desc.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-			desc.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-			desc.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-			desc.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-			desc.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
-			return desc;
-		}
-
-		static VkAttachmentDescription CreateDepthAttachmentDescription(VkFormat depth_format)
-		{
-			VkAttachmentDescription desc{};
-			desc.format = depth_format;
-			desc.samples = VK_SAMPLE_COUNT_1_BIT;
-			desc.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-			desc.storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-			desc.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-			desc.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-			desc.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-			desc.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-			return desc;
-		}
-
-		static VkAttachmentReference CreateColorAttachmentReference()
-		{
-			VkAttachmentReference ref{};
-			ref.attachment = 0;
-			ref.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-			return ref;
-		}
-
-		static VkAttachmentReference CreateDepthAttachmentReference()
-		{
-			VkAttachmentReference ref{};
-			ref.attachment = 1;
-			ref.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-			return ref;
-		}
-
-		static VkSubpassDescription CreateSubpassDescription()
-		{
-			VkSubpassDescription desc{};
-			desc.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
-			return desc;
-		}
-
-		static con::vector<VkSubpassDependency> CreateSubpassDependencies()
-		{
-			con::vector<VkSubpassDependency> dependencies{};
-
-			VkSubpassDependency dependency{};
-			dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
-			dependency.dstSubpass = 0;
-			dependency.srcStageMask =
-				VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
-			dependency.srcAccessMask = 0;
-			dependency.dstStageMask =
-				VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
-			dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
-
-			dependencies.emplace_back(dependency);
-
-			return dependencies;
-		}
-
-		static VkRenderPassCreateInfo CreateRenderPassInfo()
+		static VkRenderPassCreateInfo CreateVkInfo()
 		{
 			VkRenderPassCreateInfo info{};
 			info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
 			return info;
 		}
 
-		static VkRenderPass CreateRenderPass(mem::sptr<RenderDevice> device)
+		static VkRenderPass CreateVkRenderPass(mem::sptr<VulkanDevice> device, const con::vector<VulkanImageResourceDescription>& descriptions,
+			const con::vector<VulkanSubpassDescription>& subpasses, const con::vector<VulkanSubpassDependency>& dependencies)
 		{
-			VulkanRenderDevice& render_device = (VulkanRenderDevice&)(*device);
-			VkRenderPass render_pass = nullptr;
+			con::vector<VkAttachmentDescription> attachment_descriptions(descriptions.size());
+			for (siz i = 0; i < attachment_descriptions.size(); i++)
+				attachment_descriptions[i] = descriptions[i].GetVkAttachmentDescription();
 
-			VkAttachmentReference color_attachment_reference = CreateColorAttachmentReference();
-			VkAttachmentReference depth_attachment_reference = CreateDepthAttachmentReference();
-
-			VkSubpassDescription subpass_description = CreateSubpassDescription();
-			subpass_description.colorAttachmentCount = 1;
-			subpass_description.pColorAttachments = &color_attachment_reference;
-			subpass_description.pDepthStencilAttachment = &depth_attachment_reference;
-
-			con::vector<VkSubpassDescription> subpass_descriptions = {subpass_description};
-
-			con::vector<VkAttachmentDescription> attachment_descriptions = {
-				CreateColorAttachmentDescription(device), CreateDepthAttachmentDescription(GetDepthFormat(device))};
-
-			con::vector<VkSubpassDependency> subpass_dependencies = CreateSubpassDependencies();
-
-			VkRenderPassCreateInfo render_pass_info = CreateRenderPassInfo();
-			render_pass_info.attachmentCount = (ui32)attachment_descriptions.size();
-			render_pass_info.pAttachments = attachment_descriptions.data();
-			render_pass_info.subpassCount = (ui32)subpass_descriptions.size();
-			render_pass_info.pSubpasses = subpass_descriptions.data();
-			render_pass_info.dependencyCount = (ui32)subpass_dependencies.size();
-			render_pass_info.pDependencies = subpass_dependencies.data();
-
-			if (vkCreateRenderPass(render_device, &render_pass_info, nullptr, &render_pass) != VK_SUCCESS)
-				render_pass = nullptr;
-
-			return render_pass;
-		}
-
-		static VkFormat GetDepthFormat(mem::sptr<RenderDevice> device)
-		{
-			VulkanRenderDevice& render_device = (VulkanRenderDevice&)(*device);
-			return render_device.GetLogicalDevice()->GetSupportedFormat(
-				{VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT}, VK_IMAGE_TILING_OPTIMAL,
-				VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT);
-		}
-
-		static mem::sptr<VulkanTexture> CreateDepthTexture(mem::sptr<RenderContext> context)
-		{
-			VulkanRenderContext& render_context = (VulkanRenderContext&)(*context);
-			VulkanRenderDevice& render_device = (VulkanRenderDevice&)(*context->GetRenderDevice());
-
-			VkImageCreateInfo depth_image_create_info = VulkanImage::CreateInfo();
-			depth_image_create_info.extent.width = render_context.GetExtent().width;
-			depth_image_create_info.extent.height = render_context.GetExtent().height;
-			depth_image_create_info.format = GetDepthFormat(context->GetRenderDevice());
-			depth_image_create_info.tiling = VK_IMAGE_TILING_OPTIMAL;
-			depth_image_create_info.usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
-			VkMemoryPropertyFlags depth_memory_property_flags = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
-			VkImageViewCreateInfo depth_image_view_create_info = VulkanImageView::CreateInfo();
-			depth_image_view_create_info.format = depth_image_create_info.format;
-			depth_image_view_create_info.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
-
-			return mem::create_sptr<VulkanTexture>(context->GetServices()->GetAllocator(), render_device.GetLogicalDevice(),
-												   depth_image_create_info, depth_memory_property_flags,
-												   depth_image_view_create_info);
-			/*
-			the following transition is covered in the render pass, but here it is for reference
-
-			TransitionImageLayout(_depth_texture->GetImage(), depth_format, VK_IMAGE_LAYOUT_UNDEFINED,
-				VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
-			*/
-		}
-
-		void Dispose()
-		{
-			if (_depth_texture)
-				_depth_texture.reset();
-
-			if (_render_pass)
+			con::vector<con::vector<VkAttachmentReference>> input_attachment_references(subpasses.size());
+			con::vector<con::vector<VkAttachmentReference>> color_attachment_references(subpasses.size());
+			con::vector<con::vector<VkAttachmentReference>> resolve_attachment_references(subpasses.size());
+			con::vector<con::vector<ui32>> preserve_framebuffer_image_view_indicies(subpasses.size());
+			con::vector<VkSubpassDescription> subpass_descriptions(subpasses.size());
+			for (siz i = 0; i < subpass_descriptions.size(); i++)
 			{
-				VulkanRenderDevice& render_device = (VulkanRenderDevice&)(*GetRenderContext()->GetRenderDevice());
-				vkDestroyRenderPass(render_device, _render_pass, nullptr);
-				_render_pass = nullptr;
+				input_attachment_references[i] = subpasses[i].GetVkInputVkAttachmentReferences();
+				color_attachment_references[i] = subpasses[i].GetVkColorVkAttachmentReferences();
+				resolve_attachment_references[i] = subpasses[i].GetVkResolveVkAttachmentReferences();
+				preserve_framebuffer_image_view_indicies[i] = subpasses[i].GetPreserveFramebufferImageViewIndices();
+
+				//TODO: should we check: if resolve_attachment_references[i] is not empty, then it's size must equal color_attachment_references[i]
+
+				subpass_descriptions[i] = subpasses[i].GetVkSubpassDescription();
+				subpass_descriptions[i].inputAttachmentCount = input_attachment_references[i].size();
+				subpass_descriptions[i].pInputAttachments = input_attachment_references[i].empty() ? nullptr : input_attachment_references[i].data();
+				subpass_descriptions[i].colorAttachmentCount = color_attachment_references[i].size();
+				subpass_descriptions[i].pColorAttachments = color_attachment_references[i].empty() ? nullptr : color_attachment_references[i].data();
+				subpass_descriptions[i].pResolveAttachments = resolve_attachment_references[i].empty() ? nullptr : resolve_attachment_references[i].data();
+				subpass_descriptions[i].preserveAttachmentCount = preserve_framebuffer_image_view_indicies[i].size();
+				subpass_descriptions[i].pPreserveAttachments = preserve_framebuffer_image_view_indicies[i].empty() ? nullptr : preserve_framebuffer_image_view_indicies[i].data();
 			}
+
+			con::vector<VkSubpassDependency> subpass_dependencies(dependencies.size());
+			for (siz i = 0; i < subpass_dependencies.size(); i++)
+				subpass_dependencies[i] = dependencies[i].GetVkSubpassDependency();
+			
+			VkRenderPassCreateInfo info = CreateVkInfo();
+			info.attachmentCount = attachment_descriptions.size();
+			info.pAttachments = attachment_descriptions.empty() ? nullptr : attachment_descriptions.data();
+			info.subpassCount = subpass_descriptions.size();
+			info.pSubpasses = subpass_descriptions.empty() ? nullptr : subpass_descriptions.data();
+			info.dependencyCount = subpass_dependencies.size();
+			info.pDependencies = subpass_dependencies.empty() ? nullptr : subpass_dependencies.data();
+
+			VkRenderPass render_pass = nullptr;
+			VkResult result = vkCreateRenderPass(*device->GetLogicalDevice(), &info, nullptr, &render_pass);
+			return result == VK_SUCCESS ? render_pass : nullptr;
 		}
 
 	public:
-		static con::vector<VkClearValue> CreateClearValues()
-		{
-			con::vector<VkClearValue> values;
-
-			VkClearValue clear_color;
-			clear_color.color = {{0.0f, 0.0f, 0.0f, 1.0f}};
-
-			VkClearValue depth_stencil;
-			depth_stencil.depthStencil = {1.0f, 0};
-
-			values.emplace_back(clear_color);
-			values.emplace_back(depth_stencil);
-
-			return values;
-		}
-
-		static VkRenderPassBeginInfo CreateRenderPassBeginInfo()
-		{
-			VkRenderPassBeginInfo info{};
-			info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-			info.renderArea.offset = {0, 0};
-			return info;
-		}
-
-		static mem::sptr<VulkanCommandEndRenderPass> CreateEndRenderPassCommand(mem::sptr<srvc::Services> services)
-		{
-			return mem::create_sptr<VulkanCommandEndRenderPass>(services->GetAllocator());
-		}
-
-		VulkanRenderPass(mem::sptr<RenderContext> context):
-			RenderPass(context),
-			_render_pass(CreateRenderPass(context->GetRenderDevice())),
-			_depth_texture(CreateDepthTexture(context)),
-			_begin_render_pass(nullptr),
-			_end_render_pass(CreateEndRenderPassCommand(GetServices()))
+		VulkanRenderPass(mem::sptr<Device> device, const con::vector<ImageResourceDescription>& descriptions,
+			const con::vector<SubpassDescription>& subpasses, const con::vector<SubpassDependency>& dependencies):
+			_device(device),
+			_image_descriptions(descriptions.begin(), descriptions.end()),
+			_subpass_descriptions(subpasses.begin(), subpasses.end()),
+			_subpass_dependencies(dependencies.begin(), dependencies.end()),
+			_render_pass(CreateVkRenderPass(_device, _image_descriptions, _subpass_descriptions, _subpass_dependencies))
 		{}
 
 		~VulkanRenderPass()
 		{
-			Dispose();
-		}
-
-		mem::sptr<VulkanTexture> GetDepthTexture() const
-		{
-			return _depth_texture;
+			if (_render_pass)
+			{
+				vkDestroyRenderPass(*_device->GetLogicalDevice(), _render_pass, nullptr);
+				_render_pass = nullptr;
+			}
 		}
 
 		operator VkRenderPass() const
@@ -242,29 +251,36 @@ namespace np::gpu::__detail
 			return _render_pass;
 		}
 
-		void Rebuild()
+		virtual DetailType GetDetailType() const override
 		{
-			_depth_texture = CreateDepthTexture(GetRenderContext());
+			return DetailType::Vulkan;
 		}
 
-		void Begin(VkRenderPassBeginInfo& render_pass_begin_info, mem::sptr<CommandStaging> staging)
+		virtual mem::sptr<srvc::Services> GetServices() const override
 		{
-			NP_ENGINE_ASSERT(staging, "Vulkan requires CommandStaging to be valid");
-
-			VulkanRenderContext& render_context = (VulkanRenderContext&)(*GetRenderContext());
-			render_pass_begin_info.renderPass = _render_pass;
-			render_pass_begin_info.renderArea.extent = render_context.GetExtent();
-			_begin_render_pass = mem::create_sptr<VulkanCommandBeginRenderPass>(
-				GetServices()->GetAllocator(), render_pass_begin_info, VK_SUBPASS_CONTENTS_INLINE);
-			staging->Stage(_begin_render_pass);
+			return _device->GetServices();
 		}
 
-		void End(mem::sptr<CommandStaging> staging)
+		virtual mem::sptr<Device> GetDevice() const override
 		{
-			NP_ENGINE_ASSERT(staging, "Vulkan requires CommandStaging to be valid");
-			staging->Stage(_end_render_pass);
+			return _device;
+		}
+
+		virtual con::vector<ImageResourceDescription> GetImageResourceDescriptions() const override
+		{
+			return { _image_descriptions.begin(), _image_descriptions.end() };
+		}
+
+		virtual con::vector<SubpassDescription> GetSubpassDescriptions() const override
+		{
+			return { _subpass_descriptions.begin(), _subpass_descriptions.end() };
+		}
+
+		virtual con::vector<SubpassDependency> GetSubpassDepenedencies() const override
+		{
+			return { _subpass_dependencies.begin(), _subpass_dependencies.end() };
 		}
 	};
 } // namespace np::gpu::__detail
 
-#endif /* NP_ENGINE_VULKAN_RENDER_PASS_HPP */
+#endif /* NP_ENGINE_GPU_VULKAN_RENDER_PASS_HPP */

@@ -57,6 +57,86 @@ namespace np
 	using chr32 = char32_t;
 
 	using bl = bool;
+
+	template <typename T>
+	class Enum
+	{
+	protected:
+		T _value;
+
+		virtual void SetEmbeddedValue(T value, T mask, T shift)
+		{
+			value <<= shift;
+			value &= mask;
+			_value &= ~mask;
+			_value |= value;
+		}
+
+		virtual T GetEmbeddedValue(T mask, T shift) const
+		{
+			return (_value & mask) >> shift;
+		}
+
+	public:
+		constexpr static T Zero = 0;
+		constexpr static T None = Zero;
+		constexpr static T Empty = Zero;
+		constexpr static T Nothing = Zero;
+		constexpr static T All = ~((T)0);
+		constexpr static T Full = All;
+		constexpr static T Everything = All;
+
+		static inline bl Contains(const Enum<T>& a, const Enum<T>& b)
+		{
+			return (a._value & b._value) == b._value;
+		}
+
+		static inline bl ContainsAny(const Enum<T>& a, const Enum<T>& b)
+		{
+			return (a._value & b._value) != None;
+		}
+
+		static inline bl ContainsAll(const Enum<T>& a, const Enum<T>& b)
+		{
+			return a._value == b._value;
+		}
+
+		Enum(T value) : _value(value) {}
+
+		virtual ~Enum() = default;
+
+		operator T() const
+		{
+			return _value;
+		}
+
+		Enum<T>& operator |=(const Enum<T>& other)
+		{
+			_value |= other._value;
+			return *this;
+		}
+
+		Enum<T>& operator &=(const Enum<T>& other)
+		{
+			_value &= other._value;
+			return *this;
+		}
+
+		virtual bl Contains(const Enum<T>& other) const
+		{
+			return Contains(*this, other);
+		}
+
+		virtual bl ContainsAny(const Enum<T>& other) const
+		{
+			return ContainsAny(*this, other);
+		}
+
+		virtual bl ContainsAll(const Enum<T>& other) const
+		{
+			return ContainsAll(*this, other);
+		}
+	};
 } // namespace np
 
 #endif /* NP_ENGINE_PRIMITIVE_TYPES_HPP */

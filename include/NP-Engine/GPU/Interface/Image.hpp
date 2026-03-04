@@ -21,17 +21,17 @@
 
 namespace np::gpu
 {
-	class Image
+	class Image //TODO: we may want to investigate have a ImageResource instead. We can register an image, and get an ImageResource back to use with commands, etc.
 	{
 	public:
-		using Point = ::glm::vec<2, ui32>;
+		using Point = ::glm::uvec2;
 
 	protected:
 		ui32 _width;
 		ui32 _height;
-		con::vector<ui8> _pixels;
+		con::vector<ui8> _pixels; //TODO: we're aiming to support PNG primarily, so ui8 makes sense, but we may want to mess with the depth here? maybe let the game layer implement this?
 		str _filename;
-		::glm::mat4 _transform;
+		::glm::mat4 _transform; // TODO: support this in constructors, etc
 
 	public:
 		Image(str filename)
@@ -157,6 +157,7 @@ namespace np::gpu
 				const ui8* pixel_data = mem::AddressOf(_pixels[(siz)x + (siz)y * (siz)_width * sizeof(Color)]);
 				// TODO: ^ I feel like there are cleaner way of doing this
 				pixel = *((ui32*)pixel_data);
+				// TODO: ^ I feel like there are cleaner way of doing this -- mem::CopyBytes(mem::AddressOf(pixel), pixel_data, sizeof(Color))
 			}
 
 			return pixel;
@@ -174,6 +175,7 @@ namespace np::gpu
 				ui8* pixel_data = mem::AddressOf(_pixels[(siz)x + (siz)y * (siz)_width * sizeof(Color)]);
 				// TODO: ^ I feel like there are cleaner way of doing this
 				*((ui32*)pixel_data) = color;
+				// TODO: ^ I feel like there are cleaner way of doing this -- mem::CopyBytes(mem::AddressOf(pixel), pixel_data, sizeof(Color))
 			}
 		}
 	};

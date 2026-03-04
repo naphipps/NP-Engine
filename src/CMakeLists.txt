@@ -72,58 +72,54 @@ set(NP_ENGINE_GPU_HPP
 )
 
 set(NP_ENGINE_GPU_INTERFACE_HPP
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Interface/Interface.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Interface/Access.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Interface/Blend.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Interface/BufferResource.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Interface/Camera.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Interface/Command.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Interface/Buffer.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Interface/Pipeline.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Interface/Scene.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Interface/Shader.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Interface/Texture.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Interface/DetailType.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Interface/Vertex.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Interface/Color.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Interface/Image.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Interface/Model.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Interface/CommandStaging.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Interface/CommandBuffer.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Interface/Light.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Interface/Device.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Interface/ComputeContext.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Interface/ComputeDevice.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Interface/CommandBufferPool.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Interface/Commands.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Interface/CompareOperation.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Interface/ComputePipeline.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Interface/Context.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Interface/DepthPass.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Interface/DetailInstance.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Interface/Pass.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Interface/RayTraceContext.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Interface/RayTraceDevice.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Interface/RayTracePipeline.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Interface/RenderContext.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Interface/RenderDevice.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Interface/RenderPipeline.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Interface/RenderPass.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Interface/RenderTarget.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Interface/ScreenshotPass.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Interface/Resource.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Interface/ResourceType.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Interface/RenderableObject.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Interface/RenderableLightObject.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Interface/RenderableImage.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Interface/RenderableModel.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Interface/RenderableLight.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Interface/RenderableMetaValues.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Interface/PipelineMetaValues.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Interface/VisibleObject.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Interface/Framebuffers.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Interface/RenderShader.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Interface/ComputeShader.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Interface/DepthStencil.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Interface/Detail.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Interface/Device.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Interface/DmsImage.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Interface/DmsLineSegment.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Interface/DrawableImage.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Interface/ImageSubview.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Interface/Subview.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Interface/Dynamic.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Interface/Fence.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Interface/FloodFillImage.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Interface/Format.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Interface/Framebuffer.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Interface/FrameContext.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Interface/GraphicsPipeline.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Interface/Image.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Interface/ImageResource.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Interface/ImageResourceView.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Interface/ImageSubview.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Interface/Interface.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Interface/Light.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Interface/Logic.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Interface/Model.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Interface/Multisample.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Interface/Pipeline.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Interface/PipelineCache.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Interface/PresentTarget.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Interface/PushData.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Interface/Queue.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Interface/Rasterization.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Interface/RenderPass.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Interface/Resource.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Interface/SamplerResource.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Interface/Scissor.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Interface/Semaphore.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Interface/Shader.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Interface/Stage.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Interface/Subview.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Interface/Topology.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Interface/Viewport.hpp
 )
 
 set(NP_ENGINE_GPU_OPENGL_HPP
@@ -131,35 +127,49 @@ set(NP_ENGINE_GPU_OPENGL_HPP
 )
 
 set(NP_ENGINE_GPU_VULKAN_HPP
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Detail/Vulkan/VulkanRenderPass.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Detail/Vulkan/VulkanPhysicalDevice.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Detail/Vulkan/VulkanLogicalDevice.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Detail/Vulkan/VulkanInstance.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Detail/Vulkan/VulkanRenderShader.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Detail/Vulkan/VulkanVertex.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Detail/Vulkan/VulkanScene.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Detail/Vulkan/VulkanBuffer.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Detail/Vulkan/VulkanImage.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Detail/Vulkan/VulkanImageView.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Detail/Vulkan/VulkanSampler.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Detail/Vulkan/VulkanCommandPool.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Detail/Vulkan/VulkanAccess.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Detail/Vulkan/VulkanAllocationCallbacks.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Detail/Vulkan/VulkanBlend.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Detail/Vulkan/VulkanBufferResource.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Detail/Vulkan/VulkanBufferResourceView.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Detail/Vulkan/VulkanColor.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Detail/Vulkan/VulkanCommandBuffer.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Detail/Vulkan/VulkanDescriptorSets.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Detail/Vulkan/VulkanDescriptorSetLayout.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Detail/Vulkan/VulkanTexture.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Detail/Vulkan/VulkanFramebuffers.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Detail/Vulkan/VulkanRenderableModel.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Detail/Vulkan/VulkanRenderableImage.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Detail/Vulkan/VulkanRenderableLight.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Detail/Vulkan/VulkanCommandBufferPool.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Detail/Vulkan/VulkanCommands.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Detail/Vulkan/VulkanQueue.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Detail/Vulkan/VulkanCompareOperation.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Detail/Vulkan/VulkanComputePipeline.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Detail/Vulkan/VulkanDepthStencil.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Detail/Vulkan/VulkanDevice.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Detail/Vulkan/VulkanDeviceMemory.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Detail/Vulkan/VulkanDynamic.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Detail/Vulkan/VulkanFence.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Detail/Vulkan/VulkanFormat.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Detail/Vulkan/VulkanFramebuffer.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Detail/Vulkan/VulkanFrameContext.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Detail/Vulkan/VulkanGraphicsPipeline.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Detail/Vulkan/VulkanImageResource.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Detail/Vulkan/VulkanImageResourceView.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Detail/Vulkan/VulkanInstance.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Detail/Vulkan/VulkanLogic.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Detail/Vulkan/VulkanLogicalDevice.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Detail/Vulkan/VulkanMultisample.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Detail/Vulkan/VulkanPhysicalDevice.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Detail/Vulkan/VulkanPipeline.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Detail/Vulkan/VulkanPipelineCache.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Detail/Vulkan/VulkanPresentTarget.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Detail/Vulkan/VulkanPushData.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Detail/Vulkan/VulkanQueue.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Detail/Vulkan/VulkanRasterization.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Detail/Vulkan/VulkanRenderPass.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Detail/Vulkan/VulkanResource.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Detail/Vulkan/VulkanSampleCount.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Detail/Vulkan/VulkanSamplerResource.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Detail/Vulkan/VulkanScissor.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Detail/Vulkan/VulkanSemaphore.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Detail/Vulkan/VulkanRenderDevice.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Detail/Vulkan/VulkanRenderTarget.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Detail/Vulkan/VulkanRenderContext.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Detail/Vulkan/VulkanRenderPipeline.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Detail/Vulkan/VulkanRenderFrame.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Detail/Vulkan/VulkanShader.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Detail/Vulkan/VulkanStage.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Detail/Vulkan/VulkanTopology.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Detail/Vulkan/VulkanViewport.hpp
 )
 
 set(NP_ENGINE_INPUT_HPP
@@ -203,9 +213,11 @@ set(NP_ENGINE_MATH_HPP
 	# ${PROJECT_SOURCE_DIR}/include/NP-Engine/Math/PolygonUtility.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Math/StatisticImpl.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Math/Fnv.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Math/Range.hpp
 )
 
 set(NP_ENGINE_MEMORY_HPP
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Memory/Alignment.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Memory/Allocator.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Memory/Block.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Memory/CAllocator.hpp
@@ -413,15 +425,23 @@ else()
 endif()
 
 set(NP_ENGINE_GPU_INTERFACE_CPP
-	GPU/Interface/Scene.cpp
-	GPU/Interface/RenderTarget.cpp
-	GPU/Interface/RenderDevice.cpp
-	GPU/Interface/DetailInstance.cpp
-	GPU/Interface/RenderContext.cpp
+	GPU/Interface/Detail.cpp	
+	GPU/Interface/PresentTarget.cpp
+	GPU/Interface/Device.cpp
+	GPU/Interface/Queue.cpp
+	GPU/Interface/Resource.cpp
+	GPU/Interface/BufferResource.cpp
+	GPU/Interface/SamplerResource.cpp
+	GPU/Interface/ImageResource.cpp
+	GPU/Interface/ImageResourceView.cpp
+	GPU/Interface/FrameContext.cpp
+	GPU/Interface/Shader.cpp
+	GPU/Interface/Pipeline.cpp
+	GPU/Interface/ComputePipeline.cpp
 	GPU/Interface/RenderPass.cpp
-	GPU/Interface/Framebuffers.cpp
-	GPU/Interface/RenderShader.cpp
-	GPU/Interface/RenderPipeline.cpp
+	GPU/Interface/Framebuffer.cpp
+	GPU/Interface/GraphicsPipeline.cpp
+	GPU/Interface/Commands.cpp
 )
 
 set(NP_ENGINE_GPU_OPENGL_CPP) # placeholder - may not be needed
@@ -433,6 +453,8 @@ set(NP_ENGINE_GPU_VULKAN_SHADERS_GLSL
 	${PROJECT_SOURCE_DIR}/src/GPU/Detail/Vulkan/shaders/object_fragment.glsl
 	${PROJECT_SOURCE_DIR}/src/GPU/Detail/Vulkan/shaders/light_vertex.glsl
 	${PROJECT_SOURCE_DIR}/src/GPU/Detail/Vulkan/shaders/light_fragment.glsl
+	${PROJECT_SOURCE_DIR}/src/GPU/Detail/Vulkan/shaders/vertex.glsl
+	${PROJECT_SOURCE_DIR}/src/GPU/Detail/Vulkan/shaders/fragment.glsl
 )
 
 set(NP_ENGINE_INSIGHT_CPP

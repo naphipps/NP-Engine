@@ -1,274 +1,1034 @@
 //##===----------------------------------------------------------------------===##//
 //
-//  Author: Nathan Phipps 3/3/22
+// Author: Nathan Phipps 3/3/22
 //
 //##===----------------------------------------------------------------------===##//
 
-#ifndef NP_ENGINE_VULKAN_COMMANDS_HPP
-#define NP_ENGINE_VULKAN_COMMANDS_HPP
+#ifndef NP_ENGINE_GPU_VULKAN_COMMANDS_HPP
+#define NP_ENGINE_GPU_VULKAN_COMMANDS_HPP
 
 #include "NP-Engine/Vendor/VulkanInclude.hpp"
 
 #include "NP-Engine/GPU/Interface/Interface.hpp"
 
+//TODO: I think this file could use some simplifying
+
+#include "VulkanStage.hpp"
+#include "VulkanBufferResource.hpp"
+#include "VulkanPipeline.hpp"
+#include "VulkanComputePipeline.hpp"
+#include "VulkanGraphicsPipeline.hpp"
+#include "VulkanAccess.hpp"
+#include "VulkanQueue.hpp"
+#include "VulkanImageResource.hpp"
+#include "VulkanViewport.hpp"
+#include "VulkanScissor.hpp"
+#include "VulkanFramebuffer.hpp"
+#include "VulkanColor.hpp"
+#include "VulkanCommandBuffer.hpp"
+
 namespace np::gpu::__detail
 {
-	struct VulkanCommand : public Command
+	struct VulkanCommand;
+
+	struct VulkanCopyBufferRange
 	{
-		DetailType GetDetailType() const override
+		siz dstOffset = 0;
+		siz srcOffset = 0;
+		siz size = 0;
+
+		VulkanCopyBufferRange(const CopyBufferRange& other = {}) :
+			dstOffset(other.dstOffset),
+			srcOffset(other.srcOffset),
+			size(other.size)
+		{}
+
+		operator CopyBufferRange() const
+		{
+			return { dstOffset, srcOffset, size };
+		}
+
+		VkBufferCopy GetVkBufferCopy() const
+		{
+			return { srcOffset, dstOffset, size };
+		}
+	};
+
+	class VulkanCopyBufferCommand : public CopyBufferCommand
+	{
+	protected:
+		virtual bl ApplyTo(const CommandBuffer* command_buffer_) override
+		{
+			const VulkanCommandBuffer* command_buffer = static_cast<const VulkanCommandBuffer*>(command_buffer_);
+			mem::sptr<VulkanBufferResource> dst = EnsureIsDetailType(this->dst, DetailType::Vulkan);
+			mem::sptr<VulkanBufferResource> src = EnsureIsDetailType(this->src, DetailType::Vulkan);
+
+			con::vector<VkBufferCopy> ranges(this->ranges.size());
+			for (siz i = 0; i < ranges.size(); i++)
+				ranges[i] = VulkanCopyBufferRange{ this->ranges[i] }.GetVkBufferCopy();
+
+			vkCmdCopyBuffer(*command_buffer, *src, *dst, ranges.size(), ranges.empty() ? nullptr : ranges.data());
+			return true;
+		}
+
+	public:
+		virtual DetailType GetDetailType() const override
 		{
 			return DetailType::Vulkan;
 		}
 
-		virtual void ApplyTo(VkCommandBuffer command_buffer) = 0;
+		virtual bl IsPrepared() const override
+		{
+			return true;
+		}
 	};
 
-	struct VulkanCommandBeginRenderPass : public VulkanCommand
+	class VulkanCopyImageCommand : public CopyImageCommand
 	{
-		VkRenderPassBeginInfo renderPassBeginInfo;
-		VkSubpassContents subpassContents;
+	protected:
+		virtual bl ApplyTo(const CommandBuffer* command_buffer_) override
+		{
+			//vkCmdCopyImage(command_buffer, src, src_layout, dst, dst_layout, ranges.size, ranges.data); //TODO: implement
+			return false;
+		}
 
-		VulkanCommandBeginRenderPass(VkRenderPassBeginInfo render_pass_begin_info, VkSubpassContents subpass_contents):
-			renderPassBeginInfo(render_pass_begin_info),
-			subpassContents(subpass_contents)
+	public:
+		virtual DetailType GetDetailType() const override
+		{
+			return DetailType::Vulkan;
+		}
+
+		virtual bl IsPrepared() const override
+		{
+			return true;
+		}
+	};
+
+	class VulkanCopyBufferToImageCommand : public CopyBufferToImageCommand
+	{
+	protected:
+		virtual bl ApplyTo(const CommandBuffer* command_buffer_) override
+		{
+			//vkCmdCopyBufferToImage(command_buffer, srcBuffer, dstImage, dstImageLayout, (ui32)regions.size(), regions.data()); //TODO: implement
+			return false;
+		}
+
+	public:
+		virtual DetailType GetDetailType() const override
+		{
+			return DetailType::Vulkan;
+		}
+
+		virtual bl IsPrepared() const override
+		{
+			return true;
+		}
+	};
+
+	class VulkanCopyImageToBufferCommand : public CopyImageToBufferCommand
+	{
+	protected:
+		virtual bl ApplyTo(const CommandBuffer* command_buffer_) override
+		{
+			//vkCmdCopyImageToBuffer(command_buffer, src, src_layout, dst, ranges.size, ranges.data); //TODO: implement
+			return false;
+		}
+
+	public:
+		virtual DetailType GetDetailType() const override
+		{
+			return DetailType::Vulkan;
+		}
+
+		virtual bl IsPrepared() const override
+		{
+			return true;
+		}
+	};
+
+	class VulkanFillBufferCommand : public FillBufferCommand
+	{
+	protected:
+		virtual bl ApplyTo(const CommandBuffer* command_buffer_) override
+		{
+			const VulkanCommandBuffer* command_buffer = static_cast<const VulkanCommandBuffer*>(command_buffer_);
+
+			bl applied = true;
+			mem::sptr<VulkanBufferResource> buffer = EnsureIsDetailType(this->buffer, DetailType::Vulkan);
+			if (buffer)
+			{
+				//TODO: ensure the filled region is within the buffer
+				vkCmdFillBuffer(*command_buffer, *buffer, offset, count, value);
+				applied = true;
+			}
+			return applied;
+		}
+
+	public:
+		virtual DetailType GetDetailType() const override
+		{
+			return DetailType::Vulkan;
+		}
+
+		virtual bl IsPrepared() const override
+		{
+			return true;
+		}
+	};
+
+	class VulkanAssignBufferCommand : public AssignBufferCommand
+	{
+	protected:
+		virtual bl ApplyTo(const CommandBuffer* command_buffer_) override
+		{
+			const VulkanCommandBuffer* command_buffer = static_cast<const VulkanCommandBuffer*>(command_buffer_);
+
+			bl applied = true;
+			mem::sptr<VulkanBufferResource> buffer = EnsureIsDetailType(this->buffer, DetailType::Vulkan);
+			if (buffer)
+			{
+				//TODO: ensure the updated region is within the buffer
+				vkCmdUpdateBuffer(*command_buffer, *buffer, offset, values.size(), values.empty() ? nullptr : values.data());
+				applied = true;
+			}
+			return applied;
+		}
+
+	public:
+		virtual DetailType GetDetailType() const override
+		{
+			return DetailType::Vulkan;
+		}
+
+		virtual bl IsPrepared() const override
+		{
+			return true;
+		}
+	};
+
+
+	/*typedef struct VkOffset2D {
+		int32_t    x;
+		int32_t    y;
+	} VkOffset2D;
+
+	typedef struct VkOffset3D {
+		int32_t    x;
+		int32_t    y;
+		int32_t    z;
+	} VkOffset3D;
+
+	typedef struct VkRect2D {
+		VkOffset2D    offset;
+		VkExtent2D    extent;
+	} VkRect2D;*/
+
+
+	struct VulkanRenderArea
+	{
+		::glm::i32vec2 offset;
+		ui32 width;
+		ui32 height;
+
+		VulkanRenderArea(const RenderArea& other = {}):
+			offset(other.offset),
+			width(other.width),
+			height(other.height)
 		{}
 
-		void ApplyTo(VkCommandBuffer command_buffer) override
+		operator RenderArea() const
 		{
-			vkCmdBeginRenderPass(command_buffer, &renderPassBeginInfo, subpassContents);
+			return { offset, width, height };
+		}
+
+		VkRect2D GetVkRect2D() const
+		{
+			return { {offset.x, offset.y}, {width, height} };
 		}
 	};
 
-	struct VulkanCommandBindDescriptorSets : public VulkanCommand
-	{
-		VkPipelineBindPoint pipelineBindPoint;
-		VkPipelineLayout pipelineLayout;
-		ui32 firstSet;
-		ui32 descriptorSetCount;
-		VkDescriptorSet* descriptorSets;
-		ui32 dynamicOffsetCount;
-		ui32* dynamicOffsets;
 
-		VulkanCommandBindDescriptorSets(VkPipelineBindPoint pipeline_bind_point, VkPipelineLayout layout, ui32 first_set,
-										ui32 descriptor_set_count, VkDescriptorSet* descriptor_sets, ui32 dynamic_offset_count,
-										ui32* dynamic_offsets):
-			pipelineBindPoint(pipeline_bind_point),
-			pipelineLayout(layout),
-			firstSet(first_set),
-			descriptorSetCount(descriptor_set_count),
-			descriptorSets(descriptor_sets),
-			dynamicOffsetCount(dynamic_offset_count),
-			dynamicOffsets(dynamic_offsets)
+	class VulkanBeginRenderPassCommand : public BeginRenderPassCommand
+	{
+	protected:
+		static VkRenderPassBeginInfo GetVkRenderPassBeginInfo(mem::sptr<VulkanFramebuffer> framebuffer, VkRect2D render_area)
+		{
+			mem::sptr<VulkanRenderPass> renderpass = EnsureIsDetailType(framebuffer->GetRenderPass(), DetailType::Vulkan);
+
+			VkRenderPassBeginInfo info{};
+			info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+			info.framebuffer = *framebuffer;
+			info.renderPass = *renderpass;
+			info.renderArea = render_area;
+			return info;
+		}
+
+		virtual bl ApplyTo(const CommandBuffer* command_buffer_) override
+		{
+			const VulkanCommandBuffer* command_buffer = static_cast<const VulkanCommandBuffer*>(command_buffer_);
+
+			bl applied = false;
+			mem::sptr<VulkanFramebuffer> framebuffer = EnsureIsDetailType(this->framebuffer, DetailType::Vulkan);
+
+			if (framebuffer)
+			{
+				const VulkanSubpassUsage usage = this->usage;
+				const VulkanRenderArea render_area = renderArea;
+
+				con::vector<VkClearValue> clear_values(clearColors.size());
+				for (siz i = 0; i < clear_values.size(); i++)
+					clear_values[i] = { VulkanClearColor{ clearColors[i] }.GetVkClearColorValue() };
+
+				VkRenderPassBeginInfo info = GetVkRenderPassBeginInfo(framebuffer, render_area.GetVkRect2D());
+				info.clearValueCount = clear_values.size();
+				info.pClearValues = clear_values.empty() ? nullptr : clear_values.data();
+
+				vkCmdBeginRenderPass(*command_buffer, &info, usage.GetVkSubpassContents()); //TODO: implement
+				applied = true;
+			}
+			return applied;
+		}
+
+	public:
+		virtual DetailType GetDetailType() const override
+		{
+			return DetailType::Vulkan;
+		}
+
+		virtual bl IsPrepared() const override
+		{
+			return true;
+		}
+	};
+
+	class VulkanEndRenderPassCommand : public EndRenderPassCommand
+	{
+	protected:
+		virtual bl ApplyTo(const CommandBuffer* command_buffer_) override
+		{
+			const VulkanCommandBuffer* command_buffer = static_cast<const VulkanCommandBuffer*>(command_buffer_);
+			vkCmdEndRenderPass(*command_buffer);
+			return true;
+		}
+
+	public:
+		virtual DetailType GetDetailType() const override
+		{
+			return DetailType::Vulkan;
+		}
+
+		virtual bl IsPrepared() const override
+		{
+			return true;
+		}
+	};
+
+	class VulkanNextSubpassCommand : public NextSubpassCommand
+	{
+	protected:
+		virtual bl ApplyTo(const CommandBuffer* command_buffer_) override
+		{
+			//vkCmdNextSubpass(command_buffer, subpass_contents); //TODO: implement
+			return false;
+		}
+
+	public:
+		virtual DetailType GetDetailType() const override
+		{
+			return DetailType::Vulkan;
+		}
+
+		virtual bl IsPrepared() const override
+		{
+			return true;
+		}
+	};
+
+	class VulkanBindPipelineCommand : public BindPipelineCommand
+	{
+	protected:
+		virtual bl ApplyTo(const CommandBuffer* command_buffer_) override
+		{
+			const VulkanCommandBuffer* command_buffer = static_cast<const VulkanCommandBuffer*>(command_buffer_);
+			bl applied = false;
+
+			VkPipeline vk_pipeline = nullptr;
+
+			switch (pipeline->GetPipelineType())
+			{
+			case PipelineType::Compute:
+			{
+				mem::sptr<VulkanComputePipeline> vulkan_pipeline = EnsureIsDetailType(pipeline, DetailType::Vulkan);
+				vk_pipeline = *vulkan_pipeline;
+				break;
+			}
+			case PipelineType::Graphics:
+			{
+				mem::sptr<VulkanGraphicsPipeline> vulkan_pipeline = EnsureIsDetailType(pipeline, DetailType::Vulkan);
+				vk_pipeline = *vulkan_pipeline;
+				break;
+			}
+			};
+
+			if (vk_pipeline)
+			{
+				vkCmdBindPipeline(*command_buffer, VulkanPipelineUsage{usage}.GetVkPipelineBindPoint(), vk_pipeline);
+				applied = true;
+			}
+			return applied;
+		}
+
+	public:
+		virtual DetailType GetDetailType() const override
+		{
+			return DetailType::Vulkan;
+		}
+
+		virtual bl IsPrepared() const override
+		{
+			return true;
+		}
+	};
+
+	class VulkanBindIndexBufferCommand : public BindIndexBufferCommand
+	{
+	protected:
+		virtual bl ApplyTo(const CommandBuffer* command_buffer_) override
+		{
+			const VulkanCommandBuffer* command_buffer = static_cast<const VulkanCommandBuffer*>(command_buffer_);
+			bl applied = false;
+			mem::sptr<VulkanBufferResource> buffer = EnsureIsDetailType(this->buffer, DetailType::Vulkan);
+			if (buffer)
+			{
+				VkIndexType index_type = VK_INDEX_TYPE_MAX_ENUM;
+
+				switch (stride)
+				{
+				case (sizeof(ui16)):
+					index_type = VK_INDEX_TYPE_UINT16;
+					break;
+				case (sizeof(ui32)):
+					index_type = VK_INDEX_TYPE_UINT32;
+					break;
+				};
+
+				vkCmdBindIndexBuffer(*command_buffer, *buffer, offset, index_type);
+				applied = true;
+			}
+			return applied;
+		}
+
+	public:
+		virtual DetailType GetDetailType() const override
+		{
+			return DetailType::Vulkan;
+		}
+
+		virtual bl IsPrepared() const override
+		{
+			return true;
+		}
+	};
+
+	class VulkanBindVertexBuffersCommand : public BindVertexBuffersCommand
+	{
+	protected:
+		virtual bl ApplyTo(const CommandBuffer* command_buffer_) override
+		{
+			const VulkanCommandBuffer* command_buffer = static_cast<const VulkanCommandBuffer*>(command_buffer_);
+			con::vector<VkBuffer> buffers(contexts.size());
+			con::vector<VkDeviceSize> offsets(contexts.size());
+
+			for (siz i = 0; i < contexts.size(); i++)
+			{
+				mem::sptr<VulkanBufferResource> buffer = EnsureIsDetailType(this->contexts[i].buffer, DetailType::Vulkan);
+				buffers[i] = buffer ? *buffer : (VkBuffer)nullptr;
+				offsets[i] = contexts[i].offset;
+			}
+
+			vkCmdBindVertexBuffers(*command_buffer, 0, buffers.size(), buffers.empty() ? nullptr : buffers.data(), offsets.data());
+			return true;
+		}
+
+	public:
+		virtual DetailType GetDetailType() const override
+		{
+			return DetailType::Vulkan;
+		}
+
+		virtual bl IsPrepared() const override
+		{
+			return true;
+		}
+	};
+
+	class VulkanBindResourceGroupCommand : public BindResourceGroupCommand
+	{
+	protected:
+		virtual bl ApplyTo(const CommandBuffer* command_buffer_) override
+		{
+			//TODO: implement vkCmdBindDescriptorSets
+			//vkCmdBindDescriptorSets(command_buffer, pipelineBindPoint, pipelineLayout, firstSet, (ui32)descriptorSets.size(), descriptorSets.data(), (ui32)dynamicOffsets.size(), dynamicOffsets.data());
+			return false;
+		}
+
+	public:
+		virtual DetailType GetDetailType() const override
+		{
+			return DetailType::Vulkan;
+		}
+
+		virtual bl IsPrepared() const override
+		{
+			return true;
+		}
+	};
+
+	struct VulkanBarrier
+	{
+		VulkanAccess dstAccess = VulkanAccess::None;
+		VulkanAccess srcAccess = VulkanAccess::None;
+
+		VulkanBarrier(const Barrier& other = {}) :dstAccess(other.dstAccess), srcAccess(other.srcAccess) {}
+
+		operator Barrier() const
+		{
+			return { dstAccess, srcAccess };
+		}
+
+		VkMemoryBarrier GetVkMemoryBarrier() const
+		{
+			VkMemoryBarrier barrier{};
+			barrier.sType = VK_STRUCTURE_TYPE_MEMORY_BARRIER;
+			barrier.dstAccessMask = dstAccess.GetVkAccessFlags();
+			barrier.srcAccessMask = srcAccess.GetVkAccessFlags();
+			return barrier;
+		}
+	};
+
+	struct VulkanBufferBarrier : public VulkanBarrier
+	{
+		mem::sptr<VulkanBufferResource> buffer = nullptr;
+		ui32 offset = 0;
+		ui32 size = 0; //SIZ_MAX equates to the remaining portion of the buffer after offset (aka, VK_WHOLE_SIZE)
+		DeviceQueueFamily dstQueueFamily{};
+		DeviceQueueFamily srcQueueFamily{};
+
+		VulkanBufferBarrier(const BufferBarrier& other = {}) :
+			VulkanBarrier(other),
+			buffer(other.buffer),
+			offset(other.offset),
+			size(other.size),
+			dstQueueFamily(other.dstQueueFamily),
+			srcQueueFamily(other.srcQueueFamily)
 		{}
 
-		void ApplyTo(VkCommandBuffer command_buffer) override
+		operator BufferBarrier() const
 		{
-			vkCmdBindDescriptorSets(command_buffer, pipelineBindPoint, pipelineLayout, firstSet, descriptorSetCount,
-									descriptorSets, dynamicOffsetCount, dynamicOffsets);
+			return { dstAccess, srcAccess, buffer, offset, size, dstQueueFamily, srcQueueFamily };
+		}
+
+		VkBufferMemoryBarrier GetVkBufferMemoryBarrier() const
+		{
+			VkBufferMemoryBarrier barrier{};
+			barrier.sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER;
+			barrier.srcAccessMask = srcAccess.GetVkAccessFlags();
+			barrier.dstAccessMask = dstAccess.GetVkAccessFlags();
+			barrier.srcQueueFamilyIndex = srcQueueFamily.index;
+			barrier.dstQueueFamilyIndex = dstQueueFamily.index;
+			barrier.buffer = *buffer;
+			barrier.offset = offset;
+			barrier.size = size;
+			return barrier;
 		}
 	};
 
-	struct VulkanCommandBindIndexBuffer : public VulkanCommand
+	struct VulkanImageBarrier : public VulkanBarrier
 	{
-		VkBuffer buffer;
-		VkDeviceSize offset;
-		VkIndexType indexType;
+		mem::sptr<VulkanImageResource> image = nullptr;
+		//TODO: add image layout fields?
+		//TODO: add subresource range field?
+		DeviceQueueFamily dstQueueFamily{};
+		DeviceQueueFamily srcQueueFamily{};
 
-		VulkanCommandBindIndexBuffer(VkBuffer buffer, VkDeviceSize offset, VkIndexType index_type):
-			buffer(buffer),
-			offset(offset),
-			indexType(index_type)
+		VulkanImageBarrier(const ImageBarrier& other):
+			image(other.image),
+			dstQueueFamily(other.dstQueueFamily),
+			srcQueueFamily(other.srcQueueFamily)
 		{}
 
-		void ApplyTo(VkCommandBuffer command_buffer) override
+		operator ImageBarrier() const
 		{
-			vkCmdBindIndexBuffer(command_buffer, buffer, offset, indexType);
+			return { dstAccess, srcAccess, image, dstQueueFamily, srcQueueFamily };
+		}
+
+		VkImageMemoryBarrier GetVkImageMemoryBarrier() const
+		{
+			VkImageMemoryBarrier barrier{};
+			barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+			barrier.srcAccessMask = srcAccess.GetVkAccessFlags();
+			barrier.dstAccessMask = dstAccess.GetVkAccessFlags();
+			//barrier.oldLayout = 0;// TODO: determine this
+			//barrier.newLayout = 0; //TODO: determine this
+			barrier.srcQueueFamilyIndex = srcQueueFamily.index;
+			barrier.dstQueueFamilyIndex = dstQueueFamily.index;
+			barrier.image = *image;
+			//barrier.subresourceRange = 0; //TODO: determine this
+			return barrier;
 		}
 	};
 
-	struct VulkanCommandBindPipeline : public VulkanCommand
+	class VulkanBarrierCommand : public BarrierCommand
 	{
-		VkPipelineBindPoint pipelineBindPoint;
-		VkPipeline pipeline;
+	protected:
+		virtual bl ApplyTo(const CommandBuffer* command_buffer_) override
+		{
+			/*
+				
+				TODO: note that image layout changes are considered a color write access
+			
+			*/
+			const VulkanCommandBuffer* command_buffer = static_cast<const VulkanCommandBuffer*>(command_buffer_);
+			const VulkanStage dstStage = this->dstStage;
+			const VulkanStage srcStage = this->srcStage;
 
-		VulkanCommandBindPipeline(VkPipelineBindPoint pipeline_bind_point, VkPipeline pipeline):
-			pipelineBindPoint(pipeline_bind_point),
-			pipeline(pipeline)
+			con::vector<VkMemoryBarrier> vk_barriers(barriers.size());
+			for (siz i = 0; i < vk_barriers.size(); i++)
+				vk_barriers[i] = VulkanBarrier{ barriers[i] }.GetVkMemoryBarrier();
+
+			con::vector<VkBufferMemoryBarrier> vk_buffer_barriers(bufferBarriers.size());
+			for (siz i = 0; i < vk_buffer_barriers.size(); i++)
+				vk_buffer_barriers[i] = VulkanBufferBarrier{ bufferBarriers[i] }.GetVkBufferMemoryBarrier();
+
+			con::vector<VkImageMemoryBarrier> vk_image_barriers(imageBarriers.size());
+			for (siz i = 0; i < vk_image_barriers.size(); i++)
+				vk_image_barriers[i] = VulkanImageBarrier{ imageBarriers[i] }.GetVkImageMemoryBarrier();
+
+			vkCmdPipelineBarrier(*command_buffer,
+				srcStage.GetVkPipelineStageFlags(),
+				dstStage.GetVkPipelineStageFlags(),
+				0, //TODO: do we want to do anything with this?
+				vk_barriers.size(), vk_barriers.empty() ? nullptr : vk_barriers.data(),
+				vk_buffer_barriers.size(), vk_buffer_barriers.empty() ? nullptr : vk_buffer_barriers.data(),
+				vk_image_barriers.size(), vk_image_barriers.empty() ? nullptr : vk_image_barriers.data());
+			return true;
+		}
+
+	public:
+		virtual DetailType GetDetailType() const override
+		{
+			return DetailType::Vulkan;
+		}
+
+		virtual bl IsPrepared() const override
+		{
+			return true;
+		}
+	};
+
+	class VulkanExecuteCommandsCommand : public ExecuteCommandsCommand
+	{
+	protected:
+		virtual bl ApplyTo(const CommandBuffer* command_buffer_) override
+		{
+			const VulkanCommandBuffer* command_buffer = static_cast<const VulkanCommandBuffer*>(command_buffer_);
+			con::vector<VkCommandBuffer> command_buffers(commandBuffers.size());
+			for (siz i = 0; i < command_buffers.size(); i++)
+			{
+				mem::sptr<VulkanCommandBuffer> vulkan_command_buffer = EnsureIsDetailType(commandBuffers[i], DetailType::Vulkan);
+				command_buffers[i] = *vulkan_command_buffer;
+			}
+
+			vkCmdExecuteCommands(*command_buffer, command_buffers.size(), command_buffers.empty() ? nullptr : command_buffers.data());
+			return true;
+		}
+
+	public:
+		virtual DetailType GetDetailType() const override
+		{
+			return DetailType::Vulkan;
+		}
+
+		virtual bl IsPrepared() const override
+		{
+			return true;
+		}
+	};
+
+	class VulkanPushDataCommand : public PushDataCommand
+	{
+	protected:
+		virtual bl ApplyTo(const CommandBuffer* command_buffer_) override
+		{
+			bl applied = false;
+			mem::sptr<VulkanPipelineResourceLayout> layout = EnsureIsDetailType(pipeline->GetPipelineResourceLayout(), DetailType::Vulkan);
+
+			if (layout)
+			{
+				const VulkanCommandBuffer* command_buffer = static_cast<const VulkanCommandBuffer*>(command_buffer_);
+				VulkanStage stage = this->stage;
+				con::vector<ui8> bytes = layout->GetPushData().GetAllEntryBytes();
+				vkCmdPushConstants(*command_buffer, *layout, stage.GetVkShaderStageFlags(), 0, bytes.size(), bytes.empty() ? nullptr : bytes.data());
+				applied = true;
+			}
+
+			return applied;
+		}
+
+	public:
+		virtual DetailType GetDetailType() const override
+		{
+			return DetailType::Vulkan;
+		}
+
+		virtual bl IsPrepared() const override
+		{
+			return true;
+		}
+	};
+
+
+	class VulkanSetViewportsCommand : public SetViewportsCommand
+	{
+	protected:
+		virtual bl ApplyTo(const CommandBuffer* command_buffer_) override
+		{
+			const VulkanCommandBuffer* command_buffer = static_cast<const VulkanCommandBuffer*>(command_buffer_);
+			con::vector<VkViewport> viewports(this->viewports.size());
+			for (siz i = 0; i < viewports.size(); i++)
+				viewports[i] = VulkanViewport{ this->viewports[i] }.GetVkViewport();
+
+			vkCmdSetViewport(*command_buffer, 0, viewports.size(), viewports.empty() ? nullptr : viewports.data());
+			return true;
+		}
+
+	public:
+		virtual DetailType GetDetailType() const override
+		{
+			return DetailType::Vulkan;
+		}
+
+		virtual bl IsPrepared() const override
+		{
+			return true;
+		}
+	};
+
+	class VulkanSetScissorsCommand : public SetScissorsCommand
+	{
+	protected:
+		virtual bl ApplyTo(const CommandBuffer* command_buffer_) override
+		{
+			const VulkanCommandBuffer* command_buffer = static_cast<const VulkanCommandBuffer*>(command_buffer_);
+			con::vector<VkRect2D> scissors(this->scissors.size());
+			for (siz i = 0; i < scissors.size(); i++)
+				scissors[i] = VulkanScissor{ this->scissors[i] }.GetVkRect2D();
+
+			vkCmdSetScissor(*command_buffer, 0, scissors.size(), scissors.empty() ? nullptr : scissors.data());
+			return true;
+		}
+
+	public:
+		virtual DetailType GetDetailType() const override
+		{
+			return DetailType::Vulkan;
+		}
+
+		virtual bl IsPrepared() const override
+		{
+			return true;
+		}
+	};
+
+	class VulkanSetDepthBoundsCommand : public SetDepthBoundsCommand
+	{
+	protected:
+		virtual bl ApplyTo(const CommandBuffer* command_buffer_) override
+		{
+			const VulkanCommandBuffer* command_buffer = static_cast<const VulkanCommandBuffer*>(command_buffer_);
+			vkCmdSetDepthBounds(*command_buffer, depthBounds.min, depthBounds.max);
+			return true;
+		}
+
+	public:
+		virtual DetailType GetDetailType() const override
+		{
+			return DetailType::Vulkan;
+		}
+
+		virtual bl IsPrepared() const override
+		{
+			return true;
+		}
+	};
+
+	class VulkanDispatchCommand : public DispatchCommand
+	{
+	protected:
+		virtual bl ApplyTo(const CommandBuffer* command_buffer_) override
+		{
+			const VulkanCommandBuffer* command_buffer = static_cast<const VulkanCommandBuffer*>(command_buffer_);
+			vkCmdDispatch(*command_buffer, x, y, z);
+			return true;
+		}
+
+	public:
+		virtual DetailType GetDetailType() const override
+		{
+			return DetailType::Vulkan;
+		}
+
+		virtual bl IsPrepared() const override
+		{
+			return true;
+		}
+	};
+
+	class VulkanIndirectDispatchCommand : public IndirectDispatchCommand
+	{
+	protected:
+		virtual bl ApplyTo(const CommandBuffer* command_buffer_) override
+		{
+			const VulkanCommandBuffer* command_buffer = static_cast<const VulkanCommandBuffer*>(command_buffer_);
+			bl applied = false;
+			mem::sptr<VulkanBufferResource> buffer = EnsureIsDetailType(this->buffer, DetailType::Vulkan);
+			if (buffer)
+			{
+				vkCmdDispatchIndirect(*command_buffer, *buffer, offset);
+				applied = true;
+			}
+			return applied;
+		}
+
+	public:
+		virtual DetailType GetDetailType() const override
+		{
+			return DetailType::Vulkan;
+		}
+
+		virtual bl IsPrepared() const override
+		{
+			return true;
+		}
+	};
+
+	class VulkanDrawCommand : public DrawCommand
+	{
+	protected:
+		virtual bl ApplyTo(const CommandBuffer* command_buffer_) override
+		{
+			const VulkanCommandBuffer* command_buffer = static_cast<const VulkanCommandBuffer*>(command_buffer_);
+			vkCmdDraw(*command_buffer, vertexCount, instanceCount, vertexBeginIndex, instanceBeginIndex);
+			return true;
+		}
+
+	public:
+		virtual DetailType GetDetailType() const override
+		{
+			return DetailType::Vulkan;
+		}
+
+		virtual bl IsPrepared() const override
+		{
+			return true;
+		}
+	};
+
+	class VulkanDrawIndexedCommand : public DrawIndexedCommand
+	{
+	protected:
+		virtual bl ApplyTo(const CommandBuffer* command_buffer_) override
+		{
+			const VulkanCommandBuffer* command_buffer = static_cast<const VulkanCommandBuffer*>(command_buffer_);
+			vkCmdDrawIndexed(*command_buffer, indexCount, instanceCount, indexBeginIndex, vertexOffset, instanceBeginIndex);
+			return true;
+		}
+
+	public:
+		virtual DetailType GetDetailType() const override
+		{
+			return DetailType::Vulkan;
+		}
+
+		virtual bl IsPrepared() const override
+		{
+			return true;
+		}
+	};
+
+	struct VulkanDrawIndirectCommandPayload
+	{
+		ui32 vertexCount = 0;
+		ui32 vertexBeginIndex = 0;
+		ui32 instanceCount = 0; //TODO: does this have to default to 1? investigate
+		ui32 instanceBeginIndex = 0;
+
+		VulkanDrawIndirectCommandPayload(const DrawIndirectCommandPayload& other):
+			vertexCount(other.vertexCount),
+			vertexBeginIndex(other.vertexBeginIndex),
+			instanceCount(other.instanceCount),
+			instanceBeginIndex(other.instanceBeginIndex)
 		{}
 
-		void ApplyTo(VkCommandBuffer command_buffer) override
+		operator DrawIndirectCommandPayload() const
 		{
-			vkCmdBindPipeline(command_buffer, pipelineBindPoint, pipeline);
+			return { vertexCount, vertexBeginIndex, instanceCount, instanceBeginIndex };
+		}
+
+		VkDrawIndirectCommand GetVkDrawIndirectCommand() const
+		{
+			return { vertexCount, instanceCount, vertexBeginIndex, instanceBeginIndex };
 		}
 	};
 
-	struct VulkanCommandBindVertexBuffers : public VulkanCommand
+	class VulkanDrawIndirectCommand : public DrawIndirectCommand
 	{
-		ui32 firstBinding;
-		ui32 bindingCount;
-		VkBuffer* buffers;
-		VkDeviceSize* offsets;
+	protected:
+		bl prepared = false;
 
-		VulkanCommandBindVertexBuffers(ui32 first_binding, ui32 binding_count, VkBuffer* buffers, VkDeviceSize* offsets):
-			firstBinding(first_binding),
-			bindingCount(binding_count),
-			buffers(buffers),
-			offsets(offsets)
+		virtual bl ApplyTo(const CommandBuffer* command_buffer_) override
+		{
+			const VulkanCommandBuffer* command_buffer = static_cast<const VulkanCommandBuffer*>(command_buffer_);
+			bl applied = false;
+			mem::sptr<VulkanBufferResource> buffer = EnsureIsDetailType(this->buffer, DetailType::Vulkan);
+			if (buffer) //TODO: I'm assuming this is all correct -- investigate
+			{
+				vkCmdDrawIndirect(*command_buffer, *buffer, payloadOffset, drawCount, sizeof(VkDrawIndirectCommand));
+				applied = true;
+			}
+			return applied;
+		}
+
+	public:
+		virtual DetailType GetDetailType() const override
+		{
+			return DetailType::Vulkan;
+		}
+
+		/*
+			required to call this before adding to a command buffer
+			this methods sets payloadOffset and payloadCount
+		*/
+		virtual bl Prepare(siz offset, const con::vector<DrawIndirectCommandPayload>& payloads_) override
+		{
+			//TODO: I'm assuming this is all correct -- investigate
+
+			prepared = false;
+			mem::sptr<VulkanBufferResource> buffer = EnsureIsDetailType(this->buffer, DetailType::Vulkan);
+
+			if (buffer)
+			{
+				con::vector<VkDrawIndirectCommand> payloads(payloads_.size());
+				for (siz i = 0; i < payloads.size(); i++)
+					payloads[i] = VulkanDrawIndirectCommandPayload{ payloads_[i] }.GetVkDrawIndirectCommand();
+
+				con::vector<ui8> bytes(payloads.size() * sizeof(VkDrawIndirectCommand));
+				mem::CopyBytes(bytes.data(), payloads.data(), bytes.size());
+				prepared = buffer->Assign(offset, bytes);
+
+				if (prepared)
+				{
+					payloadOffset = offset;
+					payloadCount = payloads.size();
+				}
+			}
+
+			return prepared;
+		}
+
+		virtual bl IsPrepared() const override
+		{
+			return prepared;
+		}
+	};
+
+	struct VulkanDrawIndexedIndirectCommandPayload
+	{
+		ui32 indexCount = 0;
+		ui32 indexBeginIndex = 0;
+		i32 vertexOffset = 0;
+		ui32 instanceCount = 0;
+		ui32 instanceBeginIndex = 0;
+
+		VulkanDrawIndexedIndirectCommandPayload(const DrawIndexedIndirectCommandPayload& other) :
+			indexCount(other.indexCount),
+			indexBeginIndex(other.indexBeginIndex),
+			vertexOffset(other.vertexOffset),
+			instanceCount(other.instanceCount),
+			instanceBeginIndex(other.instanceBeginIndex)
 		{}
 
-		void ApplyTo(VkCommandBuffer command_buffer) override
+		operator DrawIndexedIndirectCommandPayload() const
 		{
-			vkCmdBindVertexBuffers(command_buffer, firstBinding, bindingCount, buffers, offsets);
+			return { indexCount, indexBeginIndex, (siz)vertexOffset, instanceCount, instanceBeginIndex };
+		}
+
+		VkDrawIndexedIndirectCommand GetVkDrawIndexedIndirectCommand() const
+		{
+			return { indexCount, instanceCount, indexBeginIndex, vertexOffset, instanceBeginIndex };
 		}
 	};
 
-	struct VulkanCommandDrawIndexed : public VulkanCommand
+	class VulkanDrawIndexedIndirectCommand : public DrawIndexedIndirectCommand
 	{
-		ui32 indexCount;
-		ui32 instanceCount;
-		ui32 firstIndex;
-		i32 vertexOffset;
-		ui32 firstInstance;
+	protected:
+		bl prepared = false;
 
-		VulkanCommandDrawIndexed(ui32 index_count, ui32 instance_count, ui32 first_index, i32 vertex_offset,
-								 ui32 first_instance):
-			indexCount(index_count),
-			instanceCount(instance_count),
-			firstIndex(first_index),
-			vertexOffset(vertex_offset),
-			firstInstance(first_instance)
-		{}
-
-		void ApplyTo(VkCommandBuffer command_buffer) override
+		virtual bl ApplyTo(const CommandBuffer* command_buffer_) override
 		{
-			vkCmdDrawIndexed(command_buffer, indexCount, instanceCount, firstIndex, vertexOffset, firstInstance);
-		}
-	};
-
-	struct VulkanCommandEndRenderPass : public VulkanCommand
-	{
-		void ApplyTo(VkCommandBuffer command_buffer) override
-		{
-			vkCmdEndRenderPass(command_buffer);
-		}
-	};
-
-	struct VulkanCommandPipelineBarrier : public VulkanCommand
-	{
-		VkPipelineStageFlags dstPipelineStageFlags;
-		VkPipelineStageFlags srcPipelineStageFlags;
-		VkDependencyFlags dependencyFlags;
-		ui32 memoryBarrierCount;
-		VkMemoryBarrier* memoryBarriers;
-		ui32 bufferMemoryBarrierCount;
-		VkBufferMemoryBarrier* bufferMemoryBarriers;
-		ui32 imageMemoryBarrierCount;
-		VkImageMemoryBarrier* imageMemoryBarriers;
-
-		VulkanCommandPipelineBarrier(VkPipelineStageFlags dst_pipeline_stage_flags,
-									 VkPipelineStageFlags src_pipeline_stage_flags, VkDependencyFlags dependency_flags,
-									 ui32 memory_barrier_count, VkMemoryBarrier* memory_barriers,
-									 ui32 buffer_memory_barrier_count, VkBufferMemoryBarrier* buffer_memory_barriers,
-									 ui32 image_memory_barrier_count, VkImageMemoryBarrier* image_memory_barriers):
-			dstPipelineStageFlags(dst_pipeline_stage_flags),
-			srcPipelineStageFlags(src_pipeline_stage_flags),
-			dependencyFlags(dependency_flags),
-			memoryBarrierCount(memory_barrier_count),
-			memoryBarriers(memory_barriers),
-			bufferMemoryBarrierCount(buffer_memory_barrier_count),
-			bufferMemoryBarriers(buffer_memory_barriers),
-			imageMemoryBarrierCount(image_memory_barrier_count),
-			imageMemoryBarriers(image_memory_barriers)
-		{}
-
-		void ApplyTo(VkCommandBuffer command_buffer) override
-		{
-			vkCmdPipelineBarrier(command_buffer, srcPipelineStageFlags, dstPipelineStageFlags, dependencyFlags,
-								 memoryBarrierCount, memoryBarriers, bufferMemoryBarrierCount, bufferMemoryBarriers,
-								 imageMemoryBarrierCount, imageMemoryBarriers);
-		}
-	};
-
-	struct VulkanCommandCopyBuffers : public VulkanCommand
-	{
-		VkBuffer dstBuffer;
-		VkBuffer srcBuffer;
-		ui32 regionCount;
-		VkBufferCopy* regions;
-
-		VulkanCommandCopyBuffers(VkBuffer dst_buffer, VkBuffer src_buffer, ui32 region_count, VkBufferCopy* regions):
-			dstBuffer(dst_buffer),
-			srcBuffer(src_buffer),
-			regionCount(region_count),
-			regions(regions)
-		{}
-
-		void ApplyTo(VkCommandBuffer command_buffer) override
-		{
-			vkCmdCopyBuffer(command_buffer, srcBuffer, dstBuffer, regionCount, regions);
-		}
-	};
-
-	struct VulkanCommandCopyBufferToImage : public VulkanCommand
-	{
-		VkImage dstImage;
-		VkBuffer srcBuffer;
-		VkImageLayout dstImageLayout;
-		ui32 regionCount;
-		VkBufferImageCopy* regions;
-
-		static VkBufferImageCopy CreateBufferImageCopy()
-		{
-			VkBufferImageCopy buffer_image_copy{};
-			buffer_image_copy.bufferOffset = 0;
-			buffer_image_copy.bufferRowLength = 0;
-			buffer_image_copy.bufferImageHeight = 0;
-			buffer_image_copy.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-			buffer_image_copy.imageSubresource.mipLevel = 0;
-			buffer_image_copy.imageSubresource.baseArrayLayer = 0;
-			buffer_image_copy.imageSubresource.layerCount = 1;
-			buffer_image_copy.imageOffset = {0, 0, 0};
-			// buffer_image_copy.imageExtent = { width, height, 1 };
-			return buffer_image_copy;
+			const VulkanCommandBuffer* command_buffer = static_cast<const VulkanCommandBuffer*>(command_buffer_);
+			bl applied = false;
+			mem::sptr<VulkanBufferResource> buffer = EnsureIsDetailType(this->buffer, DetailType::Vulkan);
+			if (buffer)
+			{
+				vkCmdDrawIndexedIndirect(*command_buffer, *buffer, payloadOffset, drawCount, sizeof(VkDrawIndexedIndirectCommand));
+				applied = true;
+			}
+			return applied;
 		}
 
-		VulkanCommandCopyBufferToImage(VkImage dst_image, VkBuffer src_buffer, VkImageLayout dst_image_layout,
-									   ui32 region_count, VkBufferImageCopy* regions):
-			dstImage(dst_image),
-			srcBuffer(src_buffer),
-			dstImageLayout(dst_image_layout),
-			regionCount(region_count),
-			regions(regions)
-		{}
-
-		void ApplyTo(VkCommandBuffer command_buffer) override
+	public:
+		virtual DetailType GetDetailType() const override
 		{
-			vkCmdCopyBufferToImage(command_buffer, srcBuffer, dstImage, dstImageLayout, regionCount, regions);
+			return DetailType::Vulkan;
 		}
-	};
 
-	struct VulkanCommandPushConstants : public VulkanCommand
-	{
-		VkPipelineLayout pipelineLayout;
-		VkShaderStageFlags shaderStageFlags;
-		ui32 offset;
-		ui32 size;
-		void* values;
-
-		VulkanCommandPushConstants(VkPipelineLayout pipeline_layout, VkShaderStageFlags shader_stage_flags, ui32 offset,
-								   ui32 size, void* values):
-			pipelineLayout(pipeline_layout),
-			shaderStageFlags(shader_stage_flags),
-			offset(offset),
-			size(size),
-			values(values)
-		{}
-
-		void ApplyTo(VkCommandBuffer command_buffer) override
+		/*
+			required to call this before adding to a command buffer
+			this methods sets payloadOffset and payloadCount
+		*/
+		virtual bl Prepare(siz offset, const con::vector<DrawIndexedIndirectCommandPayload>& payloads_) override
 		{
-			vkCmdPushConstants(command_buffer, pipelineLayout, shaderStageFlags, offset, size, values);
+			//TODO: I'm assuming this is all correct -- investigate
+
+			prepared = false;
+			mem::sptr<VulkanBufferResource> buffer = EnsureIsDetailType(this->buffer, DetailType::Vulkan);
+
+			if (buffer)
+			{
+				con::vector<VkDrawIndexedIndirectCommand> payloads(payloads_.size());
+				for (siz i = 0; i < payloads.size(); i++)
+					payloads[i] = VulkanDrawIndexedIndirectCommandPayload{ payloads_[i] }.GetVkDrawIndexedIndirectCommand();
+
+				con::vector<ui8> bytes(payloads.size() * sizeof(VkDrawIndexedIndirectCommand));
+				mem::CopyBytes(bytes.data(), payloads.data(), bytes.size());
+				prepared = buffer->Assign(offset, bytes);
+
+				if (prepared)
+				{
+					payloadOffset = offset;
+					payloadCount = payloads.size();
+				}
+			}
+
+			return prepared;
+		}
+
+		virtual bl IsPrepared() const override
+		{
+			return prepared;
 		}
 	};
 } // namespace np::gpu::__detail
 
-#endif /* NP_ENGINE_VULKAN_COMMANDS_HPP */
+#endif /* NP_ENGINE_GPU_VULKAN_COMMANDS_HPP */

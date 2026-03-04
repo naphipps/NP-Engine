@@ -4,8 +4,8 @@
 //
 //##===----------------------------------------------------------------------===##//
 
-#ifndef NP_ENGINE_IMAGE_SUBVIEW_HPP
-#define NP_ENGINE_IMAGE_SUBVIEW_HPP
+#ifndef NP_ENGINE_GPU_INTERFACE_IMAGE_SUBVIEW_HPP //TODO: ALL HPP DEFINES NEED TO INCLUDE THEIR NAMESPACE/FOLDER. NP_ENGINE_IMAGE_SUBVIEW_HPP to NP_ENGINE_GPU_INTERFACE_IMAGE_SUBVIEW_HPP
+#define NP_ENGINE_GPU_INTERFACE_IMAGE_SUBVIEW_HPP
 
 #include "NP-Engine/Foundation/Foundation.hpp"
 #include "NP-Engine/Primitive/Primitive.hpp"
@@ -28,7 +28,7 @@ namespace np::alg
 		using Circle = geom::Circle<Point::value_type>;
 
 	private:
-		Image& _image;
+		Image& _image; //TODO: I think all fields that are references should be replaced with mem::sptr<T>
 		Subview _subview;
 
 	public:
@@ -38,7 +38,7 @@ namespace np::alg
 			_subview.boundary = {_image.GetWidth(), _image.GetHeight()};
 		}
 
-		ImageSubview(Image& image, Subview subview): _image(image), _subview(subview) {}
+		ImageSubview(Image& image, Subview subview): _image(image), _subview(subview) {} //TODO: move towards all sptr usage
 
 		virtual ~ImageSubview() = default;
 
@@ -82,4 +82,4 @@ namespace np::alg
 	};
 } // namespace np::alg
 
-#endif /* NP_ENGINE_IMAGE_SUBVIEW_HPP */
+#endif /* NP_ENGINE_GPU_INTERFACE_IMAGE_SUBVIEW_HPP */
