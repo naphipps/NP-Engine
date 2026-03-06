@@ -245,7 +245,7 @@ namespace np::app
 			win::Window::Terminate(win::DetailType::Sdl);
 		}
 
-		mem::sptr<win::Window> Create(win::DetailType detail_type, uid::Uid id)
+		mem::sptr<win::Window> Create(win::DetailType detail_type, uid::Uid id) //TODO: CreateWindow
 		{
 			mem::sptr<win::Window> window = nullptr;
 			if (IsOwningThread())

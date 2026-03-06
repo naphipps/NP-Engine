@@ -46,6 +46,16 @@ namespace np
 	using siz = size_t;
 	using dif = ptrdiff_t;
 
+	/*
+		TODO: when updating to cpp23, float16_t is available in include <stdfloat>, so remove flt, dbl, and ldbl in favor of the f16, f32, f64 (or flt16, flt32, flt64)
+			#include <stdfloat>
+			using f16 = float16_t;
+			using f32 = float32_t;
+			using f64 = float64_t;
+
+		TODO: investigate supporting fixed point decimal values somehow -- seems to be a million ways
+	*/
+
 	using flt = float;
 	using dbl = double;
 	using ldbl = long double;
