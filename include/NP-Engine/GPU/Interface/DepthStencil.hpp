@@ -14,7 +14,7 @@
 
 namespace np::gpu
 {
-	class DepthStencilUsage : public Enum<ui32>
+	class DepthStencilUsage : public enm_ui32
 	{
 	public:
 		constexpr static ui32 DepthTest = BIT(0);
@@ -22,10 +22,10 @@ namespace np::gpu
 		constexpr static ui32 BoundsTest = BIT(2); //TODO: not every detail supports this -- check with device?
 		constexpr static ui32 StencilTest = BIT(3);
 
-		DepthStencilUsage(ui32 value): Enum<ui32>(value) {}
+		DepthStencilUsage(ui32 value): enm_ui32(value) {}
 	};
 
-	class StencilOperation : public Enum<ui32>
+	class StencilOperation : public enm_ui32
 	{
 	public:
 		constexpr static ui32 Keep = BIT(0);
@@ -39,7 +39,7 @@ namespace np::gpu
 		constexpr static ui32 Increment = BIT(6);
 		constexpr static ui32 Decrement = BIT(7);
 
-		StencilOperation(ui32 value): Enum<ui32>(value) {}
+		StencilOperation(ui32 value): enm_ui32(value) {}
 	};
 
 	struct StencilOperationState
@@ -57,13 +57,13 @@ namespace np::gpu
 
 	using DepthBounds = mat::DblRange;
 
-	class StencilFace : public Enum<ui32>
+	class StencilFace : public enm_ui32
 	{
 	public:
 		constexpr static ui32 Front = BIT(0);
 		constexpr static ui32 Back = BIT(1);
 
-		StencilFace(ui32 value): Enum<ui32>(value) {}
+		StencilFace(ui32 value): enm_ui32(value) {}
 	};
 
 	struct DepthStencil

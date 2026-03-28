@@ -90,12 +90,12 @@ namespace np::gpu
 		virtual bl IsPrepared() const = 0; //TODO: mainly indirect commands need preparations -- ensure all do
 	};
 
-	class CommandBufferUsage : public Enum<ui32>
+	class CommandBufferUsage : public enm_ui32
 	{
 	public:
 		constexpr static ui32 SingleUse = BIT(0);
 
-		CommandBufferUsage(ui32 value): Enum<ui32>(value) {}
+		CommandBufferUsage(ui32 value): enm_ui32(value) {}
 	};
 
 	struct CommandBuffer : public DetailObject

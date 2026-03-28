@@ -15,7 +15,7 @@
 
 namespace np::gpu
 {
-	class BlendScalar : public Enum<ui32>
+	class BlendScalar : public enm_ui32
 	{
 	public:
 		constexpr static ui32 Zeroed = BIT(0); //Zero already exists ergo past tense
@@ -32,10 +32,10 @@ namespace np::gpu
 
 		//constexpr static ui32 Src1 = BIT(0); //TODO: investigate
 
-		BlendScalar(ui32 value): Enum<ui32>(value) {}
+		BlendScalar(ui32 value): enm_ui32(value) {}
 	};
 
-	class BlendOperation : public Enum<ui32>
+	class BlendOperation : public enm_ui32
 	{
 	public:
 		constexpr static ui32 Add = BIT(0);
@@ -44,7 +44,7 @@ namespace np::gpu
 		constexpr static ui32 Min = BIT(3);
 		constexpr static ui32 Max = BIT(4);
 
-		BlendOperation(ui32 value): Enum<ui32>(value) {}
+		BlendOperation(ui32 value): enm_ui32(value) {}
 	};
 
 	struct Blending

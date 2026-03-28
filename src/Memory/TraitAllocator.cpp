@@ -8,6 +8,6 @@
 
 namespace np::mem
 {
-	CAllocator TraitAllocator::_default_allocator;
-	atm<Allocator*> TraitAllocator::_registered_allocator(AddressOf(TraitAllocator::_default_allocator));
+	c_allocator trait_allocator::_default_allocator;
+	atm<allocator*> trait_allocator::_registered_allocator(address_of(trait_allocator::_default_allocator));
 } // namespace np::mem

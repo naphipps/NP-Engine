@@ -4,70 +4,68 @@
 //
 //##===----------------------------------------------------------------------===##//
 
-#ifndef NP_ENGINE_SIZED_ALLOCATOR_HPP
-#define NP_ENGINE_SIZED_ALLOCATOR_HPP
+#ifndef NP_ENGINE_MEM_BLOCKED_ALLOCATOR_HPP
+#define NP_ENGINE_MEM_BLOCKED_ALLOCATOR_HPP
 
 #include "NP-Engine/Primitive/Primitive.hpp"
 
-#include "CAllocator.hpp"
+#include "Callocator.hpp"
 #include "Block.hpp"
 
 namespace np::mem
 {
-	class BlockedAllocator : public CAllocator
+	class blocked_allocator : public c_allocator
 	{
 	protected:
-		Block _block;
+		block _block;
 		const bl _owns_block;
 
 	public:
-		BlockedAllocator(Block block): CAllocator(), _block(block), _owns_block(false) {}
+		blocked_allocator(block b): c_allocator(), _block(b), _owns_block(false) {}
 
-		BlockedAllocator(siz size): CAllocator(), _block(CAllocator::Allocate(size)), _owns_block(true) {}
+		/*
+			alignment is the alignment for the block we will allocate for this allocator to use
+		*/
+		blocked_allocator(siz size, siz alignment): c_allocator(), _block(c_allocator::allocate(size, alignment)), _owns_block(true) {}
 
-		virtual ~BlockedAllocator()
+		virtual ~blocked_allocator()
 		{
 			if (_owns_block)
-				CAllocator::Deallocate(_block);
+				c_allocator::deallocate(_block);
 		}
 
-		virtual bl Contains(const Block& block) override
+		virtual bl contains(const block& b) override
 		{
-			return _block.Contains(block);
+			return _block.contains(b);
 		}
 
-		virtual bl Contains(const void* ptr) override
+		virtual bl contains(const void* ptr) override
 		{
-			return _block.Contains(ptr);
+			return _block.contains(ptr);
 		}
 
-		virtual siz Size() const
+		virtual siz size() const
 		{
 			return _block.size;
 		}
 
-		virtual bl OwnsBlock() const
+		virtual bl owns_block() const
 		{
 			return _owns_block;
 		}
 
-		virtual void Zeroize()
-		{
-			_block.Zeroize();
-		}
+		virtual block allocate(siz size, siz alignment) override = 0;
 
-		virtual Block Allocate(siz size) override = 0;
+		virtual block reallocate(block& b, siz size, siz alignment) override = 0;
 
-		virtual Block Reallocate(Block& old_block, siz new_size) override = 0;
+		virtual block reallocate(void* ptr, siz size, siz alignment) override = 0;
 
-		virtual Block Reallocate(void* old_ptr, siz new_size) override = 0;
+		virtual bl deallocate(block& b) override = 0;
 
-		virtual bl Deallocate(Block& block) override = 0;
+		virtual bl deallocate(void* ptr) override = 0;
 
-		virtual bl Deallocate(void* ptr) override = 0;
-
-		virtual bl DeallocateAll() = 0;
+		virtual bl deallocate_all() = 0;
 	};
 } // namespace np::mem
 
-#endif /* NP_ENGINE_SIZED_ALLOCATOR_HPP */
+#endif /* NP_ENGINE_MEM_BLOCKED_ALLOCATOR_HPP */

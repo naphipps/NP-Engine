@@ -20,14 +20,14 @@ namespace np::win
 	class WindowEvent : public evnt::Event
 	{
 	protected:
-		mem::TraitAllocator _allocator;
+		mem::trait_allocator _allocator;
 
 		WindowEvent(): evnt::Event() {}
 
 	public:
 		virtual ~WindowEvent()
 		{
-			mem::Destroy<T>(_allocator, (T*)GetPayload());
+			mem::destroy<T>(_allocator, (T*)GetPayload());
 		}
 
 		T& GetData()
@@ -58,7 +58,7 @@ namespace np::win
 	public:
 		WindowCreateEvent(DetailType detail_type, uid::Uid window_id): WindowEvent<WindowCreateEventData>()
 		{
-			SetPayload(mem::Create<WindowCreateEventData>(_allocator, detail_type, window_id));
+			SetPayload(mem::create<WindowCreateEventData>(_allocator, detail_type, window_id));
 		}
 
 		evnt::EventType GetType() const override
@@ -79,7 +79,7 @@ namespace np::win
 	public:
 		WindowFocusEvent(uid::Uid window_id, bl isFocused): WindowEvent<WindowFocusEventData>()
 		{
-			SetPayload(mem::Create<WindowFocusEventData>(_allocator, window_id, isFocused));
+			SetPayload(mem::create<WindowFocusEventData>(_allocator, window_id, isFocused));
 		}
 
 		evnt::EventType GetType() const override
@@ -93,7 +93,7 @@ namespace np::win
 	public:
 		WindowSetFocusEvent(uid::Uid window_id, bl isFocused): WindowEvent<WindowFocusEventData>()
 		{
-			SetPayload(mem::Create<WindowFocusEventData>(_allocator, window_id, isFocused));
+			SetPayload(mem::create<WindowFocusEventData>(_allocator, window_id, isFocused));
 		}
 
 		evnt::EventType GetType() const override
@@ -115,7 +115,7 @@ namespace np::win
 	public:
 		WindowSizeEvent(uid::Uid window_id, ui32 width, ui32 height): WindowEvent<WindowSizeEventData>()
 		{
-			SetPayload(mem::Create<WindowSizeEventData>(_allocator, window_id, width, height));
+			SetPayload(mem::create<WindowSizeEventData>(_allocator, window_id, width, height));
 		}
 
 		evnt::EventType GetType() const override
@@ -129,7 +129,7 @@ namespace np::win
 	public:
 		WindowSetSizeEvent(uid::Uid window_id, ui32 width, ui32 height): WindowEvent<WindowSizeEventData>()
 		{
-			SetPayload(mem::Create<WindowSizeEventData>(_allocator, window_id, width, height));
+			SetPayload(mem::create<WindowSizeEventData>(_allocator, window_id, width, height));
 		}
 
 		evnt::EventType GetType() const override
@@ -150,7 +150,7 @@ namespace np::win
 	public:
 		WindowMinimizeEvent(uid::Uid window_id, bl isMinimized): WindowEvent<WindowMinimizeEventData>()
 		{
-			SetPayload(mem::Create<WindowMinimizeEventData>(_allocator, window_id, isMinimized));
+			SetPayload(mem::create<WindowMinimizeEventData>(_allocator, window_id, isMinimized));
 		}
 
 		evnt::EventType GetType() const override
@@ -164,7 +164,7 @@ namespace np::win
 	public:
 		WindowSetMinimizeEvent(uid::Uid window_id, bl isMinimized): WindowEvent<WindowMinimizeEventData>()
 		{
-			SetPayload(mem::Create<WindowMinimizeEventData>(_allocator, window_id, isMinimized));
+			SetPayload(mem::create<WindowMinimizeEventData>(_allocator, window_id, isMinimized));
 		}
 
 		evnt::EventType GetType() const override
@@ -185,7 +185,7 @@ namespace np::win
 	public:
 		WindowMaximizeEvent(uid::Uid window_id, bl isMaximized): WindowEvent<WindowMaximizeEventData>()
 		{
-			SetPayload(mem::Create<WindowMaximizeEventData>(_allocator, window_id, isMaximized));
+			SetPayload(mem::create<WindowMaximizeEventData>(_allocator, window_id, isMaximized));
 		}
 
 		evnt::EventType GetType() const override
@@ -199,7 +199,7 @@ namespace np::win
 	public:
 		WindowSetMaximizeEvent(uid::Uid window_id, bl isMaximized): WindowEvent<WindowMaximizeEventData>()
 		{
-			SetPayload(mem::Create<WindowMaximizeEventData>(_allocator, window_id, isMaximized));
+			SetPayload(mem::create<WindowMaximizeEventData>(_allocator, window_id, isMaximized));
 		}
 
 		evnt::EventType GetType() const override
@@ -221,7 +221,7 @@ namespace np::win
 	public:
 		WindowPositionEvent(uid::Uid window_id, i32 x, i32 y): WindowEvent<WindowPositionEventData>()
 		{
-			SetPayload(mem::Create<WindowPositionEventData>(_allocator, window_id, x, y));
+			SetPayload(mem::create<WindowPositionEventData>(_allocator, window_id, x, y));
 		}
 
 		evnt::EventType GetType() const override
@@ -235,7 +235,7 @@ namespace np::win
 	public:
 		WindowSetPositionEvent(uid::Uid window_id, i32 x, i32 y): WindowEvent<WindowPositionEventData>()
 		{
-			SetPayload(mem::Create<WindowPositionEventData>(_allocator, window_id, x, y));
+			SetPayload(mem::create<WindowPositionEventData>(_allocator, window_id, x, y));
 		}
 
 		evnt::EventType GetType() const override
@@ -257,7 +257,7 @@ namespace np::win
 	public:
 		WindowFramebufferEvent(uid::Uid window_id, ui32 width, ui32 height): WindowEvent<WindowFramebufferEventData>()
 		{
-			SetPayload(mem::Create<WindowFramebufferEventData>(_allocator, window_id, width, height));
+			SetPayload(mem::create<WindowFramebufferEventData>(_allocator, window_id, width, height));
 		}
 
 		evnt::EventType GetType() const override
@@ -278,7 +278,7 @@ namespace np::win
 	public:
 		WindowSetTitleEvent(uid::Uid window_id, str title): WindowEvent<WindowTitleEventData>()
 		{
-			SetPayload(mem::Create<WindowTitleEventData>(_allocator, window_id, title));
+			SetPayload(mem::create<WindowTitleEventData>(_allocator, window_id, title));
 		}
 
 		evnt::EventType GetType() const override
@@ -298,7 +298,7 @@ namespace np::win
 	public:
 		WindowSetCloseEvent(uid::Uid window_id): WindowEvent<WindowCloseEventData>()
 		{
-			SetPayload(mem::Create<WindowCloseEventData>(_allocator, window_id));
+			SetPayload(mem::create<WindowCloseEventData>(_allocator, window_id));
 		}
 
 		evnt::EventType GetType() const override
@@ -319,7 +319,7 @@ namespace np::win
 	public:
 		WindowClosingEvent(uid::Uid window_id, mem::sptr<jsys::Job> job): WindowEvent<WindowClosingEventData>()
 		{
-			SetPayload(mem::Create<WindowClosingEventData>(_allocator, window_id, job));
+			SetPayload(mem::create<WindowClosingEventData>(_allocator, window_id, job));
 		}
 
 		evnt::EventType GetType() const override

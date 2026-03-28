@@ -920,7 +920,7 @@ namespace np::gpu::__detail
 					payloads[i] = VulkanDrawIndirectCommandPayload{payloads_[i]}.GetVkDrawIndirectCommand();
 
 				con::vector<ui8> bytes(payloads.size() * sizeof(VkDrawIndirectCommand));
-				mem::CopyBytes(bytes.data(), payloads.data(), bytes.size());
+				mem::copy_bytes(bytes.data(), payloads.data(), bytes.size());
 				prepared = buffer->Assign(offset, bytes);
 
 				if (prepared)
@@ -1009,7 +1009,7 @@ namespace np::gpu::__detail
 					payloads[i] = VulkanDrawIndexedIndirectCommandPayload{payloads_[i]}.GetVkDrawIndexedIndirectCommand();
 
 				con::vector<ui8> bytes(payloads.size() * sizeof(VkDrawIndexedIndirectCommand));
-				mem::CopyBytes(bytes.data(), payloads.data(), bytes.size());
+				mem::copy_bytes(bytes.data(), payloads.data(), bytes.size());
 				prepared = buffer->Assign(offset, bytes);
 
 				if (prepared)

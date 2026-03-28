@@ -56,7 +56,7 @@ namespace np::uid
 			UidSystem& _uid_system;
 
 		public:
-			HndlDestroyer(UidSystem& uid_system, mem::Allocator& allocator): base(allocator), _uid_system(uid_system) {}
+			HndlDestroyer(UidSystem& uid_system, mem::allocator& a): base(a), _uid_system(uid_system) {}
 
 			HndlDestroyer(const HndlDestroyer& other): base(other), _uid_system(other._uid_system) {}
 
@@ -122,9 +122,9 @@ namespace np::uid
 			con::uset<Uid> masterSet;
 		};
 
-		mem::TraitAllocator _allocator;
+		mem::trait_allocator _allocator;
 		const HndlDestroyer _destroyer;
-		mem::AccumulatingPool<Uid> _pool;
+		mem::accumulating_pool<Uid, mem::DEFAULT_ALIGNMENT> _pool;
 		mutexed_wrapper<UidBookKeeping> _bookkeeping;
 
 		static UidHandle::KeyType GetNextKey(UidBookKeeping& bookkeeping)
@@ -164,7 +164,7 @@ namespace np::uid
 				if (it != bookkeeping->keyToRecord.end())
 				{
 					UidRecord record = it->second;
-					if (hndl.generation == record.generation && _pool.Contains(record.uidSptr))
+					if (hndl.generation == record.generation && _pool.contains(record.uidSptr))
 					{
 						bookkeeping->keyToRecord.erase(it);
 						bookkeeping->releasedKeys.emplace(hndl.key);
@@ -193,13 +193,13 @@ namespace np::uid
 				bookkeeping->releasedKeys.clear();
 				bookkeeping->nextHandle = UidHandle{};
 			}
-			_pool.Clear();
+			_pool.clear();
 		}
 
 		mem::sptr<UidHandle> CreateUid()
 		{
 			mem::sptr<UidHandle> hndl = nullptr;
-			mem::sptr<Uid> id = _pool.CreateObject();
+			mem::sptr<Uid> id = _pool.create_object();
 
 			if (id)
 			{
@@ -210,9 +210,9 @@ namespace np::uid
 				bookkeeping->masterSet.emplace(*id);
 
 				const UidHandle next{GetNextKey(*bookkeeping), GetNextGeneration(*bookkeeping)};
-				HndlBlock* blocks = mem::Create<HndlBlock>(_allocator);
-				UidHandle* object = mem::Construct<UidHandle>(blocks->object_block, next);
-				hndl = mem::sptr<UidHandle>(mem::Construct<HndlResource>(blocks->resource_block, _destroyer, object));
+				HndlBlock* blocks = mem::create<HndlBlock>(_allocator);
+				UidHandle* object = mem::construct<UidHandle>(blocks->object_block, next);
+				hndl = mem::sptr<UidHandle>(mem::construct<HndlResource>(blocks->resource_block, _destroyer, object));
 				bookkeeping->keyToRecord.emplace(hndl->key, UidRecord{id, hndl->generation});
 			}
 

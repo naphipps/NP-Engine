@@ -69,12 +69,12 @@ namespace np
 	using bl = bool;
 
 	template <typename T>
-	class Enum
+	class enm 
 	{
 	protected:
 		T _value;
 
-		virtual void SetEmbeddedValue(T value, T mask, T shift)
+		void set_embedded_value(T value, T mask, T shift)
 		{
 			value <<= shift;
 			value &= mask;
@@ -82,71 +82,116 @@ namespace np
 			_value |= value;
 		}
 
-		virtual T GetEmbeddedValue(T mask, T shift) const
+		T get_embedded_value(T mask, T shift) const
 		{
 			return (_value & mask) >> shift;
 		}
 
 	public:
-		constexpr static T Zero = 0;
-		constexpr static T None = Zero;
-		constexpr static T Empty = Zero;
-		constexpr static T Nothing = Zero;
-		constexpr static T All = ~((T)0);
-		constexpr static T Full = All;
-		constexpr static T Everything = All;
+		constexpr static T zero = 0;
+		constexpr static T none = zero;
+		constexpr static T empty = zero;
+		constexpr static T nothing = zero;
+		constexpr static T all = ~((T)0);
+		constexpr static T full = all;
+		constexpr static T everything = all;
 
-		static inline bl Contains(const Enum<T>& a, const Enum<T>& b)
+		//aliases since we eventually like to use pascal casing
+		constexpr static T Zero = zero;
+		constexpr static T None = none;
+		constexpr static T Empty = empty;
+		constexpr static T Nothing = nothing;
+		constexpr static T All = all;
+		constexpr static T Full = full;
+		constexpr static T Everything = everything;
+
+		static inline bl contains(const enm<T>& a, const enm<T>& b)
 		{
 			return (a._value & b._value) == b._value;
 		}
 
-		static inline bl ContainsAny(const Enum<T>& a, const Enum<T>& b)
+		static inline bl contains_any(const enm<T>& a, const enm<T>& b)
 		{
 			return (a._value & b._value) != None;
 		}
 
-		static inline bl ContainsAll(const Enum<T>& a, const Enum<T>& b)
+		static inline bl contains_all(const enm<T>& a, const enm<T>& b)
 		{
 			return a._value == b._value;
 		}
 
-		Enum(T value): _value(value) {}
+		//aliases since we eventually like to use pascal casing
+		static inline bl Contains(const enm<T>& a, const enm<T>& b)
+		{
+			return contains(a, b);
+		}
 
-		virtual ~Enum() = default;
+		static inline bl ContainsAny(const enm<T>& a, const enm<T>& b)
+		{
+			return contains_any(a, b);
+		}
+
+		static inline bl ContainsAll(const enm<T>& a, const enm<T>& b)
+		{
+			return contains_all(a, b);
+		}
+
+		enm(T value): _value(value) {}
 
 		operator T() const
 		{
 			return _value;
 		}
 
-		Enum<T>& operator|=(const Enum<T>& other)
+		enm<T>& operator|=(const enm<T>& other)
 		{
 			_value |= other._value;
 			return *this;
 		}
 
-		Enum<T>& operator&=(const Enum<T>& other)
+		enm<T>& operator&=(const enm<T>& other)
 		{
 			_value &= other._value;
 			return *this;
 		}
 
-		virtual bl Contains(const Enum<T>& other) const
+		bl contains(const enm<T>& other) const
 		{
-			return Contains(*this, other);
+			return contains(*this, other);
 		}
 
-		virtual bl ContainsAny(const Enum<T>& other) const
+		bl contains_any(const enm<T>& other) const
 		{
-			return ContainsAny(*this, other);
+			return contains_any(*this, other);
 		}
 
-		virtual bl ContainsAll(const Enum<T>& other) const
+		bl contains_all(const enm<T>& other) const
 		{
-			return ContainsAll(*this, other);
+			return contains_all(*this, other);
+		}
+
+		//aliases since we eventually like to use pascal casing
+		bl Contains(const enm<T>& other) const
+		{
+			return contains(other);
+		}
+
+		bl ContainsAny(const enm<T>& other) const
+		{
+			return contains_any(other);
+		}
+
+		bl ContainsAll(const enm<T>& other) const
+		{
+			return contains_all(other);
 		}
 	};
+
+	using enm_ui8 = enm<ui8>;
+	using enm_ui16 = enm<ui16>;
+	using enm_ui32 = enm<ui32>;
+	using enm_ui64 = enm<ui64>;
+	using enm_siz = enm<siz>;
 } // namespace np
 
 #endif /* NP_ENGINE_PRIMITIVE_TYPES_HPP */

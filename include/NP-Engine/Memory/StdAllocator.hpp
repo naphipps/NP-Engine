@@ -4,8 +4,8 @@
 //
 //##===----------------------------------------------------------------------===##//
 
-#ifndef NP_ENGINE_STD_ALLOCATOR_HPP
-#define NP_ENGINE_STD_ALLOCATOR_HPP
+#ifndef NP_ENGINE_MEM_STD_ALLOCATOR_HPP
+#define NP_ENGINE_MEM_STD_ALLOCATOR_HPP
 
 #include <memory>
 
@@ -14,52 +14,56 @@
 namespace np::mem
 {
 	template <class T>
-	class StdAllocator : public ::std::allocator<T>
+	class std_allocator : public ::std::allocator<T>
 	{
 	protected:
-		TraitAllocator _allocator;
+		using base = ::std::allocator<T>;
+
+		trait_allocator _allocator;
 
 	public:
-		using value_type = typename ::std::allocator<T>::value_type;
-		using pointer = typename ::std::allocator<T>::pointer;
-		using const_pointer = typename ::std::allocator<T>::const_pointer;
-		using reference = typename ::std::allocator<T>::reference;
-		using const_reference = typename ::std::allocator<T>::const_reference;
-		using size_type = typename ::std::allocator<T>::size_type;
-		using difference_type = typename ::std::allocator<T>::difference_type;
+		using value_type = base::value_type;
+		using pointer = base::pointer;
+		using const_pointer = base::const_pointer;
+		using reference = base::reference;
+		using const_reference = base::const_reference;
+		using size_type = base::size_type;
+		using difference_type = base::difference_type;
 
 		template <class U>
 		struct rebind
 		{
-			using other = StdAllocator<U>;
+			using other = std_allocator<U>;
 		};
 
-		inline explicit StdAllocator()
+		inline explicit std_allocator()
 		{
 			// empty on purpose
 		}
 
-		inline StdAllocator(const StdAllocator& other)
+		inline std_allocator(const std_allocator& other)
 		{
 			// empty on purpose
 		}
 
 		template <typename U>
-		inline explicit StdAllocator(const StdAllocator<U>& other)
+		inline explicit std_allocator(const std_allocator<U>& other)
 		{
 			// empty on purpose
 		}
 
+		virtual ~std_allocator() = default;
+
 		inline pointer allocate(size_type size)
 		{
-			return static_cast<pointer>(_allocator.Allocate(size * sizeof(value_type)).ptr);
+			return static_cast<pointer>(_allocator.allocate(size * sizeof(value_type), mem::DEFAULT_ALIGNMENT).ptr);
 		}
 
 		inline void deallocate(pointer ptr, size_type size)
 		{
-			_allocator.Deallocate(ptr);
+			_allocator.deallocate(ptr);
 		}
 	};
 } // namespace np::mem
 
-#endif /* NP_ENGINE_STD_ALLOCATOR_HPP */
+#endif /* NP_ENGINE_MEM_STD_ALLOCATOR_HPP */

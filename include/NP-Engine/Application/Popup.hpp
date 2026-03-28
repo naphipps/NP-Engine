@@ -15,56 +15,59 @@
 
 namespace np::app
 {
-	class Popup
+	class PopupSelection : public enm_ui32
 	{
 	public:
-		enum class Select
+		constexpr static ui32 Ok = BIT(0);
+		constexpr static ui32 Cancel = BIT(1);
+		constexpr static ui32 Yes = BIT(2);
+		constexpr static ui32 No = BIT(3);
+		constexpr static ui32 Quit = BIT(4);
+		constexpr static ui32 Error = BIT(5);
+
+		PopupSelection(ui32 value) : enm_ui32(value) {}
+	};
+
+	class PopupStyle : public enm_ui32
+	{
+	public:
+		constexpr static ui32 Info = BIT(0);
+		constexpr static ui32 Warning = BIT(1);
+		constexpr static ui32 Error = BIT(2);
+		constexpr static ui32 Question = BIT(3);
+
+		PopupStyle(ui32 value) : enm_ui32(value) {}
+	};
+
+	class PopupButtons : public enm_ui32
+	{
+	public:
+		constexpr static ui32 Ok = BIT(0);
+		constexpr static ui32 Cancel = BIT(1);
+		constexpr static ui32 Yes = BIT(2);
+		constexpr static ui32 No = BIT(3);
+		constexpr static ui32 Quit = BIT(4);
+
+		PopupButtons(ui32 value) : enm_ui32(value) {}
+	};
+
+	struct Popup
+	{
+		static PopupSelection Show(::std::string title, ::std::string message, PopupStyle style, PopupButtons buttons);
+
+		static inline PopupSelection Show(::std::string title, ::std::string message, PopupStyle style)
 		{
-			OK,
-			Cancel,
-			Yes,
-			No,
-			Quit,
-			None,
-			Error
-		};
-
-		enum class Style
-		{
-			Info,
-			Warning,
-			Error,
-			Question
-		};
-
-		enum class Buttons
-		{
-			OK,
-			OKCancel,
-			YesNo,
-			YesNoCancel,
-			Quit
-		};
-
-		constexpr static Select DefaultSelect = Select::OK;
-		constexpr static Style DefaultStyle = Style::Info;
-		constexpr static Buttons DefaultButtons = Buttons::OK;
-
-		static Select Show(::std::string title, ::std::string message, Style style, Buttons buttons);
-
-		static inline Select Show(::std::string title, ::std::string message, Style style)
-		{
-			return Show(title, message, style, DefaultButtons);
+			return Show(title, message, style, PopupButtons::Ok);
 		}
 
-		static inline Select Show(::std::string title, ::std::string message, Buttons buttons)
+		static inline PopupSelection Show(::std::string title, ::std::string message, PopupButtons buttons)
 		{
-			return Show(title, message, DefaultStyle, buttons);
+			return Show(title, message, PopupStyle::Info, buttons);
 		}
 
-		static inline Select Show(::std::string title, ::std::string message)
+		static inline PopupSelection Show(::std::string title, ::std::string message)
 		{
-			return Show(title, message, DefaultStyle, DefaultButtons);
+			return Show(title, message, PopupStyle::Info, PopupButtons::Ok);
 		}
 	};
 } // namespace np::app

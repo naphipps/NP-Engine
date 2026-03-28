@@ -77,7 +77,7 @@ on the device
 
 namespace np::gpu
 {
-	class DeviceUsage : public Enum<ui32>
+	class DeviceUsage : public enm_ui32
 	{
 	public:
 		constexpr static ui32 Compute = BIT(0);
@@ -91,10 +91,10 @@ namespace np::gpu
 		constexpr static ui32 MultiDrawIndirect = BIT(5); //TODO: investigate -- rename to MultiDraw?
 		constexpr static ui32 Tessellation = BIT(6);
 
-		DeviceUsage(ui32 value): Enum<ui32>(value) {}
+		DeviceUsage(ui32 value): enm_ui32(value) {}
 	};
 
-	class DeviceQueueUsage : public Enum<ui32>
+	class DeviceQueueUsage : public enm_ui32
 	{
 	public:
 		constexpr static ui32 Present = BIT(0);
@@ -104,7 +104,7 @@ namespace np::gpu
 
 		//constexpr static ui32 Transfer = BIT(0); //TODO: shall we support this?
 
-		DeviceQueueUsage(ui32 value): Enum<ui32>(value) {}
+		DeviceQueueUsage(ui32 value): enm_ui32(value) {}
 	};
 
 	struct DeviceQueueFamily

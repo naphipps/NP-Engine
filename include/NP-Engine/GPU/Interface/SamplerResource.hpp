@@ -16,7 +16,7 @@
 
 namespace np::gpu
 {
-	class SamplerBorder : public Enum<ui32>
+	class SamplerBorder : public enm_ui32
 	{
 	public:
 		constexpr static ui32 Transparent = BIT(0);
@@ -24,10 +24,10 @@ namespace np::gpu
 		constexpr static ui32 Black = BIT(2);
 		constexpr static ui32 White = BIT(3);
 
-		SamplerBorder(ui32 value): Enum<ui32>(value) {}
+		SamplerBorder(ui32 value): enm_ui32(value) {}
 	};
 
-	class SamplerAddressMode : public Enum<ui32>
+	class SamplerAddressMode : public enm_ui32
 	{
 	public:
 		constexpr static ui32 Repeat = BIT(0);
@@ -36,7 +36,7 @@ namespace np::gpu
 		constexpr static ui32 Edge = BIT(3);
 		constexpr static ui32 Border = BIT(4);
 
-		SamplerAddressMode(ui32 value): Enum<ui32>(value) {}
+		SamplerAddressMode(ui32 value): enm_ui32(value) {}
 	};
 
 	struct SamplerAddressModes

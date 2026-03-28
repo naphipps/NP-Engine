@@ -4,8 +4,8 @@
 //
 //##===----------------------------------------------------------------------===##//
 
-#ifndef NP_ENGINE_SEGEREGATED_ALLOCATOR_HPP
-#define NP_ENGINE_SEGEREGATED_ALLOCATOR_HPP
+#ifndef NP_ENGINE_MEM_SEGEREGATED_ALLOCATOR_HPP
+#define NP_ENGINE_MEM_SEGEREGATED_ALLOCATOR_HPP
 
 #include "NP-Engine/Foundation/Foundation.hpp"
 #include "NP-Engine/Primitive/Primitive.hpp"
@@ -15,96 +15,94 @@
 
 namespace np::mem
 {
-	class SegregatedAllocator : public Allocator
+	class segregated_allocator : public allocator
 	{
 	private:
-		Allocator* _primary;
-		Allocator* _fallback;
+		allocator* _primary;
+		allocator* _fallback;
 		siz _size_threshold;
 
-		virtual Block Reallocate(void* old_ptr, siz new_size) override
-		{
-			return {};
-		}
-
 	public:
-		SegregatedAllocator(Allocator& primary, Allocator& fallback, siz size_threshold):
-			_primary(mem::AddressOf(primary)),
-			_fallback(mem::AddressOf(fallback)),
+		segregated_allocator(allocator& primary, allocator& fallback, siz size_threshold):
+			_primary(mem::address_of(primary)),
+			_fallback(mem::address_of(fallback)),
 			_size_threshold(size_threshold)
 		{
 			NP_ENGINE_ASSERT(_size_threshold > 0, "we must have a nonzero size threshold");
 		}
 
-		virtual siz GetSizeThreshold() const
+		virtual siz get_size_threshold() const
 		{
 			return _size_threshold;
 		}
 
-		virtual Allocator& GetPrimary()
+		virtual allocator& get_primary()
 		{
 			return *_primary;
 		}
 
-		virtual const Allocator& GetPrimary() const
+		virtual const allocator& get_primary() const
 		{
 			return *_primary;
 		}
 
-		virtual Allocator& GetFallback()
+		virtual allocator& get_fallback()
 		{
 			return *_fallback;
 		}
 
-		virtual const Allocator& GetFallback() const
+		virtual const allocator& get_fallback() const
 		{
 			return *_fallback;
 		}
 
-		virtual bl Contains(const Block& block) override
+		virtual bl contains(const block& b) override
 		{
-			return _primary->Contains(block) || _fallback->Contains(block);
+			return _primary->contains(b) || _fallback->contains(b);
 		}
 
-		virtual bl Contains(const void* ptr) override
+		virtual bl contains(const void* ptr) override
 		{
-			return _primary->Contains(ptr) || _fallback->Contains(ptr);
+			return _primary->contains(ptr) || _fallback->contains(ptr);
 		}
 
-		virtual Block Allocate(siz size) override
+		virtual block allocate(siz size, siz alignment) override
 		{
-			Block block;
-			if (size <= _size_threshold)
-				block = _primary->Allocate(size);
-			if (!block.IsValid())
-				block = _fallback->Allocate(size);
-
-			return block;
+			block b = calc_aligned_size(size, alignment) <= _size_threshold ? _primary->allocate(size, alignment) : block{};
+			return b.is_valid() ? b : _fallback->allocate(size, alignment);
 		}
 
-		virtual Block Reallocate(Block& old_block, siz new_size) override
+		virtual block reallocate(block& b_, siz size, siz alignment) override
 		{
-			Block new_block = Allocate(new_size);
-			if (Contains(old_block))
+			block b = allocate(size, alignment);
+			if (contains(b_))
 			{
-				CopyBytes(new_block.Begin(), old_block.Begin(), old_block.size);
-				Deallocate(old_block);
-				old_block.Invalidate();
+				const siz byte_count = b.size < b_.size ? b.size : b_.size;
+				copy_bytes(b.begin(), b_.begin(), byte_count);
+				deallocate(b_);
+				b_.invalidate();
 			}
-
-			return new_block;
+			return b;
 		}
 
-		virtual bl Deallocate(Block& block) override
+		/*
+			this value is meaningless from segregated_allocator
+		*/
+		virtual block reallocate(void* ptr, siz size, siz alignment) override
 		{
-			return _primary->Contains(block) ? _primary->Contains(block) : _fallback->Deallocate(block);
+			return {};
 		}
 
-		virtual bl Deallocate(void* ptr) override
+		virtual bl deallocate(block& b) override
 		{
-			return _primary->Contains(ptr) ? _primary->Contains(ptr) : _fallback->Deallocate(ptr);
+			return _primary->contains(b) ? _primary->contains(b) : _fallback->deallocate(b);
+		}
+
+		virtual bl deallocate(void* ptr) override
+		{
+			return _primary->contains(ptr) ? _primary->contains(ptr) : _fallback->deallocate(ptr);
 		}
 	};
 } // namespace np::mem
 
-#endif /* NP_ENGINE_SEGEREGATED_ALLOCATOR_HPP */
+#endif /* NP_ENGINE_MEM_SEGEREGATED_ALLOCATOR_HPP */

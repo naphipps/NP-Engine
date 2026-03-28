@@ -50,7 +50,7 @@ namespace np::jsys
 	private:
 		mutexed_wrapper<con::vector<mem::sptr<Job>>> _dependents;
 		atm_i32 _antecedent_count;
-		mem::Delegate _delegate;
+		mem::delegate _delegate;
 		bl _can_be_stolen;
 
 	public:
@@ -78,12 +78,12 @@ namespace np::jsys
 			return *this;
 		}
 
-		void SetCallback(mem::Delegate::Callback callback)
+		void SetCallback(mem::delegate::callback c)
 		{
-			_delegate.SetCallback(callback);
+			_delegate.SetCallback(c);
 		}
 
-		mem::Delegate::Callback GetCallback() const
+		mem::delegate::callback GetCallback() const
 		{
 			return _delegate.GetCallback();
 		}

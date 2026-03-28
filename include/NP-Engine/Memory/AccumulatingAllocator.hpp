@@ -4,11 +4,11 @@
 //
 //##===----------------------------------------------------------------------===##//
 
-#ifndef NP_ENGINE_ACCUMULATING_ALLOCATOR_HPP
-#define NP_ENGINE_ACCUMULATING_ALLOCATOR_HPP
+#ifndef NP_ENGINE_MEM_ACCUMULATING_ALLOCATOR_HPP
+#define NP_ENGINE_MEM_ACCUMULATING_ALLOCATOR_HPP
 
-#ifndef NP_ENGINE_ACCUMULATING_ALLOCATOR_BLOCK_SIZE
-	#define NP_ENGINE_ACCUMULATING_ALLOCATOR_BLOCK_SIZE GIGABYTE_SIZE
+#ifndef NP_ENGINE_MEM_ACCUMULATING_ALLOCATOR_BLOCK_SIZE
+	#define NP_ENGINE_MEM_ACCUMULATING_ALLOCATOR_BLOCK_SIZE GIGABYTE_SIZE
 #endif
 
 #include <vector>
@@ -19,120 +19,118 @@
 
 namespace np::mem
 {
-	template <typename AllocatorType>
-	class AccumulatingAllocator : public Allocator
+	template <typename ALLOCATOR_TYPE>
+	class accumulating_allocator : public allocator
 	{
-	private:
-		NP_ENGINE_STATIC_ASSERT((::std::is_base_of_v<BookkeepingAllocator, AllocatorType>),
-								"AllocatorType must derive from BookkeepingAllocator");
+	protected:
+		NP_ENGINE_STATIC_ASSERT((::std::is_base_of_v<bookkeeping_allocator, ALLOCATOR_TYPE>),
+								"ALLOCATOR_TYPE must derive from bookkeeping_allocator");
 
-		NP_ENGINE_STATIC_ASSERT((CalcAlignedSize(sizeof(AllocatorType)) < NP_ENGINE_ACCUMULATING_ALLOCATOR_BLOCK_SIZE),
+		constexpr static siz ALLOCATOR_TYPE_SIZE = calc_aligned_size(sizeof(ALLOCATOR_TYPE), DEFAULT_ALIGNMENT);
+
+		NP_ENGINE_STATIC_ASSERT(ALLOCATOR_TYPE_SIZE < NP_ENGINE_MEM_ACCUMULATING_ALLOCATOR_BLOCK_SIZE,
 								"make NP_ENGINE_APPLICATION_ALLOCATOR_BLOCK_SIZE larger");
 
-		constexpr static siz ALLOCATOR_TYPE_SIZE = CalcAlignedSize(sizeof(AllocatorType));
-
-		CAllocator _c_allocator;
-		mutexed_wrapper<::std::vector<AllocatorType*>> _allocators;
+		c_allocator _c_allocator;
+		mutexed_wrapper<::std::vector<ALLOCATOR_TYPE*>> _allocators; //std::vector for convenience //TODO: I think we can remove this
 
 	public:
-		~AccumulatingAllocator()
+		virtual ~accumulating_allocator()
 		{
-			DeallocateAll();
+			deallocate_all();
 		}
 
-		bl Contains(const Block& block) override
+		virtual bl contains(const block& b) override
 		{
-			return Contains(block.ptr);
+			return contains(b.ptr);
 		}
 
-		bl Contains(const void* ptr) override
+		virtual bl contains(const void* ptr) override
 		{
 			bl contains = false;
 			auto allocators = _allocators.get_access();
 			for (siz i = 0; i < allocators->size() && !contains; i++)
-				contains = (*allocators)[i]->Contains(ptr);
+				contains = (*allocators)[i]->contains(ptr);
 			return contains;
 		}
 
-		Block Allocate(siz size) override
+		virtual block allocate(siz size, siz alignment) override
 		{
-			Block b{};
+			block b{};
 			auto allocators = _allocators.get_access();
-			for (siz i = 0; i < allocators->size() && !b.IsValid(); i++)
-				b = (*allocators)[i]->Allocate(size);
+			for (siz i = 0; i < allocators->size() && !b.is_valid(); i++)
+				b = (*allocators)[i]->allocate(size, alignment);
 
-			if (!b.IsValid())
+			if (!b.is_valid())
 			{
-				siz block_size = NP_ENGINE_ACCUMULATING_ALLOCATOR_BLOCK_SIZE;
-				while (block_size - ALLOCATOR_TYPE_SIZE - AllocatorType::OVERHEAD_SIZE <= size)
+				siz block_size = NP_ENGINE_MEM_ACCUMULATING_ALLOCATOR_BLOCK_SIZE;
+				while (block_size - ALLOCATOR_TYPE_SIZE - ALLOCATOR_TYPE::get_overhead_size() <= size)
 					block_size *= 2;
 
-				Block block = _c_allocator.Allocate(block_size);
-				Block object_block{block.ptr, ALLOCATOR_TYPE_SIZE};
-				Block allocate_block{object_block.End(), block.size - object_block.size};
-				allocators->emplace_back(mem::Construct<AllocatorType>(object_block, allocate_block));
-				b = allocators->back()->Allocate(size);
+				block continguous_block = _c_allocator.allocate(block_size, DEFAULT_ALIGNMENT);
+				block object_block{ continguous_block.ptr, ALLOCATOR_TYPE_SIZE};
+				block allocate_block{object_block.end(), continguous_block.size - object_block.size};
+				allocators->emplace_back(mem::construct<ALLOCATOR_TYPE>(object_block, allocate_block));
+				b = allocators->back()->allocate(size, alignment);
 			}
 
 			return b;
 		}
 
-		Block ExtractBlock(void* block_ptr)
+		virtual block extract_allocated_block(void* block_ptr)
 		{
-			Block block{};
+			block b{};
 			auto allocators = _allocators.get_access();
-			for (siz i = 0; i < allocators->size() && !block.IsValid(); i++)
-				block = (*allocators)[i]->ExtractBlock(block_ptr);
-			return block;
+			for (siz i = 0; i < allocators->size() && !b.is_valid(); i++)
+				b = (*allocators)[i]->extract_allocated_block(block_ptr);
+			return b;
 		}
 
-		Block Reallocate(Block& old_block, siz new_size) override
+		virtual block reallocate(block& b_, siz size, siz alignment) override
 		{
-			Block new_block = Allocate(new_size);
-			if (Contains(old_block))
+			block b = allocate(size, alignment);
+			if (contains(b_))
 			{
-				CopyBytes(new_block.Begin(), old_block.Begin(), old_block.size);
-				Deallocate(old_block);
-				old_block.Invalidate();
+				copy_bytes(b.begin(), b_.begin(), b_.size);
+				deallocate(b_);
+				b_.invalidate();
 			}
-
-			return new_block;
+			return b;
 		}
 
-		Block Reallocate(void* old_ptr, siz new_size) override
+		virtual block reallocate(void* ptr, siz size, siz alignment) override
 		{
-			Block old_block = ExtractBlock(old_ptr);
-			return Reallocate(old_block, new_size);
+			block b = extract_allocated_block(ptr);
+			return reallocate(b, size, alignment);
 		}
 
-		bl Deallocate(Block& block) override
+		virtual bl deallocate(block& b) override
 		{
-			bl deallocated = Deallocate(block.ptr);
+			bl deallocated = deallocate(b.ptr);
 			if (deallocated)
-				block.Invalidate();
-
+				b.invalidate();
 			return deallocated;
 		}
 
-		bl Deallocate(void* ptr) override
+		virtual bl deallocate(void* ptr) override
 		{
 			bl deallocated = false;
 			auto allocators = _allocators.get_access();
 			for (siz i = 0; i < allocators->size() && !deallocated; i++)
-				if ((*allocators)[i]->Contains(ptr))
-					deallocated = (*allocators)[i]->Deallocate(ptr);
+				if ((*allocators)[i]->contains(ptr))
+					deallocated = (*allocators)[i]->deallocate(ptr);
 			return deallocated;
 		}
 
-		bl DeallocateAll()
+		virtual bl deallocate_all()
 		{
 			auto allocators = _allocators.get_access();
-			for (AllocatorType* allocator : *allocators)
-				Destroy<AllocatorType>(_c_allocator, allocator);
+			for (ALLOCATOR_TYPE* a : *allocators)
+				mem::destroy<ALLOCATOR_TYPE>(_c_allocator, a);
 			allocators->clear();
 			return true;
 		}
 	};
 } // namespace np::mem
 
-#endif /* NP_ENGINE_ACCUMULATING_ALLOCATOR_HPP */
+#endif /* NP_ENGINE_MEM_ACCUMULATING_ALLOCATOR_HPP */

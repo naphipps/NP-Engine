@@ -11,7 +11,7 @@
 
 namespace np::gpu
 {
-	class DynamicUsage : public Enum<ui32>
+	class DynamicUsage : public enm_ui32
 	{
 	public:
 		constexpr static ui32 Viewport = BIT(0);
@@ -24,7 +24,7 @@ namespace np::gpu
 		constexpr static ui32 StencilWriteMask = BIT(0);
 		constexpr static ui32 StencilReferenceValue = BIT(0);
 
-		DynamicUsage(ui32 value): Enum<ui32>(value) {}
+		DynamicUsage(ui32 value): enm_ui32(value) {}
 	};
 } // namespace np::gpu
 

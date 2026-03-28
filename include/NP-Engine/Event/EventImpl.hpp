@@ -14,7 +14,7 @@ namespace np::evnt
 {
 	enum class EventType : ui64
 	{
-		None,
+		None = 0,
 
 		ApplicationClose,
 		ApplicationPopup,
@@ -40,7 +40,7 @@ namespace np::evnt
 		Max
 	};
 
-	class EventCategory : public Enum<ui64>
+	class EventCategory : public enm_ui64
 	{
 	public:
 		constexpr static ui64 Application = BIT(0);
@@ -48,17 +48,17 @@ namespace np::evnt
 		constexpr static ui64 Gpu = BIT(2);
 		constexpr static ui64 Network = BIT(3);
 
-		EventCategory(ui64 value): Enum<ui64>(value) {}
+		EventCategory(ui64 value): enm_ui64(value) {}
 	};
 
-	class Event : public mem::Delegate
+	class Event : public mem::delegate
 	{
 	protected:
 		bl _handled;
 		bl _can_be_handled;
 
 	public:
-		Event(): mem::Delegate(), _handled(false), _can_be_handled(false) {}
+		Event(): mem::delegate(), _handled(false), _can_be_handled(false) {}
 
 		virtual ~Event() {}
 

@@ -4,8 +4,8 @@
 //
 //##===----------------------------------------------------------------------===##//
 
-#ifndef NP_ENGINE_MEMORY_HPP
-#define NP_ENGINE_MEMORY_HPP
+#ifndef NP_ENGINE_MEM_MEMORY_HPP
+#define NP_ENGINE_MEM_MEMORY_HPP
 
 #include "NP-Engine/Foundation/Foundation.hpp"
 
@@ -16,11 +16,10 @@
 #include "CAllocator.hpp"
 #include "Delegate.hpp"
 #include "ExplicitListAllocator.hpp"
-#include "ExplicitSegListAllocator.hpp"
+#include "ExplicitSegregatedListAllocator.hpp"
 #include "FallbackAllocator.hpp"
 #include "ImplicitListAllocator.hpp"
 #include "LinearAllocator.hpp"
-#include "LockingPoolAllocator.hpp"
 #include "Margin.hpp"
 #include "MemoryFunctions.hpp"
 #include "ObjectPool.hpp"
@@ -33,4 +32,6 @@
 #include "TraitAllocator.hpp"
 #include "AccumulatingPool.hpp"
 
-#endif /* NP_ENGINE_MEMORY_HPP */
+//TODO: slowly but surely removing c-style casting
+
+#endif /* NP_ENGINE_MEM_MEMORY_HPP */

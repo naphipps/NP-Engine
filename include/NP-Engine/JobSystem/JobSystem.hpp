@@ -31,9 +31,9 @@ namespace np::jsys
 		atm_bl _running;
 		con::vector<JobWorker> _job_workers;
 		mem::sptr<condition> _job_worker_sleep_condition;
-		mem::TraitAllocator _allocator;
+		mem::trait_allocator _allocator;
 		mem::sptr<thr::ThreadPool> _thread_pool;
-		mem::AccumulatingPool<Job> _job_pool;
+		mem::accumulating_pool<Job, mem::DEFAULT_ALIGNMENT> _job_pool;
 		JobQueue _job_queue;
 
 		JobRecord GetNextJob()
@@ -55,7 +55,7 @@ namespace np::jsys
 
 		mem::sptr<thr::Thread> CreateThread()
 		{
-			return _thread_pool->CreateObject();
+			return _thread_pool->create_object();
 		}
 
 		siz GetThreadAffinity(siz worker_id)
@@ -81,7 +81,7 @@ namespace np::jsys
 			_job_workers.clear();
 			_thread_pool.reset();
 			_job_queue.Clear();
-			_job_pool.Clear();
+			_job_pool.clear();
 		}
 
 		void SetDefaultJobWorkerCount()
@@ -94,7 +94,7 @@ namespace np::jsys
 		{
 			Stop();
 			_job_workers.clear();
-			_thread_pool = mem::create_sptr<thr::ThreadPool>(_allocator, count);
+			_thread_pool = mem::create_sptr<thr::ThreadPool>(_allocator, count, mem::DEFAULT_ALIGNMENT);
 
 			for (siz i = 0; i < count; i++)
 				_job_workers.emplace_back(i);
@@ -156,7 +156,7 @@ namespace np::jsys
 
 		mem::sptr<Job> CreateJob()
 		{
-			return _job_pool.CreateObject();
+			return _job_pool.create_object();
 		}
 
 		void SubmitJob(JobPriority priority, mem::sptr<Job> job)

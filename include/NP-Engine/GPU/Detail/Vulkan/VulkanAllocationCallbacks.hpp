@@ -23,26 +23,26 @@ namespace np::gpu::__detail
 		{
 			VulkanAllocationCallbacks* callbacks = static_cast<VulkanAllocationCallbacks*>(user_data);
 			mem::sptr<srvc::Services> services = callbacks->GetServices();
-			mem::Allocator& allocator = services->GetAllocator();
-			mem::Block block = allocator.Allocate(size); //TODO: consider alignment
-			return block.ptr;
+			mem::allocator& a = services->GetAllocator();
+			mem::block b = a.allocate(size, alignment);
+			return b.ptr;
 		}
 
-		static void* Reallocate(void* user_data, void* old_ptr, siz size, siz alignment, VkSystemAllocationScope scope)
+		static void* Reallocate(void* user_data, void* ptr, siz size, siz alignment, VkSystemAllocationScope scope)
 		{
 			VulkanAllocationCallbacks* callbacks = static_cast<VulkanAllocationCallbacks*>(user_data);
 			mem::sptr<srvc::Services> services = callbacks->GetServices();
-			mem::Allocator& allocator = services->GetAllocator();
-			mem::Block block = allocator.Reallocate(old_ptr, size); //TODO: consider alignment
-			return block.ptr;
+			mem::allocator& a = services->GetAllocator();
+			mem::block b = a.reallocate(ptr, size, alignment);
+			return b.ptr;
 		}
 
 		static void Deallocate(void* user_data, void* ptr)
 		{
 			VulkanAllocationCallbacks* callbacks = static_cast<VulkanAllocationCallbacks*>(user_data);
 			mem::sptr<srvc::Services> services = callbacks->GetServices();
-			mem::Allocator& allocator = services->GetAllocator();
-			allocator.Deallocate(ptr);
+			mem::allocator& a = services->GetAllocator();
+			a.deallocate(ptr);
 		}
 
 		static void AllocateNotification(void* user_data, siz size, VkInternalAllocationType type,
@@ -72,7 +72,7 @@ namespace np::gpu::__detail
 
 		operator const VkAllocationCallbacks*() const
 		{
-			return mem::AddressOf(_callbacks);
+			return mem::address_of(_callbacks);
 		}
 
 		virtual mem::sptr<srvc::Services> GetServices() const

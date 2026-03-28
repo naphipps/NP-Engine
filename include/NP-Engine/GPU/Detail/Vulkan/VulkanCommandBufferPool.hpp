@@ -49,8 +49,8 @@ namespace np::gpu::__detail
 			VkCommandPool _pool;
 
 		public:
-			VulkanCommandBufferDestroyer(mem::sptr<VulkanLogicalDevice> device, VkCommandPool pool, mem::Allocator& allocator):
-				base(allocator),
+			VulkanCommandBufferDestroyer(mem::sptr<VulkanLogicalDevice> device, VkCommandPool pool, mem::allocator& a):
+				base(a),
 				_device(device),
 				_pool(pool)
 			{}
@@ -153,9 +153,9 @@ namespace np::gpu::__detail
 			using resource_type = mem::smart_ptr_resource<VulkanCommandBuffer, destroyer_type>;
 			using contiguous_block_type = mem::smart_ptr_contiguous_block<VulkanCommandBuffer, resource_type>;
 
-			mem::Allocator& allocator = GetServices()->GetAllocator();
+			mem::allocator& a = GetServices()->GetAllocator();
 			resource_type* resource = nullptr;
-			contiguous_block_type* contiguous_block = mem::Create<contiguous_block_type>(allocator);
+			contiguous_block_type* contiguous_block = mem::create<contiguous_block_type>(a);
 
 			if (contiguous_block)
 			{
@@ -166,9 +166,9 @@ namespace np::gpu::__detail
 				if (result == VK_SUCCESS)
 				{
 					VulkanCommandBuffer* object =
-						mem::Construct<VulkanCommandBuffer>(contiguous_block->object_block, GetServices(), command_buffer);
-					resource = mem::Construct<resource_type>(contiguous_block->resource_block,
-															 destroyer_type{_device, info.commandPool, allocator}, object);
+						mem::construct<VulkanCommandBuffer>(contiguous_block->object_block, GetServices(), command_buffer);
+					resource = mem::construct<resource_type>(contiguous_block->resource_block,
+															 destroyer_type{_device, info.commandPool, a}, object);
 				}
 			}
 			return {resource};

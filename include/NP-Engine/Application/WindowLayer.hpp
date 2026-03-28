@@ -32,11 +32,11 @@ namespace np::app
 			uid::Uid windowId{};
 		};
 
-		static void WindowClosedCallback(mem::Delegate& d)
+		static void WindowClosedCallback(mem::delegate& d)
 		{
 			WindowClosingPayload* payload = (WindowClosingPayload*)d.GetPayload();
 			payload->caller->_windows_to_destroy.get_access()->emplace(payload->windowId);
-			mem::Destroy<WindowClosingPayload>(payload->caller->_services->GetAllocator(), payload);
+			mem::destroy<WindowClosingPayload>(payload->caller->_services->GetAllocator(), payload);
 		}
 
 		void HandleWindowClosing(mem::sptr<evnt::Event> e)
@@ -46,7 +46,7 @@ namespace np::app
 			jsys::JobSystem& job_system = _services->GetJobSystem();
 
 			mem::sptr<jsys::Job> closed_job = job_system.CreateJob();
-			closed_job->SetPayload(mem::Create<WindowClosingPayload>(_services->GetAllocator(), this, closing_data.windowId));
+			closed_job->SetPayload(mem::create<WindowClosingPayload>(_services->GetAllocator(), this, closing_data.windowId));
 			closed_job->SetCallback(WindowClosedCallback);
 			jsys::Job::AddDependency(closed_job, closing_data.job);
 

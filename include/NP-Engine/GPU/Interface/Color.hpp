@@ -16,7 +16,7 @@
 
 namespace np::gpu
 {
-	class ColorChannel : public Enum<ui32>
+	class ColorChannel : public enm_ui32
 	{
 	public:
 		constexpr static ui32 R = BIT(0);
@@ -29,7 +29,7 @@ namespace np::gpu
 		constexpr static ui32 Blue = B;
 		constexpr static ui32 Alpha = A;
 
-		ColorChannel(ui32 value): Enum<ui32>(value) {}
+		ColorChannel(ui32 value): enm_ui32(value) {}
 
 		bl IsSingleChannel() const
 		{
@@ -65,7 +65,7 @@ namespace np::gpu
 		operator ui32() const
 		{
 			ui32 i = UI32_MIN;
-			mem::CopyBytes(&i, &r, sizeof(ui32));
+			mem::copy_bytes(mem::address_of(i), this, sizeof(ui32));
 			return i;
 		}
 

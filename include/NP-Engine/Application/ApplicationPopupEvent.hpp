@@ -17,25 +17,25 @@ namespace np::app
 	class ApplicationPopupEvent : public evnt::Event
 	{
 	protected:
-		mem::TraitAllocator _allocator;
+		mem::trait_allocator _allocator;
 
 	public:
 		struct DataType
 		{
-			str message;
-			Popup::Style style;
-			Popup::Buttons buttons;
-			Popup::Select select;
+			str message = "";;
+			PopupStyle style = PopupStyle::None;
+			PopupButtons buttons = PopupButtons::None;
+			PopupSelection select = PopupSelection::None;
 		};
 
-		ApplicationPopupEvent(str message, Popup::Style style, Popup::Buttons buttons)
+		ApplicationPopupEvent(str message, PopupStyle style, PopupButtons buttons)
 		{
-			SetPayload(mem::Create<DataType>(_allocator, message, style, buttons, Popup::Select::None));
+			SetPayload(mem::create<DataType>(_allocator, message, style, buttons, PopupSelection::None));
 		}
 
 		~ApplicationPopupEvent()
 		{
-			mem::Destroy<DataType>(_allocator, (DataType*)GetPayload());
+			mem::destroy<DataType>(_allocator, (DataType*)GetPayload());
 		}
 
 		DataType& GetData()

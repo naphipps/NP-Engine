@@ -19,14 +19,14 @@ namespace np
 {
 	namespace gpu::__detail
 	{
-		class VulkanPhysicalDeviceType : public Enum<ui32>
+		class VulkanPhysicalDeviceType : public enm_ui32
 		{
 		public:
 			constexpr static ui32 Amd = BIT(0);
 			constexpr static ui32 Nvidia = BIT(1);
 			constexpr static ui32 Intel = BIT(2);
 
-			VulkanPhysicalDeviceType(ui32 value): Enum<ui32>(value) {}
+			VulkanPhysicalDeviceType(ui32 value): enm_ui32(value) {}
 		};
 
 		class VulkanPhysicalDevice

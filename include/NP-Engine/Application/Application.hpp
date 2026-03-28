@@ -44,7 +44,7 @@ namespace np::app
 			Popup::Show("NP-Engine Terminate Function Called",
 						"Probably an unhandled exception was thrown.\nLog file can be found here : " +
 							nsit::Log::GetFileLoggerFilePath(),
-						Popup::Style::Error, Popup::Buttons::OK);
+						PopupStyle::Error, PopupButtons::Ok);
 		}
 
 		static inline void HandleSignal(i32 signal) noexcept
@@ -78,7 +78,7 @@ namespace np::app
 			str message = signal_string + " was raised.\nLog file can be found here : " + nsit::Log::GetFileLoggerFilePath();
 
 			::std::cerr << message << "\n";
-			Popup::Show("NP-Engine Signal Raised", message, Popup::Style::Error, Popup::Buttons::OK);
+			Popup::Show("NP-Engine Signal Raised", message, PopupStyle::Error, PopupButtons::Ok);
 		}
 	} // namespace __detail
 
@@ -110,7 +110,7 @@ namespace np::app
 			sys::SetSignalHandler(__detail::HandleSignal);
 
 			_layers.emplace_back(this);
-			_layers.emplace_back(mem::AddressOf(_window_layer));
+			_layers.emplace_back(mem::address_of(_window_layer));
 		}
 
 		virtual void HandlePopup(mem::sptr<evnt::Event> e)

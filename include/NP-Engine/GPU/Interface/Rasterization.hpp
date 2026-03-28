@@ -11,7 +11,7 @@
 
 namespace np::gpu
 {
-	class RasterizationUsage : public Enum<ui32>
+	class RasterizationUsage : public enm_ui32
 	{
 	public:
 		constexpr static ui32 Disable = BIT(0);
@@ -29,7 +29,7 @@ namespace np::gpu
 		constexpr static ui32 DepthClamp =
 			BIT(7); //TODO: this may be resolved via the depthBiasClamp? probably not though (pg 258)
 
-		RasterizationUsage(ui32 value): Enum<ui32>(value) {}
+		RasterizationUsage(ui32 value): enm_ui32(value) {}
 	};
 
 	struct DepthBias

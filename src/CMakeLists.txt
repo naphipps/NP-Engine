@@ -222,11 +222,10 @@ set(NP_ENGINE_MEMORY_HPP
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Memory/Block.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Memory/CAllocator.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Memory/ExplicitListAllocator.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Memory/ExplicitSegListAllocator.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Memory/ExplicitSegregatedListAllocator.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Memory/FallbackAllocator.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Memory/ImplicitListAllocator.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Memory/LinearAllocator.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Memory/LockingPoolAllocator.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Memory/Margin.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Memory/Memory.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Memory/MemoryFunctions.hpp

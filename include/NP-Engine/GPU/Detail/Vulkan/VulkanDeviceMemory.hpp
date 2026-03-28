@@ -116,7 +116,7 @@ namespace np::gpu::__detail
 		void AssignData(const con::vector<ui8>& bytes)
 		{
 			if (IsMapped())
-				mem::CopyBytes(_mapping, bytes);
+				mem::copy_bytes(_mapping, bytes);
 		}
 
 		bl ClearCacheForDevice(siz offset, siz size) const //TODO: support offset and size?

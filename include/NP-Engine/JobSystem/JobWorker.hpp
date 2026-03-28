@@ -210,7 +210,7 @@ namespace np::jsys
 		{
 			// intentionally not checking if we have this coworker already
 			//	^ allows us to support uneven distribution when stealing jobs
-			_coworkers.get_access()->emplace_back(mem::AddressOf(coworker));
+			_coworkers.get_access()->emplace_back(mem::address_of(coworker));
 		}
 
 		void RemoveCoworker(JobWorker& coworker)
@@ -220,7 +220,7 @@ namespace np::jsys
 			auto coworkers = _coworkers.get_access();
 			for (auto it = coworkers->begin(); it != coworkers->end();)
 			{
-				if (mem::AddressOf(coworker) == *it)
+				if (mem::address_of(coworker) == *it)
 					it = coworkers->erase(it);
 				else
 					it++;

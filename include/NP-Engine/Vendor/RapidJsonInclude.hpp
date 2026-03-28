@@ -24,7 +24,7 @@ namespace np::mem::__detail
 {
 	static void* RapidJsonMalloc(siz size)
 	{
-		void* result = TraitAllocator::malloc(size);
+		void* result = trait_allocator::malloc(size, DEFAULT_ALIGNMENT);
 		RAPIDJSON_ASSERT(result);
 		return result;
 	}
@@ -32,27 +32,23 @@ namespace np::mem::__detail
 	static void RapidJsonFree(void* ptr)
 	{
 		if (ptr)
-			TraitAllocator::free(ptr);
+			trait_allocator::free(ptr);
 	}
 
-	static void* RapidJsonRealloc(void* old_ptr, siz new_size)
+	static void* RapidJsonRealloc(void* ptr_, siz size)
 	{
-		void* result = nullptr;
+		void* ptr = ptr_ ? trait_allocator::realloc(ptr_, size, DEFAULT_ALIGNMENT) :
+			trait_allocator::malloc(size, DEFAULT_ALIGNMENT);
 
-		if (old_ptr)
-			result = TraitAllocator::realloc(old_ptr, new_size);
-		else
-			result = TraitAllocator::malloc(new_size);
-
-		RAPIDJSON_ASSERT(result);
-		return result;
+		RAPIDJSON_ASSERT(ptr);
+		return ptr;
 	}
 
 	template <typename T, typename... Args>
 	static T* RapidJsonNew(Args&&... args)
 	{
 		siz size = sizeof(T);
-		T* object = mem::Construct<T>({RapidJsonMalloc(size), size}, ::std::forward<Args>(args)...);
+		T* object = mem::construct<T>({RapidJsonMalloc(size), size}, ::std::forward<Args>(args)...);
 		RAPIDJSON_ASSERT(object);
 		return object;
 	}
@@ -62,7 +58,7 @@ namespace np::mem::__detail
 	{
 		if (ptr)
 		{
-			bl destructed = Destruct<T>(ptr);
+			bl destructed = mem::destruct<T>(ptr);
 			RAPIDJSON_ASSERT(destructed);
 			RapidJsonFree(ptr);
 		}
@@ -72,7 +68,7 @@ namespace np::mem::__detail
 #define RAPIDJSON_MALLOC(size) ::np::mem::__detail::RapidJsonMalloc(size)
 #define RAPIDJSON_FREE(ptr) ::np::mem::__detail::RapidJsonFree(ptr)
 #define RAPIDJSON_REALLOC(ptr, size) ::np::mem::__detail::RapidJsonRealloc(ptr, size)
-#define RAPIDJSON_NEW(TypeName) ::np::mem::__detail::RapidJsonNew<TypeName>
+#define RAPIDJSON_NEW(T) ::np::mem::__detail::RapidJsonNew<T>
 #define RAPIDJSON_DELETE(ptr) ::np::mem::__detail::RapidJsonDelete(ptr)
 
 #include <rapidjson/document.h>

@@ -54,7 +54,7 @@ namespace np::net
 			msg.header.bodySize = byte_count;
 			msg.body = mem::create_sptr<BlobMessageBody>(GetServices()->GetAllocator());
 			msg.body->SetSize(msg.header.bodySize);
-			mem::CopyBytes(msg.body->GetData(), src, msg.header.bodySize);
+			mem::copy_bytes(msg.body->GetData(), src, msg.header.bodySize);
 			return msg;
 		}
 

@@ -15,13 +15,13 @@
 
 namespace np::gpu
 {
-	class CommandBufferPoolUsage : public Enum<ui32>
+	class CommandBufferPoolUsage : public enm_ui32
 	{
 	public:
 		constexpr static ui32 Transient = BIT(0);
 		constexpr static ui32 Resettable = BIT(1);
 
-		CommandBufferPoolUsage(ui32 value): Enum<ui32>(value) {}
+		CommandBufferPoolUsage(ui32 value): enm_ui32(value) {}
 	};
 
 	struct CommandBufferPool : public DetailObject

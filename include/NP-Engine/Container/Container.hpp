@@ -38,56 +38,62 @@ namespace np::con
 	using array = ::std::array<T, SIZE>;
 
 	template <class T>
-	using vector = ::std::vector<T, mem::StdAllocator<T>>;
+	using vector = ::std::vector<T, mem::std_allocator<T>>;
+
+	/*
+		//TODO: do we want to add array_list<T> ??
+		template <class T>
+		using array_list = vector<T>;
+	*/
 
 	template <class T>
-	using deque = ::std::deque<T, mem::StdAllocator<T>>;
+	using deque = ::std::deque<T, mem::std_allocator<T>>;
 
-	template <class T, class Container = con::deque<T>>
-	using stack = ::std::stack<T, Container>;
+	template <class T, class CONTAINER = con::deque<T>>
+	using stack = ::std::stack<T, CONTAINER>;
 
-	template <class T, class Container = con::deque<T>>
-	using queue = ::std::queue<T, Container>;
+	template <class T, class CONTAINER = con::deque<T>>
+	using queue = ::std::queue<T, CONTAINER>;
 
-	template <class T, class Container = con::vector<T>, class Compare = ::std::less<typename Container::value_type>>
-	using pqueue = ::std::priority_queue<T, Container, Compare>;
-
-	template <class T>
-	using flist = ::std::forward_list<T, mem::StdAllocator<T>>;
+	template <class T, class CONTAINER = con::vector<T>, class COMPARE = ::std::less<typename CONTAINER::value_type>>
+	using pqueue = ::std::priority_queue<T, CONTAINER, COMPARE>;
 
 	template <class T>
-	using list = ::std::list<T, mem::StdAllocator<T>>;
+	using flist = ::std::forward_list<T, mem::std_allocator<T>>;
 
-	template <class Key, class Compare = ::std::less<Key>>
-	using oset = ::std::set<Key, Compare, mem::StdAllocator<Key>>;
+	template <class T>
+	using list = ::std::list<T, mem::std_allocator<T>>;
 
-	template <class Key, class Hash = ::std::hash<Key>, class KeyEqualTo = ::std::equal_to<Key>>
-	using uset = ::std::unordered_set<Key, Hash, KeyEqualTo, mem::StdAllocator<Key>>;
+	template <class KEY, class COMPARE = ::std::less<KEY>>
+	using oset = ::std::set<KEY, COMPARE, mem::std_allocator<KEY>>;
 
-	template <class Key, class T, class Compare = ::std::less<Key>>
-	using omap = ::std::map<Key, T, Compare, mem::StdAllocator<::std::pair<const Key, T>>>;
+	template <class KEY, class HASH = ::std::hash<KEY>, class KEY_EQUAL_TO = ::std::equal_to<KEY>>
+	using uset = ::std::unordered_set<KEY, HASH, KEY_EQUAL_TO, mem::std_allocator<KEY>>;
 
-	template <class Key, class T, class Hash = ::std::hash<Key>, class KeyEqualTo = ::std::equal_to<Key>>
-	using umap = ::std::unordered_map<Key, T, Hash, KeyEqualTo, mem::StdAllocator<::std::pair<const Key, T>>>;
+	template <class KEY, class T, class COMPARE = ::std::less<KEY>>
+	using omap = ::std::map<KEY, T, COMPARE, mem::std_allocator<::std::pair<const KEY, T>>>;
 
-	template <class Key, class Compare = ::std::less<Key>>
-	using omset = ::std::multiset<Key, Compare, mem::StdAllocator<Key>>;
+	template <class KEY, class T, class HASH = ::std::hash<KEY>, class KEY_EQUAL_TO = ::std::equal_to<KEY>>
+	using umap = ::std::unordered_map<KEY, T, HASH, KEY_EQUAL_TO, mem::std_allocator<::std::pair<const KEY, T>>>;
 
-	template <class Key, class Hash = ::std::hash<Key>, class KeyEqualTo = ::std::equal_to<Key>>
-	using umset = ::std::unordered_multiset<Key, Hash, KeyEqualTo, mem::StdAllocator<Key>>;
+	template <class KEY, class COMPARE = ::std::less<KEY>>
+	using omset = ::std::multiset<KEY, COMPARE, mem::std_allocator<KEY>>;
 
-	template <class Key, class T, class Compare = ::std::less<Key>>
-	using ommap = ::std::multimap<Key, T, Compare, mem::StdAllocator<::std::pair<const Key, T>>>;
+	template <class KEY, class HASH = ::std::hash<KEY>, class KEY_EQUAL_TO = ::std::equal_to<KEY>>
+	using umset = ::std::unordered_multiset<KEY, HASH, KEY_EQUAL_TO, mem::std_allocator<KEY>>;
 
-	template <class Key, class T, class Hash = ::std::hash<Key>, class KeyEqualTo = ::std::equal_to<Key>>
-	using ummap = ::std::unordered_multimap<Key, T, Hash, KeyEqualTo, mem::StdAllocator<::std::pair<const Key, T>>>;
+	template <class KEY, class T, class COMPARE = ::std::less<KEY>>
+	using ommap = ::std::multimap<KEY, T, COMPARE, mem::std_allocator<::std::pair<const KEY, T>>>;
+
+	template <class KEY, class T, class HASH = ::std::hash<KEY>, class KEY_EQUAL_TO = ::std::equal_to<KEY>>
+	using ummap = ::std::unordered_multimap<KEY, T, HASH, KEY_EQUAL_TO, mem::std_allocator<::std::pair<const KEY, T>>>;
 } // namespace np::con
 
 namespace np::mem
 {
-	static inline void CopyBytes(void* dst, const con::vector<ui8>& bytes)
+	static inline void copy_bytes(void* dst, const con::vector<ui8>& bytes)
 	{
-		CopyBytes(dst, bytes.data(), bytes.size());
+		copy_bytes(dst, bytes.data(), bytes.size());
 	}
 } //namespace np::mem
 

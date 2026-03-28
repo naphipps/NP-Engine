@@ -13,7 +13,7 @@ namespace np::gpu
 {
 	//TODO: should this be moved to geom?
 
-	class PrimitiveTopology : public Enum<ui32> //TODO: we might be fine to rename this to Topology? maybe one day
+	class PrimitiveTopology : public enm_ui32 //TODO: we might be fine to rename this to Topology? maybe one day
 	{
 	public:
 		constexpr static ui32 Resettable = BIT(0); //use the relevant "_MAX" value to represent the reset value
@@ -28,7 +28,7 @@ namespace np::gpu
 		constexpr static ui32 Strip = BIT(7);
 		constexpr static ui32 Fan = BIT(8);
 
-		PrimitiveTopology(ui32 value): Enum<ui32>(value) {}
+		PrimitiveTopology(ui32 value): enm_ui32(value) {}
 	};
 } // namespace np::gpu
 

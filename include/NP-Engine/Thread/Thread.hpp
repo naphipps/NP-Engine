@@ -16,6 +16,8 @@
 #include "NP-Engine/Memory/Memory.hpp"
 #include "NP-Engine/Time/Time.hpp"
 
+// TODO: snake case this layer
+
 namespace np::thr
 {
 	class Thread
@@ -23,25 +25,28 @@ namespace np::thr
 	public:
 		using Id = ::std::thread::id;
 
+		constexpr static siz ALIGNMENT = mem::DEFAULT_ALIGNMENT;
+
 		static inline ui32 HardwareConcurrency() noexcept
 		{
 			return ::std::thread::hardware_concurrency();
 		}
 
 	private:
-		using StdThreadBlock = mem::SizedBlock<sizeof(::std::thread)>;
+		using StdThreadBlock = mem::sized_block<sizeof(::std::thread), ALIGNMENT>;
 		mutexed_wrapper<StdThreadBlock> _thread_block;
 
 		void Zeroize(StdThreadBlock& thread_block)
 		{
-			((mem::Block)thread_block).Zeroize();
+			mem::block b = thread_block;
+			b.zeroize();
 		}
 
 		bl HasThread(StdThreadBlock& thread_block) const
 		{
 			bl has_thread = false;
 			for (siz i = 0; i < StdThreadBlock::SIZE && !has_thread; i++)
-				has_thread = thread_block.allocation[i] != 0;
+				has_thread |= thread_block.allocation[i] != 0;
 			return has_thread;
 		}
 
@@ -66,7 +71,7 @@ namespace np::thr
 		{
 			Join();
 			auto thread_access = _thread_block.get_access();
-			mem::Construct<::std::thread>(*thread_access, ::std::forward<Args>(args)...);
+			mem::construct<::std::thread>(*thread_access, ::std::forward<Args>(args)...);
 		}
 
 		void Join()
@@ -76,7 +81,7 @@ namespace np::thr
 			if (thread)
 			{
 				thread->join();
-				mem::Destruct<::std::thread>(thread);
+				mem::destruct<::std::thread>(thread);
 				Zeroize(*thread_access);
 			}
 		}
@@ -87,7 +92,7 @@ namespace np::thr
 		{
 			auto thread_access = _thread_block.get_access();
 			::std::thread* thread = GetThread(*thread_access);
-			return thread ? thread->get_id() : Id();
+			return thread ? thread->get_id() : Id{};
 		}
 	};
 
@@ -98,7 +103,7 @@ namespace np::thr
 		bl SetAffinity(siz core_number);
 	} // namespace ThisThread
 
-	using ThreadPool = mem::ObjectPool<Thread>;
+	using ThreadPool = mem::object_pool<Thread, Thread::ALIGNMENT>;
 } // namespace np::thr
 
 #endif /* NP_ENGINE_THREAD_HPP */

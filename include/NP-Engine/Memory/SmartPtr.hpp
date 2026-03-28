@@ -4,8 +4,8 @@
 //
 //##===----------------------------------------------------------------------===##//
 
-#ifndef NP_ENGINE_SMART_PTR_HPP
-#define NP_ENGINE_SMART_PTR_HPP
+#ifndef NP_ENGINE_MEM_SMART_PTR_HPP
+#define NP_ENGINE_MEM_SMART_PTR_HPP
 
 #include <type_traits>
 #include <utility>
@@ -14,6 +14,7 @@
 #include "NP-Engine/Primitive/Primitive.hpp"
 
 #include "Allocator.hpp"
+#include "MemoryFunctions.hpp"
 
 /*
 	<https://www.quora.com/Are-the-classic-pointers-still-used-in-modern-C-or-are-they-being-replaced-more-and-more-by-the-smart-pointers>
@@ -37,14 +38,16 @@ namespace np::mem
 	template <typename T>
 	struct smart_ptr_destroyer
 	{
+		virtual ~smart_ptr_destroyer() = default;
+
 		virtual void destruct_object(T* ptr)
 		{
-			mem::Destruct<T>(ptr);
+			mem::destruct<T>(ptr);
 		}
 
 		virtual void destruct_resource(smart_ptr_resource_base* ptr)
 		{
-			mem::Destruct<smart_ptr_resource_base>(ptr);
+			mem::destruct<smart_ptr_resource_base>(ptr);
 		}
 
 		virtual void deallocate_object(T* ptr) = 0;
@@ -56,23 +59,25 @@ namespace np::mem
 	class smart_ptr_allocator_destroyer : public smart_ptr_destroyer<T>
 	{
 	protected:
-		Allocator& _allocator;
+		allocator& _allocator;
 
 	public:
-		smart_ptr_allocator_destroyer(Allocator& allocator): _allocator(allocator) {}
+		smart_ptr_allocator_destroyer(allocator& a): _allocator(a) {}
 
 		smart_ptr_allocator_destroyer(const smart_ptr_allocator_destroyer& other): _allocator(other._allocator) {}
 
 		smart_ptr_allocator_destroyer(smart_ptr_allocator_destroyer&& other) noexcept: _allocator(other._allocator) {}
 
+		virtual ~smart_ptr_allocator_destroyer() = default;
+
 		virtual void deallocate_object(T* ptr) override
 		{
-			_allocator.Deallocate(ptr);
+			_allocator.deallocate(ptr);
 		}
 
 		virtual void deallocate_resource(smart_ptr_resource_base* ptr) override
 		{
-			_allocator.Deallocate(ptr);
+			_allocator.deallocate(ptr);
 		}
 	};
 
@@ -83,11 +88,13 @@ namespace np::mem
 		using base = smart_ptr_allocator_destroyer<T>;
 
 	public:
-		smart_ptr_contiguous_destroyer(Allocator& allocator): base(allocator) {}
+		smart_ptr_contiguous_destroyer(allocator& a): base(a) {}
 
 		smart_ptr_contiguous_destroyer(const smart_ptr_contiguous_destroyer& other): base(other._allocator) {}
 
 		smart_ptr_contiguous_destroyer(smart_ptr_contiguous_destroyer&& other) noexcept: base(other._allocator) {}
+
+		virtual ~smart_ptr_contiguous_destroyer() = default;
 
 		virtual void deallocate_object(T* ptr) override {}
 	};
@@ -110,6 +117,8 @@ namespace np::mem
 
 	public:
 		smart_ptr_resource(destroyer_type destroyer_type, T* object): _destroyer(destroyer_type), _object(object) {}
+
+		virtual ~smart_ptr_resource() = default;
 
 		virtual void destroy_object() override
 		{
@@ -139,8 +148,8 @@ namespace np::mem
 		NP_ENGINE_STATIC_ASSERT((::std::is_base_of_v<smart_ptr_resource_base, R>),
 								"(R)esource must derive from smart_ptr_resource_base");
 
-		using resource_block_type = SizedBlock<sizeof(R)>;
-		using object_block_type = SizedBlock<sizeof(T)>;
+		using resource_block_type = sized_block<sizeof(R), DEFAULT_ALIGNMENT>;
+		using object_block_type = sized_block<sizeof(T), DEFAULT_ALIGNMENT>;
 
 		resource_block_type resource_block;
 		object_block_type object_block;
@@ -150,6 +159,7 @@ namespace np::mem
 	class smart_ptr
 	{
 	private:
+		//NP_ENGINE_STATIC_ASSERT(!(::std::is_void<T>), "smart_ptr does not support void");
 		template <typename U>
 		friend class smart_ptr;
 
@@ -158,12 +168,12 @@ namespace np::mem
 
 		atm_siz* get_strong_counter_ptr() const
 		{
-			return _resource ? mem::AddressOf(_resource->strong_counter) : nullptr;
+			return _resource ? mem::address_of(_resource->strong_counter) : nullptr;
 		}
 
 		atm_siz* get_weak_counter_ptr() const
 		{
-			return _resource ? mem::AddressOf(_resource->weak_counter) : nullptr;
+			return _resource ? mem::address_of(_resource->weak_counter) : nullptr;
 		}
 
 		virtual void increment_strong_counter()
@@ -240,7 +250,7 @@ namespace np::mem
 		}
 
 	public:
-		virtual ~smart_ptr() {}
+		virtual ~smart_ptr() = default;
 
 		virtual void reset() = 0;
 
@@ -274,7 +284,7 @@ namespace np::mem
 
 		T* get_object_ptr() const
 		{
-			return base::_resource ? (T*)base::_resource->get_object_ptr() : nullptr;
+			return base::_resource ? static_cast<T*>(base::_resource->get_object_ptr()) : nullptr;
 		}
 
 	public:
@@ -557,11 +567,11 @@ namespace np::mem
 
 			if (strong_counter_ptr)
 				for (expected = strong_counter_ptr->load(mo_acquire); expected != 0 &&
-					 !strong_counter_ptr->compare_exchange_weak(expected, expected + 1, mo_release, mo_relaxed);)
-					;
+					!strong_counter_ptr->compare_exchange_weak(expected, expected + 1, mo_release, mo_relaxed);)
+				{}
 
-			if (expected !=
-				0) //aka: if we successfully incremented strong counter when it was not zero (aka: if we safely ensured object)
+			//aka: if we successfully incremented strong counter when it was not zero (aka: if we safely ensured object)
+			if (expected != 0) 
 			{
 				base::increment_weak_counter();
 				strong_ptr._resource = base::_resource;
@@ -571,19 +581,20 @@ namespace np::mem
 		}
 	};
 
-	template <typename T, typename... Args>
-	constexpr sptr<T> create_sptr(Allocator& allocator, Args&&... args)
+	template <typename T, typename... Args,
+		::std::enable_if_t<is_parenthesis_constructible_v<T, Args...> || is_list_constructible_v<T, Args...>, bl> = true>
+	constexpr sptr<T> create_sptr(allocator& a, Args&&... args)
 	{
 		using destroyer_type = smart_ptr_contiguous_destroyer<T>;
 		using resource_type = smart_ptr_resource<T, destroyer_type>;
 		using contiguous_block_type = smart_ptr_contiguous_block<T, resource_type>;
 
 		resource_type* resource = nullptr;
-		contiguous_block_type* contiguous_block = mem::Create<contiguous_block_type>(allocator);
+		contiguous_block_type* contiguous_block = mem::create<contiguous_block_type>(a);
 		if (contiguous_block)
 		{
-			T* object = mem::Construct<T>(contiguous_block->object_block, ::std::forward<Args>(args)...);
-			resource = mem::Construct<resource_type>(contiguous_block->resource_block, destroyer_type{allocator}, object);
+			T* object = mem::construct<T>(contiguous_block->object_block, ::std::forward<Args>(args)...);
+			resource = mem::construct<resource_type>(contiguous_block->resource_block, destroyer_type{a}, object);
 		}
 		return {resource};
 	}
@@ -596,9 +607,9 @@ namespace std
 	{
 		::np::siz operator()(::np::mem::sptr<T> ptr) const noexcept
 		{
-			return ptr ? (::np::siz)(::np::mem::AddressOf(*ptr)) : 0;
+			return ptr ? (::np::siz)(::np::mem::address_of(*ptr)) : 0;
 		}
 	};
 } // namespace std
 
-#endif /* NP_ENGINE_SMART_PTR_HPP */
+#endif /* NP_ENGINE_MEM_SMART_PTR_HPP */

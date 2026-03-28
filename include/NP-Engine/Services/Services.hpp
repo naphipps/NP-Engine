@@ -18,7 +18,7 @@ namespace np::srvc
 	class Services
 	{
 	private:
-		mem::TraitAllocator _allocator;
+		mem::trait_allocator _allocator;
 		jsys::JobSystem _job_system;
 		evnt::EventQueue _event_queue;
 		evnt::EventSubmitter _event_submitter; // TODO: I do not think we need this
@@ -28,12 +28,12 @@ namespace np::srvc
 	public:
 		Services(): _allocator(), _job_system(), _event_queue(), _event_submitter(_event_queue) {}
 
-		mem::Allocator& GetAllocator()
+		mem::allocator& GetAllocator()
 		{
 			return _allocator;
 		}
 
-		const mem::Allocator& GetAllocator() const
+		const mem::allocator& GetAllocator() const
 		{
 			return _allocator;
 		}

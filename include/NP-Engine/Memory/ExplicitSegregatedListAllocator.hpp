@@ -1,31 +1,25 @@
 //##===----------------------------------------------------------------------===##//
 //
-//  Author: Nathan Phipps 2/25/21
+//  Author: Nathan Phipps 3/1/21
 //
 //##===----------------------------------------------------------------------===##//
 
-#ifndef NP_ENGINE_MEM_EXPLICIT_LIST_ALLOCATOR_HPP
-#define NP_ENGINE_MEM_EXPLICIT_LIST_ALLOCATOR_HPP
+#ifndef NP_ENGINE_MEM_EXPLICIT_SEGREGATED_LIST_ALLOCATOR_HPP
+#define NP_ENGINE_MEM_EXPLICIT_SEGREGATED_LIST_ALLOCATOR_HPP
+
+#include <type_traits>
 
 #include "NP-Engine/Foundation/Foundation.hpp"
 #include "NP-Engine/Primitive/Primitive.hpp"
 
+#include "ExplicitListAllocator.hpp"
 #include "BookkeepingAllocator.hpp"
-#include "Margin.hpp"
+#include "margin.hpp"
 #include "MemoryFunctions.hpp"
 
 namespace np::mem
 {
-	namespace __detail
-	{
-		struct explicit_list_allocator_node
-		{
-			explicit_list_allocator_node* next = nullptr;
-			explicit_list_allocator_node* prev = nullptr;
-		};
-	}
-
-	class explicit_list_allocator : public bookkeeping_allocator
+	class explicit_segregated_list_allocator : public bookkeeping_allocator
 	{
 	protected:
 		using node = __detail::explicit_list_allocator_node;
@@ -35,9 +29,12 @@ namespace np::mem
 		constexpr static siz NODE_SIZE = calc_aligned_size(sizeof(node), DEFAULT_ALIGNMENT);
 		constexpr static siz BOOKKEEPING_SIZE = MARGIN_SIZE * 2;
 		constexpr static siz OVERHEAD_SIZE = BOOKKEEPING_SIZE + NODE_SIZE;
-		
+
 		mutex _mutex;
-		node* _root;
+		node* _root_1_16; // roots are from aligned sizes A to B
+		node* _root_17_32;
+		node* _root_33_64;
+		node* _root_65_;
 
 		virtual margin* extract_header_ptr(void* ptr)
 		{
@@ -57,20 +54,48 @@ namespace np::mem
 			return header;
 		}
 
-		virtual void detach_node(node* n)
+		virtual node** get_root(siz size) const
+		{
+			node** root = nullptr;
+			if (_root_1_16 && size <= 16)
+				root = ::std::remove_const_t<node**>(address_of(_root_1_16));
+			else if (_root_17_32 && size <= 32)
+				root = ::std::remove_const_t<node**>(address_of(_root_17_32));
+			else if (_root_33_64 && size <= 64)
+				root = ::std::remove_const_t<node**>(address_of(_root_33_64));
+			else
+				root = ::std::remove_const_t<node**>(address_of(_root_65_));
+			return root;
+		}
+
+		virtual node** get_root_matching(node* ptr) const
+		{
+			node** root = nullptr;
+			if (_root_1_16 == ptr)
+				root = ::std::remove_const_t<node**>(address_of(_root_1_16));
+			else if (_root_17_32 == ptr)
+				root = ::std::remove_const_t<node**>(address_of(_root_17_32));
+			else if (_root_33_64 == ptr)
+				root = ::std::remove_const_t<node**>(address_of(_root_33_64));
+			else if (_root_65_ == ptr)
+				root = ::std::remove_const_t<node**>(address_of(_root_65_));
+			return root;
+		}
+
+		static void detach_node(node* n, node** root)
 		{
 			if (n->next)
 				n->next->prev = n->prev;
 
-			(n->prev ? n->prev->next : _root) = n->next;
+			(n->prev ? n->prev->next : *root) = n->next;
 		}
 
-		virtual void attach_node(node* n)
+		static void attach_node(node* n, node** root)
 		{
 			if (n->next)
 				n->next->prev = n;
 
-			(n->prev ? n->prev->next : _root) = n;
+			(n->prev ? n->prev->next : *root) = n;
 		}
 
 		virtual bl init_free_block(block& b)
@@ -79,11 +104,11 @@ namespace np::mem
 			if (b.size >= OVERHEAD_SIZE)
 			{
 				block header_block{b.begin(), MARGIN_SIZE };
-				block footer_block{ (ui8*)b.end() - MARGIN_SIZE, MARGIN_SIZE };
+				block footer_block{(ui8*)b.end() - MARGIN_SIZE, MARGIN_SIZE };
 				margin* header = mem::construct<margin>(header_block, b.size, false);
 				margin* footer = mem::construct<margin>(footer_block, *header);
 
-				block node_block{ header_block.end(), NODE_SIZE };
+				block node_block{header_block.end(), NODE_SIZE};
 				node* n = mem::construct<node>(node_block);
 				initialized = n;
 			}
@@ -94,15 +119,17 @@ namespace np::mem
 		{
 			bl init_success = init_free_block(b);
 			NP_ENGINE_ASSERT(init_success, "our init here should always succeed");
-			node* n = (node*)((ui8*)b.begin() + MARGIN_SIZE);
 
-			node* insert = _root;
+			node* n = (node*)((ui8*)b.begin() + MARGIN_SIZE);
+			node** root = get_root(b.size);
+			node* insert = *root;
+
 			while (contains(insert) && insert->next && insert->next < n->next)
 				insert = insert->next;
 
 			n->next = insert ? insert->next : nullptr;
 			n->prev = insert;
-			attach_node(n);
+			attach_node(n, root);
 		}
 
 		/*
@@ -111,12 +138,12 @@ namespace np::mem
 		virtual margin* find_allocation_header(siz size, bl true_best_false_first)
 		{
 			margin *node_header, *header = nullptr;
-			node* n;
+			node *n, *root = *get_root(size);
 
 			if (true_best_false_first)
 			{
 				siz diff, min_diff = SIZ_MAX;
-				for (n = _root; contains(n); n = n->next)
+				for (n = root; contains(n); n = n->next)
 				{
 					node_header = (margin*)((ui8*)n - MARGIN_SIZE);
 					if (!node_header->is_allocated() && node_header->get_size() >= size)
@@ -137,7 +164,7 @@ namespace np::mem
 			}
 			else
 			{
-				for (n = _root; contains(n) && !header; n = n->next)
+				for (n = root; contains(n) && !header; n = n->next)
 				{
 					node_header = (margin*)((ui8*)n - MARGIN_SIZE);
 					if (!node_header->is_allocated() && node_header->get_size() >= size)
@@ -153,16 +180,15 @@ namespace np::mem
 			const siz aligned_size = calc_aligned_size(size, alignment);
 
 			block b{}, split{};
-			siz contiguous_size = aligned_size + BOOKKEEPING_SIZE;
+			siz contiguous_size = calc_aligned_size(size, alignment) + BOOKKEEPING_SIZE;
 			if (contiguous_size < OVERHEAD_SIZE)
 				contiguous_size = OVERHEAD_SIZE;
 
 			margin* header = find_allocation_header(contiguous_size, true_best_false_first);
 			if (header)
 			{
-				siz size_check = header->get_size();
 				b = {header, header->get_size()};
-				detach_node((node*)((ui8*)header + MARGIN_SIZE));
+				detach_node((node*)((ui8*)header + MARGIN_SIZE), get_root(contiguous_size));
 
 				// can we split?
 				if (b.size - contiguous_size >= OVERHEAD_SIZE)
@@ -211,8 +237,8 @@ namespace np::mem
 				{
 					header->set_is_allocated(false);
 
-					margin* prev_footer, * next_header, * claim_footer, * claim_header = nullptr;
-					node* claim_node = nullptr;
+					margin* prev_footer, * next_header, * claim_header, * claim_footer;
+					node* claim_node;
 
 					// claim previous blocks
 					for (prev_footer = (margin*)((ui8*)header - MARGIN_SIZE); contains(prev_footer);
@@ -221,13 +247,13 @@ namespace np::mem
 						if (!prev_footer->is_allocated())
 						{
 							claim_header = (margin*)((ui8*)prev_footer + MARGIN_SIZE - prev_footer->get_size());
+							claim_node = (node*)((ui8*)claim_header + MARGIN_SIZE);
+							detach_node(claim_node, get_root(claim_header->get_size()));
+
 							claim_header->set_size(claim_header->get_size() + header->get_size());
 							claim_footer = (margin*)((ui8*)claim_header + claim_header->get_size() - MARGIN_SIZE);
 							*claim_footer = *claim_header;
 							header = claim_header;
-
-							claim_node = (node*)((ui8*)claim_header + MARGIN_SIZE);
-							detach_node(claim_node);
 							continue;
 						}
 						break;
@@ -240,12 +266,12 @@ namespace np::mem
 						if (!next_header->is_allocated())
 						{
 							claim_header = next_header;
+							claim_node = (node*)((ui8*)claim_header + MARGIN_SIZE);
+							detach_node(claim_node, get_root(claim_header->get_size()));
+
 							header->set_size(header->get_size() + claim_header->get_size());
 							claim_footer = (margin*)((ui8*)header + header->get_size() - MARGIN_SIZE);
 							*claim_footer = *header;
-
-							claim_node = (node*)((ui8*)claim_header + MARGIN_SIZE);
-							detach_node(claim_node);
 							continue;
 						}
 						break;
@@ -262,7 +288,13 @@ namespace np::mem
 
 		virtual void init()
 		{
-			_root = init_free_block(_block) ? static_cast<node*>(static_cast<void*>(static_cast<ui8*>(_block.begin()) + MARGIN_SIZE)) : nullptr;
+			_root_1_16 = nullptr;
+			_root_17_32 = nullptr;
+			_root_33_64 = nullptr;
+			_root_65_ = nullptr;
+
+			if (init_free_block(_block))
+				*get_root(_block.size) = static_cast<node*>(static_cast<void*>(static_cast<ui8*>(_block.begin()) + MARGIN_SIZE));
 		}
 
 	public:
@@ -271,17 +303,27 @@ namespace np::mem
 			return OVERHEAD_SIZE;
 		}
 
-		explicit_list_allocator(block b): bookkeeping_allocator(b), _root(nullptr)
+		explicit_segregated_list_allocator(block b):
+			bookkeeping_allocator(b),
+			_root_1_16(nullptr),
+			_root_17_32(nullptr),
+			_root_33_64(nullptr),
+			_root_65_(nullptr)
 		{
 			init();
 		}
 
-		explicit_list_allocator(siz size, siz alignment): bookkeeping_allocator(size, alignment), _root(nullptr)
+		explicit_segregated_list_allocator(siz size, siz aligment):
+			bookkeeping_allocator(size, aligment),
+			_root_1_16(nullptr),
+			_root_17_32(nullptr),
+			_root_33_64(nullptr),
+			_root_65_(nullptr)
 		{
 			init();
 		}
 
-		virtual ~explicit_list_allocator() = default;
+		virtual ~explicit_segregated_list_allocator() = default;
 
 		virtual block allocate(siz size, siz alignment) override
 		{
@@ -340,9 +382,7 @@ namespace np::mem
 
 		virtual block reallocate_best(void* ptr, siz size, siz alignment)
 		{
-			const block old_allocated_block = extract_allocated_block(ptr);
-			const siz offset = static_cast<ui8*>(ptr) - static_cast<ui8*>(old_allocated_block.begin());
-			block b{ ptr, old_allocated_block.size - offset };
+			block b = extract_allocated_block(ptr);
 			return reallocate_best(b, size, alignment);
 		}
 
@@ -361,9 +401,7 @@ namespace np::mem
 
 		virtual block reallocate_first(void* ptr, siz size, siz alignment)
 		{
-			const block old_allocated_block = extract_allocated_block(ptr);
-			const siz offset = static_cast<ui8*>(ptr) - static_cast<ui8*>(old_allocated_block.begin());
-			block b{ ptr, old_allocated_block.size - offset };
+			block b = extract_allocated_block(ptr);
 			return reallocate_first(b, size, alignment);
 		}
 
@@ -390,4 +428,4 @@ namespace np::mem
 	};
 } // namespace np::mem
 
-#endif /* NP_ENGINE_MEM_EXPLICIT_LIST_ALLOCATOR_HPP */
+#endif /* NP_ENGINE_MEM_EXPLICIT_SEGREGATED_LIST_ALLOCATOR_HPP */

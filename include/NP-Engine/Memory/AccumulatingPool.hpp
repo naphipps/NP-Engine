@@ -4,8 +4,8 @@
 //
 //##===----------------------------------------------------------------------===##//
 
-#ifndef NP_ENGINE_ACCUMULATING_POOL_HPP
-#define NP_ENGINE_ACCUMULATING_POOL_HPP
+#ifndef NP_ENGINE_MEM_ACCUMULATING_POOL_HPP
+#define NP_ENGINE_MEM_ACCUMULATING_POOL_HPP
 
 #include <vector>
 
@@ -14,95 +14,100 @@
 
 namespace np::mem
 {
-	template <typename T, typename A = PoolAllocator<typename ObjectPool<T>::ChunkType>>
-	class AccumulatingPool
+	template <typename T, siz ALIGNMENT, typename ALLOCATOR_TYPE = pool_allocator<object_pool_chunk_type<T>, ALIGNMENT>>
+	class accumulating_pool
 	{
-	private:
-		using PoolType = ObjectPool<T, A>;
-		constexpr static siz POOL_TYPE_SIZE = CalcAlignedSize(sizeof(PoolType));
-		mutexed_wrapper<::std::vector<PoolType*>> _pools;
+	protected:
+		NP_ENGINE_STATIC_ASSERT((::std::is_base_of_v<pool_allocator_interface<object_pool_chunk_type<T>, ALIGNMENT>, ALLOCATOR_TYPE>),
+			"our given allocator must inherit from pool_allocator_interface<object_pool_chunk_type<T>, ALIGNMENT>");
 
-		static void AddPool(::std::vector<PoolType*>& pools)
+		using pool_type = object_pool<T, ALIGNMENT, ALLOCATOR_TYPE>;
+		constexpr static siz POOL_ALIGNMENT = ALIGNMENT;
+		constexpr static siz POOL_TYPE_SIZE = calc_aligned_size(sizeof(pool_type), POOL_ALIGNMENT);
+		mutexed_wrapper<::std::vector<pool_type*>> _pools;
+
+		static void add_pool(::std::vector<pool_type*>& pools)
 		{
-			CAllocator _c_allocator;
-			const siz object_count = pools.empty() ? 4 : pools.back()->GetObjectCount() * 2;
-			const siz chunk_size = A::CHUNK_SIZE;
+			c_allocator _c_allocator{};
+			const siz object_count = BIT(pools.size() + 2); //start with 4, then times 2 from there
+			const siz chunk_size = ALLOCATOR_TYPE::CHUNK_SIZE;
 			const siz size = POOL_TYPE_SIZE + (chunk_size * object_count);
-			const Block block = _c_allocator.Allocate(size);
-			const Block object_block{block.ptr, POOL_TYPE_SIZE};
-			const Block allocate_block{object_block.End(), block.size - object_block.size};
-			pools.emplace_back(mem::Construct<PoolType>(object_block, allocate_block));
+			const block contiguous_block = _c_allocator.allocate(size, POOL_ALIGNMENT);
+			const block object_block{ contiguous_block.ptr, POOL_TYPE_SIZE};
+			const block allocate_block{object_block.end(), contiguous_block.size - object_block.size};
+			pools.emplace_back(mem::construct<pool_type>(object_block, allocate_block));
 		}
 
 	public:
-		siz GetObjectSize() const
+		virtual siz get_object_size() const
 		{
 			return sizeof(T);
 		}
 
-		siz GetChunkSize() const
+		virtual siz get_chunk_size() const
 		{
-			return A::CHUNK_SIZE;
+			return ALLOCATOR_TYPE::CHUNK_SIZE;
 		}
 
-		siz GetObjectCount()
+		virtual siz get_chunk_count()
 		{
 			siz capacity = 0;
 			auto pools = _pools.get_access();
-			for (PoolType* pool : *pools)
-				capacity += pool->GetObjectCount();
+			for (pool_type* pool : *pools)
+				capacity += pool->get_chunk_count();
 			return capacity;
 		}
 
-		void Reserve(siz count)
+		virtual void reserve(siz count)
 		{
 			siz capacity = 0;
 			auto pools = _pools.get_access();
-			for (PoolType* pool : *pools)
-				capacity += pool->GetObjectCount();
+			for (pool_type* pool : *pools)
+				capacity += pool->get_chunk_count();
 
 			while (count > capacity)
 			{
-				AddPool(*pools);
-				capacity += pools->back()->GetObjectCount();
+				add_pool(*pools);
+				capacity += pools->back()->get_chunk_count();
 			}
 		}
 
-		bl Contains(sptr<T>& object)
+		virtual bl contains(sptr<T>& object)
 		{
 			bl contains = false;
 			auto pools = _pools.get_access();
 			for (siz i = 0; i < pools->size() && !contains; i++)
-				contains = (*pools)[i]->Contains(object);
+				contains = (*pools)[i]->contains(object);
 			return contains;
 		}
 
-		template <typename... Args>
-		sptr<T> CreateObject(Args&&... args)
+		template <typename... Args,
+			::std::enable_if_t<is_parenthesis_constructible_v<T, Args...> || is_list_constructible_v<T, Args...>, bl> = true>
+		sptr<T> create_object(Args&&... args)
 		{
 			sptr<T> object = nullptr;
 			auto pools = _pools.get_access();
 			for (auto it = pools->rbegin(); !object && it != pools->rend(); it++)
-				object = (*it)->CreateObject(::std::forward<Args>(args)...);
+				object = (*it)->create_object(::std::forward<Args>(args)...);
 
 			if (!object)
 			{
-				AddPool(*pools);
-				object = pools->back()->CreateObject(::std::forward<Args>(args)...);
+				add_pool(*pools);
+				object = pools->back()->create_object(::std::forward<Args>(args)...);
 			}
 
 			return object;
 		}
 
-		void Clear()
+		virtual void clear()
 		{
-			CAllocator _c_allocator;
+			c_allocator _c_allocator{};
 			auto pools = _pools.get_access();
-			for (PoolType* pool : *pools)
-				mem::Destroy<PoolType>(_c_allocator, pool);
+			for (pool_type* pool : *pools)
+				mem::destroy<pool_type>(_c_allocator, pool);
 			pools->clear();
 		}
 	};
 } // namespace np::mem
 
-#endif /* NP_ENGINE_ACCUMULATING_POOL_HPP */
+#endif /* NP_ENGINE_MEM_ACCUMULATING_POOL_HPP */

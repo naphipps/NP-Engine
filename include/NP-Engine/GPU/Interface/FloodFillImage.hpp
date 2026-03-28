@@ -19,7 +19,7 @@ namespace np::alg
 	public:
 		using Point = ImageSubview::Point;
 
-		class PointRelation : public Enum<ui32>
+		class PointRelation : public enm_ui32
 		{
 		public:
 			constexpr static ui32 Upper = BIT(0);
@@ -31,7 +31,7 @@ namespace np::alg
 			constexpr static ui32 LowerRight = Lower | Right;
 			constexpr static ui32 LowerLeft = Lower | Left;
 
-			PointRelation(ui32 value): Enum<ui32>(value) {}
+			PointRelation(ui32 value): enm_ui32(value) {}
 		};
 
 		struct Payload
@@ -44,9 +44,9 @@ namespace np::alg
 
 	private:
 		ImageSubview _image_subview;
-		mem::BlDelegate _is_approved;
-		mem::VoidDelegate _approved_action;
-		mem::VoidDelegate _rejected_action;
+		mem::delegate_bl _is_approved;
+		mem::delegate_void _approved_action;
+		mem::delegate_void _rejected_action;
 
 	public:
 		FloodFillImage(const ImageSubview& image_subview): _image_subview(image_subview) {}
@@ -59,32 +59,32 @@ namespace np::alg
 
 		virtual ~FloodFillImage() = default;
 
-		mem::BlDelegate& GetIsApprovedDelegate()
+		mem::delegate_bl& GetIsApprovedDelegate()
 		{
 			return _is_approved;
 		}
 
-		const mem::BlDelegate& GetIsApprovedDelegate() const
+		const mem::delegate_bl& GetIsApprovedDelegate() const
 		{
 			return _is_approved;
 		}
 
-		mem::VoidDelegate& GetApprovedActionDelegate()
+		mem::delegate_void& GetApprovedActionDelegate()
 		{
 			return _approved_action;
 		}
 
-		const mem::VoidDelegate& GetApprovedActionDelegate() const
+		const mem::delegate_void& GetApprovedActionDelegate() const
 		{
 			return _approved_action;
 		}
 
-		mem::VoidDelegate& GetRejectedActionDelegate()
+		mem::delegate_void& GetRejectedActionDelegate()
 		{
 			return _rejected_action;
 		}
 
-		const mem::VoidDelegate& GetRejectedActionDelegate() const
+		const mem::delegate_void& GetRejectedActionDelegate() const
 		{
 			return _rejected_action;
 		}
@@ -93,13 +93,13 @@ namespace np::alg
 		{
 			ImageSubview* prev_image_subview = payload.imageSubview;
 			if (!prev_image_subview)
-				payload.imageSubview = mem::AddressOf(_image_subview);
+				payload.imageSubview = mem::address_of(_image_subview);
 
 			payload.relation = PointRelation::None;
 
-			_is_approved.SetPayload(mem::AddressOf(payload));
-			_approved_action.SetPayload(mem::AddressOf(payload));
-			_rejected_action.SetPayload(mem::AddressOf(payload));
+			_is_approved.SetPayload(mem::address_of(payload));
+			_approved_action.SetPayload(mem::address_of(payload));
+			_rejected_action.SetPayload(mem::address_of(payload));
 
 			ui32 height = _image_subview.GetHeight();
 			ui32 width = _image_subview.GetWidth();

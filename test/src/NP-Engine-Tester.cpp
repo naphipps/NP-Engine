@@ -20,14 +20,14 @@
 
 	i32 exit_val = NP_ENGINE_EXIT_SUCCESS;
 	str message;
-	app::Popup::Style style = app::Popup::DefaultStyle;
-	app::Popup::Buttons buttons = app::Popup::DefaultButtons;
+	app::PopupStyle style = app::PopupStyle::Info;
+	app::PopupButtons buttons = app::PopupButtons::Ok;
 
 	try
 	{
 		sys::Init();
-		mem::AccumulatingAllocator<mem::RedBlackTreeAllocator> allocator;
-		mem::TraitAllocator::Register(allocator);
+		mem::accumulating_allocator<mem::red_black_tree_allocator> allocator{};
+		mem::trait_allocator::register_allocator(allocator);
 		{
 #if NP_ENGINE_PLATFORM_IS_LINUX
 			// mem::sptr<siz> x = mem::create_sptr<siz>(allocator); // TODO: linux still signals when this is not here - FIX
@@ -41,24 +41,24 @@
 		}
 		NP_ENGINE_PROFILE_SAVE();
 		NP_ENGINE_PROFILE_RESET();
-		mem::TraitAllocator::ResetRegistration();
+		mem::trait_allocator::reset_registration();
 	}
 	catch (const ::std::exception& e)
 	{
-		mem::TraitAllocator::ResetRegistration();
+		mem::trait_allocator::reset_registration();
 		exit_val = NP_ENGINE_EXIT_STD_ERROR;
 		message = "STD EXCEPTION OCCURRED: \n" + to_str(e.what()) + "\n\n";
 		message += "Log file can be found here: " + nsit::Log::GetFileLoggerFilePath();
-		style = app::Popup::Style::Error;
+		style = app::PopupStyle::Error;
 		NP_ENGINE_LOG_ERROR(message);
 	}
 	catch (...)
 	{
-		mem::TraitAllocator::ResetRegistration();
+		mem::trait_allocator::reset_registration();
 		exit_val = NP_ENGINE_EXIT_UNKNOWN_ERROR;
 		message = "UNKNOWN EXCEPTION OCCURRED\n\n";
 		message += "Log file can be found here: " + nsit::Log::GetFileLoggerFilePath();
-		style = app::Popup::Style::Error;
+		style = app::PopupStyle::Error;
 		NP_ENGINE_LOG_ERROR(message);
 	}
 

@@ -12,7 +12,7 @@
 
 namespace np::gpu
 {
-	class MultisampleUsage : public Enum<ui32>
+	class MultisampleUsage : public enm_ui32
 	{
 	protected:
 		//store sample count in bits [24, 31]
@@ -24,16 +24,16 @@ namespace np::gpu
 		constexpr static ui32 AlphaToCoverage = BIT(1);
 		constexpr static ui32 AlphaToOne = BIT(2);
 
-		MultisampleUsage(ui32 value, ui32 sample_count): Enum<ui32>(value)
+		MultisampleUsage(ui32 value, ui32 sample_count): enm_ui32(value)
 		{
 			SetSampleCount(sample_count);
 		}
 
-		MultisampleUsage(ui32 value): Enum<ui32>(value) {}
+		MultisampleUsage(ui32 value): enm_ui32(value) {}
 
 		virtual ui32 GetSampleCount() const
 		{
-			return GetEmbeddedValue(SampleCountMask, SampleCountShift);
+			return get_embedded_value(SampleCountMask, SampleCountShift);
 		}
 
 		/*
@@ -41,7 +41,7 @@ namespace np::gpu
 		*/
 		virtual void SetSampleCount(ui32 count)
 		{
-			SetEmbeddedValue(count, SampleCountMask, SampleCountShift);
+			set_embedded_value(count, SampleCountMask, SampleCountShift);
 		}
 	};
 

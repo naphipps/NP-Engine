@@ -22,9 +22,9 @@
 
 namespace np::app
 {
-	Popup::Select Popup::Show(::std::string title, ::std::string message, Popup::Style style, Popup::Buttons buttons)
+	PopupSelection Popup::Show(::std::string title, ::std::string message, PopupStyle style, PopupButtons buttons)
 	{
-		Popup::Select select = Popup::Select::Error;
+		PopupSelection select = PopupSelection::Error;
 
 #if NP_ENGINE_PLATFORM_IS_LINUX
 		if (gtk_init_check(0, nullptr))
@@ -73,22 +73,22 @@ namespace np::app
 			switch (gtk_dialog_run(GTK_DIALOG(dialog)))
 			{
 			case GTK_RESPONSE_OK:
-				select = Popup::Select::OK;
+				select = PopupSelection::OK;
 				break;
 			case GTK_RESPONSE_CANCEL:
-				select = Popup::Select::Cancel;
+				select = PopupSelection::Cancel;
 				break;
 			case GTK_RESPONSE_YES:
-				select = Popup::Select::Yes;
+				select = PopupSelection::Yes;
 				break;
 			case GTK_RESPONSE_NO:
-				select = Popup::Select::No;
+				select = PopupSelection::No;
 				break;
 			case GTK_RESPONSE_CLOSE:
-				select = Popup::Select::Quit;
+				select = PopupSelection::Quit;
 				break;
 			default:
-				select = Popup::Select::None;
+				select = PopupSelection::None;
 				break;
 			}
 
@@ -103,18 +103,19 @@ namespace np::app
 
 		switch (style)
 		{
-		case Popup::Style::Info:
-			flags |= MB_ICONINFORMATION;
-			break;
-		case Popup::Style::Warning:
+		case PopupStyle::Warning:
 			flags |= MB_ICONWARNING;
 			break;
-		case Popup::Style::Error:
+
+		case PopupStyle::Error:
 			flags |= MB_ICONERROR;
 			break;
-		case Popup::Style::Question:
+
+		case PopupStyle::Question:
 			flags |= MB_ICONQUESTION;
 			break;
+
+		case PopupStyle::Info:
 		default:
 			flags |= MB_ICONINFORMATION;
 			break;
@@ -122,19 +123,20 @@ namespace np::app
 
 		switch (buttons)
 		{
-		case Popup::Buttons::OK:
-		case Popup::Buttons::Quit:
-			flags |= MB_OK;
-			break;
-		case Popup::Buttons::OKCancel:
+		case PopupButtons::Ok | PopupButtons::Cancel:
 			flags |= MB_OKCANCEL;
 			break;
-		case Popup::Buttons::YesNo:
+
+		case PopupButtons::Yes | PopupButtons::No:
 			flags |= MB_YESNO;
 			break;
-		case Popup::Buttons::YesNoCancel:
+
+		case PopupButtons::Yes | PopupButtons::No | PopupButtons::Cancel:
 			flags |= MB_YESNOCANCEL;
 			break;
+
+		case PopupButtons::Ok:
+		case PopupButtons::Quit:
 		default:
 			flags |= MB_OK;
 			break;
@@ -143,19 +145,23 @@ namespace np::app
 		switch (MessageBox(nullptr, message.c_str(), title.c_str(), flags))
 		{
 		case IDOK:
-			select = buttons == Popup::Buttons::Quit ? Popup::Select::Quit : Popup::Select::OK;
+			select = buttons == PopupButtons::Quit ? PopupSelection::Quit : PopupSelection::Ok;
 			break;
+
 		case IDCANCEL:
-			select = Popup::Select::Cancel;
+			select = PopupSelection::Cancel;
 			break;
+
 		case IDYES:
-			select = Popup::Select::Yes;
+			select = PopupSelection::Yes;
 			break;
+
 		case IDNO:
-			select = Popup::Select::No;
+			select = PopupSelection::No;
 			break;
+
 		default:
-			select = Popup::Select::None;
+			select = PopupSelection::None;
 			break;
 		}
 

@@ -11,7 +11,7 @@
 
 namespace np::gpu
 {
-	class Access : public Enum<ui32>
+	class Access : public enm_ui32
 	{
 	public:
 		constexpr static ui32 Read = BIT(0);
@@ -29,7 +29,7 @@ namespace np::gpu
 		constexpr static ui32 Transfer = BIT(11);
 		constexpr static ui32 Host = BIT(12);
 
-		Access(ui32 value): Enum<ui32>(value) {}
+		Access(ui32 value): enm_ui32(value) {}
 	};
 } //namespace np::gpu
 

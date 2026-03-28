@@ -130,7 +130,7 @@ namespace np::net::__detail
 			}
 		}
 
-		static void ReceivingCallback(mem::Delegate& d)
+		static void ReceivingCallback(mem::delegate& d)
 		{
 			NativeSocket& self = *((NativeSocket*)d.GetPayload());
 			Message msg;
@@ -369,9 +369,9 @@ namespace np::net::__detail
 			if (IsOpen())
 			{
 				mem::sptr<srvc::Services> services = GetServices();
-				mem::Allocator& allocator = services->GetAllocator();
+				mem::allocator& a = services->GetAllocator();
 				evnt::EventQueue& event_queue = services->GetEventQueue();
-				mem::sptr<Host> host = mem::create_sptr<Host>(allocator);
+				mem::sptr<Host> host = mem::create_sptr<Host>(a);
 
 				client = Create(GetContext());
 				if (client)
@@ -400,7 +400,7 @@ namespace np::net::__detail
 					}
 				}
 
-				event_queue.Push(mem::create_sptr<NetworkClientEvent>(allocator, host, client));
+				event_queue.Push(mem::create_sptr<NetworkClientEvent>(a, host, client));
 			}
 
 			return client;

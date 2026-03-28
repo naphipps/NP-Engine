@@ -44,7 +44,7 @@ namespace np::gpu
 		//virtual bl SetResourceGroup(siz index, mem::sptr<ResourceGroup> group) = 0; //TODO: do we want this?
 	};
 
-	class PipelineUsage : public Enum<ui32>
+	class PipelineUsage : public enm_ui32
 	{
 	public:
 		constexpr static ui32 Compute = BIT(0);
@@ -64,7 +64,7 @@ namespace np::gpu
 
 		//constexpr static ui32 RayTrace = BIT(2); //TODO: investigate
 
-		PipelineUsage(ui32 value): Enum<ui32>(value) {}
+		PipelineUsage(ui32 value): enm_ui32(value) {}
 	};
 
 	struct Pipeline : public DetailObject

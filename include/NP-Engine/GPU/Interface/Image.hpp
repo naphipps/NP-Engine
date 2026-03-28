@@ -156,10 +156,10 @@ namespace np::gpu
 
 			if (x < _width && y < _height)
 			{
-				const ui8* pixel_data = mem::AddressOf(_pixels[(siz)x + (siz)y * (siz)_width * sizeof(Color)]);
+				const ui8* pixel_data = mem::address_of(_pixels[(siz)x + (siz)y * (siz)_width * sizeof(Color)]);
 				// TODO: ^ I feel like there are cleaner way of doing this
 				pixel = *((ui32*)pixel_data);
-				// TODO: ^ I feel like there are cleaner way of doing this -- mem::CopyBytes(mem::AddressOf(pixel), pixel_data,
+				// TODO: ^ I feel like there are cleaner way of doing this -- mem::copy_bytes(mem::address_of(pixel), pixel_data,
 				// sizeof(Color))
 			}
 
@@ -175,10 +175,10 @@ namespace np::gpu
 		{
 			if (x < _width && y < _height)
 			{
-				ui8* pixel_data = mem::AddressOf(_pixels[(siz)x + (siz)y * (siz)_width * sizeof(Color)]);
+				ui8* pixel_data = mem::address_of(_pixels[(siz)x + (siz)y * (siz)_width * sizeof(Color)]);
 				// TODO: ^ I feel like there are cleaner way of doing this
 				*((ui32*)pixel_data) = color;
-				// TODO: ^ I feel like there are cleaner way of doing this -- mem::CopyBytes(mem::AddressOf(pixel), pixel_data,
+				// TODO: ^ I feel like there are cleaner way of doing this -- mem::copy_bytes(mem::address_of(pixel), pixel_data,
 				// sizeof(Color))
 			}
 		}

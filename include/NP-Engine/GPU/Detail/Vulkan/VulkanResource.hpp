@@ -299,8 +299,8 @@ namespace np::gpu::__detail
 			VkDescriptorPool _pool;
 
 		public:
-			VulkanResourceGroupDestroyer(mem::sptr<VulkanDevice> device, VkDescriptorPool pool, mem::Allocator& allocator):
-				base(allocator),
+			VulkanResourceGroupDestroyer(mem::sptr<VulkanDevice> device, VkDescriptorPool pool, mem::allocator& a):
+				base(a),
 				_device(device),
 				_pool(pool)
 			{}
@@ -452,9 +452,9 @@ namespace np::gpu::__detail
 			using resource_type = mem::smart_ptr_resource<VulkanResourceGroup, destroyer_type>;
 			using contiguous_block_type = mem::smart_ptr_contiguous_block<VulkanResourceGroup, resource_type>;
 
-			mem::Allocator& allocator = GetServices()->GetAllocator();
+			mem::allocator& a = GetServices()->GetAllocator();
 			resource_type* resource = nullptr;
-			contiguous_block_type* contiguous_block = mem::Create<contiguous_block_type>(allocator);
+			contiguous_block_type* contiguous_block = mem::create<contiguous_block_type>(a);
 
 			if (contiguous_block)
 			{
@@ -472,9 +472,9 @@ namespace np::gpu::__detail
 					if (result == VK_SUCCESS)
 					{
 						VulkanResourceGroup* object =
-							mem::Construct<VulkanResourceGroup>(contiguous_block->object_block, vulkan_layout, set);
-						resource = mem::Construct<resource_type>(contiguous_block->resource_block,
-																 destroyer_type{_device, _pool, allocator}, object);
+							mem::construct<VulkanResourceGroup>(contiguous_block->object_block, vulkan_layout, set);
+						resource = mem::construct<resource_type>(contiguous_block->resource_block,
+																 destroyer_type{_device, _pool, a}, object);
 					}
 				}
 			}

@@ -4,8 +4,8 @@
 //
 //##===----------------------------------------------------------------------===##//
 
-#ifndef NP_ENGINE_TRAIT_ALLOCATOR_HPP
-#define NP_ENGINE_TRAIT_ALLOCATOR_HPP
+#ifndef NP_ENGINE_MEM_TRAIT_ALLOCATOR_HPP
+#define NP_ENGINE_MEM_TRAIT_ALLOCATOR_HPP
 
 #include "NP-Engine/Foundation/Foundation.hpp"
 #include "NP-Engine/Primitive/Primitive.hpp"
@@ -16,88 +16,90 @@
 
 namespace np::mem
 {
-	class TraitAllocator : public Allocator
+	class trait_allocator : public allocator
 	{
 	private:
-		static CAllocator _default_allocator;
-		static atm<Allocator*> _registered_allocator;
+		static c_allocator _default_allocator;
+		static atm<allocator*> _registered_allocator;
 
-		static void EnsureRegistration()
+		static void ensure_registration()
 		{
-			Allocator* expected = nullptr;
-			_registered_allocator.compare_exchange_strong(expected, AddressOf(_default_allocator), mo_release, mo_relaxed);
-			NP_ENGINE_ASSERT(expected, "TraitAllocator's registration is nullptr when it should not be");
+			allocator* expected = nullptr;
+			_registered_allocator.compare_exchange_strong(expected, address_of(_default_allocator), mo_release, mo_relaxed);
+			NP_ENGINE_ASSERT(expected, "trait_allocator's registration is nullptr when it should not be");
 		}
 
 	public:
-		bl Contains(const Block& block) override
+		virtual ~trait_allocator() = default;
+
+		virtual bl contains(const block& b) override
 		{
-			return Contains(block.ptr);
+			return contains(b.ptr);
 		}
 
-		bl Contains(const void* ptr) override
+		virtual bl contains(const void* ptr) override
 		{
-			EnsureRegistration();
-			return _registered_allocator.load(mo_acquire)->Contains(ptr);
+			ensure_registration();
+			return _registered_allocator.load(mo_acquire)->contains(ptr);
 		}
 
-		Block Allocate(siz size) override
+		virtual block allocate(siz size, siz alignment) override
 		{
-			EnsureRegistration();
-			return _registered_allocator.load(mo_acquire)->Allocate(size);
+			ensure_registration();
+			return _registered_allocator.load(mo_acquire)->allocate(size, alignment);
 		}
 
-		Block Reallocate(Block& old_block, siz new_size) override
+		virtual block reallocate(block& b, siz size, siz alignment) override
 		{
-			EnsureRegistration();
-			return _registered_allocator.load(mo_acquire)->Reallocate(old_block, new_size);
+			ensure_registration();
+			return _registered_allocator.load(mo_acquire)->reallocate(b, size, alignment);
 		}
 
-		Block Reallocate(void* old_ptr, siz new_size) override
+		virtual block reallocate(void* ptr, siz size, siz alignment) override
 		{
-			EnsureRegistration();
-			return _registered_allocator.load(mo_acquire)->Reallocate(old_ptr, new_size);
+			ensure_registration();
+			return _registered_allocator.load(mo_acquire)->reallocate(ptr, size, alignment);
 		}
 
-		bl Deallocate(Block& block) override
+		virtual bl deallocate(block& b) override
 		{
-			return Deallocate(block.ptr);
+			return deallocate(b.ptr);
 		}
 
-		bl Deallocate(void* ptr) override
+		virtual bl deallocate(void* ptr) override
 		{
-			EnsureRegistration();
-			return _registered_allocator.load(mo_acquire)->Deallocate(ptr);
+			ensure_registration();
+			return _registered_allocator.load(mo_acquire)->deallocate(ptr);
 		}
 
-		static inline void* realloc(void* old_ptr, siz new_size)
+		static inline void* realloc(void* ptr, siz size, siz alignment)
 		{
-			EnsureRegistration();
-			return _registered_allocator.load(mo_acquire)->Reallocate(old_ptr, new_size).ptr;
+			ensure_registration();
+			return _registered_allocator.load(mo_acquire)->reallocate(ptr, size, alignment).ptr;
 		}
 
-		static inline void* malloc(siz size)
+		static inline void* malloc(siz size, siz alignment)
 		{
-			EnsureRegistration();
-			return _registered_allocator.load(mo_acquire)->Allocate(size).ptr;
+			ensure_registration();
+			return _registered_allocator.load(mo_acquire)->allocate(size, alignment).ptr;
 		}
 
 		static inline void free(void* ptr)
 		{
-			EnsureRegistration();
-			_registered_allocator.load(mo_acquire)->Deallocate(ptr);
+			ensure_registration();
+			_registered_allocator.load(mo_acquire)->deallocate(ptr);
 		}
 
-		static inline void Register(Allocator& allocator)
+		static inline void register_allocator(allocator& a)
 		{
-			_registered_allocator.store(AddressOf(allocator), mo_release);
+			_registered_allocator.store(address_of(a), mo_release);
 		}
 
-		static inline void ResetRegistration()
+		static inline void reset_registration()
 		{
-			Register(_default_allocator);
+			register_allocator(_default_allocator);
 		}
 	};
 } // namespace np::mem
 
-#endif /* NP_ENGINE_TRAIT_ALLOCATOR_HPP */
+#endif /* NP_ENGINE_MEM_TRAIT_ALLOCATOR_HPP */

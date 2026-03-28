@@ -4,11 +4,12 @@
 //
 //##===----------------------------------------------------------------------===##//
 
-#ifndef NP_ENGINE_BLOCK_HPP
-#define NP_ENGINE_BLOCK_HPP
+#ifndef NP_ENGINE_MEM_BLOCK_HPP
+#define NP_ENGINE_MEM_BLOCK_HPP
 
 #include "NP-Engine/Primitive/Primitive.hpp"
 
+#include "Alignment.hpp"
 #include "MemoryFunctions.hpp"
 
 namespace np::mem
@@ -17,72 +18,107 @@ namespace np::mem
 		our Block design was inspired by Andrei Alexandrescu's cppcon 2017 talk "std::allocator is to allocation what
 		std::vector is to vexation" <https://www.youtube.com/watch?v=LIb3L4vKZ7U>
 	*/
-	struct Block
+	struct block
 	{
 		void* ptr = nullptr;
 		siz size = 0;
 
-		void Invalidate()
+		void invalidate()
 		{
 			ptr = nullptr;
 			size = 0;
 		}
 
-		bl IsValid() const
+		bl empty() const
 		{
-			return ptr != nullptr && size > 0;
+			return size == 0;
 		}
 
-		void* Begin() const
+		bl is_valid() const
 		{
-			return IsValid() ? ptr : nullptr;
+			return ptr != nullptr && !empty();
 		}
 
-		void* End() const
+		void* begin() const
 		{
-			return IsValid() ? static_cast<ui8*>(ptr) + size : nullptr;
+			return is_valid() ? ptr : nullptr;
 		}
 
-		bl Contains(const void* p) const
+		void* end() const
 		{
-			return IsValid() ? ptr <= p && p < End() : false;
+			return is_valid() ? static_cast<ui8*>(ptr) + size : nullptr;
 		}
 
-		bl Contains(const Block& block) const
+		bl contains(const void* p) const
 		{
-			return IsValid() && block.IsValid() ? Contains(block.Begin()) && Contains(static_cast<ui8*>(block.End()) - 1)
-												: false;
+			return is_valid() ? ptr <= p && p < end() : false;
 		}
 
-		void Zeroize()
+		bl contains(const block& other) const
 		{
-			ui8* it = (ui8*)ptr;
-			const siz stride = sizeof(siz);
+			return is_valid() && other.is_valid() && contains(other.begin()) && contains(static_cast<ui8*>(other.end()) - 1);
+		}
 
-			siz loops = size / stride; // we'll zeroize 8 bytes at a time to start
-			for (siz i = 0; i < loops; i++, it += stride)
-				*(siz*)it = 0;
+		void zeroize() const
+		{
+			mem::zeroize(ptr, size);
+		}
 
-			loops = size % stride; // now we'll zeroize the remaining bytes to finish
-			for (siz i = 0; i < loops; i++, it++)
-				*it = 0;
+		bl is_zeroized() const
+		{
+			return mem::is_zeroized(ptr, size);
+		}
+
+		/*
+			returns the block representing the offset so it's end() is aligned to the DEFAULT_ALIGNMENT
+
+			the user should always uses the values allocators produce, but they use allocators with rogue values,
+			thus we unforntuately have to assume DEFAULT_ALIGNMENT
+		*/
+		block get_offset_block(void* ptr_) const
+		{
+			return is_valid() && contains(ptr_) && is_aligned(ptr_, DEFAULT_ALIGNMENT) ?
+				block{ ptr, (siz)(static_cast<ui8*>(ptr_) - static_cast<ui8*>(begin())) } : block{};
+		}
+
+		/*
+			returns this block unless offset is valid, contained within this, and offset.begin() equals our begin()
+		*/
+		block get_remaining_block(block offset) const
+		{
+			return is_valid() && offset.is_valid() && contains(offset) && offset.begin() == begin() ?
+				block{ offset.end(), size - offset.size } : *this;
+		}
+
+		/*
+			returns the pair<offset, remaining (aka: aligned)> of blocks, split on given alignment
+			calls sanitize_alignment on alignment
+		*/
+		::std::pair<block, block> get_split_on_alignment(siz alignment) const
+		{
+			alignment = sanitize_alignment(alignment);
+			void* aligned_ptr = calc_aligned_ptr(ptr, alignment);
+			block offset = is_valid() ? get_offset_block(aligned_ptr) : block{};
+			block remaining = get_remaining_block(offset); //remaining is aligned
+			return { offset, remaining };
 		}
 	};
 
-	template <siz S>
-	struct SizedBlock
+	template <siz SIZE_, siz ALIGNMENT_>
+	struct sized_block
 	{
-		NP_ENGINE_STATIC_ASSERT(S > 0, "(S)ize must be greater than zero.");
+		NP_ENGINE_STATIC_ASSERT(SIZE_ > 0, "(S)ize must be greater than zero.");
 
-		constexpr static siz SIZE = CalcAlignedSize(S);
+		constexpr static siz ALIGNMENT = sanitize_alignment(ALIGNMENT_);
+		constexpr static siz SIZE = calc_aligned_size(SIZE_, ALIGNMENT);
 
 		ui8 allocation[SIZE];
 
-		operator Block() const
+		operator block() const
 		{
-			return {(void*)allocation, SIZE};
+			return { (void*)allocation, SIZE };
 		}
 	};
 } // namespace np::mem
 
-#endif /* NP_ENGINE_BLOCK_HPP */
+#endif /* NP_ENGINE_MEM_BLOCK_HPP */

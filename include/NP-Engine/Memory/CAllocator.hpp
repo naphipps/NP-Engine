@@ -4,10 +4,10 @@
 //
 //##===----------------------------------------------------------------------===##//
 
-#ifndef NP_ENGINE_DEFAULT_ALLOCATOR_HPP
-#define NP_ENGINE_DEFAULT_ALLOCATOR_HPP
+#ifndef NP_ENGINE_MEM_C_ALLOCATOR_HPP
+#define NP_ENGINE_MEM_C_ALLOCATOR_HPP
 
-#include <cstdlib> //aligned_alloc and free
+#include <cstdlib>
 
 #include "NP-Engine/Foundation/Foundation.hpp"
 #include "NP-Engine/Primitive/Primitive.hpp"
@@ -17,77 +17,99 @@
 
 namespace np::mem
 {
-	class CAllocator : public Allocator
+	class c_allocator : public allocator
 	{
 	public:
-		virtual bl Contains(const Block& block) override
+		
+		virtual ~c_allocator() = default;
+
+		/*
+			this value is meaningless from c_allocator
+		*/
+		virtual bl contains(const block& b) override
 		{
 			return true;
 		}
 
-		virtual bl Contains(const void* ptr) override
+		/*
+			this value is meaningless from c_allocator
+		*/
+		virtual bl contains(const void* ptr) override
 		{
 			return true;
 		}
 
-		virtual Block Allocate(siz size) override
+		virtual block allocate(siz size, siz alignment) override
 		{
 			NP_ENGINE_ASSERT(size > 0, "given size must be greater than 0");
 
-			size = CalcAlignedSize(size);
-			Block block;
+			alignment = sanitize_alignment(alignment);
+			size = calc_aligned_size(size, alignment);
 			void* ptr = nullptr;
 
-#if defined(__clang__) || defined(_MSVC_LANG)
-			ptr = ::std::malloc(size);
+#if NP_ENGINE_PLATFORM_IS_WINDOWS
+			ptr = ::_aligned_malloc(size, alignment);
 #else
-			ptr = ::aligned_alloc(ALIGNMENT, size);
+#error implement allocate for non-windows
+			ptr = ::aligned_alloc(alignment, size);
 #endif
 
-			if (ptr)
-				block = {ptr, size};
-			return block;
+			return ptr ? block{ptr, size} : block{};
 		}
 
-		virtual Block Reallocate(Block& old_block, siz new_size) override
+		virtual block reallocate(block& b_, siz size, siz alignment) override
 		{
-			Block new_block = Reallocate(old_block.ptr, new_size);
-			old_block.Invalidate();
-			return new_block;
+			block b = reallocate(b_.ptr, size, alignment);
+			b_.invalidate();
+			return b;
 		}
 
-		virtual Block Reallocate(void* old_ptr, siz new_size) override
+		virtual block reallocate(void* ptr_, siz size, siz alignment) override
 		{
-			Block new_block;
-			if (old_ptr)
+			block b{};
+			if (ptr_)
 			{
-				new_size = CalcAlignedSize(new_size);
-				void* ptr = ::std::realloc(old_ptr, new_size);
+				alignment = sanitize_alignment(alignment);
+				size = calc_aligned_size(size, alignment);
+
+				void* ptr = nullptr;
+
+#if NP_ENGINE_PLATFORM_IS_WINDOWS
+				ptr = ::_aligned_realloc(ptr_, size, alignment);
+#else
+#error implement reallocate for non-windows
+
+#endif
 
 				if (ptr)
-					new_block = {ptr, new_size};
+					b = {ptr, size};
 			}
 			else
 			{
-				new_block = Allocate(new_size);
+				b = allocate(size, alignment);
 			}
 
-			return new_block;
+			return b;
 		}
 
-		virtual bl Deallocate(Block& block) override
+		virtual bl deallocate(block& b) override
 		{
-			CAllocator::Deallocate(block.ptr);
-			block.Invalidate();
-			return true;
+			bl deallocated = deallocate(b.ptr);
+			b.invalidate();
+			return deallocated;
 		}
 
-		virtual bl Deallocate(void* ptr) override
+		virtual bl deallocate(void* ptr) override
 		{
+#if NP_ENGINE_PLATFORM_IS_WINDOWS
+			::_aligned_free(ptr);
+#else
+#error implement deallocate for non-windows
 			::std::free(ptr);
+#endif
 			return true;
 		}
 	};
 } // namespace np::mem
 
-#endif /* NP_ENGINE_DEFAULT_ALLOCATOR_HPP */
+#endif /* NP_ENGINE_MEM_C_ALLOCATOR_HPP */

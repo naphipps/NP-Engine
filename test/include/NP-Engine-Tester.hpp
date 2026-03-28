@@ -7,7 +7,7 @@
 #ifndef NP_ENGINE_TESTER_HPP
 #define NP_ENGINE_TESTER_HPP
 
-//#define NP_ENGINE_ACCUMULATING_ALLOCATOR_BLOCK_SIZE (GIGABYTE_SIZE * 2) //TODO: test
+//#define NP_ENGINE_MEM_ACCUMULATING_ALLOCATOR_BLOCK_SIZE (GIGABYTE_SIZE * 2) //TODO: test
 
 #include <iostream>
 
@@ -186,7 +186,7 @@ namespace np::app
 			uid::Uid windowId{};
 		};
 
-		static void AdjustForWindowClosingCallback(mem::Delegate& d)
+		static void AdjustForWindowClosingCallback(mem::delegate& d)
 		{
 			AdjustForWindowClosingPayload* payload = (AdjustForWindowClosingPayload*)d.GetPayload();
 
@@ -202,7 +202,7 @@ namespace np::app
 			//		scene->reset(); // TODO: can we job-ify this?
 			//}
 
-			mem::Destroy<AdjustForWindowClosingPayload>(payload->caller->_services->GetAllocator(), payload);
+			mem::destroy<AdjustForWindowClosingPayload>(payload->caller->_services->GetAllocator(), payload);
 		}
 
 		void AdjustForWindowClosing(mem::sptr<evnt::Event> e)
@@ -212,7 +212,7 @@ namespace np::app
 
 			mem::sptr<jsys::Job> adjust_job = _services->GetJobSystem().CreateJob();
 			adjust_job->SetPayload(
-				mem::Create<AdjustForWindowClosingPayload>(_services->GetAllocator(), this, closing_data.windowId));
+				mem::create<AdjustForWindowClosingPayload>(_services->GetAllocator(), this, closing_data.windowId));
 			adjust_job->SetCallback(AdjustForWindowClosingCallback);
 			jsys::Job::AddDependency(closing_data.job, adjust_job);
 			_services->GetJobSystem().SubmitJob(jsys::JobPriority::Higher, adjust_job);*/
@@ -277,7 +277,7 @@ namespace np::app
 			}
 		}
 
-		/*static void SceneOnRenderCallback(mem::Delegate& d)
+		/*static void SceneOnRenderCallback(mem::delegate& d)
 		{
 			gpu::Scene::OnRenderPayload* payload = (gpu::Scene::OnRenderPayload*)d.GetPayload();
 			GameLayer& self = *((GameLayer*)payload->caller);
@@ -292,28 +292,28 @@ namespace np::app
 			mem::sptr<gpu::Resource> resource = payload->scene->GetResource(model_id);
 		}*/
 
-		static void CreateSceneCallback(mem::Delegate& d)
+		static void CreateSceneCallback(mem::delegate& d)
 		{
 			GameLayer& self = *((GameLayer*)d.GetPayload());
 
 			self._window->SetTitle("My Game Window >:D");
 
-			void* input_queue = mem::AddressOf(self._services->GetInputQueue());
+			void* input_queue = mem::address_of(self._services->GetInputQueue());
 			self._window->SetKeyCallback(input_queue, nput::InputListener::SubmitKeyState);
 			self._window->SetMouseCallback(input_queue, nput::InputListener::SubmitMouseState);
 			self._window->SetMousePositionCallback(input_queue, nput::InputListener::SubmitMousePosition);
 			self._window->SetControllerCallback(input_queue, nput::InputListener::SubmitControllerState);
 			/*
-			self._window->SetKeyCallback(mem::AddressOf(self), LogSubmitKeyState);
-			self._window->SetMouseCallback(mem::AddressOf(self), LogSubmitMouseState);
-			self._window->SetMousePositionCallback(mem::AddressOf(self), LogSubmitMousePosition);
-			self._window->SetControllerCallback(mem::AddressOf(self), LogSubmitControllerState);
-			self._window->SetFocusCallback(mem::AddressOf(self), LogFocus);
-			self._window->SetFramebufferCallback(mem::AddressOf(self), LogFramebuffer);
-			self._window->SetMaximizeCallback(mem::AddressOf(self), LogMaximize);
-			self._window->SetMinimizeCallback(mem::AddressOf(self), LogMinimize);
-			self._window->SetPositionCallback(mem::AddressOf(self), LogPosition);
-			self._window->SetSizeCallback(mem::AddressOf(self), LogSize);
+			self._window->SetKeyCallback(mem::address_of(self), LogSubmitKeyState);
+			self._window->SetMouseCallback(mem::address_of(self), LogSubmitMouseState);
+			self._window->SetMousePositionCallback(mem::address_of(self), LogSubmitMousePosition);
+			self._window->SetControllerCallback(mem::address_of(self), LogSubmitControllerState);
+			self._window->SetFocusCallback(mem::address_of(self), LogFocus);
+			self._window->SetFramebufferCallback(mem::address_of(self), LogFramebuffer);
+			self._window->SetMaximizeCallback(mem::address_of(self), LogMaximize);
+			self._window->SetMinimizeCallback(mem::address_of(self), LogMinimize);
+			self._window->SetPositionCallback(mem::address_of(self), LogPosition);
+			self._window->SetSizeCallback(mem::address_of(self), LogSize);
 			//*/
 
 			mem::sptr<srvc::Services> services = self._services;
@@ -605,7 +605,7 @@ namespace np::app
 			_prev_mouse_position = mouse_position;
 		}
 
-		static void TcpServerAcceptClientCallback(mem::Delegate& d)
+		static void TcpServerAcceptClientCallback(mem::delegate& d)
 		{
 			GameLayer& self = *((GameLayer*)d.GetPayload());
 			self._tcp_server->Accept(true);
@@ -626,7 +626,7 @@ namespace np::app
 				(*c)->Close();
 		}
 
-		static void ClientConnectToTcpServerCallback(mem::Delegate& d)
+		static void ClientConnectToTcpServerCallback(mem::delegate& d)
 		{
 			GameLayer& self = *((GameLayer*)d.GetPayload());
 			mem::sptr<net::Socket> client = net::Socket::Create(self._network_context);
@@ -844,7 +844,7 @@ namespace np::app
 							msg.header.type = net::MessageType::Text;
 							msg.body = mem::create_sptr<net::TextMessageBody>(_services->GetAllocator());
 							net::TextMessageBody& msg_body = (net::TextMessageBody&)*msg.body;
-							msg_body.content = "Hello TCP Server!\n\t- tcp client: " + to_str((siz)mem::AddressOf(**c)) + " <3";
+							msg_body.content = "Hello TCP Server!\n\t- tcp client: " + to_str((siz)mem::address_of(**c)) + " <3";
 							msg.header.bodySize = msg_body.content.size();
 							(*c)->Send(msg);
 						}
@@ -855,7 +855,7 @@ namespace np::app
 						msg.body = mem::create_sptr<net::TextMessageBody>(_services->GetAllocator());
 						net::TextMessageBody& msg_body = (net::TextMessageBody&)*msg.body;
 						msg_body.content =
-							"Hello UDP Server!\n\t- udp client: " + to_str((siz)mem::AddressOf(*_udp_client)) + " <3";
+							"Hello UDP Server!\n\t- udp client: " + to_str((siz)mem::address_of(*_udp_client)) + " <3";
 						msg.header.bodySize = msg_body.content.size();
 						_udp_client->SendTo(msg, net::Ipv4{127, 0, 0, 1}, 54555);
 					}
@@ -903,7 +903,7 @@ namespace np::app
 			Application(Application::Properties{"My Game App"}, services),
 			_game_layer(services, _window_layer)
 		{
-			PushLayer(mem::AddressOf(_game_layer));
+			PushLayer(mem::address_of(_game_layer));
 		}
 
 		void Run(i32 argc, chr** argv) override

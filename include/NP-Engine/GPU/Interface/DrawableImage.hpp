@@ -44,7 +44,7 @@ namespace np::alg
 	private:
 		ImageSubview _image_subview;
 
-		static bl IsOldColor(mem::BlDelegate& d)
+		static bl IsOldColor(mem::delegate_bl& d)
 		{
 			using Relation = FloodFillImage::PointRelation;
 			Payload& payload = *((Payload*)d.GetPayload());
@@ -62,13 +62,13 @@ namespace np::alg
 			return payload.imageSubview->Get(point) == payload.oldColor;
 		}
 
-		static void SetToNewColor(mem::VoidDelegate& d)
+		static void SetToNewColor(mem::delegate_void& d)
 		{
 			Payload& payload = *((Payload*)d.GetPayload());
 			payload.imageSubview->Set(payload.point, payload.newColor);
 		}
 
-		static void GetOutsideEdgePoints(mem::VoidDelegate& d)
+		static void GetOutsideEdgePoints(mem::delegate_void& d)
 		{
 			using Relation = FloodFillImage::PointRelation;
 			Payload& payload = *((Payload*)d.GetPayload());
@@ -86,7 +86,7 @@ namespace np::alg
 			payload.outsideEdgePoints->emplace(point);
 		}
 
-		static void GetEdgePoints(mem::VoidDelegate& d)
+		static void GetEdgePoints(mem::delegate_void& d)
 		{
 			Payload& payload = *((Payload*)d.GetPayload());
 			payload.edgePoints->emplace(payload.point);

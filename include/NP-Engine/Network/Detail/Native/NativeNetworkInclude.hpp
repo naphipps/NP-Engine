@@ -47,14 +47,14 @@ namespace np::net
 		static void PopulateSaddrin(sockaddr_in& saddrin, const Ipv4 ipv4, const ui16 port)
 		{
 			saddrin.sin_family = AF_INET;
-			mem::CopyBytes(&saddrin.sin_addr.s_addr, ipv4.bytes.data(), ipv4.bytes.size());
+			mem::copy_bytes(&saddrin.sin_addr.s_addr, ipv4.bytes.data(), ipv4.bytes.size());
 			saddrin.sin_port = htons(port);
 		}
 
 		static void PopulateSaddrin(sockaddr_in6& saddrin, const Ipv6 ipv6, const ui16 port)
 		{
 			saddrin.sin6_family = AF_INET6;
-			mem::CopyBytes(&saddrin.sin6_addr.s6_addr, ipv6.shorts.data(), ipv6.shorts.size() * sizeof(ui16));
+			mem::copy_bytes(&saddrin.sin6_addr.s6_addr, ipv6.shorts.data(), ipv6.shorts.size() * sizeof(ui16));
 			saddrin.sin6_port = htons(port);
 		}
 	} // namespace __detail
@@ -83,14 +83,14 @@ namespace np::net
 	static void PopulateHost(const sockaddr_in& saddrin, Host& host)
 	{
 		Ipv4 ipv4;
-		mem::CopyBytes(ipv4.bytes.data(), &saddrin.sin_addr.s_addr, ipv4.bytes.size());
+		mem::copy_bytes(ipv4.bytes.data(), &saddrin.sin_addr.s_addr, ipv4.bytes.size());
 		host.ipv4s.emplace(ipv4, ntohs(saddrin.sin_port));
 	}
 
 	static void PopulateHost(const sockaddr_in6& saddrin, Host& host)
 	{
 		Ipv6 ipv6;
-		mem::CopyBytes(ipv6.shorts.data(), &saddrin.sin6_addr.s6_addr, ipv6.shorts.size() * sizeof(ui16));
+		mem::copy_bytes(ipv6.shorts.data(), &saddrin.sin6_addr.s6_addr, ipv6.shorts.size() * sizeof(ui16));
 		host.ipv6s.emplace(ipv6, ntohs(saddrin.sin6_port));
 	}
 } // namespace np::net

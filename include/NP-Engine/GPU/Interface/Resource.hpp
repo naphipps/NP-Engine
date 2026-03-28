@@ -16,7 +16,7 @@
 
 namespace np::gpu
 {
-	class ResourceType : public Enum<ui32>
+	class ResourceType : public enm_ui32
 	{
 	public:
 		constexpr static ui32 View = BIT(0);
@@ -24,13 +24,13 @@ namespace np::gpu
 		constexpr static ui32 Image = BIT(2); //sampled, storage, input, combined-sampler?
 		constexpr static ui32 Sampler = BIT(3); //combined-image?
 
-		ResourceType(ui32 value): Enum<ui32>(value) {}
+		ResourceType(ui32 value): enm_ui32(value) {}
 	};
 
-	class ResourceUsage : public Enum<ui32>
+	class ResourceUsage : public enm_ui32
 	{
 	public:
-		ResourceUsage(ui32 value): Enum<ui32>(value) {}
+		ResourceUsage(ui32 value): enm_ui32(value) {}
 	};
 
 	struct Resource : public DetailObject
@@ -45,7 +45,7 @@ namespace np::gpu
 		virtual ~ResourceView() = default;
 	};
 
-	class ResourceOperation : public Enum<ui32>
+	class ResourceOperation : public enm_ui32
 	{
 	public:
 		constexpr static ui32 Load = BIT(0);
@@ -54,7 +54,7 @@ namespace np::gpu
 		constexpr static ui32 Clear = BIT(2);
 		constexpr static ui32 DontCare = BIT(3);
 
-		ResourceOperation(ui32 value): Enum<ui32>(value) {}
+		ResourceOperation(ui32 value): enm_ui32(value) {}
 	};
 
 	struct ResourceDescription

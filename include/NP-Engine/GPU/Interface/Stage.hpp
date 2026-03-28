@@ -11,7 +11,7 @@
 
 namespace np::gpu
 {
-	class Stage : public Enum<ui32>
+	class Stage : public enm_ui32
 	{
 	public:
 		constexpr static ui32 Top = BIT(0);
@@ -29,7 +29,7 @@ namespace np::gpu
 		constexpr static ui32 Transfer = BIT(10);
 		constexpr static ui32 Bottom = BIT(11);
 
-		Stage(ui32 value): Enum<ui32>(value) {}
+		Stage(ui32 value): enm_ui32(value) {}
 	};
 } //namespace np::gpu
 

@@ -45,12 +45,12 @@ namespace np::gpu
 		Access dstAccess = Access::None; //how consumer subpass will access attachments
 	};
 
-	class SubpassUsage : public Enum<ui32>
+	class SubpassUsage : public enm_ui32
 	{
 	public:
 		constexpr static ui32 HasSecondary = BIT(0);
 
-		SubpassUsage(ui32 value): Enum<ui32>(value) {}
+		SubpassUsage(ui32 value): enm_ui32(value) {}
 	};
 
 	struct RenderPass : public DetailObject //TODO: rename to "Renderpass"

@@ -4,8 +4,8 @@
 //
 //##===----------------------------------------------------------------------===##//
 
-#ifndef NP_ENGINE_DELEGATE_HPP
-#define NP_ENGINE_DELEGATE_HPP
+#ifndef NP_ENGINE_MEM_DELEGATE_HPP
+#define NP_ENGINE_MEM_DELEGATE_HPP
 
 #include <utility>
 #include <type_traits>
@@ -14,32 +14,32 @@
 
 namespace np::mem
 {
-	template <typename R>
-	class DelegateTemplate
+	template <typename R = void>
+	class delegate_template
 	{
 	public:
-		using Callback = R (*)(DelegateTemplate<R>&);
+		using callback = R(*)(delegate_template<R>&);
 
 	protected:
 		siz _id;
-		Callback _callback;
+		callback _callback;
 		void* _payload;
 
 	public:
-		DelegateTemplate(): _id(-1), _callback(nullptr), _payload(nullptr) {}
+		delegate_template(): _id(SIZ_MAX), _callback(nullptr), _payload(nullptr) {}
 
-		DelegateTemplate(const DelegateTemplate<R>& other): _id(other._id), _callback(other._callback), _payload(other._payload)
+		delegate_template(const delegate_template<R>& other): _id(other._id), _callback(other._callback), _payload(other._payload)
 		{}
 
-		DelegateTemplate(DelegateTemplate<R>&& other) noexcept:
+		delegate_template(delegate_template<R>&& other) noexcept:
 			_id(::std::move(other._id)),
 			_callback(::std::move(other._callback)),
 			_payload(::std::move(other._payload))
 		{}
 
-		virtual ~DelegateTemplate() {}
+		virtual ~delegate_template() {}
 
-		DelegateTemplate<R>& operator=(const DelegateTemplate<R>& other)
+		virtual delegate_template<R>& operator=(const delegate_template<R>& other)
 		{
 			_id = other._id;
 			_callback = other._callback;
@@ -47,7 +47,7 @@ namespace np::mem
 			return *this;
 		}
 
-		DelegateTemplate<R>& operator=(DelegateTemplate<R>&& other) noexcept
+		virtual delegate_template<R>& operator=(delegate_template<R>&& other) noexcept
 		{
 			_id = ::std::move(other._id);
 			_callback = ::std::move(other._callback);
@@ -55,29 +55,59 @@ namespace np::mem
 			return *this;
 		}
 
-		virtual void SetId(siz id)
+		virtual void set_id(siz id)
 		{
 			_id = id;
 		}
 
-		virtual siz GetId() const
+		virtual void SetId(siz id)
+		{
+			set_id(id);
+		}
+
+		virtual siz get_id() const
 		{
 			return _id;
 		}
 
-		virtual void SetCallback(Callback callback)
+		virtual siz GetId() const
 		{
-			_callback = callback;
+			return get_id();
 		}
 
-		virtual Callback GetCallback() const
+		virtual void set_callback(callback c)
+		{
+			_callback = c;
+		}
+
+		virtual void SetCallback(callback c)
+		{
+			set_callback(c);
+		}
+
+		virtual callback get_callback() const
 		{
 			return _callback;
 		}
 
-		virtual void SetPayload(void* payload)
+		virtual callback GetCallback() const
+		{
+			return _callback;
+		}
+
+		virtual void set_payload(void* payload)
 		{
 			_payload = payload;
+		}
+
+		virtual void SetPayload(void* payload)
+		{
+			set_payload(payload);
+		}
+
+		virtual void* get_payload() const
+		{
+			return _payload;
 		}
 
 		virtual void* GetPayload() const
@@ -91,35 +121,28 @@ namespace np::mem
 			{
 				if (_callback)
 					_callback(*this);
-
-				return;
 			}
 			else
 			{
-				R r;
-
-				if (_callback)
-					r = _callback(*this);
-
-				return r;
+				return _callback ? _callback(*this) : R{};
 			}
 		}
 	};
 
-	using Delegate = DelegateTemplate<void>;
-	using VoidDelegate = DelegateTemplate<void>;
-	using BlDelegate = DelegateTemplate<bl>;
-	using Ui8Delegate = DelegateTemplate<ui8>;
-	using Ui16Delegate = DelegateTemplate<ui16>;
-	using Ui32Delegate = DelegateTemplate<ui32>;
-	using Ui64Delegate = DelegateTemplate<ui64>;
-	using I8Delegate = DelegateTemplate<i8>;
-	using I16Delegate = DelegateTemplate<i16>;
-	using I32Delegate = DelegateTemplate<i32>;
-	using I64Delegate = DelegateTemplate<i64>;
-	using FltDelegate = DelegateTemplate<flt>;
-	using DblDelegate = DelegateTemplate<dbl>;
-	using SizDelegate = DelegateTemplate<siz>;
+	using delegate = delegate_template<>;
+	using delegate_void = delegate_template<void>;
+	using delegate_bl = delegate_template<bl>;
+	using delegate_ui8 = delegate_template<ui8>;
+	using delegate_ui16 = delegate_template<ui16>;
+	using delegate_ui32 = delegate_template<ui32>;
+	using delegate_ui64 = delegate_template<ui64>;
+	using delegate_i8 = delegate_template<i8>;
+	using delegate_i16 = delegate_template<i16>;
+	using delegate_i32 = delegate_template<i32>;
+	using delegate_i64 = delegate_template<i64>;
+	using delegate_flt = delegate_template<flt>;
+	using delegate_dbl = delegate_template<dbl>;
+	using delegate_siz = delegate_template<siz>;
 } // namespace np::mem
 
-#endif /* NP_ENGINE_DELEGATE_HPP */
+#endif /* NP_ENGINE_MEM_DELEGATE_HPP */

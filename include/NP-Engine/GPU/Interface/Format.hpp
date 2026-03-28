@@ -11,7 +11,7 @@
 
 namespace np::gpu
 {
-	class Format : public Enum<ui32>
+	class Format : public enm_ui32
 	{
 	protected:
 		//store component count in bits [16, 23]
@@ -33,39 +33,39 @@ namespace np::gpu
 		constexpr static ui32 Unsigned = BIT(14);
 		constexpr static ui32 GammaCorrection = BIT(15);
 
-		Format(ui32 value, ui32 component_count, ui32 component_size): Enum<ui32>(value)
+		Format(ui32 value, ui32 component_count, ui32 component_size): enm_ui32(value)
 		{
 			SetComponentCount(component_count);
 			SetComponentSize(component_size);
 		}
 
-		Format(ui32 value): Enum<ui32>(value) {}
+		Format(ui32 value): enm_ui32(value) {}
 
-		virtual ui32 GetComponentSize() const
+		ui32 GetComponentSize() const
 		{
-			return GetEmbeddedValue(ComponentSizeMask, ComponentSizeShift);
+			return get_embedded_value(ComponentSizeMask, ComponentSizeShift);
 		}
 
 		/*
 			only accepting values expressed by eight bits
 			common values: sizeof(ui8), sizeof(ui16), sizeof(ui32), sizeof(ui64), sizeof(siz), sizeof(flt), sizeof(dbl)
 		*/
-		virtual void SetComponentSize(ui32 size)
+		void SetComponentSize(ui32 size)
 		{
-			SetEmbeddedValue(size, ComponentSizeMask, ComponentSizeShift);
+			set_embedded_value(size, ComponentSizeMask, ComponentSizeShift);
 		}
 
-		virtual ui32 GetComponentCount() const
+		ui32 GetComponentCount() const
 		{
-			return GetEmbeddedValue(ComponentCountMask, ComponentCountShift);
+			return get_embedded_value(ComponentCountMask, ComponentCountShift);
 		}
 
 		/*
 			only accepting values expressed by eight bits
 		*/
-		virtual void SetComponentCount(ui32 count)
+		void SetComponentCount(ui32 count)
 		{
-			SetEmbeddedValue(count, ComponentCountMask, ComponentCountShift);
+			set_embedded_value(count, ComponentCountMask, ComponentCountShift);
 		}
 	};
 

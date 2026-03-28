@@ -4,8 +4,8 @@
 //
 //##===----------------------------------------------------------------------===##//
 
-#ifndef NP_ENGINE_FALLBACK_ALLOCATOR_HHPP
-#define NP_ENGINE_FALLBACK_ALLOCATOR_HHPP
+#ifndef NP_ENGINE_MEM_FALLBACK_ALLOCATOR_HHPP
+#define NP_ENGINE_MEM_FALLBACK_ALLOCATOR_HHPP
 
 #include "NP-Engine/Foundation/Foundation.hpp"
 #include "NP-Engine/Primitive/Primitive.hpp"
@@ -15,85 +15,87 @@
 
 namespace np::mem
 {
-	class FallbackAllocator : public Allocator
+	class fallback_allocator : public allocator
 	{
-	private:
-		Allocator* _primary;
-		Allocator* _fallback;
+	protected:
+		allocator* _primary;
+		allocator* _fallback;
 
-		virtual Block Reallocate(void* old_ptr, siz new_size) override
+	public:
+		fallback_allocator(allocator& primary, allocator& fallback):
+			_primary(address_of(primary)),
+			_fallback(address_of(fallback))
+		{}
+
+		virtual ~fallback_allocator() = default;
+
+		virtual allocator& get_primary()
+		{
+			return *_primary;
+		}
+
+		virtual const allocator& get_primary() const
+		{
+			return *_primary;
+		}
+
+		virtual allocator& get_fallback()
+		{
+			return *_fallback;
+		}
+
+		virtual const allocator& get_fallback() const
+		{
+			return *_fallback;
+		}
+
+		virtual bl contains(const block& b) override
+		{
+			return _primary->contains(b) || _fallback->contains(b);
+		}
+
+		virtual bl contains(const void* ptr) override
+		{
+			return _primary->contains(ptr) || _fallback->contains(ptr);
+		}
+
+		virtual block allocate(siz size, siz alignment) override
+		{
+			block b = _primary->allocate(size, alignment);
+			return b.is_valid() ? b : _fallback->allocate(size, alignment);
+		}
+
+		virtual block reallocate(block& b_, siz size, siz alignment) override
+		{
+			block b = allocate(size, alignment);
+			if (contains(b_))
+			{
+				const siz byte_count = b.size < b_.size ? b.size : b_.size;
+				copy_bytes(b.begin(), b_.begin(), byte_count);
+				deallocate(b_);
+				b_.invalidate();
+			}
+			return b;
+		}
+
+		/*
+			this value is meaningless from fallback_allocator
+		*/
+		virtual block reallocate(void* ptr, siz size, siz alignment) override
 		{
 			return {};
 		}
 
-	public:
-		FallbackAllocator(Allocator& primary, Allocator& fallback):
-			_primary(mem::AddressOf(primary)),
-			_fallback(mem::AddressOf(fallback))
-		{}
-
-		virtual Allocator& GetPrimary()
+		virtual bl deallocate(block& b) override
 		{
-			return *_primary;
+			return _primary->contains(b) ? _primary->deallocate(b) : _fallback->deallocate(b);
 		}
 
-		virtual const Allocator& GetPrimary() const
+		virtual bl deallocate(void* ptr) override
 		{
-			return *_primary;
-		}
-
-		virtual Allocator& GetFallback()
-		{
-			return *_fallback;
-		}
-
-		virtual const Allocator& GetFallback() const
-		{
-			return *_fallback;
-		}
-
-		virtual bl Contains(const Block& block) override
-		{
-			return _primary->Contains(block) || _fallback->Contains(block);
-		}
-
-		virtual bl Contains(const void* ptr) override
-		{
-			return _primary->Contains(ptr) || _fallback->Contains(ptr);
-		}
-
-		virtual Block Allocate(siz size) override
-		{
-			Block block = _primary->Allocate(size);
-			if (!block.IsValid())
-				block = _fallback->Allocate(size);
-
-			return block;
-		}
-
-		virtual Block Reallocate(Block& old_block, siz new_size) override
-		{
-			Block new_block = Allocate(new_size);
-			if (Contains(old_block))
-			{
-				CopyBytes(new_block.Begin(), old_block.Begin(), old_block.size);
-				Deallocate(old_block);
-				old_block.Invalidate();
-			}
-
-			return new_block;
-		}
-
-		virtual bl Deallocate(Block& block) override
-		{
-			return _primary->Contains(block) ? _primary->Contains(block) : _fallback->Deallocate(block);
-		}
-
-		bl Deallocate(void* ptr) override
-		{
-			return _primary->Contains(ptr) ? _primary->Contains(ptr) : _fallback->Deallocate(ptr);
+			return _primary->contains(ptr) ? _primary->deallocate(ptr) : _fallback->deallocate(ptr);
 		}
 	};
 } // namespace np::mem
 
-#endif /* NP_ENGINE_FALLBACK_ALLOCATOR_HHPP */
+#endif /* NP_ENGINE_MEM_FALLBACK_ALLOCATOR_HHPP */

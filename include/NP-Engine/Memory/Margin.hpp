@@ -4,46 +4,55 @@
 //
 //##===----------------------------------------------------------------------===##//
 
-#ifndef NP_ENGINE_MARGIN_HPP
-#define NP_ENGINE_MARGIN_HPP
+#ifndef NP_ENGINE_MEM_MARGIN_HPP
+#define NP_ENGINE_MEM_MARGIN_HPP
+
+#ifndef NP_ENGINE_MEM_ATTEMPT_MARGIN_EXTRACTION_COUNT
+	#define NP_ENGINE_MEM_ATTEMPT_MARGIN_EXTRACTION_COUNT 5 //this is essentially treated as a maximum multiple of DEFAULT_ALIGNMENT
+#endif
 
 #include "NP-Engine/Primitive/Primitive.hpp"
 
-#include "Allocator.hpp"
+#include "Alignment.hpp"
 
 namespace np::mem::__detail
 {
-	class Margin
+	class margin : public enm_siz
 	{
-	private:
-		NP_ENGINE_STATIC_ASSERT(ALIGNMENT % 2 == 0,
-								"This implementation requires an even ALIGNMENT because we use that last bit.");
-
-		siz _size_and_is_allocated = 0;
-
 	public:
-		siz GetSize() const
+		constexpr static siz allocated = BIT(0);
+		
+		margin(siz size, bl is_allocated) : enm_siz(zero)
 		{
-			return _size_and_is_allocated & ~ALIGNMENT_MINUS_ONE;
+			set_size(size);
+			set_is_allocated(is_allocated);
 		}
 
-		bl IsAllocated() const
+		siz get_size() const
 		{
-			return (_size_and_is_allocated & ALIGNMENT_MINUS_ONE) == 1;
+			return _value & ~allocated;
 		}
 
-		void SetSize(siz size)
+		/*
+			this will truncate bit 0 if we are not allocated
+		*/
+		void set_size(siz size)
 		{
-			_size_and_is_allocated = (size & ~ALIGNMENT_MINUS_ONE) | (_size_and_is_allocated & ALIGNMENT_MINUS_ONE);
+			_value = is_allocated() ? size | allocated : size & ~allocated;
 		}
 
-		void SetIsAllocated(bl is_allocated)
+		bl is_allocated() const
 		{
-			_size_and_is_allocated = GetSize() | ((is_allocated ? 1 : 0) & ALIGNMENT_MINUS_ONE);
+			return contains(allocated);
+		}
+
+		void set_is_allocated(bl is_allocated)
+		{
+			_value = is_allocated ? _value | allocated : _value & ~allocated;
 		}
 	};
 
-	const static siz MARGIN_SIZE = CalcAlignedSize(sizeof(Margin));
+	NP_ENGINE_STATIC_ASSERT(sizeof(margin) == DEFAULT_ALIGNMENT, "size of margin must equal alignment -- we take advantage of this");
 } // namespace np::mem::__detail
 
-#endif /* NP_ENGINE_MARGIN_HPP */
+#endif /* NP_ENGINE_MEM_MARGIN_HPP */
