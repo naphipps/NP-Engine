@@ -904,6 +904,17 @@ namespace np::noiz
 			for (ui8 i = 0; i < _octave_count; i++)
 			{
 				output += amplitude * CalculateNoiseValue(x * frequency, i * _fractional_increment * frequency);
+
+				/*
+					TODO: ^ improvement / alternative to the above:
+						output += amplitude * CalculateNoiseValue((x + i * _fractional_incremenet) * frequency);
+
+					pro: does not use the n+1 dimension of noise
+					con: might not look okay for pushing through the maximum value for flt's, but might not be a problem
+
+					TODO: apply this change to Perlin
+				*/
+
 				denom += amplitude;
 				frequency *= _lacunarity;
 				amplitude *= _persistence;

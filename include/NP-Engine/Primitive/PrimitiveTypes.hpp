@@ -39,6 +39,8 @@
 #define WCHR_MIN WCHAR_MIN
 #define WCHR_MAX WCHAR_MAX
 
+//TODO: add min/max for: chr16, chr32
+
 namespace np
 {
 	using nptr = ::std::nullptr_t;
