@@ -4,8 +4,8 @@
 //
 //##===----------------------------------------------------------------------===##//
 
-#ifndef NP_ENGINE_LOG_HPP
-#define NP_ENGINE_LOG_HPP
+#ifndef NP_ENGINE_NSIT_LOG_HPP
+#define NP_ENGINE_NSIT_LOG_HPP
 
 #include <memory>
 #include <string>
@@ -18,7 +18,7 @@
 
 namespace np::nsit
 {
-	class Log
+	class log
 	{
 	private:
 		static atm_bl _initialized;
@@ -29,7 +29,7 @@ namespace np::nsit
 		static ::std::shared_ptr<::spdlog::sinks::sink> _file_sink;
 
 	public:
-		static inline void Init()
+		static inline void init()
 		{
 			bl expected = false;
 			if (_initialized.compare_exchange_strong(expected, true, mo_release, mo_relaxed))
@@ -39,7 +39,7 @@ namespace np::nsit
 				_stdout_sink = ::std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
 				_stdout_sink->set_pattern(pattern);
 
-				::std::string log_filepath = GetFileLoggerFilePath();
+				::std::string log_filepath = get_file_logger_file_path();
 				_file_sink = ::std::make_shared<spdlog::sinks::basic_file_sink_mt>(log_filepath, true);
 				_file_sink->set_pattern(pattern);
 
@@ -62,29 +62,29 @@ namespace np::nsit
 			}
 		}
 
-		static inline ::std::string GetFileLoggerFilePath()
+		static inline ::std::string get_file_logger_file_path()
 		{
-			return fsys::Append(fsys::GetCurrentPath(), "NP-Engine-Log.log");
+			return fsys::append(fsys::get_current_path(), "NP-Engine-Log.log");
 		}
 
-		static inline ::std::shared_ptr<spdlog::logger>& GetFileLogger()
+		static inline ::std::shared_ptr<spdlog::logger>& get_file_logger()
 		{
-			Init();
+			init();
 			return _file_logger;
 		}
 
-		static inline ::std::shared_ptr<spdlog::logger>& GetStdoutLogger()
+		static inline ::std::shared_ptr<spdlog::logger>& get_stdout_logger()
 		{
-			Init();
+			init();
 			return _stdout_logger;
 		}
 
-		static inline ::std::shared_ptr<spdlog::logger>& GetLogger()
+		static inline ::std::shared_ptr<spdlog::logger>& get_logger()
 		{
-			Init();
+			init();
 			return _logger;
 		}
 	};
 } // namespace np::nsit
 
-#endif /* NP_ENGINE_LOG_HPP */
+#endif /* NP_ENGINE_NSIT_LOG_HPP */

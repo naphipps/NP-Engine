@@ -50,17 +50,17 @@ namespace np::gpu::__detail
 
 			str cmd(NP_ENGINE_VULKAN_GLSLC);
 			cmd += " -fshader-stage=" + _stage.GetCompileName();
-			cmd += " " + fsys::Append(".", _filename);
-			cmd += " -o " + fsys::Append(".", _filename_spv);
+			cmd += " " + fsys::append(".", _filename);
+			cmd += " -o " + fsys::append(".", _filename_spv);
 
-			if (fsys::Exists(_filename))
+			if (fsys::exists(_filename))
 			{
 				NP_ENGINE_LOG_INFO("Compiling: '" + cmd + "'");
-				sys::Run(cmd);
+				sys::run(cmd);
 			}
 			else
 			{
-				NP_ENGINE_LOG_ERROR("Cannot find: '" + _filename + "'\n" + sys::GetDefaultWorkingDir());
+				NP_ENGINE_LOG_ERROR("Cannot find: '" + _filename + "'\n" + sys::get_default_working_directory());
 			}
 		}
 

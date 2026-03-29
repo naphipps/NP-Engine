@@ -4,8 +4,8 @@
 //
 //##===----------------------------------------------------------------------===##//
 
-#ifndef NP_ENGINE_THREAD_HPP
-#define NP_ENGINE_THREAD_HPP
+#ifndef NP_ENGINE_THR_THREAD_HPP
+#define NP_ENGINE_THR_THREAD_HPP
 
 #include <utility>
 #include <thread>
@@ -16,94 +16,92 @@
 #include "NP-Engine/Memory/Memory.hpp"
 #include "NP-Engine/Time/Time.hpp"
 
-// TODO: snake case this layer
-
 namespace np::thr
 {
-	class Thread
+	class thread
 	{
 	public:
-		using Id = ::std::thread::id;
+		using id = ::std::thread::id;
 
 		constexpr static siz ALIGNMENT = mem::DEFAULT_ALIGNMENT;
 
-		static inline ui32 HardwareConcurrency() noexcept
+		static inline ui32 hardware_concurrency() noexcept
 		{
 			return ::std::thread::hardware_concurrency();
 		}
 
-	private:
-		using StdThreadBlock = mem::sized_block<sizeof(::std::thread), ALIGNMENT>;
-		mutexed_wrapper<StdThreadBlock> _thread_block;
+	protected:
+		using std_thread_block = mem::sized_block<sizeof(::std::thread), ALIGNMENT>;
+		mutexed_wrapper<std_thread_block> _thread_block;
 
-		void Zeroize(StdThreadBlock& thread_block)
+		void zeroize(std_thread_block& thread_block)
 		{
 			mem::block b = thread_block;
 			b.zeroize();
 		}
 
-		bl HasThread(StdThreadBlock& thread_block) const
+		bl has_thread(std_thread_block& thread_block) const
 		{
 			bl has_thread = false;
-			for (siz i = 0; i < StdThreadBlock::SIZE && !has_thread; i++)
+			for (siz i = 0; i < std_thread_block::SIZE && !has_thread; i++)
 				has_thread |= thread_block.allocation[i] != 0;
 			return has_thread;
 		}
 
-		::std::thread* GetThread(StdThreadBlock& thread_block) const
+		::std::thread* get_thread(std_thread_block& thread_block) const
 		{
-			return HasThread(thread_block) ? (::std::thread*)thread_block.allocation : nullptr;
+			return has_thread(thread_block) ? (::std::thread*)thread_block.allocation : nullptr;
 		}
 
 	public:
-		Thread()
+		thread()
 		{
-			Zeroize(*_thread_block.get_access());
+			zeroize(*_thread_block.get_access());
 		}
 
-		~Thread()
+		~thread()
 		{
-			Join();
+			join();
 		}
 
 		template <typename... Args>
-		void Run(Args&&... args)
+		void run(Args&&... args)
 		{
-			Join();
+			join();
 			auto thread_access = _thread_block.get_access();
 			mem::construct<::std::thread>(*thread_access, ::std::forward<Args>(args)...);
 		}
 
-		void Join()
+		void join()
 		{
 			auto thread_access = _thread_block.get_access();
-			::std::thread* thread = GetThread(*thread_access);
+			::std::thread* thread = get_thread(*thread_access);
 			if (thread)
 			{
 				thread->join();
 				mem::destruct<::std::thread>(thread);
-				Zeroize(*thread_access);
+				zeroize(*thread_access);
 			}
 		}
 
-		bl SetAffinity(siz core_number);
+		bl set_affinity(siz core_number);
 
-		Id GetId()
+		id get_id()
 		{
 			auto thread_access = _thread_block.get_access();
-			::std::thread* thread = GetThread(*thread_access);
-			return thread ? thread->get_id() : Id{};
+			::std::thread* thread = get_thread(*thread_access);
+			return thread ? thread->get_id() : id{};
 		}
 	};
 
-	namespace ThisThread
+	namespace this_thread
 	{
 		using namespace ::std::this_thread;
 
-		bl SetAffinity(siz core_number);
-	} // namespace ThisThread
+		bl set_affinity(siz core_number);
+	} // namespace this_thread
 
-	using ThreadPool = mem::object_pool<Thread, Thread::ALIGNMENT>;
+	using thread_pool = mem::object_pool<thread, thread::ALIGNMENT>;
 } // namespace np::thr
 
-#endif /* NP_ENGINE_THREAD_HPP */
+#endif /* NP_ENGINE_THR_THREAD_HPP */

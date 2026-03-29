@@ -52,7 +52,7 @@ namespace np::jsys
 		ResetWakeCounter();
 		_sleep_condition = system.GetJobWorkerSleepCondition();
 		_thread = system.CreateThread();
-		_thread->Run(WorkProcedure, WorkPayload{this, &system});
-		_thread->SetAffinity(system.GetThreadAffinity(_id));
+		_thread->run(WorkProcedure, WorkPayload{this, &system});
+		_thread->set_affinity(system.GetThreadAffinity(_id));
 	}
 } // namespace np::jsys

@@ -31,7 +31,7 @@ namespace np::win
 		using FocusCallback = void (*)(void* caller, bl focused);
 
 	protected:
-		const thr::Thread::Id _owning_thread_id;
+		const thr::thread::id _owning_thread_id;
 		mem::sptr<srvc::Services> _services;
 		const uid::Uid _id;
 
@@ -63,11 +63,11 @@ namespace np::win
 
 		virtual bl IsOwningThread() const
 		{
-			return _owning_thread_id == thr::ThisThread::get_id();
+			return _owning_thread_id == thr::this_thread::get_id();
 		}
 
 		Window(mem::sptr<srvc::Services> services, uid::Uid id):
-			_owning_thread_id(thr::ThisThread::get_id()),
+			_owning_thread_id(thr::this_thread::get_id()),
 			_services(services),
 			_id(id)
 		{}
@@ -90,7 +90,7 @@ namespace np::win
 			return GetUid() == GetUid();
 		}
 
-		virtual void Update(tim::DblMilliseconds milliseconds) {}
+		virtual void Update(tim::milliseconds milliseconds) {}
 
 		virtual void Close() = 0;
 

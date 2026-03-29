@@ -13,51 +13,59 @@
 
 namespace np::tim
 {
-	using SteadyClock = ::std::chrono::steady_clock;
-	using SteadyTimestamp = ::std::chrono::time_point<SteadyClock>;
+	using steady_clock = ::std::chrono::steady_clock;
+	using steady_timestamp = ::std::chrono::time_point<steady_clock>;
 
 	template <class R, class P>
-	using Duration = ::std::chrono::duration<R, P>;
+	using duration = ::std::chrono::duration<R, P>;
 
 	template <typename R = dbl>
-	using Picoseconds = Duration<R, ::std::pico>;
+	using picoseconds_template = duration<R, ::std::pico>;
 
 	template <typename R = dbl>
-	using Nanoseconds = Duration<R, ::std::nano>;
+	using nanoseconds_template = duration<R, ::std::nano>;
 
 	template <typename R = dbl>
-	using Microseconds = Duration<R, ::std::micro>;
+	using microseconds_template = duration<R, ::std::micro>;
 
 	template <typename R = dbl>
-	using Milliseconds = Duration<R, ::std::milli>;
+	using milliseconds_template = duration<R, ::std::milli>;
 
 	template <typename R = dbl>
-	using Seconds = Duration<R, ::std::ratio<1>>;
+	using seconds_template = duration<R, ::std::ratio<1>>;
 
 	template <typename R = dbl>
-	using Minutes = Duration<R, ::std::ratio<60>>;
+	using minutes_template = duration<R, ::std::ratio<60>>;
 
 	template <typename R = dbl>
-	using Hours = Duration<R, ::std::ratio<3600>>;
+	using hours_template = duration<R, ::std::ratio<3600>>;
 
-	using DblPicoseconds = Picoseconds<dbl>;
-	using DblNanoseoncds = Nanoseconds<dbl>;
-	using DblMicroseconds = Microseconds<dbl>;
-	using DblMilliseconds = Milliseconds<dbl>;
-	using DblSeconds = Seconds<dbl>;
-	using DblMinutes = Minutes<dbl>;
-	using DblHours = Hours<dbl>;
+	using picoseconds = picoseconds_template<>;
+	using nanoseconds = nanoseconds_template<>;
+	using microseconds = microseconds_template<>;
+	using milliseconds = milliseconds_template<>;
+	using seconds = seconds_template<>;
+	using minutes = minutes_template<>;
+	using hours = hours_template<>;
 
-	using Ui64Picoseconds = Picoseconds<ui64>;
-	using Ui64Nanoseoncds = Nanoseconds<ui64>;
-	using Ui64Microseconds = Microseconds<ui64>;
-	using Ui64Milliseconds = Milliseconds<ui64>;
-	using Ui64Seconds = Seconds<ui64>;
-	using Ui64Minutes = Minutes<ui64>;
-	using Ui64Hours = Hours<ui64>;
+	using picoseconds_dbl = picoseconds_template<dbl>;
+	using nanoseconds_dbl = nanoseconds_template<dbl>;
+	using microseconds_dbl = microseconds_template<dbl>;
+	using milliseconds_dbl = milliseconds_template<dbl>;
+	using seconds_dbl = seconds_template<dbl>;
+	using minutes_dbl = minutes_template<dbl>;
+	using hours_dbl = hours_template<dbl>;
+
+	using picoseconds_ui64 = picoseconds_template<ui64>;
+	using nanoseconds_ui64 = nanoseconds_template<ui64>;
+	using microseconds_ui64 = microseconds_template<ui64>;
+	using milliseconds_ui64 = milliseconds_template<ui64>;
+	using seconds_ui64 = seconds_template<ui64>;
+	using minutes_ui64 = minutes_template<ui64>;
+	using hours_ui64 = hours_template<ui64>;
 
 	template <class T, class R, class P>
-	constexpr T DurationCast(const Duration<R, P>& d)
+	constexpr T duration_cast(const duration<R, P>& d)
 	{
 		return ::std::chrono::duration_cast<T, R, P>(d);
 	}

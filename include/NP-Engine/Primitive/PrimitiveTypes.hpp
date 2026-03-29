@@ -29,6 +29,16 @@
 #define I64_MIN INT64_MIN
 #define I64_MAX INT64_MAX
 
+//FLT_MIN and FLT_MAX already defined
+//DBL_MIN and DBL_MAX already defined
+
+#define CHR_MIN CHAR_MIN
+#define CHR_MAX CHAR_MAX
+#define UCHR_MIN 0
+#define UCHR_MAX UCHAR_MAX
+#define WCHR_MIN WCHAR_MIN
+#define WCHR_MAX WCHAR_MAX
+
 namespace np
 {
 	using nptr = ::std::nullptr_t;

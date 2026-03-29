@@ -116,7 +116,7 @@ namespace np::app
 		str _model_texture_filename;
 		//mem::sptr<gpu::Model> _model;
 		mem::sptr<uid::UidHandle> _model_handle;
-		tim::SteadyTimestamp _start_timestamp;
+		tim::steady_timestamp _start_timestamp;
 		flt _rate = 5.f; // units per second
 
 		mem::sptr<net::Context> _network_context;
@@ -129,7 +129,7 @@ namespace np::app
 		mem::sptr<net::Socket> _udp_server;
 		mem::sptr<net::Socket> _udp_client;
 
-		tim::SteadyTimestamp _clients_send_msg_timestamp;
+		tim::steady_timestamp _clients_send_msg_timestamp;
 
 		static void LogSubmitKeyState(void*, const nput::KeyCodeState&)
 		{
@@ -334,9 +334,9 @@ namespace np::app
 			scene->frameContext = gpu::FrameContext::Create(scene->device, {scene->queue->GetDeviceQueueFamily()});
 
 			scene->vertexShader = gpu::Shader::Create(scene->device, gpu::Stage::Vertex,
-													  fsys::Append("Vulkan", "shaders", "vertex.glsl"), "main");
+													  fsys::append("Vulkan", "shaders", "vertex.glsl"), "main");
 			scene->fragmentShader = gpu::Shader::Create(scene->device, gpu::Stage::Fragment,
-														fsys::Append("Vulkan", "shaders", "fragment.glsl"), "main");
+														fsys::append("Vulkan", "shaders", "fragment.glsl"), "main");
 
 			//this is where we would consolodate our descriptions
 
@@ -415,7 +415,7 @@ namespace np::app
 
 		bl _mouse_is_dragging = false;
 
-		void DigestInput(tim::DblMilliseconds time_delta)
+		void DigestInput(tim::milliseconds time_delta)
 		{
 			using Key = nput::KeyCode;
 			using Mouse = nput::MouseCode;
@@ -656,15 +656,13 @@ namespace np::app
 			_window_id_handle(_services->GetUidSystem().CreateUid()),
 			_window(_window_layer.Create(win::DetailType::Glfw, _services->GetUidSystem().GetUid(_window_id_handle))),
 			_scene(nullptr),
-			_model_filename(
-				fsys::Append(fsys::Append(fsys::Append(NP_ENGINE_WORKING_DIR, "test"), "assets"), "viking_room.obj")),
-			_model_texture_filename(
-				fsys::Append(fsys::Append(fsys::Append(NP_ENGINE_WORKING_DIR, "test"), "assets"), "viking_room.png")),
+			_model_filename(fsys::append(NP_ENGINE_WORKING_DIR, "test", "assets", "viking_room.obj")),
+			_model_texture_filename(fsys::append(NP_ENGINE_WORKING_DIR, "test", "assets", "viking_room.png")),
 			//_model(mem::create_sptr<gpu::Model>(_services->GetAllocator(), _model_filename, _model_texture_filename, true)),
 			_model_handle(nullptr),
-			_start_timestamp(tim::SteadyClock::now()),
+			_start_timestamp(tim::steady_clock::now()),
 			_network_context(net::Context::Create(net::DetailType::Native, _services)),
-			_clients_send_msg_timestamp(tim::SteadyClock::now())
+			_clients_send_msg_timestamp(tim::steady_clock::now())
 		{
 			net::Init(net::DetailType::Native);
 
@@ -743,7 +741,7 @@ namespace np::app
 			net::Terminate(net::DetailType::Native);
 		}
 
-		void Update(tim::DblMilliseconds time_delta) override
+		void Update(tim::milliseconds time_delta) override
 		{
 			DigestInput(time_delta);
 
@@ -774,7 +772,7 @@ namespace np::app
 						{
 							net::TextMessageBody& text = (net::TextMessageBody&)*msg.body;
 							::std::stringstream ss;
-							ss << thr::ThisThread::get_id();
+							ss << thr::this_thread::get_id();
 							NP_ENGINE_LOG_INFO("Server received(" + str(ss.str()) + "):\n" + text.content);
 							break;
 						}
@@ -786,7 +784,7 @@ namespace np::app
 			}
 			{
 				::std::stringstream ss;
-				ss << thr::ThisThread::get_id();
+				ss << thr::this_thread::get_id();
 
 				net::MessageQueue& inbox = _udp_server->GetInbox();
 				inbox.ToggleState();
@@ -832,8 +830,8 @@ namespace np::app
 				}
 			}
 			{
-				tim::SteadyTimestamp now = tim::SteadyClock::now();
-				if (now - _clients_send_msg_timestamp > tim::DblMilliseconds(1000))
+				tim::steady_timestamp now = tim::steady_clock::now();
+				if (now - _clients_send_msg_timestamp > tim::milliseconds(1000))
 				{
 					_clients_send_msg_timestamp = now;
 					{
@@ -895,7 +893,7 @@ namespace np::app
 			jsys::JobSystem& job_system = _services->GetJobSystem();
 			con::vector<jsys::JobWorker>& job_workers = job_system.GetJobWorkers();
 
-			NP_ENGINE_ASSERT(thr::Thread::HardwareConcurrency() >= 4, "NP Engine Test requires at least four cores");
+			NP_ENGINE_ASSERT(thr::thread::hardware_concurrency() >= 4, "NP Engine Test requires at least four cores");
 		}
 
 	public:

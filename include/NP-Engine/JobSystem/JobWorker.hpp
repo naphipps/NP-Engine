@@ -48,7 +48,7 @@ namespace np::jsys
 		siz _id;
 		atm_bl _keep_working;
 		atm_ui8 _wake_counter; //ui8 to keep our values (aka, our decremented results) within range [UI8_MIN, UI8_MAX]
-		mem::sptr<thr::Thread> _thread;
+		mem::sptr<thr::thread> _thread;
 		mem::sptr<condition> _sleep_condition;
 		mutexed_wrapper<con::queue<mem::sptr<Job>>> _immediate_jobs;
 		mutexed_wrapper<con::vector<JobWorker*>> _coworkers;

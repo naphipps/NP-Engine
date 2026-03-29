@@ -4,8 +4,8 @@
 //
 //##===----------------------------------------------------------------------===##//
 
-#ifndef NP_ENGINE_TIMER_HPP
-#define NP_ENGINE_TIMER_HPP
+#ifndef NP_ENGINE_NSIT_TIMER_HPP
+#define NP_ENGINE_NSIT_TIMER_HPP
 
 #include <string>
 
@@ -14,60 +14,60 @@
 
 namespace np::nsit
 {
-	class Timer
+	class timer
 	{
 	protected:
 		::std::string _name;
-		tim::SteadyTimestamp _start_timestamp;
-		tim::SteadyTimestamp _end_timestamp;
+		tim::steady_timestamp _start_timestamp;
+		tim::steady_timestamp _end_timestamp;
 
 	public:
-		Timer(::std::string name = ""): _start_timestamp(tim::SteadyClock::now()), _name(name)
+		timer(::std::string name = ""): _start_timestamp(tim::steady_clock::now()), _name(name)
 		{
 			_end_timestamp = _start_timestamp;
 		}
 
-		virtual void Restart()
+		virtual void restart()
 		{
-			_start_timestamp = tim::SteadyClock::now();
+			_start_timestamp = tim::steady_clock::now();
 			_end_timestamp = _start_timestamp;
 		}
 
-		virtual void Stop()
+		virtual void stop()
 		{
-			_end_timestamp = tim::SteadyClock::now();
+			_end_timestamp = tim::steady_clock::now();
 		}
 
-		tim::SteadyTimestamp GetStartTimestamp()
+		tim::steady_timestamp get_start_timestamp()
 		{
 			return _start_timestamp;
 		}
 
-		tim::SteadyTimestamp GetEndTimestamp()
+		tim::steady_timestamp get_end_timestamp()
 		{
 			return _end_timestamp;
 		}
 
-		void SetName(::std::string name)
+		void set_name(::std::string name)
 		{
 			_name = name;
 		}
 
-		::std::string GetName()
+		::std::string get_name()
 		{
 			return _name;
 		}
 
-		tim::DblMilliseconds GetElapsedMilliseconds()
+		tim::milliseconds get_elapsed_milliseconds()
 		{
 			return _end_timestamp.time_since_epoch() - _start_timestamp.time_since_epoch();
 		}
 
-		tim::DblMilliseconds GetElapsedMicroseconds()
+		tim::milliseconds get_elapsed_microseconds()
 		{
 			return _end_timestamp.time_since_epoch() - _start_timestamp.time_since_epoch();
 		}
 	};
 } // namespace np::nsit
 
-#endif /* NP_ENGINE_TIMER_HPP */
+#endif /* NP_ENGINE_NSIT_TIMER_HPP */

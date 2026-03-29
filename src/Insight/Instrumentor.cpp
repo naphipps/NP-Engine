@@ -8,5 +8,5 @@
 
 namespace np::nsit
 {
-	mutexed_wrapper<Instrumentor::Properties> Instrumentor::_properties;
+	mutexed_wrapper<instrumentor::properties> instrumentor::_properties;
 } // namespace np::nsit

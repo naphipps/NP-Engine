@@ -191,7 +191,7 @@ namespace np::net::__detail
 			}
 			else if (self._keep_receiving.load(mo_acquire))
 			{
-				thr::ThisThread::sleep_for(tim::DblMilliseconds(NP_ENGINE_NETWORK_SOCKET_RECEIVING_SLEEP_DURATION));
+				thr::this_thread::sleep_for(tim::milliseconds(NP_ENGINE_NETWORK_SOCKET_RECEIVING_SLEEP_DURATION));
 				self.SubmitReceivingJob();
 			}
 		}

@@ -8,5 +8,5 @@
 
 namespace np::sys::__detail
 {
-	::std::string InitialWorkingDir;
+	::std::string initial_working_directory;
 } // namespace np::sys::__detail

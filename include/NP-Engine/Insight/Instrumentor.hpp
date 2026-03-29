@@ -4,8 +4,8 @@
 //
 //##===----------------------------------------------------------------------===##//
 
-#ifndef NP_ENGINE_INSTRUMENTOR_HPP
-#define NP_ENGINE_INSTRUMENTOR_HPP
+#ifndef NP_ENGINE_NSIT_INSTRUMENTOR_HPP
+#define NP_ENGINE_NSIT_INSTRUMENTOR_HPP
 
 #include <memory>
 #include <fstream>
@@ -27,148 +27,148 @@
 
 namespace np::nsit
 {
-	class Instrumentor
+	class instrumentor
 	{
 	public:
-		struct Properties
+		struct properties
 		{
-			bl isInitialized = false;
+			bl is_initialized = false;
 			::std::shared_ptr<::rapidjson::Document> report = nullptr;
 			::std::string filepath = "";
-			bl enableSaveOfTrace = false;
-			bl enableTrace = true;
+			bl enable_save_on_trace = false;
+			bl enable_trace = true;
 		};
 
 	private:
-		static mutexed_wrapper<Properties> _properties;
+		static mutexed_wrapper<properties> _properties;
 
-		static void SaveReport(Properties& properties)
+		static void save_report(properties& p)
 		{
-			if (properties.filepath.size() > 0)
+			if (p.filepath.size() > 0)
 			{
-				Log::GetLogger()->info("Saving Instrumentor Profile Report...");
+				log::get_logger()->info("Saving Instrumentor Profile Report...");
 
 				::std::ofstream out_stream;
-				out_stream.open(properties.filepath);
+				out_stream.open(p.filepath);
 
 				if (out_stream.is_open())
 				{
 					::rapidjson::StringBuffer buffer;
 					::rapidjson::PrettyWriter<::rapidjson::StringBuffer> writer(buffer);
-					properties.report->Accept(writer);
+					p.report->Accept(writer);
 
 					out_stream << buffer.GetString();
 					out_stream.flush();
 					out_stream.close();
 				}
 
-				Log::GetLogger()->info("Done Saving Instrumentor Profile Report: '" + properties.filepath + "'");
+				log::get_logger()->info("Done Saving Instrumentor Profile Report: '" + p.filepath + "'");
 			}
 		}
 
-		static void Init(Properties& properties)
+		static void init(properties& p)
 		{
-			if (!properties.isInitialized)
+			if (!p.is_initialized)
 			{
-				properties.isInitialized = true;
-				properties.enableTrace = true;
-				properties.enableSaveOfTrace = false;
-				properties.filepath = fsys::Append(fsys::GetCurrentPath(), "profile_report.json");
+				p.is_initialized = true;
+				p.enable_trace = true;
+				p.enable_save_on_trace = false;
+				p.filepath = fsys::append(fsys::get_current_path(), "profile_report.json");
 
-				properties.report = ::std::make_shared<::rapidjson::Document>();
-				properties.report->SetObject();
+				p.report = ::std::make_shared<::rapidjson::Document>();
+				p.report->SetObject();
 
 				::rapidjson::Value other_data_object;
 				other_data_object.SetObject();
-				properties.report->AddMember("otherData", other_data_object, properties.report->GetAllocator());
+				p.report->AddMember("otherData", other_data_object, p.report->GetAllocator());
 
 				::rapidjson::Value trace_events_array;
 				trace_events_array.SetArray();
-				properties.report->AddMember("traceEvents", trace_events_array, properties.report->GetAllocator());
+				p.report->AddMember("traceEvents", trace_events_array, p.report->GetAllocator());
 			}
 		}
 
 	public:
-		static void Reset()
+		static void reset()
 		{
-			auto properties = _properties.get_access();
-			Init(*properties);
-			properties->report.reset();
-			properties->isInitialized = false;
+			auto p = _properties.get_access();
+			init(*p);
+			p->report.reset();
+			p->is_initialized = false;
 		}
 
-		static void Save(const ::std::string filepath = "")
+		static void save(const ::std::string filepath = "")
 		{
-			auto properties = _properties.get_access();
-			Init(*properties);
+			auto p = _properties.get_access();
+			init(*p);
 
 			if (filepath.size() > 0)
-				properties->filepath = filepath;
+				p->filepath = filepath;
 
-			SaveReport(*properties);
+			save_report(*p);
 		}
 
-		static void SetFilepath(const ::std::string filepath)
+		static void set_filepath(const ::std::string filepath)
 		{
-			auto properties = _properties.get_access();
-			Init(*properties);
-			properties->filepath = filepath;
+			auto p = _properties.get_access();
+			init(*p);
+			p->filepath = filepath;
 		}
 
-		static ::std::string GetFilepath()
+		static ::std::string get_filepath()
 		{
-			auto properties = _properties.get_access();
-			Init(*properties);
-			return properties->filepath;
+			auto p = _properties.get_access();
+			init(*p);
+			return p->filepath;
 		}
 
-		static void EnableSaveOnTrace(bl enable = true)
+		static void enable_save_on_trace(bl enable = true)
 		{
-			auto properties = _properties.get_access();
-			Init(*properties);
-			properties->enableSaveOfTrace = enable;
+			auto p = _properties.get_access();
+			init(*p);
+			p->enable_save_on_trace = enable;
 		}
 
-		static void EnableTraceAdd(bl enable = true)
+		static void enable_trace_add(bl enable = true)
 		{
-			auto properties = _properties.get_access();
-			Init(*properties);
-			properties->enableTrace = enable;
+			auto p = _properties.get_access();
+			init(*p);
+			p->enable_trace = enable;
 		}
 
-		static void AddTraceEvent(TraceEvent& te)
+		static void add_trace_event(trace_event& e)
 		{
-			auto properties = _properties.get_access();
-			Init(*properties);
+			auto p = _properties.get_access();
+			init(*p);
 
-			if (properties->enableTrace)
+			if (p->enable_trace)
 			{
 				::std::stringstream ss;
-				ss << te.ThreadId;
+				ss << e.thread_id;
 				::std::string tid_str = ss.str();
 				ss.str(""); // clear ss
 
-				::rapidjson::MemoryPoolAllocator<::rapidjson::CrtAllocator>& allocator = properties->report->GetAllocator();
-				::rapidjson::Value name(te.Name.c_str(), te.Name.size(), allocator);
+				::rapidjson::MemoryPoolAllocator<::rapidjson::CrtAllocator>& allocator = p->report->GetAllocator();
+				::rapidjson::Value name(e.name.c_str(), e.name.size(), allocator);
 				::rapidjson::Value tid(tid_str.c_str(), tid_str.size(), allocator);
 				::rapidjson::Value trace;
 
 				trace.SetObject();
 				trace.AddMember("cat", "function", allocator);
-				trace.AddMember("dur", te.ElapsedMicroseconds.count(), allocator);
+				trace.AddMember("dur", e.elapsed_microseconds.count(), allocator);
 				trace.AddMember("name", name, allocator);
 				trace.AddMember("ph", "X", allocator);
 				trace.AddMember("pid", "0", allocator);
 				trace.AddMember("tid", tid, allocator);
-				trace.AddMember("ts", tim::DblMicroseconds(te.StartTimestamp.time_since_epoch()).count(), allocator);
+				trace.AddMember("ts", tim::microseconds(e.start_timestamp.time_since_epoch()).count(), allocator);
 
-				(*properties->report)["traceEvents"].PushBack(::std::move(trace), allocator);
+				(*p->report)["traceEvents"].PushBack(::std::move(trace), allocator);
 
-				if (properties->enableSaveOfTrace)
-					SaveReport(*properties);
+				if (p->enable_save_on_trace)
+					save_report(*p);
 			}
 		}
 	};
 } // namespace np::nsit
 
-#endif /* NP_ENGINE_INSTRUMENTOR_HPP */
+#endif /* NP_ENGINE_NSIT_INSTRUMENTOR_HPP */

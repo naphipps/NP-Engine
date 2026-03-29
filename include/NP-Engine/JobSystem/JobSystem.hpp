@@ -32,7 +32,7 @@ namespace np::jsys
 		con::vector<JobWorker> _job_workers;
 		mem::sptr<condition> _job_worker_sleep_condition;
 		mem::trait_allocator _allocator;
-		mem::sptr<thr::ThreadPool> _thread_pool;
+		mem::sptr<thr::thread_pool> _thread_pool;
 		mem::accumulating_pool<Job, mem::DEFAULT_ALIGNMENT> _job_pool;
 		JobQueue _job_queue;
 
@@ -53,7 +53,7 @@ namespace np::jsys
 			return _job_worker_sleep_condition;
 		}
 
-		mem::sptr<thr::Thread> CreateThread()
+		mem::sptr<thr::thread> CreateThread()
 		{
 			return _thread_pool->create_object();
 		}
@@ -61,7 +61,7 @@ namespace np::jsys
 		siz GetThreadAffinity(siz worker_id)
 		{
 			// we add one to help prevent core 0 crowding -- assuming main thread is there
-			return (worker_id + 1) % thr::Thread::HardwareConcurrency();
+			return (worker_id + 1) % thr::thread::hardware_concurrency();
 		}
 
 	public:
@@ -87,14 +87,14 @@ namespace np::jsys
 		void SetDefaultJobWorkerCount()
 		{
 			// we want to be sure we use one less the number of cores available so our main thread is not crowded
-			SetJobWorkerCount(thr::Thread::HardwareConcurrency() - 1);
+			SetJobWorkerCount(thr::thread::hardware_concurrency() - 1);
 		}
 
 		void SetJobWorkerCount(siz count)
 		{
 			Stop();
 			_job_workers.clear();
-			_thread_pool = mem::create_sptr<thr::ThreadPool>(_allocator, count, mem::DEFAULT_ALIGNMENT);
+			_thread_pool = mem::create_sptr<thr::thread_pool>(_allocator, count, mem::DEFAULT_ALIGNMENT);
 
 			for (siz i = 0; i < count; i++)
 				_job_workers.emplace_back(i);

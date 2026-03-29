@@ -18,7 +18,7 @@
 
 namespace np::thr
 {
-	bl Thread::SetAffinity(siz core_number)
+	bl thread::set_affinity(siz core_number)
 	{
 		auto thread_access = _thread_block.get_access();
 
@@ -28,8 +28,8 @@ namespace np::thr
 		// Apple does NOT support thread affinity - not even their pthread.h implementation supports it
 
 #elif NP_ENGINE_PLATFORM_IS_LINUX
-		core_number = core_number % Thread::HardwareConcurrency();
-		::std::thread* thread = GetThread(*thread_access);
+		core_number = core_number % thread::hardware_concurrency();
+		::std::thread* thread = get_thread(*thread_access);
 		if (thread)
 		{
 			cpu_set_t cpuset;
@@ -39,8 +39,8 @@ namespace np::thr
 		}
 
 #elif NP_ENGINE_PLATFORM_IS_WINDOWS
-		core_number = core_number % Thread::HardwareConcurrency();
-		::std::thread* thread = GetThread(*thread_access);
+		core_number = core_number % thread::hardware_concurrency();
+		::std::thread* thread = get_thread(*thread_access);
 		if (thread)
 		{
 			SetThreadIdealProcessor((HANDLE)thread->native_handle(), (DWORD)core_number);
@@ -52,9 +52,9 @@ namespace np::thr
 		return set;
 	}
 
-	namespace ThisThread
+	namespace this_thread
 	{
-		bl SetAffinity(siz core_number)
+		bl set_affinity(siz core_number)
 		{
 			bl set = false;
 #if NP_ENGINE_PLATFORM_IS_APPLE
@@ -75,5 +75,5 @@ namespace np::thr
 #endif
 			return set;
 		}
-	} // namespace ThisThread
+	} // namespace this_thread
 } // namespace np::thr

@@ -16,7 +16,7 @@
 {
 	using namespace ::np;
 
-	thr::ThisThread::SetAffinity(0);
+	thr::this_thread::set_affinity(0);
 
 	i32 exit_val = NP_ENGINE_EXIT_SUCCESS;
 	str message;
@@ -25,7 +25,7 @@
 
 	try
 	{
-		sys::Init();
+		sys::init();
 		mem::accumulating_allocator<mem::red_black_tree_allocator> allocator{};
 		mem::trait_allocator::register_allocator(allocator);
 		{
@@ -48,7 +48,7 @@
 		mem::trait_allocator::reset_registration();
 		exit_val = NP_ENGINE_EXIT_STD_ERROR;
 		message = "STD EXCEPTION OCCURRED: \n" + to_str(e.what()) + "\n\n";
-		message += "Log file can be found here: " + nsit::Log::GetFileLoggerFilePath();
+		message += "Log file can be found here: " + nsit::log::get_file_logger_file_path();
 		style = app::PopupStyle::Error;
 		NP_ENGINE_LOG_ERROR(message);
 	}
@@ -57,7 +57,7 @@
 		mem::trait_allocator::reset_registration();
 		exit_val = NP_ENGINE_EXIT_UNKNOWN_ERROR;
 		message = "UNKNOWN EXCEPTION OCCURRED\n\n";
-		message += "Log file can be found here: " + nsit::Log::GetFileLoggerFilePath();
+		message += "Log file can be found here: " + nsit::log::get_file_logger_file_path();
 		style = app::PopupStyle::Error;
 		NP_ENGINE_LOG_ERROR(message);
 	}

@@ -4,8 +4,8 @@
 //
 //##===----------------------------------------------------------------------===##//
 
-#ifndef NP_ENGINE_SCOPED_TIMER_HPP
-#define NP_ENGINE_SCOPED_TIMER_HPP
+#ifndef NP_ENGINE_NSIT_SCOPED_TIMER_HPP
+#define NP_ENGINE_NSIT_SCOPED_TIMER_HPP
 
 #include <string>
 
@@ -15,53 +15,49 @@
 
 namespace np::nsit
 {
-	class ScopedTimer : public Timer
+	class scoped_timer : public timer
 	{
 	public:
-		using Action = void (*)(ScopedTimer&);
+		using action = void (*)(scoped_timer&);
 
 	private:
-		Action _stopped_action;
+		action _stopped_action;
 		bl _stopped;
 
 	public:
-		ScopedTimer(Action action = nullptr): ScopedTimer("", action) {}
+		scoped_timer(action a = nullptr): scoped_timer("", a) {}
 
-		ScopedTimer(::std::string name, Action action = nullptr): Timer(name), _stopped_action(action), _stopped(false) {}
+		scoped_timer(::std::string name, action a = nullptr): timer(name), _stopped_action(a), _stopped(false) {}
 
-		virtual ~ScopedTimer()
+		virtual ~scoped_timer()
+		{
+			if (!_stopped)
+				stop();
+		}
+
+		void set_stopped_action(action a)
+		{
+			_stopped_action = a;
+		}
+
+		void stop() override
 		{
 			if (!_stopped)
 			{
-				Stop();
-			}
-		}
-
-		void SetStoppedAction(Action action)
-		{
-			_stopped_action = action;
-		}
-
-		void Stop() override
-		{
-			if (!_stopped)
-			{
-				Timer::Stop();
+				timer::stop();
 				_stopped = true;
 
 				if (_stopped_action)
-				{
 					_stopped_action(*this);
-				}
 			}
 		}
 
-		void Restart() override
+		void restart() override
 		{
-			Timer::Restart();
+			timer::restart();
 			_stopped = false;
 		}
 	};
 } // namespace np::nsit
 
-#endif /* NP_ENGINE_SCOPED_TIMER_HPP */
+#endif /* NP_ENGINE_NSIT_SCOPED_TIMER_HPP */

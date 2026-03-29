@@ -22,53 +22,53 @@ namespace np::sys
 {
 	namespace __detail
 	{
-		extern ::std::string InitialWorkingDir;
+		extern ::std::string initial_working_directory;
 	} // namespace __detail
 
-	using TerminateHandler = ::std::terminate_handler;
-	using SignalHandler = void (*)(i32 signal);
+	using terminate_handler = ::std::terminate_handler;
+	using signal_handler = void (*)(i32 signal);
 
-	static inline ::std::string GetEnv(::std::string variable)
+	static inline ::std::string get_env(::std::string variable)
 	{
 		return ::std::getenv(variable.c_str());
 	}
 
-	static inline ::std::string GetDefaultWorkingDir()
+	static inline ::std::string get_default_working_directory()
 	{
 #if NP_ENGINE_PLATFORM_IS_APPLE
-		return fsys::Append(fsys::Append(GetEnv("HOME"), "Library"), "NP-Engine");
+		return fsys::append(get_env("HOME"), "Library", "NP-Engine");
 
 #elif NP_ENGINE_PLATFORM_IS_LINUX
-		return fsys::Append(GetEnv("HOME"), ".NP-Engine");
+		return fsys::append(get_env("HOME"), ".NP-Engine");
 
 #elif NP_ENGINE_PLATFORM_IS_WINDOWS
-		return fsys::Append(GetEnv("ALLUSERSPROFILE"), "NP-Engine");
+		return fsys::append(get_env("ALLUSERSPROFILE"), "NP-Engine");
 #endif
 	}
 
-	static inline ::std::string GetInitalWorkingDir()
+	static inline ::std::string get_initial_working_directory()
 	{
-		return __detail::InitialWorkingDir;
+		return __detail::initial_working_directory;
 	}
 
-	static inline void Init()
+	static inline void init()
 	{
-		nsit::Log::Init(); // log needs to be primed
+		nsit::log::init(); // log needs to be primed
 
-		if (__detail::InitialWorkingDir.empty())
-			__detail::InitialWorkingDir = fsys::GetCurrentPath();
+		if (__detail::initial_working_directory.empty())
+			__detail::initial_working_directory = fsys::get_current_path();
 
-		::std::string working_dir = GetDefaultWorkingDir();
-		fsys::CreateDirectories(working_dir);
-		fsys::SetCurrentPath(working_dir);
+		::std::string working_directory = get_default_working_directory();
+		fsys::create_directories(working_directory);
+		fsys::set_current_path(working_directory);
 	}
 
-	static inline void SetTerminateHandler(TerminateHandler handler)
+	static inline void set_terminate_handler(terminate_handler handler)
 	{
 		::std::set_terminate(handler);
 	}
 
-	static inline void SetSignalHandler(SignalHandler handler)
+	static inline void set_signal_handler(signal_handler handler)
 	{
 		::std::signal(SIGABRT, handler);
 		::std::signal(SIGFPE, handler);
@@ -78,7 +78,7 @@ namespace np::sys
 		::std::signal(SIGTERM, handler);
 	}
 
-	static inline i32 Run(::std::string command)
+	static inline i32 run(::std::string command)
 	{
 		return ::std::system(command.c_str());
 	}

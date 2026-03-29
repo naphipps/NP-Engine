@@ -21,7 +21,7 @@ namespace np::app
 	class WindowLayer : public Layer
 	{
 	private:
-		const thr::Thread::Id _owning_thread_id;
+		const thr::thread::id _owning_thread_id;
 		mutexed_wrapper<con::vector<mem::sptr<win::Window>>> _windows;
 		mutexed_wrapper<con::uset<uid::Uid>> _windows_to_destroy;
 
@@ -226,11 +226,11 @@ namespace np::app
 
 		bl IsOwningThread() const
 		{
-			return _owning_thread_id == thr::ThisThread::get_id();
+			return _owning_thread_id == thr::this_thread::get_id();
 		}
 
 	public:
-		WindowLayer(mem::sptr<srvc::Services> services): Layer(services), _owning_thread_id(thr::ThisThread::get_id())
+		WindowLayer(mem::sptr<srvc::Services> services): Layer(services), _owning_thread_id(thr::this_thread::get_id())
 		{
 			win::Window::Init(win::DetailType::Glfw);
 			win::Window::Init(win::DetailType::Sdl);
@@ -270,7 +270,7 @@ namespace np::app
 			return window;
 		}
 
-		void Update(tim::DblMilliseconds time_delta) override
+		void Update(tim::milliseconds time_delta) override
 		{
 			win::Window::Update(win::DetailType::Glfw);
 			win::Window::Update(win::DetailType::Sdl);

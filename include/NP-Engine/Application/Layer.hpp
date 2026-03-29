@@ -29,7 +29,7 @@ namespace np::app
 
 		virtual void BeforeUdpate() {}
 
-		virtual void Update(tim::DblMilliseconds time_delta) {}
+		virtual void Update(tim::milliseconds time_delta) {}
 
 		virtual void AfterUdpate() {}
 

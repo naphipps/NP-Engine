@@ -4,8 +4,8 @@
 //
 //##===----------------------------------------------------------------------===##//
 
-#ifndef NP_ENGINE_TRACE_EVENT_HPP
-#define NP_ENGINE_TRACE_EVENT_HPP
+#ifndef NP_ENGINE_NSIT_TRACE_EVENT_HPP
+#define NP_ENGINE_NSIT_TRACE_EVENT_HPP
 
 #include <string>
 #include <thread>
@@ -14,14 +14,14 @@
 
 namespace np::nsit
 {
-	struct TraceEvent
+	struct trace_event
 	{
-		::std::string Name;
-		tim::SteadyTimestamp StartTimestamp;
-		tim::DblMicroseconds ElapsedMicroseconds;
-		tim::DblMilliseconds ElapsedMilliseconds;
-		::std::thread::id ThreadId;
+		::std::string name{};
+		tim::steady_timestamp start_timestamp{};
+		tim::microseconds elapsed_microseconds{};
+		tim::milliseconds elapsed_milliseconds{};
+		::std::thread::id thread_id{};
 	};
 } // namespace np::nsit
 
-#endif /* NP_ENGINE_TRACE_EVENT_HPP */
+#endif /* NP_ENGINE_NSIT_TRACE_EVENT_HPP */

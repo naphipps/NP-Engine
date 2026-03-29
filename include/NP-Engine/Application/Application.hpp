@@ -39,11 +39,11 @@ namespace np::app
 		static inline void HandleTerminate() noexcept
 		{
 			::std::cerr << "The terminate function was called.\nLog file can be found here : " +
-					nsit::Log::GetFileLoggerFilePath()
+					nsit::log::get_file_logger_file_path()
 						<< "\n";
 			Popup::Show("NP-Engine Terminate Function Called",
 						"Probably an unhandled exception was thrown.\nLog file can be found here : " +
-							nsit::Log::GetFileLoggerFilePath(),
+							nsit::log::get_file_logger_file_path(),
 						PopupStyle::Error, PopupButtons::Ok);
 		}
 
@@ -75,7 +75,7 @@ namespace np::app
 				break;
 			}
 
-			str message = signal_string + " was raised.\nLog file can be found here : " + nsit::Log::GetFileLoggerFilePath();
+			str message = signal_string + " was raised.\nLog file can be found here : " + nsit::log::get_file_logger_file_path();
 
 			::std::cerr << message << "\n";
 			Popup::Show("NP-Engine Signal Raised", message, PopupStyle::Error, PopupButtons::Ok);
@@ -106,8 +106,8 @@ namespace np::app
 			_running(false)
 		{
 			NP_ENGINE_PROFILE_FUNCTION();
-			sys::SetTerminateHandler(__detail::HandleTerminate);
-			sys::SetSignalHandler(__detail::HandleSignal);
+			sys::set_terminate_handler(__detail::HandleTerminate);
+			sys::set_signal_handler(__detail::HandleSignal);
 
 			_layers.emplace_back(this);
 			_layers.emplace_back(mem::address_of(_window_layer));
@@ -178,12 +178,12 @@ namespace np::app
 			jsys::JobSystem& job_system = _services->GetJobSystem();
 			nput::InputQueue& input_queue = _services->GetInputQueue();
 
-			tim::SteadyTimestamp next = tim::SteadyClock::now();
-			tim::SteadyTimestamp prev = next;
-			const tim::DblMilliseconds min_duration(NP_ENGINE_APPLICATION_LOOP_DURATION);
-			tim::SteadyTimestamp update_next = next;
-			tim::SteadyTimestamp update_prev = next;
-			tim::DblMilliseconds update_delta(0);
+			tim::steady_timestamp next = tim::steady_clock::now();
+			tim::steady_timestamp prev = next;
+			const tim::milliseconds min_duration(NP_ENGINE_APPLICATION_LOOP_DURATION);
+			tim::steady_timestamp update_next = next;
+			tim::steady_timestamp update_prev = next;
+			tim::milliseconds update_delta(0);
 
 			mem::sptr<evnt::Event> e = nullptr;
 			i64 i = 0;
@@ -211,7 +211,7 @@ namespace np::app
 				if (!_running.load(mo_acquire))
 					break;
 
-				update_next = tim::SteadyClock::now();
+				update_next = tim::steady_clock::now();
 				update_delta = update_next - update_prev;
 				update_prev = update_next;
 
@@ -237,8 +237,8 @@ namespace np::app
 				for (i = 0; i < _overlays.size(); i++)
 					_overlays[i]->Cleanup();
 
-				for (next = tim::SteadyClock::now(); next - prev < min_duration; next = tim::SteadyClock::now())
-					thr::ThisThread::yield();
+				for (next = tim::steady_clock::now(); next - prev < min_duration; next = tim::steady_clock::now())
+					thr::this_thread::yield();
 				prev = next;
 			}
 

@@ -985,7 +985,7 @@ namespace np::win::__detail
 			}
 		}
 
-		void Update(tim::DblMilliseconds milliseconds) override
+		void Update(tim::milliseconds milliseconds) override
 		{
 			auto glfw_window = _glfw_window.get_access();
 			if (*glfw_window)
