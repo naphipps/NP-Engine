@@ -1008,7 +1008,7 @@ namespace np::win::__detail
 					{
 						if (offset.x != 0 || offset.y != 0)
 						{
-							dbl t = mat::GetT((dbl)info.rcWindow.left, (dbl)info.rcWindow.right, (dbl)point.x);
+							dbl t = mat::get_t((dbl)info.rcWindow.left, (dbl)info.rcWindow.right, (dbl)point.x);
 							siz width =
 								_prev_window_placement.rcNormalPosition.right - _prev_window_placement.rcNormalPosition.left;
 							siz height =

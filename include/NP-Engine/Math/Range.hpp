@@ -4,15 +4,15 @@
 //
 //##===----------------------------------------------------------------------===##//
 
-#ifndef NP_ENGINE_MATH_RANGE_HPP
-#define NP_ENGINE_MATH_RANGE_HPP
+#ifndef NP_ENGINE_MAT_RANGE_HPP
+#define NP_ENGINE_MAT_RANGE_HPP
 
 #include "NP-Engine/Primitive/Primitive.hpp"
 
 namespace np::mat
 {
 	template <typename T>
-	struct Range
+	struct range
 	{
 		union {
 			T min = 0;
@@ -54,37 +54,43 @@ namespace np::mat
 			bl lastInclusive;
 		};
 
-		Range(T min_, T max_, bl min_inclusive_, bl max_inclusive_):
+		range(T min_, T max_, bl min_inclusive_, bl max_inclusive_):
 			min(min_),
 			max(max_),
 			minInclusive(min_inclusive_),
 			maxInclusive(max_inclusive_)
 		{}
 
-		Range(T min_, T max_, bl inclusive_): Range(min_, max_, inclusive_, inclusive_) {}
+		range(T min_, T max_, bl inclusive_): range(min_, max_, inclusive_, inclusive_) {}
 
-		Range(T min_, T max_): Range(min_, max_, true) {}
+		range(T min_, T max_): range(min_, max_, true) {}
 
-		Range() = default;
+		range() = default;
 
-		virtual bl Within(T value) const
+		virtual bl within(T value) const
 		{
 			return ((minInclusive && value == min) || value > min) && ((maxInclusive && value == max) || value < max);
 		}
+
+		//aliases since we eventually like to use pascal casing
+		virtual bl Within(T value) const
+		{
+			return within(value);
+		}
 	};
 
-	using Ui8Range = Range<ui8>;
-	using Ui16Range = Range<ui16>;
-	using Ui32Range = Range<ui32>;
-	using Ui64Range = Range<ui64>;
-	using I8Range = Range<i8>;
-	using I16Range = Range<i16>;
-	using I32Range = Range<i32>;
-	using I64Range = Range<i64>;
-	using SizRange = Range<siz>;
-	using FltRange = Range<flt>;
-	using DblRange = Range<dbl>;
-	using LdblRange = Range<ldbl>;
+	using range_ui8 = range<ui8>;
+	using range_ui16 = range<ui16>;
+	using range_ui32 = range<ui32>;
+	using range_ui64 = range<ui64>;
+	using range_i8 = range<i8>;
+	using range_i16 = range<i16>;
+	using range_i32 = range<i32>;
+	using range_i64 = range<i64>;
+	using range_siz = range<siz>;
+	using range_flt = range<flt>;
+	using range_dbl = range<dbl>;
+	using range_ldbl = range<ldbl>;
 } //namespace np::mat
 
-#endif /* NP_ENGINE_MATH_RANGE_HPP */
+#endif /* NP_ENGINE_MAT_RANGE_HPP */

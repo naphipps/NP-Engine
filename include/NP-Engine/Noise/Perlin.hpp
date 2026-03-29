@@ -344,9 +344,9 @@ namespace np::noiz
 		inline flt CalculateNoiseValue(flt x, flt y, flt z) const
 		{
 			// Find the unit cube that contains the point
-			i32 X = mat::FastFloor(x);
-			i32 Y = mat::FastFloor(y);
-			i32 Z = mat::FastFloor(z);
+			i32 X = mat::fast_floor(x);
+			i32 Y = mat::fast_floor(y);
+			i32 Z = mat::fast_floor(z);
 
 			// Find relative x, y, z of point in cube
 			x -= X;
@@ -437,36 +437,36 @@ namespace np::noiz
 			}
 
 			output /= denom;
-			output = mat::Flip(output);
+			output = mat::flip(output);
 
 			switch (_rigidity)
 			{
 			case 0:
-				output = mat::Pow0(output);
+				output = mat::pow_0(output);
 				break;
 			case 1:
-				output = mat::Pow1(output);
+				output = mat::pow_1(output);
 				break;
 			case 2:
-				output = mat::Pow2(output);
+				output = mat::pow_2(output);
 				break;
 			case 3:
-				output = mat::Pow3(output);
+				output = mat::pow_3(output);
 				break;
 			case 4:
-				output = mat::Pow4(output);
+				output = mat::pow_4(output);
 				break;
 			case 5:
-				output = mat::Pow5(output);
+				output = mat::pow_5(output);
 				break;
 			case 6:
-				output = mat::Pow6(output);
+				output = mat::pow_6(output);
 				break;
 			case 7:
-				output = mat::Pow7(output);
+				output = mat::pow_7(output);
 				break;
 			case 8:
-				output = mat::Pow8(output);
+				output = mat::pow_8(output);
 				break;
 			default:
 				output = ::std::pow(output, _rigidity);
@@ -493,36 +493,36 @@ namespace np::noiz
 			}
 
 			output /= denom;
-			output = mat::Flip(output);
+			output = mat::flip(output);
 
 			switch (_rigidity)
 			{
 			case 0:
-				output = mat::Pow0(output);
+				output = mat::pow_0(output);
 				break;
 			case 1:
-				output = mat::Pow1(output);
+				output = mat::pow_1(output);
 				break;
 			case 2:
-				output = mat::Pow2(output);
+				output = mat::pow_2(output);
 				break;
 			case 3:
-				output = mat::Pow3(output);
+				output = mat::pow_3(output);
 				break;
 			case 4:
-				output = mat::Pow4(output);
+				output = mat::pow_4(output);
 				break;
 			case 5:
-				output = mat::Pow5(output);
+				output = mat::pow_5(output);
 				break;
 			case 6:
-				output = mat::Pow6(output);
+				output = mat::pow_6(output);
 				break;
 			case 7:
-				output = mat::Pow7(output);
+				output = mat::pow_7(output);
 				break;
 			case 8:
-				output = mat::Pow8(output);
+				output = mat::pow_8(output);
 				break;
 			default:
 				output = ::std::pow(output, _rigidity);
@@ -534,12 +534,12 @@ namespace np::noiz
 
 		inline flt BillowFractal(flt x, flt y, flt z) const
 		{
-			return mat::Flip(RigidFractal(x, y, z));
+			return mat::flip(RigidFractal(x, y, z));
 		}
 
 		inline flt BillowFractional(flt x, flt y) const
 		{
-			return mat::Flip(RigidFractional(x, y));
+			return mat::flip(RigidFractional(x, y));
 		}
 
 		inline flt WarpFractal(flt x, flt y, flt z) const

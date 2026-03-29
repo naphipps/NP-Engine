@@ -304,7 +304,7 @@ namespace np::mat
 
 		Output, dbl T, the value of Owen's T function.
 	*/
-	static inline dbl OwenT(dbl h, dbl a)
+	static inline dbl owen_t(dbl h, dbl a)
 	{
 		dbl absa;
 		dbl absh;

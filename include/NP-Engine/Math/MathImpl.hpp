@@ -4,8 +4,8 @@
 //
 //##===----------------------------------------------------------------------===##//
 
-#ifndef NP_ENGINE_MATH_FUNCTIONS_HPP
-#define NP_ENGINE_MATH_FUNCTIONS_HPP
+#ifndef NP_ENGINE_MAT_MATH_FUNCTIONS_HPP
+#define NP_ENGINE_MAT_MATH_FUNCTIONS_HPP
 
 #include "NP-Engine/Primitive/Primitive.hpp"
 
@@ -23,7 +23,7 @@ namespace np::mat
 		else if result == 0 then colinear
 	*/
 	template <typename T>
-	static inline T GetOrientation(const ::glm::vec<2, T>& a, const ::glm::vec<2, T>& b, const ::glm::vec<2, T>& c)
+	static inline T get_orientation(const ::glm::vec<2, T>& a, const ::glm::vec<2, T>& b, const ::glm::vec<2, T>& c)
 	{
 		/*
 			|1  1  1 |
@@ -38,56 +38,56 @@ namespace np::mat
 	}
 
 	template <typename T>
-	static inline ::glm::vec<2, T> Midpoint(const ::glm::vec<2, T>& a, const ::glm::vec<2, T>& b)
+	static inline ::glm::vec<2, T> midpoint(const ::glm::vec<2, T>& a, const ::glm::vec<2, T>& b)
 	{
 		return {(a.x + b.x) / (T)2, (a.y + b.y) / (T)2};
 	}
 
 	template <typename T>
-	static inline ::glm::vec<3, T> Midpoint(const ::glm::vec<3, T>& a, const ::glm::vec<3, T>& b)
+	static inline ::glm::vec<3, T> midpoint(const ::glm::vec<3, T>& a, const ::glm::vec<3, T>& b)
 	{
 		return {(a.x + b.x) / (T)2, (a.y + b.y) / (T)2, (a.z + b.z) / (T)2};
 	}
 
-	static inline flt RoundTo32nd(const flt n)
+	static inline flt round_to_32nd(const flt n)
 	{
 		return ::std::round((dbl)n * 32.0) / 32.0;
 	}
 
-	static inline dbl RoundTo32nd(const dbl n)
+	static inline dbl round_to_32nd(const dbl n)
 	{
 		return ::std::round(n * 32.0) / 32.0;
 	}
 
 	template <typename T>
-	static inline T RoundTo32nd(const T n)
+	static inline T round_to_32nd(const T n)
 	{
 		return (T)(::std::round((T)n * 32.0) / 32.0);
 	}
 
-	static inline flt RoundTo16th(const flt n)
+	static inline flt round_to_16th(const flt n)
 	{
 		return ::std::round((dbl)n * 16.0) / 16.0;
 	}
 
-	static inline dbl RoundTo16th(const dbl n)
+	static inline dbl round_to_16th(const dbl n)
 	{
 		return ::std::round(n * 16.0) / 16.0;
 	}
 
 	template <typename T>
-	static inline T RoundTo16th(const T n)
+	static inline T round_to_16th(const T n)
 	{
 		return (T)(::std::round((T)n * 16.0) / 16.0);
 	}
 
-	static inline i32 FastFloor(const flt n)
+	static inline i32 fast_floor(const flt n)
 	{
 		i32 i = static_cast<i32>(n);
 		return (n < i) ? (i - 1) : (i);
 	}
 
-	static inline i64 FastFloor(const dbl n)
+	static inline i64 fast_floor(const dbl n)
 	{
 		i64 i = static_cast<i64>(n);
 		return (n < i) ? (i - 1) : (i);
@@ -96,7 +96,7 @@ namespace np::mat
 	/*
 		returns the inverse sqrt of n using Quake III's q_rsqrt algorithm
 	*/
-	static inline flt FastInvSqrt(const flt n, i32 newton_iteration_count = 2)
+	static inline flt fast_inverse_sqrt(const flt n, i32 newton_iteration_count = 2)
 	{
 		// keeping union for performance
 		union {
@@ -115,196 +115,196 @@ namespace np::mat
 	}
 
 	template <typename T>
-	static inline T Pow0(const T n)
+	static inline T pow_0(const T n)
 	{
 		return 1;
 	}
 
 	template <typename T>
-	static inline T Pow1(const T n)
+	static inline T pow_1(const T n)
 	{
 		return n;
 	}
 
 	template <typename T>
-	static inline T Pow2(const T n)
+	static inline T pow_2(const T n)
 	{
 		return n * n;
 	}
 
 	template <typename T>
-	static inline T Pow3(const T n)
+	static inline T pow_3(const T n)
 	{
 		return n * n * n;
 	}
 
 	template <typename T>
-	static inline T Pow4(const T n)
+	static inline T pow_4(const T n)
 	{
 		return n * n * n * n;
 	}
 
 	template <typename T>
-	static inline T Pow5(const T n)
+	static inline T pow_5(const T n)
 	{
 		return n * n * n * n * n;
 	}
 
 	template <typename T>
-	static inline T Pow6(const T n)
+	static inline T pow_6(const T n)
 	{
 		return n * n * n * n * n * n;
 	}
 
 	template <typename T>
-	static inline T Pow7(const T n)
+	static inline T pow_7(const T n)
 	{
 		return n * n * n * n * n * n * n;
 	}
 
 	template <typename T>
-	static inline T Pow8(const T n)
+	static inline T pow_8(const T n)
 	{
 		return n * n * n * n * n * n * n * n;
 	}
 
 	template <typename T>
-	static inline ::glm::vec<2, T> RoundTo32nd(const ::glm::vec<2, T>& point)
+	static inline ::glm::vec<2, T> round_to_32nd(const ::glm::vec<2, T>& point)
 	{
-		return {RoundTo32nd(point.x), RoundTo32nd(point.y)};
+		return {round_to_32nd(point.x), round_to_32nd(point.y)};
 	}
 
 	template <typename T>
-	static inline ::glm::vec<2, T> RoundTo16th(const ::glm::vec<2, T>& point)
+	static inline ::glm::vec<2, T> round_to_16th(const ::glm::vec<2, T>& point)
 	{
-		return {RoundTo16th(point.x), RoundTo16th(point.y)};
+		return {round_to_16th(point.x), round_to_16th(point.y)};
 	}
 
 	template <typename T>
-	static inline ::glm::vec<3, T> RoundTo32nd(const ::glm::vec<3, T>& point)
+	static inline ::glm::vec<3, T> round_to_32nd(const ::glm::vec<3, T>& point)
 	{
-		return {RoundTo32nd(point.x), RoundTo32nd(point.y), RoundTo32nd(point.z)};
+		return {round_to_32nd(point.x), round_to_32nd(point.y), round_to_32nd(point.z)};
 	}
 
 	template <typename T>
-	static inline ::glm::vec<3, T> RoundTo16th(const ::glm::vec<3, T>& point)
+	static inline ::glm::vec<3, T> round_to_16th(const ::glm::vec<3, T>& point)
 	{
-		return {RoundTo16th(point.x), RoundTo16th(point.y), RoundTo16th(point.z)};
+		return {round_to_16th(point.x), round_to_16th(point.y), round_to_16th(point.z)};
 	}
 
-	static inline dbl DistanceSquared(const flt ax, const flt ay, const flt bx, const flt by)
+	static inline dbl distance_squared(const flt ax, const flt ay, const flt bx, const flt by)
 	{
 		dbl x_diff = ax < bx ? bx - ax : ax - bx;
 		dbl y_diff = ay < by ? by - ay : ay - by;
-		return Pow2(x_diff) + Pow2(y_diff);
+		return pow_2(x_diff) + pow_2(y_diff);
 	}
 
-	static inline dbl DistanceSquared(const dbl ax, const dbl ay, const dbl bx, const dbl by)
+	static inline dbl distance_squared(const dbl ax, const dbl ay, const dbl bx, const dbl by)
 	{
 		dbl x_diff = ax < bx ? bx - ax : ax - bx;
 		dbl y_diff = ay < by ? by - ay : ay - by;
-		return Pow2(x_diff) + Pow2(y_diff);
+		return pow_2(x_diff) + pow_2(y_diff);
 	}
 
 	template <typename T>
-	static inline ui64 DistanceSquared(const T ax, const T ay, const T bx, const T by)
+	static inline ui64 distance_squared(const T ax, const T ay, const T bx, const T by)
 	{
 		ui64 x_diff = ax < bx ? bx - ax : ax - bx;
 		ui64 y_diff = ay < by ? by - ay : ay - by;
-		return Pow2(x_diff) + Pow2(y_diff);
+		return pow_2(x_diff) + pow_2(y_diff);
 	}
 
-	static inline dbl DistanceSquared(const ::glm::vec<2, flt>& a, const ::glm::vec<2, flt>& b)
+	static inline dbl distance_squared(const ::glm::vec<2, flt>& a, const ::glm::vec<2, flt>& b)
 	{
-		return DistanceSquared(a.x, a.y, b.x, b.y);
+		return distance_squared(a.x, a.y, b.x, b.y);
 	}
 
-	static inline dbl DistanceSquared(const ::glm::vec<2, dbl>& a, const ::glm::vec<2, dbl>& b)
+	static inline dbl distance_squared(const ::glm::vec<2, dbl>& a, const ::glm::vec<2, dbl>& b)
 	{
-		return DistanceSquared(a.x, a.y, b.x, b.y);
+		return distance_squared(a.x, a.y, b.x, b.y);
 	}
 
 	template <typename T>
-	static inline ui64 DistanceSquared(const ::glm::vec<2, T>& a, const ::glm::vec<2, T>& b)
+	static inline ui64 distance_squared(const ::glm::vec<2, T>& a, const ::glm::vec<2, T>& b)
 	{
-		return DistanceSquared<T>(a.x, a.y, b.x, b.y);
+		return distance_squared<T>(a.x, a.y, b.x, b.y);
 	}
 
-	static inline dbl DistanceSquared(const flt ax, const flt ay, const flt az, const flt bx, const flt by, const flt bz)
+	static inline dbl distance_squared(const flt ax, const flt ay, const flt az, const flt bx, const flt by, const flt bz)
 	{
 		dbl x_diff = ax < bx ? bx - ax : ax - bx;
 		dbl y_diff = ay < by ? by - ay : ay - by;
 		dbl z_diff = az < bz ? bz - az : az - bz;
-		return Pow2(x_diff) + Pow2(y_diff) + Pow2(z_diff);
+		return pow_2(x_diff) + pow_2(y_diff) + pow_2(z_diff);
 	}
 
-	static inline dbl DistanceSquared(const dbl ax, const dbl ay, const dbl az, const dbl bx, const dbl by, const dbl bz)
+	static inline dbl distance_squared(const dbl ax, const dbl ay, const dbl az, const dbl bx, const dbl by, const dbl bz)
 	{
 		dbl x_diff = ax < bx ? bx - ax : ax - bx;
 		dbl y_diff = ay < by ? by - ay : ay - by;
 		dbl z_diff = az < bz ? bz - az : az - bz;
-		return Pow2(x_diff) + Pow2(y_diff) + Pow2(z_diff);
+		return pow_2(x_diff) + pow_2(y_diff) + pow_2(z_diff);
 	}
 
 	template <typename T>
-	static inline ui64 DistanceSquared(const T ax, const T ay, const T az, const T bx, const T by, const T bz)
+	static inline ui64 distance_squared(const T ax, const T ay, const T az, const T bx, const T by, const T bz)
 	{
 		ui64 x_diff = ax < bx ? bx - ax : ax - bx;
 		ui64 y_diff = ay < by ? by - ay : ay - by;
 		ui64 z_diff = az < bz ? bz - az : az - bz;
-		return Pow2(x_diff) + Pow2(y_diff) + Pow2(z_diff);
+		return pow_2(x_diff) + pow_2(y_diff) + pow_2(z_diff);
 	}
 
-	static inline dbl DistanceSquared(const ::glm::vec<3, flt>& a, const ::glm::vec<3, flt>& b)
+	static inline dbl distance_squared(const ::glm::vec<3, flt>& a, const ::glm::vec<3, flt>& b)
 	{
-		return DistanceSquared(a.x, a.y, a.z, b.x, b.y, b.z);
+		return distance_squared(a.x, a.y, a.z, b.x, b.y, b.z);
 	}
 
-	static inline dbl DistanceSquared(const ::glm::vec<3, dbl>& a, const ::glm::vec<3, dbl>& b)
+	static inline dbl distance_squared(const ::glm::vec<3, dbl>& a, const ::glm::vec<3, dbl>& b)
 	{
-		return DistanceSquared(a.x, a.y, a.z, b.x, b.y, b.z);
+		return distance_squared(a.x, a.y, a.z, b.x, b.y, b.z);
 	}
 
 	template <typename T>
-	static inline ui64 DistanceSquared(const ::glm::vec<3, T>& a, const ::glm::vec<3, T>& b)
+	static inline ui64 distance_squared(const ::glm::vec<3, T>& a, const ::glm::vec<3, T>& b)
 	{
-		return DistanceSquared<T>(a.x, a.y, a.z, b.x, b.y, b.z);
+		return distance_squared<T>(a.x, a.y, a.z, b.x, b.y, b.z);
 	}
 
-	static inline flt RoundToInvPowOfTwo(const flt n, const ui8 pow_of_two)
+	static inline flt round_to_inverse_pow_of_two(const flt n, const ui8 pow_of_two)
 	{
 		dbl scalar = ::std::pow(2, pow_of_two);
 		return ::std::round((dbl)n * scalar) / scalar;
 	}
 
-	static inline dbl RoundToInvPowOfTwo(const dbl n, const ui8 pow_of_two)
+	static inline dbl round_to_inverse_pow_of_two(const dbl n, const ui8 pow_of_two)
 	{
 		dbl scalar = ::std::pow(2, pow_of_two);
 		return ::std::round(n * scalar) / scalar;
 	}
 
 	template <typename T>
-	static inline T GetAngle(const ::glm::vec<2, T>& point)
+	static inline T get_angle(const ::glm::vec<2, T>& point)
 	{
 		return ::std::atan2(-(point.y), -(point.x));
 	}
 
-	static inline dbl GetAngleB(const ::glm::vec<2, flt>& a_pt, const ::glm::vec<2, flt>& b_pt, const ::glm::vec<2, flt>& c_pt)
+	static inline dbl get_angle_b(const ::glm::vec<2, flt>& a_pt, const ::glm::vec<2, flt>& b_pt, const ::glm::vec<2, flt>& c_pt)
 	{
-		dbl a_sq = DistanceSquared(b_pt, c_pt);
-		dbl b_sq = DistanceSquared(a_pt, c_pt);
-		dbl c_sq = DistanceSquared(b_pt, a_pt);
+		dbl a_sq = distance_squared(b_pt, c_pt);
+		dbl b_sq = distance_squared(a_pt, c_pt);
+		dbl c_sq = distance_squared(b_pt, a_pt);
 		dbl a = ::std::sqrt(a_sq);
 		dbl c = ::std::sqrt(c_sq);
 		dbl B = ::std::acos((a_sq - b_sq + c_sq) / (2.f * a * c));
 		return B;
 	}
 
-	static inline dbl GetAngleB(const ::glm::vec<2, dbl>& a_pt, const ::glm::vec<2, dbl>& b_pt, const ::glm::vec<2, dbl>& c_pt)
+	static inline dbl get_angle_b(const ::glm::vec<2, dbl>& a_pt, const ::glm::vec<2, dbl>& b_pt, const ::glm::vec<2, dbl>& c_pt)
 	{
-		dbl a_sq = DistanceSquared(b_pt, c_pt);
-		dbl b_sq = DistanceSquared(a_pt, c_pt);
-		dbl c_sq = DistanceSquared(b_pt, a_pt);
+		dbl a_sq = distance_squared(b_pt, c_pt);
+		dbl b_sq = distance_squared(a_pt, c_pt);
+		dbl c_sq = distance_squared(b_pt, a_pt);
 		dbl a = ::std::sqrt(a_sq);
 		dbl c = ::std::sqrt(c_sq);
 		dbl B = ::std::acos((a_sq - b_sq + c_sq) / (2.f * a * c));
@@ -312,11 +312,11 @@ namespace np::mat
 	}
 
 	template <typename T>
-	static inline ui64 GetAngleB(const ::glm::vec<2, T>& a_pt, const ::glm::vec<2, T>& b_pt, const ::glm::vec<2, T>& c_pt)
+	static inline ui64 get_angle_b(const ::glm::vec<2, T>& a_pt, const ::glm::vec<2, T>& b_pt, const ::glm::vec<2, T>& c_pt)
 	{
-		ui64 a_sq = DistanceSquared(b_pt, c_pt);
-		ui64 b_sq = DistanceSquared(a_pt, c_pt);
-		ui64 c_sq = DistanceSquared(b_pt, a_pt);
+		ui64 a_sq = distance_squared(b_pt, c_pt);
+		ui64 b_sq = distance_squared(a_pt, c_pt);
+		ui64 c_sq = distance_squared(b_pt, a_pt);
 		ui64 a = ::std::sqrt(a_sq);
 		ui64 c = ::std::sqrt(c_sq);
 		ui64 B = ::std::acos((a_sq - b_sq + c_sq) / (2.f * a * c));
@@ -324,16 +324,22 @@ namespace np::mat
 	}
 
 	template <typename T>
-	static inline bl AngleComparerCCW(const ::glm::vec<2, T>& a, const ::glm::vec<2, T>& b)
+	static inline bl angle_comparer_ccw(const ::glm::vec<2, T>& a, const ::glm::vec<2, T>& b)
 	{
-		return GetAngle(a) < GetAngle(b);
+		return get_angle(a) < get_angle(b);
 	}
 
 	template <typename T>
-	static inline bl AngleComparerCW(const ::glm::vec<2, T>& a, const ::glm::vec<2, T>& b)
+	static inline bl angle_comparer_cw(const ::glm::vec<2, T>& a, const ::glm::vec<2, T>& b)
 	{
-		return GetAngle(a) > GetAngle(b);
+		return get_angle(a) > get_angle(b);
+	}
+
+	static inline ui64 gcd(ui64 a, ui64 b)
+	{
+		//TODO: I believe the is the ecluidian algorithm... I'm understanding there to be faster ones available
+		return b == 0 ? a : gcd(b, a % b);
 	}
 } // namespace np::mat
 
-#endif /* NP_ENGINE_MATH_FUNCTIONS_HPP */
+#endif /* NP_ENGINE_MAT_MATH_FUNCTIONS_HPP */

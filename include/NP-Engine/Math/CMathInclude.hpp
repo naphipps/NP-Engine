@@ -4,8 +4,8 @@
 //
 //##===----------------------------------------------------------------------===##//
 
-#ifndef NP_ENGINE_CMATH_INCLUDE_HPP
-#define NP_ENGINE_CMATH_INCLUDE_HPP
+#ifndef NP_ENGINE_MAT_CMATH_INCLUDE_HPP
+#define NP_ENGINE_MAT_CMATH_INCLUDE_HPP
 
 #include <cmath>
 
@@ -733,4 +733,4 @@ namespace std
 } // namespace std
 
 #endif
-#endif /* NP_ENGINE_CMATH_INCLUDE_HPP */
+#endif /* NP_ENGINE_MAT_CMATH_INCLUDE_HPP */

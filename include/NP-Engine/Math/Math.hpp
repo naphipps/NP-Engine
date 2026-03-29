@@ -4,8 +4,8 @@
 //
 //##===----------------------------------------------------------------------===##//
 
-#ifndef NP_ENGINE_MATH_HPP
-#define NP_ENGINE_MATH_HPP
+#ifndef NP_ENGINE_MAT_MATH_HPP
+#define NP_ENGINE_MAT_MATH_HPP
 
 #include "NP-Engine/Foundation/Foundation.hpp"
 
@@ -21,4 +21,4 @@
 
 // TODO: add Polygon and PolygonUtility - these might should go to alg
 
-#endif /* NP_ENGINE_MATH_HPP */
+#endif /* NP_ENGINE_MAT_MATH_HPP */

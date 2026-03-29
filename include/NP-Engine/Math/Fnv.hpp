@@ -22,7 +22,7 @@ namespace np::mat
 		<http://www.isthe.com/chongo/tech/comp/fnv/index.html#FNV-1a>
 	*/
 
-	static inline ui32 HashFnv1aUi32(const void* src, siz byte_count, ui32 hash = (ui32)0x811c9dc5)
+	static inline ui32 hash_fnv1a_ui32(const void* src, siz byte_count, ui32 hash = (ui32)0x811c9dc5)
 	{
 		const ui32 prime = 0x01000193;
 		ui8* it = static_cast<ui8*>(const_cast<void*>(src));
@@ -37,7 +37,7 @@ namespace np::mat
 		return hash;
 	}
 
-	static inline ui64 HashFnv1aUi64(const void* src, siz byte_count, ui64 hash = (ui64)0xcbf29ce484222325ULL)
+	static inline ui64 hash_fnv1a_ui64(const void* src, siz byte_count, ui64 hash = (ui64)0xcbf29ce484222325ULL)
 	{
 		const ui64 prime = 0x100000001b3ULL;
 		ui8* it = static_cast<ui8*>(const_cast<void*>(src));

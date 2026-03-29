@@ -60,7 +60,7 @@ namespace np::gpu
 		SamplerResourceUsage(ui32 value): ResourceUsage(value) {}
 	};
 
-	using LodBounds = mat::DblRange;
+	using LodBounds = mat::range_dbl;
 
 	struct SamplerResource : public Resource
 	{

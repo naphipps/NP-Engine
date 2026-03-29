@@ -23,7 +23,7 @@ namespace np::alg
 		DmsPoint _midpoint;
 
 	public:
-		DmsLineSegment(const DmsPoint& a, const DmsPoint& b): _a(a), _b(b), _midpoint(mat::Midpoint(_a, _b)) {}
+		DmsLineSegment(const DmsPoint& a, const DmsPoint& b): _a(a), _b(b), _midpoint(mat::midpoint(_a, _b)) {}
 
 		virtual ~DmsLineSegment() = default;
 

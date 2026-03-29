@@ -128,7 +128,7 @@ namespace np::gpu::__detail
 		}
 	};
 
-	struct VulkanDepthBounds : public mat::FltRange
+	struct VulkanDepthBounds : public mat::range_flt
 	{
 		VulkanDepthBounds() = default;
 

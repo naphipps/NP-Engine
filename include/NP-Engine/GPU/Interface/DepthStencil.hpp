@@ -55,7 +55,7 @@ namespace np::gpu
 		siz referenceValue = 0; //used in compareOperation and if any StencilOperation is set to Replace
 	};
 
-	using DepthBounds = mat::DblRange;
+	using DepthBounds = mat::range_dbl;
 
 	class StencilFace : public enm_ui32
 	{

@@ -210,7 +210,7 @@ namespace std
 	{
 		::np::siz operator()(const ::np::net::Ipv4& ipv4) const noexcept
 		{
-			return ::np::mat::HashFnv1aUi64(ipv4.bytes.data(), ipv4.bytes.size());
+			return ::np::mat::hash_fnv1a_ui64(ipv4.bytes.data(), ipv4.bytes.size());
 		}
 	};
 
@@ -219,7 +219,7 @@ namespace std
 	{
 		::np::siz operator()(const ::np::net::Ipv6& ipv6) const noexcept
 		{
-			return ::np::mat::HashFnv1aUi64(ipv6.shorts.data(), ipv6.shorts.size() * sizeof(::np::ui16));
+			return ::np::mat::hash_fnv1a_ui64(ipv6.shorts.data(), ipv6.shorts.size() * sizeof(::np::ui16));
 		}
 	};
 
@@ -229,7 +229,7 @@ namespace std
 		::np::siz operator()(const pair<::np::net::Ipv4, ::np::ui16>& ipv4_prt) const noexcept
 		{
 			::np::siz ipv4_h = hash<::np::net::Ipv4>{}(ipv4_prt.first);
-			return ::np::mat::HashFnv1aUi64(&ipv4_prt.second, sizeof(::np::ui16), ipv4_h);
+			return ::np::mat::hash_fnv1a_ui64(&ipv4_prt.second, sizeof(::np::ui16), ipv4_h);
 		}
 	};
 
@@ -239,7 +239,7 @@ namespace std
 		::np::siz operator()(const pair<::np::net::Ipv6, ::np::ui16>& ipv6_prt) const noexcept
 		{
 			::np::siz ipv6_h = hash<::np::net::Ipv6>{}(ipv6_prt.first);
-			return ::np::mat::HashFnv1aUi64(&ipv6_prt.second, sizeof(::np::ui16), ipv6_h);
+			return ::np::mat::hash_fnv1a_ui64(&ipv6_prt.second, sizeof(::np::ui16), ipv6_h);
 		}
 	};
 } // namespace std

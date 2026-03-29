@@ -370,7 +370,7 @@ namespace np
 			{
 				const VkImageFormatProperties properties = GetVkImageFormatProperties(format, type, tiling, usage, flags);
 
-				mat::SizRange range{VulkanSampleCount::AllVkSampleCountFlagBitsArray.size() - 1, 0};
+				mat::range_siz range{VulkanSampleCount::AllVkSampleCountFlagBitsArray.size() - 1, 0};
 				siz index = 0;
 
 				for (siz i = 0; i < VulkanSampleCount::AllVkSampleCountFlagBitsArray.size(); i++)

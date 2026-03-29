@@ -25,7 +25,7 @@ namespace np::geom
 
 		virtual bl IntersectsWith(const Circular<DIMENSION_COUNT, T>& other) const
 		{
-			return mat::DistanceSquared(Center, other.Center) <= mat::Pow2(Radius + other.Radius);
+			return mat::distance_squared(Center, other.Center) <= mat::pow_2(Radius + other.Radius);
 		}
 	};
 

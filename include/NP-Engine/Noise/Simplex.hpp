@@ -388,7 +388,7 @@ namespace np::noiz
 			// No need to skew the input space in 1D
 
 			// Corners coordinates (nearest integer values):
-			i32 i0 = mat::FastFloor(x);
+			i32 i0 = mat::fast_floor(x);
 			i32 i1 = i0 + 1;
 			// Distances to corners (between 0 and 1):
 			flt x0 = x - i0;
@@ -426,8 +426,8 @@ namespace np::noiz
 			flt s = (x + y) * F2; // Hairy factor for 2D
 			flt xs = x + s;
 			flt ys = y + s;
-			i32 i = mat::FastFloor(xs);
-			i32 j = mat::FastFloor(ys);
+			i32 i = mat::fast_floor(xs);
+			i32 j = mat::fast_floor(ys);
 
 			// Unskew the cell origin back to (x,y) space
 			flt t = static_cast<flt>(i + j) * G2;
@@ -519,9 +519,9 @@ namespace np::noiz
 
 			// Skew the input space to determine which simplex cell we're in
 			flt s = (x + y + z) * F3; // Very nice and simple skew factor for 3D
-			i32 i = mat::FastFloor(x + s);
-			i32 j = mat::FastFloor(y + s);
-			i32 k = mat::FastFloor(z + s);
+			i32 i = mat::fast_floor(x + s);
+			i32 j = mat::fast_floor(y + s);
+			i32 k = mat::fast_floor(z + s);
 			flt t = (i + j + k) * G3;
 			flt X0 = i - t; // Unskew the cell origin back to (x,y,z) space
 			flt Y0 = j - t;
@@ -678,10 +678,10 @@ namespace np::noiz
 			static const flt G4 = (flt)(5.f - ::std::sqrt(5.f)) / 20.f; // TODO: consider writing out the result
 
 			flt t = (x + y + z + w) * F4;
-			i32 i = mat::FastFloor(x + t);
-			i32 j = mat::FastFloor(y + t);
-			i32 k = mat::FastFloor(z + t);
-			i32 l = mat::FastFloor(w + t);
+			i32 i = mat::fast_floor(x + t);
+			i32 j = mat::fast_floor(y + t);
+			i32 k = mat::fast_floor(z + t);
+			i32 l = mat::fast_floor(w + t);
 			t = (i + j + k + l) * G4;
 			flt X0 = i - t;
 			flt Y0 = j - t;
@@ -965,36 +965,36 @@ namespace np::noiz
 			}
 
 			output /= denom;
-			output = mat::Flip(output);
+			output = mat::flip(output);
 
 			switch (_rigidity)
 			{
 			case 0:
-				output = mat::Pow0(output);
+				output = mat::pow_0(output);
 				break;
 			case 1:
-				output = mat::Pow1(output);
+				output = mat::pow_1(output);
 				break;
 			case 2:
-				output = mat::Pow2(output);
+				output = mat::pow_2(output);
 				break;
 			case 3:
-				output = mat::Pow3(output);
+				output = mat::pow_3(output);
 				break;
 			case 4:
-				output = mat::Pow4(output);
+				output = mat::pow_4(output);
 				break;
 			case 5:
-				output = mat::Pow5(output);
+				output = mat::pow_5(output);
 				break;
 			case 6:
-				output = mat::Pow6(output);
+				output = mat::pow_6(output);
 				break;
 			case 7:
-				output = mat::Pow7(output);
+				output = mat::pow_7(output);
 				break;
 			case 8:
-				output = mat::Pow8(output);
+				output = mat::pow_8(output);
 				break;
 			default:
 				output = ::std::pow(output, _rigidity);
@@ -1020,36 +1020,36 @@ namespace np::noiz
 			}
 
 			output /= denom;
-			output = mat::Flip(output);
+			output = mat::flip(output);
 
 			switch (_rigidity)
 			{
 			case 0:
-				output = mat::Pow0(output);
+				output = mat::pow_0(output);
 				break;
 			case 1:
-				output = mat::Pow1(output);
+				output = mat::pow_1(output);
 				break;
 			case 2:
-				output = mat::Pow2(output);
+				output = mat::pow_2(output);
 				break;
 			case 3:
-				output = mat::Pow3(output);
+				output = mat::pow_3(output);
 				break;
 			case 4:
-				output = mat::Pow4(output);
+				output = mat::pow_4(output);
 				break;
 			case 5:
-				output = mat::Pow5(output);
+				output = mat::pow_5(output);
 				break;
 			case 6:
-				output = mat::Pow6(output);
+				output = mat::pow_6(output);
 				break;
 			case 7:
-				output = mat::Pow7(output);
+				output = mat::pow_7(output);
 				break;
 			case 8:
-				output = mat::Pow8(output);
+				output = mat::pow_8(output);
 				break;
 			default:
 				output = ::std::pow(output, _rigidity);
@@ -1075,36 +1075,36 @@ namespace np::noiz
 			}
 
 			output /= denom;
-			output = mat::Flip(output);
+			output = mat::flip(output);
 
 			switch (_rigidity)
 			{
 			case 0:
-				output = mat::Pow0(output);
+				output = mat::pow_0(output);
 				break;
 			case 1:
-				output = mat::Pow1(output);
+				output = mat::pow_1(output);
 				break;
 			case 2:
-				output = mat::Pow2(output);
+				output = mat::pow_2(output);
 				break;
 			case 3:
-				output = mat::Pow3(output);
+				output = mat::pow_3(output);
 				break;
 			case 4:
-				output = mat::Pow4(output);
+				output = mat::pow_4(output);
 				break;
 			case 5:
-				output = mat::Pow5(output);
+				output = mat::pow_5(output);
 				break;
 			case 6:
-				output = mat::Pow6(output);
+				output = mat::pow_6(output);
 				break;
 			case 7:
-				output = mat::Pow7(output);
+				output = mat::pow_7(output);
 				break;
 			case 8:
-				output = mat::Pow8(output);
+				output = mat::pow_8(output);
 				break;
 			default:
 				output = ::std::pow(output, _rigidity);
@@ -1131,36 +1131,36 @@ namespace np::noiz
 			}
 
 			output /= denom;
-			output = mat::Flip(output);
+			output = mat::flip(output);
 
 			switch (_rigidity)
 			{
 			case 0:
-				output = mat::Pow0(output);
+				output = mat::pow_0(output);
 				break;
 			case 1:
-				output = mat::Pow1(output);
+				output = mat::pow_1(output);
 				break;
 			case 2:
-				output = mat::Pow2(output);
+				output = mat::pow_2(output);
 				break;
 			case 3:
-				output = mat::Pow3(output);
+				output = mat::pow_3(output);
 				break;
 			case 4:
-				output = mat::Pow4(output);
+				output = mat::pow_4(output);
 				break;
 			case 5:
-				output = mat::Pow5(output);
+				output = mat::pow_5(output);
 				break;
 			case 6:
-				output = mat::Pow6(output);
+				output = mat::pow_6(output);
 				break;
 			case 7:
-				output = mat::Pow7(output);
+				output = mat::pow_7(output);
 				break;
 			case 8:
-				output = mat::Pow8(output);
+				output = mat::pow_8(output);
 				break;
 			default:
 				output = ::std::pow(output, _rigidity);
@@ -1186,36 +1186,36 @@ namespace np::noiz
 			}
 
 			output /= denom;
-			output = mat::Flip(output);
+			output = mat::flip(output);
 
 			switch (_rigidity)
 			{
 			case 0:
-				output = mat::Pow0(output);
+				output = mat::pow_0(output);
 				break;
 			case 1:
-				output = mat::Pow1(output);
+				output = mat::pow_1(output);
 				break;
 			case 2:
-				output = mat::Pow2(output);
+				output = mat::pow_2(output);
 				break;
 			case 3:
-				output = mat::Pow3(output);
+				output = mat::pow_3(output);
 				break;
 			case 4:
-				output = mat::Pow4(output);
+				output = mat::pow_4(output);
 				break;
 			case 5:
-				output = mat::Pow5(output);
+				output = mat::pow_5(output);
 				break;
 			case 6:
-				output = mat::Pow6(output);
+				output = mat::pow_6(output);
 				break;
 			case 7:
-				output = mat::Pow7(output);
+				output = mat::pow_7(output);
 				break;
 			case 8:
-				output = mat::Pow8(output);
+				output = mat::pow_8(output);
 				break;
 			default:
 				output = ::std::pow(output, _rigidity);
@@ -1242,36 +1242,36 @@ namespace np::noiz
 			}
 
 			output /= denom;
-			output = mat::Flip(output);
+			output = mat::flip(output);
 
 			switch (_rigidity)
 			{
 			case 0:
-				output = mat::Pow0(output);
+				output = mat::pow_0(output);
 				break;
 			case 1:
-				output = mat::Pow1(output);
+				output = mat::pow_1(output);
 				break;
 			case 2:
-				output = mat::Pow2(output);
+				output = mat::pow_2(output);
 				break;
 			case 3:
-				output = mat::Pow3(output);
+				output = mat::pow_3(output);
 				break;
 			case 4:
-				output = mat::Pow4(output);
+				output = mat::pow_4(output);
 				break;
 			case 5:
-				output = mat::Pow5(output);
+				output = mat::pow_5(output);
 				break;
 			case 6:
-				output = mat::Pow6(output);
+				output = mat::pow_6(output);
 				break;
 			case 7:
-				output = mat::Pow7(output);
+				output = mat::pow_7(output);
 				break;
 			case 8:
-				output = mat::Pow8(output);
+				output = mat::pow_8(output);
 				break;
 			default:
 				output = ::std::pow(output, _rigidity);
@@ -1299,36 +1299,36 @@ namespace np::noiz
 			}
 
 			output /= denom;
-			output = mat::Flip(output);
+			output = mat::flip(output);
 
 			switch (_rigidity)
 			{
 			case 0:
-				output = mat::Pow0(output);
+				output = mat::pow_0(output);
 				break;
 			case 1:
-				output = mat::Pow1(output);
+				output = mat::pow_1(output);
 				break;
 			case 2:
-				output = mat::Pow2(output);
+				output = mat::pow_2(output);
 				break;
 			case 3:
-				output = mat::Pow3(output);
+				output = mat::pow_3(output);
 				break;
 			case 4:
-				output = mat::Pow4(output);
+				output = mat::pow_4(output);
 				break;
 			case 5:
-				output = mat::Pow5(output);
+				output = mat::pow_5(output);
 				break;
 			case 6:
-				output = mat::Pow6(output);
+				output = mat::pow_6(output);
 				break;
 			case 7:
-				output = mat::Pow7(output);
+				output = mat::pow_7(output);
 				break;
 			case 8:
-				output = mat::Pow8(output);
+				output = mat::pow_8(output);
 				break;
 			default:
 				output = ::std::pow(output, _rigidity);
@@ -1340,37 +1340,37 @@ namespace np::noiz
 
 		inline flt BillowFractal(flt x) const
 		{
-			return mat::Flip(RigidFractal(x));
+			return mat::flip(RigidFractal(x));
 		}
 
 		inline flt BillowFractal(flt x, flt y) const
 		{
-			return mat::Flip(RigidFractal(x, y));
+			return mat::flip(RigidFractal(x, y));
 		}
 
 		inline flt BillowFractal(flt x, flt y, flt z) const
 		{
-			return mat::Flip(RigidFractal(x, y, z));
+			return mat::flip(RigidFractal(x, y, z));
 		}
 
 		inline flt BillowFractal(flt x, flt y, flt z, flt w) const
 		{
-			return mat::Flip(RigidFractal(x, y, z, w));
+			return mat::flip(RigidFractal(x, y, z, w));
 		}
 
 		inline flt BillowFractional(flt x) const
 		{
-			return mat::Flip(RigidFractional(x));
+			return mat::flip(RigidFractional(x));
 		}
 
 		inline flt BillowFractional(flt x, flt y) const
 		{
-			return mat::Flip(RigidFractional(x, y));
+			return mat::flip(RigidFractional(x, y));
 		}
 
 		inline flt BillowFractional(flt x, flt y, flt z) const
 		{
-			return mat::Flip(RigidFractional(x, y, z));
+			return mat::flip(RigidFractional(x, y, z));
 		}
 
 		inline flt WarpFractal(flt x) const

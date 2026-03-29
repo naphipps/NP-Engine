@@ -85,7 +85,7 @@ namespace np::alg // TODO: refactor DMS stuff to DualMarchingSquares
 
 		void AddLineSegment(con::uset<DmsLineSegment>& segments, const DmsPoint& a, const DmsPoint& b)
 		{
-			segments.emplace(mat::RoundTo32nd(a + 0.5), mat::RoundTo32nd(b + 0.5));
+			segments.emplace(mat::round_to_32nd(a + 0.5), mat::round_to_32nd(b + 0.5));
 		}
 
 		/*

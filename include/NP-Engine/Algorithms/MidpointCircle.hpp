@@ -74,7 +74,7 @@ namespace np::alg
 			}
 		}
 
-		::std::sort(points.begin(), points.end(), mat::AngleComparerCCW<T>);
+		::std::sort(points.begin(), points.end(), mat::angle_comparer_ccw<T>);
 
 		return points;
 	}
@@ -224,7 +224,7 @@ namespace np::alg
 							::glm::vec<2, T> ao{offset.x - a.x, offset.y - a.y};
 							::glm::vec<2, T> bo{offset.x - b.x, offset.y - b.y};
 
-							return mat::AngleComparerCCW<T>(ao, bo);
+							return mat::angle_comparer_ccw<T>(ao, bo);
 						});
 		}
 
