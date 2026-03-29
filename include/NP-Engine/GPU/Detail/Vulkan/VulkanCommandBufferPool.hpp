@@ -111,9 +111,10 @@ namespace np::gpu::__detail
 		static VkCommandPool CreateVkCommandPool(mem::sptr<VulkanLogicalDevice> device, VulkanCommandBufferPoolUsage usage,
 												 DeviceQueueFamily family)
 		{
+			mem::sptr<VulkanInstance> instance = device->GetPhysicalDevice().GetDetailInstance();
 			VkCommandPoolCreateInfo info = CreateVkInfo(usage, family);
 			VkCommandPool pool = nullptr;
-			VkResult result = vkCreateCommandPool(*device, &info, nullptr, &pool);
+			VkResult result = vkCreateCommandPool(*device, &info, instance->GetVulkanAllocationCallbacks(), &pool);
 			return result == VK_SUCCESS ? pool : nullptr;
 		}
 
@@ -127,7 +128,8 @@ namespace np::gpu::__detail
 		{
 			if (_pool)
 			{
-				vkDestroyCommandPool(*_device, _pool, nullptr);
+				mem::sptr<VulkanInstance> instance = _device->GetPhysicalDevice().GetDetailInstance();
+				vkDestroyCommandPool(*_device, _pool, instance->GetVulkanAllocationCallbacks());
 				_pool = nullptr;
 			}
 		}

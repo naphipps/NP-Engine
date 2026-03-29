@@ -79,7 +79,8 @@ namespace np::gpu::__detail
 				device_info.enabledLayerCount = (ui32)enabled_layer_names.size();
 				device_info.ppEnabledLayerNames = enabled_layer_names.data();
 
-				VkResult result = vkCreateDevice(physical_device, &device_info, nullptr, &logical_device);
+				mem::sptr<VulkanInstance> instance = physical_device.GetDetailInstance();
+				VkResult result = vkCreateDevice(physical_device, &device_info, instance->GetVulkanAllocationCallbacks(), &logical_device);
 				if (result != VK_SUCCESS)
 					logical_device = nullptr;
 			}
@@ -103,7 +104,8 @@ namespace np::gpu::__detail
 		{
 			if (_device)
 			{
-				vkDestroyDevice(_device, nullptr);
+				mem::sptr<VulkanInstance> instance = _physical_device.GetDetailInstance();
+				vkDestroyDevice(_device, instance->GetVulkanAllocationCallbacks());
 				_device = nullptr;
 			}
 		}

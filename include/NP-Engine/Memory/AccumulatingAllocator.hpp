@@ -91,7 +91,8 @@ namespace np::mem
 			block b = allocate(size, alignment);
 			if (contains(b_))
 			{
-				copy_bytes(b.begin(), b_.begin(), b_.size);
+				const siz byte_count = b.size < b_.size ? b.size : b_.size;
+				copy_bytes(b.begin(), b_.begin(), byte_count);
 				deallocate(b_);
 				b_.invalidate();
 			}

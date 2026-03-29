@@ -158,16 +158,19 @@ namespace np::gpu::__detail
 										 VulkanCompareOperation op, VulkanLodBounds lod_bounds, VulkanSamplerBorder border,
 										 VulkanSamplerAddressModes address_modes)
 		{
-			const VkPhysicalDeviceProperties properties = device->GetLogicalDevice()->GetPhysicalDevice().GetVkProperties();
-			const VkPhysicalDeviceFeatures features = device->GetLogicalDevice()->GetPhysicalDevice().GetVkFeatures();
+			mem::sptr<VulkanLogicalDevice> logical_device = device->GetLogicalDevice();
+			const VulkanPhysicalDevice physical_device = logical_device->GetPhysicalDevice();
+			const VkPhysicalDeviceProperties properties = physical_device.GetVkProperties();
+			const VkPhysicalDeviceFeatures features = physical_device.GetVkFeatures();
 			anisotrophy = features.samplerAnisotropy == VK_TRUE
 				? ::std::clamp(anisotrophy, 1.f, properties.limits.maxSamplerAnisotropy)
 				: 1.f;
 
 			VkSamplerCreateInfo info = CreateVkInfo(usage, anisotrophy, op, lod_bounds, border, address_modes);
 
+			mem::sptr<VulkanInstance> instance = physical_device.GetDetailInstance();
 			VkSampler sampler = nullptr;
-			VkResult result = vkCreateSampler(*device->GetLogicalDevice(), &info, nullptr, &sampler);
+			VkResult result = vkCreateSampler(*logical_device, &info, instance->GetVulkanAllocationCallbacks(), &sampler);
 			return result == VK_SUCCESS ? sampler : nullptr;
 		}
 
@@ -188,7 +191,8 @@ namespace np::gpu::__detail
 		{
 			if (_sampler)
 			{
-				vkDestroySampler(*_device->GetLogicalDevice(), _sampler, nullptr);
+				mem::sptr<VulkanInstance> instance = _device->GetDetailInstance();
+				vkDestroySampler(*_device->GetLogicalDevice(), _sampler, instance->GetVulkanAllocationCallbacks());
 				_sampler = nullptr;
 			}
 		}

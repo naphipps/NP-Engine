@@ -227,8 +227,9 @@ namespace np::gpu::__detail
 			info.dependencyCount = subpass_dependencies.size();
 			info.pDependencies = subpass_dependencies.empty() ? nullptr : subpass_dependencies.data();
 
+			mem::sptr<VulkanInstance> instance = device->GetDetailInstance();
 			VkRenderPass render_pass = nullptr;
-			VkResult result = vkCreateRenderPass(*device->GetLogicalDevice(), &info, nullptr, &render_pass);
+			VkResult result = vkCreateRenderPass(*device->GetLogicalDevice(), &info, instance->GetVulkanAllocationCallbacks(), &render_pass);
 			return result == VK_SUCCESS ? render_pass : nullptr;
 		}
 
@@ -246,7 +247,8 @@ namespace np::gpu::__detail
 		{
 			if (_render_pass)
 			{
-				vkDestroyRenderPass(*_device->GetLogicalDevice(), _render_pass, nullptr);
+				mem::sptr<VulkanInstance> instance = _device->GetDetailInstance();
+				vkDestroyRenderPass(*_device->GetLogicalDevice(), _render_pass, instance->GetVulkanAllocationCallbacks());
 				_render_pass = nullptr;
 			}
 		}

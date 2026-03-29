@@ -77,8 +77,9 @@ namespace np::gpu::__detail
 			info.pAttachments = image_views.empty() ? nullptr : image_views.data();
 
 			mem::sptr<VulkanDevice> device = render_pass->GetDevice();
+			mem::sptr<VulkanInstance> instance = device->GetDetailInstance();
 			VkFramebuffer framebuffer = nullptr;
-			VkResult result = vkCreateFramebuffer(*device->GetLogicalDevice(), &info, nullptr, &framebuffer);
+			VkResult result = vkCreateFramebuffer(*device->GetLogicalDevice(), &info, instance->GetVulkanAllocationCallbacks(), &framebuffer);
 			return result == VK_SUCCESS ? framebuffer : nullptr;
 		}
 
@@ -98,7 +99,8 @@ namespace np::gpu::__detail
 			if (_framebuffer)
 			{
 				mem::sptr<VulkanDevice> device = _render_pass->GetDevice();
-				vkDestroyFramebuffer(*device->GetLogicalDevice(), _framebuffer, nullptr);
+				mem::sptr<VulkanInstance> instance = device->GetDetailInstance();
+				vkDestroyFramebuffer(*device->GetLogicalDevice(), _framebuffer, instance->GetVulkanAllocationCallbacks());
 				_framebuffer = nullptr;
 			}
 		}

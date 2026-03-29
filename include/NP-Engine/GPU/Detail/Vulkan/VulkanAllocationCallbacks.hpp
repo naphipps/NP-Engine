@@ -47,15 +47,11 @@ namespace np::gpu::__detail
 
 		static void AllocateNotification(void* user_data, siz size, VkInternalAllocationType type,
 										 VkSystemAllocationScope scope)
-		{
-			//TODO: add some logging?
-		}
+		{}
 
 		static void DeallocateNotification(void* user_data, siz size, VkInternalAllocationType type,
 										   VkSystemAllocationScope scope)
-		{
-			//TODO: add some logging?
-		}
+		{}
 
 		VkAllocationCallbacks CreateVkAllocationCallbacks()
 		{
@@ -67,8 +63,6 @@ namespace np::gpu::__detail
 			_services(services),
 			_callbacks(CreateVkAllocationCallbacks())
 		{}
-
-		//TODO: rule of 5 here? pretty sure, might as well
 
 		operator const VkAllocationCallbacks*() const
 		{

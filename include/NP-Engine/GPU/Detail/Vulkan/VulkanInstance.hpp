@@ -256,7 +256,7 @@ namespace np::gpu::__detail
 			bl layers_and_extensions_found = required_extension_set.empty() && required_layer_set.empty();
 
 			VkInstance instance = nullptr;
-			if (!layers_and_extensions_found || vkCreateInstance(&instance_info, nullptr, &instance) != VK_SUCCESS)
+			if (!layers_and_extensions_found || vkCreateInstance(&instance_info, _allocation_callbacks, &instance) != VK_SUCCESS)
 				instance = nullptr;
 
 			return instance;
@@ -305,7 +305,7 @@ namespace np::gpu::__detail
 
 			if (_instance)
 			{
-				vkDestroyInstance(_instance, nullptr);
+				vkDestroyInstance(_instance, _allocation_callbacks);
 				_instance = nullptr;
 			}
 		}
@@ -323,6 +323,11 @@ namespace np::gpu::__detail
 		virtual mem::sptr<srvc::Services> GetServices() const override
 		{
 			return _services;
+		}
+
+		virtual const VulkanAllocationCallbacks& GetVulkanAllocationCallbacks() const
+		{
+			return _allocation_callbacks;
 		}
 	};
 } // namespace np::gpu::__detail

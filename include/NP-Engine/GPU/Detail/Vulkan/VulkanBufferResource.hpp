@@ -95,8 +95,9 @@ namespace np::gpu::__detail
 			info.queueFamilyIndexCount = family_indices.size();
 			info.pQueueFamilyIndices = family_indices.empty() ? nullptr : family_indices.data();
 
+			mem::sptr<VulkanInstance> instance = device->GetDetailInstance();
 			VkBuffer buffer = nullptr;
-			VkResult result = vkCreateBuffer(*device->GetLogicalDevice(), &info, nullptr, &buffer);
+			VkResult result = vkCreateBuffer(*device->GetLogicalDevice(), &info, instance->GetVulkanAllocationCallbacks(), &buffer);
 			return result == VK_SUCCESS ? buffer : nullptr;
 		}
 
@@ -131,7 +132,8 @@ namespace np::gpu::__detail
 
 			if (_buffer)
 			{
-				vkDestroyBuffer(*_device->GetLogicalDevice(), _buffer, nullptr);
+				mem::sptr<VulkanInstance> instance = _device->GetDetailInstance();
+				vkDestroyBuffer(*_device->GetLogicalDevice(), _buffer, instance->GetVulkanAllocationCallbacks());
 				_buffer = nullptr;
 			}
 		}

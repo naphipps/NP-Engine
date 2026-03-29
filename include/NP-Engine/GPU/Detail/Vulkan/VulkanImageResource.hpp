@@ -257,8 +257,9 @@ namespace np::gpu::__detail
 			info.pQueueFamilyIndices = family_indices.empty() ? nullptr : family_indices.data();
 			info.samples = sample_count.GetVkSampleCountFlagBits();
 
+			mem::sptr<VulkanInstance> instance = device->GetDetailInstance();
 			VkImage image = nullptr;
-			VkResult result = vkCreateImage(*device->GetLogicalDevice(), &info, nullptr, &image);
+			VkResult result = vkCreateImage(*device->GetLogicalDevice(), &info, instance->GetVulkanAllocationCallbacks(), &image);
 			return result == VK_SUCCESS ? image : nullptr;
 		}
 
@@ -364,7 +365,8 @@ namespace np::gpu::__detail
 
 			if (_enable_destroy && _image)
 			{
-				vkDestroyImage(*_device->GetLogicalDevice(), _image, nullptr);
+				mem::sptr<VulkanInstance> instance = _device->GetDetailInstance();
+				vkDestroyImage(*_device->GetLogicalDevice(), _image, instance->GetVulkanAllocationCallbacks());
 				_image = nullptr;
 			}
 		}

@@ -40,8 +40,9 @@ namespace np::gpu::__detail
 		{
 			VkComputePipelineCreateInfo info = CreateVkInfo(shader, layout, usage);
 			mem::sptr<VulkanDevice> device = shader->GetDevice();
+			mem::sptr<VulkanInstance> instance = device->GetDetailInstance();
 			VkPipeline pipeline = nullptr;
-			VkResult result = vkCreateComputePipelines(*device->GetLogicalDevice(), nullptr, 1, &info, nullptr, &pipeline);
+			VkResult result = vkCreateComputePipelines(*device->GetLogicalDevice(), nullptr, 1, &info, instance->GetVulkanAllocationCallbacks(), &pipeline);
 			return result == VK_SUCCESS ? pipeline : nullptr;
 		}
 
@@ -58,7 +59,8 @@ namespace np::gpu::__detail
 			if (_pipeline)
 			{
 				mem::sptr<VulkanDevice> device = _shader->GetDevice();
-				vkDestroyPipeline(*device->GetLogicalDevice(), _pipeline, nullptr);
+				mem::sptr<VulkanInstance> instance = device->GetDetailInstance();
+				vkDestroyPipeline(*device->GetLogicalDevice(), _pipeline, instance->GetVulkanAllocationCallbacks());
 				_pipeline = nullptr;
 			}
 		}

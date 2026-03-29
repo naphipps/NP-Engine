@@ -30,9 +30,10 @@ namespace np::gpu::__detail
 
 		static VkSemaphore CreateVkSemaphore(mem::sptr<VulkanLogicalDevice> device)
 		{
+			mem::sptr<VulkanInstance> instance = device->GetPhysicalDevice().GetDetailInstance();
 			VkSemaphoreCreateInfo info = CreateVkInfo();
 			VkSemaphore semaphore = nullptr;
-			VkResult result = vkCreateSemaphore(*device, &info, nullptr, &semaphore);
+			VkResult result = vkCreateSemaphore(*device, &info, instance->GetVulkanAllocationCallbacks(), &semaphore);
 			return result == VK_SUCCESS ? semaphore : nullptr;
 		}
 
@@ -43,7 +44,8 @@ namespace np::gpu::__detail
 		{
 			if (_semaphore)
 			{
-				vkDestroySemaphore(*_device, _semaphore, nullptr);
+				mem::sptr<VulkanInstance> instance = _device->GetPhysicalDevice().GetDetailInstance();
+				vkDestroySemaphore(*_device, _semaphore, instance->GetVulkanAllocationCallbacks());
 				_semaphore = nullptr;
 			}
 		}

@@ -36,9 +36,10 @@ namespace np::gpu::__detail
 
 		static VkFence CreateVkFence(mem::sptr<VulkanLogicalDevice> device)
 		{
+			mem::sptr<VulkanInstance> instance = device->GetPhysicalDevice().GetDetailInstance();
 			VkFenceCreateInfo info = CreateVkInfo();
 			VkFence fence = nullptr;
-			VkResult result = vkCreateFence(*device, &info, nullptr, &fence);
+			VkResult result = vkCreateFence(*device, &info, instance->GetVulkanAllocationCallbacks(), &fence);
 			return result == VK_SUCCESS ? fence : nullptr;
 		}
 
@@ -52,7 +53,8 @@ namespace np::gpu::__detail
 		{
 			if (_fence)
 			{
-				vkDestroyFence(*_device, _fence, nullptr);
+				mem::sptr<VulkanInstance> instance = _device->GetPhysicalDevice().GetDetailInstance();
+				vkDestroyFence(*_device, _fence, instance->GetVulkanAllocationCallbacks());
 				_fence = nullptr;
 			}
 		}

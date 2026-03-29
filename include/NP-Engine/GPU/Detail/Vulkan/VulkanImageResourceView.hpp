@@ -49,8 +49,9 @@ namespace np::gpu::__detail
 			info.subresourceRange.layerCount = image->GetLayerCount();
 			info.subresourceRange.aspectMask = usage.GetVkAspectFlags(); //TODO: investigate -- what is this?
 
+			mem::sptr<VulkanInstance> instance = device->GetDetailInstance();
 			VkImageView view = nullptr;
-			VkResult result = vkCreateImageView(*device->GetLogicalDevice(), &info, nullptr, &view);
+			VkResult result = vkCreateImageView(*device->GetLogicalDevice(), &info, instance->GetVulkanAllocationCallbacks(), &view);
 			return result == VK_SUCCESS ? view : nullptr;
 		}
 
@@ -65,7 +66,8 @@ namespace np::gpu::__detail
 		{
 			if (_view)
 			{
-				vkDestroyImageView(*_device->GetLogicalDevice(), _view, nullptr);
+				mem::sptr<VulkanInstance> instance = _device->GetDetailInstance();
+				vkDestroyImageView(*_device->GetLogicalDevice(), _view, instance->GetVulkanAllocationCallbacks());
 				_view = nullptr;
 			}
 		}
