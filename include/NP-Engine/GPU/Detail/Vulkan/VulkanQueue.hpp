@@ -240,13 +240,13 @@ namespace np::gpu::__detail
 			return result == VK_SUCCESS;
 		}
 
-		virtual con::vector<bl> Present(const gpu::Present& present_) override
+		virtual PresentResults Present(const gpu::Present& present_) override
 		{
 			const VulkanPresent present{present_};
 			const con::vector<VkSemaphore> wait_semaphores = present.GetVkWaitSemaphores();
 			const con::vector<VkSwapchainKHR> swapchains = present.GetVkSwapchainKHRs();
 			const con::vector<ui32> indices = present.GetImageIndices();
-			con::vector<VkResult> results = present.GetVkResults();
+			con::vector<VkResult> vk_results = present.GetVkResults();
 
 			VkPresentInfoKHR info = present.GetVkPresentInfoKHR();
 			info.waitSemaphoreCount = wait_semaphores.size();
@@ -254,15 +254,20 @@ namespace np::gpu::__detail
 			info.swapchainCount = swapchains.size();
 			info.pSwapchains = swapchains.empty() ? nullptr : swapchains.data();
 			info.pImageIndices = indices.empty() ? nullptr : indices.data();
-			info.pResults = results.empty() ? nullptr : results.data();
+			info.pResults = vk_results.empty() ? nullptr : vk_results.data();
 
-			//mem::sptr<VulkanFence> fence = fence_ ? DetailObject::EnsureIsDetailType(fence_, DetailType::Vulkan) : nullptr;
-			VkResult result = vkQueuePresentKHR(_queue, &info);
+			VkResult vk_result = vkQueuePresentKHR(_queue, &info);
+			PresentResults results{};
+			results.overallResult = VulkanResult{ vk_result };
+			results.individualResults.resize(vk_results.size());
+			for (siz i=0; i<vk_results.size(); i++)
+				results.individualResults[i] = VulkanResult{ vk_results[i] };
+			return results;
+		}
 
-			con::vector<bl> successes(results.size());
-			for (siz i = 0; i < successes.size(); i++)
-				successes[i] = result == VK_SUCCESS && results[i] == VK_SUCCESS;
-			return successes;
+		virtual void WaitUntilIdle() const override
+		{
+			vkQueueWaitIdle(_queue);
 		}
 
 		//void WaitUntilIdle() const

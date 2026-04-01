@@ -16,6 +16,7 @@
 #include "Fence.hpp"
 #include "FrameContext.hpp"
 #include "Device.hpp"
+#include "Result.hpp"
 
 namespace np::gpu
 {
@@ -31,6 +32,12 @@ namespace np::gpu
 	{
 		con::vector<mem::sptr<Semaphore>> waitSemaphores{};
 		con::vector<mem::sptr<FrameContext>> frameContexts{};
+	};
+
+	struct PresentResults
+	{
+		Result overallResult{};
+		con::vector<Result> individualResults{};
 	};
 
 	struct Queue : public DetailObject
@@ -53,7 +60,9 @@ namespace np::gpu
 			returns vector<bl> since we accept vector<sptr<FrameContext>>
 				each bl is the success boolean for each FrameContext presentation attempt
 		*/
-		virtual con::vector<bl> Present(const Present& present) = 0;
+		virtual PresentResults Present(const Present& present) = 0;
+
+		virtual void WaitUntilIdle() const = 0;
 	};
 } //namespace np::gpu
 

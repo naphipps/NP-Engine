@@ -18,7 +18,7 @@ namespace np::gpu::__detail
 	class VulkanFormat : public Format
 	{
 	protected:
-		static Format GetVkFormatToFormat(VkFormat vk_format)
+		static Format ToFormat(VkFormat vk_format)
 		{
 			Format format = 0;
 
@@ -210,7 +210,7 @@ namespace np::gpu::__detail
 
 		VulkanFormat(ui32 value): Format(value) {}
 
-		VulkanFormat(VkFormat vk_format): Format(GetVkFormatToFormat(vk_format)) {}
+		VulkanFormat(VkFormat vk_format): Format(ToFormat(vk_format)) {}
 
 		bl HasStencilComponent() const
 		{
@@ -219,8 +219,7 @@ namespace np::gpu::__detail
 				format == VK_FORMAT_D24_UNORM_S8_UINT; //TODO: support these! consider VulkanFormat::DepthAndStencil
 		}
 
-		VkFormat GetVkFormat() const //TODO: I think I like the idea of renaming these types of getters to "GetVk____()" to
-									 //clarify the "Vk" portion (remove this todo when every object complies)
+		VkFormat GetVkFormat() const
 		{
 			const ui32 size = GetComponentSize();
 			const ui32 count = GetComponentCount();

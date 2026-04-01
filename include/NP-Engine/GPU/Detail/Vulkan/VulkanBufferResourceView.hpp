@@ -25,18 +25,18 @@ namespace np::gpu::__detail
 
 		static VkBufferView CreateBufferView(mem::sptr<VulkanLogicalDevice> device, VkBufferViewCreateInfo info)
 		{
+			mem::sptr<VulkanInstance> instance = device->GetPhysicalDevice().GetDetailInstance();
 			VkBufferView view = nullptr;
-			if (vkCreateBufferView(*device, &info, nullptr, &view) != VK_SUCCESS)
-				view = nullptr;
-
-			return view;
+			VkResult result = vkCreateBufferView(*device, &info, instance->GetVulkanAllocationCallbacks(), &view);
+			return result == VK_SUCCESS ? view : nullptr;
 		}
 
 		void Dispose()
 		{
 			if (_device && _buffer_view)
 			{
-				vkDestroyBufferView(*_device, _buffer_view, nullptr);
+				mem::sptr<VulkanInstance> instance = _device->GetPhysicalDevice().GetDetailInstance();
+				vkDestroyBufferView(*_device, _buffer_view, instance->GetVulkanAllocationCallbacks());
 				_buffer_view = nullptr;
 			}
 

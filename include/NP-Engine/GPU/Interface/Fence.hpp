@@ -27,8 +27,6 @@ namespace np::gpu
 			TODO: what units is timeout??
 		*/
 		virtual void Wait(siz timeout) const = 0;
-
-		//TODO: do we want to support resetting fences? feels like we could just create new ones just as easily....
 	};
 } // namespace np::gpu
 

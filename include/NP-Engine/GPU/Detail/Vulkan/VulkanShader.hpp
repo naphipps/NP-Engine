@@ -95,7 +95,10 @@ namespace np::gpu::__detail
 				VkShaderModuleCreateInfo info = CreateVkInfo();
 				info.codeSize = _size;
 				info.pCode = info.codeSize > 0 ? _bytes.data() : nullptr;
-				if (vkCreateShaderModule(*_device->GetLogicalDevice(), &info, nullptr, &_module) != VK_SUCCESS)
+
+				mem::sptr<VulkanInstance> instance = _device->GetDetailInstance();
+				VkResult result = vkCreateShaderModule(*_device->GetLogicalDevice(), &info, instance->GetVulkanAllocationCallbacks(), &_module);
+				if (result != VK_SUCCESS)
 					_module = nullptr;
 			}
 		}
@@ -104,7 +107,8 @@ namespace np::gpu::__detail
 		{
 			if (_module)
 			{
-				vkDestroyShaderModule(*_device->GetLogicalDevice(), _module, nullptr);
+				mem::sptr<VulkanInstance> instance = _device->GetDetailInstance();
+				vkDestroyShaderModule(*_device->GetLogicalDevice(), _module, instance->GetVulkanAllocationCallbacks());
 				_module = nullptr;
 			}
 		}

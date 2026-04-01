@@ -86,16 +86,14 @@ namespace np::gpu::__detail
 
 			VkPipelineLayoutCreateInfo info = CreateVkInfo();
 			info.setLayoutCount = (ui32)layouts.size();
-			info.pSetLayouts = layouts.empty()
-				? nullptr
-				: layouts.data(); //TODO: we should use the empty check everywhere we do this type of thing
+			info.pSetLayouts = layouts.empty() ? nullptr : layouts.data();
 			info.pushConstantRangeCount = (ui32)ranges.size();
 			info.pPushConstantRanges = ranges.empty() ? nullptr : ranges.data();
 
+			mem::sptr<VulkanInstance> instance = device->GetDetailInstance();
 			VkPipelineLayout layout = nullptr;
-			if (vkCreatePipelineLayout(*device->GetLogicalDevice(), &info, nullptr, &layout) != VK_SUCCESS)
-				layout = nullptr;
-			return layout;
+			VkResult result = vkCreatePipelineLayout(*device->GetLogicalDevice(), &info, instance->GetVulkanAllocationCallbacks(), &layout);
+			return result == VK_SUCCESS ? layout : nullptr;
 		}
 
 		static bl IsPushDataEntryCompatible(const PushDataEntry& a, const PushDataEntry& b)
@@ -104,9 +102,9 @@ namespace np::gpu::__detail
 		}
 
 	public:
-		VulkanPipelineResourceLayout(
-			mem::sptr<Device> device, const con::vector<mem::sptr<ResourceLayout>>& resource_layouts,
-			PushData push_data): //TODO: make sure all the things are checking our physical device's limits
+		//TODO: make sure all the things are checking our physical device's limits
+		VulkanPipelineResourceLayout(mem::sptr<Device> device,
+			const con::vector<mem::sptr<ResourceLayout>>& resource_layouts, PushData push_data): 
 			PipelineResourceLayout(),
 			_device(device),
 			_resource_layouts(resource_layouts.begin(), resource_layouts.end()),
@@ -118,7 +116,8 @@ namespace np::gpu::__detail
 		{
 			if (_pipeline_layout)
 			{
-				vkDestroyPipelineLayout(*_device->GetLogicalDevice(), _pipeline_layout, nullptr);
+				mem::sptr<VulkanInstance> instance = _device->GetDetailInstance();
+				vkDestroyPipelineLayout(*_device->GetLogicalDevice(), _pipeline_layout, instance->GetVulkanAllocationCallbacks());
 				_pipeline_layout = nullptr;
 			}
 		}

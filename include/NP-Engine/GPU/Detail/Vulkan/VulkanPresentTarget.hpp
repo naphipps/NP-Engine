@@ -93,8 +93,8 @@ namespace np::gpu::__detail
 			return _window;
 		}
 
-		VkExtent2D GetFramebufferExtent()
-			const //TODO: do we want to rename this to GetExtent? seems straight forward enough to me
+		//TODO: do we want to rename this to GetExtent? seems straight forward enough to me
+		VkExtent2D GetFramebufferExtent() const 
 		{
 			return _framebuffer_extent;
 		}

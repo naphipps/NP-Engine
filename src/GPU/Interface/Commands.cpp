@@ -79,13 +79,13 @@ namespace np::gpu
 			break;
 
 			//set
-		/*
 		case CommandType::SetViewports:
 			command = mem::create_sptr<__detail::VulkanSetViewportsCommand>(services->GetAllocator());
 			break;
 		case CommandType::SetScissors:
 			command = mem::create_sptr<__detail::VulkanSetScissorsCommand>(services->GetAllocator());
 			break;
+		/*
 		case CommandType::SetRasterizationDepthBias:
 			command = mem::create_sptr<__detail::VulkanSetRasterizationDepthBiasCommand>(services->GetAllocator());
 			break;

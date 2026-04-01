@@ -19,20 +19,27 @@
 #include "VulkanImageResource.hpp"
 #include "VulkanImageResourceView.hpp"
 #include "VulkanSemaphore.hpp"
+#include "VulkanResult.hpp"
 
 namespace np::gpu::__detail
 {
 	struct VulkanFrame : public Frame
 	{
-		mem::sptr<srvc::Services> services = nullptr;
-		siz index = 0;
-		mem::sptr<VulkanImageResource> image = nullptr;
-		mem::sptr<VulkanImageResourceView> view = nullptr;
+		mem::sptr<srvc::Services> services;
+		siz index;
+		mem::sptr<VulkanImageResource> image;
+		mem::sptr<VulkanImageResourceView> view;
 
-		mem::sptr<VulkanSemaphore> readySemaphore = nullptr;
-		mem::sptr<VulkanFence> readyFence = nullptr;
+		VulkanFrame(mem::sptr<srvc::Services> services_, siz index_, mem::sptr<VulkanImageResource> image_, mem::sptr<VulkanImageResourceView> view_) :
+			services(services_),
+			index(index_),
+			image(image_),
+			view(view_)
+		{}
 
-		mem::sptr<VulkanSemaphore> completedSemaphore = nullptr;
+		VulkanFrame() : VulkanFrame(nullptr, 0, nullptr, nullptr) {}
+
+		virtual ~VulkanFrame() = default;
 
 		virtual DetailType GetDetailType() const override
 		{
@@ -48,21 +55,6 @@ namespace np::gpu::__detail
 		{
 			return view;
 		}
-
-		virtual mem::sptr<Semaphore> GetReadySemaphore() const override
-		{
-			return readySemaphore;
-		}
-
-		virtual mem::sptr<Fence> GetReadyFence() const override
-		{
-			return readyFence;
-		}
-
-		virtual mem::sptr<Semaphore> GetCompletedSemaphore() const override
-		{
-			return completedSemaphore;
-		}
 	};
 
 	class VulkanFrameContext : public FrameContext
@@ -77,7 +69,7 @@ namespace np::gpu::__detail
 		ui32 _acquired_frame_index;
 		ui32 _prev_acquired_frame_index;
 
-		static VkSwapchainCreateInfoKHR CreateVkInfo(mem::sptr<VulkanDevice> device, VkExtent2D extent)
+		static VkSwapchainCreateInfoKHR CreateVkInfo(mem::sptr<VulkanDevice> device, VkExtent2D extent, VkSwapchainKHR old_swapchain)
 		{
 			const VkSurfaceFormatKHR surface_format = device->GetVkSurfaceFormat();
 			mem::sptr<VulkanPresentTarget> target = device->GetPresentTarget();
@@ -87,16 +79,15 @@ namespace np::gpu::__detail
 			info.imageFormat = surface_format.format;
 			info.imageColorSpace = surface_format.colorSpace;
 			info.imageArrayLayers = 1;
-
 			info.presentMode = device->GetVkPresentMode();
-
 			info.clipped = VK_TRUE;
 			info.imageExtent = extent;
+			info.oldSwapchain = old_swapchain;
 			return info;
 		}
 
 		static VkSwapchainKHR CreateVkSwapchain(mem::sptr<VulkanDevice> device,
-												const con::vector<DeviceQueueFamily>& queue_families, VkExtent2D extent)
+												const con::vector<DeviceQueueFamily>& queue_families, VkExtent2D extent, VkSwapchainKHR old_swapchain)
 		{
 			const VulkanPhysicalDevice physical_device = device->GetLogicalDevice()->GetPhysicalDevice();
 			mem::sptr<VulkanPresentTarget> target = device->GetPresentTarget();
@@ -106,7 +97,7 @@ namespace np::gpu::__detail
 			for (siz i = 0; i < family_indices.size(); i++)
 				family_indices[i] = queue_families[i].index;
 
-			VkSwapchainCreateInfoKHR info = CreateVkInfo(device, extent);
+			VkSwapchainCreateInfoKHR info = CreateVkInfo(device, extent, old_swapchain);
 			info.imageSharingMode = family_indices.size() > 1 ? VK_SHARING_MODE_CONCURRENT : VK_SHARING_MODE_EXCLUSIVE;
 			info.queueFamilyIndexCount = (ui32)family_indices.size();
 			info.pQueueFamilyIndices = family_indices.empty() ? nullptr : family_indices.data();
@@ -128,10 +119,10 @@ namespace np::gpu::__detail
 			const ui32 max_image_count = capabilities.maxImageCount != 0 ? capabilities.maxImageCount : image_count;
 			info.minImageCount = ::std::min(image_count, max_image_count);
 
+			mem::sptr<VulkanInstance> instance = device->GetDetailInstance();
 			VkSwapchainKHR swapchain = nullptr;
-			if (vkCreateSwapchainKHR(*device->GetLogicalDevice(), &info, nullptr, &swapchain) != VK_SUCCESS)
-				swapchain = nullptr;
-			return swapchain;
+			VkResult result = vkCreateSwapchainKHR(*device->GetLogicalDevice(), &info, instance->GetVulkanAllocationCallbacks(), &swapchain);
+			return result == VK_SUCCESS ? swapchain : nullptr;
 		}
 
 		static con::vector<VkImage> RetrieveVkImages(mem::sptr<VulkanDevice> device, VkSwapchainKHR swapchain)
@@ -149,28 +140,32 @@ namespace np::gpu::__detail
 			return images;
 		}
 
+		static con::vector<mem::sptr<VulkanImageResource>> ToImageResources(mem::sptr<VulkanDevice> device, const con::vector<VkImage>& vk_images, VkExtent2D extent)
+		{
+			const VulkanImageResourceUsage usage = VulkanImageResourceUsage::Color;
+			const VulkanFormat format = device->GetVkSurfaceFormat().format;
+
+			con::vector<mem::sptr<VulkanImageResource>> images(vk_images.size());
+			for (siz i = 0; i < images.size(); i++)
+				images[i] = VulkanImageResource::Create(device, usage, vk_images[i], format, 1, 1, 0, extent.width,
+					extent.height, 1, {});
+
+			return images;
+		}
+
 		static con::vector<mem::sptr<VulkanFrame>> CreateFrames(mem::sptr<VulkanDevice> device, VkSwapchainKHR swapchain,
 																VkExtent2D extent)
 		{
 			const VulkanImageResourceUsage usage = VulkanImageResourceUsage::Color;
 			const VulkanFormat format = device->GetVkSurfaceFormat().format;
 			const con::vector<VkImage> vk_images = RetrieveVkImages(device, swapchain);
-
-			con::vector<mem::sptr<VulkanImageResource>> images(vk_images.size());
-			for (siz i = 0; i < images.size(); i++)
-				images[i] = VulkanImageResource::Create(device, usage, vk_images[i], format, 1, 1, 0, extent.width,
-														extent.height, 1, {});
+			con::vector<mem::sptr<VulkanImageResource>> images = ToImageResources(device, vk_images, extent);
 
 			mem::sptr<srvc::Services> services = device->GetServices();
 			con::vector<mem::sptr<VulkanFrame>> frames;
 			for (siz i = 0; i < images.size(); i++)
-			{
-				frames.emplace_back(mem::create_sptr<VulkanFrame>(services->GetAllocator()));
-				frames.back()->services = services;
-				frames.back()->index = i;
-				frames.back()->image = images[i];
-				frames.back()->view = ImageResourceView::Create(device, images[i], usage);
-			}
+				frames.emplace_back(mem::create_sptr<VulkanFrame>(services->GetAllocator(),
+					services, i, images[i], ImageResourceView::Create(device, images[i], usage)));
 
 			return frames;
 		}
@@ -179,40 +174,37 @@ namespace np::gpu::__detail
 		{
 			if (_device && _swapchain)
 			{
-				vkDestroySwapchainKHR(*_device->GetLogicalDevice(), _swapchain, nullptr);
+				mem::sptr<VulkanInstance> instance = _device->GetDetailInstance();
+				vkDestroySwapchainKHR(*_device->GetLogicalDevice(), _swapchain, instance->GetVulkanAllocationCallbacks());
 				_swapchain = nullptr;
 			}
 		}
 
 		void RebuildFrames()
 		{
-			_frames = CreateFrames(_device, _swapchain, _extent);
+			const VulkanImageResourceUsage usage = VulkanImageResourceUsage::Color;
+			const VulkanFormat format = _device->GetVkSurfaceFormat().format;
+			const con::vector<VkImage> vk_images = RetrieveVkImages(_device, _swapchain);
+			con::vector<mem::sptr<VulkanImageResource>> images = ToImageResources(_device, vk_images, _extent);
 
-			/*VkImageViewCreateInfo view_info = VulkanImageResourceView::CreateInfo();
-			view_info.format = _device->GetVkSurfaceFormat().format;
-			con::vector<VkImage> images = RetrieveVkImages(_device, _swapchain);
+			mem::sptr<srvc::Services> services = _device->GetServices();
 
 			while (images.size() < _frames.size())
 				_frames.pop_back();
 
 			for (siz i = 0; i < images.size(); i++)
 			{
-				view_info.image = images[i];
-				mem::sptr<VulkanImage> image = mem::create_sptr<VulkanImage>(GetServices()->GetAllocator(), images[i],
-			view_info.format); mem::sptr<VulkanImageView> view =
-			mem::create_sptr<VulkanImageView>(GetServices()->GetAllocator(), device->GetLogicalDevice(), view_info);
-
 				if (i < _frames.size())
 				{
-					_frames[i].image = image;
-					_frames[i].imageView = view;
-					_frames[i].prevFrameFence = nullptr;
+					_frames[i]->image = images[i];
+					_frames[i]->view = ImageResourceView::Create(_device, _frames[i]->image, usage);
 				}
 				else
 				{
-					_frames.emplace_back(i, device, image, view);
+					_frames.emplace_back(mem::create_sptr<VulkanFrame>(services->GetAllocator(),
+						services, i, images[i], ImageResourceView::Create(_device, images[i], usage)));
 				}
-			}*/
+			}
 		}
 
 	public:
@@ -222,7 +214,7 @@ namespace np::gpu::__detail
 			_device(DetailObject::EnsureIsDetailType(device, DetailType::Vulkan)),
 			_queue_families{queue_families.begin(), queue_families.end()},
 			_extent(_device->ChooseVkExtent2D()),
-			_swapchain(CreateVkSwapchain(_device, _queue_families, _extent)),
+			_swapchain(CreateVkSwapchain(_device, _queue_families, _extent, nullptr)),
 			_frames(CreateFrames(_device, _swapchain, _extent)),
 			_acquire_frame_timeout(SIZ_MAX),
 			_acquired_frame_index(UI32_MAX),
@@ -282,26 +274,35 @@ namespace np::gpu::__detail
 			return {_frames.begin(), _frames.end()};
 		}
 
+		/*
+			nanoseconds (use zero to conduct non-blocking behavior)
+		*/
 		virtual void SetAcquireFrameTimeout(siz timeout) override
 		{
 			_acquire_frame_timeout = timeout;
 		}
 
-		virtual bl TryAcquireFrame() override
+		/*
+			semaphore and fence will become signaled when acquired image is ready to be rendered to
+		*/
+		virtual Result TryAcquireFrame(mem::sptr<Semaphore> semaphore_, mem::sptr<Fence> fence_) override
 		{
-			bl successful_enough = false;
-			VkResult result = TryVkAcquireFrame();
+			mem::sptr<VulkanLogicalDevice> logical_device = _device->GetLogicalDevice();
+			mem::sptr<VulkanSemaphore> semaphore = DetailObject::EnsureIsDetailType(semaphore_, DetailType::Vulkan);
+			mem::sptr<VulkanFence> fence = DetailObject::EnsureIsDetailType(fence_, DetailType::Vulkan);
+			ui32 index = UI32_MAX;
 
-			switch (result)
+			//vkAcquireNextImageKHR is a blocking call
+			VulkanResult result = vkAcquireNextImageKHR(*logical_device, _swapchain, _acquire_frame_timeout,
+				semaphore ? *semaphore : (VkSemaphore)nullptr, fence ? *fence : (VkFence)nullptr, &index);
+
+			if (result.Contains(Result::Success))
 			{
-			case VK_ERROR_OUT_OF_DATE_KHR:
-			case VK_SUBOPTIMAL_KHR:
-			case VK_SUCCESS:
-			case VK_NOT_READY:
-				successful_enough = true;
+				_prev_acquired_frame_index = _acquired_frame_index;
+				_acquired_frame_index = index;
 			}
 
-			return successful_enough;
+			return result;
 		}
 
 		virtual mem::sptr<Frame> GetPrevAcquiredFrame() const override
@@ -334,63 +335,13 @@ namespace np::gpu::__detail
 			return (flt)_extent.width / (flt)_extent.height;
 		}
 
-		//TODO: we need to revisit the whole rebuilding stuff
-		void Rebuild() //TODO: should we support passing in the old swapchain for reference when creating the new swapchain?
+		virtual void Rebuild() override //TODO: should we support passing in the old swapchain for reference when creating the new swapchain?
 		{
-			DestroySwapchain();
 			_extent = _device->ChooseVkExtent2D();
-			_swapchain = CreateVkSwapchain(_device, _queue_families, _extent);
+			VkSwapchainKHR next_swapchain = CreateVkSwapchain(_device, _queue_families, _extent, _swapchain);
+			DestroySwapchain();
+			_swapchain = next_swapchain;
 			RebuildFrames();
-		}
-
-		VkResult TryVkAcquireFrame()
-		{
-			mem::sptr<VulkanDevice> device = _device;
-			mem::sptr<VulkanLogicalDevice> logical_device = device->GetLogicalDevice();
-
-			/*
-				TODO: I feel like we could have a ring buffer for these ready-semaphores/fences?
-			*/
-
-			//ui64 timeout = SIZ_MAX; //nanoseconds (use zero to conduction non-blocking behavior)
-			// semaphore and fence will become signaled when acquired image is ready to be rendered to
-			mem::sptr<VulkanSemaphore> ready_semaphore =
-				mem::create_sptr<VulkanSemaphore>(GetServices()->GetAllocator(), logical_device);
-			mem::sptr<VulkanFence> ready_fence = mem::create_sptr<VulkanFence>(GetServices()->GetAllocator(), logical_device);
-			ui32 index = UI32_MAX; //acquired_image_index
-
-			//vkAcquireNextImageKHR is a blocking call
-			VkResult result = vkAcquireNextImageKHR(*logical_device, _swapchain, _acquire_frame_timeout, *ready_semaphore,
-													*ready_fence, &index);
-
-			switch (result)
-			{
-			//result VK_SUCCESS / VK_SUBOPTIMAL_KHR / VK_ERROR_OUT_OF_DATE_KHR indicate image acquired, and maybe a framebuffer
-			//resize/rebuild indication
-			case VK_ERROR_OUT_OF_DATE_KHR:
-			case VK_SUBOPTIMAL_KHR:
-				//do we need to consider framebuffer resize/rebuild here? switch case may not be beneficial for this since
-				//important things are handled below no break intentional
-
-			case VK_SUCCESS:
-				_prev_acquired_frame_index = _acquired_frame_index;
-				_acquired_frame_index = index;
-				_frames[_acquired_frame_index]->readySemaphore = ready_semaphore;
-				_frames[_acquired_frame_index]->readyFence = ready_fence;
-				_frames[_acquired_frame_index]->completedSemaphore =
-					mem::create_sptr<VulkanSemaphore>(GetServices()->GetAllocator(), logical_device);
-				break;
-
-			//result: VK_NOT_READY indicates no image is ready yet, timeout probably tripped
-			case VK_NOT_READY:
-				break;
-
-			default:
-				NP_ENGINE_ASSERT(false, "other error went wrong");
-				break;
-			}
-
-			return result;
 		}
 	};
 } // namespace np::gpu::__detail

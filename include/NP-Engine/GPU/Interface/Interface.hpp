@@ -7,6 +7,8 @@
 #ifndef NP_ENGINE_GPU_INTERFACE_INTERFACE_HPP
 #define NP_ENGINE_GPU_INTERFACE_INTERFACE_HPP
 
+//TODO: I think we should remove this file
+
 #include "NP-Engine/Foundation/Foundation.hpp"
 
 #include "Access.hpp"
@@ -45,6 +47,7 @@
 #include "Rasterization.hpp"
 #include "RenderPass.hpp"
 #include "Resource.hpp"
+#include "Result.hpp"
 #include "SamplerResource.hpp"
 #include "Scissor.hpp"
 #include "Semaphore.hpp"

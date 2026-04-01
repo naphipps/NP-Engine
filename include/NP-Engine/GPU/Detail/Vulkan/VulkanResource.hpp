@@ -188,10 +188,10 @@ namespace np::gpu::__detail
 			info.bindingCount = (ui32)bindings.size();
 			info.pBindings = bindings.empty() ? nullptr : bindings.data();
 
+			mem::sptr<VulkanInstance> instance = device->GetDetailInstance();
 			VkDescriptorSetLayout layout = nullptr;
-			if (vkCreateDescriptorSetLayout(*device->GetLogicalDevice(), &info, nullptr, &layout) != VK_SUCCESS)
-				layout = nullptr;
-			return layout;
+			VkResult result = vkCreateDescriptorSetLayout(*device->GetLogicalDevice(), &info, instance->GetVulkanAllocationCallbacks(), &layout);
+			return result == VK_SUCCESS ? layout : nullptr;
 		}
 
 	public:
@@ -207,7 +207,8 @@ namespace np::gpu::__detail
 		{
 			if (_layout)
 			{
-				vkDestroyDescriptorSetLayout(*_device->GetLogicalDevice(), _layout, nullptr);
+				mem::sptr<VulkanInstance> instance = _device->GetDetailInstance();
+				vkDestroyDescriptorSetLayout(*_device->GetLogicalDevice(), _layout, instance->GetVulkanAllocationCallbacks());
 				_layout = nullptr;
 			}
 		}
@@ -403,10 +404,10 @@ namespace np::gpu::__detail
 			info.pPoolSizes = pool_sizes.empty() ? nullptr : pool_sizes.data();
 			info.flags |= VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT; //enforce
 
+			mem::sptr<VulkanInstance> instance = device->GetDetailInstance();
 			VkDescriptorPool pool = nullptr;
-			if (vkCreateDescriptorPool(*device->GetLogicalDevice(), &info, nullptr, &pool) != VK_SUCCESS)
-				pool = nullptr;
-			return nullptr;
+			VkResult result = vkCreateDescriptorPool(*device->GetLogicalDevice(), &info, instance->GetVulkanAllocationCallbacks(), &pool);
+			return result == VK_SUCCESS ? pool : nullptr;
 		}
 
 	public:
@@ -421,7 +422,8 @@ namespace np::gpu::__detail
 		{
 			if (_pool)
 			{
-				vkDestroyDescriptorPool(*_device->GetLogicalDevice(), _pool, nullptr);
+				mem::sptr<VulkanInstance> instance = _device->GetDetailInstance();
+				vkDestroyDescriptorPool(*_device->GetLogicalDevice(), _pool, instance->GetVulkanAllocationCallbacks());
 				_pool = nullptr;
 			}
 		}

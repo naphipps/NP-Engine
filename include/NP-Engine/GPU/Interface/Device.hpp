@@ -133,6 +133,8 @@ namespace np::gpu
 
 		virtual mem::sptr<Semaphore> CreateSemaphore() = 0;
 
+		virtual void WaitUntilIdle() const = 0;
+
 		//virtual mem::sptr<PipelineCache> CreatePipelineCache(str filename) const = 0; //TODO: how do we want to do this?
 	};
 } // namespace np::gpu

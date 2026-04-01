@@ -34,76 +34,112 @@ namespace np::app
 			mem::sptr<gpu::CommandBufferPool> commandBufferPool = nullptr;
 			con::vector<mem::sptr<gpu::CommandBuffer>> commandBuffers{};
 
-			bl once = false;
+			mem::sptr<gpu::Fence> submitFence = nullptr;
+			mem::sptr<gpu::Semaphore> frameReadySemaphore = nullptr;
+			mem::sptr<gpu::Semaphore> submitCompleteSemaphore = nullptr;
+
+			void RebuildFrames()
+			{
+				device->WaitUntilIdle();
+				frameContext->Rebuild();
+
+				con::vector<mem::sptr<gpu::ImageResourceView>> frame_image_views = frameContext->GetImageViews();
+				framebuffers.resize(frame_image_views.size());
+				for (siz i = 0; i < framebuffers.size(); i++)
+					framebuffers[i] =
+					gpu::Framebuffer::Create(renderpass, frameContext->GetFrameWidth(),
+						frameContext->GetFrameHeight(), 1, { frame_image_views[i] });
+			}
 
 			void Render()
 			{
-				if (once)
+				if (!presentTarget->GetWindow()->IsMinimized())
 				{
-					//return;
+					if (submitFence)
+						submitFence->Wait();
+
+					gpu::Result acquire_result = frameContext->TryAcquireFrame(frameReadySemaphore, nullptr);
+					if (acquire_result.Contains(gpu::Result::OutOfDate))
+					{
+						RebuildFrames();
+					}
+					else if (acquire_result.Contains(gpu::Result::Success))
+					{
+						mem::sptr<srvc::Services> services = detailInstance->GetServices();
+						mem::sptr<gpu::Frame> frame = frameContext->GetAcquiredFrame();
+
+						mem::sptr<gpu::SetViewportsCommand> set_viewports_cmd =
+							gpu::Command::Create(gpu::DetailType::Vulkan, services, gpu::CommandType::SetViewports);
+						set_viewports_cmd->viewports = { {{}, (dbl)frameContext->GetFrameWidth(), (dbl)frameContext->GetFrameHeight(), {0, 1}} };
+
+						mem::sptr<gpu::SetScissorsCommand> set_scissors_cmd =
+							gpu::Command::Create(gpu::DetailType::Vulkan, services, gpu::CommandType::SetScissors);
+						set_scissors_cmd->scissors = {{{}, frameContext->GetFrameWidth(), frameContext->GetFrameHeight()}};
+
+						mem::sptr<gpu::BeginRenderPassCommand> begin_renderpass_cmd =
+							gpu::Command::Create(gpu::DetailType::Vulkan, services, gpu::CommandType::BeginRenderPass);
+						begin_renderpass_cmd->framebuffer = framebuffers[frameContext->GetAcquiredFrameIndex()];
+						begin_renderpass_cmd->renderArea = {
+							{/*no offset*/}, frameContext->GetFrameWidth(), frameContext->GetFrameHeight() };
+						begin_renderpass_cmd->clearColors = { gpu::ClearColor{} };
+
+						mem::sptr<gpu::BindPipelineCommand> bind_pipeline_cmd =
+							gpu::Command::Create(gpu::DetailType::Vulkan, services, gpu::CommandType::BindPipeline);
+						bind_pipeline_cmd->pipeline = graphicsPipeline;
+						bind_pipeline_cmd->usage = gpu::PipelineUsage::Graphics;
+
+						mem::sptr<gpu::DrawCommand> draw_cmd =
+							gpu::Command::Create(gpu::DetailType::Vulkan, services, gpu::CommandType::Draw);
+						draw_cmd->vertexCount = 3;
+
+						mem::sptr<gpu::EndRenderPassCommand> end_renderpass_cmd =
+							gpu::Command::Create(gpu::DetailType::Vulkan, services, gpu::CommandType::EndRenderPass);
+						end_renderpass_cmd->framebuffer = begin_renderpass_cmd->framebuffer;
+
+						if (!commandBufferPool)
+							commandBufferPool = queue->CreateCommandBufferPool(gpu::CommandBufferPoolUsage::Resettable);
+
+						if (commandBuffers.empty())
+						{
+							commandBuffers.resize(frameContext->GetFrames().size());
+							for (siz i = 0; i < commandBuffers.size(); i++)
+								commandBuffers[i] = commandBufferPool->CreateCommandBuffer();
+						}
+
+						mem::sptr<gpu::CommandBuffer> command_buffer = commandBuffers[frameContext->GetAcquiredFrameIndex()];
+
+						commandBufferPool->Reset(command_buffer, gpu::CommandBufferUsage::None);
+						commandBufferPool->Begin(command_buffer, gpu::CommandBufferUsage::None);
+						command_buffer->Add(begin_renderpass_cmd);
+						command_buffer->Add(bind_pipeline_cmd);
+						command_buffer->Add(set_viewports_cmd);
+						command_buffer->Add(set_scissors_cmd);
+						command_buffer->Add(draw_cmd);
+						command_buffer->Add(end_renderpass_cmd);
+						commandBufferPool->End(command_buffer, gpu::CommandBufferUsage::None);
+
+						gpu::Submit submit{};
+						submit.stages = { gpu::Stage::PresentComplete };
+						submit.commandBuffers = { command_buffer };
+						submit.waitSemaphores = { frameReadySemaphore };
+						submit.signalSemaphores = { submitCompleteSemaphore };
+
+						submitFence = device->CreateFence();
+						bl submit_success = queue->Submit(submit, submitFence);
+
+						gpu::Present present{};
+						present.frameContexts = { frameContext };
+						present.waitSemaphores = { submitCompleteSemaphore };
+						gpu::PresentResults present_results = queue->Present(present);
+
+						bl should_rebuild_frames = present_results.overallResult.ContainsAny(gpu::Result::OutOfDate | gpu::Result::Suboptimal);
+						for (siz i = 0; !should_rebuild_frames && i < present_results.individualResults.size(); i++)
+							should_rebuild_frames |= present_results.individualResults[i].ContainsAny(gpu::Result::OutOfDate | gpu::Result::Suboptimal);
+
+						if (should_rebuild_frames)
+							RebuildFrames();
+					}
 				}
-				once = true;
-
-				mem::sptr<srvc::Services> services = detailInstance->GetServices();
-
-				mem::sptr<gpu::Frame> frame = frameContext->TryAcquireFrame() ? frameContext->GetAcquiredFrame() : nullptr;
-				frame->GetReadyFence()->Wait();
-
-				mem::sptr<gpu::BeginRenderPassCommand> begin_renderpass_cmd =
-					gpu::Command::Create(gpu::DetailType::Vulkan, services, gpu::CommandType::BeginRenderPass);
-				begin_renderpass_cmd->framebuffer = framebuffers[frameContext->GetAcquiredFrameIndex()];
-				begin_renderpass_cmd->renderArea = {
-					{/*no offset*/}, frameContext->GetFrameWidth(), frameContext->GetFrameHeight()};
-				begin_renderpass_cmd->clearColors = {gpu::ClearColor{}};
-				//begin_renderpass_cmd->clearColors.front().color.r = UI8_MAX;
-
-				mem::sptr<gpu::BindPipelineCommand> bind_pipeline_cmd =
-					gpu::Command::Create(gpu::DetailType::Vulkan, services, gpu::CommandType::BindPipeline);
-				bind_pipeline_cmd->pipeline = graphicsPipeline;
-				bind_pipeline_cmd->usage = gpu::PipelineUsage::Graphics;
-
-				mem::sptr<gpu::DrawCommand> draw_cmd =
-					gpu::Command::Create(gpu::DetailType::Vulkan, services, gpu::CommandType::Draw);
-				draw_cmd->vertexCount = 3;
-
-				mem::sptr<gpu::EndRenderPassCommand> end_renderpass_cmd =
-					gpu::Command::Create(gpu::DetailType::Vulkan, services, gpu::CommandType::EndRenderPass);
-				end_renderpass_cmd->framebuffer = begin_renderpass_cmd->framebuffer;
-
-				if (!commandBufferPool)
-					commandBufferPool = queue->CreateCommandBufferPool(gpu::CommandBufferPoolUsage::Resettable);
-
-				if (commandBuffers.empty())
-				{
-					commandBuffers.resize(frameContext->GetFrames().size());
-					for (siz i = 0; i < commandBuffers.size(); i++)
-						commandBuffers[i] = commandBufferPool->CreateCommandBuffer();
-				}
-
-				mem::sptr<gpu::CommandBuffer> command_buffer = commandBuffers[frameContext->GetAcquiredFrameIndex()];
-
-				commandBufferPool->Reset(command_buffer, gpu::CommandBufferUsage::None);
-				commandBufferPool->Begin(command_buffer, gpu::CommandBufferUsage::None);
-				command_buffer->Add(begin_renderpass_cmd);
-				command_buffer->Add(bind_pipeline_cmd);
-				command_buffer->Add(draw_cmd);
-				command_buffer->Add(end_renderpass_cmd);
-				commandBufferPool->End(command_buffer, gpu::CommandBufferUsage::None);
-
-				gpu::Submit submit{};
-				submit.stages = {gpu::Stage::PresentComplete};
-				submit.commandBuffers = {command_buffer};
-				submit.waitSemaphores = {frame->GetReadySemaphore()};
-				submit.signalSemaphores = {frame->GetCompletedSemaphore()};
-
-				mem::sptr<gpu::Fence> submit_fence = device->CreateFence();
-				bl submit_success = queue->Submit(submit, submit_fence);
-				submit_fence->Wait();
-
-				gpu::Present present{};
-				present.frameContexts = {frameContext};
-				present.waitSemaphores = {frame->GetCompletedSemaphore()};
-				con::vector<bl> present_successes = queue->Present(present);
 			}
 		};
 
@@ -354,7 +390,7 @@ namespace np::app
 
 			scene->renderpass =
 				gpu::RenderPass::Create(scene->device, image_descriptions, render_subpasses, render_dependencies);
-			gpu::PipelineUsage graphics_pipeline_usage = gpu::PipelineUsage::Graphics | gpu::PipelineUsage::ColorBlend;
+			gpu::PipelineUsage graphics_pipeline_usage = gpu::PipelineUsage::Graphics | gpu::PipelineUsage::ColorBlend | gpu::PipelineUsage::Dynamic;
 
 			mem::sptr<gpu::PipelineResourceLayout> graphics_pipeline_layout =
 				gpu::PipelineResourceLayout::Create(scene->device, {}, {});
@@ -380,7 +416,7 @@ namespace np::app
 				  {gpu::BlendScalar::Oned, gpu::BlendScalar::Zeroed, gpu::BlendOperation::Add},
 				  gpu::ColorChannel::All}},
 				{}};
-			gpu::DynamicUsage graphics_dynamic_usage = gpu::DynamicUsage::None;
+			gpu::DynamicUsage graphics_dynamic_usage = gpu::DynamicUsage::Scissor | gpu::DynamicUsage::Viewport;
 
 			scene->graphicsPipeline = gpu::GraphicsPipeline::Create(
 				scene->renderpass, graphics_pipeline_usage, graphics_pipeline_layout, graphics_shaders, input_vertex_formatting,
@@ -394,6 +430,9 @@ namespace np::app
 				scene->framebuffers[i] =
 					gpu::Framebuffer::Create(scene->renderpass, scene->frameContext->GetFrameWidth(),
 											 scene->frameContext->GetFrameHeight(), 1, {frame_image_views[i]});
+
+			scene->frameReadySemaphore = scene->device->CreateSemaphore();
+			scene->submitCompleteSemaphore = scene->device->CreateSemaphore();
 
 			//<https://vulkan-tutorial.com/en/Drawing_a_triangle/Drawing/Command_buffers>
 

@@ -36,10 +36,10 @@ namespace np::gpu::__detail
 			info.initialDataSize = bytes.size();
 			info.pInitialData = info.initialDataSize > 0 ? bytes.data() : nullptr;
 
+			mem::sptr<VulkanInstance> instance = device->GetPhysicalDevice().GetDetailInstance();
 			VkPipelineCache cache = nullptr;
-			if (vkCreatePipelineCache(*device, &info, nullptr, &cache) != VK_SUCCESS)
-				cache = nullptr;
-			return cache;
+			VkResult result = vkCreatePipelineCache(*device, &info, instance->GetVulkanAllocationCallbacks(), &cache);
+			return result == VK_SUCCESS ? cache : nullptr;
 		}
 
 	public:
@@ -55,7 +55,8 @@ namespace np::gpu::__detail
 
 			if (_cache)
 			{
-				vkDestroyPipelineCache(*_device, _cache, nullptr);
+				mem::sptr<VulkanInstance> instance = _device->GetPhysicalDevice().GetDetailInstance();
+				vkDestroyPipelineCache(*_device, _cache, instance->GetVulkanAllocationCallbacks());
 				_cache = nullptr;
 			}
 		}

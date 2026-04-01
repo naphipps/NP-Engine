@@ -16,18 +16,13 @@
 #include "Fence.hpp"
 #include "Semaphore.hpp"
 #include "Device.hpp"
+#include "Result.hpp"
 
 namespace np::gpu
 {
 	struct Frame : public DetailObject
 	{
 		virtual mem::sptr<ImageResourceView> GetImageResourceView() const = 0;
-
-		virtual mem::sptr<Semaphore> GetReadySemaphore() const = 0;
-
-		virtual mem::sptr<Fence> GetReadyFence() const = 0;
-
-		virtual mem::sptr<Semaphore> GetCompletedSemaphore() const = 0;
 	};
 
 	struct FrameContext : public DetailObject
@@ -42,7 +37,7 @@ namespace np::gpu
 
 		virtual void SetAcquireFrameTimeout(siz timeout) = 0;
 
-		virtual bl TryAcquireFrame() = 0;
+		virtual Result TryAcquireFrame(mem::sptr<Semaphore> ready_semaphore, mem::sptr<Fence> ready_fence) = 0;
 
 		virtual mem::sptr<Frame> GetPrevAcquiredFrame() const = 0;
 
@@ -60,8 +55,6 @@ namespace np::gpu
 
 		virtual Format GetFrameFormat() const = 0;
 
-		//TODO: do we need a way to get images/views?
-
 		virtual con::vector<mem::sptr<ImageResourceView>> GetImageViews() const
 		{
 			const con::vector<mem::sptr<Frame>> frames = GetFrames();
@@ -70,6 +63,8 @@ namespace np::gpu
 				views[i] = frames[i]->GetImageResourceView();
 			return views;
 		}
+
+		virtual void Rebuild() = 0;
 	};
 } // namespace np::gpu
 

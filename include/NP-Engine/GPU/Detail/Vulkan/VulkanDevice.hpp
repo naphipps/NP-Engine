@@ -171,6 +171,11 @@ namespace np::gpu::__detail
 			return mem::create_sptr<VulkanSemaphore>(GetServices()->GetAllocator(), GetLogicalDevice());
 		}
 
+		virtual void WaitUntilIdle() const override
+		{
+			vkDeviceWaitIdle(*_logical_device);
+		}
+
 		VkExtent2D ChooseVkExtent2D() const
 		{
 			const VulkanPhysicalDevice physical_device = GetLogicalDevice()->GetPhysicalDevice();
