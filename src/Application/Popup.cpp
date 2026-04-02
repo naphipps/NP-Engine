@@ -34,16 +34,16 @@ namespace np::app
 			GtkMessageType gtkstyle = GTK_MESSAGE_INFO;
 			switch (style)
 			{
-			case Popup::Style::Info:
+			case PopupStyle::Info:
 				gtkstyle = GTK_MESSAGE_INFO;
 				break;
-			case Popup::Style::Warning:
+			case PopupStyle::Warning:
 				gtkstyle = GTK_MESSAGE_WARNING;
 				break;
-			case Popup::Style::Error:
+			case PopupStyle::Error:
 				gtkstyle = GTK_MESSAGE_ERROR;
 				break;
-			case Popup::Style::Question:
+			case PopupStyle::Question:
 				gtkstyle = GTK_MESSAGE_QUESTION;
 				break;
 			}
@@ -51,16 +51,16 @@ namespace np::app
 			GtkButtonsType gtkbuttons = GTK_BUTTONS_OK;
 			switch (buttons)
 			{
-			case Popup::Buttons::OK:
+			case PopupButtons::Ok:
 				gtkbuttons = GTK_BUTTONS_OK;
 				break;
-			case Popup::Buttons::OKCancel:
+			case PopupButtons::Ok | PopupButtons::Cancel:
 				gtkbuttons = GTK_BUTTONS_OK_CANCEL;
 				break;
-			case Popup::Buttons::YesNo:
+			case PopupButtons::Yes | PopupButtons::No:
 				gtkbuttons = GTK_BUTTONS_YES_NO;
 				break;
-			case Popup::Buttons::Quit:
+			case PopupButtons::Quit:
 				gtkbuttons = GTK_BUTTONS_CLOSE;
 				break;
 			}
@@ -73,7 +73,7 @@ namespace np::app
 			switch (gtk_dialog_run(GTK_DIALOG(dialog)))
 			{
 			case GTK_RESPONSE_OK:
-				select = PopupSelection::OK;
+				select = PopupSelection::Ok;
 				break;
 			case GTK_RESPONSE_CANCEL:
 				select = PopupSelection::Cancel;

@@ -14,7 +14,7 @@
 
 #include "ExplicitListAllocator.hpp"
 #include "BookkeepingAllocator.hpp"
-#include "margin.hpp"
+#include "Margin.hpp"
 #include "MemoryFunctions.hpp"
 
 namespace np::mem

@@ -22,13 +22,13 @@ namespace np::mem
 		trait_allocator _allocator;
 
 	public:
-		using value_type = base::value_type;
-		using pointer = base::pointer;
-		using const_pointer = base::const_pointer;
-		using reference = base::reference;
-		using const_reference = base::const_reference;
-		using size_type = base::size_type;
-		using difference_type = base::difference_type;
+		using value_type = typename base::value_type;
+		using pointer = typename base::pointer;
+		using const_pointer = typename base::const_pointer;
+		using reference = typename base::reference;
+		using const_reference = typename base::const_reference;
+		using size_type = typename base::size_type;
+		using difference_type = typename base::difference_type;
 
 		template <class U>
 		struct rebind

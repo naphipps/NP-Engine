@@ -29,11 +29,6 @@
 		mem::accumulating_allocator<mem::red_black_tree_allocator> allocator{};
 		mem::trait_allocator::register_allocator(allocator);
 		{
-#if NP_ENGINE_PLATFORM_IS_LINUX
-			// mem::sptr<siz> x = mem::create_sptr<siz>(allocator); // TODO: linux still signals when this is not here - FIX
-			// TODO: Debian 12 is fine with above, yet Ubuntu (last I checked) does not like it... do we care?
-#endif
-
 			NP_ENGINE_PROFILE_SCOPE("application lifespan");
 			mem::sptr<srvc::Services> services = mem::create_sptr<srvc::Services>(allocator);
 			mem::sptr<app::Application> application = mem::create_sptr<app::GameApp>(services->GetAllocator(), services);

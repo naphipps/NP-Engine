@@ -50,8 +50,7 @@ namespace np::mem
 #if NP_ENGINE_PLATFORM_IS_WINDOWS
 			ptr = ::_aligned_malloc(size, alignment);
 #else
-#error implement allocate for non-windows
-			ptr = ::aligned_alloc(alignment, size);
+			ptr = ::std::aligned_alloc(alignment, size);
 #endif
 
 			return ptr ? block{ptr, size} : block{};
@@ -77,10 +76,9 @@ namespace np::mem
 #if NP_ENGINE_PLATFORM_IS_WINDOWS
 				ptr = ::_aligned_realloc(ptr_, size, alignment);
 #else
-#error implement reallocate for non-windows
-
+				ptr = allocate(size, alignment).ptr;
+				copy_bytes(ptr, ptr_, size);
 #endif
-
 				if (ptr)
 					b = {ptr, size};
 			}
@@ -104,7 +102,6 @@ namespace np::mem
 #if NP_ENGINE_PLATFORM_IS_WINDOWS
 			::_aligned_free(ptr);
 #else
-#error implement deallocate for non-windows
 			::std::free(ptr);
 #endif
 			return true;

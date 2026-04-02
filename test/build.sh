@@ -1,3 +1,3 @@
 #! /bin/sh
 
-cd ../out/build; make -j
+cd ../out/build; make -j 8

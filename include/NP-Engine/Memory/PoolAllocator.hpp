@@ -64,21 +64,21 @@ namespace np::mem
 
 		virtual bl is_chunk_ptr(void* ptr)
 		{
-			return contains(ptr) && ((ui8*)ptr - (ui8*)_block.begin()) % get_chunk_size() == 0;
+			return base::contains(ptr) && ((ui8*)ptr - (ui8*)base::_block.begin()) % base::get_chunk_size() == 0;
 		}
 
 		virtual void init()
 		{
-			block b{nullptr, get_chunk_size() };
-			for (siz i = 0; i < get_chunk_count() - 1; i++)
+			block b{nullptr, base::get_chunk_size() };
+			for (siz i = 0; i < base::get_chunk_count() - 1; i++)
 			{
-				b.ptr = &static_cast<ui8*>(_block.ptr)[i * get_chunk_size()];
-				mem::construct<void*>(b, &static_cast<ui8*>(_block.ptr)[(i + 1) * get_chunk_size()]);
+				b.ptr = &static_cast<ui8*>(base::_block.ptr)[i * base::get_chunk_size()];
+				mem::construct<void*>(b, &static_cast<ui8*>(base::_block.ptr)[(i + 1) * base::get_chunk_size()]);
 			}
 
-			b.ptr = &static_cast<ui8*>(_block.ptr)[(get_chunk_count() - 1) * get_chunk_size()];
+			b.ptr = &static_cast<ui8*>(base::_block.ptr)[(base::get_chunk_count() - 1) * base::get_chunk_size()];
 			mem::construct<void*>(b, nullptr);
-			_allocation.store(_block.ptr, mo_release);
+			_allocation.store(base::_block.ptr, mo_release);
 		}
 
 	public:
@@ -97,7 +97,7 @@ namespace np::mem
 		virtual block allocate(siz size, siz alignment) override
 		{
 			block b{};
-			if (calc_aligned_size(size, alignment) <= get_chunk_size())
+			if (calc_aligned_size(size, alignment) <= base::get_chunk_size())
 			{
 				void* allocated = _allocation.load(mo_acquire);
 				while (allocated &&
@@ -106,7 +106,7 @@ namespace np::mem
 				{}
 
 				if (allocated)
-					b = { allocated, get_chunk_size() };
+					b = { allocated, base::get_chunk_size() };
 			}
 			return b;
 		}
@@ -114,7 +114,7 @@ namespace np::mem
 		virtual block reallocate(block& b_, siz size, siz alignment) override
 		{
 			block b = allocate(size, alignment);
-			if (contains(b_))
+			if (base::contains(b_))
 			{
 				const siz byte_count = b.size < b_.size ? b.size : b_.size;
 				copy_bytes(b.begin(), b_.begin(), byte_count);
@@ -135,7 +135,7 @@ namespace np::mem
 		virtual bl deallocate(block& b) override
 		{
 			bl deallocated = false;
-			if (is_chunk_ptr(b.ptr) && b.size == get_chunk_size())
+			if (is_chunk_ptr(b.ptr) && b.size == base::get_chunk_size())
 			{
 				mem::construct<void*>(b, _allocation.load(mo_acquire));
 
@@ -151,7 +151,7 @@ namespace np::mem
 
 		virtual bl deallocate(void* ptr) override
 		{
-			block b{ ptr, get_chunk_size() };
+			block b{ ptr, base::get_chunk_size() };
 			return deallocate(b);
 		}
 
@@ -175,21 +175,21 @@ namespace np::mem
 
 		virtual bl is_chunk_ptr(void* ptr)
 		{
-			return contains(ptr) && ((ui8*)ptr - (ui8*)_block.begin()) % get_chunk_size() == 0;
+			return base::contains(ptr) && ((ui8*)ptr - (ui8*)base::_block.begin()) % base::get_chunk_size() == 0;
 		}
 
 		virtual void init()
 		{
-			block b{ nullptr, get_chunk_size() };
-			for (siz i = 0; i < get_chunk_count() - 1; i++)
+			block b{ nullptr, base::get_chunk_size() };
+			for (siz i = 0; i < base::get_chunk_count() - 1; i++)
 			{
-				b.ptr = &static_cast<ui8*>(_block.ptr)[i * get_chunk_size()];
-				mem::construct<void*>(b, &static_cast<ui8*>(_block.ptr)[(i + 1) * get_chunk_size()]);
+				b.ptr = &static_cast<ui8*>(base::_block.ptr)[i * base::get_chunk_size()];
+				mem::construct<void*>(b, &static_cast<ui8*>(base::_block.ptr)[(i + 1) * base::get_chunk_size()]);
 			}
 
-			b.ptr = &static_cast<ui8*>(_block.ptr)[(get_chunk_count() - 1) * get_chunk_size()];
+			b.ptr = &static_cast<ui8*>(base::_block.ptr)[(base::get_chunk_count() - 1) * base::get_chunk_size()];
 			mem::construct<void*>(b, nullptr);
-			_alloc_iterator = _block.ptr;
+			_alloc_iterator = base::_block.ptr;
 		}
 
 	public:
@@ -220,9 +220,9 @@ namespace np::mem
 			scoped_lock l(_mutex);
 			block b{};
 
-			if (calc_aligned_size(size, alignment) <= get_chunk_size() && _alloc_iterator != nullptr)
+			if (calc_aligned_size(size, alignment) <= base::get_chunk_size() && _alloc_iterator != nullptr)
 			{
-				b = { _alloc_iterator, get_chunk_size() };
+				b = { _alloc_iterator, base::get_chunk_size() };
 				_alloc_iterator = *(void**)(&static_cast<ui8*>(_alloc_iterator)[0]);
 			}
 
@@ -232,7 +232,7 @@ namespace np::mem
 		virtual block reallocate(block& b_, siz size, siz alignment) override
 		{
 			block b = allocate(size, alignment);
-			if (contains(b_))
+			if (base::contains(b_))
 			{
 				const siz byte_count = b.size < b_.size ? b.size : b_.size;
 				copy_bytes(b.begin(), b_.begin(), byte_count);
@@ -255,13 +255,13 @@ namespace np::mem
 			scoped_lock l(_mutex);
 			bl deallocated = false;
 
-			if (is_chunk_ptr(b.ptr) && b.size == get_chunk_size())
+			if (is_chunk_ptr(b.ptr) && b.size == base::get_chunk_size())
 			{
 				void** deallocation_address = nullptr;
 
 				if (true_sort_false_constant && _alloc_iterator != nullptr)
 				{
-					for (void** it = (void**)_alloc_iterator; contains(it); it = (void**)*it)
+					for (void** it = (void**)_alloc_iterator; base::contains(it); it = (void**)*it)
 					{
 						deallocation_address = it;
 						if (*it > b.ptr)
@@ -291,13 +291,13 @@ namespace np::mem
 
 		virtual bl deallocate(void* ptr, bl true_sort_false_constant)
 		{
-			block b{ ptr, get_chunk_size() };
+			block b{ ptr, base::get_chunk_size() };
 			return deallocate(b, true_sort_false_constant);
 		}
 
 		virtual bl deallocate(void* ptr) override
 		{
-			block b{ ptr, get_chunk_size() };
+			block b{ ptr, base::get_chunk_size() };
 			return deallocate(b);
 		}
 
