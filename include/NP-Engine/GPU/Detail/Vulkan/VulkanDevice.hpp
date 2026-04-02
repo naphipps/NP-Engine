@@ -176,29 +176,6 @@ namespace np::gpu::__detail
 			vkDeviceWaitIdle(*_logical_device);
 		}
 
-		VkExtent2D ChooseVkExtent2D() const
-		{
-			const VulkanPhysicalDevice physical_device = GetLogicalDevice()->GetPhysicalDevice();
-			const VkSurfaceCapabilitiesKHR capabilities = physical_device.GetVkSurfaceCapabilities(_target);
-			VkExtent2D extent{};
-
-			if (capabilities.currentExtent.width != UI32_MAX)
-			{
-				extent = capabilities.currentExtent;
-			}
-			else
-			{
-				const VkExtent2D framebuffer_extent = _target->GetFramebufferExtent();
-				const VkExtent2D min_extent = capabilities.minImageExtent;
-				const VkExtent2D max_extent = capabilities.maxImageExtent;
-
-				extent = {::std::clamp(framebuffer_extent.width, min_extent.width, max_extent.width),
-						  ::std::clamp(framebuffer_extent.height, min_extent.height, max_extent.height)};
-			}
-
-			return extent;
-		}
-
 		mem::sptr<VulkanLogicalDevice> GetLogicalDevice() const
 		{
 			return _logical_device;

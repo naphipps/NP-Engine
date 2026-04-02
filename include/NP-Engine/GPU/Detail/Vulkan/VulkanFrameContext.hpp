@@ -86,12 +86,35 @@ namespace np::gpu::__detail
 			return info;
 		}
 
+		static VkExtent2D SanitizeVkExtent2D(mem::sptr<VulkanPresentTarget> target, const VkSurfaceCapabilitiesKHR& capabilities)
+		{
+			VkExtent2D extent{};
+
+			if (capabilities.currentExtent.width != UI32_MAX)
+			{
+				extent = capabilities.currentExtent;
+			}
+			else
+			{
+				const VkExtent2D framebuffer_extent = target->GetFramebufferExtent();
+				const VkExtent2D min_extent = capabilities.minImageExtent;
+				const VkExtent2D max_extent = capabilities.maxImageExtent;
+
+				extent = {::std::clamp(framebuffer_extent.width, min_extent.width, max_extent.width),
+						  ::std::clamp(framebuffer_extent.height, min_extent.height, max_extent.height)};
+			}
+
+			return extent;
+		}
+
 		static VkSwapchainKHR CreateVkSwapchain(mem::sptr<VulkanDevice> device,
-												const con::vector<DeviceQueueFamily>& queue_families, VkExtent2D extent, VkSwapchainKHR old_swapchain)
+												const con::vector<DeviceQueueFamily>& queue_families, VkExtent2D& extent, VkSwapchainKHR old_swapchain)
 		{
 			const VulkanPhysicalDevice physical_device = device->GetLogicalDevice()->GetPhysicalDevice();
 			mem::sptr<VulkanPresentTarget> target = device->GetPresentTarget();
 			const VkSurfaceCapabilitiesKHR capabilities = physical_device.GetVkSurfaceCapabilities(target);
+			//ensure we set extent between the latest GetVkSurfaceCapabilities call and vkCreateSwapchainKHR
+			extent = SanitizeVkExtent2D(target, capabilities);
 
 			con::vector<ui32> family_indices(queue_families.size());
 			for (siz i = 0; i < family_indices.size(); i++)
@@ -213,7 +236,7 @@ namespace np::gpu::__detail
 		VulkanFrameContext(mem::sptr<Device> device, const con::vector<DeviceQueueFamily>& queue_families):
 			_device(DetailObject::EnsureIsDetailType(device, DetailType::Vulkan)),
 			_queue_families{queue_families.begin(), queue_families.end()},
-			_extent(_device->ChooseVkExtent2D()),
+			_extent{},
 			_swapchain(CreateVkSwapchain(_device, _queue_families, _extent, nullptr)),
 			_frames(CreateFrames(_device, _swapchain, _extent)),
 			_acquire_frame_timeout(SIZ_MAX),
@@ -335,9 +358,8 @@ namespace np::gpu::__detail
 			return (flt)_extent.width / (flt)_extent.height;
 		}
 
-		virtual void Rebuild() override //TODO: should we support passing in the old swapchain for reference when creating the new swapchain?
+		virtual void Rebuild() override
 		{
-			_extent = _device->ChooseVkExtent2D();
 			VkSwapchainKHR next_swapchain = CreateVkSwapchain(_device, _queue_families, _extent, _swapchain);
 			DestroySwapchain();
 			_swapchain = next_swapchain;
