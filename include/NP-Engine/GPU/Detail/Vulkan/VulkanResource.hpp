@@ -12,7 +12,9 @@
 
 #include "NP-Engine/Vendor/VulkanInclude.hpp"
 
-#include "NP-Engine/GPU/Interface/Interface.hpp"
+#include "NP-Engine/GPU/Interface/Resource.hpp"
+#include "NP-Engine/GPU/Interface/BufferResource.hpp"
+#include "NP-Engine/GPU/Interface/ImageResource.hpp"
 
 #include "VulkanDevice.hpp"
 #include "VulkanStage.hpp"

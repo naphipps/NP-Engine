@@ -13,7 +13,7 @@
 
 #include "NP-Engine/Vendor/VulkanInclude.hpp"
 
-#include "NP-Engine/GPU/Interface/Interface.hpp"
+#include "NP-Engine/GPU/Interface/GraphicsPipeline.hpp"
 
 #include "VulkanBlend.hpp"
 #include "VulkanCompareOperation.hpp"

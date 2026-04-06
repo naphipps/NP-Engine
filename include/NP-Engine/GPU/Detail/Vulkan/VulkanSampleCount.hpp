@@ -11,8 +11,6 @@
 
 #include "NP-Engine/Vendor/VulkanInclude.hpp"
 
-#include "NP-Engine/GPU/Interface/Interface.hpp"
-
 namespace np::gpu::__detail
 {
 	class VulkanSampleCount

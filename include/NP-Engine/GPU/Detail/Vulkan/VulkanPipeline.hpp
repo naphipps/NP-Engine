@@ -11,7 +11,7 @@
 
 #include "NP-Engine/Vendor/VulkanInclude.hpp"
 
-#include "NP-Engine/GPU/Interface/Interface.hpp"
+#include "NP-Engine/GPU/Interface/Pipeline.hpp"
 
 #include "VulkanDevice.hpp"
 #include "VulkanPipelineCache.hpp"

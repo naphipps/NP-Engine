@@ -9,7 +9,7 @@
 
 #include "NP-Engine/Vendor/VulkanInclude.hpp"
 
-#include "NP-Engine/GPU/Interface/Interface.hpp"
+#include "NP-Engine/GPU/Interface/Commands.hpp"
 
 //TODO: I think this file could use some simplifying
 

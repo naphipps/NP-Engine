@@ -12,7 +12,7 @@
 #include "NP-Engine/Primitive/Primitive.hpp"
 #include "NP-Engine/Container/Container.hpp"
 
-#include "NP-Engine/GPU/Interface/Interface.hpp"
+#include "NP-Engine/GPU/Interface/Dynamic.hpp"
 
 namespace np::gpu::__detail
 {

@@ -7,9 +7,11 @@
 #ifndef NP_ENGINE_GPU_VULKAN_ALLOCATION_CALLBACKS_HPP
 #define NP_ENGINE_GPU_VULKAN_ALLOCATION_CALLBACKS_HPP
 
-#include "NP-Engine/Vendor/VulkanInclude.hpp"
+#include "NP-Engine/Primitive/Primitive.hpp"
+#include "NP-Engine/Memory/Memory.hpp"
+#include "NP-Engine/Services/Services.hpp"
 
-#include "NP-Engine/GPU/Interface/Interface.hpp"
+#include "NP-Engine/Vendor/VulkanInclude.hpp"
 
 namespace np::gpu::__detail
 {

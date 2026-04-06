@@ -11,7 +11,7 @@
 
 #include "NP-Engine/Primitive/Primitive.hpp"
 
-#include "NP-Engine/GPU/Interface/Interface.hpp"
+#include "NP-Engine/GPU/Interface/DepthStencil.hpp"
 
 #include "VulkanCompareOperation.hpp"
 

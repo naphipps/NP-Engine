@@ -9,7 +9,7 @@
 
 #include "NP-Engine/Vendor/VulkanInclude.hpp"
 
-#include "NP-Engine/GPU/Interface/Interface.hpp"
+#include "NP-Engine/GPU/Interface/Color.hpp"
 
 namespace np::gpu::__detail
 {

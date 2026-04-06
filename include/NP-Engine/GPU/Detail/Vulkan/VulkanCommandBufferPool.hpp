@@ -13,7 +13,7 @@
 
 #include "NP-Engine/Vendor/VulkanInclude.hpp"
 
-#include "NP-Engine/GPU/Interface/Interface.hpp"
+#include "NP-Engine/GPU/Interface/CommandBufferPool.hpp"
 
 #include "VulkanCommandBuffer.hpp"
 #include "VulkanLogicalDevice.hpp"

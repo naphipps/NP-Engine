@@ -4,14 +4,14 @@
 //
 //##===----------------------------------------------------------------------===##//
 
-#ifndef NP_ENGINE_GPU_VULKAN_FRAMEBUFFERS_HPP
-#define NP_ENGINE_GPU_VULKAN_FRAMEBUFFERS_HPP
+#ifndef NP_ENGINE_GPU_VULKAN_FRAMEBUFFER_HPP
+#define NP_ENGINE_GPU_VULKAN_FRAMEBUFFER_HPP
 
 #include "NP-Engine/Container/Container.hpp"
 
 #include "NP-Engine/Vendor/VulkanInclude.hpp"
 
-#include "NP-Engine/GPU/Interface/Interface.hpp"
+#include "NP-Engine/GPU/Interface/Framebuffer.hpp"
 
 #include "VulkanRenderPass.hpp"
 #include "VulkanDevice.hpp"
@@ -147,4 +147,4 @@ namespace np::gpu::__detail
 	};
 } // namespace np::gpu::__detail
 
-#endif /* NP_ENGINE_GPU_VULKAN_FRAMEBUFFERS_HPP */
+#endif /* NP_ENGINE_GPU_VULKAN_FRAMEBUFFER_HPP */

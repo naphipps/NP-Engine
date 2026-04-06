@@ -7,9 +7,9 @@
 #ifndef NP_ENGINE_GPU_VULKAN_PRESENT_TARGET_HPP
 #define NP_ENGINE_GPU_VULKAN_PRESENT_TARGET_HPP
 
-#include "NP-Engine/GPU/Interface/Interface.hpp"
-
 #include "NP-Engine/Vendor/GlfwInclude.hpp"
+
+#include "NP-Engine/GPU/Interface/PresentTarget.hpp"
 
 #include "VulkanInstance.hpp"
 

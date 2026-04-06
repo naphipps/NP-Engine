@@ -12,7 +12,7 @@
 
 #include "NP-Engine/Vendor/VulkanInclude.hpp"
 
-#include "NP-Engine/GPU/Interface/Interface.hpp"
+#include "NP-Engine/GPU/Interface/Device.hpp"
 
 #include "VulkanInstance.hpp"
 #include "VulkanPresentTarget.hpp"

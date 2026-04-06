@@ -18,7 +18,7 @@
 
 #include "NP-Engine/Vendor/VulkanInclude.hpp"
 
-#include "NP-Engine/GPU/Interface/Interface.hpp"
+#include "NP-Engine/GPU/Interface/Shader.hpp"
 
 #include "VulkanDevice.hpp"
 #include "VulkanStage.hpp"

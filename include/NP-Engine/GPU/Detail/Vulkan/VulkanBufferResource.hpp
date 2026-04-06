@@ -11,7 +11,7 @@
 
 #include "NP-Engine/Vendor/VulkanInclude.hpp"
 
-#include "NP-Engine/GPU/Interface/Interface.hpp"
+#include "NP-Engine/GPU/Interface/BufferResource.hpp"
 
 #include "VulkanDevice.hpp"
 #include "VulkanResource.hpp"

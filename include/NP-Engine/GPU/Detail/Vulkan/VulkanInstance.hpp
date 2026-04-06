@@ -14,10 +14,12 @@
 #include "NP-Engine/String/String.hpp"
 #include "NP-Engine/Platform/Platform.hpp"
 #include "NP-Engine/Services/Services.hpp"
+#include "NP-Engine/Insight/Insight.hpp"
+#include "NP-Engine/Window/Window.hpp"
 
 #include "NP-Engine/Vendor/VulkanInclude.hpp"
 
-#include "NP-Engine/GPU/Interface/Interface.hpp"
+#include "NP-Engine/GPU/Interface/Detail.hpp"
 
 #include "VulkanAllocationCallbacks.hpp"
 
