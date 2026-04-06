@@ -64,8 +64,11 @@ namespace np::gpu
 
 		operator ui32() const
 		{
-			ui32 i = UI32_MIN;
-			mem::copy_bytes(mem::address_of(i), this, sizeof(ui32));
+			union {
+				Color c{};
+				ui32 i;
+			};
+			c = *this;
 			return i;
 		}
 
