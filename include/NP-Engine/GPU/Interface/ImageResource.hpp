@@ -58,10 +58,11 @@ namespace np::gpu
 		ResourceOperation writeOperation = ResourceOperation::None;
 		ResourceOperation stencilReadOperation = ResourceOperation::None;
 		ResourceOperation stencilWriteOperation = ResourceOperation::None;
-		ImageResourceUsage initialUsage = ImageResourceUsage::None; //TODO: maybe rename this? This is what the render pass
-																	//shall expect the image's usage/layout to be
-		ImageResourceUsage finalUsage = ImageResourceUsage::None; //TODO: maybe rename this? this is the usage/layout that the
-																  //render pass shall move the image to at the end
+		ImageResourceUsage initialUsage = ImageResourceUsage::None;
+		//TODO: ^ maybe rename this? This is what the render pass shall expect the image's usage/layout to be
+		ImageResourceUsage finalUsage = ImageResourceUsage::None;
+		//TODO: ^ maybe rename this? this is the usage/layout that the render pass shall move the image to at the end
+		//TODO: ^ I like beginAsUsage, endAsUsage
 	};
 
 	struct ImageResource : public Resource
