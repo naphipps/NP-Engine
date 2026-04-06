@@ -392,13 +392,13 @@ namespace np
 				return VulkanSampleCount::AllVkSampleCountFlagBitsArray[index];
 			}
 
-			::std::optional<ui32> GetMemoryTypeIndex(ui32 type_filter, VkMemoryPropertyFlags flags) const
+			::std::optional<siz> GetMemoryTypeIndex(ui32 type_filter, VkMemoryPropertyFlags flags) const
 			{
 				const VkPhysicalDeviceMemoryProperties properties = GetVkMemoryProperties();
 
-				::std::optional<ui32> index;
-				for (ui32 i = 0; i < properties.memoryTypeCount; i++)
-					if ((type_filter & (1 << i)) && (properties.memoryTypes[i].propertyFlags & flags) == flags)
+				::std::optional<siz> index;
+				for (siz i = 0; !index.has_value() && i < properties.memoryTypeCount; i++)
+					if ((type_filter & BIT(i)) && (properties.memoryTypes[i].propertyFlags & flags) == flags)
 						index = i;
 
 				return index;

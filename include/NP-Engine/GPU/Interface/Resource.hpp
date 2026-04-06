@@ -38,6 +38,16 @@ namespace np::gpu
 		virtual ~Resource() = default;
 
 		virtual ResourceType GetResourceType() const = 0;
+
+		virtual bl ClearCacheForDevice(siz offset, siz size)
+		{
+			return false;
+		}
+
+		virtual bl ClearCacheForHost(siz offset, siz size)
+		{
+			return false;
+		}
 	};
 
 	struct ResourceView : public Resource

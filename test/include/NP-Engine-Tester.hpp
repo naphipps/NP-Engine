@@ -18,6 +18,12 @@ namespace np::app
 	class GameLayer : public Layer
 	{
 	private:
+		struct Vertex
+		{
+			glm::vec4 position{};
+			glm::vec4 color{};
+		};
+
 		struct Scene
 		{
 			gpu::DetailType detailType = gpu::DetailType::None;
@@ -37,6 +43,9 @@ namespace np::app
 			mem::sptr<gpu::Fence> submitFence = nullptr;
 			mem::sptr<gpu::Semaphore> frameReadySemaphore = nullptr;
 			mem::sptr<gpu::Semaphore> submitCompleteSemaphore = nullptr;
+
+			con::vector<Vertex> vertices{};
+			mem::sptr<gpu::BufferResource> vertexBuffer = nullptr;
 
 			void RebuildFrames()
 			{
@@ -68,14 +77,6 @@ namespace np::app
 						mem::sptr<srvc::Services> services = detailInstance->GetServices();
 						mem::sptr<gpu::Frame> frame = frameContext->GetAcquiredFrame();
 
-						mem::sptr<gpu::SetViewportsCommand> set_viewports_cmd =
-							gpu::Command::Create(gpu::DetailType::Vulkan, services, gpu::CommandType::SetViewports);
-						set_viewports_cmd->viewports = { {{}, (dbl)frameContext->GetFrameWidth(), (dbl)frameContext->GetFrameHeight(), {0, 1}} };
-
-						mem::sptr<gpu::SetScissorsCommand> set_scissors_cmd =
-							gpu::Command::Create(gpu::DetailType::Vulkan, services, gpu::CommandType::SetScissors);
-						set_scissors_cmd->scissors = {{{}, frameContext->GetFrameWidth(), frameContext->GetFrameHeight()}};
-
 						mem::sptr<gpu::BeginRenderPassCommand> begin_renderpass_cmd =
 							gpu::Command::Create(gpu::DetailType::Vulkan, services, gpu::CommandType::BeginRenderPass);
 						begin_renderpass_cmd->framebuffer = framebuffers[frameContext->GetAcquiredFrameIndex()];
@@ -88,9 +89,21 @@ namespace np::app
 						bind_pipeline_cmd->pipeline = graphicsPipeline;
 						bind_pipeline_cmd->usage = gpu::PipelineUsage::Graphics;
 
+						mem::sptr<gpu::SetViewportsCommand> set_viewports_cmd =
+							gpu::Command::Create(gpu::DetailType::Vulkan, services, gpu::CommandType::SetViewports);
+						set_viewports_cmd->viewports = { {{}, (dbl)frameContext->GetFrameWidth(), (dbl)frameContext->GetFrameHeight(), {0, 1}} };
+
+						mem::sptr<gpu::SetScissorsCommand> set_scissors_cmd =
+							gpu::Command::Create(gpu::DetailType::Vulkan, services, gpu::CommandType::SetScissors);
+						set_scissors_cmd->scissors = { {{}, frameContext->GetFrameWidth(), frameContext->GetFrameHeight()} };
+
+						mem::sptr<gpu::BindVertexBuffersCommand> bind_vertex_buffers_cmd =
+							gpu::Command::Create(gpu::DetailType::Vulkan, services, gpu::CommandType::BindVertexBuffers);
+						bind_vertex_buffers_cmd->contexts = { {vertexBuffer, 0} };
+
 						mem::sptr<gpu::DrawCommand> draw_cmd =
 							gpu::Command::Create(gpu::DetailType::Vulkan, services, gpu::CommandType::Draw);
-						draw_cmd->vertexCount = 3;
+						draw_cmd->vertexCount = vertices.size();
 
 						mem::sptr<gpu::EndRenderPassCommand> end_renderpass_cmd =
 							gpu::Command::Create(gpu::DetailType::Vulkan, services, gpu::CommandType::EndRenderPass);
@@ -114,6 +127,7 @@ namespace np::app
 						command_buffer->Add(bind_pipeline_cmd);
 						command_buffer->Add(set_viewports_cmd);
 						command_buffer->Add(set_scissors_cmd);
+						command_buffer->Add(bind_vertex_buffers_cmd);
 						command_buffer->Add(draw_cmd);
 						command_buffer->Add(end_renderpass_cmd);
 						commandBufferPool->End(command_buffer, gpu::CommandBufferUsage::None);
@@ -396,7 +410,7 @@ namespace np::app
 				gpu::PipelineResourceLayout::Create(scene->device, {}, {});
 
 			con::vector<mem::sptr<gpu::Shader>> graphics_shaders{scene->vertexShader, scene->fragmentShader};
-			con::vector<gpu::Format> input_vertex_formatting{};
+			con::vector<gpu::Format> input_vertex_formatting{ gpu::Format{gpu::Format::Floating, 4, sizeof(flt)},  gpu::Format{gpu::Format::Floating, 4, sizeof(flt)} };
 			con::vector<gpu::Format> input_instance_formatting{};
 			gpu::PrimitiveTopology graphics_topology = gpu::PrimitiveTopology::Triangle | gpu::PrimitiveTopology::List;
 			con::vector<gpu::Viewport> graphics_viewports{
@@ -436,6 +450,20 @@ namespace np::app
 
 			//<https://vulkan-tutorial.com/en/Drawing_a_triangle/Drawing/Command_buffers>
 
+			scene->vertices = {
+				{{0, -0.5, 0, 1}, {1, 0, 1, 1}},
+				{{0.5, 0.5, 0, 1}, {1, 1, 0, 1}},
+				{{-0.5, 0.5, 0, 1}, {0, 1, 1, 1}}
+			};
+
+			con::vector<ui8> vertex_buffer_bytes(sizeof(Vertex) * scene->vertices.size());
+			mem::copy_bytes(vertex_buffer_bytes.data(), scene->vertices.data(), vertex_buffer_bytes.size());
+
+			const gpu::BufferResourceUsage vertex_buffer_usage = gpu::BufferResourceUsage::Vertex | gpu::BufferResourceUsage::HostAccessible;
+			scene->vertexBuffer = gpu::BufferResource::Create(scene->device, vertex_buffer_usage, vertex_buffer_bytes.size(), {scene->queue->GetDeviceQueueFamily()});
+			scene->vertexBuffer->SetBytes(0, vertex_buffer_bytes);
+			scene->vertexBuffer->ClearCacheForDevice(0, vertex_buffer_bytes.size());
+			
 			*self._scene.get_access() = scene;
 		}
 

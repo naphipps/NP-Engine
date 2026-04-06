@@ -14,7 +14,6 @@
 #include "NP-Engine/GPU/Interface/Interface.hpp"
 
 #include "VulkanDevice.hpp"
-#include "VulkanDeviceMemory.hpp"
 #include "VulkanResource.hpp"
 
 namespace np::gpu::__detail
@@ -26,8 +25,16 @@ namespace np::gpu::__detail
 
 		VkMemoryPropertyFlags GetVkMemoryPropertyFlags() const
 		{
-			return Contains(HostAccessible) ? VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
-											: VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
+			VkMemoryPropertyFlags flags = 0;
+
+			if (Contains(HostAccessible))
+				flags |= VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT;
+			if (Contains(DeviceLocal))
+				flags |= VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
+			if (Contains(AutoClearCache))
+				flags |= VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
+
+			return flags;
 		}
 
 		VkBufferUsageFlags GetVkBufferUsageFlags() const
@@ -70,9 +77,7 @@ namespace np::gpu::__detail
 		siz _size;
 		con::vector<DeviceQueueFamily> _queue_families;
 		VkBuffer _buffer;
-		VkMemoryPropertyFlags _memory_property_flags;
-		mem::sptr<VulkanDeviceMemory> _memory; //TODO: not a good idea to allocate this per buffer, use a
-											   //device-memory-allocator (guide pg85 mentions this)
+		mem::sptr<VulkanDeviceMemoryAllocation> _memory_allocation;
 
 		static VkBufferCreateInfo CreateVkInfo(siz size, VulkanBufferResourceUsage usage)
 		{
@@ -91,7 +96,7 @@ namespace np::gpu::__detail
 				family_indices[i] = queue_families[i].index;
 
 			VkBufferCreateInfo info = CreateVkInfo(size, usage);
-			info.sharingMode = family_indices.empty() ? VK_SHARING_MODE_EXCLUSIVE : VK_SHARING_MODE_CONCURRENT;
+			info.sharingMode = family_indices.size() > 1 ? VK_SHARING_MODE_CONCURRENT : VK_SHARING_MODE_EXCLUSIVE;
 			info.queueFamilyIndexCount = family_indices.size();
 			info.pQueueFamilyIndices = family_indices.empty() ? nullptr : family_indices.data();
 
@@ -105,12 +110,16 @@ namespace np::gpu::__detail
 		{
 			VkMemoryRequirements requirements{};
 			vkGetBufferMemoryRequirements(*device->GetLogicalDevice(), buffer, &requirements);
+			requirements.alignment = mem::sanitize_alignment(requirements.alignment);
+			requirements.size = mem::calc_aligned_size(requirements.size, requirements.alignment);
 			return requirements;
 		}
 
 		void BindMemory()
 		{
-			vkBindBufferMemory(*_device->GetLogicalDevice(), _buffer, *_memory, 0);
+			VulkanResult result =  _memory_allocation->GetDeviceMemory()->Bind(_buffer, _memory_allocation->GetRegion().offset);
+			//TODO: do we want to do anything with this result? at least assert success? do we need to succeed?
+			NP_ENGINE_ASSERT(result.Contains(VulkanResult::Success), "Binding must succeed here.");
 		}
 
 	public:
@@ -119,17 +128,15 @@ namespace np::gpu::__detail
 			_device(device),
 			_size(size),
 			_queue_families{queue_families.begin(), queue_families.end()},
-			_buffer(CreateVkBuffer(_device, _size, usage, _queue_families)),
-			_memory_property_flags(VulkanBufferResourceUsage{usage}.GetVkMemoryPropertyFlags()),
-			_memory(_device->CreateDeviceMemory(GetVkMemoryRequirements(_device, _buffer), _memory_property_flags))
+			_buffer(CreateVkBuffer(_device, VulkanBufferResourceUsage{usage}, _size, _queue_families)),
+			_memory_allocation(_device->AllocateDeviceMemory(GetVkMemoryRequirements(_device, _buffer), VulkanBufferResourceUsage{ usage }.GetVkMemoryPropertyFlags()))
 		{
+			//TODO: check if _memory_allocation is valid?
 			BindMemory();
 		}
 
 		~VulkanBufferResource()
 		{
-			_memory.reset();
-
 			if (_buffer)
 			{
 				mem::sptr<VulkanInstance> instance = _device->GetDetailInstance();
@@ -173,25 +180,33 @@ namespace np::gpu::__detail
 			return false;
 		}
 
-		virtual bl Assign(siz offset,
-						  const con::vector<ui8>& bytes) override //TODO: support offset and size? This area just feels a little
-																  //off -- should this belong in the VulkanBufferView??
+		virtual bl SetBytes(siz offset, const con::vector<ui8>& bytes) override
 		{
-			bl assigned = false;
-			if (offset + bytes.size() < _size)
-			{
-				_memory->Remap(offset, bytes.size(), _memory_property_flags);
-				BindMemory(); //TODO: is this neccessary?
-				_memory->AssignData(bytes);
-				assigned = true;
-			}
-			return assigned;
+			VulkanDeviceMemoryRegion region = _memory_allocation->GetRegion();
+			region = { region.offset + offset, bytes.size() };
+			return _memory_allocation->GetDeviceMemory()->SetBytes(region, bytes);
 		}
 
-		/*const mem::sptr<VulkanDeviceMemory> GetDeviceMemory() const
+		virtual con::vector<ui8> GetBytes(siz offset, siz size) override
 		{
-			return _memory;
-		}*/
+			VulkanDeviceMemoryRegion region = _memory_allocation->GetRegion();
+			region = { region.offset + offset, size };
+			return _memory_allocation->GetDeviceMemory()->GetBytes(region);
+		}
+
+		virtual bl ClearCacheForDevice(siz offset, siz size) override
+		{
+			VulkanDeviceMemoryRegion region = _memory_allocation->GetRegion();
+			region = { region.offset + offset, size };
+			return _memory_allocation->GetDeviceMemory()->ClearCacheForDevice(region);
+		}
+
+		virtual bl ClearCacheForHost(siz offset, siz size) override
+		{
+			VulkanDeviceMemoryRegion region = _memory_allocation->GetRegion();
+			region = { region.offset + offset, size };
+			return _memory_allocation->GetDeviceMemory()->ClearCacheForHost(region);
+		}
 	};
 } // namespace np::gpu::__detail
 

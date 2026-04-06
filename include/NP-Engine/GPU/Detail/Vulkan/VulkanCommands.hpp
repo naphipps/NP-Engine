@@ -435,8 +435,8 @@ namespace np::gpu::__detail
 
 			for (siz i = 0; i < contexts.size(); i++)
 			{
-				mem::sptr<VulkanBufferResource> buffer = EnsureIsDetailType(this->contexts[i].buffer, DetailType::Vulkan);
-				buffers[i] = buffer ? *buffer : (VkBuffer) nullptr;
+				mem::sptr<VulkanBufferResource> buffer = EnsureIsDetailType(contexts[i].buffer, DetailType::Vulkan);
+				buffers[i] = buffer ? *buffer : static_cast<VkBuffer>(nullptr);
 				offsets[i] = contexts[i].offset;
 			}
 
@@ -921,7 +921,7 @@ namespace np::gpu::__detail
 
 				con::vector<ui8> bytes(payloads.size() * sizeof(VkDrawIndirectCommand));
 				mem::copy_bytes(bytes.data(), payloads.data(), bytes.size());
-				prepared = buffer->Assign(offset, bytes);
+				prepared = buffer->SetBytes(offset, bytes);
 
 				if (prepared)
 				{
@@ -1010,7 +1010,7 @@ namespace np::gpu::__detail
 
 				con::vector<ui8> bytes(payloads.size() * sizeof(VkDrawIndexedIndirectCommand));
 				mem::copy_bytes(bytes.data(), payloads.data(), bytes.size());
-				prepared = buffer->Assign(offset, bytes);
+				prepared = buffer->SetBytes(offset, bytes);
 
 				if (prepared)
 				{

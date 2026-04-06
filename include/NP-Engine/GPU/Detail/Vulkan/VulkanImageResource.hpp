@@ -17,7 +17,6 @@
 #include "NP-Engine/GPU/Interface/Interface.hpp"
 
 #include "VulkanDevice.hpp"
-#include "VulkanDeviceMemory.hpp"
 #include "VulkanFormat.hpp"
 #include "VulkanSampleCount.hpp"
 #include "VulkanResource.hpp"
@@ -130,8 +129,16 @@ namespace np::gpu::__detail
 
 		VkMemoryPropertyFlags GetVkMemoryPropertyFlags() const
 		{
-			return Contains(HostAccessible) ? VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
-											: VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
+			VkMemoryPropertyFlags flags = 0;
+
+			if (Contains(HostAccessible))
+				flags |= VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT;
+			if (Contains(DeviceLocal))
+				flags |= VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
+			if (Contains(AutoClearCache))
+				flags |= VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
+
+			return flags;
 		}
 
 		VkImageTiling GetVkImageTiling() const
@@ -210,8 +217,7 @@ namespace np::gpu::__detail
 		VulkanSampleCount _sample_count;
 		con::vector<DeviceQueueFamily> _queue_families;
 		VkImage _image;
-		mem::sptr<VulkanDeviceMemory> _memory; //TODO: not a good idea to allocate this per image, use a device-memory-allocator
-											   //(guide pg85 mentions this - source code not available)
+		mem::sptr<VulkanDeviceMemoryAllocation> _memory_allocation;
 		const bl _enable_destroy;
 
 		static VkImageType GetVkImageType(VkExtent3D extent)
@@ -267,8 +273,10 @@ namespace np::gpu::__detail
 		{
 			VkMemoryRequirements requirements{};
 			vkGetImageMemoryRequirements(*device->GetLogicalDevice(), image, &requirements);
-			//vkGetImageSparseMemoryRequirements(*device, image, &count, nullptr); //TODO: support sparse images (guide pg85)
-			//(don't think there are sparse buffers
+			//vkGetImageSparseMemoryRequirements(*device, image, &count, nullptr);
+			//TODO: ^ support sparse images (guide pg85) (don't think there are sparse buffers? maybe!)
+			requirements.alignment = mem::sanitize_alignment(requirements.alignment);
+			requirements.size = mem::calc_aligned_size(requirements.size, requirements.alignment);
 			return requirements;
 		}
 
@@ -290,7 +298,9 @@ namespace np::gpu::__detail
 
 		void BindMemory()
 		{
-			vkBindImageMemory(*_device->GetLogicalDevice(), _image, *_memory, 0);
+			VulkanResult result = _memory_allocation->GetDeviceMemory()->Bind(_image, _memory_allocation->GetRegion().offset);
+			//TODO: do we want to do anything with this result? at least assert success? do we need to succeed?
+			NP_ENGINE_ASSERT(result.Contains(VulkanResult::Success), "Binding must succeed here.");
 		}
 
 	public:
@@ -317,13 +327,9 @@ namespace np::gpu::__detail
 			_depth(depth),
 			_queue_families{queue_families.begin(), queue_families.end()},
 			_image(image),
+			_memory_allocation(nullptr),
 			_enable_destroy(false)
-		{
-			const VulkanImageResourceUsage vulkan_usage = (ui32)usage;
-			_memory =
-				_device->CreateDeviceMemory(GetVkMemoryRequirements(_device, _image), vulkan_usage.GetVkMemoryPropertyFlags());
-			//BindMemory();
-		}
+		{}
 
 		VulkanImageResource(mem::sptr<Device> device, ImageResourceUsage usage, Format format, siz mip_count, siz layer_count,
 							siz sample_count, siz width, siz height, siz depth,
@@ -354,15 +360,15 @@ namespace np::gpu::__detail
 
 			_image = CreateVkImage(_device, vulkan_usage, _format, _mip_count, _layer_count, _sample_count, _width, _height,
 								   _depth, queue_families);
-			_memory =
-				_device->CreateDeviceMemory(GetVkMemoryRequirements(_device, _image), vulkan_usage.GetVkMemoryPropertyFlags());
+			_memory_allocation = _device->AllocateDeviceMemory(
+				GetVkMemoryRequirements(_device, _image), vulkan_usage.GetVkMemoryPropertyFlags());
+
+			//TODO: check if _memory_allocation is valid?
 			BindMemory();
 		}
 
 		virtual ~VulkanImageResource()
 		{
-			_memory.reset();
-
 			if (_enable_destroy && _image)
 			{
 				mem::sptr<VulkanInstance> instance = _device->GetDetailInstance();
@@ -434,11 +440,6 @@ namespace np::gpu::__detail
 		virtual con::vector<DeviceQueueFamily> GetDeviceQueueFamilies() const override
 		{
 			return _queue_families;
-		}
-
-		const mem::sptr<VulkanDeviceMemory> GetDeviceMemory() const
-		{
-			return _memory;
 		}
 
 		VkExtent3D GetVkExtent3D() const

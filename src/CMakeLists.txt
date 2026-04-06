@@ -141,7 +141,6 @@ set(NP_ENGINE_GPU_VULKAN_HPP
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Detail/Vulkan/VulkanComputePipeline.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Detail/Vulkan/VulkanDepthStencil.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Detail/Vulkan/VulkanDevice.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Detail/Vulkan/VulkanDeviceMemory.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Detail/Vulkan/VulkanDynamic.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Detail/Vulkan/VulkanFence.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Detail/Vulkan/VulkanFormat.hpp

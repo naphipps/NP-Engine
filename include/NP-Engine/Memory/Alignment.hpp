@@ -41,6 +41,16 @@ namespace np::mem
 	}
 
 	/*
+		true iff value is a multiple of alignment, else false
+		calls sanitize_alignment on alignment
+	*/
+	constexpr static bl is_aligned(siz value, siz alignment)
+	{
+		alignment = sanitize_alignment(alignment);
+		return (value % alignment) == 0;
+	}
+
+	/*
 		true iff ptr_ is a multiple of alignment, else false
 		calls sanitize_alignment on alignment
 	*/
@@ -56,7 +66,7 @@ namespace np::mem
 		};
 
 		ptr = ptr_;
-		return (value % alignment) == 0;
+		return is_aligned(value, alignment);
 	}
 
 	/*
