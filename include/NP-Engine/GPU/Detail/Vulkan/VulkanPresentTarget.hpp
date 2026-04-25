@@ -36,7 +36,7 @@ namespace np::gpu::__detail
 			switch (_window->GetDetailType())
 			{
 			case win::DetailType::Glfw:
-				if (glfwCreateWindowSurface(*_instance, (GLFWwindow*)_window->GetDetailWindow(), nullptr, &surface) !=
+				if (glfwCreateWindowSurface(*_instance, (GLFWwindow*)_window->GetDetailWindow(), _instance->GetVulkanAllocationCallbacks(), &surface) !=
 					VK_SUCCESS)
 					surface = nullptr;
 				break;
@@ -63,7 +63,7 @@ namespace np::gpu::__detail
 		{
 			if (_surface)
 			{
-				vkDestroySurfaceKHR(*_instance, _surface, nullptr);
+				vkDestroySurfaceKHR(*_instance, _surface, _instance->GetVulkanAllocationCallbacks());
 				_surface = nullptr;
 			}
 		}
