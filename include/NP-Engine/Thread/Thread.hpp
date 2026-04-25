@@ -102,6 +102,85 @@ namespace np::thr
 	} // namespace this_thread
 
 	using thread_pool = mem::object_pool<thread, thread::ALIGNMENT>;
+
+	enum class sleep_type : ui32
+	{
+		std = 1,
+		busy,
+		hybrid
+	};
+
+	class thread_duration_sleeper
+	{
+	public:
+		constexpr static dbl DEFAULT_OVERHEAD_SCALAR = 0.05;
+		constexpr static dbl DEFAULT_HYBRID_RATIO = 0.97;
+
+	protected:
+		tim::milliseconds _duration;
+		tim::steady_timestamp _previous;
+		tim::milliseconds _overhead;
+		dbl _scalar;
+		dbl _ratio;
+
+	public:
+		thread_duration_sleeper(tim::milliseconds duration) :
+			_duration(duration),
+			_previous(tim::steady_clock::now()),
+			_overhead{},
+			_scalar(DEFAULT_OVERHEAD_SCALAR),
+			_ratio(DEFAULT_HYBRID_RATIO)
+		{}
+
+		void set_overhead_scalar(dbl scalar)
+		{
+			_scalar = ::std::min(::std::max(scalar, 0.0), 1.0);
+		}
+
+		void set_hybrid_ratio(dbl ratio)
+		{
+			_ratio = ::std::min(::std::max(ratio, 0.0), 1.0);
+		}
+
+		void sleep(sleep_type type = sleep_type::hybrid)
+		{
+			if (type == sleep_type::std || type == sleep_type::hybrid)
+			{
+				tim::milliseconds dur = _duration;
+				if (type == sleep_type::hybrid)
+					dur *= _ratio;
+
+				dur -= (tim::steady_clock::now() - _previous);
+				if (dur.count() > 0)
+				{
+					tim::steady_timestamp start = tim::steady_clock::now();
+					this_thread::sleep_for(dur - _overhead);
+					tim::milliseconds actual = tim::steady_clock::now() - start;
+					_overhead += (actual - dur) * _scalar;
+					_overhead = ::std::max(_overhead, tim::milliseconds{ 0 });
+				}
+			}
+
+			if (type == sleep_type::busy || type == sleep_type::hybrid)
+			{
+				for (tim::steady_timestamp next = tim::steady_clock::now();
+					next - _previous < _duration;
+					next = tim::steady_clock::now())
+					this_thread::yield();
+			}
+
+			_previous = tim::steady_clock::now();
+		}
+
+		/*
+			resets previous timestamp and overhead duration
+		*/
+		void reset()
+		{
+			_previous = tim::steady_clock::now();
+			_overhead = tim::milliseconds{};
+		}
+	};
 } // namespace np::thr
 
 #endif /* NP_ENGINE_THR_THREAD_HPP */
