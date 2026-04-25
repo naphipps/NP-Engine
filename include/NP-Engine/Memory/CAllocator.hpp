@@ -58,7 +58,7 @@ namespace np::mem
 
 		virtual block reallocate(block& b_, siz size, siz alignment) override
 		{
-			block b = reallocate(b_.ptr, size, alignment);
+			block b = c_allocator::reallocate(b_.ptr, size, alignment); //REQUIRED TO CALL OUR reallocate
 			b_.invalidate();
 			return b;
 		}
@@ -92,7 +92,7 @@ namespace np::mem
 
 		virtual bl deallocate(block& b) override
 		{
-			bl deallocated = deallocate(b.ptr);
+			bl deallocated = c_allocator::deallocate(b.ptr); //REQUIRED TO CALL OUR deallocate
 			b.invalidate();
 			return deallocated;
 		}
