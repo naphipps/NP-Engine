@@ -29,6 +29,7 @@ namespace np::jsys
 		friend class JobWorker;
 
 		atm_bl _running;
+		bl _is_offsetting_worker_thread_affinity;
 		con::vector<JobWorker> _job_workers;
 		mem::sptr<condition> _job_worker_sleep_condition;
 		mem::trait_allocator _allocator;
@@ -61,11 +62,11 @@ namespace np::jsys
 		siz GetThreadAffinity(siz worker_id)
 		{
 			// we add one to help prevent core 0 crowding -- assuming main thread is there
-			return (worker_id + 1) % thr::thread::hardware_concurrency();
+			return (worker_id + (_is_offsetting_worker_thread_affinity ? 1 : 0)) % thr::thread::hardware_concurrency();
 		}
 
 	public:
-		JobSystem(): _running(false), _thread_pool(nullptr)
+		JobSystem(): _running(false), _is_offsetting_worker_thread_affinity(true), _thread_pool(nullptr)
 		{
 			SetDefaultJobWorkerCount();
 		}
@@ -73,6 +74,16 @@ namespace np::jsys
 		~JobSystem()
 		{
 			Clear();
+		}
+
+		void SetIsOffsettingWorkerThreadAffinity(bl is = true)
+		{
+			_is_offsetting_worker_thread_affinity = is;
+		}
+
+		bl IsOffsettingWorkerThreadAffinity() const
+		{
+			return _is_offsetting_worker_thread_affinity;
 		}
 
 		void Clear()
