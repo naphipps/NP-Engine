@@ -18,6 +18,7 @@ namespace np::gpu
 		constexpr static ui32 Success = BIT(0);
 		constexpr static ui32 Suboptimal = BIT(1);
 		constexpr static ui32 OutOfDate = BIT(2);
+		constexpr static ui32 NotReady = BIT(3);
 
 		Result(ui32 value = None) : enm_ui32(value) {}
 	};

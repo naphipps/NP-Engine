@@ -18,25 +18,28 @@ namespace np::gpu::__detail
 	protected:
 		static Result ToResult(VkResult vk_result)
 		{
-			Result result = Result::None;
+			Result result = None;
 
 			switch (vk_result)
 			{
 			case VK_ERROR_OUT_OF_DATE_KHR:
-				result = Result::OutOfDate;
+				result = OutOfDate;
 				break;
 
 			case VK_SUBOPTIMAL_KHR:
-				result = Result::Success | Result::Suboptimal;
+				result = Success | Suboptimal;
 				break;
 
 			case VK_SUCCESS:
-				result = Result::Success;
+				result = Success;
+				break;
+				
+			case VK_NOT_READY:
+				result = NotReady;
 				break;
 
-			//TODO: VK_NOT_READY?
 			default:
-				result = Result::Error;
+				result = Error;
 				break;
 			}
 
@@ -58,6 +61,8 @@ namespace np::gpu::__detail
 				result = VK_SUBOPTIMAL_KHR;
 			if (Contains(OutOfDate))
 				result = VK_ERROR_OUT_OF_DATE_KHR;
+			if (Contains(NotReady))
+				result = VK_NOT_READY;
 
 			return result;
 		}
