@@ -99,7 +99,6 @@ set(NP_ENGINE_GPU_INTERFACE_HPP
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Interface/ImageResource.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Interface/ImageResourceView.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Interface/ImageSubview.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Interface/Interface.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Interface/Light.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Interface/Logic.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Interface/Model.hpp
