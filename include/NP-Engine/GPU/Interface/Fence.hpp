@@ -10,6 +10,7 @@
 #include "NP-Engine/Primitive/Primitive.hpp"
 
 #include "Detail.hpp"
+#include "Result.hpp"
 
 namespace np::gpu
 {
@@ -27,6 +28,10 @@ namespace np::gpu
 			TODO: what units is timeout??
 		*/
 		virtual void Wait(siz timeout) const = 0;
+
+		virtual Result GetStatus() const = 0;
+
+		virtual Result Reset() = 0;
 	};
 } // namespace np::gpu
 

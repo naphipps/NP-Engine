@@ -17,6 +17,7 @@
 #include "NP-Engine/GPU/Interface/Fence.hpp"
 
 #include "VulkanLogicalDevice.hpp"
+#include "VulkanResult.hpp"
 
 namespace np::gpu::__detail
 {
@@ -84,9 +85,14 @@ namespace np::gpu::__detail
 			vkWaitForFences(*GetLogicalDevice(), 1, &_fence, VK_TRUE, timeout);
 		}
 
-		void Reset() const
+		Result Reset() override
 		{
-			vkResetFences(*GetLogicalDevice(), 1, &_fence);
+			return VulkanResult{ vkResetFences(*GetLogicalDevice(), 1, &_fence) };
+		}
+
+		Result GetStatus() const override
+		{
+			return VulkanResult{ vkGetFenceStatus(*GetLogicalDevice(), _fence) };
 		}
 	};
 } // namespace np::gpu::__detail
