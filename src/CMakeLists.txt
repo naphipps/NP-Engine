@@ -403,7 +403,9 @@ set(NP_ENGINE_HEADER_FILES
 #NP_ENGINE Source Files
 ##==--------------------------------------------------------==##
 
-set(NP_ENGINE_APPPLICATION_CPP)
+set(NP_ENGINE_APPPLICATION_CPP
+	Application/Application.cpp
+)
 
 if (APPLE)
 	set(NP_ENGINE_APPPLICATION_CPP

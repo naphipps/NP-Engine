@@ -24,6 +24,7 @@ namespace np::app
 		const thr::thread::id _owning_thread_id;
 		mutexed_wrapper<con::vector<mem::sptr<win::Window>>> _windows;
 		mutexed_wrapper<con::uset<uid::Uid>> _windows_to_destroy;
+		evnt::EventQueue _deferred_event_queue{};
 
 	protected:
 		struct WindowClosingPayload
@@ -245,7 +246,7 @@ namespace np::app
 			win::Window::Terminate(win::DetailType::Sdl);
 		}
 
-		mem::sptr<win::Window> Create(win::DetailType detail_type, uid::Uid id) //TODO: CreateWindow
+		mem::sptr<win::Window> Create(win::DetailType detail_type, uid::Uid id) //TODO: should be "CreateWindow" but stupid microsoft macros
 		{
 			mem::sptr<win::Window> window = nullptr;
 			if (IsOwningThread())
@@ -270,18 +271,38 @@ namespace np::app
 			return window;
 		}
 
-		void Update(tim::milliseconds time_delta) override
+		virtual void OnEvent(mem::sptr<evnt::Event> e) override
+		{
+			if (GetHandledCategories().Contains(e->GetCategory()))
+			{
+				evnt::EventType et = e->GetType();
+
+				if (IsOwningThread())
+				{
+					HandleEvent(e);
+				}
+				else
+				{
+					_deferred_event_queue.Push(e);
+					e->SetHandled();
+				}
+			}
+		}
+
+		void BeforePoll() override
+		{
+			_deferred_event_queue.ToggleState();
+			for (mem::sptr<evnt::Event> e = _deferred_event_queue.Pop(); e; e = _deferred_event_queue.Pop())
+				HandleEvent(e); //we do not need to consider handled-ness or maintain these events for later handling
+		}
+
+		void Poll(tim::milliseconds time_delta) override
 		{
 			win::Window::Update(win::DetailType::Glfw);
 			win::Window::Update(win::DetailType::Sdl);
-
-			auto windows = _windows.get_access();
-			for (auto it = windows->begin(); it != windows->end(); it++)
-				if (*it)
-					(*it)->Update(time_delta);
 		}
 
-		void Cleanup() override
+		void CleanupPoll() override
 		{
 			bl submit_application_close = false;
 			{
@@ -295,7 +316,7 @@ namespace np::app
 						wit = windows->erase(wit);
 						continue;
 					}
-					else if (*wit && wit->get_strong_count() == 1)
+					else
 					{
 						auto to_destroy = _windows_to_destroy.get_access();
 						auto dit = to_destroy->find((*wit)->GetUid());

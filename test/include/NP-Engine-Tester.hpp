@@ -26,6 +26,7 @@ namespace np::app
 
 		struct Scene
 		{
+			atm_bl isRendering = false;
 			gpu::DetailType detailType = gpu::DetailType::None;
 			mem::sptr<gpu::DetailInstance> detailInstance = nullptr;
 			mem::sptr<gpu::PresentTarget> presentTarget = nullptr;
@@ -38,11 +39,12 @@ namespace np::app
 			mem::sptr<gpu::RenderPass> renderpass = nullptr;
 			mem::sptr<gpu::GraphicsPipeline> graphicsPipeline = nullptr;
 			mem::sptr<gpu::CommandBufferPool> commandBufferPool = nullptr;
-			con::vector<mem::sptr<gpu::CommandBuffer>> commandBuffers{};
 
-			mem::sptr<gpu::Fence> submitFence = nullptr;
-			mem::sptr<gpu::Semaphore> frameReadySemaphore = nullptr;
-			mem::sptr<gpu::Semaphore> submitCompleteSemaphore = nullptr;
+			con::vector<mem::sptr<gpu::CommandBuffer>> commandBuffers{};
+			con::vector<mem::sptr<gpu::Fence>> submitCompleteFences{};
+			con::vector<mem::sptr<gpu::Semaphore>> frameReadySemaphores{};
+			con::vector<mem::sptr<gpu::Semaphore>> submitCompleteSemaphores{};
+			con::vector<siz> acquireFrameIndices{};
 
 			con::vector<Vertex> vertices{};
 			mem::sptr<gpu::BufferResource> vertexBuffer = nullptr;
@@ -62,17 +64,16 @@ namespace np::app
 
 			void Render()
 			{
-				if (!presentTarget->GetWindow()->IsMinimized())
+				bl expected = false;
+				if (isRendering.compare_exchange_strong(expected, true, mo_release, mo_relaxed))
 				{
-					if (submitFence)
-						submitFence->Wait();
-
-					gpu::Result acquire_result = frameContext->TryAcquireFrame(frameReadySemaphore, nullptr);
+					mem::sptr<gpu::Semaphore> frame_ready_semaphore = device->CreateSemaphore();
+					gpu::Result acquire_result = frameContext->TryAcquireFrame(frame_ready_semaphore, nullptr);
 					if (acquire_result.Contains(gpu::Result::OutOfDate))
 					{
 						RebuildFrames();
 					}
-					else if (acquire_result.Contains(gpu::Result::Success))
+					else if (acquire_result.ContainsAny(gpu::Result::Success | gpu::Result::NotReady))
 					{
 						mem::sptr<srvc::Services> services = detailInstance->GetServices();
 						mem::sptr<gpu::Frame> frame = frameContext->GetAcquiredFrame();
@@ -112,38 +113,32 @@ namespace np::app
 						if (!commandBufferPool)
 							commandBufferPool = queue->CreateCommandBufferPool(gpu::CommandBufferPoolUsage::Resettable);
 
-						if (commandBuffers.empty())
-						{
-							commandBuffers.resize(frameContext->GetFrames().size());
-							for (siz i = 0; i < commandBuffers.size(); i++)
-								commandBuffers[i] = commandBufferPool->CreateCommandBuffer();
-						}
+						frameReadySemaphores.emplace_back(frame_ready_semaphore);
+						commandBuffers.emplace_back(commandBufferPool->CreateCommandBuffer());
+						submitCompleteFences.emplace_back(device->CreateFence());
+						submitCompleteSemaphores.emplace_back(device->CreateSemaphore());
 
-						mem::sptr<gpu::CommandBuffer> command_buffer = commandBuffers[frameContext->GetAcquiredFrameIndex()];
-
-						commandBufferPool->Reset(command_buffer, gpu::CommandBufferUsage::None);
-						commandBufferPool->Begin(command_buffer, gpu::CommandBufferUsage::None);
-						command_buffer->Add(begin_renderpass_cmd);
-						command_buffer->Add(bind_pipeline_cmd);
-						command_buffer->Add(set_viewports_cmd);
-						command_buffer->Add(set_scissors_cmd);
-						command_buffer->Add(bind_vertex_buffers_cmd);
-						command_buffer->Add(draw_cmd);
-						command_buffer->Add(end_renderpass_cmd);
-						commandBufferPool->End(command_buffer, gpu::CommandBufferUsage::None);
+						commandBufferPool->Reset(commandBuffers.back(), gpu::CommandBufferUsage::None);
+						commandBufferPool->Begin(commandBuffers.back(), gpu::CommandBufferUsage::SingleUse);
+						commandBuffers.back()->Add(begin_renderpass_cmd);
+						commandBuffers.back()->Add(bind_pipeline_cmd);
+						commandBuffers.back()->Add(set_viewports_cmd);
+						commandBuffers.back()->Add(set_scissors_cmd);
+						commandBuffers.back()->Add(bind_vertex_buffers_cmd);
+						commandBuffers.back()->Add(draw_cmd);
+						commandBuffers.back()->Add(end_renderpass_cmd);
+						commandBufferPool->End(commandBuffers.back(), gpu::CommandBufferUsage::None);
 
 						gpu::Submit submit{};
 						submit.stages = { gpu::Stage::PresentComplete };
-						submit.commandBuffers = { command_buffer };
-						submit.waitSemaphores = { frameReadySemaphore };
-						submit.signalSemaphores = { submitCompleteSemaphore };
-
-						submitFence = device->CreateFence();
-						bl submit_success = queue->Submit(submit, submitFence);
+						submit.commandBuffers = { commandBuffers.back() };
+						submit.waitSemaphores = { frameReadySemaphores.back() };
+						submit.signalSemaphores = { submitCompleteSemaphores.back() };
+						bl submit_success = queue->Submit(submit, submitCompleteFences.back());
 
 						gpu::Present present{};
 						present.frameContexts = { frameContext };
-						present.waitSemaphores = { submitCompleteSemaphore };
+						present.waitSemaphores = { submitCompleteSemaphores.back() };
 						gpu::PresentResults present_results = queue->Present(present);
 
 						bl should_rebuild_frames = present_results.overallResult.ContainsAny(gpu::Result::OutOfDate | gpu::Result::Suboptimal);
@@ -152,7 +147,25 @@ namespace np::app
 
 						if (should_rebuild_frames)
 							RebuildFrames();
+
+						//TODO: there are MUCH better ways to manage these sorts of resources
+						for (siz i = 0; i < commandBuffers.size();)
+						{
+							if (submitCompleteFences[i]->GetStatus().Contains(gpu::Result::Success))
+							{
+								frameReadySemaphores.erase(frameReadySemaphores.begin() + i);
+								commandBuffers.erase(commandBuffers.begin() + i);
+								submitCompleteFences.erase(submitCompleteFences.begin() + i);
+								submitCompleteSemaphores.erase(submitCompleteSemaphores.begin() + i);
+							}
+							else
+							{
+								i++;
+							}
+						}
 					}
+
+					isRendering.store(false, mo_release);
 				}
 			}
 		};
@@ -160,7 +173,7 @@ namespace np::app
 		WindowLayer& _window_layer;
 		mem::sptr<uid::UidHandle> _window_id_handle;
 		mem::sptr<win::Window> _window;
-		mutexed_wrapper<mem::sptr<Scene>> _scene;
+		mutexed_wrapper<mem::sptr<Scene>> _scene; //mutexed wrapper helps smooth rendering on window resize
 		gpu::Camera _camera;
 		str _model_filename;
 		str _model_texture_filename;
@@ -230,6 +243,18 @@ namespace np::app
 			NP_ENGINE_LOG_INFO("size callback");
 		}
 
+		static void RenderOnFramebuffer(void* caller, ui32 width, ui32 height)
+		{
+			if (width != 0 && height != 0)
+				(*static_cast<GameLayer*>(caller)->_scene.get_access())->Render();
+		}
+
+		static void RenderOnSize(void* caller, ui32 width, ui32 height)
+		{
+			if (width != 0 && height != 0)
+				(*static_cast<GameLayer*>(caller)->_scene.get_access())->Render();
+		}
+
 		struct AdjustForWindowClosingPayload
 		{
 			GameLayer* caller = nullptr;
@@ -270,9 +295,9 @@ namespace np::app
 
 		void AdjustForApplicationClose(mem::sptr<evnt::Event> e)
 		{
-			TcpServerCloseClients();
+			/*TcpServerCloseClients();
 			_udp_server->Close();
-			_http_socket->Close();
+			_http_socket->Close();*/
 		}
 
 		void HandleNetworkClient(mem::sptr<evnt::Event> e)
@@ -353,6 +378,10 @@ namespace np::app
 			self._window->SetMouseCallback(input_queue, nput::InputListener::SubmitMouseState);
 			self._window->SetMousePositionCallback(input_queue, nput::InputListener::SubmitMousePosition);
 			self._window->SetControllerCallback(input_queue, nput::InputListener::SubmitControllerState);
+			//*
+			//self._window->SetFramebufferCallback(mem::address_of(self), RenderOnFramebuffer);
+			self._window->SetSizeCallback(mem::address_of(self), RenderOnSize);
+			//*/
 			/*
 			self._window->SetKeyCallback(mem::address_of(self), LogSubmitKeyState);
 			self._window->SetMouseCallback(mem::address_of(self), LogSubmitMouseState);
@@ -445,9 +474,6 @@ namespace np::app
 					gpu::Framebuffer::Create(scene->renderpass, scene->frameContext->GetFrameWidth(),
 											 scene->frameContext->GetFrameHeight(), 1, {frame_image_views[i]});
 
-			scene->frameReadySemaphore = scene->device->CreateSemaphore();
-			scene->submitCompleteSemaphore = scene->device->CreateSemaphore();
-
 			//<https://vulkan-tutorial.com/en/Drawing_a_triangle/Drawing/Command_buffers>
 
 			scene->vertices = {
@@ -459,12 +485,36 @@ namespace np::app
 			con::vector<ui8> vertex_buffer_bytes(sizeof(Vertex) * scene->vertices.size());
 			mem::copy_bytes(vertex_buffer_bytes.data(), scene->vertices.data(), vertex_buffer_bytes.size());
 
-			const gpu::BufferResourceUsage vertex_buffer_usage = gpu::BufferResourceUsage::Vertex | gpu::BufferResourceUsage::HostAccessible;
+			const gpu::BufferResourceUsage vertex_buffer_usage = gpu::BufferResourceUsage::Vertex | gpu::BufferResourceUsage::DeviceLocal |
+				gpu::BufferResourceUsage::Transfer | gpu::BufferResourceUsage::Write;
 			scene->vertexBuffer = gpu::BufferResource::Create(scene->device, vertex_buffer_usage, vertex_buffer_bytes.size(), {scene->queue->GetDeviceQueueFamily()});
-			scene->vertexBuffer->SetBytes(0, vertex_buffer_bytes);
-			scene->vertexBuffer->ClearCacheForDevice(0, vertex_buffer_bytes.size());
+
+			const gpu::BufferResourceUsage staging_vertex_buffer_usage = gpu::BufferResourceUsage::Vertex | gpu::BufferResourceUsage::HostAccessible |
+				gpu::BufferResourceUsage::Transfer | gpu::BufferResourceUsage::Read;
+			mem::sptr<gpu::BufferResource> staging_vertex_buffer =
+				gpu::BufferResource::Create(scene->device, staging_vertex_buffer_usage, vertex_buffer_bytes.size(), { scene->queue->GetDeviceQueueFamily() });
+
+			staging_vertex_buffer->SetBytes(0, vertex_buffer_bytes);
+			staging_vertex_buffer->ClearCacheForDevice(0, vertex_buffer_bytes.size());
+
+			mem::sptr<gpu::CopyBufferCommand> copy_buffer_cmd = gpu::Command::Create(gpu::DetailType::Vulkan, services, gpu::CommandType::CopyBuffer);
+			copy_buffer_cmd->dst = scene->vertexBuffer;
+			copy_buffer_cmd->src = staging_vertex_buffer;
+			copy_buffer_cmd->ranges = { {0, 0, vertex_buffer_bytes.size()} };
 			
-			*self._scene.get_access() = scene;
+			mem::sptr<gpu::CommandBufferPool> command_buffer_pool = scene->queue->CreateCommandBufferPool(gpu::CommandBufferPoolUsage::None);
+			mem::sptr<gpu::CommandBuffer> command_buffer = command_buffer_pool->CreateCommandBuffer();
+			command_buffer_pool->Begin(command_buffer, gpu::CommandBufferUsage::SingleUse);
+			command_buffer->Add(copy_buffer_cmd);
+			command_buffer_pool->End(command_buffer, gpu::CommandBufferUsage::None);
+
+			gpu::Submit submit{};
+			submit.commandBuffers = { command_buffer };
+			mem::sptr<gpu::Fence> fence = scene->device->CreateFence();
+			scene->queue->Submit(submit, fence);
+			fence->Wait();
+
+			self._scene = scene;
 		}
 
 		void SubmitCreateSceneJob()
@@ -759,15 +809,18 @@ namespace np::app
 
 			//-----------------------------------------------------------
 
+			/*
 			_tcp_server = net::Socket::Create(_network_context);
 			_tcp_server->Open(net::Protocol::Tcp);
 			_tcp_server->Enable({net::SocketOptions::ReuseAddress, net::SocketOptions::ReusePort});
 			_tcp_server->BindTo(net::Ipv4{127, 0, 0, 1}, 55555);
 			_tcp_server->Listen();
 			SubmitTcpServerAcceptClientJob();
+			//*/
 
 			//-----------------------------------------------------------
 
+			/*
 			_udp_server = net::Socket::Create(_network_context);
 			_udp_server->Open(net::Protocol::Udp);
 			_udp_server->Enable({net::SocketOptions::ReuseAddress, net::SocketOptions::ReusePort});
@@ -777,9 +830,11 @@ namespace np::app
 			_udp_client = net::Socket::Create(_network_context);
 			_udp_client->Open(net::Protocol::Udp);
 			_udp_client->Enable({net::SocketOptions::ReuseAddress, net::SocketOptions::ReusePort});
+			//*/
 
 			//-----------------------------------------------------------
 
+			/*
 			mem::sptr<net::Resolver> resv = net::Resolver::Create(_network_context);
 
 			net::Host host = resv->GetHost("example.com");
@@ -793,19 +848,32 @@ namespace np::app
 						   "Connection: close\r\n\r\n";
 			_http_socket->Send(http_get.data(), http_get.size());
 			_http_socket->StartReceiving();
+			//*/
 
 			//-----------------------------------------------------------
 
-			SubmitClientConnectToTcpServerJob();
+			//SubmitClientConnectToTcpServerJob();
 		}
 
 		~GameLayer()
 		{
-			TcpServerCloseClients();
-			_udp_server->Close();
-			_http_socket->Close();
+			//TcpServerCloseClients();
+			//_udp_server->Close();
+			//_http_socket->Close();
 
 			net::Terminate(net::DetailType::Native);
+		}
+
+		void Render()
+		{
+			auto scene = _scene.get_access();
+			if (scene && *scene && !(*scene)->presentTarget->GetWindow()->IsMinimized())
+				(*scene)->Render();
+		}
+
+		bl IsWindowMaximized() const
+		{
+			return _window && _window->IsMaximized();
 		}
 
 		void Update(tim::milliseconds time_delta) override
@@ -820,11 +888,7 @@ namespace np::app
 				if (_window)
 					SubmitCreateSceneJob();
 			}
-			{
-				auto scene = _scene.get_access();
-				if (scene && *scene)
-					(*scene)->Render();
-			}
+			if (false)
 			{
 				auto clients = _tcp_server_clients.get_access();
 				for (auto c = clients->begin(); c != clients->end(); c++)
@@ -849,6 +913,7 @@ namespace np::app
 					}
 				}
 			}
+			if (false)
 			{
 				::std::stringstream ss;
 				ss << thr::this_thread::get_id();
@@ -877,6 +942,7 @@ namespace np::app
 					}
 				}
 			}
+			if (false)
 			{
 				net::MessageQueue& inbox = _http_socket->GetInbox();
 				inbox.ToggleState();
@@ -896,6 +962,7 @@ namespace np::app
 					}
 				}
 			}
+			if (false)
 			{
 				tim::steady_timestamp now = tim::steady_clock::now();
 				if (now - _clients_send_msg_timestamp > tim::milliseconds(1000))
@@ -932,7 +999,7 @@ namespace np::app
 			}
 		}
 
-		void Cleanup() override
+		void CleanupUpdate() override
 		{
 			{
 				/*auto scene = _scene.get_access();
@@ -954,29 +1021,209 @@ namespace np::app
 	{
 	private:
 		GameLayer _game_layer;
+		atm_bl _keep_poll_looping;
+		atm_bl _keep_app_looping;
+		atm_bl _keep_rendering;
+
+		static void AppLoopCallback(mem::delegate& d)
+		{
+			NP_ENGINE_PROFILE_FUNCTION();
+			NP_ENGINE_LOG_INFO("App Loop Start");
+
+			GameApp& self = *((GameApp*)d.GetPayload());
+			evnt::EventQueue& event_queue = self._services->GetEventQueue();
+			nput::InputQueue& input_queue = self._services->GetInputQueue();
+
+			thr::thread_duration_sleeper sleeper{ self.GetPlatformDefaultApplicationLoopDuration() / 2 };
+			tim::steady_timestamp next = tim::steady_clock::now();
+			tim::steady_timestamp prev = next;
+			tim::milliseconds delta{};
+
+			mem::sptr<evnt::Event> e = nullptr;
+			con::vector<Layer*>::iterator it{};
+
+			while (self._keep_app_looping.load(mo_acquire))
+			{
+				NP_ENGINE_PROFILE_SCOPE("app loop");
+
+				self.PublishEvents();
+
+				if (!self._keep_app_looping.load(mo_acquire))
+					break;
+
+				next = tim::steady_clock::now();
+				delta = next - prev;
+				prev = next;
+
+				input_queue.ApplySubmissions();
+
+				for (it = self._layers.begin(); it != self._layers.end(); it++)
+					(*it)->BeforeUpdate();
+
+				for (it = self._layers.begin(); it != self._layers.end(); it++)
+					(*it)->Update(delta);
+
+				for (it = self._layers.begin(); it != self._layers.end(); it++)
+					(*it)->AfterUpdate();
+
+				for (it = self._layers.begin(); it != self._layers.end(); it++)
+					(*it)->CleanupUpdate();
+
+				sleeper.sleep();
+			}
+
+			event_queue.Clear();
+
+			NP_ENGINE_LOG_INFO("App Loop End");
+		}
+
+		static void RenderCallback(mem::delegate& d)
+		{
+			NP_ENGINE_PROFILE_FUNCTION();
+			NP_ENGINE_LOG_INFO("Rendering Job Start");
+
+			GameApp& self = *((GameApp*)d.GetPayload());
+			thr::thread_duration_sleeper sleeper{ self.GetPlatformDefaultApplicationLoopDuration() };
+
+			while (self._keep_rendering.load(mo_acquire))
+			{
+				self._game_layer.Render();
+
+				//TODO: if our window is maximized or full screen, we can render like crazy
+
+				if (self._game_layer.IsWindowMaximized())
+					sleeper.reset();
+				else
+					sleeper.sleep();
+			}
+
+			NP_ENGINE_LOG_INFO("Rendering Job End");
+		}
 
 		void CustomizeJobSystem()
 		{
-			jsys::JobSystem& job_system = _services->GetJobSystem();
-			con::vector<jsys::JobWorker>& job_workers = job_system.GetJobWorkers();
+			const ui32 core_count = thr::thread::hardware_concurrency();
+			NP_ENGINE_ASSERT(core_count >= 4, "NP Engine Test requires at least four cores");
+			const siz worker_count = ::std::max(core_count, 8u);
 
-			NP_ENGINE_ASSERT(thr::thread::hardware_concurrency() >= 4, "NP Engine Test requires at least four cores");
+			/*
+				Thread-to-Core Layout:
+					- core 0: main thread (polling loop) and worker 0 (app loop)
+						- I'm fine with core crowding here since the polling loop should not be intensive enough to consistently throttle app loop
+						- TODO: ^ investigate
+					- core 1: worker 1 (rendering)
+					- core 2+: worker 2+ for normal job executing
+			*/
+
+			jsys::JobSystem& job_system = _services->GetJobSystem();
+			job_system.SetIsOffsettingWorkerThreadAffinity(false);
+			job_system.SetJobWorkerCount(worker_count);
+
+			con::vector<jsys::JobWorker>& job_workers = job_system.GetJobWorkers();
+			jsys::JobWorker& app_loop_worker = job_workers[0];
+			jsys::JobWorker& render_worker = job_workers[1];
+
+			app_loop_worker.ClearCoworkers();
+			render_worker.ClearCoworkers();
+			for (auto it = job_workers.begin(); it != job_workers.end(); it++)
+			{
+				it->RemoveCoworker(app_loop_worker);
+				it->RemoveCoworker(render_worker);
+			}
+
+			mem::sptr<jsys::Job> app_loop_job = job_system.CreateJob();
+			app_loop_job->SetCanBeStolen(false);
+			app_loop_job->SetPayload(this);
+			app_loop_job->SetCallback(AppLoopCallback);
+			app_loop_worker.SubmitImmediateJob(app_loop_job);
+
+			mem::sptr<jsys::Job> render_job = job_system.CreateJob();
+			render_job->SetCanBeStolen(false);
+			render_job->SetPayload(this);
+			render_job->SetCallback(RenderCallback);
+			render_worker.SubmitImmediateJob(render_job);
+		}
+
+		void PollingLoop()
+		{
+			NP_ENGINE_PROFILE_FUNCTION();
+			NP_ENGINE_LOG_INFO("Polling Loop Start");
+
+			thr::thread_duration_sleeper sleeper{ GetPlatformDefaultApplicationLoopDuration() };
+
+			tim::steady_timestamp next = tim::steady_clock::now();
+			tim::steady_timestamp prev = next;
+			tim::milliseconds delta{};
+
+			mem::sptr<evnt::Event> e = nullptr;
+			con::vector<Layer*>::iterator it{};
+
+			while (_keep_poll_looping.load(mo_acquire))
+			{
+				NP_ENGINE_PROFILE_SCOPE("poll loop");
+
+				next = tim::steady_clock::now();
+				delta = next - prev;
+				prev = next;
+
+				for (it = _layers.begin(); it != _layers.end(); it++)
+					(*it)->BeforePoll();
+
+				for (it = _layers.begin(); it != _layers.end(); it++)
+					(*it)->Poll(delta);
+
+				for (it = _layers.begin(); it != _layers.end(); it++)
+					(*it)->AfterPoll();
+
+				for (it = _layers.begin(); it != _layers.end(); it++)
+					(*it)->CleanupPoll();
+
+				sleeper.sleep(thr::sleep_type::std);
+			}
+
+			NP_ENGINE_LOG_INFO("Polling Loop End");
 		}
 
 	public:
-		GameApp(mem::sptr<srvc::Services> services):
-			Application(Application::Properties{"My Game App"}, services),
-			_game_layer(services, _window_layer)
+		GameApp(mem::sptr<srvc::Services> services) :
+			Application("My Game App", services),
+			_game_layer(services, _window_layer),
+			_keep_poll_looping(false),
+			_keep_app_looping(false),
+			_keep_rendering(false)
 		{
-			PushLayer(mem::address_of(_game_layer));
+			PushLayer(_game_layer);
 		}
+
+		virtual ~GameApp() = default;
 
 		void Run(i32 argc, chr** argv) override
 		{
 			NP_ENGINE_PROFILE_FUNCTION();
 			NP_ENGINE_LOG_INFO("Hello world from my game app! My title is '" + GetTitle() + "'");
 			CustomizeJobSystem();
-			Application::Run(argc, argv);
+
+			_keep_poll_looping.store(true, mo_release);
+			_keep_app_looping.store(true, mo_release);
+			_keep_rendering.store(true, mo_release);
+
+			jsys::JobSystem& job_system = _services->GetJobSystem();
+			job_system.Start();
+			PollingLoop();
+			job_system.Stop();
+			job_system.Clear();
+		}
+
+		virtual void StopRunning() override
+		{
+			_keep_poll_looping.store(false, mo_release);
+			_keep_app_looping.store(false, mo_release);
+			_keep_rendering.store(false, mo_release);
+		}
+
+		virtual bl IsRunning() const override
+		{
+			return _keep_app_looping.load(mo_acquire);
 		}
 	};
 } // namespace np::app

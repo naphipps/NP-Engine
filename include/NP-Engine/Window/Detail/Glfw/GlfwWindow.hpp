@@ -16,14 +16,12 @@
 #include "NP-Engine/Time/Time.hpp"
 #include "NP-Engine/String/String.hpp"
 #include "NP-Engine/Math/Math.hpp"
+#include "NP-Engine/Insight/Insight.hpp"
 
 #include "NP-Engine/Vendor/GlfwInclude.hpp"
 #include "NP-Engine/Vendor/GlmInclude.hpp"
 
 #include "NP-Engine/Window/Interface/Interface.hpp"
-
-// TODO: resizing window smaller than min siz results with mouse offset to be incorrect
-// TODO: dragging window to window edges does not trigger snapping effects (windows - maybe linux too?)
 
 namespace np::win::__detail
 {
@@ -36,160 +34,37 @@ namespace np::win::__detail
 		atm_flag _is_closing;
 
 #if NP_ENGINE_PLATFORM_IS_WINDOWS
-		using HitFlags = ui32;
-		constexpr static HitFlags HitNone = 0;
-		constexpr static HitFlags HitCaption = BIT(0);
-		constexpr static HitFlags HitTop = BIT(1);
-		constexpr static HitFlags HitRight = BIT(2);
-		constexpr static HitFlags HitBottom = BIT(3);
-		constexpr static HitFlags HitLeft = BIT(4);
-		constexpr static HitFlags HitMinimize = BIT(5);
-		constexpr static HitFlags HitMaximize = BIT(6);
-		constexpr static HitFlags HitClose = BIT(7);
-
-		WNDPROC _prev_window_procedure;
-		HitFlags _hit_flags;
-		POINT _prev_mouse_position;
-		WINDOWPLACEMENT _prev_window_placement;
-
-		static LRESULT CALLBACK GlfwWindowProcedure(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
+		static BOOL IsSystemUsingDarkMode()
 		{
-			LRESULT result = -1; // assuming -1 is an error value
-			GlfwWindow* glfw_window = (GlfwWindow*)GetWindowLongPtrA(hwnd, GWLP_USERDATA);
-			bl call_prev_window_procedure = true;
-			POINTS point = MAKEPOINTS(lparam); // screen point
+			LPCSTR subkey = "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize";
+			LPCSTR value = "SystemUsesLightTheme";
+			DWORD word = 0;
+			DWORD size = sizeof(DWORD);
+			LSTATUS status = RegGetValue(HKEY_CURRENT_USER, subkey, value, RRF_RT_DWORD, nullptr, &word, &size);
+			return status == ERROR_SUCCESS && word == 0;
+		}
 
-			switch (msg)
+		static BOOL IsUsingDarkMode(HWND hwnd)
+		{
+			BOOL is = false;
+			HRESULT result = DwmGetWindowAttribute(hwnd, DWMWA_USE_IMMERSIVE_DARK_MODE, &is, sizeof(BOOL));
+			return result == ERROR_SUCCESS && is;
+		}
+
+		static void ApplySystemTheme(HWND hwnd)
+		{
+			const BOOL is_system_using_dark_mode = IsSystemUsingDarkMode();
+			const BOOL is_using_dark_mode = IsUsingDarkMode(hwnd);
+
+			if (is_using_dark_mode != is_system_using_dark_mode)
 			{
-			case WM_NCLBUTTONDBLCLK:
-				GetWindowPlacement(hwnd, &glfw_window->_prev_window_placement);
-			case WM_NCRBUTTONDBLCLK:
-				call_prev_window_procedure = GET_NCHITTEST_WPARAM(wparam) != HTSYSMENU;
-				break;
+				HRESULT hresult = DwmSetWindowAttribute(hwnd, DWMWA_USE_IMMERSIVE_DARK_MODE, &is_system_using_dark_mode, sizeof(BOOL));
 
-			case WM_NCRBUTTONDOWN:
-				call_prev_window_procedure = false;
-				break;
-
-			case WM_NCLBUTTONDOWN:
-			{
-				switch (GET_NCHITTEST_WPARAM(wparam))
-				{
-				case HTCAPTION:
-					glfw_window->_hit_flags = HitCaption;
-					break;
-
-				case HTTOP:
-					glfw_window->_hit_flags = HitTop;
-					break;
-
-				case HTLEFT:
-					glfw_window->_hit_flags = HitLeft;
-					break;
-
-				case HTRIGHT:
-					glfw_window->_hit_flags = HitRight;
-					break;
-
-				case HTBOTTOM:
-					glfw_window->_hit_flags = HitBottom;
-					break;
-
-				case HTTOPLEFT:
-					glfw_window->_hit_flags = HitTop | HitLeft;
-					break;
-
-				case HTTOPRIGHT:
-					glfw_window->_hit_flags = HitTop | HitRight;
-					break;
-
-				case HTBOTTOMLEFT:
-					glfw_window->_hit_flags = HitLeft | HitBottom;
-					break;
-
-				case HTBOTTOMRIGHT:
-					glfw_window->_hit_flags = HitRight | HitBottom;
-					break;
-
-				case HTMINBUTTON:
-					glfw_window->_hit_flags = HitMinimize;
-					break;
-
-				case HTMAXBUTTON:
-					glfw_window->_hit_flags = HitMaximize;
-					break;
-
-				case HTCLOSE:
-					glfw_window->_hit_flags = HitClose;
-					break;
-
-				case HTSYSMENU:
-				{
-					call_prev_window_procedure = false;
-					break;
-				}
-				default:
-					glfw_window->_hit_flags = HitNone;
-					break;
-				}
-
-				if (glfw_window->_hit_flags)
-				{
-					glfw_window->_prev_mouse_position.x = point.x;
-					glfw_window->_prev_mouse_position.y = point.y;
-					call_prev_window_procedure = false;
-					result = 0; // assuming 0 is a success value
-				}
-
-				break;
+				//for some stupid windows reason, we have to reactivate to actually apply theme...
+				bl is_active = hwnd == GetActiveWindow();
+				BOOL b = SendMessage(hwnd, !is_active ? WM_ACTIVATE : WA_INACTIVE, WA_ACTIVE, 0);
+				b = SendMessage(hwnd, is_active ? WM_ACTIVATE : WA_INACTIVE, WA_ACTIVE, 0);
 			}
-			case WM_NCLBUTTONUP:
-			{
-				switch (GET_NCHITTEST_WPARAM(wparam))
-				{
-				case HTMINBUTTON:
-				{
-					if (glfw_window->_hit_flags == HitMinimize)
-					{
-						glfw_window->Minimize();
-						call_prev_window_procedure = false;
-					}
-					break;
-				}
-				case HTMAXBUTTON:
-				{
-					if (glfw_window->_hit_flags == HitMaximize)
-					{
-						if (glfw_window->IsMaximized())
-							glfw_window->RestoreFromMaximize();
-						else
-							glfw_window->Maximize();
-						call_prev_window_procedure = false;
-					}
-					break;
-				}
-				case HTCLOSE:
-				{
-					if (glfw_window->_hit_flags == HitClose)
-					{
-						glfw_window->Close();
-						call_prev_window_procedure = false;
-					}
-					break;
-				}
-				default:
-					break;
-				}
-
-				glfw_window->_hit_flags = HitNone;
-				break;
-			}
-			}
-
-			if (call_prev_window_procedure)
-				result = CallWindowProcA(glfw_window->_prev_window_procedure, hwnd, msg, wparam, lparam);
-
-			return result;
 		}
 #endif
 
@@ -212,11 +87,8 @@ namespace np::win::__detail
 
 		static void FramebufferSizeCallback(GLFWwindow* glfw_window, i32 width, i32 height)
 		{
-			if (width < 0)
-				width = 0;
-
-			if (height < 0)
-				height = 0;
+			width = ::std::max(width, 0);
+			height = ::std::max(height, 0);
 
 			GlfwWindow* window = (GlfwWindow*)glfwGetWindowUserPointer(glfw_window);
 			window->InvokeFramebufferCallbacks(width, height);
@@ -779,38 +651,43 @@ namespace np::win::__detail
 			// window->InvokeControllerCallbacks(state);
 		}
 
-		static void ApplySystemThemeOnGlfw(GLFWwindow* glfw_window)
+		void ApplySystemThemeOnGlfw(GLFWwindow* glfw_window)
 		{
 			if (glfw_window)
 			{
 #if NP_ENGINE_PLATFORM_IS_WINDOWS
-				LPCSTR subkey = "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize";
-				LPCSTR value = "SystemUsesLightTheme";
-				DWORD word = 0;
-				DWORD size = sizeof(DWORD);
-				LSTATUS status = RegGetValueA(HKEY_CURRENT_USER, subkey, value, RRF_RT_DWORD, nullptr, &word, &size);
 				HWND native_window = (HWND)GetNativeFromGlfw(glfw_window);
-				BOOL dark_mode_value = status == ERROR_SUCCESS && word == 0;
-				BOOL prev_dark_mode_value = false;
-				DWORD DARK_MODE_ATTRIBUTE = 20;
-
-				DwmGetWindowAttribute(native_window, DARK_MODE_ATTRIBUTE, &prev_dark_mode_value, sizeof(BOOL));
-
-				if (prev_dark_mode_value != dark_mode_value)
-				{
-					DwmSetWindowAttribute(native_window, DARK_MODE_ATTRIBUTE, &dark_mode_value, sizeof(BOOL));
-
-					bl is_active = native_window == GetActiveWindow();
-					GlfwWindowProcedure(native_window, WM_NCACTIVATE, !is_active, 0);
-					GlfwWindowProcedure(native_window, WM_NCACTIVATE, is_active, 0);
-				}
+				ApplySystemTheme(native_window);
 #endif
 			}
+		}
+
+		static bl IsSnapped(GLFWwindow* glfw_window)
+		{
+			bl is = false;
+			if (glfw_window)
+			{
+#if NP_ENGINE_PLATFORM_IS_WINDOWS
+				HWND native_window = (HWND)GetNativeFromGlfw(glfw_window);
+				is = IsWindowArranged(native_window);
+#endif
+			}
+			return is;
+		}
+
+		static bl IsMinimized(GLFWwindow* glfw_window)
+		{
+			return glfw_window && glfwGetWindowAttrib(glfw_window, GLFW_ICONIFIED);
 		}
 
 		static bl IsMaximized(GLFWwindow* glfw_window)
 		{
 			return glfw_window && glfwGetWindowAttrib(glfw_window, GLFW_MAXIMIZED);
+		}
+
+		static bl IsFocused(GLFWwindow* glfw_window)
+		{
+			return glfw_window && glfwGetWindowAttrib(glfw_window, GLFW_FOCUSED);
 		}
 
 		static void* GetNativeFromGlfw(GLFWwindow* glfw_window)
@@ -865,13 +742,6 @@ namespace np::win::__detail
 				glfwSetCursorPosCallback(glfw_window, MousePositionCallback);
 				glfwSetCursorEnterCallback(glfw_window, MouseEnterCallback);
 				glfwSetJoystickCallback(ControllerCallback);
-
-#if NP_ENGINE_PLATFORM_IS_WINDOWS
-				HWND native_window = (HWND)GetNativeFromGlfw(glfw_window);
-				SetWindowLongPtrA(native_window, GWLP_USERDATA, (LONG_PTR)this);
-				_prev_window_procedure =
-					(WNDPROC)SetWindowLongPtrA(native_window, GWLP_WNDPROC, (LONG_PTR)&GlfwWindowProcedure);
-#endif
 			}
 		}
 
@@ -909,16 +779,6 @@ namespace np::win::__detail
 				glfwSetCursorPosCallback(glfw_window, nullptr);
 				glfwSetCursorEnterCallback(glfw_window, nullptr);
 				glfwSetJoystickCallback(nullptr);
-
-#if NP_ENGINE_PLATFORM_IS_WINDOWS
-				HWND native_window = (HWND)GetNativeFromGlfw(glfw_window);
-				if (native_window)
-				{
-					SetWindowLongPtrA(native_window, GWLP_WNDPROC, (LONG_PTR)_prev_window_procedure);
-					SetWindowLongPtrA(native_window, GWLP_USERDATA, (LONG_PTR) nullptr);
-				}
-				_prev_window_procedure = nullptr;
-#endif
 			}
 		}
 
@@ -952,13 +812,6 @@ namespace np::win::__detail
 
 		GlfwWindow(mem::sptr<srvc::Services> services, uid::Uid id):
 			Window(services, id)
-#if NP_ENGINE_PLATFORM_IS_WINDOWS
-			,
-			_prev_window_procedure(nullptr),
-			_hit_flags(HitNone),
-			_prev_mouse_position(),
-			_prev_window_placement()
-#endif
 		{
 			_is_closing.test_and_set(mo_release);
 			auto glfw_window = _glfw_window.get_access();
@@ -985,125 +838,10 @@ namespace np::win::__detail
 			}
 		}
 
-		void Update(tim::milliseconds milliseconds) override
+		void Update(tim::milliseconds m) override
 		{
 			auto glfw_window = _glfw_window.get_access();
-			if (*glfw_window)
-			{
-#if NP_ENGINE_PLATFORM_IS_WINDOWS
-				HWND native_window = (HWND)GetNativeFromGlfw(*glfw_window);
-				POINT point;
-				WINDOWINFO info{};
-				UINT flags = 0;
-				bl call_set_window_pos = false;
-				GetCursorPos(&point);
-				GetWindowInfo(native_window, &info);
-
-				::glm::i32vec2 offset{point.x - _prev_mouse_position.x, point.y - _prev_mouse_position.y};
-
-				switch (_hit_flags)
-				{
-				case HitCaption:
-					if (IsMaximized(*glfw_window))
-					{
-						if (offset.x != 0 || offset.y != 0)
-						{
-							dbl t = mat::get_t((dbl)info.rcWindow.left, (dbl)info.rcWindow.right, (dbl)point.x);
-							siz width =
-								_prev_window_placement.rcNormalPosition.right - _prev_window_placement.rcNormalPosition.left;
-							siz height =
-								_prev_window_placement.rcNormalPosition.bottom - _prev_window_placement.rcNormalPosition.top;
-
-							_prev_window_placement.rcNormalPosition.left = point.x - (t * width) + offset.x;
-							_prev_window_placement.rcNormalPosition.top = offset.y;
-							_prev_window_placement.rcNormalPosition.right =
-								_prev_window_placement.rcNormalPosition.left + width;
-							_prev_window_placement.rcNormalPosition.bottom =
-								_prev_window_placement.rcNormalPosition.top + height;
-
-							_prev_window_placement.showCmd |= SW_RESTORE;
-							SetWindowPlacement(native_window, &_prev_window_placement);
-						}
-						// else do nothing on purpose
-					}
-					else
-					{
-						info.rcWindow.left += offset.x;
-						info.rcWindow.top += offset.y;
-						flags = SWP_NOSIZE | SWP_NOZORDER | SWP_SHOWWINDOW;
-						call_set_window_pos = true;
-					}
-					break;
-
-				case HitTop:
-					info.rcWindow.top += offset.y;
-					flags = SWP_NOZORDER | SWP_SHOWWINDOW;
-					call_set_window_pos = true;
-					break;
-
-				case HitBottom:
-					info.rcWindow.bottom += offset.y;
-					flags = SWP_NOZORDER | SWP_SHOWWINDOW;
-					call_set_window_pos = true;
-					break;
-
-				case HitLeft:
-					info.rcWindow.left += offset.x;
-					flags = SWP_NOZORDER | SWP_SHOWWINDOW;
-					call_set_window_pos = true;
-					break;
-
-				case HitRight:
-					info.rcWindow.right += offset.x;
-					flags = SWP_NOZORDER | SWP_SHOWWINDOW;
-					call_set_window_pos = true;
-					break;
-
-				case HitTop | HitLeft:
-					info.rcWindow.top += offset.y;
-					info.rcWindow.left += offset.x;
-					flags = SWP_NOZORDER | SWP_SHOWWINDOW;
-					call_set_window_pos = true;
-					break;
-
-				case HitTop | HitRight:
-					info.rcWindow.top += offset.y;
-					info.rcWindow.right += offset.x;
-					flags = SWP_NOZORDER | SWP_SHOWWINDOW;
-					call_set_window_pos = true;
-					break;
-
-				case HitBottom | HitLeft:
-					info.rcWindow.bottom += offset.y;
-					info.rcWindow.left += offset.x;
-					flags = SWP_NOZORDER | SWP_SHOWWINDOW;
-					call_set_window_pos = true;
-					break;
-
-				case HitBottom | HitRight:
-					info.rcWindow.bottom += offset.y;
-					info.rcWindow.right += offset.x;
-					flags = SWP_NOZORDER | SWP_SHOWWINDOW;
-					call_set_window_pos = true;
-					break;
-
-				case HitMinimize:
-				case HitMaximize:
-				case HitClose:
-				default:
-					break;
-				}
-
-				if (call_set_window_pos)
-				{
-					SetWindowPos(native_window, nullptr, info.rcWindow.left, info.rcWindow.top,
-								 info.rcWindow.right - info.rcWindow.left, info.rcWindow.bottom - info.rcWindow.top, flags);
-				}
-
-				_prev_mouse_position = point;
-#endif
-				ApplySystemThemeOnGlfw(*glfw_window);
-			}
+			ApplySystemThemeOnGlfw(*glfw_window);
 		}
 
 		DetailType GetDetailType() const override
@@ -1219,7 +957,7 @@ namespace np::win::__detail
 			if (IsOwningThread())
 			{
 				auto glfw_window = _glfw_window.get_access();
-				if (*glfw_window && !glfwGetWindowAttrib(*glfw_window, GLFW_ICONIFIED))
+				if (!IsMinimized(*glfw_window))
 				{
 					glfwIconifyWindow(*glfw_window);
 					mem::sptr<evnt::Event> e = mem::create_sptr<WindowMinimizeEvent>(_services->GetAllocator(), GetUid(), true);
@@ -1238,7 +976,7 @@ namespace np::win::__detail
 			if (IsOwningThread())
 			{
 				auto glfw_window = _glfw_window.get_access();
-				if (*glfw_window && glfwGetWindowAttrib(*glfw_window, GLFW_ICONIFIED))
+				if (IsMinimized(*glfw_window))
 				{
 					glfwRestoreWindow(*glfw_window);
 					mem::sptr<evnt::Event> e =
@@ -1258,11 +996,8 @@ namespace np::win::__detail
 			if (IsOwningThread())
 			{
 				auto glfw_window = _glfw_window.get_access();
-				if (*glfw_window && !glfwGetWindowAttrib(*glfw_window, GLFW_MAXIMIZED))
+				if (!IsMaximized(*glfw_window))
 				{
-#if NP_ENGINE_PLATFORM_IS_WINDOWS
-					GetWindowPlacement((HWND)GetNativeFromGlfw(*glfw_window), &_prev_window_placement);
-#endif
 					glfwMaximizeWindow(*glfw_window);
 					mem::sptr<evnt::Event> e = mem::create_sptr<WindowMaximizeEvent>(_services->GetAllocator(), GetUid(), true);
 					_services->GetEventSubmitter().Submit(e);
@@ -1280,7 +1015,7 @@ namespace np::win::__detail
 			if (IsOwningThread())
 			{
 				auto glfw_window = _glfw_window.get_access();
-				if (*glfw_window && glfwGetWindowAttrib(*glfw_window, GLFW_MAXIMIZED))
+				if (IsMaximized(*glfw_window))
 				{
 					glfwRestoreWindow(*glfw_window);
 					mem::sptr<evnt::Event> e =
@@ -1295,10 +1030,16 @@ namespace np::win::__detail
 			}
 		}
 
+		bl IsSnapped() override
+		{
+			auto glfw_window = _glfw_window.get_access();
+			return IsSnapped(*glfw_window);
+		}
+
 		bl IsMinimized() override
 		{
 			auto glfw_window = _glfw_window.get_access();
-			return *glfw_window && glfwGetWindowAttrib(*glfw_window, GLFW_ICONIFIED);
+			return IsMinimized(*glfw_window);
 		}
 
 		bl IsMaximized() override
@@ -1312,7 +1053,7 @@ namespace np::win::__detail
 			if (IsOwningThread())
 			{
 				auto glfw_window = _glfw_window.get_access();
-				if (*glfw_window && !glfwGetWindowAttrib(*glfw_window, GLFW_FOCUSED))
+				if (!IsFocused(*glfw_window))
 				{
 					glfwFocusWindow(*glfw_window);
 					mem::sptr<evnt::Event> e = mem::create_sptr<WindowFocusEvent>(_services->GetAllocator(), GetUid(), true);
@@ -1329,7 +1070,7 @@ namespace np::win::__detail
 		bl IsFocused() override
 		{
 			auto glfw_window = _glfw_window.get_access();
-			return *glfw_window && glfwGetWindowAttrib(*glfw_window, GLFW_FOCUSED);
+			return IsFocused(*glfw_window);
 		}
 
 		::glm::uvec2 GetFramebufferSize() override

@@ -8,7 +8,7 @@
 #define NP_ENGINE_APPLICATION_HPP
 
 #ifndef NP_ENGINE_APPLICATION_LOOP_DURATION
-	#define NP_ENGINE_APPLICATION_LOOP_DURATION 2 // milliseconds -- 4 -> 250 loops per second
+	#define NP_ENGINE_APPLICATION_LOOP_DURATION 2 // milliseconds (4 -> 250 loops per second)
 #endif
 
 #include "NP-Engine/Foundation/Foundation.hpp"
@@ -21,7 +21,6 @@
 #include "NP-Engine/Event/Event.hpp"
 #include "NP-Engine/Container/Container.hpp"
 #include "NP-Engine/Thread/Thread.hpp"
-#include "NP-Engine/Time/Time.hpp"
 #include "NP-Engine/Window/Window.hpp"
 #include "NP-Engine/Services/Services.hpp"
 #include "NP-Engine/System/System.hpp"
@@ -84,33 +83,24 @@ namespace np::app
 
 	class Application : public Layer
 	{
-	public:
-		struct Properties
-		{
-			str Title = "";
-		};
-
 	protected:
-		Properties _properties;
+		str _title;
 		WindowLayer _window_layer;
 		AudioLayer _audio_layer;
 		con::vector<Layer*> _layers;
-		con::vector<Layer*> _overlays;
-		atm_bl _running;
 
-		Application(const Application::Properties& app_properties, mem::sptr<srvc::Services> services):
+		Application(str title, mem::sptr<srvc::Services> services):
 			Layer(services),
-			_properties(app_properties),
+			_title(title),
 			_window_layer(services),
-			_audio_layer(services),
-			_running(false)
+			_audio_layer(services)
 		{
 			NP_ENGINE_PROFILE_FUNCTION();
 			sys::set_terminate_handler(__detail::HandleTerminate);
 			sys::set_signal_handler(__detail::HandleSignal);
 
-			_layers.emplace_back(this);
-			_layers.emplace_back(mem::address_of(_window_layer));
+			PushLayer(this);
+			PushLayer(_window_layer);
 		}
 
 		virtual void HandlePopup(mem::sptr<evnt::Event> e)
@@ -149,127 +139,48 @@ namespace np::app
 			_layers.emplace_back(layer);
 		}
 
-		virtual void PushOverlay(Layer* overlay)
+		virtual void PushLayer(Layer& layer)
 		{
-			_overlays.emplace_back(overlay);
+			PushLayer(mem::address_of(layer));
 		}
+
+		virtual void PublishEvents()
+		{
+			evnt::EventQueue& event_queue = _services->GetEventQueue();
+			con::vector<Layer*>::reverse_iterator it{};
+
+			event_queue.ToggleState();
+			for (mem::sptr<evnt::Event> e = event_queue.Pop(); e; e = event_queue.Pop())
+			{
+				e->SetCanBeHandled(false);
+
+				for (it = _layers.rbegin(); !e->IsHandled() && it != _layers.rend(); it++)
+					(*it)->OnEvent(e);
+
+				if (e->CanBeHandled())
+					event_queue.Push(e);
+			}
+		}
+
+		virtual tim::milliseconds GetPlatformDefaultApplicationLoopDuration() const;
 
 	public:
 		virtual ~Application() {}
 
-		virtual void Run()
-		{
-			Run(0, nullptr);
-		}
-
-		/*
-			TODO: game loop reference:
-				- http://www.gameprogrammingpatterns.com/game-loop.html
-				- https://gafferongames.com/post/fix_your_timestep/
-		*/
-		virtual void Run(i32 argc, chr** argv)
-		{
-			NP_ENGINE_PROFILE_SCOPE("application run");
-
-			// app::Popup::Show("Application Start Of Run", "We're about to run");
-
-			_running.store(true, mo_release);
-			evnt::EventQueue& event_queue = _services->GetEventQueue();
-			jsys::JobSystem& job_system = _services->GetJobSystem();
-			nput::InputQueue& input_queue = _services->GetInputQueue();
-
-			tim::steady_timestamp next = tim::steady_clock::now();
-			tim::steady_timestamp prev = next;
-			const tim::milliseconds min_duration(NP_ENGINE_APPLICATION_LOOP_DURATION);
-			tim::steady_timestamp update_next = next;
-			tim::steady_timestamp update_prev = next;
-			tim::milliseconds update_delta(0);
-
-			mem::sptr<evnt::Event> e = nullptr;
-			i64 i = 0;
-
-			job_system.Start();
-			while (_running.load(mo_acquire))
-			{
-				NP_ENGINE_PROFILE_SCOPE("loop");
-
-				event_queue.ToggleState();
-				for (e = event_queue.Pop(); e; e = event_queue.Pop())
-				{
-					e->SetCanBeHandled(false);
-
-					for (i = _overlays.size() - 1; !e->IsHandled() && i >= 0; i--)
-						_overlays[i]->OnEvent(e);
-
-					for (i = _layers.size() - 1; !e->IsHandled() && i >= 0; i--)
-						_layers[i]->OnEvent(e);
-
-					if (e->CanBeHandled())
-						event_queue.Push(e);
-				}
-
-				if (!_running.load(mo_acquire))
-					break;
-
-				update_next = tim::steady_clock::now();
-				update_delta = update_next - update_prev;
-				update_prev = update_next;
-
-				input_queue.ApplySubmissions();
-
-				for (i = 0; i < _layers.size(); i++)
-					_layers[i]->BeforeUdpate();
-				for (i = 0; i < _overlays.size(); i++)
-					_overlays[i]->BeforeUdpate();
-
-				for (i = 0; i < _layers.size(); i++)
-					_layers[i]->Update(update_delta);
-				for (i = 0; i < _overlays.size(); i++)
-					_overlays[i]->Update(update_delta);
-
-				for (i = 0; i < _layers.size(); i++)
-					_layers[i]->AfterUdpate();
-				for (i = 0; i < _overlays.size(); i++)
-					_overlays[i]->AfterUdpate();
-
-				for (i = 0; i < _layers.size(); i++)
-					_layers[i]->Cleanup();
-				for (i = 0; i < _overlays.size(); i++)
-					_overlays[i]->Cleanup();
-
-				for (next = tim::steady_clock::now(); next - prev < min_duration; next = tim::steady_clock::now())
-					thr::this_thread::yield();
-				prev = next;
-			}
-
-			job_system.Stop();
-			job_system.Clear();
-			event_queue.Clear();
-		}
-
-		virtual Properties GetProperties() const
-		{
-			return _properties;
-		}
-
 		virtual str GetTitle() const
 		{
-			return _properties.Title;
+			return _title;
 		}
 
-		virtual void StopRunning()
-		{
-			_running.store(false, mo_release);
-		}
+		virtual void Run(i32 argc, chr** argv) = 0;
+
+		virtual void StopRunning() = 0;
+
+		virtual bl IsRunning() const = 0;
 
 		virtual evnt::EventCategory GetHandledCategories() const override
 		{
 			return evnt::EventCategory::Application;
-		}
-
-		virtual bl IsRunning() const
-		{
-			return _running.load(mo_acquire);
 		}
 	};
 } // namespace np::app

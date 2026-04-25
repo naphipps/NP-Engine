@@ -119,6 +119,8 @@ namespace np::win
 
 		virtual void RestoreFromMaximize() = 0;
 
+		virtual bl IsSnapped() = 0;
+
 		virtual bl IsMinimized() = 0;
 
 		virtual bl IsMaximized() = 0;
