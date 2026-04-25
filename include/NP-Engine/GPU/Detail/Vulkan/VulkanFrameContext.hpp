@@ -116,36 +116,41 @@ namespace np::gpu::__detail
 			//ensure we set extent between the latest GetVkSurfaceCapabilities call and vkCreateSwapchainKHR
 			extent = SanitizeVkExtent2D(target, capabilities);
 
-			con::vector<ui32> family_indices(queue_families.size());
-			for (siz i = 0; i < family_indices.size(); i++)
-				family_indices[i] = queue_families[i].index;
-
-			VkSwapchainCreateInfoKHR info = CreateVkInfo(device, extent, old_swapchain);
-			info.imageSharingMode = family_indices.size() > 1 ? VK_SHARING_MODE_CONCURRENT : VK_SHARING_MODE_EXCLUSIVE;
-			info.queueFamilyIndexCount = (ui32)family_indices.size();
-			info.pQueueFamilyIndices = family_indices.empty() ? nullptr : family_indices.data();
-
-			if ((capabilities.supportedUsageFlags & VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT) != 0)
-				info.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
-			//TODO: else do we want an error here?
-
-			if ((capabilities.supportedCompositeAlpha & VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR) != 0)
-				info.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
-			//TODO: else do we want an error here?
-
-			info.preTransform = capabilities.currentTransform; // says that we don't want any local transform //TODO:
-															   // investigate this. We may want to mess with this
-
-			const ui32 min_image_count = capabilities.minImageCount;
-			ui32 image_count = ::std::max(
-				min_image_count + 1, (ui32)3); //TODO: should we pull the desired frame count (of 3) from target or something?
-			const ui32 max_image_count = capabilities.maxImageCount != 0 ? capabilities.maxImageCount : image_count;
-			info.minImageCount = ::std::min(image_count, max_image_count);
-
-			mem::sptr<VulkanInstance> instance = device->GetDetailInstance();
 			VkSwapchainKHR swapchain = nullptr;
-			VkResult result = vkCreateSwapchainKHR(*device->GetLogicalDevice(), &info, instance->GetVulkanAllocationCallbacks(), &swapchain);
-			return result == VK_SUCCESS ? swapchain : nullptr;
+			if (extent.width != 0 && extent.height != 0)
+			{
+				con::vector<ui32> family_indices(queue_families.size());
+				for (siz i = 0; i < family_indices.size(); i++)
+					family_indices[i] = queue_families[i].index;
+
+				VkSwapchainCreateInfoKHR info = CreateVkInfo(device, extent, old_swapchain);
+				info.imageSharingMode = family_indices.size() > 1 ? VK_SHARING_MODE_CONCURRENT : VK_SHARING_MODE_EXCLUSIVE;
+				info.queueFamilyIndexCount = (ui32)family_indices.size();
+				info.pQueueFamilyIndices = family_indices.empty() ? nullptr : family_indices.data();
+
+				if ((capabilities.supportedUsageFlags & VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT) != 0)
+					info.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+				//TODO: else do we want an error here?
+
+				if ((capabilities.supportedCompositeAlpha & VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR) != 0)
+					info.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
+				//TODO: else do we want an error here?
+
+				info.preTransform = capabilities.currentTransform;
+				// ^ says that we don't want any local transform //TODO: investigate this. We may want to mess with this
+
+				const ui32 min_image_count = capabilities.minImageCount;
+				ui32 image_count = ::std::max(min_image_count + 1, (ui32)3);
+				//TODO: ^ should we pull the desired frame count (of 3) from target or something?
+				const ui32 max_image_count = capabilities.maxImageCount != 0 ? capabilities.maxImageCount : image_count;
+				info.minImageCount = ::std::min(image_count, max_image_count);
+
+				mem::sptr<VulkanInstance> instance = device->GetDetailInstance();
+				VkResult result = vkCreateSwapchainKHR(*device->GetLogicalDevice(), &info, instance->GetVulkanAllocationCallbacks(), &swapchain);
+				if (result != VK_SUCCESS)
+					swapchain = nullptr;
+			}
+			return swapchain;
 		}
 
 		static con::vector<VkImage> RetrieveVkImages(mem::sptr<VulkanDevice> device, VkSwapchainKHR swapchain)
@@ -360,10 +365,15 @@ namespace np::gpu::__detail
 
 		virtual void Rebuild() override
 		{
-			VkSwapchainKHR next_swapchain = CreateVkSwapchain(_device, _queue_families, _extent, _swapchain);
-			DestroySwapchain();
-			_swapchain = next_swapchain;
-			RebuildFrames();
+			VkExtent2D next_extent = _extent;
+			VkSwapchainKHR next_swapchain = CreateVkSwapchain(_device, _queue_families, next_extent, _swapchain);
+			if (next_swapchain)
+			{
+				_extent = next_extent;
+				DestroySwapchain();
+				_swapchain = next_swapchain;
+				RebuildFrames();
+			}
 		}
 	};
 } // namespace np::gpu::__detail
