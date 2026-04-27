@@ -400,7 +400,7 @@ namespace np::net::__detail
 					}
 				}
 
-				event_queue.Push(mem::create_sptr<NetworkClientEvent>(a, host, client));
+				event_queue.Push(mem::create_sptr<NetworkClientEvent>(a, evnt::EventType::Did, host, client));
 			}
 
 			return client;

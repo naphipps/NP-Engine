@@ -30,11 +30,11 @@ namespace np::gpu::__detail
 		{
 			VkBorderColor color = VK_BORDER_COLOR_INT_TRANSPARENT_BLACK;
 
-			if (ContainsAll(Transparent | Black))
+			if (Equals(Transparent | Black))
 				color = VK_BORDER_COLOR_INT_TRANSPARENT_BLACK;
-			else if (ContainsAll(Opaque | Black))
+			else if (Equals(Opaque | Black))
 				color = VK_BORDER_COLOR_INT_OPAQUE_BLACK;
-			else if (ContainsAll(Opaque | White))
+			else if (Equals(Opaque | White))
 				color = VK_BORDER_COLOR_INT_OPAQUE_WHITE;
 
 			return color;
@@ -50,15 +50,15 @@ namespace np::gpu::__detail
 		{
 			VkSamplerAddressMode mode = VK_SAMPLER_ADDRESS_MODE_REPEAT;
 
-			if (ContainsAll(Repeat))
+			if (Equals(Repeat))
 				mode = VK_SAMPLER_ADDRESS_MODE_REPEAT;
-			else if (ContainsAll(Mirror | Repeat))
+			else if (Equals(Mirror | Repeat))
 				mode = VK_SAMPLER_ADDRESS_MODE_MIRRORED_REPEAT;
-			else if (ContainsAll(Clamp | Edge))
+			else if (Equals(Clamp | Edge))
 				mode = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
-			else if (ContainsAll(Clamp | Border))
+			else if (Equals(Clamp | Border))
 				mode = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER;
-			else if (ContainsAll(Mirror | Clamp | Edge))
+			else if (Equals(Mirror | Clamp | Edge))
 				mode = VK_SAMPLER_ADDRESS_MODE_MIRROR_CLAMP_TO_EDGE;
 
 			return mode;

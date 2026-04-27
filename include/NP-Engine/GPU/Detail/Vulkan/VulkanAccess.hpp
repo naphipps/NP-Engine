@@ -75,10 +75,10 @@ namespace np::gpu::__detail
 					access |= VK_ACCESS_HOST_WRITE_BIT;
 			}
 
-			if (ContainsAll(Read))
+			if (Equals(Read))
 				access |= VK_ACCESS_MEMORY_READ_BIT;
 
-			if (ContainsAll(Write))
+			if (Equals(Write))
 				access |= VK_ACCESS_MEMORY_WRITE_BIT;
 
 			return access;

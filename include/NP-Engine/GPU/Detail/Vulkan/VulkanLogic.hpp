@@ -24,7 +24,7 @@ namespace np::gpu::__detail
 		{
 			VkLogicOp op = VK_LOGIC_OP_MAX_ENUM;
 
-			//TODO: for the cases where I'm using ContainsAll exclusively, I could just use a switch statement instead
+			//TODO: for the cases where I'm using Equals exclusively, I could just use a switch statement instead
 
 			switch (_value)
 			{

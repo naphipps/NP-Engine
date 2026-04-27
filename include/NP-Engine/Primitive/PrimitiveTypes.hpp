@@ -127,7 +127,7 @@ namespace np
 			return (a._value & b._value) != None;
 		}
 
-		static inline bl contains_all(const enm<T>& a, const enm<T>& b)
+		static inline bl equals(const enm<T>& a, const enm<T>& b)
 		{
 			return a._value == b._value;
 		}
@@ -143,9 +143,9 @@ namespace np
 			return contains_any(a, b);
 		}
 
-		static inline bl ContainsAll(const enm<T>& a, const enm<T>& b)
+		static inline bl Equals(const enm<T>& a, const enm<T>& b)
 		{
-			return contains_all(a, b);
+			return equals(a, b);
 		}
 
 		enm(T value): _value(value) {}
@@ -177,9 +177,9 @@ namespace np
 			return contains_any(*this, other);
 		}
 
-		bl contains_all(const enm<T>& other) const
+		bl equals(const enm<T>& other) const
 		{
-			return contains_all(*this, other);
+			return equals(*this, other);
 		}
 
 		//aliases since we eventually like to use pascal casing
@@ -193,9 +193,9 @@ namespace np
 			return contains_any(other);
 		}
 
-		bl ContainsAll(const enm<T>& other) const
+		bl Equals(const enm<T>& other) const
 		{
-			return contains_all(other);
+			return equals(other);
 		}
 	};
 

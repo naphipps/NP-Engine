@@ -23,9 +23,9 @@ namespace np::win
 	class Window : public nput::InputSource
 	{
 	public:
-		using SizeCallback = void (*)(void* caller, ui32 width, ui32 height);
-		using PositionCallback = void (*)(void* caller, i32 x, i32 y);
-		using FramebufferCallback = void (*)(void* caller, ui32 width, ui32 height);
+		using SizeCallback = void (*)(void* caller, ::glm::uvec2 size);
+		using PositionCallback = void (*)(void* caller, ::glm::ivec2 position);
+		using FramebufferSizeCallback = void (*)(void* caller, ::glm::uvec2 framebuffer_size);
 		using MinimizeCallback = void (*)(void* caller, bl minimized);
 		using MaximizeCallback = void (*)(void* caller, bl maximized);
 		using FocusCallback = void (*)(void* caller, bl focused);
@@ -37,23 +37,24 @@ namespace np::win
 
 		mutexed_wrapper<con::uset<SizeCallback>> _size_callbacks;
 		mutexed_wrapper<con::uset<PositionCallback>> _position_callbacks;
-		mutexed_wrapper<con::uset<FramebufferCallback>> _framebuffer_callbacks;
+		mutexed_wrapper<con::uset<FramebufferSizeCallback>> _framebuffer_size_callbacks;
 		mutexed_wrapper<con::uset<MinimizeCallback>> _minimize_callbacks;
 		mutexed_wrapper<con::uset<MaximizeCallback>> _maximize_callbacks;
 		mutexed_wrapper<con::uset<FocusCallback>> _focus_callbacks;
 
 		mutexed_wrapper<con::umap<void*, SizeCallback>> _size_caller_callbacks;
 		mutexed_wrapper<con::umap<void*, PositionCallback>> _position_caller_callbacks;
-		mutexed_wrapper<con::umap<void*, FramebufferCallback>> _framebuffer_caller_callbacks;
+		mutexed_wrapper<con::umap<void*, FramebufferSizeCallback>> _framebuffer_size_caller_callbacks;
 		mutexed_wrapper<con::umap<void*, MinimizeCallback>> _minimize_caller_callbacks;
 		mutexed_wrapper<con::umap<void*, MaximizeCallback>> _maximize_caller_callbacks;
 		mutexed_wrapper<con::umap<void*, FocusCallback>> _focus_caller_callbacks;
 
-		void InvokeSizeCallbacks(ui32 width, ui32 height);
+		void InvokeSizeCallbacks(::glm::uvec2 size);
 
-		void InvokePositionCallbacks(i32 x, i32 y);
+		void InvokePositionCallbacks(::glm::ivec2 position);
 
-		void InvokeFramebufferCallbacks(ui32 width, ui32 height);
+		void InvokeFramebufferSizeCallbacks(::glm::uvec2 framebuffer_size);
+		//TODO: ^ these callbacks should be renamed to "FramebufferSize" instead of just "Framebuffer"
 
 		void InvokeMinimizeCallbacks(bl minimized);
 
@@ -90,7 +91,7 @@ namespace np::win
 			return GetUid() == GetUid();
 		}
 
-		virtual void Update(tim::milliseconds milliseconds) {}
+		virtual void Update(tim::milliseconds m) {}
 
 		virtual void Close() = 0;
 
@@ -103,11 +104,11 @@ namespace np::win
 
 		virtual str GetTitle() = 0;
 
-		virtual void SetSize(ui32 width, ui32 height) = 0;
+		virtual void SetSize(::glm::uvec2 size) = 0;
 
 		virtual ::glm::uvec2 GetSize() = 0;
 
-		virtual void SetPosition(i32 x, i32 y) = 0;
+		virtual void SetPosition(::glm::ivec2 position) = 0;
 
 		virtual ::glm::ivec2 GetPosition() = 0;
 
@@ -153,9 +154,9 @@ namespace np::win
 			SetPositionCallback(nullptr, callback);
 		}
 
-		virtual void SetFramebufferCallback(FramebufferCallback callback)
+		virtual void SetFramebufferSizeCallback(FramebufferSizeCallback callback)
 		{
-			SetFramebufferCallback(nullptr, callback);
+			SetFramebufferSizeCallback(nullptr, callback);
 		}
 
 		virtual void SetMinimizeCallback(MinimizeCallback callback)
@@ -177,11 +178,11 @@ namespace np::win
 		{
 			if (caller)
 			{
-				auto size_caller_callbacks = _size_caller_callbacks.get_access();
+				auto callbacks = _size_caller_callbacks.get_access();
 				if (callback)
-					(*size_caller_callbacks)[caller] = callback;
+					(*callbacks)[caller] = callback;
 				else
-					size_caller_callbacks->erase(caller);
+					callbacks->erase(caller);
 			}
 			else if (callback)
 			{
@@ -193,11 +194,11 @@ namespace np::win
 		{
 			if (caller)
 			{
-				auto position_caller_callbacks = _position_caller_callbacks.get_access();
+				auto callbacks = _position_caller_callbacks.get_access();
 				if (callback)
-					(*position_caller_callbacks)[caller] = callback;
+					(*callbacks)[caller] = callback;
 				else
-					position_caller_callbacks->erase(caller);
+					callbacks->erase(caller);
 			}
 			else if (callback)
 			{
@@ -205,19 +206,19 @@ namespace np::win
 			}
 		}
 
-		virtual void SetFramebufferCallback(void* caller, FramebufferCallback callback)
+		virtual void SetFramebufferSizeCallback(void* caller, FramebufferSizeCallback callback)
 		{
 			if (caller)
 			{
-				auto framebuffer_caller_callbacks = _framebuffer_caller_callbacks.get_access();
+				auto callbacks = _framebuffer_size_caller_callbacks.get_access();
 				if (callback)
-					(*framebuffer_caller_callbacks)[caller] = callback;
+					(*callbacks)[caller] = callback;
 				else
-					framebuffer_caller_callbacks->erase(caller);
+					callbacks->erase(caller);
 			}
 			else if (callback)
 			{
-				_framebuffer_callbacks.get_access()->insert(callback);
+				_framebuffer_size_callbacks.get_access()->insert(callback);
 			}
 		}
 
@@ -291,15 +292,15 @@ namespace np::win
 			SetPositionCallback(caller, nullptr);
 		}
 
-		virtual void UnsetFramebufferCallback(FramebufferCallback callback)
+		virtual void UnsetFramebufferSizeCallback(FramebufferSizeCallback callback)
 		{
 			if (callback)
-				_framebuffer_callbacks.get_access()->erase(callback);
+				_framebuffer_size_callbacks.get_access()->erase(callback);
 		}
 
-		virtual void UnsetFramebufferCallback(void* caller)
+		virtual void UnsetFramebufferSizeCallback(void* caller)
 		{
-			SetFramebufferCallback(caller, nullptr);
+			SetFramebufferSizeCallback(caller, nullptr);
 		}
 
 		virtual void UnsetMinimizeCallback(MinimizeCallback callback)
@@ -339,7 +340,7 @@ namespace np::win
 		{
 			_size_callbacks.get_access()->clear();
 			_position_callbacks.get_access()->clear();
-			_framebuffer_callbacks.get_access()->clear();
+			_framebuffer_size_callbacks.get_access()->clear();
 			_minimize_callbacks.get_access()->clear();
 			_maximize_callbacks.get_access()->clear();
 			_focus_callbacks.get_access()->clear();
@@ -350,7 +351,7 @@ namespace np::win
 		{
 			UnsetSizeCallback(caller);
 			UnsetPositionCallback(caller);
-			UnsetFramebufferCallback(caller);
+			UnsetFramebufferSizeCallback(caller);
 			UnsetMinimizeCallback(caller);
 			UnsetMaximizeCallback(caller);
 			UnsetFocusCallback(caller);

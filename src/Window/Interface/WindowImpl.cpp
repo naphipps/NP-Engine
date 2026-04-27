@@ -83,60 +83,60 @@ namespace np::win
 		return window;
 	}
 
-	void Window::InvokeSizeCallbacks(ui32 width, ui32 height)
+	void Window::InvokeSizeCallbacks(::glm::uvec2 size)
 	{
-		mem::sptr<evnt::Event> e = mem::create_sptr<WindowSizeEvent>(_services->GetAllocator(), GetUid(), width, height);
+		mem::sptr<evnt::Event> e = mem::create_sptr<WindowSizeEvent>(_services->GetAllocator(), evnt::EventType::Did, GetUid(), size);
 		_services->GetEventSubmitter().Submit(e);
 
 		{
 			auto callbacks = _size_callbacks.get_access();
 			for (auto it = callbacks->begin(); it != callbacks->end(); it++)
-				(*it)(nullptr, width, height);
+				(*it)(nullptr, size);
 		}
 		{
 			auto callbacks = _size_caller_callbacks.get_access();
 			for (auto it = callbacks->begin(); it != callbacks->end(); it++)
-				it->second(it->first, width, height);
+				it->second(it->first, size);
 		}
 	}
 
-	void Window::InvokePositionCallbacks(i32 x, i32 y)
+	void Window::InvokePositionCallbacks(::glm::ivec2 position)
 	{
-		mem::sptr<evnt::Event> e = mem::create_sptr<WindowPositionEvent>(_services->GetAllocator(), GetUid(), x, y);
+		mem::sptr<evnt::Event> e = mem::create_sptr<WindowPositionEvent>(_services->GetAllocator(), evnt::EventType::Did, GetUid(), position);
 		_services->GetEventSubmitter().Submit(e);
 
 		{
 			auto callbacks = _position_callbacks.get_access();
 			for (auto it = callbacks->begin(); it != callbacks->end(); it++)
-				(*it)(nullptr, x, y);
+				(*it)(nullptr, position);
 		}
 		{
 			auto callbacks = _position_caller_callbacks.get_access();
 			for (auto it = callbacks->begin(); it != callbacks->end(); it++)
-				it->second(it->first, x, y);
+				it->second(it->first, position);
 		}
 	}
 
-	void Window::InvokeFramebufferCallbacks(ui32 width, ui32 height)
+	void Window::InvokeFramebufferSizeCallbacks(::glm::uvec2 framebuffer_size)
 	{
-		mem::sptr<evnt::Event> e = mem::create_sptr<WindowFramebufferEvent>(_services->GetAllocator(), GetUid(), width, width);
+		mem::sptr<evnt::Event> e = mem::create_sptr<WindowFramebufferSizeEvent>(_services->GetAllocator(), evnt::EventType::Did, GetUid(), framebuffer_size);
 		_services->GetEventSubmitter().Submit(e);
 
 		{
-			auto callbacks = _framebuffer_callbacks.get_access();
+			auto callbacks = _framebuffer_size_callbacks.get_access();
 			for (auto it = callbacks->begin(); it != callbacks->end(); it++)
-				(*it)(nullptr, width, height);
+				(*it)(nullptr, framebuffer_size);
 		}
 		{
-			auto callbacks = _framebuffer_caller_callbacks.get_access();
+			auto callbacks = _framebuffer_size_caller_callbacks.get_access();
 			for (auto it = callbacks->begin(); it != callbacks->end(); it++)
-				it->second(it->first, width, height);
+				it->second(it->first, framebuffer_size);
 		}
 	}
 
 	void Window::InvokeMinimizeCallbacks(bl minimized)
 	{
-		mem::sptr<evnt::Event> e = mem::create_sptr<WindowMinimizeEvent>(_services->GetAllocator(), GetUid(), minimized);
+		mem::sptr<evnt::Event> e = mem::create_sptr<WindowMinimizeEvent>(_services->GetAllocator(), evnt::EventType::Did, GetUid(), minimized);
 		_services->GetEventSubmitter().Submit(e);
 
 		{
@@ -153,7 +153,7 @@ namespace np::win
 
 	void Window::InvokeMaximizeCallbacks(bl maximized)
 	{
-		mem::sptr<evnt::Event> e = mem::create_sptr<WindowMaximizeEvent>(_services->GetAllocator(), GetUid(), maximized);
+		mem::sptr<evnt::Event> e = mem::create_sptr<WindowMaximizeEvent>(_services->GetAllocator(), evnt::EventType::Did, GetUid(), maximized);
 		_services->GetEventSubmitter().Submit(e);
 
 		{
@@ -170,7 +170,7 @@ namespace np::win
 
 	void Window::InvokeFocusCallbacks(bl focused)
 	{
-		mem::sptr<evnt::Event> e = mem::create_sptr<WindowFocusEvent>(_services->GetAllocator(), GetUid(), focused);
+		mem::sptr<evnt::Event> e = mem::create_sptr<WindowFocusEvent>(_services->GetAllocator(), evnt::EventType::Did, GetUid(), focused);
 		_services->GetEventSubmitter().Submit(e);
 
 		{

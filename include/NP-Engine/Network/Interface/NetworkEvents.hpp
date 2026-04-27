@@ -22,8 +22,9 @@ namespace np::net
 	{
 	protected:
 		mem::trait_allocator _allocator;
+		evnt::EventType _type;
 
-		NetworkEvent(): evnt::Event() {}
+		NetworkEvent(evnt::EventType type): evnt::Event(), _type(evnt::EventType::Network | type) {}
 
 	public:
 		virtual ~NetworkEvent()
@@ -41,13 +42,12 @@ namespace np::net
 			return *((T*)GetPayload());
 		}
 
-		evnt::EventCategory GetCategory() const override
+		virtual evnt::EventType GetEventType() const override
 		{
-			return evnt::EventCategory::Network;
+			return _type;
 		}
 	};
 
-	// Network Client Event
 	struct NetworkClientEventData
 	{
 		mem::sptr<Host> host;
@@ -57,14 +57,10 @@ namespace np::net
 	class NetworkClientEvent : public NetworkEvent<NetworkClientEventData>
 	{
 	public:
-		NetworkClientEvent(mem::sptr<Host> host, mem::sptr<Socket> socket): NetworkEvent<NetworkClientEventData>()
+		NetworkClientEvent(evnt::EventType intention, mem::sptr<Host> host, mem::sptr<Socket> socket):
+			NetworkEvent<NetworkClientEventData>(evnt::EventType::Client | intention.GetIntention())
 		{
 			SetPayload(mem::create<NetworkClientEventData>(_allocator, host, socket));
-		}
-
-		evnt::EventType GetType() const override
-		{
-			return evnt::EventType::NetworkClient;
 		}
 	};
 } // namespace np::net

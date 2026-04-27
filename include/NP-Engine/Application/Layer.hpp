@@ -52,9 +52,9 @@ namespace np::app
 
 		virtual void CleanupUpdate() {}
 
-		virtual evnt::EventCategory GetHandledCategories() const override
+		virtual bl CanHandle(evnt::EventType type) const override
 		{
-			return evnt::EventCategory::None;
+			return false;
 		}
 	};
 } // namespace np::app

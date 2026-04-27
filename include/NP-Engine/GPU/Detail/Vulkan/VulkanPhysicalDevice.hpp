@@ -183,7 +183,7 @@ namespace np
 				if (!supports_required_extensions || !supports_required_layers)
 					score = 0;
 
-				return usage.ContainsAll(DeviceUsage::None) ? 0 : score;
+				return usage.Equals(DeviceUsage::None) ? 0 : score;
 			}
 
 			operator VkPhysicalDevice() const

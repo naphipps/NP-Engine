@@ -144,7 +144,7 @@ namespace np::gpu::__detail
 		{
 			VkPipelineColorBlendStateCreateInfo info{};
 			info.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
-			info.logicOpEnable = !blend.logicOperation.ContainsAll(VulkanLogicOperation::None) ? VK_TRUE : VK_FALSE;
+			info.logicOpEnable = !blend.logicOperation.Equals(VulkanLogicOperation::None) ? VK_TRUE : VK_FALSE;
 			info.logicOp = blend.logicOperation.GetVkLogicOp();
 			info.blendConstants[0] = blend.constants.a;
 			info.blendConstants[1] = blend.constants.b;
@@ -190,7 +190,7 @@ namespace np::gpu::__detail
 			{
 				shader_infos[i] = shaders[i]->GetVkPipelineShaderStageCreateInfo();
 				vertex_shader_found |=
-					shaders[i]->GetStage().ContainsAny(VulkanStage::Vertex); //TODO: should this be ContainsAll?
+					shaders[i]->GetStage().ContainsAny(VulkanStage::Vertex); //TODO: should this be Equals?
 			}
 
 			NP_ENGINE_ASSERT(vertex_shader_found, "VulkanGraphicsPipeline requires a vertex shader");
@@ -281,13 +281,13 @@ namespace np::gpu::__detail
 			//nullptr
 
 			//multisample
-			const bl multisample_enable = !multisample.usage.ContainsAll(VulkanMultisampleUsage::None);
+			const bl multisample_enable = !multisample.usage.Equals(VulkanMultisampleUsage::None);
 			VkPipelineMultisampleStateCreateInfo multisample_info = GetVkMultisampleInfo(multisample);
 			//TODO: multisample_info.pSampleMask = nullptr;
 			//multisample_info.pSampleMask = multisample.sampleMasks.empty() ? nullptr : multisample.sampleMasks.data();
 
 			//depth stencil
-			const bl depth_stencil_enabled = !depth_stencil.usage.ContainsAll(VulkanDepthStencilUsage::None);
+			const bl depth_stencil_enabled = !depth_stencil.usage.Equals(VulkanDepthStencilUsage::None);
 			VkPipelineDepthStencilStateCreateInfo depth_stencil_info = GetVkDepthStencilInfo(depth_stencil);
 
 			//color blending

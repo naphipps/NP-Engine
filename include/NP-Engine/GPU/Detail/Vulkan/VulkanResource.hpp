@@ -46,11 +46,11 @@ namespace np::gpu::__detail
 		{
 			VkAttachmentLoadOp op = VK_ATTACHMENT_LOAD_OP_MAX_ENUM;
 
-			if (ContainsAll(Load))
+			if (Equals(Load))
 				op = VK_ATTACHMENT_LOAD_OP_LOAD;
-			else if (ContainsAll(Load | Clear))
+			else if (Equals(Load | Clear))
 				op = VK_ATTACHMENT_LOAD_OP_CLEAR;
-			else if (ContainsAll(Load | DontCare))
+			else if (Equals(Load | DontCare))
 				op = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
 
 			return op;
@@ -60,9 +60,9 @@ namespace np::gpu::__detail
 		{
 			VkAttachmentStoreOp op = VK_ATTACHMENT_STORE_OP_MAX_ENUM;
 
-			if (ContainsAll(Store))
+			if (Equals(Store))
 				op = VK_ATTACHMENT_STORE_OP_STORE;
-			else if (ContainsAll(Store | DontCare))
+			else if (Equals(Store | DontCare))
 				op = VK_ATTACHMENT_STORE_OP_DONT_CARE;
 
 			return op;
@@ -121,17 +121,17 @@ namespace np::gpu::__detail
 			case ResourceType::Buffer:
 			{
 				BufferResourceUsage usage = (ui32)this->usage;
-				if (usage.ContainsAll(BufferResourceUsage::Uniform | BufferResourceUsage::Texel))
+				if (usage.Equals(BufferResourceUsage::Uniform | BufferResourceUsage::Texel))
 					type = VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER;
-				else if (usage.ContainsAll(BufferResourceUsage::Storage | BufferResourceUsage::Texel))
+				else if (usage.Equals(BufferResourceUsage::Storage | BufferResourceUsage::Texel))
 					type = VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER;
-				else if (usage.ContainsAll(BufferResourceUsage::Uniform | BufferResourceUsage::Dynamic))
+				else if (usage.Equals(BufferResourceUsage::Uniform | BufferResourceUsage::Dynamic))
 					type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
-				else if (usage.ContainsAll(BufferResourceUsage::Storage | BufferResourceUsage::Dynamic))
+				else if (usage.Equals(BufferResourceUsage::Storage | BufferResourceUsage::Dynamic))
 					type = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC;
-				else if (usage.ContainsAll(BufferResourceUsage::Uniform))
+				else if (usage.Equals(BufferResourceUsage::Uniform))
 					type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-				else if (usage.ContainsAll(BufferResourceUsage::Storage))
+				else if (usage.Equals(BufferResourceUsage::Storage))
 					type = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
 			}
 			break;

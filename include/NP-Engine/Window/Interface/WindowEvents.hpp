@@ -4,8 +4,8 @@
 //
 //##===----------------------------------------------------------------------===##//
 
-#ifndef NP_ENGINE_WINDOW_EVENTS_HPP
-#define NP_ENGINE_WINDOW_EVENTS_HPP
+#ifndef NP_ENGINE_WIN_WINDOW_EVENTS_HPP
+#define NP_ENGINE_WIN_WINDOW_EVENTS_HPP
 
 #include "NP-Engine/Foundation/Foundation.hpp"
 #include "NP-Engine/Primitive/Primitive.hpp"
@@ -16,317 +16,174 @@
 
 namespace np::win
 {
-	template <typename T>
+	template <typename DataType>
 	class WindowEvent : public evnt::Event
 	{
 	protected:
 		mem::trait_allocator _allocator;
+		const evnt::EventType _type;
 
-		WindowEvent(): evnt::Event() {}
+		WindowEvent(evnt::EventType type) :
+			Event(),
+			_type(evnt::EventType::Window | type.GetIntention() | type.GetTopic())
+		{}
 
 	public:
 		virtual ~WindowEvent()
 		{
-			mem::destroy<T>(_allocator, (T*)GetPayload());
+			mem::destroy<DataType>(_allocator, static_cast<DataType*>(GetPayload()));
 		}
 
-		T& GetData()
+		DataType& GetData()
 		{
-			return *((T*)GetPayload());
+			return *static_cast<DataType*>(GetPayload());
 		}
 
-		const T& GetData() const
+		const DataType& GetData() const
 		{
-			return *((T*)GetPayload());
+			return *static_cast<DataType*>(GetPayload());
 		}
 
-		evnt::EventCategory GetCategory() const override
+		virtual evnt::EventType GetEventType() const override
 		{
-			return evnt::EventCategory::Window;
+			return _type;
 		}
 	};
 
-	// Window Create Events
-	struct WindowCreateEventData
+	struct WindowEventData
 	{
-		DetailType detailType;
-		uid::Uid windowId;
+		uid::Uid windowId{};
+	};
+
+	struct WindowCreateEventData : public WindowEventData
+	{
+		DetailType detailType = DetailType::None;
 	};
 
 	class WindowCreateEvent : public WindowEvent<WindowCreateEventData>
 	{
 	public:
-		WindowCreateEvent(DetailType detail_type, uid::Uid window_id): WindowEvent<WindowCreateEventData>()
+		WindowCreateEvent(evnt::EventType intention, uid::Uid window_id, DetailType detail_type) :
+			WindowEvent<WindowCreateEventData>(evnt::EventType::Create | intention.GetIntention())
 		{
-			SetPayload(mem::create<WindowCreateEventData>(_allocator, detail_type, window_id));
-		}
-
-		evnt::EventType GetType() const override
-		{
-			return evnt::EventType::WindowCreate;
+			SetPayload(mem::create<WindowCreateEventData>(_allocator, window_id, detail_type));
 		}
 	};
 
-	// Window Focus Events
-	struct WindowFocusEventData
+	struct WindowFocusEventData : public WindowEventData
 	{
-		uid::Uid windowId;
-		bl isFocused;
+		bl isFocused = false;
 	};
 
 	class WindowFocusEvent : public WindowEvent<WindowFocusEventData>
 	{
 	public:
-		WindowFocusEvent(uid::Uid window_id, bl isFocused): WindowEvent<WindowFocusEventData>()
+		WindowFocusEvent(evnt::EventType intention, uid::Uid window_id, bl is_focused) :
+			WindowEvent<WindowFocusEventData>(evnt::EventType::Focus | intention.GetIntention())
 		{
-			SetPayload(mem::create<WindowFocusEventData>(_allocator, window_id, isFocused));
-		}
-
-		evnt::EventType GetType() const override
-		{
-			return evnt::EventType::WindowFocus;
+			SetPayload(mem::create<WindowFocusEventData>(_allocator, window_id, is_focused));
 		}
 	};
 
-	class WindowSetFocusEvent : public WindowEvent<WindowFocusEventData>
+	struct WindowSizeEventData : public WindowEventData
 	{
-	public:
-		WindowSetFocusEvent(uid::Uid window_id, bl isFocused): WindowEvent<WindowFocusEventData>()
-		{
-			SetPayload(mem::create<WindowFocusEventData>(_allocator, window_id, isFocused));
-		}
-
-		evnt::EventType GetType() const override
-		{
-			return evnt::EventType::WindowSetFocus;
-		}
-	};
-
-	// Window Size Events
-	struct WindowSizeEventData
-	{
-		uid::Uid windowId;
-		ui32 width;
-		ui32 height;
+		::glm::uvec2 size{ 0 };
 	};
 
 	class WindowSizeEvent : public WindowEvent<WindowSizeEventData>
 	{
 	public:
-		WindowSizeEvent(uid::Uid window_id, ui32 width, ui32 height): WindowEvent<WindowSizeEventData>()
+		WindowSizeEvent(evnt::EventType intention, uid::Uid window_id, ::glm::uvec2 size) :
+			WindowEvent<WindowSizeEventData>(evnt::EventType::Size | intention.GetIntention())
 		{
-			SetPayload(mem::create<WindowSizeEventData>(_allocator, window_id, width, height));
-		}
-
-		evnt::EventType GetType() const override
-		{
-			return evnt::EventType::WindowSize;
+			SetPayload(mem::create<WindowSizeEventData>(_allocator, window_id, size));
 		}
 	};
 
-	class WindowSetSizeEvent : public WindowEvent<WindowSizeEventData>
+	struct WindowMinimizeEventData : public WindowEventData
 	{
-	public:
-		WindowSetSizeEvent(uid::Uid window_id, ui32 width, ui32 height): WindowEvent<WindowSizeEventData>()
-		{
-			SetPayload(mem::create<WindowSizeEventData>(_allocator, window_id, width, height));
-		}
-
-		evnt::EventType GetType() const override
-		{
-			return evnt::EventType::WindowSetSize;
-		}
-	};
-
-	// Window Minimize Events
-	struct WindowMinimizeEventData
-	{
-		uid::Uid windowId;
-		bl isMinimized;
+		bl isMinimized = false;
 	};
 
 	class WindowMinimizeEvent : public WindowEvent<WindowMinimizeEventData>
 	{
 	public:
-		WindowMinimizeEvent(uid::Uid window_id, bl isMinimized): WindowEvent<WindowMinimizeEventData>()
+		WindowMinimizeEvent(evnt::EventType intention, uid::Uid window_id, bl is_minimized) :
+			WindowEvent<WindowMinimizeEventData>(evnt::EventType::Minimize | intention.GetIntention())
 		{
-			SetPayload(mem::create<WindowMinimizeEventData>(_allocator, window_id, isMinimized));
-		}
-
-		evnt::EventType GetType() const override
-		{
-			return evnt::EventType::WindowMinimize;
+			SetPayload(mem::create<WindowMinimizeEventData>(_allocator, window_id, is_minimized));
 		}
 	};
 
-	class WindowSetMinimizeEvent : public WindowEvent<WindowMinimizeEventData>
+	struct WindowMaximizeEventData : public WindowEventData
 	{
-	public:
-		WindowSetMinimizeEvent(uid::Uid window_id, bl isMinimized): WindowEvent<WindowMinimizeEventData>()
-		{
-			SetPayload(mem::create<WindowMinimizeEventData>(_allocator, window_id, isMinimized));
-		}
-
-		evnt::EventType GetType() const override
-		{
-			return evnt::EventType::WindowSetMinimize;
-		}
-	};
-
-	// Window Maximize Events
-	struct WindowMaximizeEventData
-	{
-		uid::Uid windowId;
-		bl isMaximized;
+		bl isMaximized = false;
 	};
 
 	class WindowMaximizeEvent : public WindowEvent<WindowMaximizeEventData>
 	{
 	public:
-		WindowMaximizeEvent(uid::Uid window_id, bl isMaximized): WindowEvent<WindowMaximizeEventData>()
+		WindowMaximizeEvent(evnt::EventType intention, uid::Uid window_id, bl is_maximized) :
+			WindowEvent<WindowMaximizeEventData>(evnt::EventType::Maximize | intention.GetIntention())
 		{
-			SetPayload(mem::create<WindowMaximizeEventData>(_allocator, window_id, isMaximized));
-		}
-
-		evnt::EventType GetType() const override
-		{
-			return evnt::EventType::WindowMaximize;
+			SetPayload(mem::create<WindowMaximizeEventData>(_allocator, window_id, is_maximized));
 		}
 	};
 
-	class WindowSetMaximizeEvent : public WindowEvent<WindowMaximizeEventData>
+	struct WindowPositionEventData : public WindowEventData
 	{
-	public:
-		WindowSetMaximizeEvent(uid::Uid window_id, bl isMaximized): WindowEvent<WindowMaximizeEventData>()
-		{
-			SetPayload(mem::create<WindowMaximizeEventData>(_allocator, window_id, isMaximized));
-		}
-
-		evnt::EventType GetType() const override
-		{
-			return evnt::EventType::WindowSetMaximize;
-		}
-	};
-
-	// Window Position Events
-	struct WindowPositionEventData
-	{
-		uid::Uid windowId;
-		i32 x;
-		i32 y;
+		::glm::ivec2 position{ 0 };
 	};
 
 	class WindowPositionEvent : public WindowEvent<WindowPositionEventData>
 	{
 	public:
-		WindowPositionEvent(uid::Uid window_id, i32 x, i32 y): WindowEvent<WindowPositionEventData>()
+		WindowPositionEvent(evnt::EventType intention, uid::Uid window_id, ::glm::ivec2 position) :
+			WindowEvent<WindowPositionEventData>(evnt::EventType::Position | intention.GetIntention())
 		{
-			SetPayload(mem::create<WindowPositionEventData>(_allocator, window_id, x, y));
-		}
-
-		evnt::EventType GetType() const override
-		{
-			return evnt::EventType::WindowPosition;
+			SetPayload(mem::create<WindowPositionEventData>(_allocator, window_id, position));
 		}
 	};
 
-	class WindowSetPositionEvent : public WindowEvent<WindowPositionEventData>
+	struct WindowFramebufferSizeEventData : public WindowEventData
+	{
+		::glm::uvec2 size{ 0 };
+	};
+
+	class WindowFramebufferSizeEvent : public WindowEvent<WindowFramebufferSizeEventData>
 	{
 	public:
-		WindowSetPositionEvent(uid::Uid window_id, i32 x, i32 y): WindowEvent<WindowPositionEventData>()
+		WindowFramebufferSizeEvent(evnt::EventType intention, uid::Uid window_id, ::glm::uvec2 size) :
+			WindowEvent<WindowFramebufferSizeEventData>(evnt::EventType::Framebuffer | evnt::EventType::Size | intention.GetIntention())
 		{
-			SetPayload(mem::create<WindowPositionEventData>(_allocator, window_id, x, y));
-		}
-
-		evnt::EventType GetType() const override
-		{
-			return evnt::EventType::WindowSetPosition;
+			SetPayload(mem::create<WindowFramebufferSizeEventData>(_allocator, window_id, size));
 		}
 	};
 
-	// Window Framebuffer Events
-	struct WindowFramebufferEventData
+	struct WindowTitleEventData : public WindowEventData
 	{
-		uid::Uid windowId;
-		siz width;
-		siz height;
+		str title = "";
 	};
 
-	class WindowFramebufferEvent : public WindowEvent<WindowFramebufferEventData>
+	class WindowTitleEvent : public WindowEvent<WindowTitleEventData>
 	{
 	public:
-		WindowFramebufferEvent(uid::Uid window_id, ui32 width, ui32 height): WindowEvent<WindowFramebufferEventData>()
-		{
-			SetPayload(mem::create<WindowFramebufferEventData>(_allocator, window_id, width, height));
-		}
-
-		evnt::EventType GetType() const override
-		{
-			return evnt::EventType::WindowFramebuffer;
-		}
-	};
-
-	// Window Title Events
-	struct WindowTitleEventData
-	{
-		uid::Uid windowId;
-		str title;
-	};
-
-	class WindowSetTitleEvent : public WindowEvent<WindowTitleEventData>
-	{
-	public:
-		WindowSetTitleEvent(uid::Uid window_id, str title): WindowEvent<WindowTitleEventData>()
+		WindowTitleEvent(evnt::EventType intention, uid::Uid window_id, str title) :
+			WindowEvent<WindowTitleEventData>(evnt::EventType::Title | intention.GetIntention())
 		{
 			SetPayload(mem::create<WindowTitleEventData>(_allocator, window_id, title));
 		}
-
-		evnt::EventType GetType() const override
-		{
-			return evnt::EventType::WindowSetTitle;
-		}
 	};
 
-	// Window Closed Events
-	struct WindowCloseEventData
-	{
-		uid::Uid windowId;
-	};
-
-	class WindowSetCloseEvent : public WindowEvent<WindowCloseEventData>
+	class WindowCloseEvent : public WindowEvent<WindowEventData>
 	{
 	public:
-		WindowSetCloseEvent(uid::Uid window_id): WindowEvent<WindowCloseEventData>()
+		WindowCloseEvent(evnt::EventType intention, uid::Uid window_id) :
+			WindowEvent<WindowEventData>(evnt::EventType::Close | intention.GetIntention())
 		{
-			SetPayload(mem::create<WindowCloseEventData>(_allocator, window_id));
-		}
-
-		evnt::EventType GetType() const override
-		{
-			return evnt::EventType::WindowSetClose;
-		}
-	};
-
-	// Window Closing Events
-	struct WindowClosingEventData
-	{
-		uid::Uid windowId;
-		mem::sptr<jsys::Job> job;
-	};
-
-	class WindowClosingEvent : public WindowEvent<WindowClosingEventData>
-	{
-	public:
-		WindowClosingEvent(uid::Uid window_id, mem::sptr<jsys::Job> job): WindowEvent<WindowClosingEventData>()
-		{
-			SetPayload(mem::create<WindowClosingEventData>(_allocator, window_id, job));
-		}
-
-		evnt::EventType GetType() const override
-		{
-			return evnt::EventType::WindowClosing;
+			SetPayload(mem::create<WindowEventData>(_allocator, window_id));
 		}
 	};
 } // namespace np::win
 
-#endif /* NP_ENGINE_WINDOW_EVENTS_HPP */
+#endif /* NP_ENGINE_WIN_WINDOW_EVENTS_HPP */

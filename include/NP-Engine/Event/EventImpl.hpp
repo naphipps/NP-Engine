@@ -12,43 +12,58 @@
 
 namespace np::evnt
 {
-	enum class EventType : ui64
+	class EventType : public enm_ui64
 	{
-		None = 0,
+	protected:
 
-		ApplicationClose,
-		ApplicationPopup,
+		constexpr static ui64 CategoryMask = BIT(10) - BIT(0);
+		constexpr static ui64 IntentionMask = BIT(20) - BIT(10);
+		constexpr static ui64 TopicMask = (BIT(63) - BIT(20)) | BIT(63);
 
-		WindowCreate,
-		WindowSetClose,
-		WindowClosing,
-		WindowFramebuffer,
-		WindowSetTitle,
-		WindowSetSize,
-		WindowSize,
-		WindowSetPosition,
-		WindowPosition,
-		WindowSetFocus,
-		WindowFocus,
-		WindowSetMinimize,
-		WindowMinimize,
-		WindowSetMaximize,
-		WindowMaximize,
-
-		NetworkClient,
-
-		Max
-	};
-
-	class EventCategory : public enm_ui64
-	{
 	public:
+		//category
 		constexpr static ui64 Application = BIT(0);
 		constexpr static ui64 Window = BIT(1);
-		constexpr static ui64 Gpu = BIT(2);
-		constexpr static ui64 Network = BIT(3);
+		constexpr static ui64 Network = BIT(2);
 
-		EventCategory(ui64 value): enm_ui64(value) {}
+		//intention
+		constexpr static ui64 Will = BIT(10);
+		constexpr static ui64 Did = BIT(11);
+		
+		//topic
+		constexpr static ui64 Connect = BIT(51);
+		constexpr static ui64 Server = BIT(52);
+		constexpr static ui64 Client = BIT(53);
+		constexpr static ui64 Popup = BIT(54);
+		constexpr static ui64 Create = BIT(55);
+		constexpr static ui64 Attention = BIT(56);
+		constexpr static ui64 Focus = Attention;
+		constexpr static ui64 Close = BIT(57);
+		constexpr static ui64 Size = BIT(58);
+		constexpr static ui64 Position = BIT(59);
+		constexpr static ui64 Title = BIT(60);
+		constexpr static ui64 Framebuffer = BIT(61);
+		constexpr static ui64 Min = BIT(62);
+		constexpr static ui64 Minimize = Min;
+		constexpr static ui64 Max = BIT(63);
+		constexpr static ui64 Maximize = Max;
+
+		EventType(ui64 value) : enm_ui64(value) {}
+
+		EventType GetCategory() const
+		{
+			return _value & CategoryMask;
+		}
+
+		EventType GetIntention() const
+		{
+			return _value & IntentionMask;
+		}
+
+		EventType GetTopic() const
+		{
+			return _value & TopicMask;
+		}
 	};
 
 	class Event : public mem::delegate
@@ -62,7 +77,7 @@ namespace np::evnt
 
 		virtual ~Event() {}
 
-		void SetHandled(bl handled = true)
+		void SetIsHandled(bl handled = true)
 		{
 			_handled = handled;
 		}
@@ -74,7 +89,7 @@ namespace np::evnt
 
 		void SetCanBeHandled(bl can_be_handled = true)
 		{
-			_can_be_handled = true;
+			_can_be_handled = can_be_handled;
 		}
 
 		/*
@@ -85,15 +100,7 @@ namespace np::evnt
 			return !IsHandled() && _can_be_handled;
 		}
 
-		/*
-			get the type that this event should be treated as
-		*/
-		virtual EventType GetType() const = 0; //TODO: rename to GetEventType
-
-		/*
-			get the category this event should be treated as
-		*/
-		virtual EventCategory GetCategory() const = 0; //TODO: rename to GetEventCategory
+		virtual EventType GetEventType() const = 0;
 	};
 } // namespace np::evnt
 

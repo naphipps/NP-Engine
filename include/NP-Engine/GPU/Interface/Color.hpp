@@ -33,7 +33,7 @@ namespace np::gpu
 
 		bl IsSingleChannel() const
 		{
-			return ContainsAll(R) || ContainsAll(G) || ContainsAll(B) || ContainsAll(A);
+			return Equals(R) || Equals(G) || Equals(B) || Equals(A);
 		}
 	};
 

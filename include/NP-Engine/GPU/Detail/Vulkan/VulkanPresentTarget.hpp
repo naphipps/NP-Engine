@@ -23,10 +23,10 @@ namespace np::gpu::__detail
 		VkSurfaceKHR _surface;
 		VkExtent2D _framebuffer_extent;
 
-		static void FramebufferCallback(void* caller, ui32 width, ui32 height)
+		static void FramebufferSizeCallback(void* caller, ::glm::uvec2 framebuffer_size)
 		{
 			// NVIDIA resizing framebuffer is a nightmare //TODO: is this still needed?
-			static_cast<VulkanPresentTarget*>(caller)->_framebuffer_extent = {width, height};
+			static_cast<VulkanPresentTarget*>(caller)->_framebuffer_extent = { framebuffer_size.x, framebuffer_size.y };
 		}
 
 		VkSurfaceKHR CreateVkSurface()
@@ -56,7 +56,7 @@ namespace np::gpu::__detail
 		{
 			::glm::uvec2 framebuffer_size = _window->GetFramebufferSize();
 			_framebuffer_extent = {framebuffer_size.x, framebuffer_size.y};
-			_window->SetFramebufferCallback(this, FramebufferCallback);
+			_window->SetFramebufferSizeCallback(this, FramebufferSizeCallback);
 		}
 
 		virtual ~VulkanPresentTarget()

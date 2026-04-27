@@ -21,12 +21,10 @@ set(NP_ENGINE_ALGORITHMS_HPP
 
 set(NP_ENGINE_APPLICATION_HPP
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Application/Application.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Application/ApplicationCloseEvent.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Application/Layer.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Application/WindowLayer.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Application/AudioLayer.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Application/Popup.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Application/ApplicationPopupEvent.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Application/ApplicationEvents.hpp
 )
 

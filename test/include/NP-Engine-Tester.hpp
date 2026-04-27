@@ -188,7 +188,6 @@ namespace np::app
 		mutexed_wrapper<con::vector<mem::sptr<net::Socket>>> _tcp_clients;
 
 		mem::sptr<net::Socket> _http_socket;
-
 		mem::sptr<net::Socket> _udp_server;
 		mem::sptr<net::Socket> _udp_client;
 
@@ -228,30 +227,30 @@ namespace np::app
 			NP_ENGINE_LOG_INFO("minimize callback");
 		}
 
-		static void LogFramebuffer(void*, ui32, ui32)
+		static void LogFramebufferSize(void*, ::glm::uvec2)
 		{
 			NP_ENGINE_LOG_INFO("framebuffer callback");
 		}
 
-		static void LogPosition(void*, i32, i32)
+		static void LogPosition(void*, ::glm::ivec2)
 		{
 			NP_ENGINE_LOG_INFO("position callback");
 		}
 
-		static void LogSize(void*, ui32, ui32)
+		static void LogSize(void*, ::glm::uvec2)
 		{
 			NP_ENGINE_LOG_INFO("size callback");
 		}
 
-		static void RenderOnFramebuffer(void* caller, ui32 width, ui32 height)
+		static void RenderOnFramebufferSize(void* caller, ::glm::uvec2 framebuffer_size)
 		{
-			if (width != 0 && height != 0)
+			if (framebuffer_size.x != 0 && framebuffer_size.y != 0)
 				(*static_cast<GameLayer*>(caller)->_scene.get_access())->Render();
 		}
 
-		static void RenderOnSize(void* caller, ui32 width, ui32 height)
+		static void RenderOnSize(void* caller, ::glm::uvec2 size)
 		{
-			if (width != 0 && height != 0)
+			if (size.x != 0 && size.y != 0)
 				(*static_cast<GameLayer*>(caller)->_scene.get_access())->Render();
 		}
 
@@ -302,49 +301,64 @@ namespace np::app
 
 		void HandleNetworkClient(mem::sptr<evnt::Event> e)
 		{
-			net::NetworkClientEvent& client_event = (net::NetworkClientEvent&)*e;
-			net::NetworkClientEventData& client_data = client_event.GetData();
+			mem::sptr<net::NetworkClientEvent> event = e;
+			net::NetworkClientEventData& data = event->GetData();
 
 			str name = "UNKNOWN";
-			if (client_data.host)
+			if (data.host)
 			{
-				if (client_data.host->name != "")
-					name = client_data.host->name;
-				else if (!client_data.host->ipv4s.empty())
-					name = to_str(client_data.host->ipv4s.begin()->first);
-				else if (!client_data.host->ipv6s.empty())
-					name = to_str(client_data.host->ipv6s.begin()->first);
+				if (data.host->name != "")
+					name = data.host->name;
+				else if (!data.host->ipv4s.empty())
+					name = to_str(data.host->ipv4s.begin()->first);
+				else if (!data.host->ipv6s.empty())
+					name = to_str(data.host->ipv6s.begin()->first);
 			}
 
-			if (client_data.socket && *client_data.socket)
+			if (data.socket && *data.socket)
 			{
 				NP_ENGINE_LOG_INFO("server accepted: " + name);
 
-				_tcp_server_clients.get_access()->emplace_back(client_data.socket);
-				client_data.socket->StartReceiving();
+				_tcp_server_clients.get_access()->emplace_back(data.socket);
+				data.socket->StartReceiving();
 			}
 			else
 			{
 				NP_ENGINE_LOG_INFO("server denied: " + name);
 			}
 
-			e->SetHandled();
+			e->SetIsHandled();
+		}
+
+		void HandleApplicationEvent(mem::sptr<evnt::Event> e)
+		{
+
+		}
+
+		void HandleWindowEvent(mem::sptr<evnt::Event> e)
+		{
+
+		}
+
+		void HandleNetworkEvent(mem::sptr<evnt::Event> e)
+		{
+
 		}
 
 		void HandleEvent(mem::sptr<evnt::Event> e) override
 		{
-			switch (e->GetType())
+			switch (e->GetEventType().GetCategory())
 			{
-			case evnt::EventType::ApplicationClose:
-				AdjustForApplicationClose(e);
+			case evnt::EventType::Application:
+				HandleApplicationEvent(e);
 				break;
 
-			case evnt::EventType::WindowClosing:
-				AdjustForWindowClosing(e);
+			case evnt::EventType::Window:
+				HandleWindowEvent(e);
 				break;
 
-			case evnt::EventType::NetworkClient:
-				HandleNetworkClient(e);
+			case evnt::EventType::Network:
+				HandleNetworkEvent(e);
 				break;
 
 			default:
@@ -379,7 +393,7 @@ namespace np::app
 			self._window->SetMousePositionCallback(input_queue, nput::InputListener::SubmitMousePosition);
 			self._window->SetControllerCallback(input_queue, nput::InputListener::SubmitControllerState);
 			//*
-			//self._window->SetFramebufferCallback(mem::address_of(self), RenderOnFramebuffer);
+			//self._window->SetFramebufferSizeCallback(mem::address_of(self), RenderOnFramebufferSize);
 			self._window->SetSizeCallback(mem::address_of(self), RenderOnSize);
 			//*/
 			/*
@@ -388,7 +402,7 @@ namespace np::app
 			self._window->SetMousePositionCallback(mem::address_of(self), LogSubmitMousePosition);
 			self._window->SetControllerCallback(mem::address_of(self), LogSubmitControllerState);
 			self._window->SetFocusCallback(mem::address_of(self), LogFocus);
-			self._window->SetFramebufferCallback(mem::address_of(self), LogFramebuffer);
+			self._window->SetFramebufferSizeCallback(mem::address_of(self), LogFramebufferSize);
 			self._window->SetMaximizeCallback(mem::address_of(self), LogMaximize);
 			self._window->SetMinimizeCallback(mem::address_of(self), LogMinimize);
 			self._window->SetPositionCallback(mem::address_of(self), LogPosition);
@@ -771,7 +785,7 @@ namespace np::app
 			Layer(services),
 			_window_layer(window_layer),
 			_window_id_handle(_services->GetUidSystem().CreateUid()),
-			_window(_window_layer.Create(win::DetailType::Glfw, _services->GetUidSystem().GetUid(_window_id_handle))),
+			_window(_window_layer.CreateWindow(win::DetailType::Glfw, _services->GetUidSystem().GetUid(_window_id_handle))),
 			_scene(nullptr),
 			_model_filename(fsys::append(NP_ENGINE_WORKING_DIR, "test", "assets", "viking_room.obj")),
 			_model_texture_filename(fsys::append(NP_ENGINE_WORKING_DIR, "test", "assets", "viking_room.png")),
@@ -876,7 +890,7 @@ namespace np::app
 			return _window && _window->IsMaximized();
 		}
 
-		void Update(tim::milliseconds time_delta) override
+		virtual void Update(tim::milliseconds time_delta) override
 		{
 			DigestInput(time_delta);
 
@@ -999,21 +1013,9 @@ namespace np::app
 			}
 		}
 
-		void CleanupUpdate() override
+		virtual bl CanHandle(evnt::EventType type) const override
 		{
-			{
-				/*auto scene = _scene.get_access();
-				if (scene && *scene)
-					(*scene)->CleanupVisibles();*/
-			}
-			{
-				// TODO: cleanup our _server_clients and _clients
-			}
-		}
-
-		evnt::EventCategory GetHandledCategories() const override
-		{
-			return evnt::EventCategory::All;
+			return true;
 		}
 	};
 

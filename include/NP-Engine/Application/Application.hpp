@@ -105,33 +105,25 @@ namespace np::app
 
 		virtual void HandlePopup(mem::sptr<evnt::Event> e)
 		{
-			ApplicationPopupEvent::DataType& data = *((ApplicationPopupEvent::DataType*)e->GetPayload());
+			mem::sptr<ApplicationPopupEvent> event = e;
+			ApplicationPopupEventData& data = event->GetData();
 			data.select = Popup::Show(GetTitle(), data.message, data.style, data.buttons);
-			(*e)();
-			e->SetHandled();
+			e->SetIsHandled();
 		}
 
 		virtual void HandleApplicationClose(mem::sptr<evnt::Event> e)
 		{
 			StopRunning();
-			e->SetHandled();
+			e->SetIsHandled();
 		}
 
 		virtual void HandleEvent(mem::sptr<evnt::Event> e) override
 		{
-			switch (e->GetType())
-			{
-			case evnt::EventType::ApplicationClose:
+			evnt::EventType type = e->GetEventType();
+			if (type.Contains(evnt::EventType::Application | evnt::EventType::Close))
 				HandleApplicationClose(e);
-				break;
-
-			case evnt::EventType::ApplicationPopup:
+			else if (type.Contains(evnt::EventType::Application | evnt::EventType::Popup))
 				HandlePopup(e);
-				break;
-
-			default:
-				break;
-			}
 		}
 
 		virtual void PushLayer(Layer* layer)
@@ -178,9 +170,9 @@ namespace np::app
 
 		virtual bl IsRunning() const = 0;
 
-		virtual evnt::EventCategory GetHandledCategories() const override
+		virtual bl CanHandle(evnt::EventType type) const override
 		{
-			return evnt::EventCategory::Application;
+			return type.Contains(evnt::EventType::Application);
 		}
 	};
 } // namespace np::app
