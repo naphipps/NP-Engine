@@ -21,7 +21,8 @@
 #include "NP-Engine/Vendor/GlfwInclude.hpp"
 #include "NP-Engine/Vendor/GlmInclude.hpp"
 
-#include "NP-Engine/Window/Interface/Interface.hpp"
+#include "NP-Engine/Window/Interface/WindowImpl.hpp"
+#include "NP-Engine/Window/Interface/WindowEvents.hpp"
 
 namespace np::win::__detail
 {
@@ -69,7 +70,7 @@ namespace np::win::__detail
 
 		static void WindowCloseCallback(GLFWwindow* glfw_window)
 		{
-			((GlfwWindow*)glfwGetWindowUserPointer(glfw_window))->Close();
+			static_cast<GlfwWindow*>(glfwGetWindowUserPointer(glfw_window))->Close();
 		}
 
 		static void WindowSizeCallback(GLFWwindow* glfw_window, i32 width, i32 height)
@@ -827,8 +828,6 @@ namespace np::win::__detail
 				SetGlfwCallbacks(*glfw_window);
 				ApplySystemThemeOnGlfw(*glfw_window);
 			}
-
-			//TODO: submit a window did create event?
 		}
 
 		virtual ~GlfwWindow()
@@ -858,13 +857,16 @@ namespace np::win::__detail
 		{
 			if (IsOwningThread())
 			{
-				auto glfw_window = _glfw_window.get_access();
-				if (*glfw_window)
+				if (!InvokePreventCloseCallbacks())
 				{
-					glfwHideWindow(*glfw_window);
-					mem::sptr<evnt::Event> e =
-						mem::create_sptr<WindowCloseEvent>(_services->GetAllocator(), evnt::EventType::Did, GetUid());
-					_services->GetEventSubmitter().Submit(e);
+					auto glfw_window = _glfw_window.get_access();
+					if (*glfw_window)
+					{
+						glfwHideWindow(*glfw_window);
+						mem::sptr<evnt::Event> e =
+							mem::create_sptr<WindowCloseEvent>(_services->GetAllocator(), evnt::EventType::Did, GetUid());
+						_services->GetEventSubmitter().Submit(e);
+					}
 				}
 			}
 			else
@@ -908,12 +910,7 @@ namespace np::win::__detail
 			{
 				auto glfw_window = _glfw_window.get_access();
 				if (*glfw_window)
-				{
-					glfwSetWindowSize(*glfw_window, size.x, size.y);
-					mem::sptr<evnt::Event> e =
-						mem::create_sptr<WindowSizeEvent>(_services->GetAllocator(), evnt::EventType::Did, GetUid(), size);
-					_services->GetEventSubmitter().Submit(e);
-				}
+					glfwSetWindowSize(*glfw_window, size.x, size.y); //submits WindowSizeEvent
 			}
 			else
 			{
@@ -939,12 +936,7 @@ namespace np::win::__detail
 			{
 				auto glfw_window = _glfw_window.get_access();
 				if (*glfw_window)
-				{
-					glfwSetWindowPos(*glfw_window, position.x, position.y);
-					mem::sptr<evnt::Event> e =
-						mem::create_sptr<WindowPositionEvent>(_services->GetAllocator(), evnt::EventType::Did, GetUid(), position);
-					_services->GetEventSubmitter().Submit(e);
-				}
+					glfwSetWindowPos(*glfw_window, position.x, position.y); //submits WindowPositionEvent
 			}
 			else
 			{
@@ -969,12 +961,7 @@ namespace np::win::__detail
 			{
 				auto glfw_window = _glfw_window.get_access();
 				if (!IsMinimized(*glfw_window))
-				{
-					glfwIconifyWindow(*glfw_window);
-					mem::sptr<evnt::Event> e = 
-						mem::create_sptr<WindowMinimizeEvent>(_services->GetAllocator(), evnt::EventType::Did, GetUid(), true);
-					_services->GetEventSubmitter().Submit(e);
-				}
+					glfwIconifyWindow(*glfw_window); //submits WindowMinimizeEvent
 			}
 			else
 			{
@@ -990,12 +977,7 @@ namespace np::win::__detail
 			{
 				auto glfw_window = _glfw_window.get_access();
 				if (IsMinimized(*glfw_window))
-				{
-					glfwRestoreWindow(*glfw_window);
-					mem::sptr<evnt::Event> e =
-						mem::create_sptr<WindowMinimizeEvent>(_services->GetAllocator(), evnt::EventType::Did, GetUid(), false);
-					_services->GetEventSubmitter().Submit(e);
-				}
+					glfwRestoreWindow(*glfw_window); //submits WindowMinimizeEvent
 			}
 			else
 			{
@@ -1011,12 +993,7 @@ namespace np::win::__detail
 			{
 				auto glfw_window = _glfw_window.get_access();
 				if (!IsMaximized(*glfw_window))
-				{
-					glfwMaximizeWindow(*glfw_window);
-					mem::sptr<evnt::Event> e =
-						mem::create_sptr<WindowMaximizeEvent>(_services->GetAllocator(), evnt::EventType::Did, GetUid(), true);
-					_services->GetEventSubmitter().Submit(e);
-				}
+					glfwMaximizeWindow(*glfw_window); //submits WindowMaximizeEvent
 			}
 			else
 			{
@@ -1032,12 +1009,7 @@ namespace np::win::__detail
 			{
 				auto glfw_window = _glfw_window.get_access();
 				if (IsMaximized(*glfw_window))
-				{
-					glfwRestoreWindow(*glfw_window);
-					mem::sptr<evnt::Event> e =
-						mem::create_sptr<WindowMaximizeEvent>(_services->GetAllocator(), evnt::EventType::Did, GetUid(), false);
-					_services->GetEventSubmitter().Submit(e);
-				}
+					glfwRestoreWindow(*glfw_window); //submits WindowMaximizeEvent
 			}
 			else
 			{
@@ -1071,12 +1043,7 @@ namespace np::win::__detail
 			{
 				auto glfw_window = _glfw_window.get_access();
 				if (!IsFocused(*glfw_window))
-				{
-					glfwFocusWindow(*glfw_window);
-					mem::sptr<evnt::Event> e =
-						mem::create_sptr<WindowFocusEvent>(_services->GetAllocator(), evnt::EventType::Did, GetUid(), true);
-					_services->GetEventSubmitter().Submit(e);
-				}
+					glfwFocusWindow(*glfw_window); //submits WindowFocusEvent
 			}
 			else
 			{

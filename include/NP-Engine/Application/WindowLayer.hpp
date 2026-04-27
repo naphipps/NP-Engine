@@ -27,22 +27,17 @@ namespace np::app
 		evnt::EventQueue _deferred_event_queue{};
 
 	protected:
-		struct WindowClosingPayload
+		void HandleWindowCreateEvent(mem::sptr<evnt::Event> e)
 		{
-			WindowLayer* caller = nullptr;
-			uid::Uid windowId{};
-		};
-
-		void HandleWindowCreate(mem::sptr<evnt::Event> e)
-		{
-			mem::sptr<win::WindowCreateEvent> event = e;
-			win::WindowCreateEventData& data = event->GetData();
-			CreateWindow(data.detailType, data.windowId);
-			// ^ submits another create event if this is not the owning thread, so considered handled
-			e->SetIsHandled();
+			if (e->GetEventType().Contains(evnt::EventType::Will))
+			{
+				mem::sptr<win::WindowCreateEvent> event = e;
+				win::WindowCreateEventData& data = event->GetData();
+				CreateWindow(data.detailType, data.windowId);
+			}
 		}
 
-		void HandleWindowTitle(mem::sptr<evnt::Event> e)
+		void HandleWindowTitleEvent(mem::sptr<evnt::Event> e)
 		{
 			if (e->GetEventType().Contains(evnt::EventType::Will))
 			{
@@ -56,12 +51,10 @@ namespace np::app
 						(*it)->SetTitle(data.title);
 						break;
 					}
-
-				e->SetIsHandled();
 			}
 		}
 
-		void HandleWindowFocus(mem::sptr<evnt::Event> e)
+		void HandleWindowFocusEvent(mem::sptr<evnt::Event> e)
 		{
 			if (e->GetEventType().Contains(evnt::EventType::Will))
 			{
@@ -78,12 +71,10 @@ namespace np::app
 							break;
 						}
 				}
-
-				e->SetIsHandled();
 			}
 		}
 
-		void HandleWindowMaximize(mem::sptr<evnt::Event> e)
+		void HandleWindowMaximizeEvent(mem::sptr<evnt::Event> e)
 		{
 			if (e->GetEventType().Contains(evnt::EventType::Will))
 			{
@@ -100,12 +91,10 @@ namespace np::app
 							(*it)->RestoreFromMaximize();
 						break;
 					}
-
-				e->SetIsHandled();
 			}
 		}
 
-		void HandleWindowMinimize(mem::sptr<evnt::Event> e)
+		void HandleWindowMinimizeEvent(mem::sptr<evnt::Event> e)
 		{
 			if (e->GetEventType().Contains(evnt::EventType::Will))
 			{
@@ -122,12 +111,10 @@ namespace np::app
 							(*it)->RestoreFromMinimize();
 						break;
 					}
-
-				e->SetIsHandled();
 			}
 		}
 
-		void HandleWindowPosition(mem::sptr<evnt::Event> e)
+		void HandleWindowPositionEvent(mem::sptr<evnt::Event> e)
 		{
 			if (e->GetEventType().Contains(evnt::EventType::Will))
 			{
@@ -141,12 +128,10 @@ namespace np::app
 						(*it)->SetPosition(data.position);
 						break;
 					}
-
-				e->SetIsHandled();
 			}
 		}
 
-		void HandleWindowSize(mem::sptr<evnt::Event> e)
+		void HandleWindowSizeEvent(mem::sptr<evnt::Event> e)
 		{
 			if (e->GetEventType().Contains(evnt::EventType::Will))
 			{
@@ -160,12 +145,10 @@ namespace np::app
 						(*it)->SetSize(data.size);
 						break;
 					}
-
-				e->SetIsHandled();
 			}
 		}
 
-		void HandleWindowWillClose(mem::sptr<evnt::Event> e)
+		void HandleWindowWillCloseEvent(mem::sptr<evnt::Event> e)
 		{
 			mem::sptr<win::WindowCloseEvent> event = e;
 			win::WindowEventData& data = event->GetData();
@@ -177,11 +160,9 @@ namespace np::app
 					(*it)->Close();
 					break;
 				}
-
-			e->SetIsHandled();
 		}
 
-		void HandleWindowDidClose(mem::sptr<evnt::Event> e)
+		void HandleWindowDidCloseEvent(mem::sptr<evnt::Event> e)
 		{
 			mem::sptr<win::WindowCloseEvent> event = e;
 			win::WindowEventData& data = event->GetData();
@@ -195,20 +176,18 @@ namespace np::app
 					break;
 				}
 			}
-
-			e->SetIsHandled();
 		}
 
-		void HandleWindowClose(mem::sptr<evnt::Event> e)
+		void HandleWindowCloseEvent(mem::sptr<evnt::Event> e)
 		{
 			switch (e->GetEventType().GetIntention())
 			{
 			case evnt::EventType::Will:
-				HandleWindowWillClose(e);
+				HandleWindowWillCloseEvent(e);
 				break;
 
 			case evnt::EventType::Did:
-				HandleWindowDidClose(e);
+				HandleWindowDidCloseEvent(e);
 				break;
 
 			default:
@@ -221,35 +200,35 @@ namespace np::app
 			switch (e->GetEventType().GetTopic())
 			{
 			case evnt::EventType::Create:
-				HandleWindowCreate(e);
+				HandleWindowCreateEvent(e);
 				break;
 
 			case evnt::EventType::Title:
-				HandleWindowTitle(e);
+				HandleWindowTitleEvent(e);
 				break;
 
 			case evnt::EventType::Focus:
-				HandleWindowFocus(e);
+				HandleWindowFocusEvent(e);
 				break;
 
 			case evnt::EventType::Maximize:
-				HandleWindowMaximize(e);
+				HandleWindowMaximizeEvent(e);
 				break;
 
 			case evnt::EventType::Minimize:
-				HandleWindowMinimize(e);
+				HandleWindowMinimizeEvent(e);
 				break;
 
 			case evnt::EventType::Position:
-				HandleWindowPosition(e);
+				HandleWindowPositionEvent(e);
 				break;
 
 			case evnt::EventType::Size:
-				HandleWindowSize(e);
+				HandleWindowSizeEvent(e);
 				break;
 
 			case evnt::EventType::Close:
-				HandleWindowClose(e);
+				HandleWindowCloseEvent(e);
 				break;
 
 			default:
@@ -284,6 +263,8 @@ namespace np::app
 			if (IsOwningThread())
 			{
 				window = _windows.get_access()->emplace_back(win::Window::Create(detail_type, _services, id));
+				mem::sptr<evnt::Event> e = mem::create_sptr<win::WindowCreateEvent>(_services->GetAllocator(), evnt::EventType::Did, id, detail_type);
+				_services->GetEventSubmitter().Submit(e);
 			}
 			else
 			{
@@ -318,7 +299,8 @@ namespace np::app
 		{
 			_deferred_event_queue.ToggleState();
 			for (mem::sptr<evnt::Event> e = _deferred_event_queue.Pop(); e; e = _deferred_event_queue.Pop())
-				HandleEvent(e); //we do not need to consider handled-ness or maintain these events for later handling
+				if (!e->IsHandled())
+					HandleEvent(e); //we do not need to consider handled-ness or maintain these events for later handling
 		}
 
 		void Poll(tim::milliseconds time_delta) override
@@ -329,39 +311,32 @@ namespace np::app
 
 		void CleanupPoll() override
 		{
-			bl submit_application_close = false;
+			auto windows = _windows.get_access();
+			for (auto wit = windows->begin(); wit != windows->end();)
 			{
-				auto windows = _windows.get_access();
-				for (auto wit = windows->begin(); wit != windows->end();)
+				if (*wit)
 				{
-					if (*wit)
+					auto to_destroy = _to_destroy.get_access();
+					auto dit = to_destroy->find((*wit)->GetUid());
+					if (dit != to_destroy->end())
 					{
-						auto to_destroy = _to_destroy.get_access();
-						auto dit = to_destroy->find((*wit)->GetUid());
-						if (dit != to_destroy->end())
-						{
-							wit = windows->erase(wit);
-							to_destroy->erase(dit);
-							submit_application_close |= true;
-						}
-						else
-						{
-							wit++;
-						}
+						uid::Uid id = *dit;
+						wit = windows->erase(wit);
+						to_destroy->erase(dit);
+
+						mem::sptr<evnt::Event> e =
+							mem::create_sptr<win::WindowDestroyEvent>(_services->GetAllocator(), evnt::EventType::Did, id);
+						_services->GetEventSubmitter().Submit(e);
 					}
 					else
 					{
-						wit = windows->erase(wit);
+						wit++;
 					}
 				}
-
-				submit_application_close &= windows->empty();
-			}
-			if (submit_application_close)
-			{
-				mem::sptr<evnt::Event> e =
-					mem::create_sptr<ApplicationCloseEvent>(_services->GetAllocator(), evnt::EventType::Will, this);
-				_services->GetEventSubmitter().Submit(e);
+				else
+				{
+					wit = windows->erase(wit);
+				}
 			}
 		}
 

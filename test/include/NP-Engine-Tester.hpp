@@ -254,52 +254,37 @@ namespace np::app
 				(*static_cast<GameLayer*>(caller)->_scene.get_access())->Render();
 		}
 
-		struct AdjustForWindowClosingPayload
+		static bl PreventWindowClose(void* caller)
 		{
-			GameLayer* caller = nullptr;
-			uid::Uid windowId{};
-		};
+			GameLayer& self = *static_cast<GameLayer*>(caller);
+			win::PopupSelection selection = win::Popup::Show(self._window, "Close Window?", "Testing: do we want to close this window?",
+				win::PopupStyle::Question, win::PopupButtons::Yes | win::PopupButtons::No | win::PopupButtons::Cancel);
+			return !selection.Equals(win::PopupSelection::Yes);
+		}
 
-		static void AdjustForWindowClosingCallback(mem::delegate& d)
+		/*
+			aka: close our application when our last window is destroyed
+		*/
+		void HandleWindowDestroyEvent(mem::sptr<evnt::Event> e)
 		{
-			AdjustForWindowClosingPayload* payload = (AdjustForWindowClosingPayload*)d.GetPayload();
-
-			if (payload->caller->_window->GetUid() == payload->windowId)
+			if (e->GetEventType().Contains(evnt::EventType::Did))
 			{
-				payload->caller->_window_id_handle.reset();
-				payload->caller->_window.reset();
+				mem::sptr<win::WindowDestroyEvent> event = e;
+				win::WindowEventData& data = event->GetData();
+
+				if (_window && _window->GetUid() == data.windowId)
+				{
+					_window_id_handle.reset();
+					_window.reset();
+
+					mem::sptr<evnt::Event> app_close_event =
+						mem::create_sptr<ApplicationCloseEvent>(_services->GetAllocator(), evnt::EventType::Will);
+					_services->GetEventSubmitter().Submit(app_close_event);
+				}
 			}
-
-			//{
-			//	auto scene = payload->caller->_scene.get_access();
-			//	if ((*scene)->GetRenderTarget()->GetWindow()->GetUid() == payload->windowId)
-			//		scene->reset(); // TODO: can we job-ify this?
-			//}
-
-			mem::destroy<AdjustForWindowClosingPayload>(payload->caller->_services->GetAllocator(), payload);
 		}
 
-		void AdjustForWindowClosing(mem::sptr<evnt::Event> e)
-		{
-			/*win::WindowClosingEvent& closing_event = (win::WindowClosingEvent&)(*e);
-			win::WindowClosingEventData& closing_data = closing_event.GetData();
-
-			mem::sptr<jsys::Job> adjust_job = _services->GetJobSystem().CreateJob();
-			adjust_job->SetPayload(
-				mem::create<AdjustForWindowClosingPayload>(_services->GetAllocator(), this, closing_data.windowId));
-			adjust_job->SetCallback(AdjustForWindowClosingCallback);
-			jsys::Job::AddDependency(closing_data.job, adjust_job);
-			_services->GetJobSystem().SubmitJob(jsys::JobPriority::Higher, adjust_job);*/
-		}
-
-		void AdjustForApplicationClose(mem::sptr<evnt::Event> e)
-		{
-			/*TcpServerCloseClients();
-			_udp_server->Close();
-			_http_socket->Close();*/
-		}
-
-		void HandleNetworkClient(mem::sptr<evnt::Event> e)
+		void HandleNetworkClientEvent(mem::sptr<evnt::Event> e)
 		{
 			mem::sptr<net::NetworkClientEvent> event = e;
 			net::NetworkClientEventData& data = event->GetData();
@@ -326,18 +311,23 @@ namespace np::app
 			{
 				NP_ENGINE_LOG_INFO("server denied: " + name);
 			}
-
-			e->SetIsHandled();
 		}
 
 		void HandleApplicationEvent(mem::sptr<evnt::Event> e)
 		{
-
+			/*TcpServerCloseClients();
+			_udp_server->Close();
+			_http_socket->Close();*/
 		}
 
 		void HandleWindowEvent(mem::sptr<evnt::Event> e)
 		{
-
+			switch (e->GetEventType().GetTopic())
+			{
+			case evnt::EventType::Destroy:
+				HandleWindowDestroyEvent(e);
+				break;
+			}
 		}
 
 		void HandleNetworkEvent(mem::sptr<evnt::Event> e)
@@ -397,16 +387,19 @@ namespace np::app
 			self._window->SetSizeCallback(mem::address_of(self), RenderOnSize);
 			//*/
 			/*
+			self._window->SetPreventCloseCallback(mem::address_of(self), PreventWindowClose);
+			//*/
+			/*
 			self._window->SetKeyCallback(mem::address_of(self), LogSubmitKeyState);
 			self._window->SetMouseCallback(mem::address_of(self), LogSubmitMouseState);
-			self._window->SetMousePositionCallback(mem::address_of(self), LogSubmitMousePosition);
+			//self._window->SetMousePositionCallback(mem::address_of(self), LogSubmitMousePosition);
 			self._window->SetControllerCallback(mem::address_of(self), LogSubmitControllerState);
-			self._window->SetFocusCallback(mem::address_of(self), LogFocus);
-			self._window->SetFramebufferSizeCallback(mem::address_of(self), LogFramebufferSize);
+			//self._window->SetFocusCallback(mem::address_of(self), LogFocus);
+			//self._window->SetFramebufferSizeCallback(mem::address_of(self), LogFramebufferSize);
 			self._window->SetMaximizeCallback(mem::address_of(self), LogMaximize);
 			self._window->SetMinimizeCallback(mem::address_of(self), LogMinimize);
-			self._window->SetPositionCallback(mem::address_of(self), LogPosition);
-			self._window->SetSizeCallback(mem::address_of(self), LogSize);
+			//self._window->SetPositionCallback(mem::address_of(self), LogPosition);
+			//self._window->SetSizeCallback(mem::address_of(self), LogSize);
 			//*/
 
 			mem::sptr<srvc::Services> services = self._services;
@@ -1023,9 +1016,7 @@ namespace np::app
 	{
 	private:
 		GameLayer _game_layer;
-		atm_bl _keep_poll_looping;
-		atm_bl _keep_app_looping;
-		atm_bl _keep_rendering;
+		atm_bl _keep_running;
 
 		static void AppLoopCallback(mem::delegate& d)
 		{
@@ -1044,13 +1035,13 @@ namespace np::app
 			mem::sptr<evnt::Event> e = nullptr;
 			con::vector<Layer*>::iterator it{};
 
-			while (self._keep_app_looping.load(mo_acquire))
+			while (self._keep_running.load(mo_acquire))
 			{
 				NP_ENGINE_PROFILE_SCOPE("app loop");
 
 				self.PublishEvents();
 
-				if (!self._keep_app_looping.load(mo_acquire))
+				if (!self._keep_running.load(mo_acquire))
 					break;
 
 				next = tim::steady_clock::now();
@@ -1087,7 +1078,7 @@ namespace np::app
 			GameApp& self = *((GameApp*)d.GetPayload());
 			thr::thread_duration_sleeper sleeper{ self.GetPlatformDefaultApplicationLoopDuration() };
 
-			while (self._keep_rendering.load(mo_acquire))
+			while (self._keep_running.load(mo_acquire))
 			{
 				self._game_layer.Render();
 
@@ -1160,7 +1151,7 @@ namespace np::app
 			mem::sptr<evnt::Event> e = nullptr;
 			con::vector<Layer*>::iterator it{};
 
-			while (_keep_poll_looping.load(mo_acquire))
+			while (_keep_running.load(mo_acquire))
 			{
 				NP_ENGINE_PROFILE_SCOPE("poll loop");
 
@@ -1190,9 +1181,7 @@ namespace np::app
 		GameApp(mem::sptr<srvc::Services> services) :
 			Application("My Game App", services),
 			_game_layer(services, _window_layer),
-			_keep_poll_looping(false),
-			_keep_app_looping(false),
-			_keep_rendering(false)
+			_keep_running(false)
 		{
 			PushLayer(_game_layer);
 		}
@@ -1205,9 +1194,7 @@ namespace np::app
 			NP_ENGINE_LOG_INFO("Hello world from my game app! My title is '" + GetTitle() + "'");
 			CustomizeJobSystem();
 
-			_keep_poll_looping.store(true, mo_release);
-			_keep_app_looping.store(true, mo_release);
-			_keep_rendering.store(true, mo_release);
+			_keep_running.store(true, mo_release);
 
 			jsys::JobSystem& job_system = _services->GetJobSystem();
 			job_system.Start();
@@ -1218,14 +1205,12 @@ namespace np::app
 
 		virtual void StopRunning() override
 		{
-			_keep_poll_looping.store(false, mo_release);
-			_keep_app_looping.store(false, mo_release);
-			_keep_rendering.store(false, mo_release);
+			_keep_running.store(false, mo_release);
 		}
 
 		virtual bl IsRunning() const override
 		{
-			return _keep_app_looping.load(mo_acquire);
+			return _keep_running.load(mo_acquire);
 		}
 	};
 } // namespace np::app

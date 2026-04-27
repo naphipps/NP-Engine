@@ -9,6 +9,9 @@
 
 #include "NP-Engine/Foundation/Foundation.hpp"
 
-#include "Interface/Interface.hpp"
+#include "Interface/DetailType.hpp"
+#include "Interface/WindowImpl.hpp"
+#include "Interface/WindowEvents.hpp"
+#include "Interface/Popup.hpp"
 
 #endif /* NP_ENGINE_WINDOW_HPP */

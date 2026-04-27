@@ -4,16 +4,17 @@
 //
 //##===----------------------------------------------------------------------===##//
 
-#ifndef NP_ENGINE_POPUP_HPP
-#define NP_ENGINE_POPUP_HPP
-
-#include <string>
+#ifndef NP_ENGINE_WIN_POPUP_HPP
+#define NP_ENGINE_WIN_POPUP_HPP
 
 #include "NP-Engine/Primitive/Primitive.hpp"
-#include "NP-Engine/Platform/Platform.hpp"
-#include "NP-Engine/Insight/Insight.hpp"
+#include "NP-Engine/String/String.hpp"
 
-namespace np::app
+#include "WindowImpl.hpp"
+
+//TODO: fix popups to use system themes -- this may have to be something custom
+
+namespace np::win
 {
 	class PopupSelection : public enm_ui32
 	{
@@ -53,23 +54,23 @@ namespace np::app
 
 	struct Popup
 	{
-		static PopupSelection Show(::std::string title, ::std::string message, PopupStyle style, PopupButtons buttons);
+		static PopupSelection Show(mem::sptr<Window> parent, str title, str message, PopupStyle style, PopupButtons buttons);
 
-		static inline PopupSelection Show(::std::string title, ::std::string message, PopupStyle style)
+		static inline PopupSelection Show(mem::sptr<Window> parent, str title, str message, PopupStyle style)
 		{
-			return Show(title, message, style, PopupButtons::Ok);
+			return Show(parent, title, message, style, PopupButtons::Ok);
 		}
 
-		static inline PopupSelection Show(::std::string title, ::std::string message, PopupButtons buttons)
+		static inline PopupSelection Show(mem::sptr<Window> parent, str title, str message, PopupButtons buttons)
 		{
-			return Show(title, message, PopupStyle::Info, buttons);
+			return Show(parent, title, message, PopupStyle::Info, buttons);
 		}
 
-		static inline PopupSelection Show(::std::string title, ::std::string message)
+		static inline PopupSelection Show(mem::sptr<Window> parent, str title, str message)
 		{
-			return Show(title, message, PopupStyle::Info, PopupButtons::Ok);
+			return Show(parent, title, message, PopupStyle::Info, PopupButtons::Ok);
 		}
 	};
 } // namespace np::app
 
-#endif /* NP_ENGINE_POPUP_HPP */
+#endif /* NP_ENGINE_WIN_POPUP_HPP */

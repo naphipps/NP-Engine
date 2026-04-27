@@ -184,6 +184,16 @@ namespace np::win
 			SetPayload(mem::create<WindowEventData>(_allocator, window_id));
 		}
 	};
+
+	class WindowDestroyEvent : public WindowEvent<WindowEventData>
+	{
+	public:
+		WindowDestroyEvent(evnt::EventType intention, uid::Uid window_id) :
+			WindowEvent<WindowEventData>(evnt::EventType::Destroy | intention.GetIntention())
+		{
+			SetPayload(mem::create<WindowEventData>(_allocator, window_id));
+		}
+	};
 } // namespace np::win
 
 #endif /* NP_ENGINE_WIN_WINDOW_EVENTS_HPP */

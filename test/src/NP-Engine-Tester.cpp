@@ -20,8 +20,8 @@
 
 	i32 exit_val = NP_ENGINE_EXIT_SUCCESS;
 	str message;
-	app::PopupStyle style = app::PopupStyle::Info;
-	app::PopupButtons buttons = app::PopupButtons::Ok;
+	win::PopupStyle style = win::PopupStyle::Info;
+	win::PopupButtons buttons = win::PopupButtons::Ok;
 
 	try
 	{
@@ -44,7 +44,7 @@
 		exit_val = NP_ENGINE_EXIT_STD_ERROR;
 		message = "STD EXCEPTION OCCURRED: \n" + to_str(e.what()) + "\n\n";
 		message += "Log file can be found here: " + nsit::log::get_file_logger_file_path();
-		style = app::PopupStyle::Error;
+		style = win::PopupStyle::Error;
 		NP_ENGINE_LOG_ERROR(message);
 	}
 	catch (...)
@@ -53,12 +53,12 @@
 		exit_val = NP_ENGINE_EXIT_UNKNOWN_ERROR;
 		message = "UNKNOWN EXCEPTION OCCURRED\n\n";
 		message += "Log file can be found here: " + nsit::log::get_file_logger_file_path();
-		style = app::PopupStyle::Error;
+		style = win::PopupStyle::Error;
 		NP_ENGINE_LOG_ERROR(message);
 	}
 
 	if (exit_val != 0)
-		app::Popup::Show("NP-Engine Exit Code: " + to_str(exit_val), message, style, buttons);
+		win::Popup::Show(nullptr, "NP-Engine Exit Code: " + to_str(exit_val), message, style, buttons);
 
 	return exit_val;
 }

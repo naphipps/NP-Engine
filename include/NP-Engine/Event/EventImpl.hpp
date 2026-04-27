@@ -34,7 +34,7 @@ namespace np::evnt
 		constexpr static ui64 Connect = BIT(51);
 		constexpr static ui64 Server = BIT(52);
 		constexpr static ui64 Client = BIT(53);
-		constexpr static ui64 Popup = BIT(54);
+		constexpr static ui64 Destroy = BIT(54);
 		constexpr static ui64 Create = BIT(55);
 		constexpr static ui64 Attention = BIT(56);
 		constexpr static ui64 Focus = Attention;

@@ -4,7 +4,8 @@
 //
 //##===----------------------------------------------------------------------===##//
 
-#include "NP-Engine/Window/Interface/Interface.hpp"
+#include "NP-Engine/Window/Interface/WindowImpl.hpp"
+#include "NP-Engine/Window/Interface/WindowEvents.hpp"
 
 #include "NP-Engine/Window/Detail/Glfw/GlfwWindow.hpp"
 
@@ -81,6 +82,22 @@ namespace np::win
 		}
 
 		return window;
+	}
+
+	bl Window::InvokePreventCloseCallbacks()
+	{
+		bl prevent = false;
+		{
+			auto callbacks = _prevent_close_callbacks.get_access();
+			for (auto it = callbacks->begin(); it != callbacks->end(); it++)
+				prevent |= (*it)(nullptr);
+		}
+		{
+			auto callbacks = _prevent_close_caller_callbacks.get_access();
+			for (auto it = callbacks->begin(); it != callbacks->end(); it++)
+				prevent |= it->second(it->first);
+		}
+		return prevent;
 	}
 
 	void Window::InvokeSizeCallbacks(::glm::uvec2 size)

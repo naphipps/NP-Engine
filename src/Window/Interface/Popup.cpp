@@ -4,7 +4,7 @@
 //
 //##===----------------------------------------------------------------------===##//
 
-#include "NP-Engine/Application/Popup.hpp"
+#include "NP-Engine/Window/Interface/Popup.hpp"
 
 #if NP_ENGINE_PLATFORM_IS_LINUX
 	#include <gtk/gtk.h>
@@ -20,9 +20,9 @@
 
 #endif
 
-namespace np::app
+namespace np::win
 {
-	PopupSelection Popup::Show(::std::string title, ::std::string message, PopupStyle style, PopupButtons buttons)
+	PopupSelection Popup::Show(mem::sptr<win::Window> parent, str title, str message, PopupStyle style, PopupButtons buttons)
 	{
 		PopupSelection select = PopupSelection::Error;
 
@@ -142,7 +142,9 @@ namespace np::app
 			break;
 		}
 
-		switch (MessageBox(nullptr, message.c_str(), title.c_str(), flags))
+		HWND hwnd = parent ? (HWND)parent->GetNativeWindow() : nullptr;
+
+		switch (MessageBox(hwnd, message.c_str(), title.c_str(), flags))
 		{
 		case IDOK:
 			select = buttons == PopupButtons::Quit ? PopupSelection::Quit : PopupSelection::Ok;

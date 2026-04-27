@@ -24,7 +24,6 @@ set(NP_ENGINE_APPLICATION_HPP
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Application/Layer.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Application/WindowLayer.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Application/AudioLayer.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Application/Popup.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Application/ApplicationEvents.hpp
 )
 
@@ -352,7 +351,7 @@ set(NP_ENGINE_WINDOW_INTERFACE_HPP
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Window/Interface/DetailType.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Window/Interface/WindowImpl.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Window/Interface/WindowEvents.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Window/Interface/Interface.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/Window/Interface/Popup.hpp
 )
 
 set(NP_ENGINE_WINDOW_GLFW_HPP
@@ -404,18 +403,6 @@ set(NP_ENGINE_HEADER_FILES
 set(NP_ENGINE_APPPLICATION_CPP
 	Application/Application.cpp
 )
-
-if (APPLE)
-	set(NP_ENGINE_APPPLICATION_CPP
-		${NP_ENGINE_APPPLICATION_CPP}
-		Application/Popup.mm
-	)
-else()
-	set(NP_ENGINE_APPPLICATION_CPP
-		${NP_ENGINE_APPPLICATION_CPP}
-		Application/Popup.cpp
-	)
-endif()
 
 set(NP_ENGINE_GPU_INTERFACE_CPP
 	GPU/Interface/Detail.cpp	
@@ -496,6 +483,18 @@ set(NP_ENGINE_THREAD_CPP
 set(NP_ENGINE_WINDOW_INTERFACE_CPP
 	Window/Interface/WindowImpl.cpp
 )
+
+if (APPLE)
+	set(NP_ENGINE_WINDOW_INTERFACE_CPP
+		${NP_ENGINE_WINDOW_INTERFACE_CPP}
+		Window/Interface/Popup.mm
+	)
+else()
+	set(NP_ENGINE_WINDOW_INTERFACE_CPP
+		${NP_ENGINE_WINDOW_INTERFACE_CPP}
+		Window/Interface/Popup.cpp
+	)
+endif()
 
 set(NP_ENGINE_SOURCE_FILES
 	${NP_ENGINE_THREAD_CPP}

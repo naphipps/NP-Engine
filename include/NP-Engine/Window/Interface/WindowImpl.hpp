@@ -16,13 +16,22 @@
 
 #include "DetailType.hpp"
 
-// TODO: add a wait to create fixed-size windows, fullscreen, frameless, etc
+// TODO: add a way to create fixed-size windows, fullscreen, frameless, etc
+/*
+	TODO: add support for parent / child windows
+		<https://stackoverflow.com/questions/46152212/embed-windowglfwcreatewindow-as-child-to-c-mfc-parent-form>
+*/
+/*
+	TODO: support all this:
+		<https://learn.microsoft.com/en-us/windows/apps/desktop/modernize/ui/apply-windows-themes>
+*/
 
 namespace np::win
 {
 	class Window : public nput::InputSource
 	{
 	public:
+		using PreventCloseCallback = bl(*)(void* caller);
 		using SizeCallback = void (*)(void* caller, ::glm::uvec2 size);
 		using PositionCallback = void (*)(void* caller, ::glm::ivec2 position);
 		using FramebufferSizeCallback = void (*)(void* caller, ::glm::uvec2 framebuffer_size);
@@ -35,6 +44,7 @@ namespace np::win
 		mem::sptr<srvc::Services> _services;
 		const uid::Uid _id;
 
+		mutexed_wrapper<con::uset<PreventCloseCallback>> _prevent_close_callbacks;
 		mutexed_wrapper<con::uset<SizeCallback>> _size_callbacks;
 		mutexed_wrapper<con::uset<PositionCallback>> _position_callbacks;
 		mutexed_wrapper<con::uset<FramebufferSizeCallback>> _framebuffer_size_callbacks;
@@ -42,12 +52,15 @@ namespace np::win
 		mutexed_wrapper<con::uset<MaximizeCallback>> _maximize_callbacks;
 		mutexed_wrapper<con::uset<FocusCallback>> _focus_callbacks;
 
+		mutexed_wrapper<con::umap<void*, PreventCloseCallback>> _prevent_close_caller_callbacks;
 		mutexed_wrapper<con::umap<void*, SizeCallback>> _size_caller_callbacks;
 		mutexed_wrapper<con::umap<void*, PositionCallback>> _position_caller_callbacks;
 		mutexed_wrapper<con::umap<void*, FramebufferSizeCallback>> _framebuffer_size_caller_callbacks;
 		mutexed_wrapper<con::umap<void*, MinimizeCallback>> _minimize_caller_callbacks;
 		mutexed_wrapper<con::umap<void*, MaximizeCallback>> _maximize_caller_callbacks;
 		mutexed_wrapper<con::umap<void*, FocusCallback>> _focus_caller_callbacks;
+
+		bl InvokePreventCloseCallbacks();
 
 		void InvokeSizeCallbacks(::glm::uvec2 size);
 
@@ -144,6 +157,11 @@ namespace np::win
 		*/
 		virtual void* GetNativeWindow() = 0;
 
+		virtual void SetPreventCloseCallback(PreventCloseCallback callback)
+		{
+			SetPreventCloseCallback(nullptr, callback);
+		}
+
 		virtual void SetSizeCallback(SizeCallback callback)
 		{
 			SetSizeCallback(nullptr, callback);
@@ -172,6 +190,22 @@ namespace np::win
 		virtual void SetFocusCallback(FocusCallback callback)
 		{
 			SetFocusCallback(nullptr, callback);
+		}
+
+		virtual void SetPreventCloseCallback(void* caller, PreventCloseCallback callback)
+		{
+			if (caller)
+			{
+				auto callbacks = _prevent_close_caller_callbacks.get_access();
+				if (callback)
+					(*callbacks)[caller] = callback;
+				else
+					callbacks->erase(caller);
+			}
+			else if (callback)
+			{
+				_prevent_close_callbacks.get_access()->insert(callback);
+			}
 		}
 
 		virtual void SetSizeCallback(void* caller, SizeCallback callback)

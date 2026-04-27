@@ -29,7 +29,6 @@
 #include "Layer.hpp"
 #include "WindowLayer.hpp"
 #include "AudioLayer.hpp"
-#include "Popup.hpp"
 
 namespace np::app
 {
@@ -40,10 +39,10 @@ namespace np::app
 			::std::cerr << "The terminate function was called.\nLog file can be found here : " +
 					nsit::log::get_file_logger_file_path()
 						<< "\n";
-			Popup::Show("NP-Engine Terminate Function Called",
+			win::Popup::Show(nullptr, "NP-Engine Terminate Function Called",
 						"Probably an unhandled exception was thrown.\nLog file can be found here : " +
 							nsit::log::get_file_logger_file_path(),
-						PopupStyle::Error, PopupButtons::Ok);
+						win::PopupStyle::Error, win::PopupButtons::Ok);
 		}
 
 		static inline void HandleSignal(i32 signal) noexcept
@@ -77,7 +76,7 @@ namespace np::app
 			str message = signal_string + " was raised.\nLog file can be found here : " + nsit::log::get_file_logger_file_path();
 
 			::std::cerr << message << "\n";
-			Popup::Show("NP-Engine Signal Raised", message, PopupStyle::Error, PopupButtons::Ok);
+			win::Popup::Show(nullptr, "NP-Engine Signal Raised", message, win::PopupStyle::Error, win::PopupButtons::Ok);
 		}
 	} // namespace __detail
 
@@ -103,27 +102,16 @@ namespace np::app
 			PushLayer(_window_layer);
 		}
 
-		virtual void HandlePopup(mem::sptr<evnt::Event> e)
-		{
-			mem::sptr<ApplicationPopupEvent> event = e;
-			ApplicationPopupEventData& data = event->GetData();
-			data.select = Popup::Show(GetTitle(), data.message, data.style, data.buttons);
-			e->SetIsHandled();
-		}
-
-		virtual void HandleApplicationClose(mem::sptr<evnt::Event> e)
+		virtual void HandleApplicationCloseEvent(mem::sptr<evnt::Event> e)
 		{
 			StopRunning();
-			e->SetIsHandled();
 		}
 
 		virtual void HandleEvent(mem::sptr<evnt::Event> e) override
 		{
 			evnt::EventType type = e->GetEventType();
-			if (type.Contains(evnt::EventType::Application | evnt::EventType::Close))
-				HandleApplicationClose(e);
-			else if (type.Contains(evnt::EventType::Application | evnt::EventType::Popup))
-				HandlePopup(e);
+			if (type.Contains(evnt::EventType::Close))
+				HandleApplicationCloseEvent(e);
 		}
 
 		virtual void PushLayer(Layer* layer)
@@ -136,6 +124,9 @@ namespace np::app
 			PushLayer(mem::address_of(layer));
 		}
 
+		/*
+			publishes events bottom-up
+		*/
 		virtual void PublishEvents()
 		{
 			evnt::EventQueue& event_queue = _services->GetEventQueue();
