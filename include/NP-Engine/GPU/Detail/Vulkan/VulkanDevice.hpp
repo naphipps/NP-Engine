@@ -266,6 +266,22 @@ namespace np::gpu::__detail
 		{
 			return _region;
 		}
+
+		bl ClearCacheForDevice(siz offset, siz size)
+		{
+			const VkPhysicalDeviceProperties properties = _memory->GetLogicalDevice()->GetPhysicalDevice().GetVkProperties();
+			VulkanDeviceMemoryRegion region{ _region.offset + offset,
+				mem::calc_aligned_size(size, properties.limits.nonCoherentAtomSize) };
+			return _memory->ClearCacheForDevice(region);
+		}
+
+		bl ClearCacheForHost(siz offset, siz size)
+		{
+			const VkPhysicalDeviceProperties properties = _memory->GetLogicalDevice()->GetPhysicalDevice().GetVkProperties();
+			VulkanDeviceMemoryRegion region{ _region.offset + offset,
+				mem::calc_aligned_size(size, properties.limits.nonCoherentAtomSize) };
+			return _memory->ClearCacheForHost(region);
+		}
 	};
 
 	class VulkanDeviceMemoryPool
@@ -302,7 +318,6 @@ namespace np::gpu::__detail
 		};
 
 		mem::sptr<VulkanDeviceMemory> _memory;
-		siz _size;
 		mutexed_wrapper<con::vector<VulkanDeviceMemoryRegion>> _free_regions;
 
 		void ReleaseRegion(VulkanDeviceMemoryRegion region)
@@ -396,12 +411,11 @@ namespace np::gpu::__detail
 		}
 
 	public:
-		VulkanDeviceMemoryPool(mem::sptr<VulkanDeviceMemory> memory, siz size) :
+		VulkanDeviceMemoryPool(mem::sptr<VulkanDeviceMemory> memory) :
 			_memory(memory),
-			_size(size),
 			_free_regions{}
 		{
-			_free_regions.get_access()->emplace_back(VulkanDeviceMemoryRegion{ 0, _size });
+			_free_regions.get_access()->emplace_back(VulkanDeviceMemoryRegion{ 0, memory->GetSize()});
 		}
 
 		mem::sptr<VulkanDeviceMemoryAllocation> AllocateDeviceMemory(VkMemoryRequirements requirements, VkMemoryPropertyFlags flags)
@@ -489,12 +503,12 @@ namespace np::gpu::__detail
 
 				if (!allocation)
 				{
-					mem::allocator& a = GetServices()->GetAllocator();
-					mem::sptr<VulkanDeviceMemory> memory = mem::create_sptr<VulkanDeviceMemory>(a, _device, GetMemoryTypeIndex(), requirements.size);
 					siz size = ::std::min(NP_ENGINE_MEM_ACCUMULATING_ALLOCATOR_BLOCK_SIZE, (ui64)(GetMemoryHeap().size * 0.2)); //TODO: 20% of heap is arbitrary
 					size = ::std::max(size, requirements.size); //ensure we can at least fit the requirements
-
-					pools->emplace_back(mem::create_sptr<VulkanDeviceMemoryPool>(a, memory, size));
+					
+					mem::allocator& a = GetServices()->GetAllocator();
+					mem::sptr<VulkanDeviceMemory> memory = mem::create_sptr<VulkanDeviceMemory>(a, _device, GetMemoryTypeIndex(), size);
+					pools->emplace_back(mem::create_sptr<VulkanDeviceMemoryPool>(a, memory));
 					allocation = pools->back()->AllocateDeviceMemory(requirements, flags);
 				}
 			}

@@ -196,16 +196,12 @@ namespace np::gpu::__detail
 
 		virtual bl ClearCacheForDevice(siz offset, siz size) override
 		{
-			VulkanDeviceMemoryRegion region = _memory_allocation->GetRegion();
-			region = { region.offset + offset, size };
-			return _memory_allocation->GetDeviceMemory()->ClearCacheForDevice(region);
+			return _memory_allocation->ClearCacheForDevice(offset, size);
 		}
 
 		virtual bl ClearCacheForHost(siz offset, siz size) override
 		{
-			VulkanDeviceMemoryRegion region = _memory_allocation->GetRegion();
-			region = { region.offset + offset, size };
-			return _memory_allocation->GetDeviceMemory()->ClearCacheForHost(region);
+			return _memory_allocation->ClearCacheForHost(offset, size);
 		}
 	};
 } // namespace np::gpu::__detail
