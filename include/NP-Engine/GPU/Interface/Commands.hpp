@@ -829,7 +829,7 @@ namespace np::gpu
 		siz indexCount = 0;
 		siz indexBeginIndex = 0;
 		siz vertexOffset = 0;
-		siz instanceCount = 0;
+		siz instanceCount = 1;
 		siz instanceBeginIndex = 0;
 
 		virtual CommandType GetCommandType() const override
@@ -848,7 +848,7 @@ namespace np::gpu
 	{
 		siz vertexCount = 0;
 		siz vertexBeginIndex = 0;
-		siz instanceCount = 0; //TODO: does this have to default to 1? investigate
+		siz instanceCount = 1; //TODO: does this have to default to 1? investigate
 		siz instanceBeginIndex = 0;
 	};
 
@@ -876,7 +876,7 @@ namespace np::gpu
 		siz indexCount = 0;
 		siz indexBeginIndex = 0;
 		siz vertexOffset = 0; //TODO: should this be i64?
-		siz instanceCount = 0; //TODO: does this have to default to 1? investigate
+		siz instanceCount = 1; //TODO: does this have to default to 1? investigate
 		siz instanceBeginIndex = 0;
 	};
 
