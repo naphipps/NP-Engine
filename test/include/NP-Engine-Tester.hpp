@@ -47,7 +47,9 @@ namespace np::app
 			con::vector<siz> acquireFrameIndices{};
 
 			con::vector<Vertex> vertices{};
+			con::vector<ui32> indices{};
 			mem::sptr<gpu::BufferResource> vertexBuffer = nullptr;
+			mem::sptr<gpu::BufferResource> indexBuffer = nullptr;
 
 			void RebuildFrames()
 			{
@@ -102,9 +104,14 @@ namespace np::app
 							gpu::Command::Create(gpu::DetailType::Vulkan, services, gpu::CommandType::BindVertexBuffers);
 						bind_vertex_buffers_cmd->contexts = { {vertexBuffer, 0} };
 
-						mem::sptr<gpu::DrawCommand> draw_cmd =
-							gpu::Command::Create(gpu::DetailType::Vulkan, services, gpu::CommandType::Draw);
-						draw_cmd->vertexCount = vertices.size();
+						mem::sptr<gpu::BindIndexBufferCommand> bind_index_buffer_cmd =
+							gpu::Command::Create(gpu::DetailType::Vulkan, services, gpu::CommandType::BindIndexBuffer);
+						bind_index_buffer_cmd->buffer = indexBuffer;
+						bind_index_buffer_cmd->stride = sizeof(ui32);
+
+						mem::sptr<gpu::DrawIndexedCommand> draw_indexed_cmd =
+							gpu::Command::Create(gpu::DetailType::Vulkan, services, gpu::CommandType::DrawIndexed);
+						draw_indexed_cmd->indexCount = indices.size();
 
 						mem::sptr<gpu::EndRenderPassCommand> end_renderpass_cmd =
 							gpu::Command::Create(gpu::DetailType::Vulkan, services, gpu::CommandType::EndRenderPass);
@@ -125,7 +132,8 @@ namespace np::app
 						commandBuffers.back()->Add(set_viewports_cmd);
 						commandBuffers.back()->Add(set_scissors_cmd);
 						commandBuffers.back()->Add(bind_vertex_buffers_cmd);
-						commandBuffers.back()->Add(draw_cmd);
+						commandBuffers.back()->Add(bind_index_buffer_cmd);
+						commandBuffers.back()->Add(draw_indexed_cmd);
 						commandBuffers.back()->Add(end_renderpass_cmd);
 						commandBufferPool->End(commandBuffers.back(), gpu::CommandBufferUsage::None);
 
@@ -484,35 +492,58 @@ namespace np::app
 			//<https://vulkan-tutorial.com/en/Drawing_a_triangle/Drawing/Command_buffers>
 
 			scene->vertices = {
-				{{0, -0.5, 0, 1}, {1, 0, 1, 1}},
-				{{0.5, 0.5, 0, 1}, {1, 1, 0, 1}},
-				{{-0.5, 0.5, 0, 1}, {0, 1, 1, 1}}
+				{{-0.5, -0.5, 0, 1}, {1, 0, 1, 1}},
+				{{0.5, -0.5, 0, 1}, {1, 1, 0, 1}},
+				{{0.5, 0.5, 0, 1}, {0, 1, 1, 1}},
+				{{-0.5, 0.5, 0, 1}, {0, 1, 0, 1}}
 			};
+
+			scene->indices = {0, 1, 2, 2, 3, 0};
 
 			con::vector<ui8> vertex_buffer_bytes(sizeof(Vertex) * scene->vertices.size());
 			mem::copy_bytes(vertex_buffer_bytes.data(), scene->vertices.data(), vertex_buffer_bytes.size());
 
+			con::vector<ui8> index_buffer_bytes(sizeof(ui32) * scene->indices.size());
+			mem::copy_bytes(index_buffer_bytes.data(), scene->indices.data(), index_buffer_bytes.size());
+
 			const gpu::BufferResourceUsage vertex_buffer_usage = gpu::BufferResourceUsage::Vertex | gpu::BufferResourceUsage::DeviceLocal |
 				gpu::BufferResourceUsage::Transfer | gpu::BufferResourceUsage::Write;
 			scene->vertexBuffer = gpu::BufferResource::Create(scene->device, vertex_buffer_usage, vertex_buffer_bytes.size(), {scene->queue->GetDeviceQueueFamily()});
+
+			const gpu::BufferResourceUsage index_buffer_usage = gpu::BufferResourceUsage::Index | gpu::BufferResourceUsage::DeviceLocal |
+				gpu::BufferResourceUsage::Transfer | gpu::BufferResourceUsage::Write;
+			scene->indexBuffer = gpu::BufferResource::Create(scene->device, index_buffer_usage, index_buffer_bytes.size(), { scene->queue->GetDeviceQueueFamily() });
 
 			const gpu::BufferResourceUsage staging_vertex_buffer_usage = gpu::BufferResourceUsage::Vertex | gpu::BufferResourceUsage::HostAccessible |
 				gpu::BufferResourceUsage::Transfer | gpu::BufferResourceUsage::Read;
 			mem::sptr<gpu::BufferResource> staging_vertex_buffer =
 				gpu::BufferResource::Create(scene->device, staging_vertex_buffer_usage, vertex_buffer_bytes.size(), { scene->queue->GetDeviceQueueFamily() });
 
+			const gpu::BufferResourceUsage staging_index_buffer_usage = gpu::BufferResourceUsage::Index | gpu::BufferResourceUsage::HostAccessible |
+				gpu::BufferResourceUsage::Transfer | gpu::BufferResourceUsage::Read;
+			mem::sptr<gpu::BufferResource> staging_index_buffer =
+				gpu::BufferResource::Create(scene->device, staging_index_buffer_usage, index_buffer_bytes.size(), { scene->queue->GetDeviceQueueFamily() });
+
 			staging_vertex_buffer->SetBytes(0, vertex_buffer_bytes);
 			staging_vertex_buffer->ClearCacheForDevice(0, vertex_buffer_bytes.size());
+			staging_index_buffer->SetBytes(0, index_buffer_bytes);
+			staging_index_buffer->ClearCacheForDevice(0, index_buffer_bytes.size());
 
-			mem::sptr<gpu::CopyBufferCommand> copy_buffer_cmd = gpu::Command::Create(gpu::DetailType::Vulkan, services, gpu::CommandType::CopyBuffer);
-			copy_buffer_cmd->dst = scene->vertexBuffer;
-			copy_buffer_cmd->src = staging_vertex_buffer;
-			copy_buffer_cmd->ranges = { {0, 0, vertex_buffer_bytes.size()} };
+			mem::sptr<gpu::CopyBufferCommand> copy_vertex_buffer_cmd = gpu::Command::Create(gpu::DetailType::Vulkan, services, gpu::CommandType::CopyBuffer);
+			copy_vertex_buffer_cmd->dst = scene->vertexBuffer;
+			copy_vertex_buffer_cmd->src = staging_vertex_buffer;
+			copy_vertex_buffer_cmd->ranges = { {0, 0, vertex_buffer_bytes.size()} };
+
+			mem::sptr<gpu::CopyBufferCommand> copy_index_buffer_cmd = gpu::Command::Create(gpu::DetailType::Vulkan, services, gpu::CommandType::CopyBuffer);
+			copy_index_buffer_cmd->dst = scene->indexBuffer;
+			copy_index_buffer_cmd->src = staging_index_buffer;
+			copy_index_buffer_cmd->ranges = { {0, 0, index_buffer_bytes.size()} };
 			
 			mem::sptr<gpu::CommandBufferPool> command_buffer_pool = scene->queue->CreateCommandBufferPool(gpu::CommandBufferPoolUsage::None);
 			mem::sptr<gpu::CommandBuffer> command_buffer = command_buffer_pool->CreateCommandBuffer();
 			command_buffer_pool->Begin(command_buffer, gpu::CommandBufferUsage::SingleUse);
-			command_buffer->Add(copy_buffer_cmd);
+			command_buffer->Add(copy_vertex_buffer_cmd);
+			command_buffer->Add(copy_index_buffer_cmd);
 			command_buffer_pool->End(command_buffer, gpu::CommandBufferUsage::None);
 
 			gpu::Submit submit{};
