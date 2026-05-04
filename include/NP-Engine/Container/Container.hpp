@@ -4,8 +4,8 @@
 //
 //##===----------------------------------------------------------------------===##//
 
-#ifndef NP_ENGINE_CONTAINER_HPP
-#define NP_ENGINE_CONTAINER_HPP
+#ifndef NP_ENGINE_CON_CONTAINER_HPP
+#define NP_ENGINE_CON_CONTAINER_HPP
 
 #include <utility> //pair
 
@@ -97,4 +97,4 @@ namespace np::mem
 	}
 } //namespace np::mem
 
-#endif /* NP_ENGINE_CONTAINER_HPP */
+#endif /* NP_ENGINE_CON_CONTAINER_HPP */

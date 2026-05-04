@@ -4,8 +4,8 @@
 //
 //##===----------------------------------------------------------------------===##//
 
-#ifndef NP_ENGINE_ENTITY_HPP
-#define NP_ENGINE_ENTITY_HPP
+#ifndef NP_ENGINE_CON_ENTITY_HPP
+#define NP_ENGINE_CON_ENTITY_HPP
 
 #include "NP-Engine/Foundation/Foundation.hpp"
 #include "NP-Engine/Primitive/Primitive.hpp"
@@ -15,7 +15,7 @@
 
 namespace np::con
 {
-	using entity_registry = ::entt::registry;
+	using entity_registry = ::entt::basic_registry<::entt::entity, mem::std_allocator<::entt::entity>>;
 
 	class entity
 	{
@@ -43,7 +43,13 @@ namespace np::con
 		}
 
 		template <typename... T>
-		bl has() const
+		bl has_any() const
+		{
+			return _registry->any_of<T...>(_entity);
+		}
+
+		template <typename... T>
+		bl has_all() const
 		{
 			return _registry->all_of<T...>(_entity);
 		}
@@ -51,17 +57,17 @@ namespace np::con
 		template <typename T>
 		T& get()
 		{
-			NP_ENGINE_ASSERT(has<T>(), "Cannot get a component we do not have.");
+			NP_ENGINE_ASSERT(has_all<T>(), "Cannot get a component we do not have.");
 			return _registry->get<T>(_entity);
 		}
 
 		template <typename T, typename... Args>
 		T& add(Args&&... args)
 		{
-			NP_ENGINE_ASSERT(!has<T>(), "Cannot add a component we already have.");
+			NP_ENGINE_ASSERT(!has_all<T>(), "Cannot add a component we already have.");
 			return _registry->emplace<T>(_entity, ::std::forward<Args>(args)...);
 		}
 	};
 } // namespace np::con
 
-#endif /* NP_ENGINE_ENTITY_HPP */
+#endif /* NP_ENGINE_CON_ENTITY_HPP */

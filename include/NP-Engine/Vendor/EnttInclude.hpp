@@ -20,11 +20,4 @@
 
 #include <entt/entt.hpp>
 
-namespace np::ecs
-{
-	using entity = ::entt::entity;
-
-	using registry = ::entt::basic_registry<entity, mem::std_allocator<entity>>;
-}
-
 #endif /* NP_ENGINE_VENDOR_ENTT_INCLUDE_HPP */
