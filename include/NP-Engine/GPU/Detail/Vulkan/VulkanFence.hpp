@@ -7,8 +7,6 @@
 #ifndef NP_ENGINE_GPU_VULKAN_FENCE_HPP
 #define NP_ENGINE_GPU_VULKAN_FENCE_HPP
 
-#include <utility>
-
 #include "NP-Engine/Memory/Memory.hpp"
 #include "NP-Engine/Primitive/Primitive.hpp"
 
@@ -87,12 +85,12 @@ namespace np::gpu::__detail
 			return result;
 		}
 
-		Result Reset() override
+		virtual Result Reset() override
 		{
 			return VulkanResult{ vkResetFences(*GetLogicalDevice(), 1, &_fence) };
 		}
 
-		Result GetStatus() const override
+		virtual Result GetStatus() const override
 		{
 			return VulkanResult{ vkGetFenceStatus(*GetLogicalDevice(), _fence) };
 		}

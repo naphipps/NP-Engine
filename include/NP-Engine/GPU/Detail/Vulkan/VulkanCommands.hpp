@@ -580,9 +580,7 @@ namespace np::gpu::__detail
 		virtual bl ApplyTo(const CommandBuffer* command_buffer_) override
 		{
 			/*
-
 				TODO: note that image layout changes are considered a color write access
-
 			*/
 			const VulkanCommandBuffer* command_buffer = static_cast<const VulkanCommandBuffer*>(command_buffer_);
 			const VulkanStage dstStage{this->dstStage};
