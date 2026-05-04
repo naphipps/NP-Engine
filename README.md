@@ -27,14 +27,13 @@ This game engine started out as my first video game, but since the project kept 
 			- [x] Provide context to callbacks via an id value
 			- [x] Can return any type via template (all primitive delegates are provide i.e. BlDelegate, I32Delegate, FltDelegate)
 			- _lambdas with capture clauses will not be supported_
-	- [ ] Vulkan rendering - **currently under heavy construction.** (OpenGL and DX11/DX12 _probably much_ later as means to improve our API).
-		- [ ] Add list of features here
-	- [x] ECS via [Entt](https://github.com/skypjack/entt)
-		- [ ] I am seriously considering forking Entt to force it support my own containers, which all use my memory management.
-	- [ ] 2D Physics via [Box2D](https://github.com/erincatto/box2d) with [liquidfun's](https://github.com/google/liquidfun) particle physics.
-		- I will use Box2D V3 when it is available.
-		- I will also improve the pressure solvers to _probably_ IISPH or something that is better, faster, and more accurate.
-	- [ ] 3D Physics via [Bullet](https://github.com/bulletphysics/bullet3)
+	- [ ] Vulkan rendering - **currently under heavy construction.** (OpenGL and DX11/DX12 _probably much_ later as means to improve our API). <!-- TODO: add list of features here -->
+		- [ ] API is as simple as possible, so it feels like you're using Vulkan directly.
+	- [x] ECS via [Entt](https://github.com/skypjack/entt), using my memory management under the hood.
+	- [ ] Physics
+		- [ ] 2D Physics via [box2d](https://github.com/erincatto/box2d).
+			- [ ] Add particle physics. This maybe with box2d V3.2+, or I may have to bring [liquidfun](https://github.com/google/liquidfun) here, which I'd also have to improve the pressure solvers to _probably_ IISPH or something that is better, faster, and more accurate.
+		- [ ] 3D Physics via [Bullet](https://github.com/bulletphysics/bullet3)
 	- [x] A feature-rich JobSystem (task graph architecture):
 		- [x] Lightweight. Job submition is as small as an ui32, smart ptr, and boolean.
 		- [x] Power-efficient. JobWorkers sleep when no Jobs are available, and are woken up when Jobs are submitted.

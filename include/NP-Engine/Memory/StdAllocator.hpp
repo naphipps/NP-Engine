@@ -23,10 +23,6 @@ namespace np::mem
 
 	public:
 		using value_type = typename base::value_type;
-		using pointer = typename base::pointer;
-		using const_pointer = typename base::const_pointer;
-		using reference = typename base::reference;
-		using const_reference = typename base::const_reference;
 		using size_type = typename base::size_type;
 		using difference_type = typename base::difference_type;
 
@@ -54,12 +50,12 @@ namespace np::mem
 
 		virtual ~std_allocator() = default;
 
-		inline pointer allocate(size_type size)
+		inline value_type* allocate(size_type size)
 		{
-			return static_cast<pointer>(_allocator.allocate(size * sizeof(value_type), mem::DEFAULT_ALIGNMENT).ptr);
+			return static_cast<value_type*>(_allocator.allocate(size * sizeof(value_type), mem::DEFAULT_ALIGNMENT).ptr);
 		}
 
-		inline void deallocate(pointer ptr, size_type size)
+		inline void deallocate(value_type* ptr, size_type size)
 		{
 			_allocator.deallocate(ptr);
 		}

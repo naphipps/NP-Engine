@@ -278,10 +278,10 @@ set(NP_ENGINE_HPP
 )
 
 set(NP_ENGINE_PHYSICS_HPP
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Physics/Body.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Physics/ContactListener.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Physics/ParticleSystem.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Physics/Physics.hpp
+# 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Physics/Body.hpp
+# 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Physics/ContactListener.hpp
+# 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Physics/ParticleSystem.hpp
+# 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Physics/Physics.hpp
 )
 
 set(NP_ENGINE_PLATFORM_HPP
@@ -340,7 +340,6 @@ set(NP_ENGINE_VENDOR_HPP
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Vendor/LodePngInclude.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Vendor/RapidJsonInclude.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/Vendor/StduuidInclude.hpp
-	${PROJECT_SOURCE_DIR}/include/NP-Engine/Vendor/TinyObjLoaderInclude.hpp
 )
 
 set(NP_ENGINE_WINDOW_HPP
@@ -466,10 +465,10 @@ set(NP_ENGINE_NETWORK_INTERFACE_CPP
 )
 
 set(NP_ENGINE_PHYSICS_CPP
-	Physics/ParticleSystem.cpp
-	Physics/Body.cpp
-	Physics/ContactListener.cpp
-	Physics/Physics.cpp
+	# Physics/ParticleSystem.cpp
+	# Physics/Body.cpp
+	# Physics/ContactListener.cpp
+	# Physics/Physics.cpp
 )
 
 set(NP_ENGINE_SYSTEM_CPP
@@ -530,13 +529,12 @@ endif()
 target_link_libraries(
 	${PROJECT_NAME} PUBLIC
 	spdlog::spdlog
-	Box2D
+	box2d
 	pcg-cpp
 	randutils
 	EnTT::EnTT
 	glm
 	glfw
-	tinyobjloader
 	lodepng
 	stduuid
 )
@@ -544,7 +542,6 @@ target_link_libraries(
 target_include_directories(
 	${PROJECT_NAME} PUBLIC
 	${PROJECT_SOURCE_DIR}/include
-	${Box2D_SOURCE_DIR}
 	${RapidJSON_SOURCE_DIR}/include
 	${stduuid_INCLUDE_DIR}
 )

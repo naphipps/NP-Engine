@@ -6,7 +6,7 @@
 //  Copyright © 2018 Nathan Phipps. All rights reserved.
 //
 
-#ifndef Physics_hpp
+#if !defined(Physics_hpp) && false
 #define Physics_hpp
 
 #include <iostream>

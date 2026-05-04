@@ -4,9 +4,6 @@
 [submodule "vendor/skypjack_entt"]
 	path = vendor/skypjack_entt
 	url = git@github.com:skypjack/entt.git
-[submodule "vendor/naphipps_liquidfun"]
-	path = vendor/naphipps_liquidfun
-	url = git@github.com:naphipps/liquidfun.git
 [submodule "vendor/naphipps_pcg-cpp"]
 	path = vendor/naphipps_pcg-cpp
 	url = git@github.com:naphipps/pcg-cpp.git
@@ -22,9 +19,6 @@
 [submodule "vendor/Tencent_rapidjson"]
 	path = vendor/Tencent_rapidjson
 	url = git@github.com:Tencent/rapidjson.git
-[submodule "vendor/tinyobjloader_tinyobjloader"]
-	path = vendor/tinyobjloader_tinyobjloader
-	url = git@github.com:tinyobjloader/tinyobjloader.git
 [submodule "vendor/naphipps_lodepng"]
 	path = vendor/naphipps_lodepng
 	url = git@github.com:naphipps/lodepng.git
@@ -34,3 +28,6 @@
 [submodule "vendor/AlDanial_cloc"]
 	path = vendor/AlDanial_cloc
 	url = git@github.com:AlDanial/cloc.git
+[submodule "vendor/erincatto_box2d"]
+	path = vendor/erincatto_box2d
+	url = git@github.com:erincatto/box2d.git
