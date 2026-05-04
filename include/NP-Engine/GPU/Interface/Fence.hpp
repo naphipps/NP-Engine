@@ -8,6 +8,7 @@
 #define NP_ENGINE_GPU_INTERFACE_FENCE_HPP
 
 #include "NP-Engine/Primitive/Primitive.hpp"
+#include "NP-Engine/Time/Time.hpp"
 
 #include "Detail.hpp"
 #include "Result.hpp"
@@ -17,17 +18,14 @@ namespace np::gpu
 	struct Fence : public DetailObject
 	{
 		/*
-			aka: Wait(SIZ_MAX);
+			aka: Wait(tim::milliseconds{ DBL_MAX });
 		*/
-		virtual void Wait() const
+		virtual Result Wait() const
 		{
-			Wait(SIZ_MAX);
+			return Wait(tim::milliseconds{ DBL_MAX });
 		}
 
-		/*
-			TODO: what units is timeout??
-		*/
-		virtual void Wait(siz timeout) const = 0;
+		virtual Result Wait(tim::milliseconds timeout) const = 0;
 
 		virtual Result GetStatus() const = 0;
 

@@ -80,9 +80,11 @@ namespace np::gpu::__detail
 			return _device;
 		}
 
-		virtual void Wait(siz timeout) const override
+		virtual Result Wait(tim::milliseconds timeout_) const override
 		{
-			vkWaitForFences(*GetLogicalDevice(), 1, &_fence, VK_TRUE, timeout);
+			tim::nanoseconds_ui64 timeout = tim::duration_cast<tim::nanoseconds_ui64>(timeout_);
+			VulkanResult result = vkWaitForFences(*GetLogicalDevice(), 1, &_fence, VK_TRUE, timeout.count());
+			return result;
 		}
 
 		Result Reset() override
