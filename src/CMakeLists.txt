@@ -87,6 +87,7 @@ set(NP_ENGINE_GPU_INTERFACE_HPP
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Interface/DrawableImage.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Interface/Dynamic.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Interface/Fence.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Interface/Flag.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Interface/FloodFillImage.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Interface/Format.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Interface/Framebuffer.hpp
@@ -139,6 +140,7 @@ set(NP_ENGINE_GPU_VULKAN_HPP
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Detail/Vulkan/VulkanDevice.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Detail/Vulkan/VulkanDynamic.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Detail/Vulkan/VulkanFence.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Detail/Vulkan/VulkanFlag.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Detail/Vulkan/VulkanFormat.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Detail/Vulkan/VulkanFramebuffer.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Detail/Vulkan/VulkanFrameContext.hpp

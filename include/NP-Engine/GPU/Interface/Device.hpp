@@ -20,6 +20,7 @@
 #include "Fence.hpp"
 #include "Semaphore.hpp"
 #include "PipelineCache.hpp"
+#include "Flag.hpp"
 
 /*
 	TODO: add RenderableShape -- lines, circulars, polygons
@@ -85,6 +86,8 @@ namespace np::gpu
 		virtual mem::sptr<Fence> CreateFence() = 0;
 
 		virtual mem::sptr<Semaphore> CreateSemaphore() = 0;
+
+		virtual mem::sptr<Flag> CreateFlag() = 0;
 
 		virtual void WaitUntilIdle() const = 0;
 

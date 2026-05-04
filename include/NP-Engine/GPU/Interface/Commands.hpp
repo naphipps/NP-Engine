@@ -22,6 +22,7 @@
 #include "DmsLineSegment.hpp"
 #include "DrawableImage.hpp"
 #include "Dynamic.hpp"
+#include "Flag.hpp"
 #include "FloodFillImage.hpp"
 #include "Framebuffer.hpp"
 #include "FrameContext.hpp"
@@ -808,6 +809,43 @@ namespace np::gpu
 		virtual CommandType GetCommandType() const override
 		{
 			return CommandType::IndirectDispatch;
+		}
+	};
+
+	struct WaitFlagsCommand : public Command
+	{
+		con::vector<mem::sptr<Flag>> flags{};
+		Stage dstStage = Stage::None;
+		Stage srcStage = Stage::None;
+		con::vector<Barrier> barriers{};
+		con::vector<BufferBarrier> bufferBarriers{};
+		con::vector<ImageBarrier> imageBarriers{};
+
+		virtual CommandType GetCommandType() const override
+		{
+			return CommandType::WaitFlags;
+		}
+	};
+
+	struct SetFlagCommand : public Command
+	{
+		mem::sptr<Flag> flag = nullptr;
+		Stage stage = Stage::None;
+
+		virtual CommandType GetCommandType() const override
+		{
+			return CommandType::SetFlag;
+		}
+	};
+
+	struct ResetFlagCommand : public Command
+	{
+		mem::sptr<Flag> flag = nullptr;
+		Stage stage = Stage::None;
+
+		virtual CommandType GetCommandType() const override
+		{
+			return CommandType::ResetFlag;
 		}
 	};
 

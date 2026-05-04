@@ -809,6 +809,120 @@ namespace np::gpu::__detail
 		}
 	};
 
+
+
+
+	class VulkanWaitFlagsCommand : public WaitFlagsCommand
+	{
+	protected:
+		virtual bl ApplyTo(const CommandBuffer* command_buffer_) override
+		{
+			/*
+				TODO: note that image layout changes are considered a color write access
+			*/
+			const VulkanCommandBuffer* command_buffer = static_cast<const VulkanCommandBuffer*>(command_buffer_);
+			const VulkanStage dstStage{ this->dstStage };
+			const VulkanStage srcStage{ this->srcStage };
+
+			con::vector<VkEvent> vk_flags(flags.size());
+			for (siz i = 0; i < vk_flags.size(); i++)
+				vk_flags[i] = *mem::sptr<VulkanFlag>{ flags[i] };
+
+			con::vector<VkMemoryBarrier> vk_barriers(barriers.size());
+			for (siz i = 0; i < vk_barriers.size(); i++)
+				vk_barriers[i] = VulkanBarrier{ barriers[i] }.GetVkMemoryBarrier();
+
+			con::vector<VkBufferMemoryBarrier> vk_buffer_barriers(bufferBarriers.size());
+			for (siz i = 0; i < vk_buffer_barriers.size(); i++)
+				vk_buffer_barriers[i] = VulkanBufferBarrier{ bufferBarriers[i] }.GetVkBufferMemoryBarrier();
+
+			con::vector<VkImageMemoryBarrier> vk_image_barriers(imageBarriers.size());
+			for (siz i = 0; i < vk_image_barriers.size(); i++)
+				vk_image_barriers[i] = VulkanImageBarrier{ imageBarriers[i] }.GetVkImageMemoryBarrier();
+
+			vkCmdWaitEvents(*command_buffer, vk_flags.size(), vk_flags.empty() ? nullptr : vk_flags.data(),
+				srcStage.GetVkPipelineStageFlags(), dstStage.GetVkPipelineStageFlags(),
+				vk_barriers.size(), vk_barriers.empty() ? nullptr : vk_barriers.data(),
+				vk_buffer_barriers.size(), vk_buffer_barriers.empty() ? nullptr : vk_buffer_barriers.data(),
+				vk_image_barriers.size(), vk_image_barriers.empty() ? nullptr : vk_image_barriers.data());
+
+			return true;
+		}
+
+	public:
+		virtual DetailType GetDetailType() const override
+		{
+			return DetailType::Vulkan;
+		}
+
+		virtual bl IsPrepared() const override
+		{
+			return true;
+		}
+	};
+
+	class VulkanSetFlagCommand : public SetFlagCommand
+	{
+	protected:
+		virtual bl ApplyTo(const CommandBuffer* command_buffer_) override
+		{
+			const VulkanCommandBuffer* command_buffer = static_cast<const VulkanCommandBuffer*>(command_buffer_);
+			bl applied = false;
+			mem::sptr<VulkanFlag> flag = this->flag;
+			VulkanStage stage{ this->stage };
+
+			if (flag)
+			{
+				vkCmdSetEvent(*command_buffer, *flag, stage.GetVkPipelineStageFlags());
+				applied = true;
+			}
+
+			return true;
+		}
+
+	public:
+		virtual DetailType GetDetailType() const override
+		{
+			return DetailType::Vulkan;
+		}
+
+		virtual bl IsPrepared() const override
+		{
+			return true;
+		}
+	};
+
+	class VulkanResetFlagCommand : public ResetFlagCommand
+	{
+	protected:
+		virtual bl ApplyTo(const CommandBuffer* command_buffer_) override
+		{
+			const VulkanCommandBuffer* command_buffer = static_cast<const VulkanCommandBuffer*>(command_buffer_);
+			bl applied = false;
+			mem::sptr<VulkanFlag> flag = this->flag;
+			VulkanStage stage{ this->stage };
+
+			if (flag)
+			{
+				vkCmdResetEvent(*command_buffer, *flag, stage.GetVkPipelineStageFlags());
+				applied = true;
+			}
+
+			return applied;
+		}
+
+	public:
+		virtual DetailType GetDetailType() const override
+		{
+			return DetailType::Vulkan;
+		}
+
+		virtual bl IsPrepared() const override
+		{
+			return true;
+		}
+	};
+
 	class VulkanDrawCommand : public DrawCommand
 	{
 	protected:

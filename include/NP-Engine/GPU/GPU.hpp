@@ -26,6 +26,7 @@
 #include "Interface/DrawableImage.hpp"
 #include "Interface/Dynamic.hpp"
 #include "Interface/Fence.hpp"
+#include "Interface/Flag.hpp"
 #include "Interface/FloodFillImage.hpp"
 #include "Interface/Framebuffer.hpp"
 #include "Interface/FrameContext.hpp"

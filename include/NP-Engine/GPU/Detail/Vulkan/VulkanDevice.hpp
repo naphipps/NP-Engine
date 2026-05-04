@@ -20,6 +20,7 @@
 #include "VulkanPipelineCache.hpp"
 #include "VulkanFence.hpp"
 #include "VulkanSemaphore.hpp"
+#include "VulkanFlag.hpp"
 #include "VulkanResult.hpp"
 
 namespace np::gpu::__detail
@@ -674,6 +675,11 @@ namespace np::gpu::__detail
 		virtual mem::sptr<Semaphore> CreateSemaphore() override
 		{
 			return mem::create_sptr<VulkanSemaphore>(GetServices()->GetAllocator(), GetLogicalDevice());
+		}
+
+		virtual mem::sptr<Flag> CreateFlag() override
+		{
+			return mem::create_sptr<VulkanFlag>(GetServices()->GetAllocator(), GetLogicalDevice());
 		}
 
 		virtual void WaitUntilIdle() const override

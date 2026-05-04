@@ -58,6 +58,11 @@ namespace np::gpu
 		Dispatch,
 		IndirectDispatch,
 
+		//flag
+		WaitFlags,
+		SetFlag,
+		ResetFlag,
+
 		//draw
 		Present, //TODO: Do we need this?? Feel like this should be for the PresentQueue object?
 		Draw,
