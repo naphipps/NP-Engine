@@ -24,8 +24,17 @@ namespace np::app
 			glm::vec4 color{};
 		};
 
+		struct Ubo
+		{
+			alignas(BIT(4)) ::glm::mat4 model{};
+			alignas(BIT(4)) ::glm::mat4 view{};
+			alignas(BIT(4)) ::glm::mat4 projection{};
+		};
+
 		struct Scene
 		{
+			tim::steady_timestamp startTimestamp = tim::steady_clock::now();
+
 			atm_bl isRendering = false;
 			gpu::DetailType detailType = gpu::DetailType::None;
 			mem::sptr<gpu::DetailInstance> detailInstance = nullptr;
@@ -39,29 +48,111 @@ namespace np::app
 			mem::sptr<gpu::RenderPass> renderpass = nullptr;
 			mem::sptr<gpu::GraphicsPipeline> graphicsPipeline = nullptr;
 			mem::sptr<gpu::CommandBufferPool> commandBufferPool = nullptr;
+			mem::sptr<gpu::ResourceGroupPool> resourceGroupPool = nullptr;
 
+			siz frameCounter = 0;
+			siz frameCount = SIZ_MAX;
 			con::vector<mem::sptr<gpu::CommandBuffer>> commandBuffers{};
 			con::vector<mem::sptr<gpu::Fence>> submitCompleteFences{};
 			con::vector<mem::sptr<gpu::Semaphore>> frameReadySemaphores{};
 			con::vector<mem::sptr<gpu::Semaphore>> submitCompleteSemaphores{};
-			con::vector<siz> acquireFrameIndices{};
+			con::vector<mem::sptr<gpu::BufferResource>> uboBuffers{};
+			con::vector<con::vector<mem::sptr<gpu::ResourceGroup>>> resourceGroups{};
 
 			con::vector<Vertex> vertices{};
-			con::vector<ui32> indices{};
+			con::vector<ui16> indices{};
 			mem::sptr<gpu::BufferResource> vertexBuffer = nullptr;
 			mem::sptr<gpu::BufferResource> indexBuffer = nullptr;
+
+			Scene() :
+				isRendering(false)
+			{
+
+			}
+
+			~Scene()
+			{
+				if (device)
+					device->WaitUntilIdle();
+			}
+
+			void EnsureFramebuffers(const con::vector<mem::sptr<gpu::Frame>>& frames)
+			{
+				framebuffers.resize(frameCount);
+				for (siz i = 0; i < framebuffers.size(); i++)
+					framebuffers[i] =
+					gpu::Framebuffer::Create(renderpass, frameContext->GetFrameWidth(),
+						frameContext->GetFrameHeight(), 1, { frames[i]->GetImageResourceView() });
+			}
+
+			void EnsureFrameCommandBuffers()
+			{
+				commandBuffers.resize(frameCount);
+				for (auto it = commandBuffers.begin(); it != commandBuffers.end(); it++)
+					if (!*it)
+						*it = commandBufferPool->CreateCommandBuffer();
+			}
+
+			void EnsureFrameSyncronizations()
+			{
+				submitCompleteFences.resize(frameCount);
+				for (auto it = submitCompleteFences.begin(); it != submitCompleteFences.end(); it++)
+					if (!*it)
+						*it = device->CreateFence();
+
+				submitCompleteSemaphores.resize(frameCount);
+				for (auto it = submitCompleteSemaphores.begin(); it != submitCompleteSemaphores.end(); it++)
+					if (!*it)
+						*it = device->CreateSemaphore();
+
+				frameReadySemaphores.resize(frameCount);
+				for (auto it = frameReadySemaphores.begin(); it != frameReadySemaphores.end(); it++)
+					if (!*it)
+						*it = device->CreateSemaphore();
+			}
+
+			void EnsureFrameResources()
+			{
+				uboBuffers.resize(frameCount);
+				for (auto it = uboBuffers.begin(); it != uboBuffers.end(); it++)
+					if (!*it)
+						*it = gpu::BufferResource::Create(device,
+							gpu::BufferResourceUsage::Uniform | gpu::BufferResourceUsage::HostAccessible | gpu::BufferResourceUsage::AutoClearCache,
+							mem::calc_aligned_size(sizeof(Ubo), mem::DEFAULT_ALIGNMENT), {queue->GetDeviceQueueFamily()});
+
+				mem::sptr<gpu::PipelineResourceLayout> pipeline_layout = graphicsPipeline->GetPipelineResourceLayout();
+
+				if (!resourceGroupPool || frameCount != resourceGroupPool->GetSize())
+				{
+					resourceGroups.clear();
+					resourceGroupPool = gpu::ResourceGroupPool::Create(device, frameCount, pipeline_layout->GetResourceDesciptions());
+				}
+
+				con::vector<mem::sptr<gpu::ResourceLayout>> resource_layouts = pipeline_layout->GetResourceLayouts();
+
+				resourceGroups.resize(frameCount);
+				for (auto it = resourceGroups.begin(); it != resourceGroups.end(); it++)
+					if (it->size() != resource_layouts.size())
+						*it = resourceGroupPool->CreateResourceGroups(resource_layouts);
+			}
+
+			void EnsureFrames()
+			{
+				con::vector<mem::sptr<gpu::Frame>> frames = frameContext->GetFrames();
+				frameCounter = 0;
+				frameCount = frames.size();
+
+				EnsureFramebuffers(frames);
+				EnsureFrameCommandBuffers();
+				EnsureFrameSyncronizations();
+				EnsureFrameResources();
+			}
 
 			void RebuildFrames()
 			{
 				device->WaitUntilIdle();
 				frameContext->Rebuild();
-
-				con::vector<mem::sptr<gpu::ImageResourceView>> frame_image_views = frameContext->GetImageViews();
-				framebuffers.resize(frame_image_views.size());
-				for (siz i = 0; i < framebuffers.size(); i++)
-					framebuffers[i] =
-					gpu::Framebuffer::Create(renderpass, frameContext->GetFrameWidth(),
-						frameContext->GetFrameHeight(), 1, { frame_image_views[i] });
+				EnsureFrames();
 			}
 
 			void Render()
@@ -69,7 +160,7 @@ namespace np::app
 				bl expected = false;
 				if (isRendering.compare_exchange_strong(expected, true, mo_release, mo_relaxed))
 				{
-					mem::sptr<gpu::Semaphore> frame_ready_semaphore = device->CreateSemaphore();
+					mem::sptr<gpu::Semaphore> frame_ready_semaphore = frameReadySemaphores[frameCounter];
 					gpu::Result acquire_result = frameContext->TryAcquireFrame(frame_ready_semaphore, nullptr);
 					if (acquire_result.Contains(gpu::Result::OutOfDate))
 					{
@@ -77,6 +168,29 @@ namespace np::app
 					}
 					else if (acquire_result.ContainsAny(gpu::Result::Success | gpu::Result::NotReady))
 					{
+						mem::sptr<gpu::Fence> submit_complete_fence = submitCompleteFences[frameCounter];
+						submit_complete_fence->Wait();
+						submit_complete_fence->Reset();
+
+						tim::seconds s = startTimestamp - tim::steady_clock::now();
+
+						Ubo ubo{};
+						ubo.model = ::glm::rotate(::glm::mat4{ 1 }, ::glm::radians(90.f) * (flt)s.count(), ::glm::vec3{0, 0, 1});
+						ubo.view = ::glm::lookAt(::glm::vec3{ 2, 2, 2 }, ::glm::vec3{ 0, 0, 0 }, ::glm::vec3{ 0, 0, 1 });
+						ubo.projection = ::glm::perspective(::glm::radians(45.f), (flt)frameContext->GetFrameAspectRatio(), 0.1f, 10.f);
+						ubo.projection[1][1] *= -1; //compensate for glm legacy where y axis was inverted
+						con::vector<ui8> ubo_bytes(sizeof(Ubo));
+						mem::copy_bytes(ubo_bytes.data(), &ubo, ubo_bytes.size());
+						uboBuffers[frameCounter]->SetBytes(0, ubo_bytes);
+						uboBuffers[frameCounter]->ClearCacheForDevice(0, ubo_bytes.size());
+
+						con::vector<mem::sptr<gpu::ResourceGroup>>& resource_group = resourceGroups[frameCounter];
+						resource_group[0]->ApplyResourceAssignments({{}, 
+							{
+								{0, {{uboBuffers[frameCounter], 0, uboBuffers[frameCounter]->GetSize()}}}
+							},
+						{}});
+
 						mem::sptr<srvc::Services> services = detailInstance->GetServices();
 						mem::sptr<gpu::Frame> frame = frameContext->GetAcquiredFrame();
 
@@ -107,7 +221,12 @@ namespace np::app
 						mem::sptr<gpu::BindIndexBufferCommand> bind_index_buffer_cmd =
 							gpu::Command::Create(gpu::DetailType::Vulkan, services, gpu::CommandType::BindIndexBuffer);
 						bind_index_buffer_cmd->buffer = indexBuffer;
-						bind_index_buffer_cmd->stride = sizeof(ui32);
+						bind_index_buffer_cmd->stride = sizeof(ui16);
+
+						mem::sptr<gpu::BindResourceGroupsCommand> bind_resource_groups_cmd =
+							gpu::Command::Create(gpu::DetailType::Vulkan, services, gpu::CommandType::BindResourceGroups);
+						bind_resource_groups_cmd->pipeline = graphicsPipeline;
+						bind_resource_groups_cmd->resourceGroups = { resourceGroups[frameCounter] };
 
 						mem::sptr<gpu::DrawIndexedCommand> draw_indexed_cmd =
 							gpu::Command::Create(gpu::DetailType::Vulkan, services, gpu::CommandType::DrawIndexed);
@@ -117,60 +236,42 @@ namespace np::app
 							gpu::Command::Create(gpu::DetailType::Vulkan, services, gpu::CommandType::EndRenderPass);
 						end_renderpass_cmd->framebuffer = begin_renderpass_cmd->framebuffer;
 
-						if (!commandBufferPool)
-							commandBufferPool = queue->CreateCommandBufferPool(gpu::CommandBufferPoolUsage::Resettable);
+						mem::sptr<gpu::CommandBuffer> command_buffer = commandBuffers[frameCounter];
+						mem::sptr<gpu::Semaphore> submit_complete_semaphore = submitCompleteSemaphores[frameCounter];
 
-						frameReadySemaphores.emplace_back(frame_ready_semaphore);
-						commandBuffers.emplace_back(commandBufferPool->CreateCommandBuffer());
-						submitCompleteFences.emplace_back(device->CreateFence());
-						submitCompleteSemaphores.emplace_back(device->CreateSemaphore());
-
-						commandBufferPool->Reset(commandBuffers.back(), gpu::CommandBufferUsage::None);
-						commandBufferPool->Begin(commandBuffers.back(), gpu::CommandBufferUsage::SingleUse);
-						commandBuffers.back()->Add(begin_renderpass_cmd);
-						commandBuffers.back()->Add(bind_pipeline_cmd);
-						commandBuffers.back()->Add(set_viewports_cmd);
-						commandBuffers.back()->Add(set_scissors_cmd);
-						commandBuffers.back()->Add(bind_vertex_buffers_cmd);
-						commandBuffers.back()->Add(bind_index_buffer_cmd);
-						commandBuffers.back()->Add(draw_indexed_cmd);
-						commandBuffers.back()->Add(end_renderpass_cmd);
-						commandBufferPool->End(commandBuffers.back(), gpu::CommandBufferUsage::None);
+						commandBufferPool->Reset(command_buffer, gpu::CommandBufferUsage::None);
+						commandBufferPool->Begin(command_buffer, gpu::CommandBufferUsage::SingleUse);
+						command_buffer->Add(begin_renderpass_cmd);
+						command_buffer->Add(bind_pipeline_cmd);
+						command_buffer->Add(set_viewports_cmd);
+						command_buffer->Add(set_scissors_cmd);
+						command_buffer->Add(bind_vertex_buffers_cmd);
+						command_buffer->Add(bind_index_buffer_cmd);
+						command_buffer->Add(bind_resource_groups_cmd);
+						command_buffer->Add(draw_indexed_cmd);
+						command_buffer->Add(end_renderpass_cmd);
+						commandBufferPool->End(command_buffer, gpu::CommandBufferUsage::None);
 
 						gpu::Submit submit{};
 						submit.stages = { gpu::Stage::PresentComplete };
-						submit.commandBuffers = { commandBuffers.back() };
-						submit.waitSemaphores = { frameReadySemaphores.back() };
-						submit.signalSemaphores = { submitCompleteSemaphores.back() };
-						bl submit_success = queue->Submit(submit, submitCompleteFences.back());
+						submit.commandBuffers = { command_buffer };
+						submit.waitSemaphores = { frame_ready_semaphore };
+						submit.signalSemaphores = { submit_complete_semaphore };
+						bl submit_success = queue->Submit(submit, submit_complete_fence);
 
 						gpu::Present present{};
 						present.frameContexts = { frameContext };
-						present.waitSemaphores = { submitCompleteSemaphores.back() };
+						present.waitSemaphores = { submit_complete_semaphore };
 						gpu::PresentResults present_results = queue->Present(present);
 
 						bl should_rebuild_frames = present_results.overallResult.ContainsAny(gpu::Result::OutOfDate | gpu::Result::Suboptimal);
 						for (siz i = 0; !should_rebuild_frames && i < present_results.individualResults.size(); i++)
 							should_rebuild_frames |= present_results.individualResults[i].ContainsAny(gpu::Result::OutOfDate | gpu::Result::Suboptimal);
 
+						frameCounter = (frameCounter + 1) % frameCount;
+
 						if (should_rebuild_frames)
 							RebuildFrames();
-
-						//TODO: there are MUCH better ways to manage these sorts of resources
-						for (siz i = 0; i < commandBuffers.size();)
-						{
-							if (submitCompleteFences[i]->GetStatus().Contains(gpu::Result::Success))
-							{
-								frameReadySemaphores.erase(frameReadySemaphores.begin() + i);
-								commandBuffers.erase(commandBuffers.begin() + i);
-								submitCompleteFences.erase(submitCompleteFences.begin() + i);
-								submitCompleteSemaphores.erase(submitCompleteSemaphores.begin() + i);
-							}
-							else
-							{
-								i++;
-							}
-						}
 					}
 
 					isRendering.store(false, mo_release);
@@ -282,6 +383,7 @@ namespace np::app
 
 				if (_window && _window->GetUid() == data.windowId)
 				{
+					//we could reset the scene sptr here
 					_window_id_handle.reset();
 					_window.reset();
 
@@ -450,8 +552,15 @@ namespace np::app
 				gpu::RenderPass::Create(scene->device, image_descriptions, render_subpasses, render_dependencies);
 			gpu::PipelineUsage graphics_pipeline_usage = gpu::PipelineUsage::Graphics | gpu::PipelineUsage::ColorBlend | gpu::PipelineUsage::Dynamic;
 
+			gpu::ResourceDescription ubo_description
+			{
+				gpu::ResourceType::Buffer, gpu::BufferResourceUsage::Uniform, 1, gpu::Stage::VertexInput
+			};
+
+			mem::sptr<gpu::ResourceLayout> graphics_resource_layout = gpu::ResourceLayout::Create(scene->device, { ubo_description });
+
 			mem::sptr<gpu::PipelineResourceLayout> graphics_pipeline_layout =
-				gpu::PipelineResourceLayout::Create(scene->device, {}, {});
+				gpu::PipelineResourceLayout::Create(scene->device, { graphics_resource_layout }, {});
 
 			con::vector<mem::sptr<gpu::Shader>> graphics_shaders{scene->vertexShader, scene->fragmentShader};
 			con::vector<gpu::Format> input_vertex_formatting{ gpu::Format{gpu::Format::Floating, 4, sizeof(flt)},  gpu::Format{gpu::Format::Floating, 4, sizeof(flt)} };
@@ -461,9 +570,7 @@ namespace np::app
 				{{}, (dbl)scene->frameContext->GetFrameWidth(), (dbl)scene->frameContext->GetFrameHeight(), {0, 1}}};
 			con::vector<gpu::Scissor> graphics_scissors{
 				{{}, scene->frameContext->GetFrameWidth(), scene->frameContext->GetFrameHeight()}};
-			gpu::Rasterization graphics_rasterization{gpu::RasterizationUsage::PolygonFill | gpu::RasterizationUsage::CullBack |
-														  gpu::RasterizationUsage::FrontFaceClockwise,
-													  {}};
+			gpu::Rasterization graphics_rasterization{gpu::RasterizationUsage::PolygonFill | gpu::RasterizationUsage::CullBack, {}};
 			gpu::Multisample graphics_multisample{{gpu::MultisampleUsage::None, 1}, 0.0, {}};
 			//gpu::DepthStencil graphics_depth_stencil{};
 			gpu::Blend graphics_blend{
@@ -481,13 +588,9 @@ namespace np::app
 				input_instance_formatting, graphics_topology, 0, graphics_viewports, graphics_scissors, graphics_rasterization,
 				graphics_multisample, {}, graphics_blend, graphics_dynamic_usage, nullptr);
 
-			con::vector<mem::sptr<gpu::ImageResourceView>> frame_image_views = scene->frameContext->GetImageViews();
-
-			scene->framebuffers.resize(frame_image_views.size());
-			for (siz i = 0; i < scene->framebuffers.size(); i++)
-				scene->framebuffers[i] =
-					gpu::Framebuffer::Create(scene->renderpass, scene->frameContext->GetFrameWidth(),
-											 scene->frameContext->GetFrameHeight(), 1, {frame_image_views[i]});
+			scene->commandBufferPool = scene->queue->CreateCommandBufferPool(gpu::CommandBufferPoolUsage::Resettable);
+			
+			scene->EnsureFrames();
 
 			//<https://vulkan-tutorial.com/en/Drawing_a_triangle/Drawing/Command_buffers>
 
@@ -549,6 +652,7 @@ namespace np::app
 			gpu::Submit submit{};
 			submit.commandBuffers = { command_buffer };
 			mem::sptr<gpu::Fence> fence = scene->device->CreateFence();
+			fence->Reset();
 			scene->queue->Submit(submit, fence);
 			fence->Wait();
 

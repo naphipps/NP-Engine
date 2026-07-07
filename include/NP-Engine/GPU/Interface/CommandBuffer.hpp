@@ -36,7 +36,7 @@ namespace np::gpu
 		BindPipeline,
 		BindIndexBuffer,
 		BindVertexBuffers,
-		BindResourceGroup,
+		BindResourceGroups,
 
 		//general
 		Barrier,

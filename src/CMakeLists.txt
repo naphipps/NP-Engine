@@ -109,6 +109,7 @@ set(NP_ENGINE_GPU_INTERFACE_HPP
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Interface/Rasterization.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Interface/RenderPass.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Interface/Resource.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Interface/ResourceGroup.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Interface/Result.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Interface/SamplerResource.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Interface/Scissor.hpp
@@ -160,6 +161,7 @@ set(NP_ENGINE_GPU_VULKAN_HPP
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Detail/Vulkan/VulkanRasterization.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Detail/Vulkan/VulkanRenderPass.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Detail/Vulkan/VulkanResource.hpp
+	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Detail/Vulkan/VulkanResourceGroup.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Detail/Vulkan/VulkanResult.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Detail/Vulkan/VulkanSampleCount.hpp
 	${PROJECT_SOURCE_DIR}/include/NP-Engine/GPU/Detail/Vulkan/VulkanSamplerResource.hpp
@@ -411,6 +413,7 @@ set(NP_ENGINE_GPU_INTERFACE_CPP
 	GPU/Interface/Device.cpp
 	GPU/Interface/Queue.cpp
 	GPU/Interface/Resource.cpp
+	GPU/Interface/ResourceGroup.cpp
 	GPU/Interface/BufferResource.cpp
 	GPU/Interface/SamplerResource.cpp
 	GPU/Interface/ImageResource.cpp

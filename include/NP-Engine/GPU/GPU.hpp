@@ -46,6 +46,7 @@
 #include "Interface/Rasterization.hpp"
 #include "Interface/RenderPass.hpp"
 #include "Interface/Resource.hpp"
+#include "Interface/ResourceGroup.hpp"
 #include "Interface/Result.hpp"
 #include "Interface/SamplerResource.hpp"
 #include "Interface/Scissor.hpp"

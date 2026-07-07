@@ -37,6 +37,33 @@ namespace np::gpu
 
 		virtual con::vector<mem::sptr<ResourceLayout>> GetResourceLayouts() const = 0;
 
+		virtual con::vector<gpu::ResourceDescription> GetResourceDesciptions() const
+		{
+			con::vector<mem::sptr<gpu::ResourceLayout>> ls = GetResourceLayouts();
+			con::vector<gpu::ResourceDescription> descriptions{};
+
+			for (auto it = ls.begin(); it != ls.end(); it++)
+			{
+				con::vector<gpu::ResourceDescription> ds = (*it)->GetResourceDescriptions();
+				for (auto jt = ds.begin(); jt != ds.end(); jt++)
+				{
+					bl found = false;
+					for (auto kt = descriptions.begin(); kt != descriptions.end(); kt++)
+						if (kt->type == jt->type && kt->stage == jt->stage && kt->usage == jt->usage)
+						{
+							found = true;
+							kt->count += jt->count;
+							break;
+						}
+
+					if (!found)
+						descriptions.emplace_back(*jt);
+				}
+			}
+
+			return descriptions;
+		}
+
 		virtual PushData GetPushData() const = 0;
 
 		virtual bl SetPushDataEntry(siz index, const PushDataEntry& entry) = 0;

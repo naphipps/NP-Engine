@@ -69,7 +69,7 @@ namespace np::gpu::__detail
 		}
 	};
 
-	struct VulkanResourceDescription //TODO: remove inheritance here to use Vulkan objects as fields
+	struct VulkanResourceDescription
 	{
 		VulkanResourceType type = VulkanResourceType::None;
 		VulkanResourceUsage usage = VulkanResourceUsage::None;
@@ -86,6 +86,11 @@ namespace np::gpu::__detail
 		operator ResourceDescription() const
 		{
 			return {type, usage, count, stage};
+		}
+
+		bl operator==(const VulkanResourceDescription& other) const
+		{
+			return type == other.type && usage == other.usage && count == other.count && stage == other.stage;
 		}
 
 		VkDescriptorType GetVkDescriptorType() const
@@ -120,7 +125,7 @@ namespace np::gpu::__detail
 			{
 			case ResourceType::Buffer:
 			{
-				BufferResourceUsage usage = (ui32)this->usage;
+				BufferResourceUsage usage{ this->usage };
 				if (usage.Equals(BufferResourceUsage::Uniform | BufferResourceUsage::Texel))
 					type = VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER;
 				else if (usage.Equals(BufferResourceUsage::Storage | BufferResourceUsage::Texel))
@@ -137,7 +142,7 @@ namespace np::gpu::__detail
 			break;
 			case ResourceType::Image:
 			{
-				ImageResourceUsage usage = (ui32)this->usage;
+				ImageResourceUsage usage{ this->usage };
 			}
 			break;
 			case ResourceType::Sampler:
@@ -152,7 +157,7 @@ namespace np::gpu::__detail
 
 		VkDescriptorSetLayoutBinding GetVkDescriptorSetLayoutBinding() const
 		{
-			const VulkanStage stage = this->stage;
+			const VulkanStage stage{ this->stage };
 			VkDescriptorSetLayoutBinding binding{};
 			binding.binding = UI32_MAX; //intentional invalid value
 			binding.stageFlags = stage.GetVkShaderStageFlags();
@@ -197,9 +202,8 @@ namespace np::gpu::__detail
 		}
 
 	public:
-		VulkanResourceLayout(mem::sptr<Device> device,
-							 con::vector<ResourceDescription>
-								 descriptions): //TODO: make sure all the things are checking our physical device's limits
+		VulkanResourceLayout(mem::sptr<Device> device, con::vector<ResourceDescription> descriptions):
+			//TODO: ^ make sure all the things are checking our physical device's limits
 			_device(device),
 			_descriptions(descriptions.begin(), descriptions.end()),
 			_layout(CreateVkDescriptorSetLayout(_device, _descriptions))
@@ -239,259 +243,16 @@ namespace np::gpu::__detail
 		{
 			return {_descriptions.begin(), _descriptions.end()};
 		}
-	};
 
-	class VulkanResourceGroup : public ResourceGroup
-	{
-	protected:
-		mem::sptr<VulkanResourceLayout> _resource_layout;
-		VkDescriptorSet _set;
-
-	public:
-		VulkanResourceGroup(mem::sptr<ResourceLayout> resource_layout, VkDescriptorSet set):
-			_resource_layout(resource_layout),
-			_set(set)
-		{}
-
-		virtual ~VulkanResourceGroup() = default;
-
-		operator VkDescriptorSet() const
+		virtual bl IsCompatible(mem::sptr<ResourceLayout> other_) const override
 		{
-			return _set;
-		}
+			mem::sptr<VulkanResourceLayout> other = DetailObject::EnsureIsDetailType(other_, DetailType::Vulkan);
+			bl is = other && _descriptions.size() == other->_descriptions.size();
 
-		virtual DetailType GetDetailType() const override
-		{
-			return DetailType::Vulkan;
-		}
+			for (siz i = 0; is && i < _descriptions.size(); i++)
+				is &= _descriptions[i] == other->_descriptions[i];
 
-		virtual mem::sptr<srvc::Services> GetServices() const override
-		{
-			return _resource_layout->GetServices();
-		}
-
-		virtual mem::sptr<ResourceLayout> GetResourceLayout() const override
-		{
-			return _resource_layout;
-		}
-
-		virtual siz GetResourceCount() const override
-		{
-			return _resource_layout->GetResourceDescriptions().size();
-		}
-
-		virtual bl AssignBufferResource(siz index, mem::sptr<BufferResource> resource, BufferResourceAssignInfo info) override
-		{
-			return false; //TODO: how do we want to handle this?
-		}
-
-		virtual bl AssignImageResource(siz index, mem::sptr<ImageResource> resource, ImageResourceAssignInfo info) override
-		{
-			return false; //TODO: how do we want to handle this?
-		}
-	};
-
-	class VulkanResourceGroupPool : public ResourceGroupPool
-	{
-	protected:
-		class VulkanResourceGroupDestroyer : public mem::smart_ptr_contiguous_destroyer<VulkanResourceGroup>
-		{
-		private:
-			using base = mem::smart_ptr_contiguous_destroyer<VulkanResourceGroup>;
-			mem::sptr<VulkanDevice> _device;
-			VkDescriptorPool _pool;
-
-		public:
-			VulkanResourceGroupDestroyer(mem::sptr<VulkanDevice> device, VkDescriptorPool pool, mem::allocator& a):
-				base(a),
-				_device(device),
-				_pool(pool)
-			{}
-
-			VulkanResourceGroupDestroyer(const VulkanResourceGroupDestroyer& other):
-				base(other._allocator),
-				_device(other._device),
-				_pool(other._pool)
-			{}
-
-			VulkanResourceGroupDestroyer(VulkanResourceGroupDestroyer&& other) noexcept:
-				base(other._allocator),
-				_device(::std::move(other._device)),
-				_pool(::std::move(other._pool))
-			{
-				other._device.reset();
-				other._pool = nullptr;
-			}
-
-			void destruct_object(VulkanResourceGroup* ptr) override
-			{
-				VkDescriptorSet set = *ptr;
-				vkFreeDescriptorSets(*_device->GetLogicalDevice(), _pool, 1,
-									 &set); //TODO: do we do anything with this result? Other than an assert, I can't imagine
-											//what we could do with it
-				base::destruct_object(ptr);
-			}
-		};
-
-		mem::sptr<VulkanDevice> _device;
-		siz _size;
-		con::vector<VulkanResourceDescription> _descriptions;
-		VkDescriptorPool _pool;
-
-		static VkDescriptorSetAllocateInfo GetVkDescriptorSetAllocateInfo(VkDescriptorPool pool, siz count)
-		{
-			VkDescriptorSetAllocateInfo info{};
-			info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
-			info.descriptorPool = pool;
-			info.descriptorSetCount = count;
-			return info;
-		}
-
-		static VkDescriptorSet CreateVkDescriptorSet(mem::sptr<VulkanResourceLayout> resource_layout,
-													 VkDescriptorSetAllocateInfo info)
-		{
-			mem::sptr<VulkanDevice> device = resource_layout->GetDevice();
-			VkDescriptorSetLayout layout = *resource_layout;
-
-			info.descriptorSetCount = 1;
-			info.pSetLayouts = &layout;
-
-			VkDescriptorSet descriptor_set = nullptr;
-			if (vkAllocateDescriptorSets(*device->GetLogicalDevice(), &info, &descriptor_set) != VK_SUCCESS)
-				descriptor_set = nullptr;
-
-			return descriptor_set;
-		}
-
-		static VkDescriptorPoolCreateInfo CreateVkInfo(siz size)
-		{
-			/*
-				TODO: what are these create flags do?
-					VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT = 0x00000001,
-					VK_DESCRIPTOR_POOL_CREATE_UPDATE_AFTER_BIND_BIT = 0x00000002,
-					VK_DESCRIPTOR_POOL_CREATE_HOST_ONLY_BIT_EXT = 0x00000004,
-					VK_DESCRIPTOR_POOL_CREATE_UPDATE_AFTER_BIND_BIT_EXT = VK_DESCRIPTOR_POOL_CREATE_UPDATE_AFTER_BIND_BIT,
-					VK_DESCRIPTOR_POOL_CREATE_HOST_ONLY_BIT_VALVE = VK_DESCRIPTOR_POOL_CREATE_HOST_ONLY_BIT_EXT,
-					VK_DESCRIPTOR_POOL_CREATE_FLAG_BITS_MAX_ENUM = 0x7FFFFFFF
-			*/
-
-			VkDescriptorPoolCreateInfo info{};
-			info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
-			info.maxSets = size;
-			return info;
-		}
-
-		static VkDescriptorPool CreateVkDescriptorPool(mem::sptr<VulkanDevice> device, siz size,
-													   const con::vector<VulkanResourceDescription>& descriptions)
-		{
-			con::vector<VkDescriptorPoolSize> pool_sizes{};
-			for (const VulkanResourceDescription& description : descriptions)
-			{
-				const VkDescriptorType type = description.GetVkDescriptorType();
-				bl found = false;
-
-				for (auto it = pool_sizes.rbegin(); !found && it != pool_sizes.rend(); it++)
-				{
-					found |= type == it->type;
-					if (found)
-						it->descriptorCount++;
-				}
-
-				if (!found)
-					pool_sizes.emplace_back(VkDescriptorPoolSize{type, 1});
-			}
-
-			VkDescriptorPoolCreateInfo info = CreateVkInfo(size);
-			info.poolSizeCount = pool_sizes.size();
-			info.pPoolSizes = pool_sizes.empty() ? nullptr : pool_sizes.data();
-			info.flags |= VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT; //enforce
-
-			mem::sptr<VulkanInstance> instance = device->GetDetailInstance();
-			VkDescriptorPool pool = nullptr;
-			VkResult result = vkCreateDescriptorPool(*device->GetLogicalDevice(), &info, instance->GetVulkanAllocationCallbacks(), &pool);
-			return result == VK_SUCCESS ? pool : nullptr;
-		}
-
-	public:
-		VulkanResourceGroupPool(mem::sptr<Device> device, siz size, con::vector<ResourceDescription> descriptions):
-			_device(device),
-			_size(size),
-			_descriptions(descriptions.begin(), descriptions.end()),
-			_pool(CreateVkDescriptorPool(_device, _size, _descriptions))
-		{}
-
-		virtual ~VulkanResourceGroupPool()
-		{
-			if (_pool)
-			{
-				mem::sptr<VulkanInstance> instance = _device->GetDetailInstance();
-				vkDestroyDescriptorPool(*_device->GetLogicalDevice(), _pool, instance->GetVulkanAllocationCallbacks());
-				_pool = nullptr;
-			}
-		}
-
-		virtual DetailType GetDetailType() const override
-		{
-			return DetailType::Vulkan;
-		}
-
-		virtual mem::sptr<srvc::Services> GetServices() const override
-		{
-			return _device->GetServices();
-		}
-
-		virtual mem::sptr<Device> GetDevice() const override
-		{
-			return _device;
-		}
-
-		virtual siz GetSize() const override
-		{
-			return _size;
-		}
-
-		virtual mem::sptr<ResourceGroup> CreateResourceGroup(mem::sptr<ResourceLayout> layout) override
-		{
-			using destroyer_type = VulkanResourceGroupDestroyer;
-			using resource_type = mem::smart_ptr_resource<VulkanResourceGroup, destroyer_type>;
-			using contiguous_block_type = mem::smart_ptr_contiguous_block<VulkanResourceGroup, resource_type>;
-
-			mem::allocator& a = GetServices()->GetAllocator();
-			resource_type* resource = nullptr;
-			contiguous_block_type* contiguous_block = mem::create<contiguous_block_type>(a);
-
-			if (contiguous_block)
-			{
-				mem::sptr<VulkanResourceLayout> vulkan_layout = DetailObject::EnsureIsDetailType(layout, DetailType::Vulkan);
-				if (vulkan_layout)
-				{
-					const VkDescriptorSetLayout vk_layout = *vulkan_layout;
-
-					VkDescriptorSetAllocateInfo info = GetVkDescriptorSetAllocateInfo(_pool, 1);
-					info.pSetLayouts = &vk_layout;
-
-					VkDescriptorSet set = nullptr;
-					VkResult result = vkAllocateDescriptorSets(*_device->GetLogicalDevice(), &info, &set);
-
-					if (result == VK_SUCCESS)
-					{
-						VulkanResourceGroup* object =
-							mem::construct<VulkanResourceGroup>(contiguous_block->object_block, vulkan_layout, set);
-						resource = mem::construct<resource_type>(contiguous_block->resource_block,
-																 destroyer_type{_device, _pool, a}, object);
-					}
-				}
-			}
-			return {resource};
-		}
-
-		virtual con::vector<mem::sptr<ResourceGroup>> CreateResourceGroups(
-			con::vector<mem::sptr<ResourceLayout>> layouts) override
-		{
-			con::vector<mem::sptr<ResourceGroup>> groups{};
-			for (mem::sptr<ResourceLayout> layout : layouts)
-				groups.emplace_back(CreateResourceGroup(layout));
-			return groups;
+			return is;
 		}
 	};
 } //namespace np::gpu::__detail

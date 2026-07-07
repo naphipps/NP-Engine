@@ -53,16 +53,14 @@ namespace np::gpu
 
 		virtual siz GetFrameHeight() const = 0;
 
-		virtual Format GetFrameFormat() const = 0;
-
-		virtual con::vector<mem::sptr<ImageResourceView>> GetImageViews() const
+		virtual dbl GetFrameAspectRatio() const
 		{
-			const con::vector<mem::sptr<Frame>> frames = GetFrames();
-			con::vector<mem::sptr<ImageResourceView>> views(frames.size());
-			for (siz i = 0; i < views.size(); i++)
-				views[i] = frames[i]->GetImageResourceView();
-			return views;
+			const siz width = GetFrameWidth();
+			const siz height = GetFrameHeight();
+			return height != 0 ? static_cast<dbl>(width) / static_cast<dbl>(height) : 0;
 		}
+
+		virtual Format GetFrameFormat() const = 0;
 
 		virtual void Rebuild() = 0;
 	};

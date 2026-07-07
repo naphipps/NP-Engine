@@ -42,6 +42,7 @@
 #include "Rasterization.hpp"
 #include "RenderPass.hpp"
 #include "Resource.hpp"
+#include "ResourceGroup.hpp"
 #include "SamplerResource.hpp"
 #include "Scissor.hpp"
 #include "Shader.hpp"
@@ -52,205 +53,6 @@
 
 /*
 	TODO: support the following commands:
-
-		- [x] vkCmdPushConstants(
-				VkCommandBuffer commandBuffer,
-				VkPipelineLayout layout,
-				VkShaderStageFlags stageFlags,
-				uint32_t offset,
-				uint32_t size,
-				const void* pValues);
-
-		- [x] vkCmdBeginRenderPass(
-				VkCommandBuffer commandBuffer,
-				const VkRenderPassBeginInfo * pRenderPassBegin,
-				VkSubpassContents contents);
-
-		- [x] vkCmdNextSubpass(
-				VkCommandBuffer commandBuffer,
-				VkSubpassContents contents);
-
-		- [x] vkCmdEndRenderPass(
-				VkCommandBuffer commandBuffer);
-
-		- [x] vkCmdExecuteCommands(
-				VkCommandBuffer commandBuffer,
-				uint32_t commandBufferCount,
-				const VkCommandBuffer * pCommandBuffers);
-
-		- [x] vkCmdCopyBuffer(
-				VkCommandBuffer commandBuffer,
-				VkBuffer srcBuffer,
-				VkBuffer dstBuffer,
-				uint32_t regionCount,
-				const VkBufferCopy * pRegions);
-
-		- [x] vkCmdCopyImage(
-				VkCommandBuffer commandBuffer,
-				VkImage srcImage,
-				VkImageLayout srcImageLayout,
-				VkImage dstImage,
-				VkImageLayout dstImageLayout,
-				uint32_t regionCount,
-				const VkImageCopy * pRegions);
-
-		- [x] vkCmdUpdateBuffer(
-				VkCommandBuffer commandBuffer,
-				VkBuffer dstBuffer,
-				VkDeviceSize dstOffset,
-				VkDeviceSize dataSize,
-				const void* pData);
-
-		- [x] vkCmdFillBuffer(
-				VkCommandBuffer commandBuffer,
-				VkBuffer dstBuffer,
-				VkDeviceSize dstOffset,
-				VkDeviceSize size,
-				uint32_t data);
-
-		- [x] vkCmdPipelineBarrier(
-				VkCommandBuffer commandBuffer,
-				VkPipelineStageFlags srcStageMask,
-				VkPipelineStageFlags dstStageMask,
-				VkDependencyFlags dependencyFlags,
-				uint32_t memoryBarrierCount,
-				const VkMemoryBarrier * pMemoryBarriers,
-				uint32_t bufferMemoryBarrierCount,
-				const VkBufferMemoryBarrier * pBufferMemoryBarriers,
-				uint32_t imageMemoryBarrierCount,
-				const VkImageMemoryBarrier * pImageMemoryBarriers);
-
-		- [x] vkCmdBindPipeline(
-				VkCommandBuffer commandBuffer,
-				VkPipelineBindPoint pipelineBindPoint,
-				VkPipeline pipeline);
-
-		- [x] vkCmdDispatch(
-				VkCommandBuffer commandBuffer,
-				uint32_t groupCountX,
-				uint32_t groupCountY,
-				uint32_t groupCountZ);
-
-		- [x] vkCmdDispatchIndirect(
-				VkCommandBuffer commandBuffer,
-				VkBuffer buffer,
-				VkDeviceSize offset);
-
-		- [x] vkCmdBindDescriptorSets(
-				VkCommandBuffer commandBuffer,
-				VkPipelineBindPoint pipelineBindPoint,
-				VkPipelineLayout layout,
-				uint32_t firstSet,
-				uint32_t descriptorSetCount,
-				const VkDescriptorSet * pDescriptorSets,
-				uint32_t dynamicOffsetCount,
-				const uint32_t * pDynamicOffsets);
-
-		- [x] vkCmdCopyBufferToImage(
-				VkCommandBuffer commandBuffer,
-				VkBuffer srcBuffer,
-				VkImage dstImage,
-				VkImageLayout dstImageLayout,
-				uint32_t regionCount,
-				const VkBufferImageCopy * pRegions);
-
-		- [x] vkCmdCopyImageToBuffer(
-				VkCommandBuffer commandBuffer,
-				VkImage srcImage,
-				VkImageLayout srcImageLayout,
-				VkBuffer dstBuffer,
-				uint32_t regionCount,
-				const VkBufferImageCopy * pRegions);
-
-
-
-		- [x] vkCmdSetViewport(
-				VkCommandBuffer commandBuffer,
-				uint32_t firstViewport,
-				uint32_t viewportCount,
-				const VkViewport * pViewports);
-
-		- [x] vkCmdSetScissor(
-				VkCommandBuffer commandBuffer,
-				uint32_t firstScissor,
-				uint32_t scissorCount,
-				const VkRect2D * pScissors);
-
-		- [x] vkCmdSetLineWidth(
-				VkCommandBuffer commandBuffer,
-				float lineWidth);
-
-		- [x] vkCmdSetDepthBias(
-				VkCommandBuffer commandBuffer,
-				float depthBiasConstantFactor,
-				float depthBiasClamp,
-				float depthBiasSlopeFactor);
-
-		- [x] vkCmdSetBlendConstants(
-				VkCommandBuffer commandBuffer,
-				const float blendConstants[4]);
-
-		- [x] vkCmdSetDepthBounds(
-				VkCommandBuffer commandBuffer,
-				float minDepthBounds,
-				float maxDepthBounds);
-
-		- [x] vkCmdSetStencilCompareMask(
-				VkCommandBuffer commandBuffer,
-				VkStencilFaceFlags faceMask,
-				uint32_t compareMask);
-
-		- [x] vkCmdSetStencilWriteMask(
-				VkCommandBuffer commandBuffer,
-				VkStencilFaceFlags faceMask,
-				uint32_t writeMask);
-
-		- [x] vkCmdSetStencilReference(
-				VkCommandBuffer commandBuffer,
-				VkStencilFaceFlags faceMask,
-				uint32_t reference);
-
-		- [x] vkCmdBindIndexBuffer(
-				VkCommandBuffer commandBuffer,
-				VkBuffer buffer,
-				VkDeviceSize offset,
-				VkIndexType indexType);
-
-		- [x] vkCmdBindVertexBuffers(
-				VkCommandBuffer commandBuffer,
-				uint32_t firstBinding,
-				uint32_t bindingCount,
-				const VkBuffer * pBuffers,
-				const VkDeviceSize * pOffsets);
-
-		- [x] vkCmdDraw(
-				VkCommandBuffer commandBuffer,
-				uint32_t vertexCount,
-				uint32_t instanceCount,
-				uint32_t firstVertex,
-				uint32_t firstInstance);
-
-		- [x] vkCmdDrawIndexed(
-				VkCommandBuffer commandBuffer,
-				uint32_t indexCount,
-				uint32_t instanceCount,
-				uint32_t firstIndex,
-				int32_t vertexOffset,
-				uint32_t firstInstance);
-
-		- [x] vkCmdDrawIndirect(
-				VkCommandBuffer commandBuffer,
-				VkBuffer buffer,
-				VkDeviceSize offset,
-				uint32_t drawCount,
-				uint32_t stride);
-
-		- [x] vkCmdDrawIndexedIndirect(
-				VkCommandBuffer commandBuffer,
-				VkBuffer buffer,
-				VkDeviceSize offset,
-				uint32_t drawCount,
-				uint32_t stride);
 
 		--------------------------------------------------------------
 
@@ -263,8 +65,6 @@
 				uint32_t regionCount,
 				const VkImageBlit * pRegions,
 				VkFilter filter);
-
-
 
 		- [ ] vkCmdClearColorImage(
 				VkCommandBuffer commandBuffer,
@@ -282,7 +82,6 @@
 				uint32_t rangeCount,
 				const VkImageSubresourceRange * pRanges);
 
-
 		- [ ] vkCmdResolveImage(
 				VkCommandBuffer commandBuffer,
 				VkImage srcImage, //srcImage
@@ -295,47 +94,12 @@
 
 		--------------------------------------------------------------
 
-
-
-
-
-
 		- [ ] vkCmdClearAttachments(
 				VkCommandBuffer commandBuffer,
 				uint32_t attachmentCount,
 				const VkClearAttachment * pAttachments,
 				uint32_t rectCount,
 				const VkClearRect * pRects);
-
-
-
-
-
-
-		- [ ] vkCmdSetEvent(
-				VkCommandBuffer commandBuffer,
-				VkEvent event,
-				VkPipelineStageFlags stageMask);
-
-		- [ ] vkCmdResetEvent(
-				VkCommandBuffer commandBuffer,
-				VkEvent event,
-				VkPipelineStageFlags stageMask);
-
-		- [ ] vkCmdWaitEvents(
-				VkCommandBuffer commandBuffer,
-				uint32_t eventCount,
-				const VkEvent * pEvents,
-				VkPipelineStageFlags srcStageMask,
-				VkPipelineStageFlags dstStageMask,
-				uint32_t memoryBarrierCount,
-				const VkMemoryBarrier * pMemoryBarriers,
-				uint32_t bufferMemoryBarrierCount,
-				const VkBufferMemoryBarrier * pBufferMemoryBarriers,
-				uint32_t imageMemoryBarrierCount,
-				const VkImageMemoryBarrier * pImageMemoryBarriers);
-
-
 
 		- [ ] vkCmdBeginQuery(
 				VkCommandBuffer commandBuffer,
@@ -394,17 +158,28 @@ namespace np::gpu
 		}
 	};
 
+	struct CopyImageLayers
+	{
+		siz mipLayer = 0;
+		siz layerCount = 1;
+		siz layerBeginIndex = 0;
+	};
+
 	struct CopyImageRange
 	{
 		ImageResource::Point dstOffset{};
 		ImageResource::Point srcOffset{};
-		ImageResource::Point size{}; //width and height to copy
+		ImageResource::Point size{};
+		CopyImageLayers dstLayers{};
+		CopyImageLayers srcLayers{};
 	};
 
 	struct CopyImageCommand : public Command
 	{
 		mem::sptr<ImageResource> dst = nullptr;
 		mem::sptr<ImageResource> src = nullptr;
+		ImageResourceUsage dstUsage = ImageResourceUsage::None;
+		ImageResourceUsage srcUsage = ImageResourceUsage::None;
 		con::vector<CopyImageRange> ranges{};
 
 		virtual CommandType GetCommandType() const override
@@ -415,22 +190,20 @@ namespace np::gpu
 
 	struct CopyBufferToImageRange
 	{
-		ImageResource::Point dstOffset{};
-		//TODO: should we consider VkImageSubresourceLayers?
-
-		siz srcOffset = 0;
-		//ui32 srcImageWidth = 0; //TODO: feel like the image provides this?
-		//ui32 srcImageHeight = 0; //TODO: feel like the image provides this?
-
-		siz size = 0;
+		ImageResource::Point imageOffset{};
+		ImageResource::Point imageSize{};
+		CopyImageLayers imageLayers{};
+		siz bufferOffset = 0;
+		siz bufferRowCount = 0;
+		siz bufferRowLength = 0;
 	};
 
 	struct CopyBufferToImageCommand : public Command
 	{
-		mem::sptr<ImageResource> dst;
-		mem::sptr<BufferResource> src;
-		con::vector<CopyBufferToImageRange> ranges;
-		//TODO: VkImageLayout dstImageLayout ??
+		mem::sptr<ImageResource> image = nullptr;
+		ImageResourceUsage imageUsage = ImageResourceUsage::None;
+		mem::sptr<BufferResource> buffer = nullptr;
+		con::vector<CopyBufferToImageRange> ranges{};
 
 		virtual CommandType GetCommandType() const override
 		{
@@ -438,28 +211,14 @@ namespace np::gpu
 		}
 	};
 
-	struct CopyImageToBufferRange
-	{
-		siz dstOffset = 0;
-		//ui32 dstImageWidth = 0; //TODO: feel like the image provides this?
-		//ui32 dstImageHeight = 0; //TODO: feel like the image provides this?
-
-		//TODO: I feel like we need a begin and end point, but also a good way to indicate that we just want what is in these
-		//bounds, or if we want all image data from that point, then sequentially through the image until we reach the end point
-		Image::Point srcBeginPoint{};
-		//TODO: should we consider VkImageSubresourceLayers?
-
-		Image::Point srcEndPoint{};
-
-		//siz size = 0; //TODO: should we replace this with a width/height bounds for the image?
-	};
+	using CopyImageToBufferRange = CopyBufferToImageRange;
 
 	struct CopyImageToBufferCommand : public Command
 	{
-		mem::sptr<BufferResource> dst;
-		mem::sptr<ImageResource> src;
-		con::vector<CopyImageToBufferRange> ranges;
-		//TODO: VkImageLayout dstImageLayout ??
+		mem::sptr<ImageResource> image = nullptr;
+		ImageResourceUsage imageUsage = ImageResourceUsage::None;
+		mem::sptr<BufferResource> buffer = nullptr;
+		con::vector<CopyImageToBufferRange> ranges{};
 
 		virtual CommandType GetCommandType() const override
 		{
@@ -472,8 +231,7 @@ namespace np::gpu
 		mem::sptr<BufferResource> buffer = nullptr;
 		siz offset = 0;
 		siz count = 0;
-		siz value = 0;
-		//siz valueSize = sizeof(ui32); //default to size of ui32, but user may want size with [sizeof(ui8), sizeof(siz)]
+		ui32 value = 0;
 
 		virtual CommandType GetCommandType() const override
 		{
@@ -484,7 +242,7 @@ namespace np::gpu
 	struct AssignBufferCommand : public Command
 	{
 		mem::sptr<BufferResource> buffer = nullptr;
-		siz offset = 0; //within buffer
+		siz offset = 0;
 		con::vector<ui8> values{};
 
 		virtual CommandType GetCommandType() const override
@@ -504,9 +262,11 @@ namespace np::gpu
 	{
 		mem::sptr<Framebuffer> framebuffer = nullptr;
 		RenderArea renderArea{};
-		con::vector<ClearColor> clearColors{}; //size = [1, N) where N = number of images in framebuffer?
-		SubpassUsage usage =
-			SubpassUsage::None; //TODO: some way to indicate whether to not we're enabling secondary command buffers
+		//size = 1 XOR N where N = number of images in framebuffer?
+		con::vector<ClearColor> clearColors{}; 
+		
+		SubpassUsage usage = SubpassUsage::None; 
+		//TODO: some way to indicate whether or not we're enabling secondary command buffers
 
 		virtual CommandType GetCommandType() const override
 		{
@@ -526,7 +286,7 @@ namespace np::gpu
 
 	struct NextSubpassCommand : public Command
 	{
-		//TODO: subpass stuff?
+		SubpassUsage usage = SubpassUsage::None;
 
 		virtual CommandType GetCommandType() const override
 		{
@@ -630,33 +390,16 @@ namespace np::gpu
 		}
 	};
 
-	struct BindResourceGroupCommand : public Command
+	struct BindResourceGroupsCommand : public Command
 	{
-		/*
-		- [x] vkCmdBindDescriptorSets(
-				VkCommandBuffer commandBuffer,
-				VkPipelineBindPoint pipelineBindPoint,
-				VkPipelineLayout layout,
-				uint32_t firstSet,
-				uint32_t descriptorSetCount,
-				const VkDescriptorSet * pDescriptorSets,
-				uint32_t dynamicOffsetCount,
-				const uint32_t * pDynamicOffsets);
-		*/
-
 		mem::sptr<Pipeline> pipeline = nullptr;
-		siz resourceLayoutIndex =
-			SIZ_MAX; //index into the PipelineResourceLayout's ResourceLayouts the given group will apply to
-		mem::sptr<ResourceGroup> group =
-			nullptr; //TODO: always check and make sure this group is compatible with the resource layout in the pipeline
-
-		//TODO: some resources are dynamic and need offsets. We are required to consider them. Doesn't have to be here, but
-		//needs to happpen.
+		siz resourceLayoutBeginIndex = 0;
+		con::vector<mem::sptr<ResourceGroup>> resourceGroups{};
 		con::vector<siz> dynamicResourceOffsets{};
 
 		virtual CommandType GetCommandType() const override
 		{
-			return CommandType::BindResourceGroup;
+			return CommandType::BindResourceGroups;
 		}
 	};
 
@@ -673,8 +416,8 @@ namespace np::gpu
 
 	struct SetViewportsCommand : public Command
 	{
-		//siz index = 0; //TODO: I don't think we need this.
 		con::vector<Viewport> viewports{};
+		siz viewportBeginIndex = 0;
 
 		virtual CommandType GetCommandType() const override
 		{
@@ -684,8 +427,8 @@ namespace np::gpu
 
 	struct SetScissorsCommand : public Command
 	{
-		//siz index = 0; //TODO: I don't think we need this.
 		con::vector<Scissor> scissors{};
+		siz scissorBeginIndex = 0;
 
 		virtual CommandType GetCommandType() const override
 		{
@@ -765,29 +508,6 @@ namespace np::gpu
 			return CommandType::SetStencilReferenceValue;
 		}
 	};
-
-	//struct BindIndexBufferCommand : public Command
-	//{
-	//	mem::sptr<BufferResource> buffer = nullptr;
-	//	siz offset = 0;
-	//	siz stride = 0; //common strides: sizeof(ui16), sizeof(ui32)
-
-	//	virtual CommandType GetCommandType() const override
-	//	{
-	//		return CommandType::BindIndexBuffer;
-	//	}
-	//};
-
-	//struct BindVertexBuffersCommand : public Command
-	//{
-	//	con::vector<mem::sptr<BufferResource>> buffers{};
-	//	con::vector<siz> offsets{};
-
-	//	virtual CommandType GetCommandType() const override
-	//	{
-	//		return CommandType::BindVertexBuffers;
-	//	}
-	//};
 
 	struct DispatchCommand : public Command
 	{
@@ -894,7 +614,7 @@ namespace np::gpu
 	{
 		mem::sptr<BufferResource> buffer = nullptr;
 		siz payloadOffset = 0;
-		siz payloadCount = 0;
+		siz payloadCount = 0; //TODO: I don't think we need this... investigate
 		siz drawCount = 1; //if payloadCount < drawCount, then only the first payload will be used for the repeated draw calls
 
 		virtual CommandType GetCommandType() const override
@@ -913,8 +633,8 @@ namespace np::gpu
 	{
 		siz indexCount = 0;
 		siz indexBeginIndex = 0;
-		siz vertexOffset = 0; //TODO: should this be i64?
-		siz instanceCount = 1; //TODO: does this have to default to 1? investigate
+		siz vertexOffset = 0;
+		siz instanceCount = 1;
 		siz instanceBeginIndex = 0;
 	};
 
@@ -922,7 +642,7 @@ namespace np::gpu
 	{
 		mem::sptr<BufferResource> buffer = nullptr;
 		siz payloadOffset = 0;
-		siz payloadCount = 0;
+		siz payloadCount = 0; //TODO: I don't think we need this... investigate
 		siz drawCount = 1; //if payloadCount < drawCount, then only the first payload will be used for the repeated draw calls
 		//TODO: ^ some devices may not support multiple draws (look at device features pg 285)
 		//TODO: ^ devices that support multiple draws will have a device limit

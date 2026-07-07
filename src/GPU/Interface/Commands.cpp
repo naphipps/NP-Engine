@@ -63,8 +63,8 @@ namespace np::gpu
 		case CommandType::BindVertexBuffers:
 			command = mem::create_sptr<__detail::VulkanBindVertexBuffersCommand>(services->GetAllocator());
 			break;
-		case CommandType::BindResourceGroup:
-			command = mem::create_sptr<__detail::VulkanBindResourceGroupCommand>(services->GetAllocator());
+		case CommandType::BindResourceGroups:
+			command = mem::create_sptr<__detail::VulkanBindResourceGroupsCommand>(services->GetAllocator());
 			break;
 
 			//general
@@ -85,29 +85,27 @@ namespace np::gpu
 		case CommandType::SetScissors:
 			command = mem::create_sptr<__detail::VulkanSetScissorsCommand>(services->GetAllocator());
 			break;
-		/*
 		case CommandType::SetRasterizationDepthBias:
-			command = mem::create_sptr<__detail::VulkanSetRasterizationDepthBiasCommand>(services->GetAllocator());
+			//command = mem::create_sptr<__detail::VulkanSetRasterizationDepthBiasCommand>(services->GetAllocator());
 			break;
 		case CommandType::SetLineWidth:
-			command = mem::create_sptr<__detail::VulkanSetLineWidthCommand>(services->GetAllocator());
+			//command = mem::create_sptr<__detail::VulkanSetLineWidthCommand>(services->GetAllocator());
 			break;
 		case CommandType::SetDepthBounds:
 			command = mem::create_sptr<__detail::VulkanSetDepthBoundsCommand>(services->GetAllocator());
 			break;
 		case CommandType::SetBlendConstants:
-			command = mem::create_sptr<__detail::VulkanSetBlendConstantsCommand>(services->GetAllocator());
+			//command = mem::create_sptr<__detail::VulkanSetBlendConstantsCommand>(services->GetAllocator());
 			break;
 		case CommandType::SetStencilCompareMask:
-			command = mem::create_sptr<__detail::VulkanSetStencilCompareMaskCommand>(services->GetAllocator());
+			//command = mem::create_sptr<__detail::VulkanSetStencilCompareMaskCommand>(services->GetAllocator());
 			break;
 		case CommandType::SetStencilWriteMask:
-			command = mem::create_sptr<__detail::VulkanSetStencilWriteMaskCommand>(services->GetAllocator());
+			//command = mem::create_sptr<__detail::VulkanSetStencilWriteMaskCommand>(services->GetAllocator());
 			break;
 		case CommandType::SetStencilReferenceValue:
-			command = mem::create_sptr<__detail::VulkanSetStencilReferenceValueCommand>(services->GetAllocator());
+			//command = mem::create_sptr<__detail::VulkanSetStencilReferenceValueCommand>(services->GetAllocator());
 			break;
-		//*/
 
 		//dispath
 		case CommandType::Dispatch:
@@ -115,6 +113,17 @@ namespace np::gpu
 			break;
 		case CommandType::IndirectDispatch:
 			command = mem::create_sptr<__detail::VulkanIndirectDispatchCommand>(services->GetAllocator());
+			break;
+
+		//flag
+		case CommandType::WaitFlags:
+			command = mem::create_sptr<__detail::VulkanWaitFlagsCommand>(services->GetAllocator());
+			break;
+		case CommandType::SetFlag:
+			command = mem::create_sptr<__detail::VulkanSetFlagCommand>(services->GetAllocator());
+			break;
+		case CommandType::ResetFlag:
+			command = mem::create_sptr<__detail::VulkanResetFlagCommand>(services->GetAllocator());
 			break;
 
 			//draw

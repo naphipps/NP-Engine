@@ -76,7 +76,7 @@ namespace np::gpu
 		//con::vector<mem::sptr<Sampler>> samplers{}; //TODO: add sampler support -- pretty sure length MUST equal count value
 		//or be empty
 
-		bl operator==(const ResourceDescription& other) const
+		bl IsCompatible(const ResourceDescription& other) const
 		{
 			return type == other.type && usage == other.usage && count == other.count && stage == other.stage;
 		}
@@ -92,64 +92,10 @@ namespace np::gpu
 
 		virtual con::vector<ResourceDescription> GetResourceDescriptions() const = 0;
 
-		//virtual bl IsCompatible(mem::sptr<ResourceLayout> other) const = 0; //TODO: do we want this? I think so
-	};
-
-	class BufferResource;
-	class ImageResource;
-	class SamplerResource;
-
-	struct BufferResourceAssignInfo
-	{
-		siz offset = 0;
-		siz range = 0;
-	};
-
-	struct ImageResourceAssignInfo
-	{
-		mem::sptr<SamplerResource> sampler = nullptr;
-		//TODO: image view?
-	};
-
-	struct ResourceGroup : public DetailObject
-	{
-		virtual ~ResourceGroup() = default;
-
-		virtual mem::sptr<ResourceLayout> GetResourceLayout() const = 0;
-
-		virtual siz GetResourceCount() const = 0;
-
-		virtual bl AssignBufferResource(siz index, mem::sptr<BufferResource> resource, BufferResourceAssignInfo info) = 0;
-
-		virtual bl AssignImageResource(siz index, mem::sptr<ImageResource> resource, ImageResourceAssignInfo info) = 0;
-
-		//virtual bl IsCompatible(mem::sptr<ResourceGroup> other) const = 0;  //TODO: do we want this? I think so
-
-		//virtual bl IsCompatible(mem::sptr<ResourceLayout> layout) const = 0;  //TODO: do we want this? I think so
-	};
-
-	struct ResourceGroupPool : public DetailObject
-	{
-		static mem::sptr<ResourceGroupPool> Create(mem::sptr<Device> device, siz size,
-												   con::vector<ResourceDescription> descriptions);
-
-		virtual ~ResourceGroupPool() = default;
-
-		virtual mem::sptr<Device> GetDevice() const = 0;
-
-		virtual siz GetSize() const = 0;
-
-		/*
-			resources pertaining to the returned ResourceGroup will return to the pool upon sptr-destroyer-object-destruct
-		*/
-		virtual mem::sptr<ResourceGroup> CreateResourceGroup(mem::sptr<ResourceLayout> layout) = 0;
-
-		/*
-			resources pertaining to the returned ResourceGroup will return to the pool upon sptr-destroyer-object-destruct
-		*/
-		virtual con::vector<mem::sptr<ResourceGroup>> CreateResourceGroups(con::vector<mem::sptr<ResourceLayout>> layouts) = 0;
-
-		//TODO: do we want a Reset method?? Vulkan supports it, but I'm not so sure
+		virtual bl IsCompatible(mem::sptr<ResourceLayout> other) const
+		{
+			return false;
+		}
 	};
 } // namespace np::gpu
 

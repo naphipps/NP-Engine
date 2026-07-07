@@ -26,6 +26,7 @@
 #include "VulkanFramebuffer.hpp"
 #include "VulkanColor.hpp"
 #include "VulkanCommandBuffer.hpp"
+#include "VulkanResourceGroup.hpp"
 
 namespace np::gpu::__detail
 {
@@ -33,9 +34,9 @@ namespace np::gpu::__detail
 
 	struct VulkanCopyBufferRange
 	{
-		siz dstOffset = 0;
-		siz srcOffset = 0;
-		siz size = 0;
+		siz dstOffset;
+		siz srcOffset;
+		siz size;
 
 		VulkanCopyBufferRange(const CopyBufferRange& other = {}):
 			dstOffset(other.dstOffset),
@@ -63,12 +64,18 @@ namespace np::gpu::__detail
 			mem::sptr<VulkanBufferResource> dst = EnsureIsDetailType(this->dst, DetailType::Vulkan);
 			mem::sptr<VulkanBufferResource> src = EnsureIsDetailType(this->src, DetailType::Vulkan);
 
-			con::vector<VkBufferCopy> ranges(this->ranges.size());
-			for (siz i = 0; i < ranges.size(); i++)
-				ranges[i] = VulkanCopyBufferRange{this->ranges[i]}.GetVkBufferCopy();
+			bl applied = false;
+			if (src && dst)
+			{
+				con::vector<VkBufferCopy> ranges(this->ranges.size());
+				for (siz i = 0; i < ranges.size(); i++)
+					ranges[i] = VulkanCopyBufferRange{ this->ranges[i] }.GetVkBufferCopy();
 
-			vkCmdCopyBuffer(*command_buffer, *src, *dst, ranges.size(), ranges.empty() ? nullptr : ranges.data());
-			return true;
+				vkCmdCopyBuffer(*command_buffer, *src, *dst, ranges.size(), ranges.empty() ? nullptr : ranges.data());
+				applied = true;
+			}
+
+			return applied;
 		}
 
 	public:
@@ -80,6 +87,73 @@ namespace np::gpu::__detail
 		virtual bl IsPrepared() const override
 		{
 			return true;
+		}
+	};
+
+	struct VulkanCopyImageLayers
+	{
+		ui32 mipLayer;
+		ui32 layerCount;
+		ui32 layerBeginIndex;
+
+		VulkanCopyImageLayers(const CopyImageLayers& other = {}) :
+			mipLayer(other.mipLayer),
+			layerCount(other.layerCount),
+			layerBeginIndex(other.layerBeginIndex)
+		{}
+
+		operator CopyImageLayers() const
+		{
+			return { mipLayer, layerCount, layerBeginIndex };
+		}
+
+		/*
+			NOTE: caller must set aspectMask
+		*/
+		VkImageSubresourceLayers GetVkImageSubresourceLayers() const
+		{
+			return { VK_IMAGE_ASPECT_FLAG_BITS_MAX_ENUM, mipLayer, layerBeginIndex, layerCount };
+		}
+	};
+
+	struct VulkanCopyImageRange
+	{
+		VkOffset3D dstOffset;
+		VkOffset3D srcOffset;
+		VkExtent3D size;
+		VulkanCopyImageLayers dstLayers;
+		VulkanCopyImageLayers srcLayers;
+
+		VulkanCopyImageRange(const CopyImageRange& other = {}) :
+			dstOffset(other.dstOffset.x, other.dstOffset.y, other.dstOffset.z),
+			srcOffset(other.srcOffset.x, other.srcOffset.y, other.srcOffset.z),
+			size(other.size.x, other.size.y, other.size.z),
+			dstLayers(other.dstLayers),
+			srcLayers(other.srcLayers)
+		{}
+
+		operator CopyImageRange() const
+		{
+			return
+			{ 
+				{dstOffset.x, dstOffset.y, dstOffset.z},
+				{srcOffset.x, srcOffset.y, srcOffset.z},
+				{size.width, size.height, size.depth},
+				dstLayers, srcLayers
+			};
+		}
+
+		/*
+			NOTE: caller must set aspectMask for both dstSubresource and srcSubresource
+		*/
+		VkImageCopy GetVkImageCopy() const
+		{
+			return
+			{ 
+				srcLayers.GetVkImageSubresourceLayers(), srcOffset,
+				dstLayers.GetVkImageSubresourceLayers(), dstOffset,
+				size
+			};
 		}
 	};
 
@@ -88,8 +162,31 @@ namespace np::gpu::__detail
 	protected:
 		virtual bl ApplyTo(const CommandBuffer* command_buffer_) override
 		{
-			//vkCmdCopyImage(command_buffer, src, src_layout, dst, dst_layout, ranges.size, ranges.data); //TODO: implement
-			return false;
+			const VulkanCommandBuffer* command_buffer = static_cast<const VulkanCommandBuffer*>(command_buffer_);
+			mem::sptr<VulkanImageResource> dst = EnsureIsDetailType(this->dst, DetailType::Vulkan);
+			mem::sptr<VulkanImageResource> src = EnsureIsDetailType(this->src, DetailType::Vulkan);
+
+			bl applied = false;
+			if (dst && src)
+			{
+				const VulkanImageResourceUsage dst_usage{ dstUsage };
+				const VulkanImageResourceUsage src_usage{ srcUsage };
+
+				con::vector<VkImageCopy> ranges(this->ranges.size());
+				for (siz i = 0; i < ranges.size(); i++)
+				{
+					ranges[i] = VulkanCopyImageRange{ this->ranges[i] }.GetVkImageCopy();
+					ranges[i].dstSubresource.aspectMask = dst_usage.GetVkAspectFlags();
+					ranges[i].srcSubresource.aspectMask = src_usage.GetVkAspectFlags();
+				}
+				
+				vkCmdCopyImage(*command_buffer, *src, src_usage.GetVkImageLayout(),
+					*dst, dst_usage.GetVkImageLayout(),
+					ranges.size(), ranges.empty() ? nullptr : ranges.data());
+				applied = true;
+			}
+
+			return applied;
 		}
 
 	public:
@@ -101,6 +198,47 @@ namespace np::gpu::__detail
 		virtual bl IsPrepared() const override
 		{
 			return true;
+		}
+	};
+
+	struct VulkanCopyBufferToImageRange
+	{
+		VkOffset3D imageOffset;
+		VkExtent3D imageSize;
+		VulkanCopyImageLayers imageLayers;
+		siz bufferOffset;
+		ui32 bufferRowCount;
+		ui32 bufferRowLength;
+
+		VulkanCopyBufferToImageRange(const CopyBufferToImageRange& other = {}):
+			imageOffset(other.imageOffset.x, other.imageOffset.y, other.imageOffset.z),
+			imageSize(other.imageSize.x, other.imageSize.y, other.imageSize.z),
+			imageLayers(other.imageLayers),
+			bufferOffset(other.bufferOffset),
+			bufferRowCount(other.bufferRowCount),
+			bufferRowLength(other.bufferRowLength)
+		{}
+
+		operator CopyBufferToImageRange() const
+		{
+			return
+			{
+				{imageOffset.x,imageOffset.y, imageOffset.z},
+				{imageSize.width, imageSize.height, imageSize.depth},
+				imageLayers, bufferOffset, bufferRowCount, bufferRowLength
+			};
+		}
+
+		/*
+			NOTE: caller must set aspectMask for imageSubresource
+		*/
+		VkBufferImageCopy GetVkBufferImageCopy() const
+		{
+			return
+			{
+				bufferOffset, bufferRowLength, bufferRowCount,
+				imageLayers.GetVkImageSubresourceLayers(), imageOffset, imageSize
+			};
 		}
 	};
 
@@ -109,9 +247,28 @@ namespace np::gpu::__detail
 	protected:
 		virtual bl ApplyTo(const CommandBuffer* command_buffer_) override
 		{
-			//vkCmdCopyBufferToImage(command_buffer, srcBuffer, dstImage, dstImageLayout, (ui32)regions.size(), regions.data());
-			////TODO: implement
-			return false;
+			const VulkanCommandBuffer* command_buffer = static_cast<const VulkanCommandBuffer*>(command_buffer_);
+			mem::sptr<VulkanImageResource> image = EnsureIsDetailType(this->image, DetailType::Vulkan);
+			mem::sptr<VulkanBufferResource> buffer = EnsureIsDetailType(this->buffer, DetailType::Vulkan);
+
+			bl applied = false;
+			if (image && buffer)
+			{
+				const VulkanImageResourceUsage image_usage{ imageUsage };
+
+				con::vector<VkBufferImageCopy> ranges(this->ranges.size());
+				for (siz i = 0; i < ranges.size(); i++)
+				{
+					ranges[i] = VulkanCopyBufferToImageRange{ this->ranges[i] }.GetVkBufferImageCopy();
+					ranges[i].imageSubresource.aspectMask = image_usage.GetVkAspectFlags();
+				}
+
+				vkCmdCopyBufferToImage(*command_buffer, *buffer, *image, image_usage.GetVkImageLayout(),
+					ranges.size(), ranges.empty() ? nullptr : ranges.data());
+				applied = true;
+			}
+
+			return applied;
 		}
 
 	public:
@@ -126,13 +283,35 @@ namespace np::gpu::__detail
 		}
 	};
 
+	using VulkanCopyImageToBufferRange = VulkanCopyBufferToImageRange;
+
 	class VulkanCopyImageToBufferCommand : public CopyImageToBufferCommand
 	{
 	protected:
 		virtual bl ApplyTo(const CommandBuffer* command_buffer_) override
 		{
-			//vkCmdCopyImageToBuffer(command_buffer, src, src_layout, dst, ranges.size, ranges.data); //TODO: implement
-			return false;
+			const VulkanCommandBuffer* command_buffer = static_cast<const VulkanCommandBuffer*>(command_buffer_);
+			mem::sptr<VulkanImageResource> image = EnsureIsDetailType(this->image, DetailType::Vulkan);
+			mem::sptr<VulkanBufferResource> buffer = EnsureIsDetailType(this->buffer, DetailType::Vulkan);
+
+			bl applied = false;
+			if (buffer && image)
+			{
+				const VulkanImageResourceUsage image_usage{ imageUsage };
+
+				con::vector<VkBufferImageCopy> ranges(this->ranges.size());
+				for (siz i = 0; i < ranges.size(); i++)
+				{
+					ranges[i] = VulkanCopyImageToBufferRange{ this->ranges[i] }.GetVkBufferImageCopy();
+					ranges[i].imageSubresource.aspectMask = image_usage.GetVkAspectFlags();
+				}
+
+				vkCmdCopyImageToBuffer(*command_buffer, *image, image_usage.GetVkImageLayout(), *buffer, 
+					ranges.size(), ranges.empty() ? nullptr : ranges.data());
+				applied = true;
+			}
+
+			return applied;
 		}
 
 	public:
@@ -153,12 +332,10 @@ namespace np::gpu::__detail
 		virtual bl ApplyTo(const CommandBuffer* command_buffer_) override
 		{
 			const VulkanCommandBuffer* command_buffer = static_cast<const VulkanCommandBuffer*>(command_buffer_);
-
-			bl applied = true;
 			mem::sptr<VulkanBufferResource> buffer = EnsureIsDetailType(this->buffer, DetailType::Vulkan);
-			if (buffer)
+			bl applied = true;
+			if (buffer && offset < buffer->GetSize() && offset + count <= buffer->GetSize())
 			{
-				//TODO: ensure the filled region is within the buffer
 				vkCmdFillBuffer(*command_buffer, *buffer, offset, count, value);
 				applied = true;
 			}
@@ -183,12 +360,10 @@ namespace np::gpu::__detail
 		virtual bl ApplyTo(const CommandBuffer* command_buffer_) override
 		{
 			const VulkanCommandBuffer* command_buffer = static_cast<const VulkanCommandBuffer*>(command_buffer_);
-
-			bl applied = true;
 			mem::sptr<VulkanBufferResource> buffer = EnsureIsDetailType(this->buffer, DetailType::Vulkan);
-			if (buffer)
+			bl applied = true;
+			if (buffer && offset < buffer->GetSize() && offset + values.size() <= buffer->GetSize())
 			{
-				//TODO: ensure the updated region is within the buffer
 				vkCmdUpdateBuffer(*command_buffer, *buffer, offset, values.size(), values.empty() ? nullptr : values.data());
 				applied = true;
 			}
@@ -206,22 +381,6 @@ namespace np::gpu::__detail
 			return true;
 		}
 	};
-
-	/*typedef struct VkOffset2D {
-		int32_t    x;
-		int32_t    y;
-	} VkOffset2D;
-
-	typedef struct VkOffset3D {
-		int32_t    x;
-		int32_t    y;
-		int32_t    z;
-	} VkOffset3D;
-
-	typedef struct VkRect2D {
-		VkOffset2D    offset;
-		VkExtent2D    extent;
-	} VkRect2D;*/
 
 	struct VulkanRenderArea
 	{
@@ -266,7 +425,7 @@ namespace np::gpu::__detail
 
 			if (framebuffer)
 			{
-				const VulkanSubpassUsage usage = (ui32)this->usage;
+				const VulkanSubpassUsage usage{ this->usage };
 				const VulkanRenderArea render_area = renderArea;
 
 				con::vector<VkClearValue> clear_values(clearColors.size());
@@ -322,8 +481,10 @@ namespace np::gpu::__detail
 	protected:
 		virtual bl ApplyTo(const CommandBuffer* command_buffer_) override
 		{
-			//vkCmdNextSubpass(command_buffer, subpass_contents); //TODO: implement
-			return false;
+			const VulkanCommandBuffer* command_buffer = static_cast<const VulkanCommandBuffer*>(command_buffer_);
+			VulkanSubpassUsage usage{ this->usage };
+			vkCmdNextSubpass(*command_buffer, usage.GetVkSubpassContents());
+			return true;
 		}
 
 	public:
@@ -457,15 +618,67 @@ namespace np::gpu::__detail
 		}
 	};
 
-	class VulkanBindResourceGroupCommand : public BindResourceGroupCommand
+	class VulkanBindResourceGroupsCommand : public BindResourceGroupsCommand
 	{
 	protected:
 		virtual bl ApplyTo(const CommandBuffer* command_buffer_) override
 		{
-			//TODO: implement vkCmdBindDescriptorSets
-			//vkCmdBindDescriptorSets(command_buffer, pipelineBindPoint, pipelineLayout, firstSet, (ui32)descriptorSets.size(),
-			//descriptorSets.data(), (ui32)dynamicOffsets.size(), dynamicOffsets.data());
-			return false;
+			const VulkanCommandBuffer* command_buffer = static_cast<const VulkanCommandBuffer*>(command_buffer_);
+			bl applied = false;
+
+			if (pipeline && EnsureIsDetailType(pipeline, DetailType::Vulkan) != nullptr)
+			{
+				VulkanPipelineUsage pipeline_usage = VulkanPipelineUsage::None;
+				switch (pipeline->GetPipelineType())
+				{
+				case PipelineType::Graphics:
+					pipeline_usage = VulkanPipelineUsage::Graphics;
+					break;
+
+				case PipelineType::Compute:
+					pipeline_usage = VulkanPipelineUsage::Compute;
+					break;
+				}
+
+				if (!pipeline_usage.Equals(VulkanPipelineUsage::None))
+				{
+					mem::sptr<VulkanPipelineResourceLayout> layout = EnsureIsDetailType(pipeline->GetPipelineResourceLayout(), DetailType::Vulkan);
+
+					if (layout)
+					{
+						const con::vector<mem::sptr<ResourceLayout>> resource_layouts = layout->GetResourceLayouts();
+						bl is_compatible = resource_layouts.size() >= resourceLayoutBeginIndex + resourceGroups.size();
+
+						con::vector<VkDescriptorSet> sets(resourceGroups.size());
+						for (siz i = 0; is_compatible && i < sets.size(); i++)
+						{
+							mem::sptr<VulkanResourceGroup> resource_group = resourceGroups[i];
+							mem::sptr<ResourceLayout> resource_layout = resource_layouts[resourceLayoutBeginIndex + i];
+							is_compatible &= resource_group->IsCompatible(resource_layout);
+							sets[i] = *resource_group;
+						}
+
+						if (is_compatible)
+						{
+							con::vector<ui32> offsets(dynamicResourceOffsets.size());
+							for (siz i = 0; i < offsets.size(); i++)
+								offsets[i] = static_cast<ui32>(dynamicResourceOffsets[i]);
+
+							/*
+								TODO: check if offsets are compatible here?
+									- I know/am-pretty-sure offsets.size() must equal sets.size()
+							*/
+
+							vkCmdBindDescriptorSets(*command_buffer, pipeline_usage.GetVkPipelineBindPoint(), *layout, 0,
+								sets.size(), sets.empty() ? nullptr : sets.data(),
+								offsets.size(), offsets.empty() ? nullptr : offsets.data());
+							applied = true;
+						}
+					}
+				}
+			}
+
+			return applied;
 		}
 
 	public:
@@ -504,11 +717,11 @@ namespace np::gpu::__detail
 
 	struct VulkanBufferBarrier : public VulkanBarrier
 	{
-		mem::sptr<VulkanBufferResource> buffer = nullptr;
-		ui32 offset = 0;
-		ui32 size = 0; //SIZ_MAX equates to the remaining portion of the buffer after offset (aka, VK_WHOLE_SIZE)
-		DeviceQueueFamily dstQueueFamily{};
-		DeviceQueueFamily srcQueueFamily{};
+		mem::sptr<VulkanBufferResource> buffer;
+		siz offset;
+		siz size;
+		DeviceQueueFamily dstQueueFamily;
+		DeviceQueueFamily srcQueueFamily;
 
 		VulkanBufferBarrier(const BufferBarrier& other = {}):
 			VulkanBarrier(other),
@@ -541,13 +754,13 @@ namespace np::gpu::__detail
 
 	struct VulkanImageBarrier : public VulkanBarrier
 	{
-		mem::sptr<VulkanImageResource> image = nullptr;
+		mem::sptr<VulkanImageResource> image;
 		//TODO: add image layout fields?
 		//TODO: add subresource range field?
-		DeviceQueueFamily dstQueueFamily{};
-		DeviceQueueFamily srcQueueFamily{};
+		DeviceQueueFamily dstQueueFamily;
+		DeviceQueueFamily srcQueueFamily;
 
-		VulkanImageBarrier(const ImageBarrier& other):
+		VulkanImageBarrier(const ImageBarrier& other = {}) :
 			image(other.image),
 			dstQueueFamily(other.dstQueueFamily),
 			srcQueueFamily(other.srcQueueFamily)
@@ -583,8 +796,8 @@ namespace np::gpu::__detail
 				TODO: note that image layout changes are considered a color write access
 			*/
 			const VulkanCommandBuffer* command_buffer = static_cast<const VulkanCommandBuffer*>(command_buffer_);
-			const VulkanStage dstStage{this->dstStage};
-			const VulkanStage srcStage{this->srcStage};
+			const VulkanStage dst_stage{dstStage};
+			const VulkanStage src_stage{srcStage};
 
 			con::vector<VkMemoryBarrier> vk_barriers(barriers.size());
 			for (siz i = 0; i < vk_barriers.size(); i++)
@@ -598,7 +811,7 @@ namespace np::gpu::__detail
 			for (siz i = 0; i < vk_image_barriers.size(); i++)
 				vk_image_barriers[i] = VulkanImageBarrier{imageBarriers[i]}.GetVkImageMemoryBarrier();
 
-			vkCmdPipelineBarrier(*command_buffer, srcStage.GetVkPipelineStageFlags(), dstStage.GetVkPipelineStageFlags(),
+			vkCmdPipelineBarrier(*command_buffer, src_stage.GetVkPipelineStageFlags(), dst_stage.GetVkPipelineStageFlags(),
 								 0, //TODO: do we want to do anything with this?
 								 vk_barriers.size(), vk_barriers.empty() ? nullptr : vk_barriers.data(),
 								 vk_buffer_barriers.size(), vk_buffer_barriers.empty() ? nullptr : vk_buffer_barriers.data(),
@@ -693,7 +906,7 @@ namespace np::gpu::__detail
 			for (siz i = 0; i < viewports.size(); i++)
 				viewports[i] = VulkanViewport{this->viewports[i]}.GetVkViewport();
 
-			vkCmdSetViewport(*command_buffer, 0, viewports.size(), viewports.empty() ? nullptr : viewports.data());
+			vkCmdSetViewport(*command_buffer, viewportBeginIndex, viewports.size(), viewports.empty() ? nullptr : viewports.data());
 			return true;
 		}
 
@@ -719,7 +932,7 @@ namespace np::gpu::__detail
 			for (siz i = 0; i < scissors.size(); i++)
 				scissors[i] = VulkanScissor{this->scissors[i]}.GetVkRect2D();
 
-			vkCmdSetScissor(*command_buffer, 0, scissors.size(), scissors.empty() ? nullptr : scissors.data());
+			vkCmdSetScissor(*command_buffer, scissorBeginIndex, scissors.size(), scissors.empty() ? nullptr : scissors.data());
 			return true;
 		}
 
@@ -785,8 +998,8 @@ namespace np::gpu::__detail
 		virtual bl ApplyTo(const CommandBuffer* command_buffer_) override
 		{
 			const VulkanCommandBuffer* command_buffer = static_cast<const VulkanCommandBuffer*>(command_buffer_);
-			bl applied = false;
 			mem::sptr<VulkanBufferResource> buffer = EnsureIsDetailType(this->buffer, DetailType::Vulkan);
+			bl applied = false;
 			if (buffer)
 			{
 				vkCmdDispatchIndirect(*command_buffer, *buffer, offset);
@@ -807,9 +1020,6 @@ namespace np::gpu::__detail
 		}
 	};
 
-
-
-
 	class VulkanWaitFlagsCommand : public WaitFlagsCommand
 	{
 	protected:
@@ -819,32 +1029,42 @@ namespace np::gpu::__detail
 				TODO: note that image layout changes are considered a color write access
 			*/
 			const VulkanCommandBuffer* command_buffer = static_cast<const VulkanCommandBuffer*>(command_buffer_);
-			const VulkanStage dstStage{ this->dstStage };
-			const VulkanStage srcStage{ this->srcStage };
+			const VulkanStage dst_stage{ dstStage };
+			const VulkanStage src_stage{ srcStage };
+			bl applied = false;
 
+			bl found_nullptr = false;
 			con::vector<VkEvent> vk_flags(flags.size());
-			for (siz i = 0; i < vk_flags.size(); i++)
-				vk_flags[i] = *mem::sptr<VulkanFlag>{ flags[i] };
+			for (siz i = 0; !found_nullptr && i < vk_flags.size(); i++)
+			{
+				mem::sptr<VulkanFlag> flag = EnsureIsDetailType(flags[i], DetailType::Vulkan);
+				vk_flags[i] = flag ? *flag : nullptr;
+				found_nullptr |= vk_flags[i] == nullptr;
+			}
 
-			con::vector<VkMemoryBarrier> vk_barriers(barriers.size());
-			for (siz i = 0; i < vk_barriers.size(); i++)
-				vk_barriers[i] = VulkanBarrier{ barriers[i] }.GetVkMemoryBarrier();
+			if (found_nullptr)
+			{
+				con::vector<VkMemoryBarrier> vk_barriers(barriers.size());
+				for (siz i = 0; i < vk_barriers.size(); i++)
+					vk_barriers[i] = VulkanBarrier{ barriers[i] }.GetVkMemoryBarrier();
 
-			con::vector<VkBufferMemoryBarrier> vk_buffer_barriers(bufferBarriers.size());
-			for (siz i = 0; i < vk_buffer_barriers.size(); i++)
-				vk_buffer_barriers[i] = VulkanBufferBarrier{ bufferBarriers[i] }.GetVkBufferMemoryBarrier();
+				con::vector<VkBufferMemoryBarrier> vk_buffer_barriers(bufferBarriers.size());
+				for (siz i = 0; i < vk_buffer_barriers.size(); i++)
+					vk_buffer_barriers[i] = VulkanBufferBarrier{ bufferBarriers[i] }.GetVkBufferMemoryBarrier();
 
-			con::vector<VkImageMemoryBarrier> vk_image_barriers(imageBarriers.size());
-			for (siz i = 0; i < vk_image_barriers.size(); i++)
-				vk_image_barriers[i] = VulkanImageBarrier{ imageBarriers[i] }.GetVkImageMemoryBarrier();
+				con::vector<VkImageMemoryBarrier> vk_image_barriers(imageBarriers.size());
+				for (siz i = 0; i < vk_image_barriers.size(); i++)
+					vk_image_barriers[i] = VulkanImageBarrier{ imageBarriers[i] }.GetVkImageMemoryBarrier();
 
-			vkCmdWaitEvents(*command_buffer, vk_flags.size(), vk_flags.empty() ? nullptr : vk_flags.data(),
-				srcStage.GetVkPipelineStageFlags(), dstStage.GetVkPipelineStageFlags(),
-				vk_barriers.size(), vk_barriers.empty() ? nullptr : vk_barriers.data(),
-				vk_buffer_barriers.size(), vk_buffer_barriers.empty() ? nullptr : vk_buffer_barriers.data(),
-				vk_image_barriers.size(), vk_image_barriers.empty() ? nullptr : vk_image_barriers.data());
+				vkCmdWaitEvents(*command_buffer, vk_flags.size(), vk_flags.empty() ? nullptr : vk_flags.data(),
+					src_stage.GetVkPipelineStageFlags(), dst_stage.GetVkPipelineStageFlags(),
+					vk_barriers.size(), vk_barriers.empty() ? nullptr : vk_barriers.data(),
+					vk_buffer_barriers.size(), vk_buffer_barriers.empty() ? nullptr : vk_buffer_barriers.data(),
+					vk_image_barriers.size(), vk_image_barriers.empty() ? nullptr : vk_image_barriers.data());
+				applied = true;
+			}
 
-			return true;
+			return applied;
 		}
 
 	public:
@@ -865,17 +1085,15 @@ namespace np::gpu::__detail
 		virtual bl ApplyTo(const CommandBuffer* command_buffer_) override
 		{
 			const VulkanCommandBuffer* command_buffer = static_cast<const VulkanCommandBuffer*>(command_buffer_);
+			mem::sptr<VulkanFlag> flag = EnsureIsDetailType(this->flag, DetailType::Vulkan);
 			bl applied = false;
-			mem::sptr<VulkanFlag> flag = this->flag;
-			VulkanStage stage{ this->stage };
-
 			if (flag)
 			{
+				VulkanStage stage{ this->stage };
 				vkCmdSetEvent(*command_buffer, *flag, stage.GetVkPipelineStageFlags());
 				applied = true;
 			}
-
-			return true;
+			return applied;
 		}
 
 	public:
@@ -896,16 +1114,14 @@ namespace np::gpu::__detail
 		virtual bl ApplyTo(const CommandBuffer* command_buffer_) override
 		{
 			const VulkanCommandBuffer* command_buffer = static_cast<const VulkanCommandBuffer*>(command_buffer_);
+			mem::sptr<VulkanFlag> flag = EnsureIsDetailType(this->flag, DetailType::Vulkan);
 			bl applied = false;
-			mem::sptr<VulkanFlag> flag = this->flag;
-			VulkanStage stage{ this->stage };
-
 			if (flag)
 			{
+				VulkanStage stage{ this->stage };
 				vkCmdResetEvent(*command_buffer, *flag, stage.GetVkPipelineStageFlags());
 				applied = true;
 			}
-
 			return applied;
 		}
 
@@ -967,12 +1183,12 @@ namespace np::gpu::__detail
 
 	struct VulkanDrawIndirectCommandPayload
 	{
-		ui32 vertexCount = 0;
-		ui32 vertexBeginIndex = 0;
-		ui32 instanceCount = 0; //TODO: does this have to default to 1? investigate
-		ui32 instanceBeginIndex = 0;
+		ui32 vertexCount;
+		ui32 vertexBeginIndex;
+		ui32 instanceCount;
+		ui32 instanceBeginIndex;
 
-		VulkanDrawIndirectCommandPayload(const DrawIndirectCommandPayload& other):
+		VulkanDrawIndirectCommandPayload(const DrawIndirectCommandPayload& other = {}) :
 			vertexCount(other.vertexCount),
 			vertexBeginIndex(other.vertexBeginIndex),
 			instanceCount(other.instanceCount),
@@ -998,9 +1214,9 @@ namespace np::gpu::__detail
 		virtual bl ApplyTo(const CommandBuffer* command_buffer_) override
 		{
 			const VulkanCommandBuffer* command_buffer = static_cast<const VulkanCommandBuffer*>(command_buffer_);
-			bl applied = false;
 			mem::sptr<VulkanBufferResource> buffer = EnsureIsDetailType(this->buffer, DetailType::Vulkan);
-			if (buffer) //TODO: I'm assuming this is all correct -- investigate
+			bl applied = false;
+			if (buffer)
 			{
 				vkCmdDrawIndirect(*command_buffer, *buffer, payloadOffset, drawCount, sizeof(VkDrawIndirectCommand));
 				applied = true;
@@ -1017,14 +1233,14 @@ namespace np::gpu::__detail
 		/*
 			required to call this before adding to a command buffer
 			this methods sets payloadOffset and payloadCount
+			this method DOES NOT call buffer's ClearCacheForDevice
 		*/
 		virtual bl Prepare(siz offset, const con::vector<DrawIndirectCommandPayload>& payloads_) override
 		{
 			//TODO: I'm assuming this is all correct -- investigate
-
-			prepared = false;
 			mem::sptr<VulkanBufferResource> buffer = EnsureIsDetailType(this->buffer, DetailType::Vulkan);
-
+			prepared = false;
+			
 			if (buffer)
 			{
 				con::vector<VkDrawIndirectCommand> payloads(payloads_.size());
@@ -1034,7 +1250,7 @@ namespace np::gpu::__detail
 				con::vector<ui8> bytes(payloads.size() * sizeof(VkDrawIndirectCommand));
 				mem::copy_bytes(bytes.data(), payloads.data(), bytes.size());
 				prepared = buffer->SetBytes(offset, bytes);
-
+				
 				if (prepared)
 				{
 					payloadOffset = offset;
@@ -1053,13 +1269,13 @@ namespace np::gpu::__detail
 
 	struct VulkanDrawIndexedIndirectCommandPayload
 	{
-		ui32 indexCount = 0;
-		ui32 indexBeginIndex = 0;
-		i32 vertexOffset = 0;
-		ui32 instanceCount = 0;
-		ui32 instanceBeginIndex = 0;
+		ui32 indexCount;
+		ui32 indexBeginIndex;
+		i32 vertexOffset;
+		ui32 instanceCount;
+		ui32 instanceBeginIndex;
 
-		VulkanDrawIndexedIndirectCommandPayload(const DrawIndexedIndirectCommandPayload& other):
+		VulkanDrawIndexedIndirectCommandPayload(const DrawIndexedIndirectCommandPayload& other = {}) :
 			indexCount(other.indexCount),
 			indexBeginIndex(other.indexBeginIndex),
 			vertexOffset(other.vertexOffset),
@@ -1086,8 +1302,8 @@ namespace np::gpu::__detail
 		virtual bl ApplyTo(const CommandBuffer* command_buffer_) override
 		{
 			const VulkanCommandBuffer* command_buffer = static_cast<const VulkanCommandBuffer*>(command_buffer_);
-			bl applied = false;
 			mem::sptr<VulkanBufferResource> buffer = EnsureIsDetailType(this->buffer, DetailType::Vulkan);
+			bl applied = false;
 			if (buffer)
 			{
 				vkCmdDrawIndexedIndirect(*command_buffer, *buffer, payloadOffset, drawCount,
@@ -1106,13 +1322,13 @@ namespace np::gpu::__detail
 		/*
 			required to call this before adding to a command buffer
 			this methods sets payloadOffset and payloadCount
+			this method DOES NOT call buffer's ClearCacheForDevice
 		*/
 		virtual bl Prepare(siz offset, const con::vector<DrawIndexedIndirectCommandPayload>& payloads_) override
 		{
 			//TODO: I'm assuming this is all correct -- investigate
-
-			prepared = false;
 			mem::sptr<VulkanBufferResource> buffer = EnsureIsDetailType(this->buffer, DetailType::Vulkan);
+			prepared = false;
 
 			if (buffer)
 			{

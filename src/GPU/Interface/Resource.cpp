@@ -31,23 +31,4 @@ namespace np::gpu
 
 		return layout;
 	}
-
-	mem::sptr<ResourceGroupPool> ResourceGroupPool::Create(mem::sptr<Device> device, siz size,
-														   con::vector<ResourceDescription> descriptions)
-	{
-		mem::sptr<ResourceGroupPool> pool = nullptr;
-
-		switch (device->GetDetailType())
-		{
-		case DetailType::Vulkan:
-			pool = mem::create_sptr<__detail::VulkanResourceGroupPool>(device->GetServices()->GetAllocator(), device, size,
-																	   descriptions);
-			break;
-
-		default:
-			break;
-		}
-
-		return pool;
-	}
 } // namespace np::gpu

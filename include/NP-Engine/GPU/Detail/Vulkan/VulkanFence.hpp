@@ -43,10 +43,7 @@ namespace np::gpu::__detail
 		}
 
 	public:
-		VulkanFence(mem::sptr<VulkanLogicalDevice> device): _device(device), _fence(CreateVkFence(_device))
-		{
-			Reset();
-		}
+		VulkanFence(mem::sptr<VulkanLogicalDevice> device): _device(device), _fence(CreateVkFence(_device)) {}
 
 		~VulkanFence()
 		{

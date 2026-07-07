@@ -146,8 +146,8 @@ namespace np::gpu::__detail
 				info.minImageCount = ::std::min(image_count, max_image_count);
 
 				mem::sptr<VulkanInstance> instance = device->GetDetailInstance();
-				VkResult result = vkCreateSwapchainKHR(*device->GetLogicalDevice(), &info, instance->GetVulkanAllocationCallbacks(), &swapchain);
-				if (result != VK_SUCCESS)
+				VulkanResult result = vkCreateSwapchainKHR(*device->GetLogicalDevice(), &info, instance->GetVulkanAllocationCallbacks(), &swapchain);
+				if (!result.Contains(VulkanResult::Success))
 					swapchain = nullptr;
 			}
 			return swapchain;
