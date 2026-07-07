@@ -21,7 +21,7 @@
 
 namespace np::gpu::__detail
 {
-	class VulkanResourceType : public ResourceType
+	class VulkanResourceType : public ResourceType //TODO: I think we can remove VulkanResourceType
 	{
 	public:
 		VulkanResourceType(ui32 value): ResourceType(value) {}
@@ -29,7 +29,7 @@ namespace np::gpu::__detail
 		//TODO: get Vk things
 	};
 
-	class VulkanResourceUsage : public ResourceUsage
+	class VulkanResourceUsage : public ResourceUsage  //TODO: I think we can remove VulkanResourceUsage
 	{
 	public:
 		VulkanResourceUsage(ui32 value): ResourceUsage(value) {}
@@ -71,8 +71,8 @@ namespace np::gpu::__detail
 
 	struct VulkanResourceDescription
 	{
-		VulkanResourceType type = VulkanResourceType::None;
-		VulkanResourceUsage usage = VulkanResourceUsage::None;
+		VulkanResourceType type = VulkanResourceType::None; //TODO: we might be just fine with ResourceType
+		VulkanResourceUsage usage = VulkanResourceUsage::None; //TODO: we might be just fine with ResourceUsage
 		ui32 count = 0;
 		VulkanStage stage = VulkanStage::None;
 
