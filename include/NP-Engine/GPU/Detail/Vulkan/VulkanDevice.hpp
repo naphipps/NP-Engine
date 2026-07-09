@@ -271,16 +271,20 @@ namespace np::gpu::__detail
 		bl ClearCacheForDevice(siz offset, siz size)
 		{
 			const VkPhysicalDeviceProperties properties = _memory->GetLogicalDevice()->GetPhysicalDevice().GetVkProperties();
-			VulkanDeviceMemoryRegion region{ _region.offset + offset,
-				mem::calc_aligned_size(size, properties.limits.nonCoherentAtomSize) };
+			VulkanDeviceMemoryRegion region{
+				((_region.offset + offset) / properties.limits.nonCoherentAtomSize) * properties.limits.nonCoherentAtomSize,
+				mem::calc_aligned_size(size, properties.limits.nonCoherentAtomSize)
+			};
 			return _memory->ClearCacheForDevice(region);
 		}
 
 		bl ClearCacheForHost(siz offset, siz size)
 		{
 			const VkPhysicalDeviceProperties properties = _memory->GetLogicalDevice()->GetPhysicalDevice().GetVkProperties();
-			VulkanDeviceMemoryRegion region{ _region.offset + offset,
-				mem::calc_aligned_size(size, properties.limits.nonCoherentAtomSize) };
+			VulkanDeviceMemoryRegion region{
+				((_region.offset + offset) / properties.limits.nonCoherentAtomSize)* properties.limits.nonCoherentAtomSize,
+				mem::calc_aligned_size(size, properties.limits.nonCoherentAtomSize)
+			};
 			return _memory->ClearCacheForHost(region);
 		}
 	};

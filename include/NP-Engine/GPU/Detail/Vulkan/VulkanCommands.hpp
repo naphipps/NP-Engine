@@ -90,41 +90,67 @@ namespace np::gpu::__detail
 		}
 	};
 
-	struct VulkanCopyImageLayers
+	struct VulkanImageLayers
 	{
-		ui32 mipLayer;
+		VulkanImageResourceUsage usage;
+		ui32 mipLevel;
 		ui32 layerCount;
 		ui32 layerBeginIndex;
 
-		VulkanCopyImageLayers(const CopyImageLayers& other = {}) :
-			mipLayer(other.mipLayer),
+		VulkanImageLayers(const ImageLayers& other = {}) :
+			usage(other.usage),
+			mipLevel(other.mipLevel),
 			layerCount(other.layerCount),
 			layerBeginIndex(other.layerBeginIndex)
 		{}
 
-		operator CopyImageLayers() const
+		operator ImageLayers() const
 		{
-			return { mipLayer, layerCount, layerBeginIndex };
+			return { usage, mipLevel, layerCount, layerBeginIndex };
 		}
 
-		/*
-			NOTE: caller must set aspectMask
-		*/
 		VkImageSubresourceLayers GetVkImageSubresourceLayers() const
 		{
-			return { VK_IMAGE_ASPECT_FLAG_BITS_MAX_ENUM, mipLayer, layerBeginIndex, layerCount };
+			return { usage.GetVkAspectFlags(), mipLevel, layerBeginIndex, layerCount};
 		}
 	};
 
-	struct VulkanCopyImageRange
+	struct VulkanImageRange
+	{
+		VulkanImageResourceUsage usage;
+		ui32 mipCount;
+		ui32 mipBeginIndex;
+		ui32 layerCount;
+		ui32 layerBeginIndex;
+
+		VulkanImageRange(const ImageRange& other = {}):
+			usage(other.usage),
+			mipCount(other.mipCount),
+			mipBeginIndex(other.mipBeginIndex),
+			layerCount(other.layerCount),
+			layerBeginIndex(other.layerBeginIndex)
+		{}
+
+		operator ImageRange() const
+		{
+			return { usage, mipCount, mipBeginIndex, layerCount, layerBeginIndex };
+		}
+
+		VkImageSubresourceRange GetVkImageSubresourceRange() const
+		{
+			return { usage.GetVkAspectFlags(), mipBeginIndex, mipCount, layerBeginIndex, layerCount };
+		}
+	};
+
+	struct VulkanCopyImageContext
 	{
 		VkOffset3D dstOffset;
 		VkOffset3D srcOffset;
 		VkExtent3D size;
-		VulkanCopyImageLayers dstLayers;
-		VulkanCopyImageLayers srcLayers;
+		VulkanImageLayers dstLayers;
+		VulkanImageLayers srcLayers;
 
-		VulkanCopyImageRange(const CopyImageRange& other = {}) :
+		VulkanCopyImageContext(const CopyImageContext& other = {}) :
 			dstOffset(other.dstOffset.x, other.dstOffset.y, other.dstOffset.z),
 			srcOffset(other.srcOffset.x, other.srcOffset.y, other.srcOffset.z),
 			size(other.size.x, other.size.y, other.size.z),
@@ -132,7 +158,7 @@ namespace np::gpu::__detail
 			srcLayers(other.srcLayers)
 		{}
 
-		operator CopyImageRange() const
+		operator CopyImageContext() const
 		{
 			return
 			{ 
@@ -143,9 +169,6 @@ namespace np::gpu::__detail
 			};
 		}
 
-		/*
-			NOTE: caller must set aspectMask for both dstSubresource and srcSubresource
-		*/
 		VkImageCopy GetVkImageCopy() const
 		{
 			return
@@ -172,17 +195,13 @@ namespace np::gpu::__detail
 				const VulkanImageResourceUsage dst_usage{ dstUsage };
 				const VulkanImageResourceUsage src_usage{ srcUsage };
 
-				con::vector<VkImageCopy> ranges(this->ranges.size());
-				for (siz i = 0; i < ranges.size(); i++)
-				{
-					ranges[i] = VulkanCopyImageRange{ this->ranges[i] }.GetVkImageCopy();
-					ranges[i].dstSubresource.aspectMask = dst_usage.GetVkAspectFlags();
-					ranges[i].srcSubresource.aspectMask = src_usage.GetVkAspectFlags();
-				}
+				con::vector<VkImageCopy> contexts(this->contexts.size());
+				for (siz i = 0; i < contexts.size(); i++)
+					contexts[i] = VulkanCopyImageContext{ this->contexts[i] }.GetVkImageCopy();
 				
 				vkCmdCopyImage(*command_buffer, *src, src_usage.GetVkImageLayout(),
 					*dst, dst_usage.GetVkImageLayout(),
-					ranges.size(), ranges.empty() ? nullptr : ranges.data());
+					contexts.size(), contexts.empty() ? nullptr : contexts.data());
 				applied = true;
 			}
 
@@ -205,7 +224,7 @@ namespace np::gpu::__detail
 	{
 		VkOffset3D imageOffset;
 		VkExtent3D imageSize;
-		VulkanCopyImageLayers imageLayers;
+		VulkanImageLayers imageLayers;
 		siz bufferOffset;
 		ui32 bufferRowCount;
 		ui32 bufferRowLength;
@@ -258,10 +277,7 @@ namespace np::gpu::__detail
 
 				con::vector<VkBufferImageCopy> ranges(this->ranges.size());
 				for (siz i = 0; i < ranges.size(); i++)
-				{
 					ranges[i] = VulkanCopyBufferToImageRange{ this->ranges[i] }.GetVkBufferImageCopy();
-					ranges[i].imageSubresource.aspectMask = image_usage.GetVkAspectFlags();
-				}
 
 				vkCmdCopyBufferToImage(*command_buffer, *buffer, *image, image_usage.GetVkImageLayout(),
 					ranges.size(), ranges.empty() ? nullptr : ranges.data());
@@ -755,20 +771,24 @@ namespace np::gpu::__detail
 	struct VulkanImageBarrier : public VulkanBarrier
 	{
 		mem::sptr<VulkanImageResource> image;
-		//TODO: add image layout fields?
-		//TODO: add subresource range field?
+		VulkanImageResourceUsage dstImageResourceUsage;
+		VulkanImageResourceUsage srcImageResourceUsage;
 		DeviceQueueFamily dstQueueFamily;
 		DeviceQueueFamily srcQueueFamily;
+		VulkanImageRange range;
 
 		VulkanImageBarrier(const ImageBarrier& other = {}) :
 			image(other.image),
+			dstImageResourceUsage(other.dstImageResourceUsage),
+			srcImageResourceUsage(other.srcImageResourceUsage),
 			dstQueueFamily(other.dstQueueFamily),
-			srcQueueFamily(other.srcQueueFamily)
+			srcQueueFamily(other.srcQueueFamily),
+			range(other.range)
 		{}
 
 		operator ImageBarrier() const
 		{
-			return {dstAccess, srcAccess, image, dstQueueFamily, srcQueueFamily};
+			return {dstAccess, srcAccess, image, dstImageResourceUsage, srcImageResourceUsage, dstQueueFamily, srcQueueFamily, range };
 		}
 
 		VkImageMemoryBarrier GetVkImageMemoryBarrier() const
@@ -777,12 +797,12 @@ namespace np::gpu::__detail
 			barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
 			barrier.srcAccessMask = srcAccess.GetVkAccessFlags();
 			barrier.dstAccessMask = dstAccess.GetVkAccessFlags();
-			//barrier.oldLayout = 0;// TODO: determine this
-			//barrier.newLayout = 0; //TODO: determine this
+			barrier.oldLayout = srcImageResourceUsage.GetVkImageLayout();
+			barrier.newLayout = dstImageResourceUsage.GetVkImageLayout();
 			barrier.srcQueueFamilyIndex = srcQueueFamily.index;
 			barrier.dstQueueFamilyIndex = dstQueueFamily.index;
 			barrier.image = *image;
-			//barrier.subresourceRange = 0; //TODO: determine this
+			barrier.subresourceRange = range.GetVkImageSubresourceRange();
 			return barrier;
 		}
 	};

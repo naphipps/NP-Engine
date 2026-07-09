@@ -22,9 +22,8 @@ namespace np::gpu
 {
 	struct Submit
 	{
-		con::vector<Stage> stages{};
 		con::vector<mem::sptr<CommandBuffer>> commandBuffers{};
-		con::vector<mem::sptr<Semaphore>> waitSemaphores{};
+		con::vector<::std::pair<Stage, mem::sptr<Semaphore>>> waitStageSemaphores{};
 		con::vector<mem::sptr<Semaphore>> signalSemaphores{};
 	};
 

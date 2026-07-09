@@ -105,9 +105,9 @@ namespace np::gpu::__detail
 			//		/*
 			//			TODO: figure out VkDescriptorType operator here -- this is an actual enum and NOT flags
 			//				- [x] VK_DESCRIPTOR_TYPE_SAMPLER = 0,
-			//				- [ ] VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER = 1,
+			//				- [x] VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER = 1,
 			//				- [ ] VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE = 2,
-			//				- [ ] VK_DESCRIPTOR_TYPE_STORAGE_IMAGE = 3,
+			//				- [x] VK_DESCRIPTOR_TYPE_STORAGE_IMAGE = 3,
 			//				- [x] VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER = 4,
 			//				- [x] VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER = 5,
 			//				- [x] VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER = 6,
@@ -140,14 +140,30 @@ namespace np::gpu::__detail
 					type = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
 			}
 			break;
+			case ResourceType::Image | ResourceType::Sampler:
+			{
+				type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+			}
+			break;
 			case ResourceType::Image:
 			{
 				ImageResourceUsage usage{ this->usage };
+				if (usage.Equals(ImageResourceUsage::Storage))
+					type = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
+				else if (usage.Equals(ImageResourceUsage::Sampled))
+					type = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
+				//VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT?
 			}
 			break;
 			case ResourceType::Sampler:
 			{
 				type = VK_DESCRIPTOR_TYPE_SAMPLER;
+			}
+			break;
+			default:
+			{
+				//VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT?
+				//VK_DESCRIPTOR_TYPE_INLINE_UNIFORM_BLOCK
 			}
 			break;
 			}

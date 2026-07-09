@@ -33,7 +33,6 @@ namespace np::gpu
 		con::vector<ui8> _pixels; //TODO: we're aiming to support PNG primarily, so ui8 makes sense, but we may want to mess
 								  //with the depth here? maybe let the game layer implement this?
 		str _filename;
-		::glm::mat4 _transform; // TODO: support this in constructors, etc
 
 	public:
 		Image(str filename)
@@ -91,7 +90,7 @@ namespace np::gpu
 
 			// TODO: is there a way for us to pass our _pixels in?
 			::std::vector<ui8> pixels;
-			ui32 error_code = ::lodepng::decode(pixels, _width, _height, _filename.c_str());
+			ui32 error_code = ::lodepng::decode(pixels, _width, _height, _filename.c_str(), LCT_RGBA, 8u);
 			_pixels.assign(::std::make_move_iterator(pixels.begin()), ::std::make_move_iterator(pixels.end()));
 
 			if (error_code)

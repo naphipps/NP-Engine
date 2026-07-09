@@ -22,6 +22,17 @@ namespace np::app
 		{
 			glm::vec4 position{};
 			glm::vec4 color{};
+			glm::vec2 uv{};
+
+			static con::vector<gpu::Format> GetInputFormatting()
+			{
+				return
+				{ 
+					gpu::Format{gpu::Format::Floating, 4, sizeof(flt)},
+					gpu::Format{gpu::Format::Floating, 4, sizeof(flt)},
+					gpu::Format{gpu::Format::Floating, 2, sizeof(flt)}
+				};
+			}
 		};
 
 		struct Ubo
@@ -57,6 +68,8 @@ namespace np::app
 			con::vector<mem::sptr<gpu::Semaphore>> frameReadySemaphores{};
 			con::vector<mem::sptr<gpu::Semaphore>> submitCompleteSemaphores{};
 			con::vector<mem::sptr<gpu::BufferResource>> uboBuffers{};
+			mem::sptr<gpu::ImageResourceView> statueImageResourceView = nullptr;
+			mem::sptr<gpu::SamplerResource> statueSamplerResource = nullptr;
 			con::vector<con::vector<mem::sptr<gpu::ResourceGroup>>> resourceGroups{};
 
 			con::vector<Vertex> vertices{};
@@ -64,11 +77,7 @@ namespace np::app
 			mem::sptr<gpu::BufferResource> vertexBuffer = nullptr;
 			mem::sptr<gpu::BufferResource> indexBuffer = nullptr;
 
-			Scene() :
-				isRendering(false)
-			{
-
-			}
+			Scene() : isRendering(false) {}
 
 			~Scene()
 			{
@@ -113,6 +122,135 @@ namespace np::app
 
 			void EnsureFrameResources()
 			{
+				if (!statueImageResourceView)
+				{
+					gpu::Image statue_image{ fsys::append("test", "assets", "statue-512x512.png") };
+
+					mem::sptr<gpu::BufferResource> statue_buffer_resource = gpu::BufferResource::Create(device,
+						gpu::BufferResourceUsage::HostAccessible | gpu::BufferResourceUsage::Transfer | gpu::BufferResourceUsage::Read,
+						mem::calc_aligned_size(statue_image.Size(), mem::DEFAULT_ALIGNMENT), { queue->GetDeviceQueueFamily() });
+
+					con::vector<ui8> statue_bytes(statue_image.Size());
+					mem::copy_bytes(statue_bytes.data(), statue_image.Data(), statue_bytes.size());
+					statue_buffer_resource->SetBytes(0, statue_bytes);
+					statue_buffer_resource->ClearCacheForDevice(0, statue_buffer_resource->GetSize());
+
+					mem::sptr<gpu::ImageResource> statue_image_resource = gpu::ImageResource::Create(device,
+						gpu::ImageResourceUsage::DeviceLocal | 
+						gpu::ImageResourceUsage::Transfer | gpu::ImageResourceUsage::Write |
+						gpu::ImageResourceUsage::Sampled,
+						gpu::Format{ gpu::Format::Unsigned | gpu::Format::Integer | gpu::Format::GammaCorrection, 4, sizeof(ui8) },
+						1, 1, 1, statue_image.GetWidth(), statue_image.GetHeight(), 1,
+						statue_buffer_resource->GetDeviceQueueFamilies());
+
+					mem::sptr<srvc::Services> services = detailInstance->GetServices();
+
+					gpu::ImageBarrier image_barrier_0{};
+					image_barrier_0.dstAccess = gpu::Access::Transfer | gpu::Access::Write;
+					image_barrier_0.srcAccess = gpu::Access::None;
+					image_barrier_0.image = statue_image_resource;
+					image_barrier_0.dstImageResourceUsage = gpu::ImageResourceUsage::Transfer | gpu::ImageResourceUsage::Write;
+					image_barrier_0.srcImageResourceUsage = gpu::ImageResourceUsage::None;
+					image_barrier_0.dstQueueFamily = queue->GetDeviceQueueFamily();
+					image_barrier_0.srcQueueFamily = queue->GetDeviceQueueFamily();
+					image_barrier_0.range.usage = gpu::ImageResourceUsage::Color;
+
+					gpu::ImageLayers image_layers{};
+					image_layers.usage = gpu::ImageResourceUsage::Color;
+
+					gpu::CopyBufferToImageRange copy_buffer_to_image_range{};
+					copy_buffer_to_image_range.imageSize = { statue_image_resource->GetWidth(), statue_image_resource->GetHeight(), 1 };
+					copy_buffer_to_image_range.bufferRowCount = copy_buffer_to_image_range.imageSize.y;
+					copy_buffer_to_image_range.bufferRowLength = copy_buffer_to_image_range.imageSize.x;
+					copy_buffer_to_image_range.imageLayers = { image_layers };
+
+					gpu::ImageBarrier image_barrier_1{};
+					image_barrier_1.dstAccess = gpu::Access::Shader | gpu::Access::Read;
+					image_barrier_1.srcAccess = image_barrier_0.dstAccess;
+					image_barrier_1.image = image_barrier_0.image;
+					image_barrier_1.dstImageResourceUsage = gpu::ImageResourceUsage::Shader | gpu::ImageResourceUsage::Read;
+					image_barrier_1.srcImageResourceUsage = image_barrier_0.dstImageResourceUsage;
+					image_barrier_1.dstQueueFamily = image_barrier_0.dstQueueFamily;
+					image_barrier_1.srcQueueFamily = image_barrier_0.srcQueueFamily;
+					image_barrier_1.range.usage = image_barrier_0.range.usage;
+
+					mem::sptr<gpu::BarrierCommand> barrier_cmd_0 = 
+						gpu::Command::Create(gpu::DetailType::Vulkan, services, gpu::CommandType::Barrier);
+					barrier_cmd_0->dstStage = gpu::Stage::Transfer;
+					barrier_cmd_0->srcStage = gpu::Stage::Top;
+					barrier_cmd_0->imageBarriers = { image_barrier_0 };
+
+					mem::sptr<gpu::CopyBufferToImageCommand> copy_buffer_to_image_cmd = 
+						gpu::Command::Create(gpu::DetailType::Vulkan, services, gpu::CommandType::CopyBufferToImage);
+					copy_buffer_to_image_cmd->buffer = statue_buffer_resource;
+					copy_buffer_to_image_cmd->image = statue_image_resource;
+					copy_buffer_to_image_cmd->imageUsage = gpu::ImageResourceUsage::Transfer | gpu::ImageResourceUsage::Write;
+					copy_buffer_to_image_cmd->ranges = { copy_buffer_to_image_range };
+
+					mem::sptr<gpu::BarrierCommand> barrier_cmd_1 = 
+						gpu::Command::Create(gpu::DetailType::Vulkan, services, gpu::CommandType::Barrier);
+					barrier_cmd_1->dstStage = gpu::Stage::VertexInput;
+					barrier_cmd_1->srcStage = gpu::Stage::Transfer;
+					barrier_cmd_1->imageBarriers = { image_barrier_1 };
+
+					mem::sptr<gpu::CommandBuffer> command_buffer_0 = commandBufferPool->CreateCommandBuffer();
+					mem::sptr<gpu::CommandBuffer> command_buffer_1 = commandBufferPool->CreateCommandBuffer();
+					mem::sptr<gpu::CommandBuffer> command_buffer_2 = commandBufferPool->CreateCommandBuffer();
+
+					commandBufferPool->Begin(command_buffer_0, gpu::CommandBufferUsage::SingleUse);
+					command_buffer_0->Add(barrier_cmd_0);
+					commandBufferPool->End(command_buffer_0, gpu::CommandBufferUsage::None);
+
+					commandBufferPool->Begin(command_buffer_1, gpu::CommandBufferUsage::SingleUse);
+					command_buffer_1->Add(copy_buffer_to_image_cmd);
+					commandBufferPool->End(command_buffer_1, gpu::CommandBufferUsage::None);
+
+					commandBufferPool->Begin(command_buffer_2, gpu::CommandBufferUsage::SingleUse);
+					command_buffer_2->Add(barrier_cmd_1);
+					commandBufferPool->End(command_buffer_2, gpu::CommandBufferUsage::None);
+
+					mem::sptr<gpu::Semaphore> semaphore_0 = device->CreateSemaphore();
+					mem::sptr<gpu::Semaphore> semaphore_1 = device->CreateSemaphore();
+					mem::sptr<gpu::Fence> fence = device->CreateFence();
+
+					gpu::Submit submit_0{};
+					submit_0.commandBuffers = { command_buffer_0 };
+					submit_0.signalSemaphores = { semaphore_0 };
+
+					gpu::Submit submit_1{};
+					submit_1.commandBuffers = { command_buffer_1 };
+					submit_1.waitStageSemaphores = { {gpu::Stage::Transfer, semaphore_0} };
+					submit_1.signalSemaphores = { semaphore_1 };
+					
+					gpu::Submit submit_2{};
+					submit_2.commandBuffers = { command_buffer_2};
+					submit_2.waitStageSemaphores = { {gpu::Stage::VertexInput, semaphore_1} };
+
+					fence->Reset();
+					queue->Submit(submit_0, nullptr);
+					queue->Submit(submit_1, nullptr);
+					queue->Submit(submit_2, fence);
+					fence->Wait();
+
+					statueImageResourceView = gpu::ImageResourceView::Create(device, statue_image_resource, gpu::ImageResourceUsage::Color);
+				}
+
+				if (!statueSamplerResource)
+				{
+					gpu::SamplerAddressModes address_modes{};
+					address_modes.u = gpu::SamplerAddressMode::Repeat;
+					address_modes.v = gpu::SamplerAddressMode::Repeat;
+					address_modes.w = gpu::SamplerAddressMode::Repeat;
+
+					statueSamplerResource = gpu::SamplerResource::Create(device, 
+						gpu::SamplerResourceUsage::MinimizeLinear | gpu::SamplerResourceUsage::MagnifyLinear | gpu::SamplerResourceUsage::MipmapLinear, 
+						DBL_MAX, //TODO: I'd like to be able to query the max value here
+						gpu::CompareOperation::None, 
+						gpu::LodBounds{}, 
+						gpu::SamplerBorder::Opaque | gpu::SamplerBorder::Black, 
+						address_modes);
+				}
+
 				uboBuffers.resize(frameCount);
 				for (auto it = uboBuffers.begin(); it != uboBuffers.end(); it++)
 					if (!*it)
@@ -185,11 +323,14 @@ namespace np::app
 						uboBuffers[frameCounter]->ClearCacheForDevice(0, ubo_bytes.size());
 
 						con::vector<mem::sptr<gpu::ResourceGroup>>& resource_group = resourceGroups[frameCounter];
-						resource_group[0]->ApplyResourceAssignments({{}, 
+						gpu::Result assignment_result = resource_group[0]->ApplyResourceAssignments({ 
+							{
+								{1, {{statueImageResourceView, statueSamplerResource, gpu::ImageResourceUsage::Shader}}}
+							},
 							{
 								{0, {{uboBuffers[frameCounter], 0, uboBuffers[frameCounter]->GetSize()}}}
 							},
-						{}});
+						{} });
 
 						mem::sptr<srvc::Services> services = detailInstance->GetServices();
 						mem::sptr<gpu::Frame> frame = frameContext->GetAcquiredFrame();
@@ -253,9 +394,8 @@ namespace np::app
 						commandBufferPool->End(command_buffer, gpu::CommandBufferUsage::None);
 
 						gpu::Submit submit{};
-						submit.stages = { gpu::Stage::PresentComplete };
 						submit.commandBuffers = { command_buffer };
-						submit.waitSemaphores = { frame_ready_semaphore };
+						submit.waitStageSemaphores = { {gpu::Stage::PresentComplete, frame_ready_semaphore} };
 						submit.signalSemaphores = { submit_complete_semaphore };
 						bl submit_success = queue->Submit(submit, submit_complete_fence);
 
@@ -557,13 +697,18 @@ namespace np::app
 				gpu::ResourceType::Buffer, gpu::BufferResourceUsage::Uniform, 1, gpu::Stage::VertexInput
 			};
 
-			mem::sptr<gpu::ResourceLayout> graphics_resource_layout = gpu::ResourceLayout::Create(scene->device, { ubo_description });
+			gpu::ResourceDescription image_sampler_description
+			{
+				gpu::ResourceType::Image | gpu::ResourceType::Sampler, gpu::ImageResourceUsage::None, 1, gpu::Stage::FragmentInput
+			};
+
+			mem::sptr<gpu::ResourceLayout> graphics_resource_layout = gpu::ResourceLayout::Create(scene->device, { ubo_description, image_sampler_description });
 
 			mem::sptr<gpu::PipelineResourceLayout> graphics_pipeline_layout =
 				gpu::PipelineResourceLayout::Create(scene->device, { graphics_resource_layout }, {});
 
 			con::vector<mem::sptr<gpu::Shader>> graphics_shaders{scene->vertexShader, scene->fragmentShader};
-			con::vector<gpu::Format> input_vertex_formatting{ gpu::Format{gpu::Format::Floating, 4, sizeof(flt)},  gpu::Format{gpu::Format::Floating, 4, sizeof(flt)} };
+			con::vector<gpu::Format> input_vertex_formatting = Vertex::GetInputFormatting();
 			con::vector<gpu::Format> input_instance_formatting{};
 			gpu::PrimitiveTopology graphics_topology = gpu::PrimitiveTopology::Triangle | gpu::PrimitiveTopology::List;
 			con::vector<gpu::Viewport> graphics_viewports{
@@ -595,10 +740,10 @@ namespace np::app
 			//<https://vulkan-tutorial.com/en/Drawing_a_triangle/Drawing/Command_buffers>
 
 			scene->vertices = {
-				{{-0.5, -0.5, 0, 1}, {1, 0, 1, 1}},
-				{{0.5, -0.5, 0, 1}, {1, 1, 0, 1}},
-				{{0.5, 0.5, 0, 1}, {0, 1, 1, 1}},
-				{{-0.5, 0.5, 0, 1}, {0, 1, 0, 1}}
+				{{-0.5, -0.5, 0, 1}, {1, 0, 1, 1}, {1.f, 0.f}},
+				{{0.5, -0.5, 0, 1}, {1, 1, 0, 1}, {0.f, 0.f}},
+				{{0.5, 0.5, 0, 1}, {0, 1, 1, 1}, {0.f, 1.f}},
+				{{-0.5, 0.5, 0, 1}, {0, 1, 0, 1}, {1.f, 1.f}}
 			};
 
 			scene->indices = {0, 1, 2, 2, 3, 0};

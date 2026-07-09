@@ -50,6 +50,7 @@ namespace np::gpu::__detail
 				layout = VK_IMAGE_LAYOUT_GENERAL;
 				break;
 			case Shader:
+			case Shader | Read:
 				layout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 				break;
 			case Depth | Stencil | Read:
@@ -120,9 +121,10 @@ namespace np::gpu::__detail
 				flags |= VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
 			if (Contains(Shader))
 				flags |= VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT;
+			if (Contains(Sampled))
+				flags |= VK_IMAGE_USAGE_SAMPLED_BIT;
 
 			//TODO: resolve VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT?
-			//TODO: resolve VK_IMAGE_USAGE_SAMPLED_BIT?
 
 			return flags;
 		}

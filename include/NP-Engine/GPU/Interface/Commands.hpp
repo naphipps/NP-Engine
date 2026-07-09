@@ -158,20 +158,30 @@ namespace np::gpu
 		}
 	};
 
-	struct CopyImageLayers
+	struct ImageLayers
 	{
-		siz mipLayer = 0;
+		ImageResourceUsage usage = ImageResourceUsage::None;
+		siz mipLevel = 0;
 		siz layerCount = 1;
-		siz layerBeginIndex = 0;
+		siz layerBeginIndex = 0; //TODO: add better support for image arrays
 	};
 
-	struct CopyImageRange
+	struct ImageRange
+	{
+		ImageResourceUsage usage = ImageResourceUsage::None;
+		siz mipCount = 1;
+		siz mipBeginIndex = 0;
+		siz layerCount = 1;
+		siz layerBeginIndex = 0; //TODO: add better support for image arrays
+	};
+
+	struct CopyImageContext
 	{
 		ImageResource::Point dstOffset{};
 		ImageResource::Point srcOffset{};
 		ImageResource::Point size{};
-		CopyImageLayers dstLayers{};
-		CopyImageLayers srcLayers{};
+		ImageLayers dstLayers{};
+		ImageLayers srcLayers{};
 	};
 
 	struct CopyImageCommand : public Command
@@ -180,7 +190,7 @@ namespace np::gpu
 		mem::sptr<ImageResource> src = nullptr;
 		ImageResourceUsage dstUsage = ImageResourceUsage::None;
 		ImageResourceUsage srcUsage = ImageResourceUsage::None;
-		con::vector<CopyImageRange> ranges{};
+		con::vector<CopyImageContext> contexts{};
 
 		virtual CommandType GetCommandType() const override
 		{
@@ -192,7 +202,7 @@ namespace np::gpu
 	{
 		ImageResource::Point imageOffset{};
 		ImageResource::Point imageSize{};
-		CopyImageLayers imageLayers{};
+		ImageLayers imageLayers{};
 		siz bufferOffset = 0;
 		siz bufferRowCount = 0;
 		siz bufferRowLength = 0;
@@ -368,12 +378,11 @@ namespace np::gpu
 	struct ImageBarrier : public Barrier
 	{
 		mem::sptr<ImageResource> image = nullptr;
-		//ImageResourceUsage dstImageResourceUsage = ImageResourceUsage::None;
-		//ImageResourceUsage srcImageResourceUsage = ImageResourceUsage::None;
-		//TODO: add image layout fields?
-		//TODO: add subresource range field?
+		ImageResourceUsage dstImageResourceUsage = ImageResourceUsage::None;
+		ImageResourceUsage srcImageResourceUsage = ImageResourceUsage::None;
 		DeviceQueueFamily dstQueueFamily{};
 		DeviceQueueFamily srcQueueFamily{};
+		ImageRange range{};
 	};
 
 	struct BarrierCommand : public Command

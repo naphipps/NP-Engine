@@ -39,13 +39,14 @@ namespace np::gpu
 		constexpr static ui32 Cube = BIT(7);
 		constexpr static ui32 Present = BIT(8);
 
-		constexpr static ui32 General = BIT(9);
-		constexpr static ui32 Color = BIT(10);
-		constexpr static ui32 Storage = BIT(11);
-		constexpr static ui32 Depth = BIT(12);
-		constexpr static ui32 Stencil = BIT(13);
-		constexpr static ui32 Transfer = BIT(14);
-		constexpr static ui32 Shader = BIT(15);
+		constexpr static ui32 Sampled = BIT(9);
+		constexpr static ui32 General = BIT(10);
+		constexpr static ui32 Color = BIT(11);
+		constexpr static ui32 Storage = BIT(12);
+		constexpr static ui32 Depth = BIT(13);
+		constexpr static ui32 Stencil = BIT(14);
+		constexpr static ui32 Transfer = BIT(15);
+		constexpr static ui32 Shader = BIT(16);
 
 		ImageResourceUsage(ui32 value): ResourceUsage(value) {}
 	};

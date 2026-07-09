@@ -24,31 +24,28 @@ namespace np::gpu::__detail
 {
 	struct VulkanSubmit
 	{
-		con::vector<VulkanStage> stages{};
 		con::vector<mem::sptr<VulkanCommandBuffer>> commandBuffers{};
-		con::vector<mem::sptr<VulkanSemaphore>> waitSemaphores{};
+		con::vector<::std::pair<VulkanStage, mem::sptr<VulkanSemaphore>>> waitStageSemaphores{};
 		con::vector<mem::sptr<VulkanSemaphore>> signalSemaphores{};
 
 		VulkanSubmit(const Submit& other = {}):
-			stages{other.stages.begin(), other.stages.end()},
 			commandBuffers{other.commandBuffers.begin(), other.commandBuffers.end()},
-			waitSemaphores{other.waitSemaphores.begin(), other.waitSemaphores.end()},
+			waitStageSemaphores{other.waitStageSemaphores.begin(), other.waitStageSemaphores.end()},
 			signalSemaphores{other.signalSemaphores.begin(), other.signalSemaphores.end()}
 		{}
 
 		operator Submit() const
 		{
-			return {{stages.begin(), stages.end()},
-					{commandBuffers.begin(), commandBuffers.end()},
-					{waitSemaphores.begin(), waitSemaphores.end()},
+			return {{commandBuffers.begin(), commandBuffers.end()},
+					{waitStageSemaphores.begin(), waitStageSemaphores.end()},
 					{signalSemaphores.begin(), signalSemaphores.end()}};
 		}
 
 		con::vector<VkPipelineStageFlags> GetVkWaitPipelineStageFlags() const
 		{
-			con::vector<VkPipelineStageFlags> flags(stages.size());
+			con::vector<VkPipelineStageFlags> flags(waitStageSemaphores.size());
 			for (siz i = 0; i < flags.size(); i++)
-				flags[i] = stages[i].GetVkPipelineStageFlags();
+				flags[i] = waitStageSemaphores[i].first.GetVkPipelineStageFlags();
 			return flags;
 		}
 
@@ -62,9 +59,9 @@ namespace np::gpu::__detail
 
 		con::vector<VkSemaphore> GetVkWaitSemaphores() const
 		{
-			con::vector<VkSemaphore> semaphores(waitSemaphores.size());
+			con::vector<VkSemaphore> semaphores(waitStageSemaphores.size());
 			for (siz i = 0; i < semaphores.size(); i++)
-				semaphores[i] = *waitSemaphores[i];
+				semaphores[i] = *waitStageSemaphores[i].second;
 			return semaphores;
 		}
 
