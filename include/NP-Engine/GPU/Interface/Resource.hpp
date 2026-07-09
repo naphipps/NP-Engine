@@ -73,8 +73,8 @@ namespace np::gpu
 		ResourceUsage usage = ResourceUsage::None;
 		siz count = 0;
 		Stage stage = Stage::None;
-		//con::vector<mem::sptr<Sampler>> samplers{}; //TODO: add sampler support -- pretty sure length MUST equal count value
-		//or be empty
+		//con::vector<mem::sptr<Sampler>> samplers{};
+		//TODO: ^ add sampler support -- pretty sure length MUST equal count value or be empty
 
 		bl IsCompatible(const ResourceDescription& other) const
 		{
