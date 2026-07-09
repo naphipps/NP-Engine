@@ -260,17 +260,19 @@ namespace np::app
 
 				mem::sptr<gpu::PipelineResourceLayout> pipeline_layout = graphicsPipeline->GetPipelineResourceLayout();
 
+				bl is_resource_group_pool_reset = false;
 				if (!resourceGroupPool || frameCount != resourceGroupPool->GetSize())
 				{
 					resourceGroups.clear();
 					resourceGroupPool = gpu::ResourceGroupPool::Create(device, frameCount, pipeline_layout->GetResourceDesciptions());
+					is_resource_group_pool_reset = true;
 				}
 
 				con::vector<mem::sptr<gpu::ResourceLayout>> resource_layouts = pipeline_layout->GetResourceLayouts();
 
 				resourceGroups.resize(frameCount);
 				for (auto it = resourceGroups.begin(); it != resourceGroups.end(); it++)
-					if (it->size() != resource_layouts.size())
+					if (it->size() != resource_layouts.size() || is_resource_group_pool_reset)
 						*it = resourceGroupPool->CreateResourceGroups(resource_layouts);
 			}
 
