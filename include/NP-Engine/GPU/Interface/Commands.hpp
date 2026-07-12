@@ -366,7 +366,7 @@ namespace np::gpu
 		Access srcAccess = Access::None;
 	};
 
-	struct BufferBarrier : public Barrier
+	struct BufferBarrier : public Barrier //TODO: investigate removing this inheritance
 	{
 		mem::sptr<BufferResource> buffer = nullptr;
 		siz offset = 0;
@@ -375,7 +375,7 @@ namespace np::gpu
 		DeviceQueueFamily srcQueueFamily{};
 	};
 
-	struct ImageBarrier : public Barrier
+	struct ImageBarrier : public Barrier //TODO: investigate removing this inheritance
 	{
 		mem::sptr<ImageResource> image = nullptr;
 		ImageResourceUsage dstImageResourceUsage = ImageResourceUsage::None;
