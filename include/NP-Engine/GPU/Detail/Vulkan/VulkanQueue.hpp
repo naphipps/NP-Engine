@@ -215,26 +215,37 @@ namespace np::gpu::__detail
 															 _family);
 		}
 
-		virtual bl Submit(const gpu::Submit& submit_, mem::sptr<Fence> fence_) override
+		virtual Result Submit(const con::vector<gpu::Submit>& submittals, mem::sptr<Fence> fence_) override
 		{
-			const VulkanSubmit submit{submit_};
-			const con::vector<VkPipelineStageFlags> wait_flags = submit.GetVkWaitPipelineStageFlags();
-			const con::vector<VkCommandBuffer> command_buffers = submit.GetVkCommandBuffers();
-			const con::vector<VkSemaphore> wait_semaphores = submit.GetVkWaitSemaphores();
-			const con::vector<VkSemaphore> signal_semaphores = submit.GetVkSignalSemaphores();
+			con::vector<VkSubmitInfo> infos(submittals.size());;
+			con::vector<con::vector<VkPipelineStageFlags>> wait_flags(submittals.size());
+			con::vector<con::vector<VkCommandBuffer>> command_buffers(submittals.size());
+			con::vector<con::vector<VkSemaphore>> wait_semaphores(submittals.size());
+			con::vector<con::vector<VkSemaphore>> signal_semaphores(submittals.size());
 
-			VkSubmitInfo info = submit.GetVkSubmitInfo();
-			info.pWaitDstStageMask = wait_flags.empty() ? nullptr : wait_flags.data();
-			info.commandBufferCount = command_buffers.size();
-			info.pCommandBuffers = command_buffers.empty() ? nullptr : command_buffers.data();
-			info.waitSemaphoreCount = wait_semaphores.size();
-			info.pWaitSemaphores = wait_semaphores.empty() ? nullptr : wait_semaphores.data();
-			info.signalSemaphoreCount = signal_semaphores.size();
-			info.pSignalSemaphores = signal_semaphores.empty() ? nullptr : signal_semaphores.data();
+			for (siz i = 0; i < submittals.size(); i++)
+			{
+				const VulkanSubmit submittal{ submittals[i] };
+				infos[i] = submittal.GetVkSubmitInfo();
+				wait_flags[i] = submittal.GetVkWaitPipelineStageFlags();
+				command_buffers[i] = submittal.GetVkCommandBuffers();
+				wait_semaphores[i] = submittal.GetVkWaitSemaphores();
+				signal_semaphores[i] = submittal.GetVkSignalSemaphores();
+
+				infos[i].pWaitDstStageMask = wait_flags[i].empty() ? nullptr : wait_flags[i].data();
+				infos[i].commandBufferCount = command_buffers[i].size();
+				infos[i].pCommandBuffers = command_buffers[i].empty() ? nullptr : command_buffers[i].data();
+				infos[i].waitSemaphoreCount = wait_semaphores[i].size();
+				infos[i].pWaitSemaphores = wait_semaphores[i].empty() ? nullptr : wait_semaphores[i].data();
+				infos[i].signalSemaphoreCount = signal_semaphores[i].size();
+				infos[i].pSignalSemaphores = signal_semaphores[i].empty() ? nullptr : signal_semaphores[i].data();
+			}
 
 			mem::sptr<VulkanFence> fence = DetailObject::EnsureIsDetailType(fence_, DetailType::Vulkan);
-			VkResult result = vkQueueSubmit(_queue, 1, &info, fence ? *fence : (VkFence) nullptr);
-			return result == VK_SUCCESS;
+			VulkanResult result = vkQueueSubmit(_queue,
+				infos.size(), infos.empty() ? nullptr : infos.data(),
+				fence ? *fence : (VkFence) nullptr);
+			return result.Contains(VulkanResult::Success);
 		}
 
 		virtual PresentResults Present(const gpu::Present& present_) override

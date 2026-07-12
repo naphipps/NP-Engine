@@ -53,7 +53,7 @@ namespace np::gpu
 
 		virtual mem::sptr<CommandBufferPool> CreateCommandBufferPool(CommandBufferPoolUsage usage) = 0;
 
-		virtual bl Submit(const Submit& submit, mem::sptr<Fence> fence) = 0; //TODO: how are we going to do this?
+		virtual Result Submit(const con::vector<gpu::Submit>& submittals, mem::sptr<Fence> fence) = 0;
 
 		/*
 			returns vector<bl> since we accept vector<sptr<FrameContext>>

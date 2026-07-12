@@ -227,9 +227,7 @@ namespace np::app
 					submit_2.waitStageSemaphores = { {gpu::Stage::VertexInput, semaphore_1} };
 
 					fence->Reset();
-					queue->Submit(submit_0, nullptr);
-					queue->Submit(submit_1, nullptr);
-					queue->Submit(submit_2, fence);
+					queue->Submit({ submit_0, submit_1, submit_2 }, fence);
 					fence->Wait();
 
 					statueImageResourceView = gpu::ImageResourceView::Create(device, statue_image_resource, gpu::ImageResourceUsage::Color);
@@ -399,7 +397,7 @@ namespace np::app
 						submit.commandBuffers = { command_buffer };
 						submit.waitStageSemaphores = { {gpu::Stage::PresentComplete, frame_ready_semaphore} };
 						submit.signalSemaphores = { submit_complete_semaphore };
-						bl submit_success = queue->Submit(submit, submit_complete_fence);
+						bl submit_success = queue->Submit({ submit }, submit_complete_fence);
 
 						gpu::Present present{};
 						present.frameContexts = { frameContext };
@@ -800,7 +798,7 @@ namespace np::app
 			submit.commandBuffers = { command_buffer };
 			mem::sptr<gpu::Fence> fence = scene->device->CreateFence();
 			fence->Reset();
-			scene->queue->Submit(submit, fence);
+			scene->queue->Submit({ submit }, fence);
 			fence->Wait();
 
 			self._scene = scene;
