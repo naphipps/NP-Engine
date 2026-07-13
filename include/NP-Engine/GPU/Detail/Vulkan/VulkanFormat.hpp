@@ -206,7 +206,7 @@ namespace np::gpu::__detail
 		}
 
 	public:
-		VulkanFormat(ui32 value, ui32 component_size, ui32 component_count): Format(value, component_size, component_count) {}
+		VulkanFormat(ui32 value, ui32 component_count, ui32 component_size): Format(value, component_count, component_size) {}
 
 		VulkanFormat(ui32 value): Format(value) {}
 
