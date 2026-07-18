@@ -250,6 +250,7 @@ namespace np::app
 					fence->Reset();
 					queue->Submit({ submit_0, submit_1, submit_2 }, fence);
 					fence->Wait();
+					queue->WaitUntilIdle();
 
 					statueImageResourceView = gpu::ImageResourceView::Create(device, statue_image_resource, gpu::ImageResourceUsage::Color);
 				}
