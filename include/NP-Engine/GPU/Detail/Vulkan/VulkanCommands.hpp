@@ -1081,7 +1081,7 @@ namespace np::gpu::__detail
 			for (siz i = 0; !found_nullptr && i < vk_flags.size(); i++)
 			{
 				mem::sptr<VulkanFlag> flag = EnsureIsDetailType(flags[i], DetailType::Vulkan);
-				vk_flags[i] = flag ? *flag : nullptr;
+				vk_flags[i] = flag ? *flag : static_cast<VkEvent>(nullptr);
 				found_nullptr |= vk_flags[i] == nullptr;
 			}
 

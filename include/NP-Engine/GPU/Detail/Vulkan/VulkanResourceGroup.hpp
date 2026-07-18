@@ -63,8 +63,8 @@ namespace np::gpu::__detail
 		{
 			return
 			{
-				sampler ? *sampler : nullptr,
-				view ? *view : nullptr,
+				sampler ? *sampler : static_cast<VkSampler>(nullptr),
+				view ? *view : static_cast<VkImageView>(nullptr),
 				VulkanImageResourceUsage{usage}.GetVkImageLayout()
 			};
 		}
@@ -89,7 +89,7 @@ namespace np::gpu::__detail
 
 		VkDescriptorBufferInfo GetVkDescriptorBufferInfo() const
 		{
-			return { buffer ? *buffer : nullptr, offset, range };
+			return { buffer ? *buffer : static_cast<VkBuffer>(nullptr), offset, range };
 		}
 	};
 
