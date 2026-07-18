@@ -31,4 +31,18 @@ namespace np::gpu
 
 		return image;
 	}
+
+	bl ImageResource::IsSupported(mem::sptr<Device> device, ImageResourceUsage usage, Format format, Format format_features)
+	{
+		bl is = false;
+
+		switch (device->GetDetailType())
+		{
+		case DetailType::Vulkan:
+			is = __detail::VulkanImageResource::IsSupported(device, usage, format, format_features);
+			break;
+		}
+
+		return is;
+	}
 } // namespace np::gpu

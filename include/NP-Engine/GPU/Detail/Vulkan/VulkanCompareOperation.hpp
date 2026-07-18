@@ -20,7 +20,7 @@ namespace np::gpu::__detail
 
 		VkCompareOp GetVkCompareOp() const
 		{
-			VkCompareOp op = VK_COMPARE_OP_MAX_ENUM;
+			VkCompareOp op = VK_COMPARE_OP_NEVER;
 
 			switch (_value)
 			{

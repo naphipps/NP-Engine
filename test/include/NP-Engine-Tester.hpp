@@ -70,6 +70,9 @@ namespace np::app
 			con::vector<mem::sptr<gpu::BufferResource>> uboBuffers{};
 			mem::sptr<gpu::ImageResourceView> statueImageResourceView = nullptr;
 			mem::sptr<gpu::SamplerResource> statueSamplerResource = nullptr;
+			gpu::Format depthStencilFormat = gpu::Format::None;
+			gpu::ImageResourceUsage depthStencilImageResourceUsage = gpu::ImageResourceUsage::None;
+			mem::sptr<gpu::ImageResourceView> depthStencilImageResourceView = nullptr;
 			con::vector<con::vector<mem::sptr<gpu::ResourceGroup>>> resourceGroups{};
 
 			con::vector<Vertex> vertices{};
@@ -87,11 +90,12 @@ namespace np::app
 
 			void EnsureFramebuffers(const con::vector<mem::sptr<gpu::Frame>>& frames)
 			{
-				framebuffers.resize(frameCount);
+				framebuffers.resize(frameCount); //assuming frameCount == frames.size()
 				for (siz i = 0; i < framebuffers.size(); i++)
 					framebuffers[i] =
 					gpu::Framebuffer::Create(renderpass, frameContext->GetFrameWidth(),
-						frameContext->GetFrameHeight(), 1, { frames[i]->GetImageResourceView() });
+						frameContext->GetFrameHeight(), 1,
+						{ frames[i]->GetImageResourceView(), depthStencilImageResourceView });
 			}
 
 			void EnsureFrameCommandBuffers()
@@ -120,7 +124,24 @@ namespace np::app
 						*it = device->CreateSemaphore();
 			}
 
-			void EnsureFrameResources()
+			void EnsureDepthStencilResources()
+			{
+				if (!depthStencilImageResourceView)
+				{
+					mem::sptr<gpu::ImageResource> image = gpu::ImageResource::Create(device,
+						depthStencilImageResourceUsage, depthStencilFormat,
+						1, 1, 1, frameContext->GetFrameWidth(), frameContext->GetFrameHeight(), 1,
+						{ queue->GetDeviceQueueFamily() });
+
+					gpu::ImageResourceUsage view_usage = gpu::ImageResourceUsage::Depth;
+					if (image->GetFormat().Contains(gpu::Format::Stencil))
+						view_usage |= gpu::ImageResourceUsage::Stencil;
+
+					depthStencilImageResourceView = gpu::ImageResourceView::Create(device, image, view_usage);
+				}
+			}
+
+			void EnsureStatueResources()
 			{
 				if (!statueImageResourceView)
 				{
@@ -223,7 +244,7 @@ namespace np::app
 					submit_1.signalSemaphores = { semaphore_1 };
 					
 					gpu::Submit submit_2{};
-					submit_2.commandBuffers = { command_buffer_2};
+					submit_2.commandBuffers = { command_buffer_2 };
 					submit_2.waitStageSemaphores = { {gpu::Stage::VertexInput, semaphore_1} };
 
 					fence->Reset();
@@ -248,6 +269,11 @@ namespace np::app
 						gpu::SamplerBorder::Opaque | gpu::SamplerBorder::Black, 
 						address_modes);
 				}
+			}
+
+			void EnsureFrameResources()
+			{
+				EnsureStatueResources();
 
 				uboBuffers.resize(frameCount);
 				for (auto it = uboBuffers.begin(); it != uboBuffers.end(); it++)
@@ -280,6 +306,7 @@ namespace np::app
 				frameCounter = 0;
 				frameCount = frames.size();
 
+				EnsureDepthStencilResources();
 				EnsureFramebuffers(frames);
 				EnsureFrameCommandBuffers();
 				EnsureFrameSyncronizations();
@@ -290,6 +317,7 @@ namespace np::app
 			{
 				device->WaitUntilIdle();
 				frameContext->Rebuild();
+				depthStencilImageResourceView.reset();
 				EnsureFrames();
 			}
 
@@ -335,12 +363,15 @@ namespace np::app
 						mem::sptr<srvc::Services> services = detailInstance->GetServices();
 						mem::sptr<gpu::Frame> frame = frameContext->GetAcquiredFrame();
 
+						gpu::ClearColor clear_color{};
+						gpu::ClearColor depth_stencil_clear_color{ gpu::Color{}, 1, 0 };
+
 						mem::sptr<gpu::BeginRenderPassCommand> begin_renderpass_cmd =
 							gpu::Command::Create(gpu::DetailType::Vulkan, services, gpu::CommandType::BeginRenderPass);
 						begin_renderpass_cmd->framebuffer = framebuffers[frameContext->GetAcquiredFrameIndex()];
 						begin_renderpass_cmd->renderArea = {
 							{/*no offset*/}, frameContext->GetFrameWidth(), frameContext->GetFrameHeight() };
-						begin_renderpass_cmd->clearColors = { gpu::ClearColor{} };
+						begin_renderpass_cmd->clearColors = { clear_color, depth_stencil_clear_color };
 
 						mem::sptr<gpu::BindPipelineCommand> bind_pipeline_cmd =
 							gpu::Command::Create(gpu::DetailType::Vulkan, services, gpu::CommandType::BindPipeline);
@@ -676,17 +707,72 @@ namespace np::app
 
 			//this is where we would consolodate our descriptions
 
-			con::vector<gpu::ImageResourceDescription> image_descriptions{
-				{scene->frameContext->GetFrameFormat(), 1, gpu::ResourceOperation::Load | gpu::ResourceOperation::Clear,
-				 gpu::ResourceOperation::Store, gpu::ResourceOperation::Load | gpu::ResourceOperation::DontCare,
-				 gpu::ResourceOperation::Store | gpu::ResourceOperation::DontCare, gpu::ImageResourceUsage::None,
-				 gpu::ImageResourceUsage::Present}};
+			scene->depthStencilImageResourceUsage = 
+				gpu::ImageResourceUsage::DeviceLocal | gpu::ImageResourceUsage::Depth | gpu::ImageResourceUsage::Stencil;
 
-			con::vector<gpu::SubpassDescription> render_subpasses{{{}, {{0, gpu::ImageResourceUsage::Color}}, {}, {}}};
+			gpu::Format depth_stencil_image_format_features = gpu::Format::Features | gpu::Format::FeatureDepth | gpu::Format::FeatureStencil;
+			con::vector<gpu::Format> depth_stencil_image_formats
+			{
+				gpu::Format{gpu::Format::Depth | gpu::Format::Floating, 1, sizeof(flt)},
+				gpu::Format{gpu::Format::Depth | gpu::Format::Stencil | gpu::Format::Floating, 1, sizeof(flt)},
+				gpu::Format{gpu::Format::Depth | gpu::Format::Stencil | gpu::Format::Unsigned, 1, sizeof(ui8) * 3}
+			};
 
-			con::vector<gpu::SubpassDependency> render_dependencies{{SIZ_MAX, 0, gpu::Stage::PresentComplete,
-																	 gpu::Stage::PresentComplete, gpu::Access::None,
-																	 gpu::Access::Image | gpu::Access::Write}};
+			for (gpu::Format f : depth_stencil_image_formats)
+			{
+				if (gpu::ImageResource::IsSupported(scene->device,
+					scene->depthStencilImageResourceUsage, f, depth_stencil_image_format_features))
+				{
+					scene->depthStencilFormat = f;
+					break;
+				}
+			}
+
+			NP_ENGINE_ASSERT(scene->depthStencilFormat != gpu::Format::None, "we should have depth stencil format here");
+
+			con::vector<gpu::ImageResourceDescription> image_descriptions
+			{
+				{
+					scene->frameContext->GetFrameFormat(), 1, 
+					gpu::ResourceOperation::Load | gpu::ResourceOperation::Clear,
+					gpu::ResourceOperation::Store, 
+					gpu::ResourceOperation::Load | gpu::ResourceOperation::DontCare,
+					gpu::ResourceOperation::Store | gpu::ResourceOperation::DontCare, 
+					gpu::ImageResourceUsage::None,
+					gpu::ImageResourceUsage::Present
+				},
+				{
+					scene->depthStencilFormat, 1,
+					gpu::ResourceOperation::Load | gpu::ResourceOperation::Clear,
+					gpu::ResourceOperation::Store | gpu::ResourceOperation::DontCare,
+					gpu::ResourceOperation::Load | gpu::ResourceOperation::DontCare,
+					gpu::ResourceOperation::Store | gpu::ResourceOperation::DontCare,
+					gpu::ImageResourceUsage::None,
+					gpu::ImageResourceUsage::Depth | gpu::ImageResourceUsage::Stencil
+				}
+			};
+
+			con::vector<gpu::SubpassDescription> render_subpasses
+			{ 
+				{
+					{}, 
+					{{0, gpu::ImageResourceUsage::Color}}, 
+					{},
+					{1, gpu::ImageResourceUsage::Depth | gpu::ImageResourceUsage::Stencil}, 
+					{}
+				} 
+			};
+
+			con::vector<gpu::SubpassDependency> render_dependencies
+			{
+				{
+					SIZ_MAX, 0, 
+					gpu::Stage::PresentComplete | gpu::Stage::FragmentInput,
+					gpu::Stage::PresentComplete | gpu::Stage::FragmentInput,
+					gpu::Access::Depth | gpu::Access::Stencil | gpu::Access::Write,
+					gpu::Access::Image | gpu::Access::Depth | gpu::Access::Stencil | gpu::Access::Write
+				}
+			};
 
 			scene->renderpass =
 				gpu::RenderPass::Create(scene->device, image_descriptions, render_subpasses, render_dependencies);
@@ -717,7 +803,12 @@ namespace np::app
 				{{}, scene->frameContext->GetFrameWidth(), scene->frameContext->GetFrameHeight()}};
 			gpu::Rasterization graphics_rasterization{gpu::RasterizationUsage::PolygonFill | gpu::RasterizationUsage::CullBack, {}};
 			gpu::Multisample graphics_multisample{{gpu::MultisampleUsage::None, 1}, 0.0, {}};
-			//gpu::DepthStencil graphics_depth_stencil{};
+			gpu::DepthStencil graphics_depth_stencil{
+				gpu::DepthStencilUsage::DepthWrite | gpu::DepthStencilUsage::DepthTest,
+				gpu::CompareOperation::Less,
+				{}, {},
+				{0, 1}
+			};
 			gpu::Blend graphics_blend{
 				gpu::LogicOperation::None,
 				{{false,
@@ -731,7 +822,7 @@ namespace np::app
 			scene->graphicsPipeline = gpu::GraphicsPipeline::Create(
 				scene->renderpass, graphics_pipeline_usage, graphics_pipeline_layout, graphics_shaders, input_vertex_formatting,
 				input_instance_formatting, graphics_topology, 0, graphics_viewports, graphics_scissors, graphics_rasterization,
-				graphics_multisample, {}, graphics_blend, graphics_dynamic_usage, nullptr);
+				graphics_multisample, graphics_depth_stencil, graphics_blend, graphics_dynamic_usage, nullptr);
 
 			scene->commandBufferPool = scene->queue->CreateCommandBufferPool(gpu::CommandBufferPoolUsage::Resettable);
 			
@@ -743,10 +834,24 @@ namespace np::app
 				{{-0.5, -0.5, 0, 1}, {1, 0, 1, 1}, {1.f, 0.f}},
 				{{0.5, -0.5, 0, 1}, {1, 1, 0, 1}, {0.f, 0.f}},
 				{{0.5, 0.5, 0, 1}, {0, 1, 1, 1}, {0.f, 1.f}},
-				{{-0.5, 0.5, 0, 1}, {0, 1, 0, 1}, {1.f, 1.f}}
+				{{-0.5, 0.5, 0, 1}, {0, 1, 0, 1}, {1.f, 1.f}},
+
+				{{-0.5, -0.5, -0.5f, 1}, {1, 0, 1, 1}, {1.f, 0.f}},
+				{{0.5, -0.5, -0.5f, 1}, {1, 1, 0, 1}, {0.f, 0.f}},
+				{{0.5, 0.5, -0.5f, 1}, {0, 1, 1, 1}, {0.f, 1.f}},
+				{{-0.5, 0.5, -0.5f, 1}, {0, 1, 0, 1}, {1.f, 1.f}},
+
+				{{-0.5, -0.5, 0.5f, 1}, {1, 0, 1, 1}, {1.f, 0.f}},
+				{{0.5, -0.5, 0.5f, 1}, {1, 1, 0, 1}, {0.f, 0.f}},
+				{{0.5, 0.5, 0.5f, 1}, {0, 1, 1, 1}, {0.f, 1.f}},
+				{{-0.5, 0.5, 0.5f, 1}, {0, 1, 0, 1}, {1.f, 1.f}}
 			};
 
-			scene->indices = {0, 1, 2, 2, 3, 0};
+			scene->indices = {
+				0, 1, 2, 2, 3, 0,
+				4, 5, 6, 6, 7, 4,
+				8, 9, 10, 10, 11, 8
+			};
 
 			con::vector<ui8> vertex_buffer_bytes(sizeof(Vertex) * scene->vertices.size());
 			mem::copy_bytes(vertex_buffer_bytes.data(), scene->vertices.data(), vertex_buffer_bytes.size());

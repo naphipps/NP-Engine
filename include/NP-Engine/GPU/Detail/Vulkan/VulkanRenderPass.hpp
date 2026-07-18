@@ -48,12 +48,14 @@ namespace np::gpu::__detail
 		con::vector<VulkanSubpassImageResourceReference> inputs{};
 		con::vector<VulkanSubpassImageResourceReference> outputs{};
 		con::vector<VulkanSubpassImageResourceReference> multisampleResolves{};
+		VulkanSubpassImageResourceReference depthStencil{};
 		con::vector<ui32> preserveFramebufferImageViewIndicies{};
 
 		VulkanSubpassDescription(const SubpassDescription& other = {}):
 			inputs(other.inputs.begin(), other.inputs.end()),
 			outputs(other.outputs.begin(), other.outputs.end()),
-			multisampleResolves(other.multisampleResolves.begin(), other.multisampleResolves.end())
+			multisampleResolves(other.multisampleResolves.begin(), other.multisampleResolves.end()),
+			depthStencil(other.depthStencil)
 		{
 			preserveFramebufferImageViewIndicies.resize(other.preserveFramebufferImageViewIndicies.size());
 			for (siz i = 0; i < preserveFramebufferImageViewIndicies.size(); i++)
@@ -65,6 +67,7 @@ namespace np::gpu::__detail
 			return {{inputs.begin(), inputs.end()},
 					{outputs.begin(), outputs.end()},
 					{multisampleResolves.begin(), multisampleResolves.end()},
+					depthStencil,
 					{preserveFramebufferImageViewIndicies.begin(), preserveFramebufferImageViewIndicies.end()}};
 		}
 
@@ -102,6 +105,11 @@ namespace np::gpu::__detail
 			return refs;
 		}
 
+		VkAttachmentReference GetVkDepthStencilVkAttachmentReference() const
+		{
+			return depthStencil.GetVkAttachmentReference();
+		}
+
 		con::vector<ui32> GetPreserveFramebufferImageViewIndices() const
 		{
 			return preserveFramebufferImageViewIndicies;
@@ -128,7 +136,12 @@ namespace np::gpu::__detail
 
 		operator SubpassDependency() const
 		{
-			return {srcSubpassIndex, dstSubpassIndex, srcStage, dstStage, srcAccess, dstAccess};
+			return
+			{
+				srcSubpassIndex == VK_SUBPASS_EXTERNAL ? SIZ_MAX : srcSubpassIndex,
+				dstSubpassIndex == VK_SUBPASS_EXTERNAL ? SIZ_MAX : dstSubpassIndex,
+				srcStage, dstStage, srcAccess, dstAccess
+			};
 		}
 
 		VkSubpassDependency GetVkSubpassDependency() const
@@ -188,6 +201,7 @@ namespace np::gpu::__detail
 			con::vector<con::vector<VkAttachmentReference>> input_attachment_references(subpasses.size());
 			con::vector<con::vector<VkAttachmentReference>> color_attachment_references(subpasses.size());
 			con::vector<con::vector<VkAttachmentReference>> resolve_attachment_references(subpasses.size());
+			con::vector<VkAttachmentReference> depth_stencil_attachment_references(subpasses.size());
 			con::vector<con::vector<ui32>> preserve_framebuffer_image_view_indicies(subpasses.size());
 			con::vector<VkSubpassDescription> subpass_descriptions(subpasses.size());
 			for (siz i = 0; i < subpass_descriptions.size(); i++)
@@ -195,6 +209,7 @@ namespace np::gpu::__detail
 				input_attachment_references[i] = subpasses[i].GetVkInputVkAttachmentReferences();
 				color_attachment_references[i] = subpasses[i].GetVkColorVkAttachmentReferences();
 				resolve_attachment_references[i] = subpasses[i].GetVkResolveVkAttachmentReferences();
+				depth_stencil_attachment_references[i] = subpasses[i].GetVkDepthStencilVkAttachmentReference();
 				preserve_framebuffer_image_view_indicies[i] = subpasses[i].GetPreserveFramebufferImageViewIndices();
 
 				//TODO: should we check: if resolve_attachment_references[i] is not empty, then it's size must equal
@@ -209,6 +224,7 @@ namespace np::gpu::__detail
 					color_attachment_references[i].empty() ? nullptr : color_attachment_references[i].data();
 				subpass_descriptions[i].pResolveAttachments =
 					resolve_attachment_references[i].empty() ? nullptr : resolve_attachment_references[i].data();
+				subpass_descriptions[i].pDepthStencilAttachment = mem::address_of(depth_stencil_attachment_references[i]);
 				subpass_descriptions[i].preserveAttachmentCount = preserve_framebuffer_image_view_indicies[i].size();
 				subpass_descriptions[i].pPreserveAttachments = preserve_framebuffer_image_view_indicies[i].empty()
 					? nullptr

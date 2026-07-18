@@ -74,6 +74,8 @@ namespace np::gpu
 											   siz layer_count, siz sample_count, siz width, siz height, siz depth,
 											   const con::vector<DeviceQueueFamily>& queue_families);
 
+		static bl IsSupported(mem::sptr<Device> device, ImageResourceUsage usage, Format format, Format format_features);
+
 		virtual ~ImageResource() = default;
 
 		virtual ResourceType GetResourceType() const override

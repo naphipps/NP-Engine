@@ -51,7 +51,7 @@ namespace np::gpu::__detail
 
 		VkStencilOp GetVkStencilOp() const
 		{
-			VkStencilOp op = VK_STENCIL_OP_MAX_ENUM;
+			VkStencilOp op = VK_STENCIL_OP_KEEP;
 
 			switch (_value)
 			{

@@ -58,6 +58,9 @@ namespace np::gpu::__detail
 			case Stencil | Read:
 				layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
 				break;
+			case Depth | Stencil:
+			case Depth:
+			case Stencil:
 			case Depth | Stencil | Write:
 			case Depth | Write:
 			case Stencil | Write:
@@ -314,6 +317,29 @@ namespace np::gpu::__detail
 			return mem::create_sptr<VulkanImageResource>(device->GetServices()->GetAllocator(), device, usage, image, format,
 														 mip_count, layer_count, sample_count, width, height, depth,
 														 queue_families);
+		}
+
+		static bl IsSupported(mem::sptr<Device> device_, ImageResourceUsage usage_, Format format_, Format format_features_)
+		{
+			bl is = false;
+
+			mem::sptr<VulkanDevice> device = EnsureIsDetailType(device_, DetailType::Vulkan);
+			if (device)
+			{
+				const VulkanFormat format{ format_ };
+				const VkFormatFeatureFlags given_features_flags = VulkanFormat{ format_features_ }.GetVkFormatFeatureFlags();
+				const VulkanImageResourceUsage usage{ usage_ };
+				
+				mem::sptr<VulkanLogicalDevice> logical_device = device->GetLogicalDevice();
+				const VulkanPhysicalDevice physical_device = logical_device->GetPhysicalDevice();
+				const VkFormatProperties properties = physical_device.GetVkFormatProperties(format.GetVkFormat());
+				const VkFormatFeatureFlags feature_flags = usage.GetVkImageTiling() == VK_IMAGE_TILING_LINEAR ?
+					properties.linearTilingFeatures : properties.optimalTilingFeatures;
+
+				is = (feature_flags & given_features_flags) == given_features_flags;
+			}
+
+			return is;
 		}
 
 		VulkanImageResource(mem::sptr<Device> device, ImageResourceUsage usage, VkImage image, Format format, siz mip_count,

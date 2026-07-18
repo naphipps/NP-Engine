@@ -28,10 +28,10 @@ namespace np::gpu
 
 	struct SubpassDescription
 	{
-		con::vector<SubpassImageResourceReference> inputs{}; //input images
-		con::vector<SubpassImageResourceReference> outputs{}; //output images
-		con::vector<SubpassImageResourceReference>
-			multisampleResolves{}; //multisampled images whose results are to be resolved over subpass
+		con::vector<SubpassImageResourceReference> inputs{};
+		con::vector<SubpassImageResourceReference> outputs{};
+		con::vector<SubpassImageResourceReference> multisampleResolves{}; //multisampled images whose results are to be resolved over subpass
+		SubpassImageResourceReference depthStencil{};
 		con::vector<siz> preserveFramebufferImageViewIndicies{}; //preserve these images over subpass
 	};
 

@@ -272,7 +272,7 @@ namespace np::gpu
 	{
 		mem::sptr<Framebuffer> framebuffer = nullptr;
 		RenderArea renderArea{};
-		//size = 1 XOR N where N = number of images in framebuffer?
+		//one for each image view in framebuffer
 		con::vector<ClearColor> clearColors{}; 
 		
 		SubpassUsage usage = SubpassUsage::None; 

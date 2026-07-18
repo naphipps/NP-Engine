@@ -441,20 +441,43 @@ namespace np::gpu::__detail
 
 			if (framebuffer)
 			{
-				const VulkanSubpassUsage usage{ this->usage };
-				const VulkanRenderArea render_area = renderArea;
+				con::vector<mem::sptr<ImageResourceView>> views = framebuffer->GetImageResourceViews();
+				if (views.size() == clearColors.size())
+				{
+					bl is_valid = true;
+					con::vector<VkClearValue> clear_values(clearColors.size());
+					for (siz i = 0; is_valid && i < clear_values.size(); i++)
+					{
+						mem::sptr<VulkanImageResourceView> view = EnsureIsDetailType(views[i], DetailType::Vulkan);
+						mem::sptr<VulkanImageResource> image = EnsureIsDetailType(view->GetImageResource(), DetailType::Vulkan);
+						is_valid &= view && image;
+						if (is_valid)
+						{
+							const VulkanClearColor clear_color{ clearColors[i] };
+							const VulkanFormat format{ image->GetFormat() };
 
-				con::vector<VkClearValue> clear_values(clearColors.size());
-				for (siz i = 0; i < clear_values.size(); i++)
-					clear_values[i] = {VulkanClearColor{clearColors[i]}.GetVkClearColorValue()};
+							if (format.ContainsAny(VulkanImageResourceUsage::Depth | VulkanImageResourceUsage::Stencil))
+								clear_values[i].depthStencil = clear_color.GetVkClearDepthStencilValue();
+							else
+								clear_values[i].color = clear_color.GetVkClearColorValue();
+						}
+					}
 
-				VkRenderPassBeginInfo info = GetVkRenderPassBeginInfo(framebuffer, render_area.GetVkRect2D());
-				info.clearValueCount = clear_values.size();
-				info.pClearValues = clear_values.empty() ? nullptr : clear_values.data();
+					if (is_valid)
+					{
+						const VulkanSubpassUsage usage{ this->usage };
+						const VulkanRenderArea render_area = renderArea;
 
-				vkCmdBeginRenderPass(*command_buffer, &info, usage.GetVkSubpassContents()); //TODO: implement
-				applied = true;
+						VkRenderPassBeginInfo info = GetVkRenderPassBeginInfo(framebuffer, render_area.GetVkRect2D());
+						info.clearValueCount = clear_values.size();
+						info.pClearValues = clear_values.empty() ? nullptr : clear_values.data();
+
+						vkCmdBeginRenderPass(*command_buffer, &info, usage.GetVkSubpassContents()); //TODO: implement
+						applied = true;
+					}
+				}
 			}
+
 			return applied;
 		}
 
